@@ -248,9 +248,11 @@ import {
   CoinRead,
   MoneyBalloon,
   UiShell,
+  boardFill,
   boardFillBox,
   boardFillPoint,
   boardPoint as mapBoardPoint,
+  boardView,
   boardViewBox,
   NIGHT_MAP,
   nightEnemies,
@@ -281,6 +283,10 @@ interface DefendScreenProps {
 
 /** 1.4.375: how long the lamp level-up burst, roman bump, and −1✦ stay readable. */
 const LEVEL_BURST_MS = 1100
+/** Easy: drop grey seat rings the frame cuts in half. Flip to false to bring them back. */
+const NW_HIDE_EDGE_SEATS = true
+/** Easy: the Wave survived! banner stays up long enough to read. Only the hide timer reads this. */
+const SURVIVED_HOLD_MS = Math.max(WAVE_SURVIVED_MS, 2400)
 
 /** Playtest `nwLamps=0..2` trims the jump. A missing cap keeps the full load. */
 function jumpedNightLoad(jump: number) {
@@ -523,6 +529,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const [sparkSpend, setSparkSpend] = useState(false)
   const [sparkSpent, setSparkSpent] = useState(1)
   const [placeArm, setPlaceArm] = useState<WatchAbility | null>(null)
+  /** Easy: the kid chose a lamp this plant step. Draw-only; no sim or placement code reads it. */
+  const [lampPicked, setLampPicked] = useState(false)
   const placeArmRef = useRef<WatchAbility | null>(null)
   const plantOpenGroundRef = useRef<(clientX: number, clientY: number) => boolean>(() => false)
   placeArmRef.current = placeArm
@@ -1431,12 +1439,16 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   }, [phase])
 
   useEffect(() => {
+    if (phase === 'plant') setLampPicked(false)
+  }, [phase])
+
+  useEffect(() => {
     if (!easy || phase !== 'boost' || won) {
       setSurvivedRound(null)
       return
     }
     setSurvivedRound(waveIndexRef.current + 1)
-    const id = window.setTimeout(() => setSurvivedRound(null), WAVE_SURVIVED_MS)
+    const id = window.setTimeout(() => setSurvivedRound(null), SURVIVED_HOLD_MS)
     return () => window.clearTimeout(id)
   }, [easy, phase, won])
 
@@ -1567,6 +1579,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     flushSync(() => {
       setSpendOpen(false)
       setHelpOpen(false)
+      setLampPicked(true)
       setPlaceArm(id)
       if (!candle && !bell && !incense && !cross) setAbility(id)
       closeUpgrade(true)
@@ -1808,6 +1821,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     window.clearTimeout(placeToastTimer.current)
     flushSync(() => {
       setPlants(next.plants)
+      setLampPicked(true)
       setPlaceToast(null)
       setReachMiss([])
       setGhost(null)
@@ -3290,8 +3304,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const groundPick = Boolean(easy && !won && (placeArm || cardOn))
   const seatAbility = placeArm ?? ability
   const groundHints = useMemo(
-    () =>
-      groundPick
+    () => {
+      const hints = groundPick
         ? armedSeatMarks(
             seatAbility,
             progress,
@@ -3299,9 +3313,19 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
             plants,
             easy ? easyShotReach(pathsOf(runPaths, seatAbility)) : 0,
           )
-        : [],
+        : []
+      if (!NW_HIDE_EDGE_SEATS || !(boardBox.w > 0)) return hints
+      // Draw-only: a grey ring the frame cuts in half is dropped. Live rings and seat data stay.
+      const view = plateFill ? boardFill(boardBox) : boardView(boardBox)
+      const r = 46 * view.scale
+      return hints.filter((seat) => {
+        if (seat.live) return true
+        const p = plateFill ? boardFillPoint(boardBox, seat) : mapBoardPoint(boardBox, seat)
+        return p.left - r >= 0 && p.left + r <= boardBox.w && p.top - r >= 0 && p.top + r <= boardBox.h
+      })
+    },
     // roadD changes after the map bind, and the seat tint reads that same road.
-    [groundPick, seatAbility, progress, runTier, plants, runPaths, easy, roadD],
+    [groundPick, seatAbility, progress, runTier, plants, runPaths, easy, roadD, boardBox, plateFill],
   )
   const bossLive = raiders.find((raider) => raider.boss && !raider.turned)
   const walkerCalls: EasyWalkerCall[] = midWave
@@ -3868,7 +3892,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       easy={easy}
       ability={ability}
       setAbility={(id) => {
-        flushSync(() => setAbility(id))
+        flushSync(() => {
+          setAbility(id)
+          setLampPicked(true)
+        })
       }}
       setToolLock={setToolLock}
       firing={firing}
@@ -3898,6 +3925,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   return (
     <main
       className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${mendOn ? 'is-mend' : ''} ${mendShield ? 'is-mend-shield' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''} ${clearPanelFolded(boosting, placeArm) ? 'is-clear-fold' : ''} ${phase === 'lost' ? 'is-lost' : ''} ${boosting && runSparks < 1 ? 'is-spark-broke' : ''} ${showMapSheet ? 'is-map-sheet' : ''} ${easy && phase === 'plant' && awaitingLamp ? 'is-need-lamp' : ''} ${cardOn ? 'is-card-on' : ''} ${easy && (phase === 'plant' || placeArm) ? 'is-placing' : ''} ${easy && !won && (phase === 'wave' || phase === 'boost') ? 'is-shop' : ''}`}
+      data-lamp-picked={easy && lampPicked ? 'yes' : undefined}
       aria-label={WATCH_TITLE}
       data-night-map={mapId}
     >

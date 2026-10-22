@@ -426,6 +426,11 @@ html[data-easy='on'] .city-folk .city-porch-rail {
   filter: none;
 }
 
+/* Easy: a lot with no candy still, and not the next or ready one, would fall back to the white SVG plate. Hide it. */
+html[data-easy='on'] .city-overworld .city-plot.is-easy-lot:not(.has-candy-img):not(.is-next):not(.is-ready) {
+  display: none;
+}
+
 /* Easy plot focus is the gold ring. The browser rectangle reads as a white plate. */
 .city-overworld .city-plot.is-easy-lot,
 .city-overworld .city-plot.is-easy-lot:focus,

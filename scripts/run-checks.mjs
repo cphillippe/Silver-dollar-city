@@ -6,6 +6,7 @@
  * Phone Easy play-through is `npm run test:e2e` (not a scope here).
  */
 import { spawnSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
@@ -122,6 +123,16 @@ if (!scope) {
 }
 
 console.log(`run-checks: scope=${scopeName}`)
+
+// The version label the app shows must be the version package.json ships.
+const appVersion = /export const APP_VERSION = '([^']+)'/.exec(readFileSync(join(root, 'src/config/app.ts'), 'utf8'))?.[1]
+const pkgVersion = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version
+if (scopeName === 'all' || scopeName === 'core') {
+  if (appVersion !== pkgVersion) {
+    console.error(`run-checks: APP_VERSION ${appVersion} !== package.json version ${pkgVersion}`)
+    process.exit(1)
+  }
+}
 
 if (scope.embed) {
   run(process.execPath, [join(root, 'scripts/embed-packs.mjs')])

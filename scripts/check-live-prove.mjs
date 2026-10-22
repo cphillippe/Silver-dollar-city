@@ -1176,6 +1176,128 @@ function cueClearance(page, selector) {
   }, { sel: selector, path: DEFEND_PATH })
 }
 
+
+/** #792b NWUI-1: Night Watch chrome that paints gold (255,204,51 or 255,159,26 family) in a fill, border, glow or text. Art, the tap ring, debug panel and tap feedback are not chrome. */
+async function goldCues(page) {
+  return page.evaluate(() => {
+    const root = document.querySelector('.defend-page')
+    if (!root) return []
+    const gold = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = Number(match[1])
+        const g = Number(match[2])
+        const b = Number(match[3])
+        const a = match[4] === undefined ? 1 : Number(match[4])
+        if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const chrome = 'button, .defend-abilities, .defend-boost, .defend-tower-card, .defend-path-pip, .nw-balloon-orb, .defend-wave, .defend-ability-stock'
+    return [...root.querySelectorAll(chrome)]
+      .filter((node) => !node.closest('.defend-nw-debug'))
+      .filter((node) => {
+        const box = node.getBoundingClientRect()
+        const style = getComputedStyle(node)
+        return box.width > 1 && box.height > 1 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0
+      })
+      .filter((node) => {
+        const style = getComputedStyle(node)
+        const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+        const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+        return gold(style.backgroundImage) || gold(style.backgroundColor) || border || gold(style.boxShadow) || (text && gold(style.color))
+      })
+      .map((node) => `${node.tagName}.${node.getAttribute('class') || ''}`.slice(0, 60))
+  })
+}
+
+async function tapCueUntilBoost(page, ms) {
+  const fight = Date.now()
+  while (Date.now() - fight < ms && (await page.locator('.defend-page.is-boost').count()) < 1) {
+    const cue = await page.evaluate(() => {
+      const face = document.querySelector('.defend-raider.is-easy-cue')
+      if (!face) return null
+      const id = face.getAttribute('data-walker-id')
+      const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+      if (!tap) return null
+      const box = tap.getBoundingClientRect()
+      const x = box.x + box.width / 2
+      const y = box.y + box.height / 2
+      const node = document.elementFromPoint(x, y)
+      if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+      return { x, y }
+    })
+    if (cue) await page.mouse.click(cue.x, cue.y)
+    await page.waitForTimeout(70)
+  }
+}
+
+/** #792b NWUI-1: one gold per Night Watch state, at 375 and 390. Real pointer input. */
+async function checkGoldCues(browser, port, errors, width, height) {
+  const label = `${width}x${height}`
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width, height },
+    deviceScaleFactor: 1,
+    reducedMotion: 'reduce',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: SAVE },
+  )
+  const page = await context.newPage()
+  listen(page, errors, `gold ${label}`)
+  await openJump(page, '?playtest=1&nwRound=2')
+  const pre = await goldCues(page)
+  assert.ok(pre.length <= 1, `#792b NWUI-1 ${label} pre-Begin has at most one gold (${pre})`)
+  assert.ok(pre.some((name) => name.includes('defend-go')) || pre.length === 0, `#792b NWUI-1 ${label} the one pre-Begin gold is Begin (${pre})`)
+  if (width === 390) assert.equal(pre.length, 1, `#792b NWUI-1 ${label} pre-Begin has exactly one gold: Begin (${pre})`)
+  await page.locator('.defend-clear-lamp').first().click()
+  await page.locator('.defend-tower-card').waitFor()
+  const planted = await goldCues(page)
+  assert.ok(planted.length <= 1, `#792b NWUI-1 ${label} after a plant, with the card open, has at most one gold (${planted})`)
+  if (width === 390) {
+    assert.equal(planted.length, 1, `#792b NWUI-1 ${label} after a plant has exactly one gold (${planted})`)
+    assert.ok(planted[0].includes('defend-go'), `#792b NWUI-1 ${label} the one gold after a plant is Begin (${planted})`)
+  }
+  assert.equal(await page.getByRole('button', { name: /^Far, (need \d+|\d+ sparks)$/ }).count(), 1, `#792b NWUI-3 ${label} one Far button pre-Begin`)
+  assert.equal(await page.getByRole('button', { name: /^Strong, (need \d+|\d+ sparks)$/ }).count(), 1, `#792b NWUI-3 ${label} one Strong button pre-Begin`)
+  await page.locator('.defend-go').click()
+  await page.locator('.defend-page.is-easy-tap').waitFor()
+  await page.locator('[data-walker-tap]').first().waitFor()
+  await page.locator('.defend-clear-lamp').first().click()
+  await page.locator('.defend-tower-card').waitFor()
+  const strip = await goldCues(page)
+  assert.ok(strip.length <= 1, `#792b NWUI-1 ${label} mid-wave with the strip open has at most one gold (${strip})`)
+  if (width === 390) assert.equal(strip.length, 0, `#792b NWUI-1 ${label} mid-wave chrome has no gold (${strip})`)
+  assert.equal(await page.getByRole('button', { name: /^Far, (need \d+|\d+ sparks)$/ }).count(), 1, `#792b NWUI-3 ${label} one Far button mid-wave`)
+  assert.equal(await page.getByRole('button', { name: /^Strong, (need \d+|\d+ sparks)$/ }).count(), 1, `#792b NWUI-3 ${label} one Strong button mid-wave`)
+  await page.locator('.defend-clear-lamp').first().click({ force: true })
+  await tapCueUntilBoost(page, 90_000)
+  await page.locator('.defend-page.is-boost').waitFor()
+  await page.locator('.defend-continue').waitFor()
+  await page.locator('.nw-wave-survived').waitFor({ state: 'detached', timeout: 10_000 })
+  const clear = await goldCues(page)
+  assert.ok(clear.length <= 1, `#792b NWUI-1 ${label} the clear has at most one gold (${clear})`)
+  assert.ok(clear.some((name) => name.includes('defend-continue')), `#792b NWUI-1 ${label} the one clear gold is Continue (${clear})`)
+  if (width === 390) assert.equal(clear.length, 1, `#792b NWUI-1 ${label} post-wave has exactly one gold: Continue (${clear})`)
+  await context.close()
+}
+
+/** #792b NWUI-9: the welcome version line is the shipped version. */
+async function checkWelcomeVersion(browser, port, errors) {
+  const context = await browser.newContext({ baseURL: `http://127.0.0.1:${port}/`, viewport: { width: 390, height: 844 } })
+  const page = await context.newPage()
+  listen(page, errors, 'welcome version')
+  await page.goto('/')
+  const shown = (await page.locator('.welcome-version').first().textContent())?.trim()
+  const shipped = await page.evaluate(async () => (await (await fetch('/app-version.json')).json()).version)
+  assert.ok(shown && shown.length > 0, '#792b NWUI-9 the welcome screen shows a version')
+  assert.ok(shown.includes(shipped), `#792b NWUI-9 welcome shows ${shown} but app-version.json says ${shipped}`)
+  await context.close()
+}
+
 async function checkWaveCues(browser, port, errors) {
   const seatDoc = readFileSync(new URL('../docs/nw-prove-seats.md', import.meta.url), 'utf8')
   for (const tap of [...SEAT_TAPS, ...GROUND_TAPS]) {
@@ -1391,6 +1513,13 @@ async function checkWaveCues(browser, port, errors) {
       `1.4.501 ${path} mid-wave name matches pre-Begin with no mark letter (${waveBuys[path]} vs ${beforeBuys[path]})`,
     )
   }
+  assert.match(waveBuys.far, /^Far, (need \d+|\d+ sparks)$/, `#792b NWUI-3 mid-wave Far has its own name (${waveBuys.far})`)
+  assert.match(waveBuys.strong, /^Strong, (need \d+|\d+ sparks)$/, `#792b NWUI-3 mid-wave Strong has its own name (${waveBuys.strong})`)
+  assert.notEqual(waveBuys.far, waveBuys.strong, '#792b NWUI-3 Far and Strong names differ mid-wave')
+  assert.match(beforeBuys.far, /^Far, /, `#792b NWUI-3 pre-Begin Far name (${beforeBuys.far})`)
+  assert.match(beforeBuys.strong, /^Strong, /, `#792b NWUI-3 pre-Begin Strong name (${beforeBuys.strong})`)
+  assert.equal(await page.getByRole('button', { name: /^Far, (need \d+|\d+ sparks)$/ }).count(), 1, '#792b NWUI-3 one Far button by role')
+  assert.equal(await page.getByRole('button', { name: /^Strong, (need \d+|\d+ sparks)$/ }).count(), 1, '#792b NWUI-3 one Strong button by role')
   await page.locator(`[data-clear-lamp="${lamp.id}"]`).click({ force: true })
   await page.locator('.defend-tower-card').waitFor({ state: 'hidden' })
   const fight = Date.now()
@@ -2284,7 +2413,7 @@ async function freshWatch(browser, port, errors, id, label) {
     await page.locator(`[data-map="${id}"]`).click()
     await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
   }
-  await page.locator('[data-seat="dead"]').first().waitFor()
+  await page.locator('[data-seat="dead"]').first().waitFor({ state: 'attached' })
   return { context, page }
 }
 
@@ -4913,6 +5042,26 @@ export async function checkLiveProve() {
       assert.equal(errors.join('\n'), '', `1.4.526 walk-in prove stays free of console errors ${errors.join(' | ').slice(0, 160)}`)
       return
     }
+    if (process.env.NW_TAIL_ONLY === '1') {
+      await checkPointerSeats(browser, port, errors)
+      await checkCrownHold(browser, port, errors)
+      await checkShareCard(browser, port, errors)
+      await checkShareBusyTap(browser, port, errors)
+      await checkOssuaryLesson(browser, port, errors)
+      await checkSpawnMarkers(browser, port, errors)
+      await checkHardDraw()
+      await checkWalkIn(browser, port, errors)
+      assert.equal(errors.join('\n'), '', `tail prove stays free of console errors ${errors.join(' | ').slice(0, 160)}`)
+      console.log('tail ok')
+      return
+    }
+    if (process.env.NW_GOLD_ONLY === '1') {
+      await checkGoldCues(browser, port, errors, 375, 667)
+      await checkGoldCues(browser, port, errors, 390, 844)
+      await checkWelcomeVersion(browser, port, errors)
+      assert.equal(errors.join('\n'), '', `#792b gold prove stays free of console errors ${errors.join(' | ').slice(0, 160)}`)
+      return
+    }
     await checkReadoutCueClear(browser, port, errors)
     if (process.env.NW_CUE_ONLY === '1') return
     await checkTrustedMisses(browser, port, errors)
@@ -4929,6 +5078,9 @@ export async function checkLiveProve() {
     await checkClearBar(browser, port, errors, 412, 915, true)
     await checkClearBar(browser, port, errors, 768, 1024, false)
     await checkWaveCues(browser, port, errors)
+    await checkGoldCues(browser, port, errors, 375, 667)
+    await checkGoldCues(browser, port, errors, 390, 844)
+    await checkWelcomeVersion(browser, port, errors)
     await checkJumpSeatsAndCandle(browser, port, errors)
     await checkDeadSeat(browser, port, errors)
     await checkGreyMaps(browser, port, errors)

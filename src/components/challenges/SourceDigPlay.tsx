@@ -22,7 +22,7 @@ import { WinBurst } from './WinBurst'
 
 interface SourceDigPlayProps {
   lineId: string
-  /** Easy lane gets the longer clock. */
+  /** Easy has no clock (store copy: no countdown timers). Hard keeps SOURCE_DIG_TIMER_HARD_MS. */
   easy?: boolean
   onMiss: () => void
   onClear?: () => void
@@ -113,6 +113,7 @@ export function SourceDigPlay({
   }
 
   function armClock() {
+    if (easy) return
     if (clockOnRef.current || wonRef.current || timedOut.current) return
     clockOnRef.current = true
     setClockOn(true)
@@ -280,16 +281,18 @@ export function SourceDigPlay({
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>
-      <p
-        className={`dig-timer ${pulse ? 'is-pulse' : ''} ${clockOn ? 'is-live' : 'is-armed'}`}
-        role="timer"
-        aria-live="polite"
-        aria-atomic="true"
-        aria-label={timerLabel}
-      >
-        <strong>{clockOn ? secs : Math.round(timerMs / 1000)}</strong>
-        <span>{clockOn ? 's' : 's · scrub to start'}</span>
-      </p>
+      {easy ? null : (
+        <p
+          className={`dig-timer ${pulse ? 'is-pulse' : ''} ${clockOn ? 'is-live' : 'is-armed'}`}
+          role="timer"
+          aria-live="polite"
+          aria-atomic="true"
+          aria-label={timerLabel}
+        >
+          <strong>{clockOn ? secs : Math.round(timerMs / 1000)}</strong>
+          <span>{clockOn ? 's' : 's · scrub to start'}</span>
+        </p>
+      )}
       {toast ? (
         <p
           className={`match-toast gem-toast ${toast === SOURCE_DIG_TIMEOUT ? 'is-miss' : 'is-yes'}`}
