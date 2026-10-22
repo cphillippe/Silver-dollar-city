@@ -2390,7 +2390,7 @@ async function freshWatch(browser, port, errors, id, label) {
     await page.locator(`[data-map="${id}"]`).click()
     await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
   }
-  await page.locator('[data-seat="dead"]').first().waitFor()
+  await page.locator('[data-seat="dead"]').first().waitFor({ state: 'attached' })
   return { context, page }
 }
 
@@ -5017,6 +5017,19 @@ export async function checkLiveProve() {
       await checkHardDraw()
       await checkWalkIn(browser, port, errors)
       assert.equal(errors.join('\n'), '', `1.4.526 walk-in prove stays free of console errors ${errors.join(' | ').slice(0, 160)}`)
+      return
+    }
+    if (process.env.NW_TAIL_ONLY === '1') {
+      await checkPointerSeats(browser, port, errors)
+      await checkCrownHold(browser, port, errors)
+      await checkShareCard(browser, port, errors)
+      await checkShareBusyTap(browser, port, errors)
+      await checkOssuaryLesson(browser, port, errors)
+      await checkSpawnMarkers(browser, port, errors)
+      await checkHardDraw()
+      await checkWalkIn(browser, port, errors)
+      assert.equal(errors.join('\n'), '', `tail prove stays free of console errors ${errors.join(' | ').slice(0, 160)}`)
+      console.log('tail ok')
       return
     }
     if (process.env.NW_GOLD_ONLY === '1') {
