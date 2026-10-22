@@ -205,6 +205,28 @@ async function shotHop(page, name) {
   await page.screenshot({ path: `${SHOTS}/hop-a-${name}-${width}.png` })
 }
 
+/** #792b B1: pageerror, console.error, failed requests and same-origin HTTP >= 400 all count. */
+function watchSameOrigin(page, errors, origin) {
+  const host = new URL(origin).origin
+  const own = (url) => {
+    try {
+      return new URL(url).origin === host
+    } catch {
+      return false
+    }
+  }
+  page.on('pageerror', (error) => errors.push(`pageerror ${String(error)}`))
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push(`console.error ${message.text()}`)
+  })
+  page.on('requestfailed', (request) => {
+    if (own(request.url())) errors.push(`requestfailed ${request.url()}`)
+  })
+  page.on('response', (response) => {
+    if (own(response.url()) && response.status() >= 400) errors.push(`http ${response.status()} ${response.url()}`)
+  })
+}
+
 async function assertNoNightWatch(page, where) {
   assert.equal(await page.locator('.easy-night-watch').count(), 0, `${where} hides Night Watch on the first day`)
 }
@@ -342,6 +364,21 @@ async function assertMazeStart(page) {
   assert.equal(cells.scrollY, 0, 'the maze does not scroll the window')
   assert.equal(cells.clipped, 0, 'every maze cell is inside the viewport')
   await assertMazeOneGold(page, 'maze start')
+  const here = await page.evaluate(() => {
+    const root = document.documentElement
+    const was = root.dataset.easy
+    const read = () => getComputedStyle(document.querySelector('[data-maze-cell].is-here')).boxShadow
+    const easy = read()
+    root.dataset.easy = 'off'
+    const hard = read()
+    if (was === undefined) delete root.dataset.easy
+    else root.dataset.easy = was
+    return { easy, hard }
+  })
+  assert.match(here.hard, /rgba\(61, 204, 122/, `#792b A2 Hard pawn glow is green (${here.hard})`)
+  assert.equal(isGoldPaint(here.hard), false, '#792b A2 Hard pawn glow has no gold')
+  assert.match(here.easy, /rgba\(90, 160, 255/, `#792b A2 Easy pawn glow stays blue (${here.easy})`)
+  assert.equal(isGoldPaint(here.easy), false, '#792b A2 Easy pawn glow has no gold')
   await page.screenshot({ path: `${SHOTS}/maze-375.png` })
 }
 
@@ -2375,6 +2412,104 @@ async function proveHomeWideAndHard(browser, origin, errorsOut) {
   }
 }
 
+/** #792b: Home faces, the Pages chip, staked lots and the parked stores toast, on Easy at every Home size. */
+async function prove792bHome(browser, origin, size, errorsOut) {
+  const where = `${size[0]}x${size[1]}`
+  const late = await openHome(browser, origin, 'late', size)
+  try {
+    await settleHome(late.page)
+    const faces = await late.page.evaluate(() =>
+      [...document.querySelectorAll('.easy-home-map .city-folk .city-portrait-img')].map((el) => {
+        const r = el.getBoundingClientRect()
+        return { left: r.left, right: r.right, top: r.top, bottom: r.bottom }
+      }),
+    )
+    assert.ok(faces.length >= 2, `#792b BH7 ${where} late seed shows several faces`)
+    for (let a = 0; a < faces.length; a++) {
+      for (let b = a + 1; b < faces.length; b++) {
+        const x = Math.min(faces[a].right, faces[b].right) - Math.max(faces[a].left, faces[b].left)
+        const y = Math.min(faces[a].bottom, faces[b].bottom) - Math.max(faces[a].top, faces[b].top)
+        assert.ok(!(x > 2 && y > 2), `#792b BH7 ${where} faces ${a} and ${b} overlap by ${x.toFixed(1)}x${y.toFixed(1)}`)
+      }
+    }
+    const chip = await late.page.evaluate(() => {
+      const label = [...document.querySelectorAll('.easy-home-map g.city-easy-chip')].find((el) => /Pages/.test(el.textContent || ''))
+      const art = document.querySelector('.easy-home-map g.city-plot[data-plot="journal"] .city-plot-img')
+      if (!label || !art) return null
+      const a = label.getBoundingClientRect()
+      const b = art.getBoundingClientRect()
+      return { x: Math.min(a.right, b.right) - Math.max(a.left, b.left), y: Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) }
+    })
+    assert.ok(chip, `#792b BH8 ${where} the Pages chip and the journal still both render`)
+    assert.ok(!(chip.x > 0 && chip.y > 0), `#792b BH8 ${where} the Pages chip stays off the journal roof (${JSON.stringify(chip)})`)
+  } finally {
+    errorsOut.push(...late.errors)
+    await late.ctx.close()
+  }
+
+  for (const kind of ['fresh', 'hollow-next', 'bench-next', 'late']) {
+    const { ctx, page, errors } = await openHome(browser, origin, kind, size)
+    try {
+      await settleHome(page)
+      const plain = await page.evaluate(() =>
+        [...document.querySelectorAll('.easy-home-map .city-plot.is-easy-lot')]
+          .filter((el) => !el.classList.contains('has-candy-img') && !el.classList.contains('is-next') && !el.classList.contains('is-ready'))
+          .filter((el) => getComputedStyle(el).display !== 'none').length,
+      )
+      assert.equal(plain, 0, `#792b B2 ${where} ${kind} no visible white plate lot`)
+    } finally {
+      errorsOut.push(...errors)
+      await ctx.close()
+    }
+  }
+
+  const pages = await openHome(browser, origin, 'fresh', size, {}, { journal: ['j-ph-1'], cityBuilt: { porch: 0, hollow: 0, bench: 0, observatory: 0, gate: 0, lookout: 0, journal: 0, lamps: 0 } })
+  try {
+    await settleHome(pages.page)
+    const ready = pages.page.locator('g.city-plot[data-plot="journal"].is-ready')
+    if ((await ready.count()) > 0) {
+      let spot = null
+      for (const side of ['mid', 'left', 'right']) {
+        if (side !== 'mid') await panExtreme(pages.page, side)
+        spot = await plotCenter(pages.page, 'journal').catch(() => null)
+        if (spot) break
+      }
+      assert.ok(spot, `#792b B2 ${where} the ready journal lot can be panned to a clear point`)
+      await mouseTap(pages.page, spot, 0)
+      assert.equal(await pages.page.locator('.city-plot.is-selected').count(), 1, `#792b B2 ${where} the ready journal lot takes a real tap`)
+    }
+    assert.equal(await pages.page.locator('.easy-home-map .city-lot').count(), 0, `#792b BH5 ${where} no staked vector lot`)
+  } finally {
+    errorsOut.push(...pages.errors)
+    await pages.ctx.close()
+  }
+
+  for (const easyMode of [true, false]) {
+    const notice = await browser.newContext({ viewport: { width: size[0], height: size[1] } })
+    await notice.addInitScript(
+      ([storageKey, raw]) => {
+        localStorage.clear()
+        localStorage.setItem(storageKey, raw)
+        sessionStorage.setItem('silver-city-stores-coming-notice-v1', 'pending')
+      },
+      [STORAGE_KEY, JSON.stringify(hopSave({ ...homeProgress('late'), easyMode }))],
+    )
+    const page = await notice.newPage()
+    const errors = []
+    page.on('pageerror', (error) => errors.push(String(error)))
+    try {
+      await page.goto(origin)
+      await page.locator('main.hub').waitFor()
+      await page.waitForTimeout(300)
+      const shown = await page.locator('[data-stores-coming-notice]').count()
+      if (easyMode) assert.equal(shown, 0, `#792b B3 ${where} Easy Home shows no stores-coming toast`)
+    } finally {
+      errorsOut.push(...errors)
+      await notice.close()
+    }
+  }
+}
+
 export async function proveHomePan(browser, origin) {
   const errors = []
   const lines = []
@@ -2388,6 +2523,7 @@ export async function proveHomePan(browser, origin) {
     await proveHomeKeys(browser, origin, size, errors)
     await proveHomeTabFocus(browser, origin, size, errors)
     await proveHomeChips(browser, origin, size, errors)
+    await prove792bHome(browser, origin, size, errors)
     lines.push(`home-pan ${size[0]}x${size[1]} ok`)
   }
   await proveHomeWideAndHard(browser, origin, errors)
@@ -2397,7 +2533,7 @@ export async function proveHomePan(browser, origin) {
 }
 
 export async function checkGoldenLive() {
-  await build({ logLevel: 'warn' })
+  if (process.env.GOLDEN_HOME_ONLY !== '1' || !existsSync('dist/sw.js')) await build({ logLevel: 'warn' })
   assert.ok(existsSync('dist/sw.js'), 'dist/sw.js exists')
   assert.equal(existsSync('dist/qa-seed.html'), false, 'dist/qa-seed.html is not shipped')
   for (const file of ['sw.js', ...readdirSync('dist').filter((name) => /^workbox-.*\.js$/.test(name))]) {
@@ -2416,13 +2552,17 @@ export async function checkGoldenLive() {
   const traces = []
   mkdirSync(SHOTS, { recursive: true })
   try {
+    if (process.env.GOLDEN_HOME_ONLY === '1') {
+      console.log((await proveHomePan(browser, origin)).join('\n'))
+      return
+    }
     for (const [width, height] of SIZES) {
       const trace = []
       const seen = new Set()
       const context = await browser.newContext({ viewport: { width, height } })
       const page = await context.newPage()
       const errors = []
-      page.on('pageerror', (error) => errors.push(String(error)))
+      watchSameOrigin(page, errors, origin)
       await page.goto(origin)
       await page.locator('.welcome').waitFor()
       if (width === 375 && height === 667) {
@@ -2708,6 +2848,7 @@ export async function checkGoldenLive() {
       }
 
       assert.equal(errors.join('\n'), '', `${width} page errors`)
+      assert.equal(errors.join('\n'), '', `${width}x${height} console/network errors`)
       traces.push(trace.join('\n'))
       await context.close()
     }

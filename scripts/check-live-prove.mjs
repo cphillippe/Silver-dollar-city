@@ -1259,7 +1259,19 @@ async function checkGoldCues(browser, port, errors, width, height) {
   const clear = await goldCues(page)
   assert.ok(clear.length <= 1, `#792b NWUI-1 ${label} the clear has at most one gold (${clear})`)
   assert.ok(clear.some((name) => name.includes('defend-continue')), `#792b NWUI-1 ${label} the one clear gold is Continue (${clear})`)
-  await page.screenshot({ path: `/opt/cursor/artifacts/screenshots/nwui-gold-clear-${width}.png` })
+  await context.close()
+}
+
+/** #792b NWUI-9: the welcome version line is the shipped version. */
+async function checkWelcomeVersion(browser, port, errors) {
+  const context = await browser.newContext({ baseURL: `http://127.0.0.1:${port}/`, viewport: { width: 390, height: 844 } })
+  const page = await context.newPage()
+  listen(page, errors, 'welcome version')
+  await page.goto('/')
+  const shown = (await page.locator('.welcome-version').first().textContent())?.trim()
+  const shipped = await page.evaluate(async () => (await (await fetch('/app-version.json')).json()).version)
+  assert.ok(shown && shown.length > 0, '#792b NWUI-9 the welcome screen shows a version')
+  assert.ok(shown.includes(shipped), `#792b NWUI-9 welcome shows ${shown} but app-version.json says ${shipped}`)
   await context.close()
 }
 
@@ -5007,6 +5019,13 @@ export async function checkLiveProve() {
       assert.equal(errors.join('\n'), '', `1.4.526 walk-in prove stays free of console errors ${errors.join(' | ').slice(0, 160)}`)
       return
     }
+    if (process.env.NW_GOLD_ONLY === '1') {
+      await checkGoldCues(browser, port, errors, 375, 667)
+      await checkGoldCues(browser, port, errors, 390, 844)
+      await checkWelcomeVersion(browser, port, errors)
+      assert.equal(errors.join('\n'), '', `#792b gold prove stays free of console errors ${errors.join(' | ').slice(0, 160)}`)
+      return
+    }
     await checkReadoutCueClear(browser, port, errors)
     if (process.env.NW_CUE_ONLY === '1') return
     await checkTrustedMisses(browser, port, errors)
@@ -5025,6 +5044,7 @@ export async function checkLiveProve() {
     await checkWaveCues(browser, port, errors)
     await checkGoldCues(browser, port, errors, 375, 667)
     await checkGoldCues(browser, port, errors, 390, 844)
+    await checkWelcomeVersion(browser, port, errors)
     await checkJumpSeatsAndCandle(browser, port, errors)
     await checkDeadSeat(browser, port, errors)
     await checkGreyMaps(browser, port, errors)
