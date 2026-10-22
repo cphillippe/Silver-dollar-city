@@ -1810,6 +1810,12 @@ assert.match(
     assert.doesNotMatch(read792b(`src/content/${name}`), /idle talk/i, `#792b B-RSV no idle talk left in src/content/${name}`)
   }
 
+  assert.doesNotMatch(read792b('src/lib/sourceDig.ts'), /idle talk/i, '#792b B-RSV no idle talk left in src/lib/sourceDig.ts')
+  assert.ok(
+    read792b('src/lib/sourceDig.ts').includes("bite: 'Women go first. Luke still writes that the men thought it was an idle tale.',"),
+    '#792b B-RSV sourceDig.ts bite line',
+  )
+
   const cityCss792b = read792b('src/styles/city.css')
   assert.match(
     cityCss792b,
