@@ -1466,6 +1466,822 @@ async function proveGemToast(browser, origin) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Easy Home map pan (#817). Real pointer, touch and key input only. Never el.click().
+// ---------------------------------------------------------------------------
+const HOME_SIZES = [
+  [375, 667],
+  [390, 844],
+  [412, 915],
+]
+const TAP_SLOP = 8
+const HOME_HOLLOW = ['ph-road', 'ph-father', 'ph-seeds', 'ph-debt']
+const HOME_BENCH = ['wb-creed', 'wb-early', 'wb-method', 'wb-women']
+const HOME_OBS = ['ob-tuning', 'ob-design', 'ob-leibniz', 'ob-life']
+const HOME_GATE = ['fg-mover', 'fg-contingent', 'fg-kalam', 'fg-limits']
+const HOME_LOOK = ['hl-moral', 'hl-mind', 'hl-meaning', 'hl-beauty']
+const CHIP_PLOT = {
+  'Story Creek': 'hollow',
+  'Star lamps': 'lamps',
+  Pages: 'journal',
+  'Witness Square': 'bench',
+  'East porch': 'porch',
+}
+
+export function homeProgress(kind) {
+  const today = localDateKey()
+  const days = ['2020-01-01', '2020-01-02', today]
+  const built = (over) => ({ porch: 0, hollow: 0, bench: 0, observatory: 0, gate: 0, lookout: 0, journal: 0, lamps: 0, ...over })
+  switch (kind) {
+    case 'fresh':
+      return {}
+    case 'hollow-next':
+      return { lastDailyDate: today, dailyDates: [today], cityBuilt: built({ porch: 2, hollow: 1 }) }
+    case 'bench-next':
+      return {
+        lastDailyDate: today,
+        dailyDates: days,
+        completed: HOME_HOLLOW,
+        cityBuilt: built({ porch: 4, hollow: 4, bench: 1 }),
+      }
+    case 'ready':
+      return {
+        lastDailyDate: today,
+        dailyDates: days,
+        completed: HOME_HOLLOW,
+        cityBuilt: built({ porch: 4, hollow: 2, bench: 1 }),
+      }
+    case 'tall-dock':
+      return {
+        lastDailyDate: today,
+        dailyDates: days,
+        completed: HOME_HOLLOW,
+        held: ['ph-road'],
+        easyHeld: ['ph-road'],
+        cityBuilt: built({ porch: 4, hollow: 4, bench: 1 }),
+      }
+    case 'late':
+      return {
+        lastDailyDate: today,
+        dailyDates: days,
+        completed: [...HOME_HOLLOW, ...HOME_BENCH, ...HOME_OBS, ...HOME_GATE, ...HOME_LOOK],
+        journal: Array.from({ length: 12 }, (_, i) => `j-${i}`),
+        stars: { a: 14 },
+        cityBuilt: built({ porch: 4, hollow: 4, bench: 4, observatory: 4, gate: 4, lookout: 4, journal: 4, lamps: 2 }),
+      }
+    default:
+      throw new Error(`unknown home seed ${kind}`)
+  }
+}
+
+async function openHome(browser, origin, kind, [width, height], context = {}, progress = {}) {
+  const ctx = await browser.newContext({ viewport: { width, height }, ...context })
+  await ctx.addInitScript(
+    ([storageKey, raw]) => {
+      localStorage.clear()
+      localStorage.setItem(storageKey, raw)
+    },
+    [STORAGE_KEY, JSON.stringify(hopSave({ ...homeProgress(kind), ...progress }))],
+  )
+  const page = await ctx.newPage()
+  const errors = []
+  page.on('pageerror', (error) => errors.push(String(error)))
+  await page.goto(origin)
+  await page.locator('main.hub').waitFor()
+  return { ctx, page, errors, width, height }
+}
+
+async function settleHome(page) {
+  await page.locator('.city-pan-viewport').waitFor()
+  await page.waitForTimeout(500)
+}
+
+async function homeView(page) {
+  return page.evaluate(() => {
+    const vp = document.querySelector('.city-pan-viewport')
+    const layer = document.querySelector('.city-pan-layer')
+    const svg = layer?.querySelector('.city-svg')
+    if (!vp || !layer || !svg) return null
+    const vr = vp.getBoundingClientRect()
+    const sr = svg.getBoundingClientRect()
+    const scale = svg.clientWidth / 640
+    const tx = new DOMMatrix(getComputedStyle(layer).transform).m41
+    const dock = document.querySelector('.easy-home-dock')
+    const plate = svg.querySelector(':scope > image')
+    const pr = plate ? plate.getBoundingClientRect() : null
+    return {
+      scale,
+      tx,
+      panX: -tx / scale,
+      maxX: 640 - vr.width / scale,
+      viewW: vr.width / scale,
+      vp: { left: vr.left, top: vr.top, right: vr.right, bottom: vr.bottom, width: vr.width, height: vr.height },
+      dockTop: dock ? dock.getBoundingClientRect().top : vr.bottom,
+      svgWidth: sr.width,
+      plate: pr ? { left: pr.left, top: pr.top, right: pr.right, bottom: pr.bottom } : null,
+    }
+  })
+}
+
+async function plotCenter(page, id) {
+  const points = await page.evaluate((plotId) => {
+    const hit = document.querySelector(`g.city-plot[data-plot="${plotId}"] .city-plot-hit`)
+    if (!hit) return []
+    const r = hit.getBoundingClientRect()
+    const out = []
+    for (const [dx, dy] of [[0, 0], [0, -0.3], [0.3, 0], [-0.3, 0], [0, 0.3], [0.45, -0.2], [-0.45, 0.2]]) {
+      const x = r.left + r.width / 2 + dx * r.width
+      const y = r.top + r.height / 2 + dy * r.height
+      const el = document.elementFromPoint(x, y)
+      if (el && el.closest(`g.city-plot[data-plot="${plotId}"]`)) out.push({ x, y })
+    }
+    return out
+  }, id)
+  if (!points.length) throw new Error(`no clear point on plot ${id}`)
+  return points[0]
+}
+
+async function mouseDrag(page, from, to, steps = 10) {
+  await page.mouse.move(from.x, from.y)
+  await page.mouse.down()
+  await page.mouse.move(to.x, to.y, { steps })
+  await page.mouse.up()
+  await page.waitForTimeout(80)
+}
+
+async function mouseTap(page, at, jitter = 0) {
+  await page.mouse.move(at.x, at.y)
+  await page.mouse.down()
+  if (jitter) await page.mouse.move(at.x + jitter, at.y, { steps: 2 })
+  await page.mouse.up()
+  await page.waitForTimeout(120)
+}
+
+async function touchDrag(page, from, to, steps = 8) {
+  const cdp = await page.context().newCDPSession(page)
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: from.x, y: from.y }] })
+  for (let i = 1; i <= steps; i += 1) {
+    const x = from.x + ((to.x - from.x) * i) / steps
+    const y = from.y + ((to.y - from.y) * i) / steps
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y }] })
+  }
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await cdp.detach()
+  await page.waitForTimeout(100)
+}
+
+/** Drag the same way again and again, past the clamp, about 2000 px in all. */
+async function panExtreme(page, side) {
+  const view = await homeView(page)
+  const y = view.vp.top + view.vp.height * 0.25
+  const reach = view.vp.width - 40
+  const from = side === 'left' ? view.vp.left + 20 : view.vp.right - 20
+  const to = side === 'left' ? from + reach : from - reach
+  for (let i = 0; i < Math.ceil(2000 / reach); i += 1) await mouseDrag(page, { x: from, y }, { x: to, y }, 8)
+  return homeView(page)
+}
+
+async function mapGoldCues(page) {
+  return page.evaluate(() => {
+    const vp = document.querySelector('.city-pan-viewport')?.getBoundingClientRect()
+    const dockTop = document.querySelector('.easy-home-dock')?.getBoundingClientRect().top ?? 1e9
+    const probe = document.createElement('i')
+    document.body.append(probe)
+    const rgb = (value) => {
+      probe.style.color = ''
+      probe.style.color = value
+      const m = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/.exec(getComputedStyle(probe).color)
+      return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null
+    }
+    const gold = (value) => {
+      const c = value && value !== 'none' ? rgb(value) : null
+      return Boolean(c && c[0] > 190 && c[1] > 140 && c[2] < 120 && c[0] > c[2] + 60)
+    }
+    const inView = (r) =>
+      Boolean(vp) && r.width > 0 && r.height > 0 && r.right > vp.left && r.left < vp.right && r.bottom > vp.top && r.top < dockTop
+    const shown = (el) => {
+      const st = getComputedStyle(el)
+      return st.display !== 'none' && st.visibility !== 'hidden' && Number(st.opacity) > 0
+    }
+    const cues = []
+    for (const el of document.querySelectorAll('.city-next-halo')) {
+      if (shown(el) && gold(getComputedStyle(el).stroke) && inView(el.getBoundingClientRect())) {
+        const mark = el.closest('g.city-next-mark')
+        const m = /translate\(\s*([-\d.]+)[ ,]+([-\d.]+)/.exec(mark?.getAttribute('transform') || '')
+        cues.push({ kind: 'halo', x: m ? Number(m[1]) : null })
+      }
+    }
+    for (const el of document.querySelectorAll('.city-plot.is-ready .city-plot-hit')) {
+      if (shown(el) && gold(getComputedStyle(el).stroke) && inView(el.getBoundingClientRect())) {
+        cues.push({ kind: 'ready-ring', x: Number(el.getAttribute('cx')) })
+      }
+    }
+    for (const el of document.querySelectorAll('.city-plot .city-plot-select')) {
+      if (getComputedStyle(el).display !== 'none' && inView(el.getBoundingClientRect())) {
+        cues.push({ kind: 'select-ring', x: Number(el.getAttribute('cx')) })
+      }
+    }
+    probe.remove()
+    const rc = document.querySelector('.easy-map-recenter')
+    return { cues, recenter: rc ? { gold: gold(getComputedStyle(rc).backgroundColor) || gold(getComputedStyle(rc).borderColor) } : null }
+  })
+}
+
+async function cueTarget(page) {
+  return page.evaluate(() => {
+    const ready = document.querySelector('g.city-plot.is-ready')
+    const next = document.querySelector('g.city-plot.is-next')
+    const target = ready || next
+    const hit = target?.querySelector('.city-plot-hit')
+    return target ? { id: target.getAttribute('data-plot'), x: hit ? Number(hit.getAttribute('cx')) : null } : null
+  })
+}
+
+async function chipPx(page) {
+  return page.evaluate(() => {
+    const out = []
+    for (const text of document.querySelectorAll('.city-easy-chip text')) {
+      const ctm = text.getScreenCTM()
+      out.push(ctm ? ctm.a * parseFloat(getComputedStyle(text).fontSize) : 0)
+    }
+    return out
+  })
+}
+
+// Bar 1: it opens centered on the current or next road.
+async function proveHomeOpensOnTarget(browser, origin, size, errorsOut) {
+  const where = `${size[0]}x${size[1]}`
+  const cases = [
+    ['fresh', 'porch', 'right'],
+    ['hollow-next', 'hollow', 'left'],
+    ['bench-next', 'bench', 'mid'],
+    ['ready', 'hollow', 'left'],
+    ['late', 'lamps', 'mid'],
+  ]
+  for (const [kind, expectId, clamp] of cases) {
+    const { ctx, page, errors } = await openHome(browser, origin, kind, size)
+    try {
+      await settleHome(page)
+      const view = await homeView(page)
+      const target = await cueTarget(page)
+      assert.equal(target?.id, expectId, `homePan opens: ${where} ${kind} targets ${expectId}`)
+      const want = Math.min(view.maxX, Math.max(0, target.x - view.viewW / 2))
+      assert.ok(Math.abs(view.panX - want) < 1.5, `homePan opens: ${where} ${kind} pan ${view.panX.toFixed(1)} is on ${want.toFixed(1)}`)
+      if (clamp === 'right') assert.ok(Math.abs(view.panX - view.maxX) < 1.5, `${where} ${kind} opens at the right end`)
+      if (clamp === 'left') assert.ok(view.panX < 1.5, `${where} ${kind} opens at the left end`)
+      if (clamp === 'mid') {
+        assert.ok(view.panX > 4 && view.panX < view.maxX - 4, `${where} ${kind} opens between the ends`)
+        const screenX = view.vp.left + (target.x - view.panX) * view.scale
+        assert.ok(
+          Math.abs(screenX - (view.vp.left + view.vp.width / 2)) <= 3,
+          `${where} ${kind} target sits mid-screen (${screenX.toFixed(1)})`,
+        )
+      }
+      const screenX = view.vp.left + (target.x - view.panX) * view.scale
+      assert.ok(screenX > view.vp.left + 8 && screenX < view.vp.right - 8, `${where} ${kind} target is in view`)
+      assert.equal(await page.locator('.easy-map-recenter').count(), 0, `${where} ${kind} shows no center button at open`)
+    } finally {
+      errorsOut.push(...errors)
+      await ctx.close()
+    }
+  }
+}
+
+// Bar 2: every unlocked plot and its label can be dragged fully into view.
+async function proveHomeReach(browser, origin, size, errorsOut) {
+  const where = `${size[0]}x${size[1]}`
+  for (const kind of ['late', 'tall-dock']) {
+    const { ctx, page, errors } = await openHome(browser, origin, kind, size)
+    try {
+      await settleHome(page)
+      const plots = await page.evaluate(() =>
+        [...document.querySelectorAll('g.city-plot[role="button"]')].map((el) => el.getAttribute('data-plot')),
+      )
+      assert.ok(plots.length >= (kind === 'late' ? 7 : 3), `${where} ${kind} has unlocked plots (${plots.join(',')})`)
+      const reached = new Set()
+      const chipsReached = new Set()
+      const sample = async () => {
+        const hits = await page.evaluate(() => {
+          const vp = document.querySelector('.city-pan-viewport').getBoundingClientRect()
+          const dockTop = document.querySelector('.easy-home-dock').getBoundingClientRect().top
+          const inside = (r) => r.left >= vp.left - 0.5 && r.right <= vp.right + 0.5 && r.top >= vp.top - 0.5 && r.bottom <= dockTop + 0.5
+          const plotsIn = []
+          for (const el of document.querySelectorAll('g.city-plot[role="button"]')) {
+            const hit = el.querySelector('.city-plot-hit')
+            if (inside(hit.getBoundingClientRect())) plotsIn.push(el.getAttribute('data-plot'))
+          }
+          const chips = []
+          for (const chip of document.querySelectorAll('.city-easy-chip')) {
+            const label = [...chip.querySelectorAll('tspan')].map((t) => t.textContent).join(' ').trim()
+            if (inside(chip.getBoundingClientRect())) chips.push(label)
+          }
+          return { plotsIn, chips }
+        })
+        for (const id of hits.plotsIn) reached.add(id)
+        return hits
+      }
+      let view = await panExtreme(page, 'left')
+      assert.ok(view.panX < 0.5, `${where} ${kind} reaches the left end`)
+      const step = view.vp.width * 0.3
+      const y = view.vp.top + view.vp.height * 0.25
+      const perPlot = new Map()
+      for (let i = 0; i < 40; i += 1) {
+        const hits = await sample()
+        for (const chip of hits.chips) chipsReached.add(chip)
+        for (const id of hits.plotsIn) {
+          const labels = hits.chips.map((c) => CHIP_PLOT[c]).filter(Boolean)
+          if (!perPlot.has(id)) perPlot.set(id, labels.includes(id))
+          else if (labels.includes(id)) perPlot.set(id, true)
+        }
+        view = await homeView(page)
+        if (view.panX > view.maxX - 0.5) break
+        await mouseDrag(page, { x: view.vp.right - 20, y }, { x: view.vp.right - 20 - step, y }, 6)
+      }
+      for (const id of plots) assert.ok(reached.has(id), `homePan reach: ${where} ${kind} ${id} can be dragged fully into view`)
+      const chipPlots = plots.filter((id) => Object.values(CHIP_PLOT).includes(id))
+      for (const id of chipPlots) assert.ok(perPlot.get(id), `homePan reach: ${where} ${kind} ${id} and its label share one fully visible view`)
+      const named = await page.evaluate(() => document.querySelectorAll('.city-easy-chip').length)
+      assert.ok(chipsReached.size >= named, `${where} ${kind} every name chip was fully visible once (${[...chipsReached].join('|')})`)
+    } finally {
+      errorsOut.push(...errors)
+      await ctx.close()
+    }
+  }
+}
+
+// Bar 3: nothing hidden or unfinished can be panned into view, and no bleed or void shows.
+async function proveHomeNoHidden(browser, origin, size, errorsOut) {
+  const where = `${size[0]}x${size[1]}`
+  for (const kind of ['fresh', 'bench-next', 'late']) {
+    const { ctx, page, errors } = await openHome(browser, origin, kind, size)
+    try {
+      await settleHome(page)
+      for (const side of ['left', 'right', 'mid']) {
+        const view = side === 'mid' ? await homeView(page) : await panExtreme(page, side)
+        const label = `${where} ${kind} ${side}`
+        assert.ok(view.plate, `${label} has a plate`)
+        assert.ok(view.plate.left <= view.vp.left + 0.6 && view.plate.right >= view.vp.right - 0.6, `homePan hidden: ${label} plate covers the width (${view.plate.left.toFixed(1)}..${view.plate.right.toFixed(1)})`)
+        assert.ok(view.plate.top <= view.vp.top + 0.6, `${label} plate starts at the top`)
+        assert.ok(view.plate.bottom >= view.dockTop - 0.6, `${label} plate reaches the dock (${view.plate.bottom.toFixed(1)} vs ${view.dockTop.toFixed(1)})`)
+        const hidden = await page.evaluate(() => {
+          const imgs = [...document.querySelectorAll('.city-svg image')].map((el) => el.getAttribute('href') || '')
+          const stripSvgs = document.querySelectorAll('.city-stage-bleed svg').length
+          const folkLamps = [...document.querySelectorAll('.city-folk .city-lamp')].filter((el) => getComputedStyle(el).display !== 'none').length
+          return {
+            eden: document.querySelectorAll('.city-eden').length,
+            heaven: document.querySelectorAll('.city-heaven').length,
+            streetLamps: document.querySelectorAll('.city-street-lamps').length,
+            lots: document.querySelectorAll('.city-lot').length,
+            stripSvgs,
+            folkLamps,
+            rough: imgs.filter((h) => /plot-observatory|plot-gate-scaffold|plot-lamps-scaffold|plot-lamps-built/.test(h)).length,
+            heavenTab: [...document.querySelectorAll('[aria-label]')].filter((el) => /Heaven waits on the ridge/.test(el.getAttribute('aria-label'))).length,
+          }
+        })
+        assert.deepEqual(
+          { ...hidden, stripSvgs: Math.min(hidden.stripSvgs, 1) },
+          { eden: 0, heaven: 0, streetLamps: 0, lots: 0, stripSvgs: Math.min(hidden.stripSvgs, 1), folkLamps: 0, rough: 0, heavenTab: 0 },
+          `homePan hidden: ${label} shows nothing hidden or unfinished ${JSON.stringify(hidden)}`,
+        )
+        assert.ok(hidden.stripSvgs <= 1, `${label} only the strip under the dock is kept`)
+      }
+      const maxPan = (await homeView(page)).maxX
+      assert.ok(maxPan >= 0, `${where} ${kind} pan range is non-negative`)
+    } finally {
+      errorsOut.push(...errors)
+      await ctx.close()
+    }
+  }
+  await proveHomeNoHiddenFounders(browser, origin, size, errorsOut)
+}
+
+// Bar 3, Founder's Lamp: the gift style keeps no folk lamp dots either.
+async function proveHomeNoHiddenFounders(browser, origin, size, errorsOut) {
+  const where = `${size[0]}x${size[1]}`
+  const { ctx, page, errors } = await openHome(browser, origin, 'late', size, {}, { lampStyle: 'founders', firstSeen: '2026-10-01' })
+  try {
+    await settleHome(page)
+    assert.equal(await page.locator('.city-overworld.is-style-founders').count(), 1, `${where} founders style is on`)
+    for (const side of ['left', 'right', 'mid']) {
+      if (side !== 'mid') await panExtreme(page, side)
+      const folkLamps = await page.evaluate(
+        () => [...document.querySelectorAll('.city-folk .city-lamp')].filter((el) => getComputedStyle(el).display !== 'none').length,
+      )
+      assert.equal(folkLamps, 0, `homePan hidden: ${where} founders ${side} shows no folk lamp dots (${folkLamps})`)
+    }
+  } finally {
+    errorsOut.push(...errors)
+    await ctx.close()
+  }
+}
+
+// Bar 4: exactly one gold cue in view at open, on the target.
+async function proveHomeOneGold(browser, origin, size, errorsOut) {
+  const where = `${size[0]}x${size[1]}`
+  for (const kind of ['fresh', 'hollow-next', 'bench-next', 'ready', 'late']) {
+    const { ctx, page, errors } = await openHome(browser, origin, kind, size)
+    try {
+      await settleHome(page)
+      const { cues, recenter } = await mapGoldCues(page)
+      const target = await cueTarget(page)
+      assert.equal(cues.length, 1, `homePan gold: ${where} ${kind} shows exactly one gold map cue ${JSON.stringify(cues)}`)
+      assert.equal(cues[0].kind, 'halo', `${where} ${kind} the one cue is the halo`)
+      assert.equal(cues[0].x, target.x, `${where} ${kind} the halo sits on ${target.id}`)
+      assert.equal(recenter, null, `${where} ${kind} no center button at open`)
+      assert.equal((await filledGolds(page)).length, 1, `${where} ${kind} the dock keeps its one filled gold`)
+      const view = await homeView(page)
+      await mouseDrag(page, { x: view.vp.left + view.vp.width * 0.8, y: view.vp.top + 120 }, { x: view.vp.left + view.vp.width * 0.2, y: view.vp.top + 120 })
+      const after = await mapGoldCues(page)
+      assert.ok(after.cues.length <= 1, `${where} ${kind} a drag adds no gold cue ${JSON.stringify(after.cues)}`)
+      if (after.recenter) assert.equal(after.recenter.gold, false, `${where} ${kind} the center button is not gold`)
+    } finally {
+      errorsOut.push(...errors)
+      await ctx.close()
+    }
+  }
+}
+
+// Bar 5: a drag never fires a plot tap. TAP_SLOP is 8 px.
+async function proveHomeTapSlop(browser, origin, size, errorsOut) {
+  const where = `${size[0]}x${size[1]}`
+  const { ctx, page, errors } = await openHome(browser, origin, 'bench-next', size)
+  try {
+    await settleHome(page)
+    const selected = () => page.locator('.city-plot.is-selected').count()
+    const manage = () => page.locator('.mind-map').count()
+    const bench = await plotCenter(page, 'bench')
+    const before = await homeView(page)
+
+    await mouseDrag(page, bench, { x: bench.x - 60, y: bench.y }, 6)
+    let view = await homeView(page)
+    assert.ok(Math.abs(view.panX - before.panX) > 20, `homePan tap: ${where} a drag that starts on a house moves the map`)
+    assert.equal(await selected(), 0, `homePan tap: ${where} a drag that starts on a house selects nothing`)
+    assert.equal(await manage(), 0, `${where} that drag opens no Manage`)
+
+    const spot = await plotCenter(page, 'bench')
+    await mouseDrag(page, { x: spot.x - 90, y: spot.y + 60 }, { x: spot.x, y: spot.y }, 6)
+    assert.equal(await selected(), 0, `${where} a drag that ends on a house selects nothing`)
+
+    const small = await plotCenter(page, 'bench')
+    await mouseTap(page, small, TAP_SLOP - 1)
+    assert.equal(await selected(), 1, `${where} a ${TAP_SLOP - 1}px wobble is still a tap`)
+    await page.keyboard.press('Escape')
+    assert.equal(await selected(), 0, `${where} Esc clears the chosen house`)
+
+    const wide = await plotCenter(page, 'bench')
+    const beforeWide = await homeView(page)
+    await mouseTap(page, wide, TAP_SLOP + 1)
+    assert.equal(await selected(), 0, `${where} a ${TAP_SLOP + 1}px move is a drag, not a tap`)
+    assert.ok(Math.abs((await homeView(page)).panX - beforeWide.panX) > 0.5, `${where} a ${TAP_SLOP + 1}px move pans`)
+
+    const one = await plotCenter(page, 'bench')
+    await mouseTap(page, one, 3)
+    assert.equal(await selected(), 1, `${where} tap selects with the gold ring`)
+    assert.equal(await manage(), 0, `${where} the first tap does not open Manage`)
+    const ring = await page.evaluate(() => {
+      const el = document.querySelector('.city-plot.is-selected .city-plot-select')
+      return el ? getComputedStyle(el).display : 'none'
+    })
+    assert.notEqual(ring, 'none', `${where} the chosen house shows its ring`)
+    await page.waitForTimeout(400)
+
+    const pan = await homeView(page)
+    await mouseDrag(page, { x: pan.vp.left + pan.vp.width * 0.8, y: pan.vp.top + 90 }, { x: pan.vp.left + pan.vp.width * 0.3, y: pan.vp.top + 90 })
+    assert.equal(await selected(), 1, `${where} a drag keeps the chosen house`)
+    assert.equal(await manage(), 0, `${where} a drag opens no Manage`)
+
+    const two = await plotCenter(page, 'bench')
+    await mouseTap(page, two, 0)
+    await page.locator('.mind-map').waitFor({ timeout: 4000 })
+    assert.equal(await manage(), 1, `${where} the second tap opens Manage`)
+
+    // Esc closes Manage first, then clears the chosen house.
+    await page.keyboard.press('Escape')
+    await page.locator('.mind-map').waitFor({ state: 'detached', timeout: 4000 })
+    assert.equal(await selected(), 1, `${where} the first Esc keeps the chosen house`)
+    await page.keyboard.press('Escape')
+    assert.equal(await selected(), 0, `${where} the second Esc clears it`)
+
+    // The dock never starts a pan.
+    const dockBox = await page.locator('.easy-home-dock').boundingBox()
+    const t0 = (await homeView(page)).tx
+    const dock = { x: dockBox.x + dockBox.width / 2, y: dockBox.y + 14 }
+    await mouseDrag(page, dock, { x: dock.x - 40, y: dock.y }, 5)
+    await mouseDrag(page, dock, { x: dock.x + 40, y: dock.y }, 5)
+    assert.equal((await homeView(page)).tx, t0, `homePan tap: ${where} a drag from the dock leaves the map where it was`)
+  } finally {
+    errorsOut.push(...errors)
+    await ctx.close()
+  }
+
+  const touch = await openHome(browser, origin, 'bench-next', size, { hasTouch: true })
+  try {
+    await settleHome(touch.page)
+    const view = await homeView(touch.page)
+    const spot = await plotCenter(touch.page, 'bench')
+    await touchDrag(touch.page, spot, { x: spot.x - 70, y: spot.y })
+    assert.ok(Math.abs((await homeView(touch.page)).panX - view.panX) > 20, `${where} a finger drag pans the map`)
+    assert.equal(await touch.page.locator('.city-plot.is-selected').count(), 0, `${where} a finger drag selects nothing`)
+    // Chromium swallows a tap that follows a scroll gesture within a beat.
+    await touch.page.waitForTimeout(700)
+    const again = await plotCenter(touch.page, 'bench')
+    await touch.page.touchscreen.tap(again.x, again.y)
+    await touch.page.waitForTimeout(150)
+    assert.equal(await touch.page.locator('.city-plot.is-selected').count(), 1, `${where} a finger tap selects`)
+  } finally {
+    errorsOut.push(...touch.errors)
+    await touch.ctx.close()
+  }
+}
+
+async function proveHomeClampAndCenter(browser, origin, size, errorsOut) {
+  const where = `${size[0]}x${size[1]}`
+  const { ctx, page, errors } = await openHome(browser, origin, 'hollow-next', size)
+  try {
+    await settleHome(page)
+    const right = await panExtreme(page, 'right')
+    assert.ok(Math.abs(right.panX - right.maxX) < 0.6, `homePan clamp: ${where} over-drag right stops at the plate edge (${right.panX.toFixed(1)} of ${right.maxX.toFixed(1)})`)
+    assert.ok(right.plate.right >= right.vp.right - 0.6, `${where} no bleed past the right edge`)
+    await page.waitForTimeout(100)
+    const rc = page.locator('.easy-map-recenter')
+    await rc.waitFor({ timeout: 3000 })
+    const box = await rc.boundingBox()
+    assert.ok(box.width >= 44 && box.height >= 44, `homePan recenter: ${where} button is ${box.width}x${box.height}`)
+    assert.equal(await rc.getAttribute('aria-label'), 'Center the map on your house')
+    assert.equal(await page.getByRole('button', { name: 'Center the map on your house' }).count(), 1, `${where} the center button has its name`)
+    const paint = await page.evaluate(() => {
+      const el = document.querySelector('.easy-map-recenter')
+      const st = getComputedStyle(el)
+      return { bg: st.backgroundColor, border: st.borderTopColor, img: st.backgroundImage, text: (el.textContent || '').trim() }
+    })
+    assert.equal(isGoldPaint(paint.bg) || isGoldPaint(paint.border), false, `${where} the center button is not gold ${JSON.stringify(paint)}`)
+    assert.equal(paint.img, 'none', `${where} the center button draws no image`)
+    assert.equal(paint.text, '', `${where} the center button has no baked text`)
+
+    // A pan never starts on the center button.
+    const t0 = (await homeView(page)).tx
+    const at = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+    await page.mouse.move(at.x, at.y)
+    await page.mouse.down()
+    await page.mouse.move(at.x - 40, at.y, { steps: 5 })
+    await page.mouse.up()
+    await page.waitForTimeout(100)
+    assert.equal((await homeView(page)).tx, t0, `${where} a drag from the center button does not pan`)
+
+    const left = await panExtreme(page, 'left')
+    assert.ok(left.panX < 0.6, `${where} over-drag left stops at the plate edge (${left.panX.toFixed(1)})`)
+    assert.ok(left.plate.left <= left.vp.left + 0.6, `${where} no bleed past the left edge`)
+    assert.equal(await page.locator('.easy-map-recenter').count(), 0, `${where} the button hides at home`)
+
+    await panExtreme(page, 'right')
+    await rc.waitFor()
+    const rb = await rc.boundingBox()
+    await page.mouse.click(rb.x + rb.width / 2, rb.y + rb.height / 2)
+    await page.waitForTimeout(600)
+    const home = await homeView(page)
+    assert.ok(home.panX < 1.5, `homePan recenter: ${where} the button brings the house back (${home.panX.toFixed(1)})`)
+    assert.equal(await page.locator('.easy-map-recenter').count(), 0, `${where} the button goes away once home`)
+    const hollow = await page.evaluate(() => {
+      const r = document.querySelector('g.city-plot[data-plot="hollow"] .city-plot-hit').getBoundingClientRect()
+      const vp = document.querySelector('.city-pan-viewport').getBoundingClientRect()
+      return r.left >= vp.left - 0.5 && r.right <= vp.right + 0.5
+    })
+    assert.ok(hollow, `${where} the house is fully back in view`)
+  } finally {
+    errorsOut.push(...errors)
+    await ctx.close()
+  }
+}
+
+async function proveHomeKeys(browser, origin, size, errorsOut) {
+  const where = `${size[0]}x${size[1]}`
+  const { ctx, page, errors } = await openHome(browser, origin, 'bench-next', size)
+  try {
+    await settleHome(page)
+    const start = await homeView(page)
+    for (let i = 0; i < 14; i += 1) {
+      const active = await page.evaluate(() => document.activeElement?.classList.contains('city-pan-viewport'))
+      if (active) break
+      await page.keyboard.press('Tab')
+    }
+    assert.equal(await page.evaluate(() => document.activeElement?.classList.contains('city-pan-viewport')), true, `${where} Tab reaches the map`)
+    assert.equal(await page.locator('.city-pan-viewport').getAttribute('aria-label'), 'Map view. Use the arrow keys to look around.')
+    await page.keyboard.press('ArrowLeft')
+    await page.waitForTimeout(500)
+    const left = await homeView(page)
+    assert.ok(Math.abs(start.panX - left.panX - 48) < 1, `homePan keys: ${where} ArrowLeft pans 48 units (${start.panX.toFixed(1)} to ${left.panX.toFixed(1)})`)
+    await page.keyboard.press('ArrowRight')
+    await page.waitForTimeout(500)
+    const back = await homeView(page)
+    assert.ok(Math.abs(back.panX - start.panX) < 1, `${where} ArrowRight pans back 48 units (${back.panX.toFixed(1)})`)
+    await page.keyboard.press('Shift+ArrowLeft')
+    await page.waitForTimeout(500)
+    const far = await homeView(page)
+    assert.ok(Math.abs(start.panX - far.panX - 144) < 1, `${where} Shift+ArrowLeft pans three steps (${far.panX.toFixed(1)})`)
+    await page.locator('.easy-map-recenter').waitFor({ timeout: 2000 })
+    await page.keyboard.press('Home')
+    await page.waitForTimeout(500)
+    const home = await homeView(page)
+    assert.ok(Math.abs(home.panX - start.panX) < 1, `${where} Home recenters`)
+    assert.equal(await page.locator('.easy-map-recenter').count(), 0, `${where} the center button goes away`)
+  } finally {
+    errorsOut.push(...errors)
+    await ctx.close()
+  }
+
+  const calm = await openHome(browser, origin, 'bench-next', size, { reducedMotion: 'reduce' })
+  try {
+    await settleHome(calm.page)
+    const view = await homeView(calm.page)
+    const y = view.vp.top + 100
+    await calm.page.mouse.move(view.vp.left + 300, y)
+    await calm.page.mouse.down()
+    await calm.page.mouse.move(view.vp.left + 160, y, { steps: 3 })
+    await calm.page.mouse.move(view.vp.left + 40, y, { steps: 2 })
+    await calm.page.mouse.up()
+    const first = (await homeView(calm.page)).tx
+    await calm.page.waitForTimeout(60)
+    const second = (await homeView(calm.page)).tx
+    await calm.page.waitForTimeout(250)
+    const third = (await homeView(calm.page)).tx
+    assert.equal(first, second, `homePan reduced: ${where} a flick leaves no glide on the next frame`)
+    assert.equal(second, third, `${where} the map stays put after a flick`)
+    assert.notEqual(first, view.tx, `${where} the flick still panned`)
+    await calm.page.locator('.city-pan-viewport').focus()
+    const before = (await homeView(calm.page)).panX
+    await calm.page.keyboard.press('ArrowLeft')
+    await calm.page.waitForTimeout(40)
+    assert.ok(Math.abs(before - (await homeView(calm.page)).panX - 48) < 1, `${where} reduced motion jumps the arrow step at once`)
+  } finally {
+    errorsOut.push(...calm.errors)
+    await calm.ctx.close()
+  }
+}
+
+async function proveHomeTabFocus(browser, origin, size, errorsOut) {
+  const where = `${size[0]}x${size[1]}`
+  const { ctx, page, errors } = await openHome(browser, origin, 'late', size)
+  try {
+    await settleHome(page)
+    for (const id of ['porch', 'hollow']) {
+      await panExtreme(page, id === 'porch' ? 'left' : 'right')
+      const out = await page.evaluate((plotId) => {
+        const r = document.querySelector(`g.city-plot[data-plot="${plotId}"] .city-plot-hit`).getBoundingClientRect()
+        const vp = document.querySelector('.city-pan-viewport').getBoundingClientRect()
+        return r.left < vp.left || r.right > vp.right
+      }, id)
+      assert.ok(out, `${where} ${id} starts off-screen`)
+      await page.evaluate(() => document.querySelector('.city-pan-viewport').focus())
+      let landed = false
+      for (let i = 0; i < 20 && !landed; i += 1) {
+        await page.keyboard.press('Tab')
+        landed = await page.evaluate((plotId) => document.activeElement?.getAttribute('data-plot') === plotId, id)
+      }
+      assert.ok(landed, `${where} Tab reaches ${id}`)
+      await page.waitForTimeout(500)
+      const inView = await page.evaluate((plotId) => {
+        const r = document.querySelector(`g.city-plot[data-plot="${plotId}"] .city-plot-hit`).getBoundingClientRect()
+        const vp = document.querySelector('.city-pan-viewport').getBoundingClientRect()
+        return { left: r.left - vp.left, right: vp.right - r.right }
+      }, id)
+      assert.ok(inView.left >= -0.5 && inView.right >= -0.5, `homePan focus: ${where} Tab focus pans ${id} into view ${JSON.stringify(inView)}`)
+    }
+  } finally {
+    errorsOut.push(...errors)
+    await ctx.close()
+  }
+}
+
+async function proveHomeChips(browser, origin, size, errorsOut) {
+  const { ctx, page, errors } = await openHome(browser, origin, 'fresh', size)
+  try {
+    await settleHome(page)
+    const sizes = await chipPx(page)
+    assert.ok(sizes.length > 0, `${size[0]}x${size[1]} Home has a name chip`)
+    for (const px of sizes) assert.ok(px >= 12, `homePan chips: ${size[0]}x${size[1]} chip text is ${px.toFixed(1)} CSS px`)
+    const view = await homeView(page)
+    assert.ok(view.scale > 0.9, `${size[0]}x${size[1]} the map is bigger than the old fit (${view.scale.toFixed(2)})`)
+  } finally {
+    errorsOut.push(...errors)
+    await ctx.close()
+  }
+}
+
+async function proveHomeWideAndHard(browser, origin, errorsOut) {
+  const wide = await openHome(browser, origin, 'late', [768, 1024])
+  try {
+    await wide.page.locator('.city-svg').waitFor()
+    await wide.page.waitForTimeout(400)
+    assert.equal(await wide.page.locator('.city-pan-viewport').count(), 0, 'homePan wide: 768 keeps the fit-to-width map')
+    const spot = await plotCenter(wide.page, 'lamps')
+    await mouseTap(wide.page, spot, 0)
+    assert.equal(await wide.page.locator('.city-plot.is-selected').count(), 1, '768 a tap still chooses a house')
+  } finally {
+    errorsOut.push(...wide.errors)
+    await wide.ctx.close()
+  }
+
+  // Ready lots without a candy still: main draws the gold ring on them. The next road is a different lot.
+  const readySeed = {
+    completed: [...HOME_HOLLOW, ...HOME_BENCH],
+    cityBuilt: { porch: 4, hollow: 4, bench: 1, observatory: 0, gate: 0, lookout: 0, journal: 0, lamps: 0 },
+  }
+  const readyCue = (page) =>
+    page.evaluate(() => {
+      const next = document.querySelector('g.city-plot.is-next')
+      const cx = (g) => Number(g?.querySelector('.city-plot-hit')?.getAttribute('cx'))
+      const mark = document.querySelector('g.city-next-mark')
+      const m = /translate\(\s*([-\d.]+)[ ,]+([-\d.]+)/.exec(mark?.getAttribute('transform') || '')
+      const rings = [...document.querySelectorAll('g.city-plot.is-ready')].map((g) => ({
+        id: g.getAttribute('data-plot'),
+        candy: g.classList.contains('has-candy-img'),
+        stroke: getComputedStyle(g.querySelector('.city-plot-hit')).stroke,
+      }))
+      return {
+        nextId: next?.getAttribute('data-plot'),
+        nextX: cx(next),
+        haloX: m ? Number(m[1]) : null,
+        rings,
+        pan: document.querySelectorAll('.city-overworld.is-easy-pan').length,
+      }
+    })
+  const ready768 = await openHome(browser, origin, 'ready', [768, 1024], {}, readySeed)
+  try {
+    await ready768.page.locator('.city-svg').waitFor()
+    await ready768.page.waitForTimeout(500)
+    const cue = await readyCue(ready768.page)
+    const plain = cue.rings.filter((ring) => !ring.candy)
+    assert.equal(cue.pan, 0, '768 is not in pan mode')
+    assert.ok(plain.length >= 1, `768 seed has a ready lot without a candy still ${JSON.stringify(cue)}`)
+    assert.ok(Math.abs(cue.haloX - cue.nextX) < 1, `768 the halo sits on the next road, as on main ${JSON.stringify(cue)}`)
+    for (const ring of plain) assert.notEqual(ring.stroke, 'none', `768 the gold ready ring is present on ${ring.id}, as on main`)
+  } finally {
+    errorsOut.push(...ready768.errors)
+    await ready768.ctx.close()
+  }
+
+  const readyPan = await openHome(browser, origin, 'ready', [390, 844], {}, readySeed)
+  try {
+    await settleHome(readyPan.page)
+    const cue = await readyCue(readyPan.page)
+    assert.equal(cue.pan, 1, '390 is in pan mode')
+    assert.ok(cue.rings.length >= 1, `390 seed has a ready lot ${JSON.stringify(cue)}`)
+    for (const ring of cue.rings) assert.equal(ring.stroke, 'none', `390 the ready ring is off in pan mode on ${ring.id}`)
+  } finally {
+    errorsOut.push(...readyPan.errors)
+    await readyPan.ctx.close()
+  }
+
+  const hard = await openHome(browser, origin, 'late', [390, 844], {}, { easyMode: false })
+  try {
+    await hard.page.locator('.city-svg').waitFor()
+    // Hard plays its own build and homecoming camera first. Wait for it to settle on the whole plate.
+    await hard.page
+      .waitForFunction(() => document.querySelector('.city-svg')?.getAttribute('viewBox') === '0 0 640 420', null, { timeout: 15000 })
+      .catch(() => {})
+    const probe = await hard.page.evaluate(() => ({
+      viewport: document.querySelectorAll('.city-pan-viewport').length,
+      layer: document.querySelectorAll('.city-pan-layer').length,
+      recenter: document.querySelectorAll('.easy-map-recenter').length,
+      viewBox: document.querySelector('.city-svg')?.getAttribute('viewBox'),
+      eden: document.querySelectorAll('.city-eden').length,
+      heaven: document.querySelectorAll('.city-heaven').length,
+      streetLamps: document.querySelectorAll('.city-street-lamps').length,
+      observatory: [...document.querySelectorAll('.city-svg image')].filter((el) => /plot-observatory/.test(el.getAttribute('href') || '')).length,
+    }))
+    assert.equal(probe.viewport + probe.layer + probe.recenter, 0, `homePan hard: Hard Home has no pan viewport ${JSON.stringify(probe)}`)
+    assert.equal(probe.viewBox, '0 0 640 420', 'Hard Home keeps its viewBox')
+    assert.equal(probe.eden, 1, 'Hard Home keeps the Eden vectors')
+    assert.equal(probe.heaven, 1, 'Hard Home keeps the heaven city')
+    assert.ok(probe.streetLamps >= 1, 'Hard Home keeps the street lamps')
+    assert.ok(probe.observatory >= 1, 'Hard Home keeps the observatory still')
+  } finally {
+    errorsOut.push(...hard.errors)
+    await hard.ctx.close()
+  }
+}
+
+export async function proveHomePan(browser, origin) {
+  const errors = []
+  const lines = []
+  for (const size of HOME_SIZES) {
+    await proveHomeOpensOnTarget(browser, origin, size, errors)
+    await proveHomeReach(browser, origin, size, errors)
+    await proveHomeNoHidden(browser, origin, size, errors)
+    await proveHomeOneGold(browser, origin, size, errors)
+    await proveHomeTapSlop(browser, origin, size, errors)
+    await proveHomeClampAndCenter(browser, origin, size, errors)
+    await proveHomeKeys(browser, origin, size, errors)
+    await proveHomeTabFocus(browser, origin, size, errors)
+    await proveHomeChips(browser, origin, size, errors)
+    lines.push(`home-pan ${size[0]}x${size[1]} ok`)
+  }
+  await proveHomeWideAndHard(browser, origin, errors)
+  assert.deepEqual(errors, [], `homePan page errors: ${errors.join('\n')}`)
+  lines.push('home-pan wide and hard ok')
+  return lines
+}
+
 export async function checkGoldenLive() {
   await build({ logLevel: 'warn' })
   const server = await preview({
@@ -1939,6 +2755,7 @@ export async function checkGoldenLive() {
     await proveNotQuite(browser, origin)
     await proveGemToast(browser, origin)
     traces.push('hop-b not-quite and gem toast')
+    traces.push((await proveHomePan(browser, origin)).join('\n'))
   } finally {
     await browser.close()
     await server.close()

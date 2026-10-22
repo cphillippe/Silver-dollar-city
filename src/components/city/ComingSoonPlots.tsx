@@ -29,7 +29,7 @@ const FALLBACK: PlotMetrics = {
  * A tap shows one Coming soon line and a gold Back. It does not open checkout.
  * On a phone the pill stays at least 48px and the label at least 12px, clear of the edge.
  */
-export function ComingSoonPlots() {
+export function ComingSoonPlots({ svgSelector = '.city-svg' }: { svgSelector?: string } = {}) {
   const [open, setOpen] = useState<string | null>(null)
   const [metrics, setMetrics] = useState<PlotMetrics>(FALLBACK)
   const closed = playShopClosed()
@@ -37,7 +37,7 @@ export function ComingSoonPlots() {
   useLayoutEffect(() => {
     if (!closed) return
     const measure = () => {
-      const svg = document.querySelector('.city-svg')
+      const svg = document.querySelector(svgSelector)
       if (!(svg instanceof SVGSVGElement)) return
       const box = svg.getBoundingClientRect()
       const view = svg.viewBox.baseVal
@@ -55,7 +55,7 @@ export function ComingSoonPlots() {
     measure()
     window.addEventListener('resize', measure)
     return () => window.removeEventListener('resize', measure)
-  }, [closed])
+  }, [closed, svgSelector])
 
   if (!closed) return null
   const streets = paidPacks()
