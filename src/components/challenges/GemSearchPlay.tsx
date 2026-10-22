@@ -19,7 +19,7 @@ import {
   type GemCoord,
 } from '../../lib/gemSearch'
 import { MATCH_DOCK_JUICE_POINTS } from '../../lib/matchBonus'
-import { jarCrossing, skillBonusPoints, skillsFor } from '../../lib/gemJar'
+import { skillBonusPoints, skillsFor } from '../../lib/gemJar'
 import { gemBonusBeat, matchClearBeat } from '../../lib/successBeat'
 import { MatchTakeaway } from '../HeldTriad'
 import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
