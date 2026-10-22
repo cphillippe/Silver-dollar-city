@@ -519,6 +519,20 @@ async function run() {
         assert.match(head, new RegExp(`Gem Jar ${lifetime.toLocaleString('en-US')}`), `${tag} Journal shows the jar total`)
         assert.doesNotMatch(head, /\+\d+ bonus/, `${tag} Easy Journal no longer shows +N bonus`)
         assert.equal(await page.locator('[data-gem-skill="sight"]').count(), 1, `${tag} Journal chips the unlocked skill`)
+        const contrast = await page.locator('.journal-head [data-gem-skill]').first().evaluate((node) => {
+          const lum = (css) => {
+            const [r, g, b] = css.match(/[\d.]+/g).slice(0, 3).map(Number).map((v) => {
+              const c = v / 255
+              return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+            })
+            return 0.2126 * r + 0.7152 * g + 0.0722 * b
+          }
+          const style = getComputedStyle(node)
+          const a = lum(style.color)
+          const b = lum(style.backgroundColor)
+          return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
+        })
+        assert.ok(contrast >= 4.5, `${tag} Journal skill chip text is readable (contrast ${contrast.toFixed(2)})`)
         assert.deepEqual(await typeOffenders(page, '.journal-head [data-gem-skill]'), [], `${tag} Journal skill chip type is >= 13px sans`)
       }
       await context.close()

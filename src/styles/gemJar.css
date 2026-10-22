@@ -210,3 +210,10 @@ html[data-easy='on'] .play.is-gem-search .gem-cell.is-sight:not(.is-start-gold) 
     transition: none;
   }
 }
+
+/* Journal skill chips: the base .held-mark is pale text for a dark card; on the cream Easy page use ink on parchment. */
+html[data-easy='on'] .journal-head .dossier-marks .held-mark[data-gem-skill] {
+  background: var(--parchment);
+  color: var(--ink);
+  border: 1.5px solid var(--pine);
+}
