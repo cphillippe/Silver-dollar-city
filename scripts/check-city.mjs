@@ -1839,6 +1839,9 @@ assert.match(
     assert.match(selector, /is-easy-watch|^@|^\.defend-page/, `#792b every new Night Watch rule is scoped to Easy: ${selector}`)
   }
   assert.doesNotMatch(tail792b, /#[0-9a-f]{3,8}\b/i, '#792b the new Night Watch rules use existing tokens, no new hex colors')
+  const tailCode792b = tail792b.replace(/\/\*[\s\S]*?\*\//g, '')
+  assert.doesNotMatch(tailCode792b, /font-family|font-size|font:|font-weight/, '#792b the new Night Watch rules add no font or size (existing sans stack, no Fraunces or serif)')
+  assert.doesNotMatch(tailCode792b, /var\(--gold|255,\s*204,\s*51|255,\s*159,\s*26|#ffcc33|#ff9f1a/i, '#792b the new Night Watch rules add no gold')
   assert.match(tail792b, /\.defend-path-line \{[^}]*clip-path: inset\(50%\)/, '#792b NWUI-5 the reach lines use the sr-only clip')
   assert.doesNotMatch(tail792b, /defend-path-line \{[^}]*display: none/, '#792b NWUI-5 the reach lines never use display none')
   assert.match(tail792b, /nw-wave-survived \{\s*animation: nw-wave-survived-hold 2\.4s/, '#792b NWUI-8 survived holds 2.4s')
