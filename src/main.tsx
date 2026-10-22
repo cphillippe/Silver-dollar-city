@@ -31,6 +31,7 @@ import './styles/easyTopbar.css'
 import './styles/shareCard.css'
 import './styles/lockInCue.css'
 import './styles/gem-easy-tone.css'
+import './styles/easy-gold-cues.css'
 
 const webSurface = webRefreshSurface({
   play: isPlayBuild(),
