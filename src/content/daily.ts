@@ -362,7 +362,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
           id: 'b',
           text: 'Women are among the first witnesses.',
           bin: 'keep',
-          why: 'Luke names women first — and that the men called it idle talk.',
+          why: 'Luke names women first — and that the men thought it was an idle tale.',
         },
         { id: 'c', text: 'Rome instantly converts the senate.', bin: 'discard' },
         {

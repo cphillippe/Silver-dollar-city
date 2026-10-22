@@ -134,7 +134,7 @@ export const witnessBench: Area = {
       idea: 'women as first witnesses is an awkward detail to invent',
       prompt: 'Keep the careful historical move. Toss the overclaims.',
       context:
-        'Women are first at the tomb (Mark 16:1–8; Luke 24:1–11; John 20). Luke 24:11: the report sounded like “idle talk.”',
+        'Women are first at the tomb (Mark 16:1–8; Luke 24:1–11; John 20). Luke 24:11: their words “seemed to them an idle tale.”',
       keepLabel: 'Keep',
       discardLabel: 'Toss',
       tiles: [

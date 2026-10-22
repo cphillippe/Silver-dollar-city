@@ -72,7 +72,7 @@ const PLAIN: Record<string, PlainLine> = {
   ),
   'wb-women': line(
     'Women were first to report Jesus’ empty tomb.',
-    'Women go to Jesus’ tomb at dawn and find it empty. They tell the apostles. Luke says the men called it idle talk. The report still begins with the women.',
+    'Women go to Jesus’ tomb at dawn and find it empty. They tell the apostles. Luke says the men thought it was an idle tale. The report still begins with the women.',
     { term: 'Witness', sense: 'someone who says what they saw', hint: 'Keep the costly opening. Toss overclaims.' },
   ),
   'ob-tuning': line(

@@ -99,6 +99,11 @@ export interface LevelBurst {
 
 export type { TowerCardPoint }
 
+/** The place name a lamp is announced by: a city lot title, or open ground. */
+export function lampPlotTitle(plotId: CityPlotId): string {
+  return CITY_PLOTS.find((plot) => plot.id === plotId)?.title ?? (isFreeSpot(plotId) ? 'open ground' : plotId)
+}
+
 export function DefendTowerCard({
   plotId,
   ability,
@@ -181,9 +186,7 @@ export function DefendTowerCard({
         : isCandle(ability)
           ? CANDLE_LABEL
           : (WATCH_ABILITY_LABEL[ability] ?? 'Love')
-  const plotTitle =
-    CITY_PLOTS.find((plot) => plot.id === plotId)?.title ??
-    (isFreeSpot(plotId) ? 'open ground' : plotId)
+  const plotTitle = lampPlotTitle(plotId)
   const lessonCue = Boolean(
     easy &&
       !midWave &&
@@ -228,7 +231,7 @@ export function DefendTowerCard({
         data-upgrade-plot={plotId}
         role="dialog"
         tabIndex={-1}
-        aria-label={`Upgrade ${label} at ${plotTitle}`}
+        aria-label={`${label} at ${plotTitle} upgrades`}
         style={{
           left: placed.left,
           top: placed.top,
@@ -374,7 +377,7 @@ export function DefendTowerCard({
         data-upgrade-plot={plotId}
         role="dialog"
         tabIndex={-1}
-        aria-label={`Upgrade ${label} at ${plotTitle}`}
+        aria-label={`${label} at ${plotTitle} upgrades`}
         style={{
           left: placed.left,
           top: placed.top,
@@ -521,7 +524,7 @@ export function DefendTowerCard({
         data-upgrade-plot={plotId}
         role="dialog"
         tabIndex={-1}
-        aria-label={`Upgrade ${label} at ${plotTitle}`}
+        aria-label={`${label} at ${plotTitle} upgrades`}
         style={{
           left: placed.left,
           top: placed.top,
@@ -663,7 +666,7 @@ export function DefendTowerCard({
         data-upgrade-plot={plotId}
         role="dialog"
         tabIndex={-1}
-        aria-label={`Upgrade ${label} at ${plotTitle}`}
+        aria-label={`${label} at ${plotTitle} upgrades`}
         style={{
           left: placed.left,
           top: placed.top,
@@ -788,6 +791,9 @@ export function DefendTowerCard({
                   disabled={broke}
                   data-path-buy={path}
                   data-cost={buy.cost}
+                  aria-label={
+                    broke ? `${PATH_LABEL[path]}, need ${buy.cost}` : `${PATH_LABEL[path]}, ${buy.cost} sparks`
+                  }
                   onPointerDown={(event) => {
                     event.stopPropagation()
                     if (!broke) onArmPathBuy?.(path)
@@ -831,7 +837,7 @@ export function DefendTowerCard({
         data-upgrade-plot={plotId}
         role="dialog"
         tabIndex={-1}
-        aria-label={`Upgrade ${label} at ${plotTitle}`}
+        aria-label={`${label} at ${plotTitle} upgrades`}
         style={{
           left: placed.left,
           top: placed.top,
@@ -966,6 +972,9 @@ export function DefendTowerCard({
                   disabled={broke}
                   data-path-buy={path}
                   data-cost={buy.cost}
+                  aria-label={
+                    broke ? `${PATH_LABEL[path]}, need ${buy.cost}` : `${PATH_LABEL[path]}, ${buy.cost} sparks`
+                  }
                   onPointerDown={(event) => {
                     event.stopPropagation()
                     if (!broke) onArmPathBuy?.(path)
@@ -1064,7 +1073,7 @@ export function DefendTowerCard({
       data-can-spend={canSpend ? 'yes' : 'no'}
       role="dialog"
       tabIndex={-1}
-      aria-label={`Upgrade ${label} at ${plotTitle}`}
+      aria-label={`${label} at ${plotTitle} upgrades`}
       style={{
         left: placed.left,
         top: placed.top,

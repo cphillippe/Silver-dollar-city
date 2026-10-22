@@ -6,7 +6,7 @@ import { EASY_CROWN_HIT_R, EASY_FACE_HIT_R, PATH_WALKER_FACE_DY, WATCH_ABILITY_L
 import { boardFill, boardFillPoint, boardPoint as mapBoardPoint, boardView, lampIconBox, nightTowers } from '../nightWatch'
 import type { DefendNightSkyProps } from './DefendNightSky'
 import { DefendNightSky } from './DefendNightSky'
-import { DefendTowerCard, type TowerCardPoint } from './DefendTowerCard'
+import { DefendTowerCard, lampPlotTitle, type TowerCardPoint } from './DefendTowerCard'
 import { samePillarLessons } from '../nightWatch/lampPillar'
 import { easyShotReach, pathsOf, type BonusGate, type LampPaths, type TreePath } from '../nightWatch/upgradeTree'
 import { bellPathKey, isBell } from '../nightWatch/bell'
@@ -264,7 +264,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           roadNote={roadNote}
           easy={easy}
           midWave={phase === 'wave'}
-          reserveBottom={easy && boosting ? CLEAR_BAR_RESERVE : 0}
+          reserveBottom={easy && (boosting || phase === 'plant') ? CLEAR_BAR_RESERVE : 0}
           gate={lessonGate}
           onOpenLessons={onOpenLessons}
         />
@@ -287,6 +287,13 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
             const at = place(boardBox, nightTowers.anchor(id))
             const type = towerType[id]
             const label = isIncense(type) ? INCENSE_LABEL : isCross(type) ? CROSS_LABEL : isBell(type) ? 'Bell' : isCandle(type) ? 'Candle' : (WATCH_ABILITY_LABEL[type ?? ''] ?? 'lamp')
+            const baseName = `Upgrade ${label} at ${lampPlotTitle(id)}`
+            const sameName = planted.filter((other) => {
+              const t = towerType[other]
+              const l = isIncense(t) ? INCENSE_LABEL : isCross(t) ? CROSS_LABEL : isBell(t) ? 'Bell' : isCandle(t) ? 'Candle' : (WATCH_ABILITY_LABEL[t ?? ''] ?? 'lamp')
+              return `Upgrade ${l} at ${lampPlotTitle(other)}` === baseName
+            })
+            const lampName = sameName.length > 1 ? `${baseName}, ${sameName.indexOf(id) + 1} of ${sameName.length}` : baseName
             const icon = lampIconBox(isIncense(type) ? 'incense' : isCross(type) ? 'cross' : isBell(type) ? 'bell' : isCandle(type) ? 'candle' : 'tower')
             const scale = cameraScale > 0 ? cameraScale : 1
             const lift = lampLift[id] ?? 0
@@ -299,7 +306,8 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
                 data-lamp-icon="yes"
                 data-incense-icon={isIncense(type) ? 'yes' : undefined}
                 data-tower-type={type}
-                aria-label={`Upgrade ${label}`}
+                aria-label={lampName}
+                aria-expanded={easy ? upgradeAt === id : undefined}
                 style={{
                   left: at.left + icon.x * scale,
                   top: at.top + icon.y * scale,
