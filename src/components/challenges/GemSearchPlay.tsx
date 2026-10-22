@@ -9,6 +9,7 @@ import {
   bonusPointsFor,
   gemHue,
   isStoryWord,
+  isStoryWordPrefix,
   isStraightPath,
   matchBonusWord,
   matchGemWord,
@@ -393,7 +394,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     }, stampAt)
   }
 
-  function submit(nextPath: GemCoord[]) {
+  function submit(nextPath: GemCoord[], building = false) {
     const hit = matchGemWord(nextPath, puzzle, foundRef.current)
     if (hit) {
       const nextFound = [...foundRef.current, hit.id]
@@ -414,6 +415,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       if (done) finishBoard()
       return true
     }
+    if (building && isStoryWordPrefix(nextPath, puzzle, bonusRef.current)) return false
     const extra = matchBonusWord(nextPath, puzzle, bonusRef.current)
     if (extra) {
       const nextBonus = [...bonusRef.current, extra.id]
@@ -511,7 +513,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     rawRef.current = next
     const line = snapFingerPath(next, puzzle.size)
     writePath(line)
-    submit(line)
+    submit(line, true)
   }
 
   function onCellDown(event: ReactPointerEvent<HTMLDivElement>, cell: GemCoord) {

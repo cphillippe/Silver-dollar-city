@@ -682,9 +682,15 @@ function filledCells(grid: (string | '')[][]): number {
 }
 
 /** Story words for a lesson. SHARED_BONUS (HELP, CARE, …) stay generic unless the lesson authors them. */
-function relatedWordsFor(lineId: string, pool: string[]): string[] {
-  const authored = new Set(LESSON_BONUS[lineId] ?? [])
-  return pool.filter((text) => authored.has(text) || !SHARED_BONUS.includes(text))
+function relatedWordsFor(lineId: string, pool: string[], chips: Set<string>): string[] {
+  const authoredRow = LESSON_BONUS[lineId] ?? []
+  const authored = new Set(authoredRow)
+  const out = pool.filter((text) => authored.has(text) || !SHARED_BONUS.includes(text))
+  // Authored words the pool filter dropped (function-word list, chip overlap) still pay as Story words.
+  for (const text of authoredRow) {
+    if (!out.includes(text) && !chips.has(text) && inBonusBand(text)) out.push(text)
+  }
+  return out
 }
 
 /** A found extra is a Story word when it is one of this lesson's related words. */
@@ -747,7 +753,7 @@ function buildGemPuzzleOnce(lineId: string, salt: number): GemPuzzle {
   const targets = new Set(words.map((word) => word.text))
   const authoredLesson = shuffleSeed(LESSON_BONUS[lineId] ?? [], rand)
   const lessonPicked: string[] = []
-  const related = relatedWordsFor(lineId, bonusPool)
+  const related = relatedWordsFor(lineId, bonusPool, new Set(words.map((word) => word.text)))
   for (const text of lessonPlantOrder(authoredLesson, related, targets)) {
     if (lessonPicked.length >= LESSON_PLANT_MAX) break
     if (collidesWithChip(text, new Set(lessonPicked))) continue
@@ -841,7 +847,7 @@ function trailMatches(placed: GemCoord[], path: GemCoord[]): boolean {
 export function isBonusSpelling(text: string, puzzle: GemPuzzle): boolean {
   if (!bonusBitOk(text)) return false
   if (puzzle.words.some((word) => word.text === text)) return false
-  if (puzzle.bonusPool.includes(text)) return true
+  if (puzzle.bonusPool.includes(text) || (puzzle.related ?? []).includes(text)) return true
   return COMMON_BONUS.has(text) && isKidFriendlyBonusWord(text)
 }
 
@@ -887,6 +893,18 @@ export function matchBonusWord(
   return word
 }
 
+
+/** True while a tap-by-tap path is still the front of an unfound Story word (TUNE on the way to TUNED). */
+export function isStoryWordPrefix(path: GemCoord[], puzzle: GemPuzzle, foundBonus: string[]): boolean {
+  if (path.length < 1) return false
+  return puzzle.planted.some((word) => {
+    if (!puzzle.lessonPlanted.includes(word.text)) return false
+    if (foundBonus.includes(word.id) || foundBonus.includes(word.text)) return false
+    const placed = puzzle.bonusPaths[word.id]
+    if (!placed || placed.length <= path.length) return false
+    return sameTrail(placed.slice(0, path.length), path) || sameTrail([...placed].reverse().slice(0, path.length), path)
+  })
+}
 
 /** Cells still required by planted bonus words the player has not found yet. */
 export function cellsNeededByOpenPlanted(puzzle: GemPuzzle, foundBonus: string[]): Set<string> {

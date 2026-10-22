@@ -260,9 +260,14 @@ async function nwGoldCues(page) {
 
 /** Bill's golden line: exactly one gold cue per Easy Night Watch screen, never zero. */
 export async function checkSeatRingGold(browser, port, errors) {
+  await seatRingAt(browser, port, errors, 375, 812, false)
+  await seatRingAt(browser, port, errors, 390, 844, true)
+}
+
+async function seatRingAt(browser, port, errors, width, height, plant) {
   const context = await browser.newContext({
     baseURL: `http://127.0.0.1:${port}/`,
-    viewport: { width: 390, height: 844 },
+    viewport: { width, height },
     deviceScaleFactor: 1,
     reducedMotion: 'reduce',
   })
@@ -271,7 +276,7 @@ export async function checkSeatRingGold(browser, port, errors) {
     { key: STORAGE_KEY, save: SAVE },
   )
   const page = await context.newPage()
-  listen(page, errors, 'gold-cues')
+  listen(page, errors, `gold-cues ${width}`)
   await openJump(page, '?playtest=1&nwSeed=2')
   if (await page.locator('[data-map-overlay]').count()) {
     await page.locator('[data-map="a2"]').click()
@@ -283,14 +288,40 @@ export async function checkSeatRingGold(browser, port, errors) {
   assert.equal(await page.locator('.defend-go').getAttribute('aria-disabled'), 'true', 'pre-wave Begin is the grey disabled button')
 
   const pre = await nwGoldCues(page)
-  assert.equal(pre.length, 1, `pre-wave (no lamp) shows exactly one gold cue ${JSON.stringify(pre)}`)
+  assert.equal(pre.length, 1, `${width}x${height} pre-wave (no lamp) shows exactly one gold cue ${JSON.stringify(pre)}`)
   assert.equal(pre[0].tag, 'circle', 'the pre-wave gold cue is a seat ring')
-  assert.match(pre[0].cls, /is-first-seat/, 'the pre-wave gold cue sits on the first open seat')
-  assert.equal(await page.locator('.defend-plant-ground circle.is-first-seat').count(), 1, 'only the first open seat is ringed')
-  const seatBox = await page.locator('.defend-plant-ground circle.is-first-seat').boundingBox()
-  assert.ok(seatBox && seatBox.y > 48 && seatBox.y + seatBox.height < 844, 'the ringed seat is on the board, in view')
+  assert.match(pre[0].cls, /is-first-seat/, 'the pre-wave gold cue sits on an open seat')
+  assert.equal(await page.locator('.defend-plant-ground circle.is-first-seat').count(), 1, 'only one open seat is ringed')
+  const ring = await page.locator('.defend-plant-ground circle.is-first-seat').boundingBox()
+  assert.ok(ring, 'the ring has a box')
+  assert.ok(
+    ring.x >= 0 && ring.y >= 0 && ring.x + ring.width <= width && ring.y + ring.height <= height,
+    `${width}x${height} the ring is fully on screen ${JSON.stringify(ring)}`,
+  )
+  const covers = await page.evaluate(() =>
+    [...document.querySelectorAll('.nw-rail, .nw-balloon-slot, .defend-go, .defend-hud')]
+      .map((node) => {
+        const rect = node.getBoundingClientRect()
+        return { cls: node.getAttribute('class'), x: rect.x, y: rect.y, w: rect.width, h: rect.height }
+      })
+      .filter((rect) => rect.w > 0 && rect.h > 0),
+  )
+  assert.ok(covers.some((item) => /nw-rail/.test(item.cls)), 'the lamp rail is measured')
+  for (const item of covers) {
+    const apart = ring.x + ring.width <= item.x || ring.x >= item.x + item.w || ring.y + ring.height <= item.y || ring.y >= item.y + item.h
+    assert.ok(apart, `${width}x${height} the ring ${JSON.stringify(ring)} is not covered by ${item.cls} ${JSON.stringify(item)}`)
+  }
+  const top = await page.evaluate(() => document.elementFromPoint(
+    ...(() => { const r = document.querySelector('.defend-plant-ground circle.is-first-seat').getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2] })(),
+  )?.closest('.nw-rail, .defend-go, .defend-hud') != null)
+  assert.equal(top, false, `${width}x${height} nothing from the rail or bars sits on the ring centre`)
   const hitBefore = await page.evaluate(() => document.querySelectorAll('.defend-plant-ground').length && getComputedStyle(document.querySelector('.defend-plant-ground')).pointerEvents)
   assert.equal(hitBefore, 'none', 'the seat ring takes no taps')
+  console.log(`seat ring ${width}x${height} box ${JSON.stringify({ x: Math.round(ring.x), y: Math.round(ring.y), w: Math.round(ring.width), h: Math.round(ring.height) })}`)
+  if (!plant) {
+    await context.close()
+    return
+  }
 
   const seats = await openSeatClients(page)
   const live = seats.find((seat) => seat.seat === 'live')
