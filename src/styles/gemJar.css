@@ -1,21 +1,21 @@
 /* Gem Jar (Easy Match win slot + play skills). Existing tokens only:
-   --parchment, --ink, --pine, --radius, --sans/--serif inherited. No gold here. */
+   --parchment, --ink, --pine, --radius, the body --sans stack inherited. No gold here. */
 .play.is-gem-search .gem-jar-slot {
   flex: 0 0 auto;
   margin: 0;
   padding: 0 4px;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   color: var(--ink);
 }
 
 .gem-jar {
   position: relative;
   display: grid;
-  grid-template-rows: 22px minmax(0, 1fr);
+  grid-template-rows: 22px 19px;
   align-items: center;
   gap: 3px;
   box-sizing: border-box;
-  height: var(--gem-jar-h, 46px);
+  height: var(--gem-jar-h, 54px);
   margin: 0 auto;
   width: min(100%, 390px);
   padding: 5px 10px;
@@ -37,47 +37,28 @@
 
 .gem-jar-name {
   font-weight: 750;
-  font-size: 0.78rem;
+  font-size: 0.82rem;
 }
 
 .gem-jar-count {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 850;
   font-variant-numeric: tabular-nums;
   color: var(--ink);
 }
 
 .gem-jar-story {
-  font-size: 0.74rem;
+  flex: 0 0 auto;
+  font-size: 0.82rem;
   font-weight: 750;
   color: var(--ink);
 }
 
 .gem-jar-caption {
   margin-left: auto;
-  font-size: 0.74rem;
+  font-size: 0.82rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-}
-
-@media (max-width: 420px) {
-  .gem-jar {
-    padding-inline: 8px;
-  }
-
-  .gem-jar-row {
-    gap: 4px;
-  }
-
-  .gem-jar-name,
-  .gem-jar-story,
-  .gem-jar-caption {
-    font-size: 0.68rem;
-  }
-
-  .gem-jar-count {
-    font-size: 0.88rem;
-  }
 }
 
 .gem-jar-icon {
@@ -98,8 +79,14 @@
   fill: var(--pine);
 }
 
+.gem-jar-row2 {
+  gap: 8px;
+  min-height: 19px;
+}
+
 .gem-jar-bar {
   display: block;
+  flex: 1 1 auto;
   height: 8px;
   border-radius: 999px;
   overflow: hidden;
@@ -116,23 +103,24 @@
 
 .gem-jar-reveal {
   margin: 0;
-  font-size: 0.74rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.82rem;
   font-weight: 750;
   line-height: 1.2;
-  white-space: normal;
   color: var(--ink);
 }
 
 /* The win board shrinks by the card height, so the win stack never grows. */
 html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked.is-win.has-gem-jar .gem-board {
-  width: min(100%, 520px, calc(36vh - var(--gem-jar-h, 46px)));
-  width: min(100%, 520px, calc(36svh - var(--gem-jar-h, 46px)));
+  width: min(100%, 520px, calc(36vh - var(--gem-jar-h, 54px)));
+  width: min(100%, 520px, calc(36svh - var(--gem-jar-h, 54px)));
 }
 
 @media (max-height: 720px) {
   html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked.is-win.has-gem-jar .gem-board {
-    width: min(100%, 520px, calc(30vh - var(--gem-jar-h, 46px)));
-    width: min(100%, 520px, calc(30svh - var(--gem-jar-h, 46px)));
+    width: min(100%, 520px, calc(30vh - var(--gem-jar-h, 54px)));
+    width: min(100%, 520px, calc(30svh - var(--gem-jar-h, 54px)));
   }
 }
 

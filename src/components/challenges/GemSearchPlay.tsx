@@ -30,7 +30,7 @@ import { lociStampFor } from '../../lib/lociStamp'
 import { LociStamp } from '../LociStamp'
 import { StoryStrip } from '../StoryStrip'
 import { WinBurst } from './WinBurst'
-import { GemJarCard, JAR_CARD_H, JAR_CARD_REVEAL_H } from './GemJarCard'
+import { GemJarCard, JAR_CARD_H } from './GemJarCard'
 
 interface GemSearchPlayProps {
   lineId: string
@@ -101,7 +101,6 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   lifetimeRef.current = lifetimeNow
   const [jarBefore, setJarBefore] = useState(lifetimeNow)
   const [sightKeys, setSightKeys] = useState<string[]>([])
-  const [jarH, setJarH] = useState(JAR_CARD_H)
   const boardPts = useRef(0)
   const jarSkills = useMemo(() => (easy ? skillsFor(jarBefore) : []), [easy, jarBefore])
   const [status, setStatus] = useState<'play' | 'ok'>('play')
@@ -389,8 +388,6 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     }
     const stampAt = prefersReducedMotion() ? 80 : 880
     window.setTimeout(() => {
-      const reveal = jarCrossing(jarBefore, jarBefore + boardPts.current, progress.matchSkillSeen ?? 0)
-      setJarH(reveal ? JAR_CARD_REVEAL_H : JAR_CARD_H)
       setWinStamp(true)
       setStatus('ok')
     }, stampAt)
@@ -576,7 +573,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       className={`play is-gem-search is-panel-blast is-story-docked ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${status === 'ok' && easy ? 'has-gem-jar' : ''} ${burst.length ? 'is-boom' : ''} ${plusFlash ? 'is-bonus-pop' : ''} ${findPop ? 'is-find-pop' : ''}`}
       style={{
         ['--gem-size' as string]: puzzle.size,
-        ...(status === 'ok' && easy ? { ['--gem-jar-h' as string]: `${jarH}px` } : {}),
+        ...(status === 'ok' && easy ? { ['--gem-jar-h' as string]: `${JAR_CARD_H}px` } : {}),
       }}
       onPointerUp={onBoardUp}
       onPointerCancel={onBoardCancel}

@@ -350,6 +350,26 @@ function totalFor(chips, extras) {
   return MATCH_DOCK_JUICE_POINTS + chips.reduce((sum, chip) => sum + Math.max(25, chip.text.length * 10), 0) + extras
 }
 
+/** New Easy text must be >= 13px and use the existing body sans stack (no Fraunces, no serif). */
+async function typeOffenders(page, selector) {
+  return page.evaluate((selector) => {
+    const bodyFamily = getComputedStyle(document.body).fontFamily
+    const bad = []
+    for (const root of document.querySelectorAll(selector)) {
+      for (const node of [root, ...root.querySelectorAll('*')]) {
+        const own = [...node.childNodes].some((n) => n.nodeType === 3 && (n.textContent || '').trim())
+        if (!own) continue
+        const style = getComputedStyle(node)
+        const px = parseFloat(style.fontSize)
+        if (px < 13 || style.fontFamily !== bodyFamily || /fraunces/i.test(style.fontFamily)) {
+          bad.push(`${node.tagName.toLowerCase()}.${String(node.className)} ${px}px ${style.fontFamily}`)
+        }
+      }
+    }
+    return bad
+  }, selector)
+}
+
 async function toastText(page) {
   const toast = page.locator('.gem-stage .match-toast, .gem-stage .bonus-banner')
   await toast.first().waitFor({ timeout: 3000 })
@@ -394,6 +414,7 @@ async function run() {
       const story = main.story[0]
       await swipe(page, story.path)
       assert.match(await toastText(page), /Story word! \+100/, `${tag} story word pops +100`)
+      assert.deepEqual(await typeOffenders(page, '.gem-stage .match-toast'), [], `${tag} Story word! pop type is >= 13px sans`)
       let progress = await savedProgress(page)
       assert.equal(progress.matchBonus[main.line] - 0 >= 100, true)
       const afterStory = progress.matchLifetime
@@ -426,6 +447,7 @@ async function run() {
       await page.locator('[data-gem-jar-reveal]').waitFor({ timeout: 4000 })
       await page.waitForTimeout(700)
       const layout = await winLayout(page, tag, viewport)
+      assert.deepEqual(await typeOffenders(page, '[data-gem-jar]'), [], `${tag} jar, Story word! and skill reveal type is >= 13px sans`)
       const jarGold = await goldElements(page, '[data-gem-jar]', null)
       assert.deepEqual(jarGold, [], `${tag} the jar has no gold (${jarGold.join(' | ')})`)
       const winGold = await goldElements(page, '.play.is-gem-search.is-win', null)
@@ -443,7 +465,7 @@ async function run() {
       assert.equal(progress.matchLifetime, expected, `${tag} saved jar equals the board total`)
       assert.equal(progress.matchSkillSeen, 1, `${tag} the first reveal is marked seen`)
       const reveal = await page.locator('[data-gem-jar-reveal]').innerText()
-      assert.match(reveal, /New skill: Bonus Sight — a bonus word shimmers at the start/, `${tag} first win unlocks Bonus Sight`)
+      assert.match(reveal, /^New skill: Bonus Sight$/, `${tag} first win unlocks Bonus Sight`)
       assert.equal(await page.getByText('New skill: Bonus Sight', { exact: false }).count(), 1, `${tag} reveal shows once`)
       const winText = await page.locator('.play.is-gem-search').innerText()
       assert.doesNotMatch(winText, /\d+\s*s(ec)?\b.*left|countdown/i, `${tag} no countdown`)
@@ -497,6 +519,7 @@ async function run() {
         assert.match(head, new RegExp(`Gem Jar ${lifetime.toLocaleString('en-US')}`), `${tag} Journal shows the jar total`)
         assert.doesNotMatch(head, /\+\d+ bonus/, `${tag} Easy Journal no longer shows +N bonus`)
         assert.equal(await page.locator('[data-gem-skill="sight"]').count(), 1, `${tag} Journal chips the unlocked skill`)
+        assert.deepEqual(await typeOffenders(page, '.journal-head [data-gem-skill]'), [], `${tag} Journal skill chip type is >= 13px sans`)
       }
       await context.close()
     }
