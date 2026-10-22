@@ -1,0 +1,38 @@
+/* #792 Easy Lock In: one neutral gold slide cue. No card is gold on its own. */
+html[data-easy='on'] .recall-gate.is-why-blast .why-blast:not(.is-miss-teach):not(.is-win) .why-claim.why-claim {
+  position: relative;
+  overflow: visible;
+  border-color: rgba(42, 33, 24, 0.35);
+}
+html[data-easy='on'] .recall-gate.is-why-blast .why-blast:not(.is-miss-teach):not(.is-win) .why-score.why-score {
+  color: #2a2118;
+  background: #fff6e8;
+  background-image: none;
+  border: 2.5px solid rgba(42, 33, 24, 0.35);
+  box-shadow: none;
+}
+html[data-easy='on'] .recall-gate.is-why-blast .why-blast .why-slide-cue {
+  position: absolute;
+  left: 50%;
+  top: -20px;
+  width: 34px;
+  height: 20px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #fffce8, #ffcc33 55%, #ff9f1a);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  filter: drop-shadow(0 2px 0 #8a5a22);
+  pointer-events: none;
+  z-index: 3;
+  animation: why-slide-nudge 1.2s ease-in-out infinite;
+}
+@keyframes why-slide-nudge {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, 6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-easy='on'] .recall-gate.is-why-blast .why-blast .why-slide-cue { animation: none; }
+}
+html[data-easy='on'] .recall-gate.is-why-blast .why-blast:not(.is-miss-teach):not(.is-win) .why-chip.why-chip.is-pressed {
+  border-color: #ffcc33;
+  box-shadow: 0 0 0 3px #ffcc33, 0 0 14px rgba(255, 204, 51, 0.8);
+}

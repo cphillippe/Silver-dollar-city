@@ -179,7 +179,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
 
         <div className="easy-home-dock">
           <FoundersGiftLine />
-          <p className="easy-home-whisper quiet">{homeWhisper}</p>
+          {homeWhisper !== dockGift ? <p className="easy-home-whisper quiet">{homeWhisper}</p> : null}
           <section className="easy-build-it" aria-label="Build It">
             <div className="easy-build-meta">
               <p className="eyebrow">{dockEyebrow}</p>

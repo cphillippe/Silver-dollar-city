@@ -1199,7 +1199,6 @@ export function CityMap({
           ) : (
             isEasy(progress) ? (
               <>
-                <p className="city-gift">{gift}</p>
                 {lockNote ? (
                   <p className="city-lock-toast" role="status">
                     {lockNote}

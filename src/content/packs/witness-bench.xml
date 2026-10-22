@@ -471,7 +471,7 @@ These criteria can be overused. They do not replace reading texts as wholes. The
         </sources>
       </journal>
     </lesson>
-    <lesson id="wb-women" place="Witness Square" person="Silas Whitman" tripleId="women-bench" ideaId="idea-women" ideaLabel="Women first saw the tomb." challengeKind="sort" challengeTitle="Idle talk">
+    <lesson id="wb-women" place="Witness Square" person="Silas Whitman" tripleId="women-bench" ideaId="idea-women" ideaLabel="Women first saw the tomb." challengeKind="sort" challengeTitle="An idle tale">
       <easy points="10" easyOrder="5">
         <learn>
           <shortStory>Women go to Jesus’ tomb at dawn and find it empty. They tell the apostles. Luke says the men called it idle talk. The report still begins with the women.</shortStory>

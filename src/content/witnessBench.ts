@@ -130,7 +130,7 @@ export const witnessBench: Area = {
     {
       kind: 'sort',
       id: 'wb-women',
-      title: 'Idle talk',
+      title: 'An idle tale',
       idea: 'women as first witnesses is an awkward detail to invent',
       prompt: 'Keep the careful historical move. Toss the overclaims.',
       context:

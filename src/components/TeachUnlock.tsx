@@ -110,7 +110,7 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
       <p className="next-tap">Read this, then unlock the play.</p>
       {picture ? <GemMark gem={picture} size="sm" /> : null}
       <p className="teach-reason">{story}</p>
-      <WordGloss words={school} extra={plain?.word} />
+      <WordGloss words={school} extra={easy || plain?.word?.term !== 'Set just right' ? plain?.word : undefined} />
       <p className="quiet">{WORDS.claim.teach}</p>
       <p className="eyebrow hold-kicker">The claim you will lock in</p>
       <p className="recall-line rehearse-stem">{brief.claim}</p>
