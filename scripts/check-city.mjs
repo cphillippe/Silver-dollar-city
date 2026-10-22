@@ -23,6 +23,7 @@ import {
   SPINE_GROW,
 } from '../src/lib/city.ts'
 import { APP_VERSION } from '../src/config/app.ts'
+import { clampPan, EASY_PAN_MAX_W, easyPanFrame, panToward } from '../src/lib/cityModel.ts'
 import { easyLoopLine as easyLoopFromLib, easyTrailView as easyTrailViewFromLib } from '../src/lib/easy.ts'
 import {
   easyLoopLine as easyLoopFromShelf,
@@ -1712,9 +1713,9 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.526')
+assert.equal(APP_VERSION, '1.4.527')
+assert.equal(CHANGELOG[0].version, '1.4.527', '1.4.527 is the newest row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.526'), '1.4.526 changelog row')
-assert.equal(CHANGELOG[0].version, '1.4.526', '1.4.526 is the newest row')
 assert.doesNotMatch(
   latestChange('1.4.526').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
@@ -1729,6 +1730,65 @@ assert.equal(
 )
 assert.match(latestChange('1.4.526').items.join('\n'), /Hard/)
 assert.match(latestChange('1.4.526').items.join('\n'), /Easy/)
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.527'), '1.4.527 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.527').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.527 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.527').items.join('\n'), /Refs #817/)
+assert.match(latestChange('1.4.527').items.join('\n'), /Hard/)
+{
+  // 1.4.527 Easy Home pan: frame math, clamp and wiring (live proof: proveHomePan in check-golden-live).
+  const phone = easyPanFrame(390, 844, 560)
+  assert.ok(phone, 'a 390 wide phone gets the pan frame')
+  assert.ok(phone.maxX > 0, 'the plate is wider than the phone view, so there is something to pan')
+  assert.ok(Math.abs(phone.scale * MAP_PLATE.h - 560) < 0.5, 'plate height fills the strip above the dock')
+  assert.ok(Math.abs(phone.viewW + phone.maxX - MAP_PLATE.w) < 1e-6, 'view width plus max pan is the plate width')
+  assert.equal(clampPan(-50, phone), 0, 'pan clamps at the left plate edge')
+  assert.equal(clampPan(MAP_PLATE.w, phone), phone.maxX, 'pan clamps at the right plate edge')
+  assert.equal(clampPan(Number.NaN, phone), 0, 'a bad pan value falls back to the left edge')
+  assert.equal(panToward(0, phone), 0, 'a road at the far left clamps to the edge')
+  assert.equal(panToward(MAP_PLATE.w, phone), phone.maxX, 'a road at the far right clamps to the edge')
+  const spec = easyPanFrame(390, 756, 555)
+  assert.ok(
+    Math.abs(spec.scale - 1.3217) < 0.01 && Math.abs(spec.viewW - 295) < 1 && Math.abs(spec.maxX - 345) < 1,
+    `spec frame 390x756 strip 555 ${JSON.stringify(spec)}`,
+  )
+  assert.match(plotArtSrc, /porch: \{ x: 582,/)
+  assert.match(plotArtSrc, /hollow: \{ x: 92,/)
+  assert.equal(panToward(582, spec), spec.maxX, 'porch opens at the right end')
+  assert.equal(panToward(92, spec), 0, 'hollow opens at the left end')
+  assert.equal(easyPanFrame(1024, 700, 600), null, 'desktop keeps the fit-to-width map')
+  assert.match(plotArtSrc, /observatory: \['scaffold', 'built', 'lit'\]/)
+  assert.match(plotArtSrc, /lamps: \{ built: 'lit' \}/)
+  assert.match(cssSrc, /\.city-overworld\.is-easy-pan \.city-plot\.is-ready \.city-plot-hit/, 'ready ring is off in pan mode only')
+  assert.doesNotMatch(cssSrc, /\.is-style-founders\) \.city-folk \.city-lamp/, 'folk lamps are hidden under every style')
+  assert.equal(easyPanFrame(EASY_PAN_MAX_W + 1, 1024, 700), null, 'tablets keep the fit-to-width map')
+  assert.equal(easyPanFrame(768, 1024, 700), null, '768 keeps stageCam')
+  assert.equal(easyPanFrame(390, 844, 20), null, 'a squashed strip does not pan')
+  assert.match(mapSrc, /city-pan-viewport/)
+  assert.match(mapSrc, /city-pan-layer/)
+  assert.match(mapSrc, /const TAP_SLOP = 8\b/)
+  assert.match(mapSrc, /translate3d\(/)
+  assert.match(mapSrc, /requestAnimationFrame/)
+  assert.match(mapSrc, /Center the map on your house/)
+  assert.match(mapSrc, /svgSelector="\.city-coming-layer"|svgSelector='\.city-coming-layer'|svgSelector=\{?['"]\.city-coming-layer/)
+  assert.match(mapSrc, /stageCam\(/, 'stageCam stays for Hard and wide frames')
+  assert.match(plotArtSrc, /EASY_HIDE_ART/)
+  const panCss = cssSrc.slice(cssSrc.indexOf('.city-pan-viewport'))
+  assert.match(panCss, /touch-action:\s*pan-y pinch-zoom/)
+  assert.doesNotMatch(
+    panCss.slice(panCss.indexOf('.city-pan-layer {')).split('}')[0],
+    /filter:/,
+    'the pan layer carries no filter',
+  )
+  assert.doesNotMatch(
+    readFileSync(new URL('../src/index.css', import.meta.url), 'utf8'),
+    /city-pan-/,
+    '1.4.527 pan rules live in city.css, not index.css',
+  )
+}
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.525'), '1.4.525 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.525').items.join('\n'),

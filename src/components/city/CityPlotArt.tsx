@@ -38,8 +38,9 @@ import {
 } from '../../lib/city'
 import {
   EASY_FOLK_LIFT,
-  EASY_FOLK_NUDGE,
+  easyFolkNudge,
   EASY_TAG_SLOT,
+  EASY_TAG_SLOT_PAN,
   easyTagMetrics,
   HEAVEN_TAG,
   plotTag,
@@ -59,6 +60,22 @@ export const ANCHOR: Record<CityPlotId, { x: number; y: number }> = {
 }
 
 const BUILD_SCALE = 1.58
+
+/** Easy hides these stills: baked checker windows, label strips, fringe halos. Hard keeps them. */
+export const EASY_HIDE_ART: Partial<Record<CityPlotId, CityStage[]>> = {
+  observatory: ['scaffold', 'built', 'lit'],
+  gate: ['scaffold'],
+  lamps: ['scaffold'],
+}
+
+/** Easy draws a cleaner existing still in place of a rough one. */
+export const EASY_SWAP_ART: Partial<Record<CityPlotId, Partial<Record<CityStage, CityStage>>>> = {
+  lamps: { built: 'lit' },
+}
+
+export function easyArtHidden(id: CityPlotId, stage: CityStage): boolean {
+  return Boolean(EASY_HIDE_ART[id]?.includes(stage))
+}
 
 /** Phone-big candy stills for Easy-trail Pack A + B home map lots. */
 type CandyPlotId =
@@ -191,9 +208,9 @@ export function SpinePath({ age }: { age: CityAge }) {
   )
 }
 
-export function EasyPlotChip({ id }: { id: CityPlotId }) {
-  const { lines, x0, y0, w, h } = easyTagMetrics(id)
-  const slot = EASY_TAG_SLOT[id]
+export function EasyPlotChip({ id, pan = false }: { id: CityPlotId; pan?: boolean }) {
+  const { lines, x0, y0, w, h } = easyTagMetrics(id, pan)
+  const slot = (pan ? EASY_TAG_SLOT_PAN[id] : undefined) ?? EASY_TAG_SLOT[id]
   return (
     <g className="city-easy-chip">
       <rect className="city-plot-tag-bg" x={x0} y={y0} width={w} height={h} rx={10} />
@@ -284,6 +301,7 @@ export function PlotGroup({
   ready,
   selected = false,
   onOpen,
+  onFocusPlot,
 }: {
   id: CityPlotId
   stage: CityStage
@@ -294,12 +312,16 @@ export function PlotGroup({
   ready: boolean
   selected?: boolean
   onOpen: (id: CityPlotId) => void
+  /** Keyboard focus landed on this plot. Easy Home pans it into view. */
+  onFocusPlot?: (id: CityPlotId) => void
 }) {
   const { progress } = useProgress()
   const easy = isEasy(progress)
-  const clickable = stage !== 'empty' || next || ready
+  const hiddenArt = easy && easyArtHidden(id, stage)
+  const clickable = hiddenArt ? next || ready : stage !== 'empty' || next || ready
   const at = ANCHOR[id]
-  const vacant = stage === 'empty' && !next && !ready
+  const vacant = (stage === 'empty' || hiddenArt) && !next && !ready
+  const artStage = easy ? (EASY_SWAP_ART[id]?.[stage] ?? stage) : stage
   const title =
     easy && id === 'journal'
       ? 'River’s pages'
@@ -312,16 +334,28 @@ export function PlotGroup({
   const tagX = Math.min(632 - tagW / 2, Math.max(tagW / 2 + 8, at.x))
   const tagY = at.y + 32
   const tagH = 18
-  const candyImg = plotImageHref(id, stage)
+  const candyImg = hiddenArt ? undefined : plotImageHref(id, artStage)
   return (
     <g
-      className={`city-plot is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-rising' : ''} ${tapped ? 'is-tapped' : ''} ${ready ? 'is-ready' : ''} ${selected ? 'is-selected' : ''} ${easy ? 'is-easy-lot' : ''} ${candyImg ? 'has-candy-img' : ''}`}
+      data-plot={id}
+      className={`city-plot is-${stage}${hiddenArt ? ' is-easy-art-hidden' : ''} ${next ? 'is-next' : ''} ${rising ? 'is-rising' : ''} ${tapped ? 'is-tapped' : ''} ${ready ? 'is-ready' : ''} ${selected ? 'is-selected' : ''} ${easy ? 'is-easy-lot' : ''} ${candyImg ? 'has-candy-img' : ''}`}
       role={clickable ? 'button' : undefined}
       tabIndex={clickable ? 0 : undefined}
       aria-pressed={clickable && easy ? Boolean(selected) : undefined}
       aria-label={`${title} ${stage}${ready ? ', upgrade ready' : ''}${next ? ', next to build' : ''}${rising ? ', just rose' : ''}`}
       onClick={() => {
         if (clickable) onOpen(id)
+      }}
+      onFocus={(event) => {
+        if (!clickable || !onFocusPlot) return
+        // Mouse focus must not move the map under a drag. Keyboard focus may.
+        let keyboard = false
+        try {
+          keyboard = event.currentTarget.matches(':focus-visible')
+        } catch {
+          keyboard = false
+        }
+        if (keyboard) onFocusPlot(id)
       }}
       onKeyDown={(event) => {
         if (!clickable) return
@@ -334,8 +368,8 @@ export function PlotGroup({
       {clickable ? (
         <circle className="city-plot-hit" cx={at.x} cy={at.y} r={hit} />
       ) : null}
-      {vacant ? (
-        next || ready ? (
+      {vacant || hiddenArt ? (
+        (next || ready) && !easy ? (
           <g className="city-lot is-staked" transform={`translate(${at.x} ${at.y}) scale(${scale})`}>
             <ellipse rx="20" ry="9" className="city-earth" />
             <path
@@ -346,7 +380,7 @@ export function PlotGroup({
         ) : null
       ) : (
         <g transform={`translate(${at.x} ${at.y}) scale(${scale}) translate(${-at.x} ${-at.y})`}>
-          <PlotArt id={id} stage={stage} fill={fill} rising={rising} />
+          <PlotArt id={id} stage={artStage} fill={fill} rising={rising} />
         </g>
       )}
       {showTag ? (
@@ -775,6 +809,7 @@ export function TownFolk({
   rising,
   speaking,
   ack,
+  pan = false,
 }: {
   id: CityPlotId
   stage: CityStage
@@ -782,12 +817,14 @@ export function TownFolk({
   rising: boolean
   speaking: boolean
   ack?: CityUpgrade['beat']
+  pan?: boolean
 }) {
   const { progress } = useProgress()
-  if (stage === 'empty' && !next) return null
   const easy = isEasy(progress)
+  if (stage === 'empty' && !next) return null
+  if (easy && (stage === 'empty' || easyArtHidden(id, stage))) return null
   const seat = FOLK[id]
-  const nudge = easy ? EASY_FOLK_NUDGE[id] : undefined
+  const nudge = easy ? easyFolkNudge(id, pan) : undefined
   const at = easy
     ? {
         x: seat.x + (nudge?.x ?? 0),
