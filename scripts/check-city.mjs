@@ -1790,8 +1790,16 @@ assert.match(
   assert.equal(HEAVEN_POINT_792.y, 36)
 }
 
-assert.equal(APP_VERSION, '1.4.527')
-assert.equal(CHANGELOG[0].version, '1.4.527', '1.4.527 is the newest row')
+assert.equal(APP_VERSION, '1.4.528')
+assert.equal(CHANGELOG[0].version, '1.4.528', '1.4.528 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.528'), '1.4.528 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.528').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.528 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.528').items.join('\n'), /Refs #792/, '1.4.528 changelog refs #792')
+assert.match(latestChange('1.4.528').items.join('\n'), /Hard/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.526'), '1.4.526 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.526').items.join('\n'),
