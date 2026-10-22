@@ -41,7 +41,7 @@ export const EASY_CHROME: Record<string, string> = {
   'Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.':
     'Life needs tight numbers — chance does not explain that.',
   'Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.':
-    'Life numbers are wide — chance is enough.',
+    'The settings for life could be almost anything, so luck explains it.',
   'Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.':
     'God wanted people, so He made the world just right.',
   'Models describe a world already given; a physical “vacuum” is still something.':

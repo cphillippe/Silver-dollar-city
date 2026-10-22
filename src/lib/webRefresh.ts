@@ -33,6 +33,32 @@ export function claimAutoReload(version: string, storage: Pick<Storage, 'getItem
   return true
 }
 
+type WorkerContainer = Pick<ServiceWorkerContainer, 'addEventListener' | 'removeEventListener' | 'controller'>
+type WorkerReg = Pick<ServiceWorkerRegistration, 'waiting' | 'installing' | 'active'>
+
+/**
+ * `reg.update()` resolves once the new script is fetched, not once it controls the page.
+ * Reload only after the fresh worker has taken over, so the first reload shows the new build.
+ */
+export function waitForFreshWorker(
+  sw: WorkerContainer | undefined,
+  reg: WorkerReg | undefined,
+  timeoutMs = 10000,
+): Promise<boolean> {
+  if (!sw || !reg) return Promise.resolve(true)
+  if (!reg.waiting && !reg.installing && reg.active && reg.active !== sw.controller) return Promise.resolve(true)
+  return new Promise((resolve) => {
+    const finish = (fresh: boolean) => {
+      clearTimeout(timer)
+      sw.removeEventListener('controllerchange', onChange)
+      resolve(fresh)
+    }
+    const onChange = () => finish(true)
+    const timer = setTimeout(() => finish(false), timeoutMs)
+    sw.addEventListener('controllerchange', onChange)
+  })
+}
+
 export async function pullWebBuild(current: string): Promise<void> {
   if (typeof fetch !== 'function' || typeof document === 'undefined') return
   try {
@@ -44,7 +70,8 @@ export async function pullWebBuild(current: string): Promise<void> {
     if (typeof data.version !== 'string' || data.version === '' || data.version === current) return
     const reg = await navigator.serviceWorker?.getRegistration()
     await reg?.update()
-    window.dispatchEvent(new CustomEvent(WEB_UPDATE_EVENT, { detail: { version: data.version } }))
+    const fresh = await waitForFreshWorker(navigator.serviceWorker, reg)
+    window.dispatchEvent(new CustomEvent(WEB_UPDATE_EVENT, { detail: { version: data.version, fresh } }))
   } catch {
     /* offline players keep the copy they have */
   }

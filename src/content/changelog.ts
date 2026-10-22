@@ -8,6 +8,23 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.528',
+    title: 'Easy Lock In shows where to slide',
+    when: '2026-10-22',
+    items: [
+      'On Easy, Lock In shows one gold arrow to the main idea. The card you hold glows while you slide.',
+      'Home says Start your first road once.',
+      'A word search first letter has a dark ring, so it shows on bright tiles.',
+      'On a small phone, MATCHED! keeps Home on the screen.',
+      'On Easy, lesson 3 says Set just right and uses luck in the wrong answers.',
+      'Night Watch keeps the City of Heaven sign clear of the lamp buttons.',
+      'The website update lands on the first reload.',
+      'Hard stays the same.',
+      'CI: pin City scans to ubuntu-24.04 (ubuntu-latest moved to 26.04 / Java 25 broke Gradle)',
+      'Refs #792.',
+    ],
+  },
+  {
     version: '1.4.527',
     title: 'A bigger Home map you can slide',
     when: '2026-10-21',

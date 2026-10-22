@@ -71,6 +71,7 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
   const [missFlash, setMissFlash] = useState(false)
   const [missTeach, setMissTeach] = useState(false)
   const [retryJuice, setRetryJuice] = useState(false)
+  const [pressing, setPressing] = useState<string | null>(null)
   const beat = holdSuccessBeat(claim, easyWhyLine(reason), source)
   const ctaRef = useRef<HTMLDivElement | null>(null)
   const missesRef = useRef(0)
@@ -143,6 +144,7 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
   function onChipPointerDown(event: ReactPointerEvent<HTMLButtonElement>, line: string) {
     if (locked || tossing || missTeach || gone.includes(line)) return
     dragRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY, line, moved: false }
+    setPressing(line)
     try {
       event.currentTarget.setPointerCapture(event.pointerId)
     } catch {
@@ -158,11 +160,13 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
     if (dx * dx + dy * dy < 144) return
     drag.moved = true
     suppressClick.current = true
+    setPressing(null)
     pick(drag.line)
   }
 
   function onChipPointerUp(event: ReactPointerEvent<HTMLButtonElement>) {
     if (dragRef.current?.id === event.pointerId) dragRef.current = null
+    setPressing(null)
   }
 
   function onChipClick(line: string) {
@@ -228,7 +232,7 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
               <button
                 key={line}
                 type="button"
-                className={`why-chip match-card recall-card slot-${index} float-${index} ${tossed ? 'is-toss' : ''} ${gone.includes(line) ? 'is-gone' : ''} ${locked ? 'is-clear' : ''} ${locked && line === reason ? 'is-lock' : ''} ${retryJuice && !gone.includes(line) ? 'is-retry-pulse' : ''} ${entry ? 'is-entry' : ''}`}
+                className={`why-chip match-card recall-card slot-${index} float-${index} ${tossed ? 'is-toss' : ''} ${gone.includes(line) ? 'is-gone' : ''} ${locked ? 'is-clear' : ''} ${locked && line === reason ? 'is-lock' : ''} ${retryJuice && !gone.includes(line) ? 'is-retry-pulse' : ''} ${entry ? 'is-entry' : ''} ${pressing === line && !locked && !tossed ? 'is-pressed' : ''}`}
                 onPointerDown={(event) => onChipPointerDown(event, line)}
                 onPointerMove={onChipPointerMove}
                 onPointerUp={onChipPointerUp}
@@ -242,6 +246,9 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
           })}
           <p className="why-claim recall-line rehearse-stem">
             {/* Easy Clear 1.4.141: live arena names Main idea — same family as miss teach 139 + Learn 140. */}
+            {!locked && !missTeach && !tossing && !pressing ? (
+              <span className="why-slide-cue" data-gold-cue="slide" aria-hidden="true" />
+            ) : null}
             <span className="why-miss-label">{EASY.mainIdea}</span>
             {easyFacingLine(id, claim)}
           </p>

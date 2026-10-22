@@ -15,6 +15,7 @@ import {
   safeWebScreen,
   webRefreshAction,
   webRefreshSurface,
+  waitForFreshWorker,
 } from '../src/lib/webRefresh.ts'
 
 const shotDir = '/opt/cursor/artifacts'
@@ -37,6 +38,22 @@ assert.equal(webRefreshAction({ surface: 'web', safe: true, updateReady: true })
 assert.equal(webRefreshAction({ surface: 'web', safe: false, updateReady: true }), 'prompt')
 assert.equal(webRefreshAction({ surface: 'off', safe: true, updateReady: true }), 'none')
 assert.equal(webRefreshAction({ surface: 'web', safe: true, updateReady: false }), 'none')
+const fakeWorkers = (fireAfterMs) => {
+  const listeners = new Set()
+  const sw = {
+    controller: {},
+    addEventListener: (_type, fn) => listeners.add(fn),
+    removeEventListener: (_type, fn) => listeners.delete(fn),
+  }
+  if (fireAfterMs != null) setTimeout(() => [...listeners].forEach((fn) => fn(new Event('controllerchange'))), fireAfterMs)
+  return sw
+}
+const installing = { waiting: null, installing: {}, active: {} }
+assert.equal(await waitForFreshWorker(fakeWorkers(20), installing, 2000), true, 'controllerchange means the new build is live')
+assert.equal(await waitForFreshWorker(fakeWorkers(null), installing, 50), false, 'no takeover times out to the prompt')
+assert.equal(await waitForFreshWorker(undefined, undefined, 50), true, 'no worker means nothing to wait for')
+const swSrc = readFileSync(new URL('../src/components/WebBuildRefresh.tsx', import.meta.url), 'utf8')
+assert.match(swSrc, /detail\?\.fresh !== false/, 'a stale worker shows the prompt instead of reloading')
 const memory = new Map()
 const storage = {
   getItem: (key) => memory.get(key) ?? null,

@@ -638,9 +638,23 @@ html[data-easy='on'] .play.is-gem-search .gem-cell.is-start-gold {
   z-index: 2;
   border-color: #ffe28a;
   box-shadow:
-    0 0 0 3px #ffcc33,
+    0 0 0 2px #2a2118,
+    0 0 0 5px #ffcc33,
     0 0 16px rgba(255, 204, 51, 0.95);
-  animation: need-pulse 1.15s ease-in-out infinite;
+  animation: gem-start-pulse 1.15s ease-in-out infinite;
+}
+
+/* need-pulse swaps box-shadow every frame, so the ink ring needs its own keyframes. */
+@keyframes gem-start-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px #2a2118, 0 0 0 5px #ffcc33, 0 0 16px rgba(255, 204, 51, 0.95);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 2px #2a2118, 0 0 0 8px rgba(255, 204, 51, 0.55), 0 0 32px rgba(255, 204, 51, 0.8);
+    transform: scale(1.02);
+  }
 }
 
 html[data-easy='on'] .play.is-gem-search .gem-start-hint {
