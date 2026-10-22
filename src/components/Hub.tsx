@@ -291,7 +291,6 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           </button>
         </nav>
         <section className="easy-extra-streets" aria-hidden="true" hidden />
-        <StoresComingNotice />
       </main>
     )
 

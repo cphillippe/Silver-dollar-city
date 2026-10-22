@@ -8,6 +8,22 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.529',
+    title: 'Easy Home and Night Watch, tidied up',
+    when: '2026-10-22',
+    items: [
+      'On Easy, the Home map hides its rough bits: the white fallback plates and the stray lamp dots. The gate and Pages faces no longer crowd the porch.',
+      'On Easy, the tablet dig has no clock. Take your time.',
+      'Night Watch waits to show open seats until you pick a lamp, and the plant card stays off Begin.',
+      'Night Watch names each lamp by its house, so a screen reader can tell them apart.',
+      'Wave survived! stays up a little longer. The Sparks count and the speed chip are easier to read.',
+      'The Hard maze pawn glows green again.',
+      'Luke 24:11 now says an idle tale, as in the RSV.',
+      'Hard stays the same.',
+      'Refs #792.',
+    ],
+  },
+  {
     version: '1.4.528',
     title: 'Easy Lock In shows where to slide',
     when: '2026-10-22',

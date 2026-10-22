@@ -115,7 +115,7 @@ const TABLETS: Record<string, DigTablet[]> = {
       id: 2,
       era: 'ancient',
       title: 'Awkward first',
-      bite: 'Women go first. Luke still writes that the men called it idle talk.',
+      bite: 'Women go first. Luke still writes that the men thought it was an idle tale.',
     },
   ],
   'wb-early': [

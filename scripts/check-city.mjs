@@ -515,6 +515,7 @@ import {
   readyUpgradeId,
   EASY_FOLK_LIFT,
   EASY_FOLK_NUDGE,
+  EASY_TAG_SLOT,
 } from '../src/lib/cityBuild.ts'
 import { emptyProgress, progressAfterReset } from '../src/lib/save.ts'
 import { EASY, EASY_LINE_ORDER, DIG_ARC, FOUNDATION_ARC, NAMES_ARC, STONE_ARC, INK_ARC, easyChromeLine, easyChromeNearDup, easyFacingLine, easyHomeFocus, easyHoldFields, easyHoldLine, easyHoldPractice, easyHoldView, easyLockInExit, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, easyTeachFields, easyTrailView, markEasyHeld, markEasyTaught, progressAfterMatchTaught, sameProofRecap, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
@@ -1745,11 +1746,11 @@ assert.match(
       assert.doesNotMatch(easyWhyLine(line), /\bchance\b/i, `#792 ${lesson.id} Easy wrong answer avoids chance: ${line}`)
     }
   }
-  // #792 C2: only the wb-women title moves to the RSV words. The teach text keeps "idle talk".
+  // #792 C2: the wb-women title is the RSV words. #792b B-RSV moves the teach text to the same words.
   const wbXml = readFileSync(new URL('../src/content/packs/witness-bench.xml', import.meta.url), 'utf8')
   assert.match(wbXml, /id="wb-women"[^>]*challengeTitle="An idle tale"/, '#792 C2 wb-women title is An idle tale')
   assert.doesNotMatch(wbXml, /challengeTitle="Idle talk"/)
-  assert.match(wbXml, /idle talk/, '#792 C2 teach text keeps idle talk')
+  assert.doesNotMatch(wbXml, /idle talk/i, '#792b B-RSV teach text no longer says idle talk')
   assert.match(readFileSync(new URL('../src/content/witnessBench.ts', import.meta.url), 'utf8'), /id: 'wb-women',\s*title: 'An idle tale',/)
   const obXml = readFileSync(new URL('../src/content/packs/observatory.xml', import.meta.url), 'utf8')
   const obTiers = obXml.slice(obXml.indexOf('<medium'), obXml.indexOf('</hard>') + '</hard>'.length)
@@ -1790,16 +1791,90 @@ assert.match(
   assert.equal(HEAVEN_POINT_792.y, 36)
 }
 
-assert.equal(APP_VERSION, '1.4.528')
-assert.equal(CHANGELOG[0].version, '1.4.528', '1.4.528 is the newest row')
-assert.ok(CHANGELOG.some((note) => note.version === '1.4.528'), '1.4.528 changelog row')
+{
+  // #792b: Easy polish. Source reads only; the live proofs sit in check-golden-live, check-live-prove and check-phone-fixes.
+  const read792b = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8')
+  const wb792b = read792b('src/content/packs/witness-bench.xml')
+  const hardTeach = 'Women are first at the tomb (Mark 16:1–8; Luke 24:1–11; John 20). Luke 24:11: their words “seemed to them an idle tale.”'
+  const shortStory = 'Women go to Jesus’ tomb at dawn and find it empty. They tell the apostles. Luke says the men thought it was an idle tale. The report still begins with the women.'
+  const mediumTeach = 'The tomb stories begin with women (Mark 16; Luke 24; John 20). Luke says the men thought it was an idle tale. The church kept that first report: women were first to tell of Jesus’ empty tomb.'
+  assert.ok(wb792b.includes(`<hardTeach>${hardTeach}`), '#792b B-RSV hardTeach')
+  assert.ok(wb792b.includes(`<fullTeach>${hardTeach}`), '#792b B-RSV fullTeach')
+  assert.ok(wb792b.includes(`<shortStory>${shortStory}`), '#792b B-RSV shortStory')
+  assert.ok(wb792b.includes(`<mediumTeach>${mediumTeach}`), '#792b B-RSV mediumTeach')
+  assert.ok(read792b('src/content/witnessBench.ts').includes(hardTeach), '#792b B-RSV witnessBench.ts')
+  assert.ok(read792b('src/content/plain.ts').includes(shortStory), '#792b B-RSV plain.ts')
+  assert.ok(read792b('src/content/daily.ts').includes('Luke names women first — and that the men thought it was an idle tale.'), '#792b B-RSV daily.ts')
+  for (const name of readdirSync(new URL('../src/content', import.meta.url), { recursive: true })) {
+    if (!/\.(ts|xml)$/.test(String(name))) continue
+    assert.doesNotMatch(read792b(`src/content/${name}`), /idle talk/i, `#792b B-RSV no idle talk left in src/content/${name}`)
+  }
+
+  assert.doesNotMatch(read792b('src/lib/sourceDig.ts'), /idle talk/i, '#792b B-RSV no idle talk left in src/lib/sourceDig.ts')
+  assert.ok(
+    read792b('src/lib/sourceDig.ts').includes("bite: 'Women go first. Luke still writes that the men thought it was an idle tale.',"),
+    '#792b B-RSV sourceDig.ts bite line',
+  )
+
+  const cityCss792b = read792b('src/styles/city.css')
+  assert.match(
+    cityCss792b,
+    /html\[data-easy='on'\] \.city-overworld \.city-plot\.is-easy-lot:not\(\.has-candy-img\):not\(\.is-next\):not\(\.is-ready\) \{\s*display: none;/,
+    '#792b B2 the white fallback plate hides on Easy, the next and ready lots stay',
+  )
+  assert.equal(EASY_FOLK_NUDGE.gate?.x, -38, '#792b BH7 the gate face steps left of the porch face')
+  assert.equal(EASY_FOLK_NUDGE.gate?.y, 2, '#792b BH7 the gate face steps up off the porch face')
+  assert.deepEqual(EASY_TAG_SLOT.journal, { x: 292, y: 388 }, '#792b BH8 the Pages chip rides the bottom row')
+  assert.ok(easyTagsFit(), '#792b BH8 every Easy tag still fits')
+
+  const hubSrc792b = read792b('src/components/Hub.tsx')
+  const easyReturn792b = hubSrc792b.slice(hubSrc792b.indexOf('easy-extra-streets'), hubSrc792b.indexOf('easy-extra-streets') + 200)
+  assert.doesNotMatch(easyReturn792b, /StoresComingNotice/, '#792b B3 Easy Home drops the parked stores toast')
+  assert.equal(hubSrc792b.match(/<StoresComingNotice \/>/g)?.length, 1, '#792b B3 Hard Home keeps the one stores toast mount')
+
+  const mazeCss792b = read792b('src/styles/maze.css')
+  assert.match(
+    mazeCss792b,
+    /\.play\.is-road-maze \.maze-cell\.is-road\.is-here \{\s*box-shadow:\s*0 0 0 2px #fffce8,\s*0 0 16px rgba\(61, 204, 122, 0\.65\),\s*0 3px 0 #8a5a22;/,
+    '#792b A2 the Hard pawn glow is green again',
+  )
+
+  const defendCss792b = read792b('src/styles/defend.css')
+  const tail792b = defendCss792b.slice(defendCss792b.indexOf('792b B6'))
+  for (const selector of tail792b.match(/^[.\w][^{}\n]*\{/gm) ?? []) {
+    assert.match(selector, /is-easy-watch|^@|^\.defend-page/, `#792b every new Night Watch rule is scoped to Easy: ${selector}`)
+  }
+  assert.doesNotMatch(tail792b, /#[0-9a-f]{3,8}\b/i, '#792b the new Night Watch rules use existing tokens, no new hex colors')
+  const tailCode792b = tail792b.replace(/\/\*[\s\S]*?\*\//g, '')
+  assert.doesNotMatch(tailCode792b, /font-family|font-size|font:|font-weight/, '#792b the new Night Watch rules add no font or size (existing sans stack, no Fraunces or serif)')
+  assert.doesNotMatch(tailCode792b, /var\(--gold|255,\s*204,\s*51|255,\s*159,\s*26|#ffcc33|#ff9f1a/i, '#792b the new Night Watch rules add no gold')
+  assert.match(tail792b, /\.defend-path-line \{[^}]*clip-path: inset\(50%\)/, '#792b NWUI-5 the reach lines use the sr-only clip')
+  assert.doesNotMatch(tail792b, /defend-path-line \{[^}]*display: none/, '#792b NWUI-5 the reach lines never use display none')
+  assert.match(tail792b, /nw-wave-survived \{\s*animation: nw-wave-survived-hold 2\.4s/, '#792b NWUI-8 survived holds 2.4s')
+
+  const screen792b = read792b('src/components/DefendScreen.tsx')
+  assert.match(screen792b, /const SURVIVED_HOLD_MS = Math\.max\(WAVE_SURVIVED_MS, 2400\)/, '#792b NWUI-8 hold constant')
+  assert.match(screen792b, /setSurvivedRound\(null\), SURVIVED_HOLD_MS\)/, '#792b NWUI-8 the banner timeout uses the hold')
+  assert.match(screen792b, /data-lamp-picked=\{easy && lampPicked \? 'yes' : undefined\}/, '#792b B6 the picked flag is Easy only')
+
+  const dig792b = read792b('src/components/challenges/SourceDigPlay.tsx')
+  assert.match(dig792b, /function armClock\(\) \{\s*if \(easy\) return/, '#792b B9 Easy never arms the Dig clock')
+  assert.match(dig792b, /\{easy \? null : \(\s*<p\s+className=\{`dig-timer/, '#792b B9 Easy never renders the Dig timer')
+  assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
+}
+
+assert.equal(APP_VERSION, '1.4.529')
+assert.equal(CHANGELOG[0].version, '1.4.529', '1.4.529 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.529'), '1.4.529 changelog row')
 assert.doesNotMatch(
-  latestChange('1.4.528').items.join('\n'),
+  latestChange('1.4.529').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
-  '1.4.528 changelog avoids GitHub close keywords',
+  '1.4.529 changelog avoids GitHub close keywords',
 )
+assert.match(latestChange('1.4.529').items.join('\n'), /Refs #792/, '1.4.529 changelog refs #792')
+assert.match(latestChange('1.4.529').items.join('\n'), /Hard/)
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.528'), '1.4.528 changelog row')
 assert.match(latestChange('1.4.528').items.join('\n'), /Refs #792/, '1.4.528 changelog refs #792')
-assert.match(latestChange('1.4.528').items.join('\n'), /Hard/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.526'), '1.4.526 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.526').items.join('\n'),

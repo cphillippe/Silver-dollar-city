@@ -373,3 +373,140 @@ function shortest(from: Cell, to: Cell, open: Set<string>): Cell[] | null {
 function key(cell: Cell) {
   return `${cell.r}:${cell.c}`
 }
+
+async function seedNightWatch(page: Page) {
+  await page.addInitScript(() => {
+    localStorage.clear()
+    localStorage.setItem(
+      'silver-city-progress-v1',
+      JSON.stringify({
+        kind: 'silver-city-save',
+        schemaVersion: 1,
+        appVersion: '1.4.496',
+        savedAt: '2026-10-15T00:00:00.000Z',
+        progress: {
+          started: true,
+          easyMode: true,
+          theme: 'candy',
+          completed: [],
+          lastDailyDate: '2026-10-14',
+          held: [],
+          easyHeld: ['ph-road'],
+        },
+      }),
+    )
+  })
+}
+
+async function openDeveloper(page: Page) {
+  await page.getByRole('button', { name: 'Settings' }).click()
+  await page.locator('summary', { hasText: 'Developer' }).click()
+}
+
+async function tapAt(page: Page, x: number, y: number) {
+  await page.mouse.move(x, y)
+  await page.mouse.down()
+  await page.mouse.up()
+}
+
+for (const [width, height] of [
+  [375, 667],
+  [412, 915],
+] as const) {
+  test(`NWUI-4 clear-lamp names are unique and expand at ${width}x${height}`, async ({ page }) => {
+    await page.setViewportSize({ width, height })
+    await seedNightWatch(page)
+    await page.goto('/?playtest=1&nwRound=10')
+    await openDeveloper(page)
+    await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
+    await page.locator('.defend-board').waitFor()
+    await page.locator('.defend-clear-lamp').first().waitFor()
+
+    const lamps = page.locator('.defend-clear-lamp')
+    const planted = await lamps.count()
+    expect(planted).toBeGreaterThanOrEqual(2)
+    const names = await lamps.evaluateAll((nodes) => nodes.map((node) => node.getAttribute('aria-label') ?? ''))
+    for (const name of names) expect(name).toMatch(/^Upgrade .+ at .+$/)
+    expect(new Set(names).size, `names are unique: ${names.join(' | ')}`).toBe(planted)
+
+    for (let i = 0; i < planted; i++) {
+      const button = lamps.nth(i)
+      const hit = await button.evaluate((node) => {
+        const box = node.getBoundingClientRect()
+        const top = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)
+        return top === node || Boolean(top?.closest('.defend-clear-lamp') === node) || Boolean(top?.closest('.defend-tower-card'))
+      })
+      expect(hit, `lamp ${i + 1} centre is the button or the card`).toBe(true)
+    }
+
+    const box = await lamps.first().boundingBox()
+    await tapAt(page, box!.x + box!.width / 2, box!.y + box!.height / 2)
+    await expect(page.locator('.defend-tower-card')).toBeVisible()
+    await expect(lamps.first()).toHaveAttribute('aria-expanded', 'true')
+    await expect(lamps.nth(1)).toHaveAttribute('aria-expanded', 'false')
+    await page.waitForTimeout(450)
+    const cx = box!.x + box!.width / 2
+    const cy = box!.y + box!.height / 2
+    const lampOnTop = await page.evaluate(([x, y]) => Boolean(document.elementFromPoint(x, y)?.closest('.defend-clear-lamp')), [cx, cy])
+    if (lampOnTop) {
+      await tapAt(page, cx, cy)
+    } else {
+      // The open card can sit over the lamp. A tap there would hit a buy button, so close with the keyboard.
+      await lamps.first().focus()
+      await page.keyboard.press('Enter')
+    }
+    await expect(page.locator('.defend-tower-card')).toBeHidden()
+    await expect(lamps.first()).toHaveAttribute('aria-expanded', 'false')
+  })
+}
+
+test('B9 Easy dig: no countdown, completes after 20 s', async ({ page }) => {
+  test.setTimeout(90_000)
+  await seedNightWatch(page)
+  await page.goto('/?playtest=1')
+  await openDeveloper(page)
+  await page.getByRole('button', { name: /^wb-women ·/ }).first().click()
+  const play = page.locator('.play.is-source-dig')
+  await play.waitFor()
+  const tablets = page.locator('[data-dig-tablet]')
+  const count = await tablets.count()
+  expect(count).toBeGreaterThan(0)
+
+  const first = await tablets.first().locator('.dig-dirt').boundingBox()
+  const cx = first!.x + first!.width / 2
+  const cy = first!.y + first!.height / 2
+  await page.mouse.move(cx - 20, cy)
+  await page.mouse.down()
+  await page.mouse.move(cx + 20, cy, { steps: 6 })
+  await page.mouse.move(cx - 20, cy + 6, { steps: 6 })
+  await page.mouse.up()
+  await expect(page.locator('.dig-tablet.is-open')).toHaveCount(0)
+
+  await page.waitForTimeout(21_000)
+  const timers = await play.locator('[role="timer"], .dig-timer, [class*="timer" i], [class*="countdown" i]').evaluateAll(
+    (nodes) => nodes.filter((node) => (node as HTMLElement).getBoundingClientRect().width > 0).length,
+  )
+  expect(timers, 'no visible countdown on Easy').toBe(0)
+  expect(await play.innerText()).not.toMatch(/\b\d+\s*s\b|0:\d\d/)
+  await expect(page.locator('.match-toast.is-miss')).toHaveCount(0)
+
+  for (let i = 0; i < count; i++) {
+    const dirt = tablets.nth(i).locator('.dig-dirt')
+    if ((await dirt.count()) === 0) continue
+    const box = await dirt.boundingBox()
+    if (!box) continue
+    const x = box.x + box.width / 2
+    const y = box.y + box.height / 2
+    await page.mouse.move(x - 24, y)
+    await page.mouse.down()
+    for (let pass = 0; pass < 4; pass++) {
+      await page.mouse.move(x + 24, y + (pass % 2 ? 8 : -8), { steps: 5 })
+      await page.mouse.move(x - 24, y + (pass % 2 ? -8 : 8), { steps: 5 })
+    }
+    await page.mouse.up()
+    await page.waitForTimeout(250)
+  }
+  await expect(play).toHaveClass(/is-win/)
+  await expect(page.locator('.dig-tablet.is-open')).toHaveCount(count)
+  await expect(page.getByRole('button', { name: 'Lock In next' })).toBeVisible()
+})
