@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
   EASY_CROWN_HIT_R,
   EASY_FACE_HIT_R,
@@ -221,6 +221,39 @@ export function DefendNightActorsSvg({
 }) {
   const spawnSeen = useRef(new Set<string>())
   const faceAim = useRef<{ id: number; point: { x: number; y: number } | null; pointerType: string } | null>(null)
+  const groundRef = useRef<SVGGElement | null>(null)
+  const [seatPick, setSeatPick] = useState<number | null>(null)
+  // Ring the first open seat that is fully on screen and clear of the lamp rail and bars.
+  useLayoutEffect(() => {
+    const ground = groundRef.current
+    if (!ground) {
+      setSeatPick(null)
+      return
+    }
+    const choose = () => {
+      const covers = [...document.querySelectorAll('.nw-rail, .nw-balloon-slot, .defend-go, .defend-hud')]
+        .map((node) => node.getBoundingClientRect())
+        .filter((rect) => rect.width > 0 && rect.height > 0)
+      const wide = window.innerWidth
+      const tall = window.innerHeight
+      const pad = 4
+      const circles = [...ground.querySelectorAll('circle')]
+      const open = circles.findIndex((node) => {
+        if (!node.classList.contains('is-live')) return false
+        const box = node.getBoundingClientRect()
+        if (box.width <= 0) return false
+        if (box.left < pad || box.top < pad || box.right > wide - pad || box.bottom > tall - pad) return false
+        return !covers.some(
+          (rect) =>
+            box.left - pad < rect.right && box.right + pad > rect.left && box.top - pad < rect.bottom && box.bottom + pad > rect.top,
+        )
+      })
+      setSeatPick(open >= 0 ? open : null)
+    }
+    choose()
+    window.addEventListener('resize', choose)
+    return () => window.removeEventListener('resize', choose)
+  }, [groundHints])
   useEffect(() => {
     if (!spawnLog || !easy) return
     for (const raider of raiders) {
@@ -433,11 +466,11 @@ export function DefendNightActorsSvg({
     )
   })
   const liveSeat = groundHints.findIndex((spot) => spot.live)
-  const firstSeat = liveSeat >= 0 ? liveSeat : 0
+  const firstSeat = seatPick ?? (liveSeat >= 0 ? liveSeat : 0)
   return (
     <>
               {groundHints.length > 0 ? (
-                <g className="defend-plant-ground" data-plant-ground="yes" pointerEvents="none">
+                <g ref={groundRef} className="defend-plant-ground" data-plant-ground="yes" pointerEvents="none">
                   {groundHints.map((spot, index) => (
                     <circle
                       key={`${spot.x}-${spot.y}`}

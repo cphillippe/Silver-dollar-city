@@ -825,6 +825,21 @@ for (const id of Object.keys(MATCH_CHIPS)) {
       )
       assert.equal(matchBonusWord(path, board, [])?.text, text)
     }
+    // Every story word on the board scores as one: planted, or an authored row word that lands by chance.
+    for (const text of authoredRow) {
+      if (chips.includes(text)) continue
+      assert.equal(isStoryWord(text, board), true, `${id}#${seed} authored ${text} is a story word`)
+      const spot = findStraightSpelling(board.letters, text)
+      if (!spot) continue
+      const hit = matchBonusWord(spot, board, [])
+      assert.equal(hit?.text, text, `${id}#${seed} swiping ${text} scores ${text}`)
+      assert.equal(bonusPointsFor(hit.text, board), MATCH_STORY_POINTS, `${id}#${seed} ${text} pays +100`)
+    }
+    for (const word of [...board.bonus, ...board.planted]) {
+      if (authoredRow.includes(word.text) || board.lessonPlanted.includes(word.text)) {
+        assert.equal(isStoryWord(word.text, board), true, `${id}#${seed} board word ${word.text} is a story word`)
+      }
+    }
     for (const chip of board.words) {
       const path = board.paths[chip.id]
       assert.equal(pathLetters(path, board.letters), chip.text, `${id}#${seed} chip ${chip.text} intact`)
