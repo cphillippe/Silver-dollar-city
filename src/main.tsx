@@ -30,6 +30,7 @@ import './styles/fatherRunHint.css'
 import './styles/easyTopbar.css'
 import './styles/shareCard.css'
 import './styles/lockInCue.css'
+import './styles/gem-easy-tone.css'
 
 const webSurface = webRefreshSurface({
   play: isPlayBuild(),
