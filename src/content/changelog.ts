@@ -8,6 +8,23 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.530',
+    title: 'More words to find, and a Gem Jar',
+    when: '2026-10-22',
+    items: [
+      'On Easy word search, more everyday words, plurals and Bible names count as extras.',
+      'Every board hides 3 or 4 words from the lesson story. A Story word! is worth +100. Other extras are worth +50.',
+      'On the win screen, your points fill a Gem Jar. It only goes up, and Lock In next never waits for it.',
+      'The first win unlocks Bonus Sight. More jar steps unlock Combo Spark and Big Word. The jar tips over and shows each new skill.',
+      'The Journal shows your Gem Jar total.',
+      'The MATCHED! glow is white, the +50 banner is green, and the Story word! pop is a dark pill. Gold stays on the one tap cue.',
+      'Night Watch shows one gold ring on the first open seat until you plant a lamp. Begin the watch on Home no longer has a gold border.',
+      'The share card footer says Silver City.',
+      'Hard stays the same.',
+      'Refs #827.',
+    ],
+  },
+  {
     version: '1.4.529',
     title: 'Easy Home and Night Watch, tidied up',
     when: '2026-10-22',
