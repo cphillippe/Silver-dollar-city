@@ -6,7 +6,9 @@ import {
   cellKey,
   cellsNeededByOpenPlanted,
   cellsStillNeeded,
+  bonusPointsFor,
   gemHue,
+  isStoryWord,
   isStraightPath,
   matchBonusWord,
   matchGemWord,
@@ -16,7 +18,7 @@ import {
   tryAddToPath,
   type GemCoord,
 } from '../../lib/gemSearch'
-import { MATCH_BONUS_POINTS, MATCH_DOCK_JUICE_POINTS } from '../../lib/matchBonus'
+import { MATCH_DOCK_JUICE_POINTS } from '../../lib/matchBonus'
 import { gemBonusBeat, matchClearBeat } from '../../lib/successBeat'
 import { MatchTakeaway } from '../HeldTriad'
 import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
@@ -79,6 +81,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const [comboFlash, setComboFlash] = useState(0)
   const [findPop, setFindPop] = useState(0)
   const [lastAward, setLastAward] = useState(0)
+  const [bonusPts, setBonusPts] = useState(0)
+  const [storyFound, setStoryFound] = useState(0)
   const [status, setStatus] = useState<'play' | 'ok'>('play')
   const [winStamp, setWinStamp] = useState(false)
   const [stripMode, setStripMode] = useState<'hero' | 'dock' | 'sheet'>('dock')
@@ -140,6 +144,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     setComboFlash(0)
     setFindPop(0)
     setLastAward(0)
+    setBonusPts(0)
+    setStoryFound(0)
     comboRef.current = 0
     setStatus('play')
     setWinStamp(false)
@@ -282,7 +288,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     window.setTimeout(() => setBurst([]), done ? 980 : 720)
   }
 
-  function explodeBonus(cells: GemCoord[], label: string) {
+  function explodeBonus(cells: GemCoord[], label: string, story: boolean) {
     // Never delete letters still needed for lesson chips OR remaining planted bonuses.
     // Exclusive bonus cells clear; shared cells ghost/crack and stay playable.
     const needLesson = cellsStillNeeded(puzzle, foundRef.current)
@@ -301,7 +307,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     if (ghostKeys.length) {
       setBonusGhosted((current) => [...current, ...ghostKeys.filter((k) => !current.includes(k))])
     }
-    const beat = gemBonusBeat(label)
+    const beat = gemBonusBeat(label, story)
     // If a find pop is still on screen, wait so BONUS! is its own punch.
     const wait = Math.max(0, findUntil.current - Date.now())
     window.setTimeout(() => {
@@ -374,9 +380,13 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         setComboFlash(comboRef.current)
         window.setTimeout(() => setComboFlash(0), 1100)
       }
-      recordMatchBonus(lineId)
-      setLastAward(MATCH_BONUS_POINTS)
-      explodeBonus(nextPath, extra.label)
+      const story = isStoryWord(extra.text, puzzle)
+      const pts = bonusPointsFor(extra.text, puzzle)
+      recordMatchBonus(lineId, pts)
+      setLastAward(pts)
+      setBonusPts(pts)
+      if (story) setStoryFound((count) => count + 1)
+      explodeBonus(nextPath, extra.label, story)
       return true
     }
     return false
@@ -672,7 +682,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       ) : null}
       {plusFlash ? (
         <p className="bonus-plus" aria-hidden>
-          +100
+          +{bonusPts || 100}
         </p>
       ) : null}
       {findPop > 0 ? (
@@ -773,6 +783,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       <p className={`match-score ${plusFlash || findPop > 0 || comboFlash > 1 ? 'is-juice' : ''}`}>
         {left} left · {found.length} / {puzzle.words.length} found
         {bonusFound.length ? ` · ${bonusFound.length} bonus` : ''}
+        {status === 'ok' && storyFound > 0 ? ` · ${EASY.storyWinLabel} ×${storyFound}` : ''}
         {lastAward > 0 ? <span className="bonus-pts"> · +{lastAward} bonus</span> : null}
       </p>
       </div>

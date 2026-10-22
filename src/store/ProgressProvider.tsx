@@ -359,9 +359,9 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     })
   }, [write])
 
-  const recordMatchBonus = useCallback((lineId: string) => {
+  const recordMatchBonus = useCallback((lineId: string, points?: number) => {
     if (!lineId) return
-    setProgress((current) => write({ ...current, ...applyMatchBonus(current, lineId) }))
+    setProgress((current) => write({ ...current, ...applyMatchBonus(current, lineId, points) }))
   }, [write])
 
   const recordMatchDockJuice = useCallback((lineId: string) => {
