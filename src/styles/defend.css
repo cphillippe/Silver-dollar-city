@@ -6074,3 +6074,61 @@ button.defend-new-lamp[aria-pressed='true'] {
     animation: none;
   }
 }
+
+/* 792b gold pass: on Easy the rail, tray and stock pill drop their gold. Begin, the walker ring and Continue keep it. */
+.defend-page.is-easy-watch .defend-ability {
+  border-color: var(--berry);
+}
+
+.defend-page.is-easy-watch.is-boost .nw-rail .defend-abilities {
+  border-color: var(--berry);
+  box-shadow: 0 10px 24px rgba(18, 6, 46, 0.55);
+}
+
+.defend-page.is-easy-watch.is-boost .nw-rail .defend-ability:not(.is-locked) {
+  border-color: var(--berry);
+  box-shadow: none;
+  animation: none;
+}
+
+.defend-page.is-easy-watch .defend-ability.is-on .defend-ability-stock {
+  background: var(--berry);
+  color: var(--parchment);
+  border-color: var(--parchment);
+}
+
+.defend-page.is-easy-watch .nw-balloon-orb {
+  border-color: var(--parchment);
+  color: var(--parchment);
+  text-shadow: none;
+}
+
+.defend-page.is-easy-watch .defend-tower-card .defend-path-pip.is-on {
+  background: var(--berry);
+  border-color: var(--parchment);
+  color: var(--parchment);
+}
+
+.defend-page.is-easy-watch .defend-wave {
+  border-color: var(--berry);
+}
+
+.defend-page.is-easy-watch .defend-kit.defend-kit-choice {
+  border-color: var(--berry);
+  box-shadow: 0 0 0 1px var(--berry);
+}
+
+.defend-page.is-easy-watch .defend-ability.is-on.is-placed {
+  box-shadow:
+    0 5px 0 var(--dusk),
+    inset 0 3px 0 rgba(255, 255, 255, 0.9);
+}
+
+.defend-page.is-easy-watch.is-boost .defend-boost.is-clear-bar {
+  border-color: var(--berry);
+}
+
+.defend-page.is-easy-watch.is-boost .defend-clear-row .defend-clear-spend,
+.defend-page.is-easy-watch.is-boost .defend-clear-row .defend-clear-help {
+  border-color: var(--berry);
+}

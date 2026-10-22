@@ -1177,13 +1177,26 @@ function cueClearance(page, selector) {
 }
 
 
-/** #792b NWUI-1: nodes that paint gold (255,204,51 or 255,159,26) among the screen's buttons and cards. */
+/** #792b NWUI-1: Night Watch chrome that paints gold (255,204,51 or 255,159,26 family) in a fill, border, glow or text. Art, the tap ring, debug panel and tap feedback are not chrome. */
 async function goldCues(page) {
   return page.evaluate(() => {
     const root = document.querySelector('.defend-page')
     if (!root) return []
-    const gold = (value) => value.includes('255, 204, 51') || value.includes('255, 159, 26')
-    return [...root.querySelectorAll('.btn.primary, .defend-ability.is-on, .defend-tower-card, button.defend-new-lamp')]
+    const gold = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = Number(match[1])
+        const g = Number(match[2])
+        const b = Number(match[3])
+        const a = match[4] === undefined ? 1 : Number(match[4])
+        if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const chrome = 'button, .defend-abilities, .defend-boost, .defend-tower-card, .defend-path-pip, .nw-balloon-orb, .defend-wave, .defend-ability-stock'
+    return [...root.querySelectorAll(chrome)]
+      .filter((node) => !node.closest('.defend-nw-debug'))
       .filter((node) => {
         const box = node.getBoundingClientRect()
         const style = getComputedStyle(node)
@@ -1191,7 +1204,9 @@ async function goldCues(page) {
       })
       .filter((node) => {
         const style = getComputedStyle(node)
-        return gold(style.backgroundImage) || gold(style.backgroundColor) || gold(style.borderTopColor)
+        const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+        const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+        return gold(style.backgroundImage) || gold(style.backgroundColor) || border || gold(style.boxShadow) || (text && gold(style.color))
       })
       .map((node) => `${node.tagName}.${node.getAttribute('class') || ''}`.slice(0, 60))
   })
@@ -1237,10 +1252,15 @@ async function checkGoldCues(browser, port, errors, width, height) {
   const pre = await goldCues(page)
   assert.ok(pre.length <= 1, `#792b NWUI-1 ${label} pre-Begin has at most one gold (${pre})`)
   assert.ok(pre.some((name) => name.includes('defend-go')) || pre.length === 0, `#792b NWUI-1 ${label} the one pre-Begin gold is Begin (${pre})`)
+  if (width === 390) assert.equal(pre.length, 1, `#792b NWUI-1 ${label} pre-Begin has exactly one gold: Begin (${pre})`)
   await page.locator('.defend-clear-lamp').first().click()
   await page.locator('.defend-tower-card').waitFor()
   const planted = await goldCues(page)
   assert.ok(planted.length <= 1, `#792b NWUI-1 ${label} after a plant, with the card open, has at most one gold (${planted})`)
+  if (width === 390) {
+    assert.equal(planted.length, 1, `#792b NWUI-1 ${label} after a plant has exactly one gold (${planted})`)
+    assert.ok(planted[0].includes('defend-go'), `#792b NWUI-1 ${label} the one gold after a plant is Begin (${planted})`)
+  }
   assert.equal(await page.getByRole('button', { name: /^Far, (need \d+|\d+ sparks)$/ }).count(), 1, `#792b NWUI-3 ${label} one Far button pre-Begin`)
   assert.equal(await page.getByRole('button', { name: /^Strong, (need \d+|\d+ sparks)$/ }).count(), 1, `#792b NWUI-3 ${label} one Strong button pre-Begin`)
   await page.locator('.defend-go').click()
@@ -1250,15 +1270,18 @@ async function checkGoldCues(browser, port, errors, width, height) {
   await page.locator('.defend-tower-card').waitFor()
   const strip = await goldCues(page)
   assert.ok(strip.length <= 1, `#792b NWUI-1 ${label} mid-wave with the strip open has at most one gold (${strip})`)
+  if (width === 390) assert.equal(strip.length, 0, `#792b NWUI-1 ${label} mid-wave chrome has no gold (${strip})`)
   assert.equal(await page.getByRole('button', { name: /^Far, (need \d+|\d+ sparks)$/ }).count(), 1, `#792b NWUI-3 ${label} one Far button mid-wave`)
   assert.equal(await page.getByRole('button', { name: /^Strong, (need \d+|\d+ sparks)$/ }).count(), 1, `#792b NWUI-3 ${label} one Strong button mid-wave`)
   await page.locator('.defend-clear-lamp').first().click({ force: true })
   await tapCueUntilBoost(page, 90_000)
   await page.locator('.defend-page.is-boost').waitFor()
   await page.locator('.defend-continue').waitFor()
+  await page.locator('.nw-wave-survived').waitFor({ state: 'detached', timeout: 10_000 })
   const clear = await goldCues(page)
   assert.ok(clear.length <= 1, `#792b NWUI-1 ${label} the clear has at most one gold (${clear})`)
   assert.ok(clear.some((name) => name.includes('defend-continue')), `#792b NWUI-1 ${label} the one clear gold is Continue (${clear})`)
+  if (width === 390) assert.equal(clear.length, 1, `#792b NWUI-1 ${label} post-wave has exactly one gold: Continue (${clear})`)
   await context.close()
 }
 
