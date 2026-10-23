@@ -1,6 +1,7 @@
 import { packLesson } from '../content/packCatalog.ts'
 import { evidenceFor } from '../content/evidence.ts'
 import { easyChromeLine, easyWhoWhere } from './easy.ts'
+import { MATCH_GENERIC_POINTS, MATCH_STORY_POINTS } from './matchBonus.ts'
 import {
   BONUS_WORD_MAX,
   COMMON_BONUS_WORDS,
@@ -20,6 +21,7 @@ import {
   plantCandidates,
   placeFallback,
   sameCell,
+  shuffleSeed,
   scanBonusOnBoard,
   snapFingerPath,
   tryAddToPath,
@@ -72,6 +74,10 @@ export interface GemPuzzle {
   paths: Record<string, GemCoord[]>
   /** Curated lesson words that are not required chips. */
   bonusPool: string[]
+  /** Story words: authored lesson row plus lesson-text pool. Score higher than generic extras. */
+  related: string[]
+  /** The related words planted on this board (3, or 4 when the grid has room). */
+  lessonPlanted: string[]
   /** Planted or discovered bonus words on this board. */
   bonus: GemWord[]
   /** Bonus words placed on purpose so extras are actually findable. */
@@ -83,6 +89,12 @@ const MIN_LEN = 3
 const MAX_LEN = 8
 const MAX_WORDS = 4
 const BONUS_MAX_LEN = BONUS_WORD_MAX
+/** Lesson-related words planted first on every board: always this many... */
+export const LESSON_PLANT_MIN = 3
+/** ...and one more when the grid still has room (see LESSON_PLANT_CELL_CAP). */
+export const LESSON_PLANT_MAX = 4
+/** Filled cells (chips + lesson words) allowed before the 4th related word is skipped. */
+export const LESSON_PLANT_CELL_CAP = 38
 const SHARED_BONUS = ['HELP', 'CARE', 'KIND', 'GIFT', 'ROAD', 'BED', 'GAP']
 
 /**
@@ -92,20 +104,61 @@ const SHARED_BONUS = ['HELP', 'CARE', 'KIND', 'GIFT', 'ROAD', 'BED', 'GAP']
 const COMMON_BONUS = COMMON_BONUS_WORDS
 
 /** Authored extras plus common board words. Lesson text fills the rest. */
-const LESSON_BONUS: Record<string, string[]> = {
-  'ph-road': ['ROAD', 'HELP', 'HURT', 'CARE', 'OIL', 'INN', 'KIND', 'GAP'],
-  'ph-father': ['GAP', 'SON', 'HUG', 'RUN', 'HOME', 'ARMS', 'RING'],
-  'ph-debt': ['DEBT', 'KING', 'JAIL', 'SUM', 'PEER'],
-  'wb-creed': ['CREED', 'DIED', 'ROSE', 'PAUL', 'NAMES'],
-  'wb-women': ['TOMB', 'WOMEN', 'DAWN', 'TOLD'],
-  'daily-lantern': ['LAMP', 'HILL', 'CITY', 'LIGHT'],
-  'daily-stars': ['SKY', 'STARS', 'MAKER', 'SPEAK'],
-  'daily-cosmos': ['WORLD', 'LIFE', 'FIT', 'GIVEN'],
-  'hl-moral': ['DUTY', 'HEART', 'RIGHT', 'KNOW'],
-  'fg-order': ['HOLD', 'WORLD', 'HINGE', 'TRUST'],
-  'fg-reason': ['MIND', 'KNOW', 'WORD', 'TRUST'],
-  'fg-ought': ['HEART', 'NATURE', 'TRUST', 'RIGHT'],
-  'fg-ground': ['LIVE', 'MOVE', 'ACTS', 'FOUND'],
+export const LESSON_BONUS: Record<string, string[]> = {
+  'ph-road': ['ROAD', 'HELP', 'HURT', 'CARE', 'OIL', 'INN', 'KIND', 'GAP', 'DONKEY', 'PRIEST', 'WINE'],
+  'ph-father': ['GAP', 'SON', 'HUG', 'RUN', 'HOME', 'ARMS', 'RING', 'ROBE', 'FEAST', 'PIGS', 'FOUND'],
+  'ph-debt': ['DEBT', 'KING', 'JAIL', 'SUM', 'PEER', 'COINS', 'OWE', 'PAID', 'MERCY'],
+  'wb-creed': ['CREED', 'DIED', 'ROSE', 'PAUL', 'NAMES', 'BELIEF', 'FAITH', 'SAID', 'WORDS'],
+  'wb-women': ['TOMB', 'WOMEN', 'DAWN', 'TOLD', 'MARY', 'SPICES', 'EARLY', 'ANGEL', 'STONE'],
+  'daily-lantern': ['LAMP', 'HILL', 'CITY', 'LIGHT', 'SHINE', 'GLOW', 'DARK'],
+  'daily-stars': ['SKY', 'STARS', 'MAKER', 'SPEAK', 'NIGHT', 'MOON', 'SUN', 'GLORY'],
+  'daily-cosmos': ['WORLD', 'LIFE', 'FIT', 'GIVEN', 'SPACE', 'EARTH', 'ATOMS', 'PLANET', 'SUN'],
+  'hl-moral': ['DUTY', 'HEART', 'RIGHT', 'KNOW', 'GOOD', 'WRONG', 'FAIR', 'KIND', 'MORAL'],
+  'fg-order': ['HOLD', 'WORLD', 'HINGE', 'TRUST', 'FIXED', 'RULES', 'DESIGN', 'PLAN'],
+  'fg-reason': ['MIND', 'KNOW', 'WORD', 'TRUST', 'THINK', 'LOGIC', 'PROOF', 'SENSE'],
+  'fg-ought': ['HEART', 'NATURE', 'TRUST', 'RIGHT', 'GOOD', 'WRONG', 'FAIR', 'MORAL'],
+  'fg-ground': ['LIVE', 'MOVE', 'ACTS', 'FOUND', 'BASE', 'ROOT', 'SOLID', 'STAND'],
+  'wb-early': ['PAUL', 'RISEN', 'PROOF', 'OLD', 'CREED', 'WROTE', 'SEEN', 'LETTER', 'PETER'],
+  'wb-method': ['LUKE', 'PAUL', 'READ', 'TOOL', 'FACTS', 'LETTER', 'WRITE', 'TRUE'],
+  'daily-names': ['PAUL', 'TWELVE', 'FIVE', 'NAMES', 'PETER', 'JAMES', 'JOHN', 'LISTS'],
+  'daily-creed': ['PAUL', 'LETTER', 'RAISED', 'WROTE', 'RISEN', 'BURIED', 'SAVED'],
+  'daily-empty': ['TOMB', 'STONE', 'WOMEN', 'FEAR', 'ANGEL', 'MARY', 'GONE', 'JOY'],
+  'ph-seeds': ['SEED', 'SHEEP', 'LOST', 'SOIL', 'COIN', 'GROW', 'WHEAT'],
+  'daily-gems': ['LAMP', 'SEED', 'CUP', 'PORCH', 'PEARL', 'GEM', 'FIELD', 'SHINE'],
+  'daily-seed': ['SOWER', 'PATH', 'SOILS', 'ROCKS', 'THORNS', 'GROW', 'CROP', 'WHEAT'],
+  'daily-neighbor': ['PORCH', 'STORY', 'ANSWER', 'PEOPLE', 'HELP', 'KIND', 'LOVE', 'STREET'],
+  'ob-tuning': ['FINE', 'TUNED', 'SPEED', 'SPACE', 'FORCE', 'ATOMS', 'LIFE'],
+  'ob-design': ['FIT', 'PLACE', 'FINE', 'BEST', 'ORDER', 'PLAN', 'MADE', 'SHAPE'],
+  'ob-leibniz': ['EMPTY', 'SPACE', 'FREE', 'HERE', 'CAUSE', 'WORLD', 'REASON'],
+  'ob-life': ['CELLS', 'MIND', 'WONDER', 'LIFE', 'ALIVE', 'GROW', 'CODE'],
+  'daily-life': ['LIFE', 'MIND', 'PLACE', 'WORLD', 'ALIVE', 'GROW', 'BREATH', 'SOUL'],
+  'fg-mover': ['STEP', 'CHAIN', 'MOVER', 'TIME', 'FIRST', 'PUSH', 'MOVES', 'CAUSE', 'START'],
+  'fg-contingent': ['EXIST', 'ROCK', 'CHAIN', 'NEED', 'CAUSE', 'STAND', 'FIRST', 'LEAN'],
+  'fg-kalam': ['BEGINS', 'STEPS', 'START', 'FIRST', 'TIME', 'ORIGIN', 'WORLD'],
+  'fg-limits': ['CAUSE', 'FAITH', 'GREAT', 'WHOLE', 'EDGE', 'FENCE', 'BOUND', 'SCOPE'],
+  'daily-scroll': ['COPY', 'PAGE', 'INK', 'TEXT', 'SCROLL', 'PEN', 'WRITE', 'READ'],
+  'daily-isaiah': ['POEM', 'LAMB', 'SWORD', 'ISAIAH', 'PEACE', 'PRINCE', 'SHEEP', 'LORD'],
+  'hl-mind': ['TRUTH', 'INNER', 'HOME', 'THINK', 'BRAIN', 'IDEA', 'SMART', 'WISE'],
+  'hl-meaning': ['WORK', 'GOOD', 'BUILD', 'BOTH', 'REASON', 'WHY', 'GOAL', 'VALUE'],
+  'hl-beauty': ['SKY', 'PSALM', 'TASTE', 'SUNSET', 'MUSIC', 'SONG', 'COLOR', 'FLOWER'],
+  'daily-grace': ['HOPE', 'WAGE', 'EARNED', 'BOAST', 'GIFT', 'FREE', 'LOVE', 'MERCY', 'SAVED'],
+  'daily-rest': ['COME', 'TIRED', 'HILL', 'PEOPLE', 'SLEEP', 'LIGHT', 'BURDEN', 'EASY', 'PEACE'],
+  'daily-door': ['WIDE', 'LOCK', 'TOWN', 'ENTERS', 'KNOCK', 'OPEN', 'KEY', 'WAY'],
+  'sc-tacitus': ['ROMAN', 'ROME', 'TOMB', 'PILATE', 'RULER', 'WROTE', 'NERO'],
+  'sc-james': ['JAMES', 'COURT', 'CHURCH', 'JEWISH', 'JESUS', 'WROTE', 'LORD'],
+  'sc-pliny': ['HYMN', 'SING', 'MEET', 'CLUB', 'GOD', 'DAWN', 'SONG', 'OATH'],
+  'ic-trajan': ['PLINY', 'CASE', 'ROMAN', 'PUBLIC', 'LETTER', 'EMPIRE', 'ASKED'],
+  'ic-suetonius': ['ROME', 'CLASS', 'BOOK', 'ROMAN', 'RIOTS', 'EMPIRE', 'WROTE'],
+  'ic-lucian': ['GREEK', 'MOCK', 'VOICE', 'WRITER', 'JOKE', 'JESUS', 'TALE'],
+  'papr-p52': ['SCRAP', 'JOHN', 'EGYPT', 'SAND', 'VERSE', 'PAGE', 'INK', 'OLD'],
+  'papr-p46': ['PAUL', 'CODEX', 'BOOK', 'NILE', 'PAGES', 'OLD', 'INK', 'COPY'],
+  'papr-p66': ['REED', 'INK', 'PEN', 'JOHN', 'SCRIBE', 'COPY', 'PAGE', 'OLD'],
+  'aa-tacitus': ['ROMAN', 'JUDEA', 'ROME', 'FAMOUS', 'RULER', 'NERO', 'WROTE'],
+  'aa-josephus': ['TRIAL', 'FAMILY', 'JEWISH', 'REPORT', 'JESUS', 'WROTE', 'PRIEST', 'TEMPLE'],
+  'aa-suetonius': ['TWELVE', 'JEWS', 'ROMAN', 'RIOTS', 'EMPIRE', 'WROTE', 'NERO', 'CAESAR'],
+  'psw-pilate': ['STONE', 'BLOCK', 'LATIN', 'JUDEA', 'ROMAN', 'RULER', 'NAME', 'CARVED'],
+  'psw-ossuary': ['BONE', 'BOX', 'JOSEPH', 'JAMES', 'STONE', 'NAME', 'TOMB'],
+  'psw-nazareth': ['ROCK', 'GREW', 'CUT', 'DAY', 'TOWN', 'STONE', 'SMALL', 'FARM'],
 }
 
 export function lettersOnly(text: string): string {
@@ -606,6 +659,56 @@ function makeBonusWord(text: string): GemWord {
   }
 }
 
+/** Authored lesson words first, then the rest of the pool; never junk pool bits like ISN or KAL. */
+function lessonPlantOrder(authored: string[], pool: string[], chips: Set<string>): string[] {
+  const out: string[] = []
+  const seen = new Set<string>()
+  for (const text of [...authored, ...pool]) {
+    if (seen.has(text)) continue
+    seen.add(text)
+    if (text.length < MIN_LEN || text.length > BONUS_MAX_LEN) continue
+    if (STOP.has(text) || !isKidFriendlyBonusWord(text)) continue
+    if (collidesWithChip(text, chips)) continue
+    if (!authored.includes(text) && !COMMON_BONUS.has(text)) continue
+    out.push(text)
+  }
+  return out
+}
+
+function filledCells(grid: (string | '')[][]): number {
+  let n = 0
+  for (const row of grid) for (const cell of row) if (cell) n += 1
+  return n
+}
+
+/** Story words for a lesson. SHARED_BONUS (HELP, CARE, …) stay generic unless the lesson authors them. */
+function relatedWordsFor(lineId: string, pool: string[], chips: Set<string>): string[] {
+  const authoredRow = LESSON_BONUS[lineId] ?? []
+  const authored = new Set(authoredRow)
+  const out = pool.filter((text) => authored.has(text) || !SHARED_BONUS.includes(text))
+  // Authored words the pool filter dropped (function-word list, chip overlap) still pay as Story words.
+  for (const text of authoredRow) {
+    if (!out.includes(text) && !chips.has(text) && inBonusBand(text)) out.push(text)
+  }
+  return out
+}
+
+/** A found extra is a Story word when it is one of this lesson's related words. */
+export function isStoryWord(text: string, puzzle: Pick<GemPuzzle, 'related'>): boolean {
+  return puzzle.related.includes(text)
+}
+
+export function bonusPointsFor(text: string, puzzle: Pick<GemPuzzle, 'related'>): number {
+  return isStoryWord(text, puzzle) ? MATCH_STORY_POINTS : MATCH_GENERIC_POINTS
+}
+
+function collidesWithChip(text: string, chips: Set<string>): boolean {
+  for (const chip of chips) {
+    if (chip === text || chip.includes(text) || text.includes(chip)) return true
+  }
+  return false
+}
+
 export function buildGemPuzzle(lineId: string, salt = 0): GemPuzzle {
   try {
     return buildGemPuzzleOnce(lineId, salt)
@@ -648,8 +751,29 @@ function buildGemPuzzleOnce(lineId: string, salt: number): GemPuzzle {
   const plantedWords: GemWord[] = []
   const planted = new Set<string>()
   const targets = new Set(words.map((word) => word.text))
+  const authoredLesson = shuffleSeed(LESSON_BONUS[lineId] ?? [], rand)
+  const lessonPicked: string[] = []
+  const related = relatedWordsFor(lineId, bonusPool, new Set(words.map((word) => word.text)))
+  for (const text of lessonPlantOrder(authoredLesson, related, targets)) {
+    if (lessonPicked.length >= LESSON_PLANT_MAX) break
+    if (collidesWithChip(text, new Set(lessonPicked))) continue
+    const extra = lessonPicked.length >= LESSON_PLANT_MIN
+    if (extra && filledCells(grid) + text.length > LESSON_PLANT_CELL_CAP) continue
+    const placed = tryPlaceWord(grid, text, starts, rand) ?? (extra ? null : placeFallback(grid, text))
+    if (!placed) continue
+    const word = makeBonusWord(text)
+    plantedWords.push(word)
+    bonus.push(word)
+    bonusPaths[word.id] = placed
+    planted.add(text)
+    lessonPicked.push(text)
+  }
+  if (lessonPicked.length < LESSON_PLANT_MIN) {
+    throw new Error(`Match ${lineId} placed only ${lessonPicked.length} lesson words`)
+  }
   for (const text of plantCandidates(targets, rand)) {
     if (plantedWords.length >= MAX_BONUS_PLANT) break
+    if (planted.has(text)) continue
     const placed = tryPlaceWord(grid, text, starts, rand) ?? placeFallback(grid, text)
     if (!placed) continue
     const word = makeBonusWord(text)
@@ -693,7 +817,19 @@ function buildGemPuzzleOnce(lineId: string, salt: number): GemPuzzle {
     bonusPaths[word.id] = hit.path
   }
 
-  return { id: lineId, size, words, letters, paths, bonusPool, bonus, planted: plantedWords, bonusPaths }
+  return {
+    id: lineId,
+    size,
+    words,
+    letters,
+    paths,
+    bonusPool,
+    related,
+    lessonPlanted: lessonPicked,
+    bonus,
+    planted: plantedWords,
+    bonusPaths,
+  }
 }
 
 function sameTrail(a: GemCoord[], b: GemCoord[]): boolean {
@@ -711,7 +847,7 @@ function trailMatches(placed: GemCoord[], path: GemCoord[]): boolean {
 export function isBonusSpelling(text: string, puzzle: GemPuzzle): boolean {
   if (!bonusBitOk(text)) return false
   if (puzzle.words.some((word) => word.text === text)) return false
-  if (puzzle.bonusPool.includes(text)) return true
+  if (puzzle.bonusPool.includes(text) || (puzzle.related ?? []).includes(text)) return true
   return COMMON_BONUS.has(text) && isKidFriendlyBonusWord(text)
 }
 
@@ -757,6 +893,18 @@ export function matchBonusWord(
   return word
 }
 
+
+/** True while a tap-by-tap path is still the front of an unfound Story word (TUNE on the way to TUNED). */
+export function isStoryWordPrefix(path: GemCoord[], puzzle: GemPuzzle, foundBonus: string[]): boolean {
+  if (path.length < 1) return false
+  return puzzle.planted.some((word) => {
+    if (!puzzle.lessonPlanted.includes(word.text)) return false
+    if (foundBonus.includes(word.id) || foundBonus.includes(word.text)) return false
+    const placed = puzzle.bonusPaths[word.id]
+    if (!placed || placed.length <= path.length) return false
+    return sameTrail(placed.slice(0, path.length), path) || sameTrail([...placed].reverse().slice(0, path.length), path)
+  })
+}
 
 /** Cells still required by planted bonus words the player has not found yet. */
 export function cellsNeededByOpenPlanted(puzzle: GemPuzzle, foundBonus: string[]): Set<string> {

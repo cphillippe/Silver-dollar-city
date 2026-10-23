@@ -32,7 +32,7 @@ export function ShareCard({ learning }: { learning: ShareLine }) {
         </p>
         <p>Why: {learning.reason}</p>
         <p>From: {learning.source}</p>
-        <p className="share-card-foot">Silver City: Unending Evidence</p>
+        <p className="share-card-foot">Silver City</p>
       </figure>
       <div className="share-card-actions">
         <button

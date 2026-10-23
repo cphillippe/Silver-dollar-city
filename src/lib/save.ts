@@ -1,7 +1,8 @@
 import { APP_VERSION, SAVE_SCHEMA_VERSION, STORAGE_BACKUP_KEY, STORAGE_KEY } from '../config/app.ts'
 import { localDateKey } from './dates.ts'
 import { emptyCityBuilt, snapshotCityBuilt } from './cityBuild.ts'
-import { MATCH_BONUS_MAX, MATCH_EXTRA_MAX } from './matchBonus.ts'
+import { MATCH_BONUS_MAX, MATCH_EXTRA_MAX, MATCH_LIFETIME_MAX } from './matchBonus.ts'
+import { JAR_LADDER_STEPS, jarState } from './gemJar.ts'
 import { emptyDefense, normalizeMet } from './defend.ts'
 import { emptyTrace } from './memory.ts'
 import type {
@@ -149,6 +150,8 @@ export function emptyProgress(): ProgressState {
     tierTaught: {},
     matchBonus: {},
     matchExtra: {},
+    matchLifetime: 0,
+    matchSkillSeen: 0,
   }
 }
 
@@ -336,7 +339,18 @@ export function normalizeProgress(parsed: Partial<ProgressState> | ProgressState
     tierTaught: asTierMap(parsed.tierTaught),
     matchBonus: asCountMap(parsed.matchBonus, MATCH_BONUS_MAX),
     matchExtra: asCountMap(parsed.matchExtra, MATCH_EXTRA_MAX),
+    matchLifetime: 0,
+    matchSkillSeen: 0,
   }
+  const bonusSum = Object.values(base.matchBonus).reduce((sum, value) => sum + value, 0)
+  base.matchLifetime = Math.max(
+    finiteInt(parsed.matchLifetime, 0, MATCH_LIFETIME_MAX, 0),
+    Math.min(MATCH_LIFETIME_MAX, bonusSum),
+  )
+  base.matchSkillSeen = Math.min(
+    finiteInt(parsed.matchSkillSeen, 0, JAR_LADDER_STEPS, 0),
+    jarState(base.matchLifetime).rung,
+  )
   if (isCalendarDate(parsed.firstSeen)) base.firstSeen = parsed.firstSeen
   if (parsed.lampStyle === 'classic' || parsed.lampStyle === 'founders') {
     base.lampStyle = parsed.lampStyle

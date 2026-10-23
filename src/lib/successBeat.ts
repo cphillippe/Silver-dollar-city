@@ -36,9 +36,9 @@ export function gemTargetBeat(word: GemWord): SuccessBeat {
   return { title: `Yes · ${word.label}`, why: 'That’s the main idea.' }
 }
 
-/** Kid-plain beat after a bonus word — names the +100 and the extra try. */
-export function gemBonusBeat(label: string): SuccessBeat {
-  return { title: EASY.bonusToast, why: `${label} · ${EASY.bonusWhy}` }
+/** Kid-plain beat after an extra word. Story words (the lesson's own) say so and pay more. */
+export function gemBonusBeat(label: string, story = false, points = story ? 100 : 50): SuccessBeat {
+  return { title: `${story ? EASY.storyToast : EASY.bonusToast} +${points}`, why: `${label} · ${EASY.bonusWhy}` }
 }
 
 export function matchClaimLine(lineId: string): string {
