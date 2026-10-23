@@ -14,6 +14,7 @@ import './styles/city.css'
 import './styles/defend.css'
 import './styles/maze.css'
 import './styles/gem.css'
+import './styles/gemJar.css'
 import './styles/sortHold.css'
 import './styles/storyStrip.css'
 import './styles/welcome.css'
@@ -29,6 +30,8 @@ import './styles/fatherRunHint.css'
 import './styles/easyTopbar.css'
 import './styles/shareCard.css'
 import './styles/lockInCue.css'
+import './styles/gem-easy-tone.css'
+import './styles/easy-gold-cues.css'
 
 const webSurface = webRefreshSurface({
   play: isPlayBuild(),

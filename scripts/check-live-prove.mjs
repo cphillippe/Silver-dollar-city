@@ -230,6 +230,116 @@ async function waitCue(page, inside, ms) {
   )
 }
 
+/**
+ * Night Watch gold cues on the plant screen: a gold seat ring on open ground, or a gold Begin button.
+ * Map art strokes, the selected lamp card and star orbs are scenery or selection state, not the tap cue.
+ */
+async function nwGoldCues(page) {
+  return page.evaluate(() => {
+    const gold = /rgba?\(255, 204, 51(?:, [\d.]+)?\)|rgba?\(255, 159, 26(?:, [\d.]+)?\)/
+    const visible = (node) => {
+      const style = getComputedStyle(node)
+      const box = node.getBoundingClientRect()
+      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0 && box.width > 0 && box.height > 0
+    }
+    const hits = []
+    for (const node of document.querySelectorAll('.defend-plant-ground circle')) {
+      if (visible(node) && gold.test(getComputedStyle(node).stroke)) {
+        hits.push({ tag: 'circle', cls: String(node.getAttribute('class')), text: '', props: ['stroke'] })
+      }
+    }
+    for (const node of document.querySelectorAll('.defend-go')) {
+      const style = getComputedStyle(node)
+      if (visible(node) && (gold.test(style.backgroundImage) || gold.test(style.backgroundColor))) {
+        hits.push({ tag: 'button', cls: node.className, text: (node.textContent || '').trim().slice(0, 24), props: ['background'] })
+      }
+    }
+    return hits
+  })
+}
+
+/** Bill's golden line: exactly one gold cue per Easy Night Watch screen, never zero. */
+export async function checkSeatRingGold(browser, port, errors) {
+  await seatRingAt(browser, port, errors, 375, 812, false)
+  await seatRingAt(browser, port, errors, 390, 844, true)
+}
+
+async function seatRingAt(browser, port, errors, width, height, plant) {
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width, height },
+    deviceScaleFactor: 1,
+    reducedMotion: 'reduce',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: SAVE },
+  )
+  const page = await context.newPage()
+  listen(page, errors, `gold-cues ${width}`)
+  await openJump(page, '?playtest=1&nwSeed=2')
+  if (await page.locator('[data-map-overlay]').count()) {
+    await page.locator('[data-map="a2"]').click()
+    await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+  }
+  await page.locator('[data-seat="live"]').first().waitFor()
+  await page.locator('.defend-go.is-awaiting-plant').waitFor()
+  await page.locator('.defend-page.is-need-lamp').waitFor()
+  assert.equal(await page.locator('.defend-go').getAttribute('aria-disabled'), 'true', 'pre-wave Begin is the grey disabled button')
+
+  const pre = await nwGoldCues(page)
+  assert.equal(pre.length, 1, `${width}x${height} pre-wave (no lamp) shows exactly one gold cue ${JSON.stringify(pre)}`)
+  assert.equal(pre[0].tag, 'circle', 'the pre-wave gold cue is a seat ring')
+  assert.match(pre[0].cls, /is-first-seat/, 'the pre-wave gold cue sits on an open seat')
+  assert.equal(await page.locator('.defend-plant-ground circle.is-first-seat').count(), 1, 'only one open seat is ringed')
+  const ring = await page.locator('.defend-plant-ground circle.is-first-seat').boundingBox()
+  assert.ok(ring, 'the ring has a box')
+  assert.ok(
+    ring.x >= 0 && ring.y >= 0 && ring.x + ring.width <= width && ring.y + ring.height <= height,
+    `${width}x${height} the ring is fully on screen ${JSON.stringify(ring)}`,
+  )
+  const covers = await page.evaluate(() =>
+    [...document.querySelectorAll('.nw-rail, .nw-balloon-slot, .defend-go, .defend-hud')]
+      .map((node) => {
+        const rect = node.getBoundingClientRect()
+        return { cls: node.getAttribute('class'), x: rect.x, y: rect.y, w: rect.width, h: rect.height }
+      })
+      .filter((rect) => rect.w > 0 && rect.h > 0),
+  )
+  assert.ok(covers.some((item) => /nw-rail/.test(item.cls)), 'the lamp rail is measured')
+  for (const item of covers) {
+    const apart = ring.x + ring.width <= item.x || ring.x >= item.x + item.w || ring.y + ring.height <= item.y || ring.y >= item.y + item.h
+    assert.ok(apart, `${width}x${height} the ring ${JSON.stringify(ring)} is not covered by ${item.cls} ${JSON.stringify(item)}`)
+  }
+  const top = await page.evaluate(() => document.elementFromPoint(
+    ...(() => { const r = document.querySelector('.defend-plant-ground circle.is-first-seat').getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2] })(),
+  )?.closest('.nw-rail, .defend-go, .defend-hud') != null)
+  assert.equal(top, false, `${width}x${height} nothing from the rail or bars sits on the ring centre`)
+  const hitBefore = await page.evaluate(() => document.querySelectorAll('.defend-plant-ground').length && getComputedStyle(document.querySelector('.defend-plant-ground')).pointerEvents)
+  assert.equal(hitBefore, 'none', 'the seat ring takes no taps')
+  console.log(`seat ring ${width}x${height} box ${JSON.stringify({ x: Math.round(ring.x), y: Math.round(ring.y), w: Math.round(ring.width), h: Math.round(ring.height) })}`)
+  if (!plant) {
+    await context.close()
+    return
+  }
+
+  const seats = await openSeatClients(page)
+  const live = seats.find((seat) => seat.seat === 'live')
+  assert.ok(live, 'a live seat is on screen')
+  const planted = await plantedCount(page)
+  await pointerTap(page, live.cx, live.cy)
+  await page.waitForFunction((count) => document.querySelectorAll('.defend-pad.is-planted').length > count, planted)
+  await page.locator('.defend-go.is-after-plant').waitFor()
+  assert.equal(await page.locator('.defend-page.is-need-lamp').count(), 0, 'planting a lamp ends the need-lamp state')
+  const post = await nwGoldCues(page)
+  assert.equal(post.filter((cue) => cue.tag === 'circle').length, 0, 'the gold seat ring is gone once a lamp is planted')
+  console.log('gold cues 390x844 Night Watch: pre-wave', pre.length, 'after plant', post.length)
+  assert.equal(post.length, 1, `after a lamp Begin is the one gold cue ${JSON.stringify(post)}`)
+  assert.equal(post[0].tag, 'button', 'the one gold cue after a plant is Begin')
+  assert.match(post[0].text, /Begin the watch/, 'Begin is gold after a plant')
+  await context.close()
+}
+
 async function checkMaps(browser, port, errors) {
   for (const [width, height] of WIDTHS) {
     const context = await browser.newContext({
@@ -5058,6 +5168,7 @@ export async function checkLiveProve() {
     if (process.env.NW_GOLD_ONLY === '1') {
       await checkGoldCues(browser, port, errors, 375, 667)
       await checkGoldCues(browser, port, errors, 390, 844)
+      await checkSeatRingGold(browser, port, errors)
       await checkWelcomeVersion(browser, port, errors)
       assert.equal(errors.join('\n'), '', `#792b gold prove stays free of console errors ${errors.join(' | ').slice(0, 160)}`)
       return
@@ -5085,6 +5196,7 @@ export async function checkLiveProve() {
     await checkDeadSeat(browser, port, errors)
     await checkGreyMaps(browser, port, errors)
     await checkPointerSeats(browser, port, errors)
+    await checkSeatRingGold(browser, port, errors)
     await checkCrownHold(browser, port, errors)
     await checkShareCard(browser, port, errors)
     await checkShareBusyTap(browser, port, errors)

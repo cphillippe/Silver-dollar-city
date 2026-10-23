@@ -1,0 +1,78 @@
+/* Easy Match tone pass (#827 Art Director hold). Easy gem screens only; tokens from :root.
+   Gold stays on the single tap cue (Lock In next / the start cell). */
+
+/* 1) MATCHED! stamp: white pulse glow, fill unchanged. */
+@keyframes gem-stamp-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.55));
+  }
+  50% {
+    filter: drop-shadow(0 0 28px rgba(255, 255, 255, 0.55));
+  }
+}
+
+html[data-easy='on'] .play.is-gem-search.is-win .win-stamp {
+  border-color: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 22px rgba(255, 255, 255, 0.55);
+  text-shadow: 0 0 14px rgba(255, 255, 255, 0.55);
+  animation:
+    win-stamp-pop 0.48s cubic-bezier(0.2, 1.45, 0.35, 1) both,
+    gem-stamp-glow 0.9s 0.4s ease-in-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-easy='on'] .play.is-gem-search.is-win .win-stamp {
+    animation:
+      win-stamp-pop 0.48s cubic-bezier(0.2, 1.45, 0.35, 1) both,
+      gem-stamp-glow 0.9s 0.4s ease-in-out both !important;
+  }
+}
+
+/* 2) Generic +50 banner: pine fill, parchment text. */
+html[data-easy='on'] .play.is-gem-search.is-panel-blast .gem-stage .bonus-banner {
+  background: var(--pine);
+  color: var(--parchment);
+  border: 2px solid var(--parchment);
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--pine) 55%, var(--ink));
+}
+
+/* 3) Story word! toast: opaque ink pill. */
+html[data-easy='on'] .play.is-gem-search .gem-stage .match-toast.gem-toast.is-yes {
+  background: var(--ink);
+  color: var(--parchment);
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: none;
+  opacity: 1;
+  padding: 8px 14px;
+}
+
+/* Bonus-swept cells: light pine tint of the tile instead of pale cream shards. */
+html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .gem-cell.is-clear.is-bonus-burst,
+html[data-easy='on'] .play.is-gem-search .gem-cell.is-bonus-burst {
+  background: color-mix(in srgb, var(--pine) 30%, var(--gem, var(--pine)));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--pine) 60%, transparent);
+  animation: gem-bonus-fade 0.5s ease-out both;
+}
+
+html[data-easy='on'] .play.is-gem-search .gem-cell.is-bonus-burst .gem-shard {
+  background: color-mix(in srgb, var(--pine) 40%, var(--gem, var(--pine)));
+  box-shadow: none;
+}
+
+html[data-easy='on'] .play.is-gem-search .gem-cell.is-bonus-burst .gem-pop {
+  background: var(--pine);
+  box-shadow: none;
+}
+
+@keyframes gem-bonus-fade {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.6);
+    opacity: 0.6;
+  }
+}

@@ -4633,6 +4633,18 @@ button.defend-new-lamp[aria-pressed='true'] {
   stroke: rgba(186, 245, 196, 0.92);
 }
 
+/* One gold cue before the first lamp: a ring on the first open seat. Begin is grey until a lamp is planted. */
+.defend-page.is-easy-watch.is-need-lamp .defend-plant-ground {
+  animation: none;
+  opacity: 0.92;
+}
+
+.defend-page.is-easy-watch.is-need-lamp .defend-plant-ground circle.is-first-seat {
+  stroke: #ffcc33;
+  stroke-width: 5;
+  filter: drop-shadow(0 0 8px #ffcc33);
+}
+
 .defend-page.is-easy-watch .defend-plant-ground circle.is-dead {
   fill: rgba(72, 76, 86, 0.5);
   stroke: rgba(154, 158, 168, 0.78);

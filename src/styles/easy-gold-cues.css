@@ -1,0 +1,4 @@
+/* One gold cue per screen (#827). Easy Home: the quiet Begin the watch button keeps a berry rim, not the 0.42 gold line. */
+html[data-easy='on'] .easy-night-watch .btn.easy-nw-quiet {
+  border-color: var(--berry);
+}

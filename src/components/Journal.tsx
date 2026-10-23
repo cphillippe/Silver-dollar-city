@@ -10,6 +10,7 @@ import { isDue, nextGapLabel } from '../lib/memory'
 import { starLegend } from '../lib/stars'
 import { deployLabel, findLearning, storedLearnings, withLearningBeat } from '../lib/learning'
 import { bonusFace, journalBonusPoints, lineBonusPoints } from '../lib/matchBonus'
+import { SKILL_LADDER, skillsFor } from '../lib/gemJar'
 import { journalPoints, journalTierCounts, currentLessonTier, scoreFace } from '../lib/tiers'
 import { watchTool } from '../lib/watchTools'
 import { DigDeeper } from './DigDeeper'
@@ -52,8 +53,11 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
   const packPts = journalPoints(progress)
   const packTiers = journalTierCounts(progress)
   const bonusPts = journalBonusPoints(progress)
+  const jarPts = progress.matchLifetime ?? 0
+  const jarSkillIds = skillsFor(jarPts)
+  const jarLine = easy && jarPts ? ` · ${EASY.jarName} ${jarPts.toLocaleString('en-US')}` : ''
   const packScoreLine = packPts
-    ? ` · ${packPts} pts${bonusPts ? ` · +${bonusPts} bonus` : ''} · ${packTiers.easy} Easy · ${packTiers.medium} Medium · ${packTiers.hard} Hard`
+    ? ` · ${packPts} pts${!easy && bonusPts ? ` · +${bonusPts} bonus` : ''} · ${packTiers.easy} Easy · ${packTiers.medium} Medium · ${packTiers.hard} Hard`
     : ''
   const [later, setLater] = useState(() => readLater(today))
   const sessionItems = sessionDue(progress, today, later)
@@ -152,9 +156,18 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
         <h1>{easy ? EASY.saved : 'What you can still say'}</h1>
         <p>
           {easy
-            ? `${heldCount} ${EASY.savedSub}${waiting ? ` · ${waiting} due to read again` : ''}${packScoreLine}.`
+            ? `${heldCount} ${EASY.savedSub}${waiting ? ` · ${waiting} due to read again` : ''}${packScoreLine}${jarLine}.`
             : `${open} of ${total} unsealed · ${percent}% of the dossier · ${heldCount} lines held from memory${packScoreLine}${waiting ? ` · ${waiting} due to dust off` : ''}. Forgetting is why a page comes back.`}
         </p>
+        {easy && jarSkillIds.length ? (
+          <div className="dossier-marks" aria-label="Gem Jar skills">
+            {SKILL_LADDER.filter((skill) => jarSkillIds.includes(skill.id)).map((skill) => (
+              <span key={skill.id} className="held-mark" data-gem-skill={skill.id}>
+                {skill.name}
+              </span>
+            ))}
+          </div>
+        ) : null}
         {easy ? null : (
         <>
         <div
