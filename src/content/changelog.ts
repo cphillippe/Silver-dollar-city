@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.533',
+    title: 'Night Watch: one gold spot before your first lamp',
+    when: '2026-10-24',
+    items: [
+      'Before you plant, the Candle button waits in the quiet purple look, so the gold ring on the map is the only gold to follow.',
+      'It turns gold again once your first lamp is down.',
+      'Hard stays the same.',
+      'Refs #818, Refs #834.',
+    ],
+  },
+  {
     version: '1.4.532',
     title: 'Night Watch: the first seat shows, and lamp taps always work',
     when: '2026-10-24',
