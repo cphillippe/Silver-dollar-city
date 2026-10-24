@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.532',
+    title: 'Night Watch: the first seat shows, and lamp taps always work',
+    when: '2026-10-24',
+    items: [
+      'Before your first lamp, the one gold seat is now always on screen.',
+      'A tap on a lamp opens its card anywhere on the map, even near the top or bottom. The map only slides when you drag.',
+      'Hard stays the same.',
+      'Refs #818, Refs #834.',
+    ],
+  },
+  {
     version: '1.4.531',
     title: 'A bigger Night Watch map you can slide',
     when: '2026-10-24',

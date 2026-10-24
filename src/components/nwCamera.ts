@@ -106,6 +106,62 @@ export function focusPan(
   return camClamp(right / 2 - p.x * k, ty, W, H, world)
 }
 
+export interface CamSeatView {
+  W: number
+  H: number
+  s0: number
+  z: number
+  tx: number
+  ty: number
+}
+
+/** Plate radius of a seat ring. */
+const SEAT_R = 46
+
+/** Frame px box of a seat ring at this pan. */
+function seatBox(seat: { x: number; y: number }, view: CamSeatView) {
+  const k = view.s0 * view.z
+  const r = SEAT_R * k
+  const left = view.tx + seat.x * k - r
+  const top = view.ty + seat.y * k - r
+  return { left, top, right: left + 2 * r, bottom: top + 2 * r }
+}
+
+/** The ring sits whole inside the clear window: off the header, Begin and the lamp rail. */
+export function camSeatClear(seat: { x: number; y: number }, view: CamSeatView, insets: CamInsets): boolean {
+  const box = seatBox(seat, view)
+  const inBand = box.bottom >= insets.rightBand[0] && box.top <= insets.rightBand[1]
+  return (
+    box.left >= 0 &&
+    box.right <= view.W - (inBand ? insets.right : 0) &&
+    box.top >= insets.top &&
+    box.bottom <= view.H - insets.bottom
+  )
+}
+
+/**
+ * The one seat that wears the gold first-seat ring before the first lamp.
+ * It is the first open seat in list order that sits whole in the clear window, and the earlier pick stays while it still does.
+ * With none clear, the first open seat any part of which shows, so a pan never leaves the board with no cue.
+ */
+export function camFirstSeat<T extends { x: number; y: number; live?: boolean }>(
+  seats: readonly T[],
+  view: CamSeatView,
+  insets: CamInsets,
+  keep: { x: number; y: number } | null = null,
+): T | null {
+  const held = keep ? seats.find((seat) => seat.live && seat.x === keep.x && seat.y === keep.y) : undefined
+  if (held && camSeatClear(held, view, insets)) return held
+  const clear = seats.find((seat) => seat.live && camSeatClear(seat, view, insets))
+  if (clear) return clear
+  const shown = seats.find((seat) => {
+    if (!seat.live) return false
+    const box = seatBox(seat, view)
+    return box.right > 0 && box.left < view.W && box.bottom > 0 && box.top < view.H
+  })
+  return shown ?? seats.find((seat) => seat.live) ?? seats[0] ?? null
+}
+
 export function camTransform(tx: number, ty: number): string {
   return `translate3d(${tx}px, ${ty}px, 0)`
 }

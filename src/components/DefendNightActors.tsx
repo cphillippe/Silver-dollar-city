@@ -131,6 +131,8 @@ export interface DefendNightActorsProps {
   spawnLog?: boolean
   /** Soft marks on ground that can take the picked lamp. `live` meets the road now. */
   groundHints?: readonly { x: number; y: number; live?: boolean }[]
+  /** Phone camera: the seat that wears the gold first-seat ring, picked from the camera view. Left out, the ring is picked from the page. */
+  firstSeatAt?: { x: number; y: number } | null
   /** Planted lamps Begin just called out. They pulse. */
   reachMiss?: readonly string[]
   /**
@@ -210,6 +212,7 @@ export function DefendNightActorsSvg({
   upFlashId = null,
   ghost = null,
   groundHints = [],
+  firstSeatAt,
   reachMiss = [],
   roundIndex = -1,
   armorFrom = 7,
@@ -226,7 +229,7 @@ export function DefendNightActorsSvg({
   // Ring the first open seat that is fully on screen and clear of the lamp rail and bars.
   useLayoutEffect(() => {
     const ground = groundRef.current
-    if (!ground) {
+    if (!ground || firstSeatAt !== undefined) {
       setSeatPick(null)
       return
     }
@@ -253,7 +256,7 @@ export function DefendNightActorsSvg({
     choose()
     window.addEventListener('resize', choose)
     return () => window.removeEventListener('resize', choose)
-  }, [groundHints])
+  }, [groundHints, firstSeatAt])
   useEffect(() => {
     if (!spawnLog || !easy) return
     for (const raider of raiders) {
@@ -466,7 +469,8 @@ export function DefendNightActorsSvg({
     )
   })
   const liveSeat = groundHints.findIndex((spot) => spot.live)
-  const firstSeat = seatPick ?? (liveSeat >= 0 ? liveSeat : 0)
+  const pinned = firstSeatAt ? groundHints.findIndex((spot) => spot.x === firstSeatAt.x && spot.y === firstSeatAt.y) : -1
+  const firstSeat = pinned >= 0 ? pinned : (seatPick ?? (liveSeat >= 0 ? liveSeat : 0))
   return (
     <>
               {groundHints.length > 0 ? (
