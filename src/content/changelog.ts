@@ -8,6 +8,18 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.531',
+    title: 'A bigger Night Watch map you can slide',
+    when: '2026-10-24',
+    items: [
+      'On a phone in Easy, the Night Watch map is bigger, so lamp seats and walker faces are easier to tap.',
+      'Slide the map with a finger to look around. A quick tap still plants a lamp or pops a walker.',
+      'The Recenter button brings the map back to where the night starts.',
+      'Hard stays the same.',
+      'Refs #818.',
+    ],
+  },
+  {
     version: '1.4.530',
     title: 'More words to find, and a Gem Jar',
     when: '2026-10-22',
