@@ -1,4 +1,5 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState, type ReactElement } from 'react'
+import { createPortal } from 'react-dom'
 import type { CityPlotId } from '../lib/city'
 import { clampGhostHintLeft, clientToMap, lampRoadNote, ROAD_COVER_WORD } from '../lib/lampPlace'
 import { CLEAR_BAR_RESERVE } from '../lib/towerCardPlace'
@@ -7,6 +8,7 @@ import { boardFill, boardFillPoint, boardPoint as mapBoardPoint, boardView, lamp
 import type { DefendNightSkyProps } from './DefendNightSky'
 import { DefendNightSky } from './DefendNightSky'
 import { DefendTowerCard, lampPlotTitle, type TowerCardPoint } from './DefendTowerCard'
+import { camPoint } from './nwCamera'
 import { samePillarLessons } from '../nightWatch/lampPillar'
 import { easyShotReach, pathsOf, type BonusGate, type LampPaths, type TreePath } from '../nightWatch/upgradeTree'
 import { bellPathKey, isBell } from '../nightWatch/bell'
@@ -44,6 +46,8 @@ export type DefendNightBoardProps = Omit<DefendNightSkyProps, 'children'> &
     onOpenLessons?: () => void
     /** Easy phone: overlays share the fill camera with the board. */
     plateFill?: boolean
+    /** Easy phone camera (#818). Plate px are `s0`, the world is zoomed by `z` and panned by `tx, ty`. */
+    cam?: { s0: number; z: number; tx: number; ty: number }
   }
 
 export function DefendNightBoard(props: DefendNightBoardProps) {
@@ -58,10 +62,10 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     onUpgradePath, onArmPathBuy, onBuyBright, showBright = false, runPaths, roundIndex = -1, armorFrom = 7,
     heldLessons, playtestSteps = false, onOpenLessons, spawnLog = false,
     plateFill = false, onPlacePointer, cueNudge = false,
-    map, roadD, porchCandy, roadLabel, mapFeatures, pops, mapId, walkIn,
+    map, roadD, porchCandy, roadLabel, mapFeatures, pops, mapId, walkIn, cam,
   } = props
   const walkerAim = useRef<{ id: number; point: { x: number; y: number } | null; pointerType: string } | null>(null)
-  const place = plateFill ? boardFillPoint : mapBoardPoint
+  const place = cam ? camPoint(cam.s0) : plateFill ? boardFillPoint : mapBoardPoint
   const cardAbility = upgradeAt ? towerType[upgradeAt] : undefined
   const bellCard = Boolean(cardAbility && isBell(cardAbility) && upgradeAt)
   const incenseCard = Boolean(cardAbility && isIncense(cardAbility) && upgradeAt)
@@ -105,18 +109,25 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
   const showCard = Boolean(
     upgradeAt && cardAbility && upgradePoint && boardBox && boardBox.w > 0 && onCloseUpgrade,
   )
+  // The card is not scaled with the world, so its anchors move to frame px.
+  const toFrame = (at: { left: number; top: number }) =>
+    cam ? { left: cam.tx + at.left * cam.z, top: cam.ty + at.top * cam.z } : at
   const clearOf =
     showCard && boardBox
       ? planted
           .filter((id) => id !== upgradeAt)
-          .map((id) => place(boardBox, nightTowers.anchor(id)))
+          .map((id) => toFrame(place(boardBox, nightTowers.anchor(id))))
       : []
-  const cameraScale =
-    boardBox && boardBox.w > 0 ? (plateFill ? boardFill(boardBox) : boardView(boardBox)).scale : 0.55
+  const cameraScale = cam
+    ? cam.s0
+    : boardBox && boardBox.w > 0
+      ? (plateFill ? boardFill(boardBox) : boardView(boardBox)).scale
+      : 0.55
+  const camOn = Boolean(cam)
   // CSS pixels. Measured from layout (offsetTop), never from a transformed box, so the lift cannot chase itself.
   const [lampLift, setLampLift] = useState<Record<string, number>>({})
   useLayoutEffect(() => {
-    if (!easy || !boosting) {
+    if (!easy || !boosting || camOn) {
       setLampLift((prev) => (Object.keys(prev).length > 0 ? {} : prev))
       return
     }
@@ -160,7 +171,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     observer.observe(frame)
     if (panel instanceof HTMLElement) observer.observe(panel)
     return () => observer.disconnect()
-  }, [easy, boosting, boardBox, planted, cameraScale, boardRef])
+  }, [easy, boosting, boardBox, planted, cameraScale, boardRef, camOn])
   const lampRise: Record<string, number> = {}
   if (cameraScale > 0) {
     for (const [id, lift] of Object.entries(lampLift)) {
@@ -184,6 +195,37 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           )
         })
       : null
+  const towerCard = showCard ? (
+    <DefendTowerCard
+      plotId={upgradeAt as CityPlotId}
+      ability={cardAbility ?? ''}
+      runTier={runTier}
+      sparks={runSparks}
+      point={toFrame(upgradePoint as TowerCardPoint)}
+      board={boardBox as { w: number; h: number }}
+      onUpgrade={() => onBoostTower?.(upgradeAt as CityPlotId)}
+      onUpgradePath={(path, fromPip) => onUpgradePath?.(upgradeAt as CityPlotId, path, fromPip)}
+      onArmPathBuy={onArmPathBuy}
+      onBuyBright={onBuyBright ? () => onBuyBright(upgradeAt as CityPlotId) : undefined}
+      showBright={showBright}
+      paths={cardPaths}
+      clearOf={clearOf}
+      cameraScale={cam ? cam.s0 * cam.z : cameraScale}
+      onPull={onPullLamp}
+      pullSparks={pullSparks}
+      onClose={onCloseUpgrade as () => void}
+      levelBurst={levelBurst}
+      roadNote={roadNote}
+      easy={easy}
+      midWave={phase === 'wave'}
+      reserveBottom={easy && (boosting || phase === 'plant') ? CLEAR_BAR_RESERVE : 0}
+      gate={lessonGate}
+      onOpenLessons={onOpenLessons}
+    />
+  ) : null
+  const cardFrame = cam ? boardRef.current?.closest('.defend-frame') : null
+  const cardPortal = (node: ReactElement | null) =>
+    cardFrame instanceof HTMLElement && node ? createPortal(node, cardFrame) : null
   return (
     <>
       <DefendNightSky
@@ -241,41 +283,14 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           cueNudge={cueNudge}
         />
       </DefendNightSky>
-      {showCard ? (
-        <DefendTowerCard
-          plotId={upgradeAt as CityPlotId}
-          ability={cardAbility ?? ''}
-          runTier={runTier}
-          sparks={runSparks}
-          point={upgradePoint as TowerCardPoint}
-          board={boardBox as { w: number; h: number }}
-          onUpgrade={() => onBoostTower?.(upgradeAt as CityPlotId)}
-          onUpgradePath={(path, fromPip) => onUpgradePath?.(upgradeAt as CityPlotId, path, fromPip)}
-          onArmPathBuy={onArmPathBuy}
-          onBuyBright={onBuyBright ? () => onBuyBright(upgradeAt as CityPlotId) : undefined}
-          showBright={showBright}
-          paths={cardPaths}
-          clearOf={clearOf}
-          cameraScale={cameraScale}
-          onPull={onPullLamp}
-          pullSparks={pullSparks}
-          onClose={onCloseUpgrade as () => void}
-          levelBurst={levelBurst}
-          roadNote={roadNote}
-          easy={easy}
-          midWave={phase === 'wave'}
-          reserveBottom={easy && (boosting || phase === 'plant') ? CLEAR_BAR_RESERVE : 0}
-          gate={lessonGate}
-          onOpenLessons={onOpenLessons}
-        />
-      ) : null}
+      {cam ? cardPortal(towerCard) : towerCard}
       {ghost && !ghost.blocked && (ghost.cover || ghost.note) && boardBox && boardBox.w > 0 ? (
         <span
           className={`defend-ghost-hint${ghost.cover ? ` is-${ghost.cover}` : ''}`}
           data-road-note={ghost.cover ? ROAD_COVER_WORD[ghost.cover] : ghost.note}
           data-road-rank={ghost.cover || ''}
           style={{
-            left: clampGhostHintLeft(place(boardBox, ghost.at).left, boardBox.w),
+            left: clampGhostHintLeft(place(boardBox, ghost.at).left, cam ? 798 * cam.s0 : boardBox.w),
             top: place(boardBox, { x: ghost.at.x, y: ghost.at.y - ghost.range }).top,
           }}
         >
