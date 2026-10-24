@@ -2555,7 +2555,7 @@ assert.equal(applyCrossWait(700, 0.9), 630, '1.4.490 a lamp beside the planted c
 assert.equal(crossPaceFor({}, undefined, { x: 0, y: 0 }), 1, '1.4.490 no cross leaves the wait alone')
 assert.match(
   readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8'),
-  /closest\('\.defend-go, \.defend-ability, \.defend-new-lamp'\)/,
+  /closest\('\.defend-go, \.defend-ability, \.defend-new-lamp(, \.nw-cam-recenter)?'\)/,
   '1.4.490 a plant-phase lamp buy is not a ground tap',
 )
 {
@@ -15558,7 +15558,7 @@ console.log('check-city: ok')
   assert.doesNotMatch(defendSkySrc, /slice/)
   assert.match(
     defendScreenOnlySrc,
-    /viewBox=\{plateFill \? boardFillBox\(boardBox\) : boardViewBox\(boardBox\)\}/,
+    /viewBox=\{camOn \? '0 0 798 1134' : plateFill \? boardFillBox\(boardBox\) : boardViewBox\(boardBox\)\}/,
     '1.4.312 contain camera stays; 1.4.379 Easy phone fills the stage',
   )
   assert.match(surface312, /Math\.min\(box\.w \/ map\.width, box\.h \/ map\.height\)/, '1.4.312 contain scale')
