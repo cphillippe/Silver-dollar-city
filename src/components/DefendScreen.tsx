@@ -422,14 +422,14 @@ function keepReadoutClear() {
 }
 
 /** #792 Easy: slide the Heaven sign left (draw only) so it never touches the lamp rail. Sim keeps HEAVEN_POINT. */
-function keepHeavenClear(camOn = false) {
+function keepHeavenClear() {
   const sign = document.querySelector('.defend-board g.defend-heaven')
   const rail = document.querySelector('.nw-rail .defend-abilities')
   const svg = sign?.closest('svg')
   if (!(sign instanceof SVGGElement) || !(rail instanceof HTMLElement) || !(svg instanceof SVGSVGElement)) return
   sign.style.transform = ''
   sign.removeAttribute('data-heaven-tuck')
-  if (camOn) return
+  if (document.querySelector('.nw-cam[data-nw-cam="on"]')) return
   const ctm = svg.getScreenCTM()
   if (!ctm || ctm.a <= 0) return
   const markers = () => [...document.querySelectorAll('.nw-spawn-marker')].map((el) => el.getBoundingClientRect())
@@ -1710,7 +1710,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   useLayoutEffect(() => {
     if (!easy) return
-    const sync = () => keepHeavenClear(camOn)
+    const sync = () => keepHeavenClear()
     sync()
     const settle = window.requestAnimationFrame(() => window.requestAnimationFrame(sync))
     const frame = document.querySelector('.defend-frame')
@@ -1722,7 +1722,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       observer?.disconnect()
       window.removeEventListener('resize', sync)
     }
-  }, [easy, phase, mapId, camOn])
+  }, [easy, phase, mapId])
 
   function noteSpend(cost: number) {
     setSparkSpent(cost)
