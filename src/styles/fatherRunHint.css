@@ -347,7 +347,7 @@ html[data-easy='on'] .play.is-father-run .run-miss.is-arming .btn {
   html[data-easy='on'] .play.is-father-run.is-miss .run-miss .cta-dock .btn.xl[data-run-again] {
     min-height: 48px;
     background: #e9d3ff;
-    color: var(--ink);
+    color: #2a2118;
     border: 0;
     box-shadow: 0 4px 0 #6a28b8;
   }
