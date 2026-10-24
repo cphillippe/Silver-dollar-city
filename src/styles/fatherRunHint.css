@@ -114,7 +114,6 @@ html[data-easy='on'] .play.is-father-run .run-miss.is-arming .btn {
       radial-gradient(circle at 88% 82%, var(--berry) 0 22px, transparent 23px),
       radial-gradient(circle at 70% 70%, #c86bff 0 16px, transparent 17px),
       linear-gradient(180deg, #ff8aa3 0%, var(--berry) 28%, var(--dusk-2) 58%, #2a0d58 100%);
-    min-height: 50dvh;
   }
 
   :is(html[data-easy='on'] .play.is-father-run,
@@ -438,4 +437,67 @@ html[data-easy='on'] .play.is-father-run .run-miss.is-arming .btn {
     text-shadow: none;
     animation: win-stamp-pop 0.48s cubic-bezier(0.2, 1.45, 0.35, 1) both;
   }
+}
+
+/* PR #839 fix pack (Art Director review) · Easy only · CSS only */
+@media (max-height: 920px), (min-height: 921px) {
+  /* F1 drop the 50dvh floor: it clips Hold / Run again at 375x667 and the hug dock everywhere */
+  :is(html[data-easy='on'] .play.is-father-run,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-father-run,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run) .run-scene { min-height: 0; }
+
+  /* F2 speech: count shares the kicker row, no max-height clip (2-line phrases were cut at 375) */
+  :is(html[data-easy='on'] .play.is-father-run,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-father-run,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run) .run-speech {
+    display: grid; grid-template-columns: 1fr auto; column-gap: 8px; align-content: start;
+    max-height: none; padding: 6px 14px 8px;
+  }
+  html[data-easy='on'] .play.is-father-run .run-speech-kicker { grid-area: 1 / 1; margin: 0; }
+  html[data-easy='on'] .play.is-father-run .run-speech-count { grid-area: 1 / 2; margin: 0; text-align: right; }
+  html[data-easy='on'] .play.is-father-run :is(.run-speech-line, .run-speech-bar) { grid-column: 1 / -1; }
+  html[data-easy='on'] .play.is-father-run .run-speech-line { margin: 1px 0 4px; line-height: 1.15; }
+
+  /* F3 dock: kill the 1.4.257 cream slab (it hides cream "Hold to run!") and the 16px top margin */
+  :is(html[data-easy='on'] .play.is-father-run,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-father-run,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run) .cta-dock,
+  :is(html[data-easy='on'] .play.is-father-run,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-father-run,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run) .cta-dock.run-dock {
+    background: transparent; background-image: none; box-shadow: none; backdrop-filter: none;
+    margin-top: 8px; padding-top: 0; gap: 6px;
+  }
+  /* page shell grape, not the 1.4.257 cream frame */
+  html[data-easy='on'] .app-body:has(.play.is-father-run) { background: var(--dusk); }
+
+  /* F4 hug: hide speech + rail with selectors that beat welcome.css (the PR's rule loses on specificity) */
+  :is(html[data-easy='on'] .play.is-father-run.is-hug,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-father-run.is-hug,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run.is-hug,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run.is-hug) :is(.run-speech, .run-rail) { display: none; }
+  /* F5 hug dock a touch tighter */
+  html[data-easy='on'] .play.is-father-run.is-hug .cta-dock { gap: 8px; }
+  html[data-easy='on'] .play.is-father-run.is-hug .cta-dock > :first-child { min-height: 58px; }
+  html[data-easy='on'] .play.is-father-run.is-hug .match-yes .held-from { font-size: 13px; }
+
+  /* F6 miss copy legible on grape (was #2a2118 on #2a0d58) */
+  html[data-easy='on'] .play.is-father-run .run-miss-hint,
+  html[data-easy='on'] .play.is-father-run .run-miss .quiet { color: var(--parchment); }
+  /* F7 2-miss: Keep going (gold) + Run again (lilac) side by side */
+  html[data-easy='on'] .play.is-father-run.is-miss .run-miss .cta-dock:has(> :nth-child(2)) { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  html[data-easy='on'] .play.is-father-run.is-miss .run-miss .cta-dock:has(> :nth-child(2)) > * { min-height: 56px; margin: 0; }
+
+  /* F8 house above the road; actors fully inside the scene */
+  html[data-easy='on'] .play.is-father-run .run-road { z-index: 0; }
+  html[data-easy='on'] .play.is-father-run .run-house { z-index: 1; bottom: 16%; }
+  html[data-easy='on'] .play.is-father-run .run-actor.is-father { width: 120px; height: 120px; margin-left: 40px; }
+  html[data-easy='on'] .play.is-father-run .run-actor.is-son { margin-left: -18px; }
+
+  /* F9 de-gold the hug flash (2nd gold on hug) */
+  html[data-easy='on'] .play.is-father-run .win-flash { background: radial-gradient(circle at 50% 42%, rgba(255,246,232,.92), rgba(200,107,255,.45) 34%, transparent 70%); }
 }
