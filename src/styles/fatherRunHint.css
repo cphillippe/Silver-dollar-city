@@ -86,3 +86,356 @@ html[data-easy='on'] .play.is-father-run .run-speech.is-last .run-speech-count {
 html[data-easy='on'] .play.is-father-run .run-miss.is-arming .btn {
   pointer-events: none;
 }
+
+/* Father run polish · Easy only · stage 1 (1.4.535) */
+@media (max-height: 920px), (min-height: 921px) {
+  :is(html[data-easy='on'] .play.is-father-run,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-father-run,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run) {
+    background: linear-gradient(180deg, var(--dusk-2), var(--dusk));
+    padding: 8px 12px 16px;
+    gap: 8px;
+  }
+
+  /* 1. inversion: the scene absorbs, the speech shrinks (4-selector chain beats welcome.css) */
+  :is(html[data-easy='on'] .play.is-father-run,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-father-run,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run) .run-scene {
+    flex: 1 1 0;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    border-radius: var(--radius);
+    box-shadow: 0 6px 0 rgba(80, 20, 40, 0.34);
+    background:
+      radial-gradient(circle at 12% 78%, var(--pine) 0 18px, transparent 19px),
+      radial-gradient(circle at 88% 82%, var(--berry) 0 22px, transparent 23px),
+      radial-gradient(circle at 70% 70%, #c86bff 0 16px, transparent 17px),
+      linear-gradient(180deg, #ff8aa3 0%, var(--berry) 28%, var(--dusk-2) 58%, #2a0d58 100%);
+    min-height: 50dvh;
+  }
+
+  :is(html[data-easy='on'] .play.is-father-run,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-father-run,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run) .run-speech {
+    flex: 0 0 auto;
+    max-height: 84px;
+    justify-content: flex-start;
+    background: var(--parchment);
+    color: var(--ink);
+    border: 0;
+    border-radius: 18px;
+    box-shadow: 0 5px 0 rgba(18, 6, 46, 0.9);
+    padding: 10px 16px;
+  }
+
+  html[data-easy='on'] .play.is-father-run :is(.run-speech-kicker, .run-speech-count) {
+    font: 800 13px/1.2 var(--sans);
+    color: var(--ink);
+    opacity: 0.72;
+    letter-spacing: 0.04em;
+    text-transform: none;
+  }
+
+  html[data-easy='on'] .play.is-father-run .run-speech-line {
+    font: 800 18px/1.25 var(--sans);
+    color: var(--ink);
+    margin: 2px 0 6px;
+  }
+
+  html[data-easy='on'] .play.is-father-run .run-speech-bar {
+    background: linear-gradient(90deg, var(--berry), #ff5a7a);
+    box-shadow: none;
+    height: 5px;
+  }
+
+  html[data-easy='on'] .play.is-father-run .run-how {
+    color: var(--parchment);
+  }
+
+  /* 2. overlays into the scene sky band */
+  html[data-easy='on'] .play.is-father-run .run-thumbs {
+    position: absolute;
+    top: 42px;
+    left: 24px;
+    z-index: 6;
+    margin: 0;
+    width: min(220px, 58vw);
+    gap: 4px;
+  }
+
+  html[data-easy='on'] .play.is-father-run .run-thumb {
+    max-height: 42px;
+  }
+
+  html[data-easy='on'] .play.is-father-run .match-score {
+    position: absolute;
+    top: 46px;
+    right: 24px;
+    z-index: 6;
+    background: var(--parchment);
+    color: var(--ink);
+    font: 800 15px var(--sans);
+    border-radius: 999px;
+    padding: 4px 12px;
+  }
+
+  html[data-easy='on'] .play.is-father-run .match-score .bonus-pts {
+    color: var(--ink);
+  }
+
+  html[data-easy='on'] .play.is-father-run .match-toast {
+    position: absolute;
+    top: 150px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 7;
+    margin: 0;
+    padding: 10px 26px;
+    border-radius: 999px;
+    border: 0;
+    background: var(--parchment);
+    background-color: var(--parchment);
+    background-image: none;
+    color: var(--ink);
+    box-shadow: 0 5px 0 var(--pine);
+    font: 800 28px/1.1 var(--sans);
+    width: max-content;
+    max-width: 330px;
+    text-align: center;
+    text-shadow: none;
+    opacity: 1;
+  }
+
+  html[data-easy='on'] .play.is-father-run .match-toast strong {
+    color: var(--ink);
+    font-size: inherit;
+    font-weight: 800;
+    opacity: 1;
+  }
+
+  html[data-easy='on'] .play.is-father-run .story-caption,
+  html[data-easy='on'] .play.is-father-run .story-kicker {
+    color: var(--parchment);
+    font-family: var(--sans);
+  }
+
+  html[data-easy='on'] .play.is-father-run .story-caption {
+    font: 700 15px/1.2 var(--sans);
+  }
+
+  html[data-easy='on'] .play.is-father-run .story-kicker {
+    font: 800 13px var(--sans);
+    letter-spacing: 0.06em;
+  }
+
+  /* 3. actors */
+  html[data-easy='on'] .play.is-father-run .run-actor {
+    bottom: 14%;
+  }
+
+  html[data-easy='on'] .play.is-father-run .run-actor.is-father {
+    width: 132px;
+    height: 132px;
+  }
+
+  html[data-easy='on'] .play.is-father-run .run-actor.is-son {
+    width: 104px;
+    height: 104px;
+  }
+
+  /* 4. house = Story Creek cottage art */
+  html[data-easy='on'] .play.is-father-run .run-house {
+    inset: auto;
+    width: 130px;
+    height: 120px;
+    bottom: 10%;
+    left: 2%;
+    background: url('../assets/city/plots/plot-hollow-built.webp') center bottom / contain no-repeat;
+    border: 0;
+    box-shadow: none;
+  }
+
+  html[data-easy='on'] .play.is-father-run .run-house::before,
+  html[data-easy='on'] .play.is-father-run .run-house::after {
+    content: none;
+  }
+
+  html[data-easy='on'] .play.is-father-run .run-sky {
+    background: radial-gradient(circle at 50% 12%, rgba(255, 246, 232, 0.35), transparent 55%);
+  }
+
+  html[data-easy='on'] .play.is-father-run .run-road {
+    height: 28%;
+    background: #ffd6e0;
+    box-shadow: none;
+  }
+
+  html[data-easy='on'] .play.is-father-run .run-road-line {
+    background: repeating-linear-gradient(90deg, var(--parchment) 0 10px, transparent 10px 20px);
+  }
+
+  /* 5. hug payoff fills the scene */
+  html[data-easy='on'] .play.is-father-run.is-hug .run-hug-art {
+    inset: 0;
+    width: auto;
+    height: auto;
+    border: 0;
+    border-radius: inherit;
+    box-shadow: none;
+  }
+
+  html[data-easy='on'] .play.is-father-run.is-hug .run-hug-art :is(img, .story-art-tile) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  html[data-easy='on'] .play.is-father-run.is-hug :is(.run-speech, .run-rail, .run-actor, .run-house) {
+    display: none;
+  }
+
+  html[data-easy='on'] .play.is-father-run.is-hug .run-thumbs,
+  html[data-easy='on'] .play.is-father-run.is-hug .match-score,
+  html[data-easy='on'] .play.is-father-run.is-hug .match-toast {
+    display: none;
+  }
+
+  html[data-easy='on'] .play.is-father-run.is-miss .run-rail {
+    display: none;
+  }
+
+  html[data-easy='on'] .play.is-father-run.is-miss .run-miss {
+    gap: 4px;
+  }
+
+  html[data-easy='on'] .play.is-father-run.is-miss .run-miss-hint,
+  html[data-easy='on'] .play.is-father-run.is-miss .run-miss .quiet {
+    margin: 0;
+    font: 700 15px/1.2 var(--sans);
+  }
+
+  /* 6. Hold pad: the one gold */
+  html[data-easy='on'] .play.is-father-run .cta-dock.run-dock .run-pad {
+    min-height: 74px;
+    border-radius: var(--radius);
+    font: 800 22px var(--sans);
+  }
+
+  /* 7. hug dock */
+  html[data-easy='on'] .play.is-father-run.is-hug .cta-dock {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 8px;
+  }
+
+  html[data-easy='on'] .play.is-father-run.is-hug .cta-dock > :first-child {
+    grid-column: 1 / -1;
+    min-height: 62px;
+  }
+
+  html[data-easy='on'] .play.is-father-run.is-hug .cta-dock .btn.xl:not(.primary) {
+    min-height: 48px;
+    background: #e9d3ff;
+    color: var(--ink);
+    border: 0;
+    box-shadow: 0 4px 0 #6a28b8;
+  }
+
+  html[data-easy='on'] .play.is-father-run.is-miss .run-miss .cta-dock .btn.xl[data-run-again] {
+    min-height: 48px;
+    background: #e9d3ff;
+    color: var(--ink);
+    border: 0;
+    box-shadow: 0 4px 0 #6a28b8;
+  }
+
+  /* De-gold: one cue per state */
+  html[data-easy='on'] .play.is-father-run .run-rail-gem {
+    background: var(--parchment);
+    box-shadow: 0 3px 0 #6a28b8;
+  }
+
+  html[data-easy='on'] .play.is-father-run .run-rail-notch {
+    border: 2px solid var(--berry);
+    background: transparent;
+    box-shadow: none;
+  }
+
+  html[data-easy='on'] .play.is-father-run .run-rail.is-hot .run-rail-notch {
+    background: var(--berry);
+    box-shadow: none;
+  }
+
+  html[data-easy='on'] .play.is-father-run .run-thumb.is-now {
+    box-shadow:
+      0 0 0 2px var(--berry),
+      0 3px 0 rgba(80, 20, 40, 0.28);
+  }
+
+  html[data-easy='on'] .play.is-father-run.is-glow .run-scene {
+    box-shadow: 0 6px 0 rgba(80, 20, 40, 0.34);
+  }
+
+  html[data-easy='on'] .play.is-father-run .run-combo {
+    text-shadow: 0 3px 0 var(--dusk-2);
+  }
+
+  html[data-easy='on'] .play.is-father-run .run-dust,
+  html[data-easy='on'] .play.is-father-run .run-shard,
+  html[data-easy='on'] .play.is-father-run .run-burst {
+    background: rgba(255, 138, 163, 0.55);
+  }
+
+  html[data-easy='on'] .play.is-father-run .run-actor img {
+    box-shadow:
+      0 0 0 3px var(--parchment),
+      0 4px 0 rgba(80, 20, 40, 0.35);
+  }
+
+  html[data-easy='on'] .play.is-father-run .bonus-plus {
+    color: var(--parchment);
+    text-shadow: 0 3px 0 var(--dusk-2);
+  }
+
+  html[data-easy='on'] .play.is-father-run .win-gem {
+    background: linear-gradient(135deg, #fff6e8, var(--berry) 48%, var(--dusk-2));
+    box-shadow:
+      0 0 12px rgba(255, 90, 122, 0.45),
+      inset 0 2px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  html[data-easy='on'] .play.is-father-run .win-gem:nth-child(odd) {
+    background: linear-gradient(135deg, #fff6e8, #c86bff 50%, var(--dusk-2));
+  }
+
+  html[data-easy='on'] .play.is-father-run .win-gem:nth-child(3n) {
+    background: linear-gradient(135deg, #ffe0e8, var(--berry) 48%, #5a2ab8);
+  }
+
+  html[data-easy='on'] .play.is-father-run.is-win .match-yes {
+    background: var(--parchment);
+    color: var(--ink);
+    border: 0;
+    box-shadow: 0 5px 0 rgba(18, 6, 46, 0.9);
+  }
+
+  html[data-easy='on'] .play.is-father-run.is-win .match-yes strong,
+  html[data-easy='on'] .play.is-father-run.is-win .match-yes span,
+  html[data-easy='on'] .play.is-father-run.is-win .match-yes .held-from {
+    color: var(--ink);
+    opacity: 1;
+  }
+
+  html[data-easy='on'] .play.is-father-run .win-stamp {
+    color: var(--ink);
+    background: var(--parchment);
+    border: 0;
+    box-shadow: 0 5px 0 #ff5a7a;
+    text-shadow: none;
+    animation: win-stamp-pop 0.48s cubic-bezier(0.2, 1.45, 0.35, 1) both;
+  }
+}

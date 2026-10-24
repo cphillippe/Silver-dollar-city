@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.535',
+    title: "Easy Father's run: the story fills the screen",
+    when: '2026-10-24',
+    items: [
+      "The run scene is tall again on a phone, with the hired-hand speech on a short parchment card.",
+      'Mercy! and the fail hint read as cream pills over the sky.',
+      'The hug uses the feast still full-bleed; Hold is the one gold cue while you run.',
+      'Hard stays the same.',
+    ],
+  },
+  {
     version: '1.4.534',
     title: 'Night Watch: the gold cue follows you to the map corners',
     when: '2026-10-24',
