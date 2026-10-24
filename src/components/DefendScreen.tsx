@@ -283,6 +283,7 @@ import { DefendAbilityBar, type LampDragPhase } from './DefendAbilityBar'
 import { DefendNightBoard } from './DefendNightBoard'
 import {
   camClamp,
+  camFirstSeat,
   camFrameInsets,
   camPoint,
   camToPlate,
@@ -852,6 +853,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const camPanning = useRef(false)
   const suppressClickUntil = useRef(0)
   const camSeen = useRef<{ node: HTMLElement | null; key: string }>({ node: null, key: '' })
+  const camPointerAt = useRef(-Infinity)
+  const camFirstRef = useRef<{ x: number; y: number } | null>(null)
+  const [camDims, setCamDims] = useState<{ W: number; H: number; top: number } | null>(null)
 
   function camFrame() {
     const node = camRef.current
@@ -901,6 +905,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       return
     }
     camWrite()
+    const dims = camFrame()
+    if (dims) {
+      setCamDims((prev) => (prev && prev.W === dims.W && prev.H === dims.H && prev.top === dims.top ? prev : { W: dims.W, H: dims.H, top: dims.top }))
+    }
     if (!(boardBox.w > 0)) return
     const key = `${mapId}:${boardBox.w}x${boardBox.h}`
     if (camSeen.current.node === node && camSeen.current.key === key) return
@@ -914,6 +922,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   function camDown(event: ReactPointerEvent<HTMLDivElement>) {
     if (!camOn || !event.isPrimary) return
+    camPointerAt.current = performance.now()
+    suppressClickUntil.current = 0
     camPanning.current = false
     camStart.current = null
     const target = event.target as Element | null
@@ -988,6 +998,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     camScroll(event)
     const target = event.target as Element
     if (!target.matches?.('.defend-clear-lamp, .defend-walker-tap')) return
+    // A finger or mouse that lands on a lamp focuses it. Only a key focus pans, or the tap would miss.
+    if (performance.now() - camPointerAt.current < 500 && !target.matches(':focus-visible')) return
     const f = camFrame()
     if (!f) return
     const r = target.getBoundingClientRect()
@@ -3540,6 +3552,15 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     // roadD changes after the map bind, and the seat tint reads that same road.
     [groundPick, seatAbility, progress, runTier, plants, runPaths, easy, roadD, boardBox, plateFill, camOn, camS0],
   )
+  const camSeatView =
+    camOn && camDims && boardBox.w > 0
+      ? { W: camDims.W, H: camDims.H, s0: camS0, z: camZ, tx: camPan[0], ty: camPan[1] }
+      : null
+  const firstSeatPick =
+    camSeatView && groundHints.length > 0
+      ? camFirstSeat(groundHints, camSeatView, camFrameInsets(camDims?.top ?? 0), camFirstRef.current)
+      : null
+  camFirstRef.current = firstSeatPick ? { x: firstSeatPick.x, y: firstSeatPick.y } : null
   const bossLive = raiders.find((raider) => raider.boss && !raider.turned)
   const walkerCalls: EasyWalkerCall[] = midWave
     ? raiders
@@ -4296,6 +4317,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                   onPlacePointer={onPlacePointer}
                   ghost={ghost}
                   groundHints={groundHints}
+                  firstSeatAt={camOn ? firstSeatPick : undefined}
                   reachMiss={reachMiss}
                   plateFill={plateFill}
                   cam={camOn && boardBox.w > 0 ? { s0: camS0, z: camZ, tx: camPan[0], ty: camPan[1] } : undefined}

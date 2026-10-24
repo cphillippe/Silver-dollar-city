@@ -23,7 +23,7 @@ import {
   SPINE_GROW,
 } from '../src/lib/city.ts'
 import { APP_VERSION } from '../src/config/app.ts'
-import { camClamp, camFrameInsets, camToPlate, camWorld, focusPan, nwCameraOn, NW_CAMERA_FOCUS, NW_CAMERA_INSETS, NW_CAMERA_ZOOM, NW_TAP_SLOP } from '../src/components/nwCamera.ts'
+import { camClamp, camFirstSeat, camFrameInsets, camSeatClear, camToPlate, camWorld, focusPan, nwCameraOn, NW_CAMERA_FOCUS, NW_CAMERA_INSETS, NW_CAMERA_ZOOM, NW_TAP_SLOP } from '../src/components/nwCamera.ts'
 import { clampPan, EASY_PAN_MAX_W, easyPanFrame, panToward } from '../src/lib/cityModel.ts'
 import { easyLoopLine as easyLoopFromLib, easyTrailView as easyTrailViewFromLib } from '../src/lib/easy.ts'
 import {
@@ -1864,9 +1864,47 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.531')
-assert.equal(CHANGELOG[0].version, '1.4.531', '1.4.531 is the newest row')
-assert.ok(CHANGELOG.some((note) => note.version === '1.4.531'), '1.4.531 changelog row')
+assert.equal(APP_VERSION, '1.4.532')
+assert.equal(CHANGELOG[0].version, '1.4.532', '1.4.532 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.532'), '1.4.532 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.532').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.532 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.532').items.join('\n'), /Refs #818, Refs #834/, '1.4.532 changelog refs #818 and #834')
+assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
+
+{
+  const camSrc834 = readFileSync(new URL('../src/components/nwCamera.ts', import.meta.url), 'utf8')
+  const screen834 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const actors834 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  assert.match(camSrc834, /export const NW_TAP_SLOP = 8\b/, '#834 the tap slop stays 8')
+  assert.match(camSrc834, /export function camFirstSeat/, '#834 the first seat is picked from the camera view')
+  assert.match(screen834, /firstSeatAt=\{camOn \? firstSeatPick : undefined\}/, '#834 DefendScreen passes the camera pick down')
+  assert.match(actors834, /firstSeatAt\?: \{ x: number; y: number \} \| null/, '#834 the actors take the pick')
+  assert.match(actors834, /firstSeatAt !== undefined/, '#834 the page-measured pick is only for the static board')
+  assert.match(screen834, /camPointerAt\.current < 500 && !target\.matches\(':focus-visible'\)/, '#834 a pointer focus never pans the camera')
+  assert.match(screen834, /suppressClickUntil\.current = 0\n\s+camPanning\.current = false/, '#834 a new press clears the click swallow')
+
+  const seat = (x, y, live = true) => ({ x, y, live })
+  const view = { W: 375, H: 574, s0: 0.5063, z: 1.4, tx: -200, ty: -250 }
+  const frameInsets = camFrameInsets(93)
+  const k834 = view.s0 * view.z
+  assert.equal(camSeatClear(seat(464, 768), view, frameInsets), true, '#834 a seat in the middle is clear')
+  assert.equal(camSeatClear(seat(600, 88), view, frameInsets), false, '#834 a seat above the header is not clear')
+  assert.equal(camSeatClear(seat(600, 1040), view, frameInsets), false, '#834 a seat under Begin is not clear')
+  const seats = [seat(600, 88), seat(464, 224, false), seat(464, 360), seat(464, 768), seat(600, 904)]
+  const pick = camFirstSeat(seats, view, frameInsets)
+  assert.deepEqual([pick.x, pick.y], [464, 768], '#834 the first clear open seat wins, dead seats never do')
+  assert.equal(camSeatClear(pick, view, frameInsets), true)
+  const kept = camFirstSeat(seats, view, frameInsets, { x: 600, y: 904 })
+  assert.deepEqual([kept.x, kept.y], [600, 904], '#834 an earlier pick stays while it is still clear')
+  const nowhere = camFirstSeat([seat(600, 88)], view, frameInsets)
+  assert.deepEqual([nowhere.x, nowhere.y], [600, 88], '#834 with no seat clear the cue still lands on an open seat')
+  assert.equal(camFirstSeat([], view, frameInsets), null, '#834 no seats, no cue')
+  assert.ok(k834 > 0)
+}
 assert.doesNotMatch(
   latestChange('1.4.531').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
