@@ -470,7 +470,7 @@ export function DefendNightActorsSvg({
   })
   const liveSeat = groundHints.findIndex((spot) => spot.live)
   const pinned = firstSeatAt ? groundHints.findIndex((spot) => spot.x === firstSeatAt.x && spot.y === firstSeatAt.y) : -1
-  const firstSeat = pinned >= 0 ? pinned : (seatPick ?? (liveSeat >= 0 ? liveSeat : 0))
+  const firstSeat = firstSeatAt === null ? -1 : pinned >= 0 ? pinned : (seatPick ?? (liveSeat >= 0 ? liveSeat : 0))
   return (
     <>
               {groundHints.length > 0 ? (
