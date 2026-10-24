@@ -1,4 +1,14 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FocusEvent as ReactFocusEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
 import { createPortal, flushSync } from 'react-dom'
 import { evidenceFor } from '../content/evidence'
 import {
@@ -271,6 +281,19 @@ import { TownReturn } from './TownReturn'
 import { WinBurst } from './challenges/WinBurst'
 import { DefendAbilityBar, type LampDragPhase } from './DefendAbilityBar'
 import { DefendNightBoard } from './DefendNightBoard'
+import {
+  camClamp,
+  camFrameInsets,
+  camPoint,
+  camToPlate,
+  camTransform,
+  camWorld,
+  focusPan,
+  NW_CAMERA_FOCUS,
+  NW_CAMERA_ZOOM,
+  NW_TAP_SLOP,
+  nwCameraOn,
+} from './nwCamera'
 import { NightPaceControl } from './NightPaceControl'
 import { NightSkillTray } from './NightSkillTray'
 import type { EasyTapJuice, EasyWalkerCall } from './DefendNightActors'
@@ -406,6 +429,7 @@ function keepHeavenClear() {
   if (!(sign instanceof SVGGElement) || !(rail instanceof HTMLElement) || !(svg instanceof SVGSVGElement)) return
   sign.style.transform = ''
   sign.removeAttribute('data-heaven-tuck')
+  if (document.querySelector('.nw-cam[data-nw-cam="on"]')) return
   const ctm = svg.getScreenCTM()
   if (!ctm || ctm.a <= 0) return
   const markers = () => [...document.querySelectorAll('.nw-spawn-marker')].map((el) => el.getBoundingClientRect())
@@ -457,6 +481,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const [ability, setAbility] = useState<WatchAbility>(() => unlocked[0] ?? 'love')
   const taught = true
   const boardRef = useRef<SVGSVGElement>(null)
+  const camRef = useRef<HTMLDivElement>(null)
+  const panRef = useRef<HTMLDivElement>(null)
+  const camOn = nwCameraOn(easy, phoneSe, typeof window === 'undefined' ? '' : window.location.search)
   const [boardBox, setBoardBox] = useState({ w: 0, h: 0 })
   const [toolLock, setToolLock] = useState<string | null>(null)
   const darkMissLine = easy && toolLock === EASY.nightMiss
@@ -816,6 +843,173 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const playingMap = playableNightMap(mapId)
   walkPlateRef.current = playingMap?.plate ?? NIGHT_MAP
   mapIdRef.current = mapId
+  const camZ = NW_CAMERA_ZOOM[mapId]
+  const camS0 = camWorld(boardBox.w, boardBox.h, 1).s0
+  const camPanRef = useRef<[number, number]>([0, 0])
+  const [camPan, setCamPan] = useState<[number, number]>([0, 0])
+  const camRaf = useRef(0)
+  const camStart = useRef<{ x: number; y: number; id: number; tx: number; ty: number } | null>(null)
+  const camPanning = useRef(false)
+  const suppressClickUntil = useRef(0)
+  const camSeen = useRef<{ node: HTMLElement | null; key: string }>({ node: null, key: '' })
+
+  function camFrame() {
+    const node = camRef.current
+    if (!node) return null
+    const W = node.clientWidth
+    const H = node.clientHeight
+    if (W < 1 || H < 1) return null
+    const box = node.getBoundingClientRect()
+    return { W, H, left: box.left, top: box.top, world: camWorld(W, H, camZ), insets: camFrameInsets(box.top) }
+  }
+
+  function camWrite() {
+    const node = panRef.current
+    if (node) node.style.transform = camTransform(camPanRef.current[0], camPanRef.current[1])
+  }
+
+  /** Drags write in rAF. Keys, Recenter and focus commit at once so the card follows. */
+  function camApply(tx: number, ty: number, commit: boolean) {
+    const f = camFrame()
+    if (!f) return
+    const [cx, cy] = camClamp(tx, ty, f.W, f.H, f.world)
+    camPanRef.current = [cx, cy]
+    if (commit) {
+      window.cancelAnimationFrame(camRaf.current)
+      camRaf.current = 0
+      camWrite()
+      setCamPan((prev) => (prev[0] === cx && prev[1] === cy ? prev : [cx, cy]))
+    } else if (!camRaf.current) {
+      camRaf.current = window.requestAnimationFrame(() => {
+        camRaf.current = 0
+        camWrite()
+      })
+    }
+  }
+
+  function recenter() {
+    const f = camFrame()
+    if (!f) return
+    const [tx, ty] = focusPan(NW_CAMERA_FOCUS[mapId], f.W, f.H, f.world.s0, camZ, f.insets)
+    camApply(tx, ty, true)
+  }
+
+  useLayoutEffect(() => {
+    const node = camRef.current
+    if (!camOn || !node) {
+      camSeen.current = { node: null, key: '' }
+      return
+    }
+    camWrite()
+    if (!(boardBox.w > 0)) return
+    const key = `${mapId}:${boardBox.w}x${boardBox.h}`
+    if (camSeen.current.node === node && camSeen.current.key === key) return
+    camSeen.current = { node, key }
+    recenter()
+  })
+
+  useEffect(() => () => window.cancelAnimationFrame(camRaf.current), [])
+
+  const CAM_CHROME = '.nw-hud,.nw-rail,.nw-docks,.nw-balloon-slot,.nw-map-overlay,.defend-tower-card,.nw-cam-recenter,.nw-pace'
+
+  function camDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!camOn || !event.isPrimary) return
+    camPanning.current = false
+    camStart.current = null
+    const target = event.target as Element | null
+    if (lampDragLive.current || target?.closest?.(CAM_CHROME)) return
+    if (event.pointerType === 'mouse' && event.button !== 0) return
+    camStart.current = {
+      x: event.clientX,
+      y: event.clientY,
+      id: event.pointerId,
+      tx: camPanRef.current[0],
+      ty: camPanRef.current[1],
+    }
+  }
+
+  function camMove(event: ReactPointerEvent<HTMLDivElement>) {
+    const start = camStart.current
+    if (!camOn || !start || event.pointerId !== start.id) return
+    const dx = event.clientX - start.x
+    const dy = event.clientY - start.y
+    if (!camPanning.current) {
+      if (Math.hypot(dx, dy) < NW_TAP_SLOP) return
+      camPanning.current = true
+      try {
+        camRef.current?.setPointerCapture(start.id)
+      } catch {
+        /* A pan that cannot capture still follows the pointer over the map. */
+      }
+      closeUpgrade(true)
+      setGhost(null)
+    }
+    camApply(start.tx + dx, start.ty + dy, false)
+  }
+
+  function camUp(event: ReactPointerEvent<HTMLDivElement>) {
+    const start = camStart.current
+    if (!camOn || !start || event.pointerId !== start.id) return
+    camStart.current = null
+    if (!camPanning.current) return
+    suppressClickUntil.current = performance.now() + 400
+    event.stopPropagation()
+    camApply(camPanRef.current[0], camPanRef.current[1], true)
+    keepReadoutClear()
+  }
+
+  function camEatClick(event: ReactMouseEvent<HTMLDivElement>) {
+    if (!camOn || performance.now() >= suppressClickUntil.current) return
+    suppressClickUntil.current = 0
+    event.stopPropagation()
+    event.preventDefault()
+  }
+
+  function camKey(event: ReactKeyboardEvent<HTMLDivElement>) {
+    if (!camOn || event.target !== event.currentTarget) return
+    const step = event.shiftKey ? 120 : 40
+    const [tx, ty] = camPanRef.current
+    if (event.key === 'ArrowLeft') camApply(tx + step, ty, true)
+    else if (event.key === 'ArrowRight') camApply(tx - step, ty, true)
+    else if (event.key === 'ArrowUp') camApply(tx, ty + step, true)
+    else if (event.key === 'ArrowDown') camApply(tx, ty - step, true)
+    else if (event.key === 'Home') recenter()
+    else return
+    event.preventDefault()
+  }
+
+  function camScroll(event: { currentTarget: HTMLElement }) {
+    event.currentTarget.scrollLeft = 0
+    event.currentTarget.scrollTop = 0
+  }
+
+  function camFocus(event: ReactFocusEvent<HTMLDivElement>) {
+    if (!camOn) return
+    camScroll(event)
+    const target = event.target as Element
+    if (!target.matches?.('.defend-clear-lamp, .defend-walker-tap')) return
+    const f = camFrame()
+    if (!f) return
+    const r = target.getBoundingClientRect()
+    const inBand = r.top - f.top <= f.insets.rightBand[1] && r.bottom - f.top >= f.insets.rightBand[0]
+    const clear =
+      r.left >= f.left &&
+      r.right <= f.left + f.W - (inBand ? f.insets.right : 0) &&
+      r.top >= f.top + f.insets.top &&
+      r.bottom <= f.top + f.H - f.insets.bottom
+    if (clear) return
+    const at = camToPlate(
+      r.left + r.width / 2,
+      r.top + r.height / 2,
+      f,
+      camPanRef.current[0],
+      camPanRef.current[1],
+      f.world.s0,
+      camZ,
+    )
+    const [tx, ty] = focusPan(at, f.W, f.H, f.world.s0, camZ, f.insets)
+    camApply(tx, ty, true)
+  }
   tuneRef.current = nightTune(playingMap?.rules)
   hpMulRef.current = playingMap?.hpMul ?? 1
   waveRef.current = playingMap?.wave ?? null
@@ -863,7 +1057,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     const onDown = (event: PointerEvent) => {
       const target = event.target as Element | null
       if (!target?.closest) return
-      if (target.closest('.defend-go, .defend-ability, .defend-new-lamp')) return
+      if (target.closest('.defend-go, .defend-ability, .defend-new-lamp, .nw-cam-recenter')) return
       if (!target.closest('.nw-docks')) return
       if (!plantOpenGroundRef.current(event.clientX, event.clientY)) return
       event.preventDefault()
@@ -1461,18 +1655,23 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   useEffect(() => () => newLampStop.current?.(), [])
 
   useLayoutEffect(() => {
-    const node = boardRef.current
+    const node = camOn ? camRef.current : boardRef.current
     if (!node) return
     const sync = () => {
-      const rect = node.getBoundingClientRect()
+      // The camera frame is measured by layout size, never by a transformed rect.
+      const rect = camOn ? { width: node.clientWidth, height: node.clientHeight } : node.getBoundingClientRect()
       if (rect.width < 1 || rect.height < 1) return
-      setBoardBox({ w: rect.width, h: rect.height })
+      if (!camOn) {
+        setBoardBox({ w: rect.width, h: rect.height })
+        return
+      }
+      setBoardBox((prev) => (prev.w === rect.width && prev.h === rect.height ? prev : { w: rect.width, h: rect.height }))
     }
     sync()
     const observer = new ResizeObserver(sync)
     observer.observe(node)
     return () => observer.disconnect()
-  }, [phase, taught, easy])
+  }, [phase, taught, easy, camOn])
 
   useEffect(() => {
     if (!easy) {
@@ -1882,6 +2081,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     currentTarget: EventTarget
     target: EventTarget | null
   }) {
+    if (camPanning.current) {
+      setGhost(null)
+      return
+    }
     if (lampDragLive.current) return
     if (placeHitsActor(event.target)) {
       if (event.type === 'pointerdown') setGhost(null)
@@ -3270,6 +3473,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   }
 
   function boardPoint(x: number, y: number) {
+    if (camOn && boardBox.w > 0) return camPoint(camS0)(boardBox, { x, y })
     if (!plateFill) return mapBoardPoint(boardBox, { x, y })
     return boardFillPoint(boardBox, { x, y })
   }
@@ -3315,6 +3519,15 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           )
         : []
       if (!NW_HIDE_EDGE_SEATS || !(boardBox.w > 0)) return hints
+      if (camOn) {
+        const r = 46 * camS0
+        return hints.filter((seat) => {
+          if (seat.live) return true
+          const left = seat.x * camS0
+          const top = seat.y * camS0
+          return left - r >= 0 && left + r <= 798 * camS0 && top - r >= 0 && top + r <= 1134 * camS0
+        })
+      }
       // Draw-only: a grey ring the frame cuts in half is dropped. Live rings and seat data stay.
       const view = plateFill ? boardFill(boardBox) : boardView(boardBox)
       const r = 46 * view.scale
@@ -3325,7 +3538,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       })
     },
     // roadD changes after the map bind, and the seat tint reads that same road.
-    [groundPick, seatAbility, progress, runTier, plants, runPaths, easy, roadD, boardBox, plateFill],
+    [groundPick, seatAbility, progress, runTier, plants, runPaths, easy, roadD, boardBox, plateFill, camOn, camS0],
   )
   const bossLive = raiders.find((raider) => raider.boss && !raider.turned)
   const walkerCalls: EasyWalkerCall[] = midWave
@@ -3458,6 +3671,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   const docks = (
     <>
+      {camOn ? (
+        <button type="button" className="nw-cam-recenter" aria-label="Recenter map" onClick={recenter} />
+      ) : null}
       {tapReadoutOn && (phase === 'wave' || phase === 'boost' || phase === 'lost') ? (
         <p
           className="nw-tap-readout"
@@ -3996,84 +4212,110 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                 {EASY.nightMiss}
               </p>
             ) : null}
-            <DefendNightBoard
-              boardRef={boardRef}
-              viewBox={plateFill ? boardFillBox(boardBox) : boardViewBox(boardBox)}
-              shake={shake}
-              won={won}
-              phase={phase}
-              fireBest={fireBest}
-              fireAtRaider={fireAtRaider}
-              easyTap={easyTap}
-              pads={pads}
-              planted={planted}
-              progress={progress}
-              raiders={raiders}
-              raiderAt={raiderAt}
-              walkIn={walkIn}
-              ability={ability}
-              towerType={plants}
-              unlocked={unlocked}
-              flash={flash}
-              togglePad={togglePad}
-              fire={fire}
-              shots={shots}
-              easy={easy}
-              blasts={blasts}
-              tapTarget={tapTarget}
-              tapPos={tapPos}
-              tapJuice={tapJuice}
-              walkerCalls={easy ? [] : walkerCalls}
-              loreLine={easy ? null : (loreMeet?.line ?? null)}
-              runTier={runTier}
-              runPaths={runPaths}
-              boosting={boosting}
-              onBoostTower={boostSelectedTool}
-              onUpgradePath={boostSelectedPath}
-              onArmPathBuy={armPathBuy}
-              onBuyBright={buyBright}
-              showBright={brightRoundOpen(waveIndex)}
-              upgradeAt={upgradeAt}
-              onOpenUpgrade={openUpgrade}
-              roundIndex={waveIndex}
-              spawnLog={easy && debugPanel}
-              upFlashId={upFlash}
-              levelBurst={
-                levelBurst && upgradeAt === levelBurst.plotId
-                  ? { from: levelBurst.from, to: levelBurst.to }
-                  : null
-              }
-              upgradePoint={upgradePoint}
-              boardBox={boardBox}
-              runSparks={runSparks}
-              onPullLamp={
-                phase === 'plant' || phase === 'boost' ? pullUpgradeLamp : undefined
-              }
-              pullSparks={upgradeAt ? pullSparksFor(upgradeAt) : 0}
-              onCloseUpgrade={closeUpgrade}
-              heldLessons={progress.held}
-              playtestSteps={tapReadoutOn}
-              onOpenLessons={openLockInLessons}
-              onBoardTap={closeUpgrade}
-              onPlacePointer={onPlacePointer}
-              ghost={ghost}
-              groundHints={groundHints}
-              reachMiss={reachMiss}
-              plateFill={plateFill}
-              map={playingMap?.plate}
-              roadD={roadD}
-              porchCandy={!playingMap}
-              roadLabel={
-                playingMap
-                  ? `Night road through ${playingMap.name}`
-                  : 'Night road through Silver City'
-              }
-              armorFrom={tuneRef.current.armorFrom}
-              cueNudge={cueNudge}
-              mapFeatures={playingMap?.mapFeatures}
-              pops={pops}
-              mapId={mapId}
-            />
+            <div
+              className="nw-cam"
+              data-nw-cam={camOn ? 'on' : 'off'}
+              ref={camRef}
+              tabIndex={camOn ? 0 : -1}
+              role={camOn ? 'group' : undefined}
+              aria-label={camOn ? 'Map view. Use the arrow keys to look around.' : undefined}
+              onPointerDownCapture={camDown}
+              onPointerMoveCapture={camMove}
+              onPointerUpCapture={camUp}
+              onPointerCancelCapture={camUp}
+              onClickCapture={camEatClick}
+              onKeyDown={camKey}
+              onFocusCapture={camFocus}
+              onScroll={camOn ? camScroll : undefined}
+              onDragStart={camOn ? (event) => event.preventDefault() : undefined}
+            >
+              <div className="nw-pan" ref={panRef}>
+                <div
+                  className="nw-zoom"
+                  style={camOn ? { transform: `scale(${camZ})`, width: (798 * camS0), height: (1134 * camS0) } : undefined}
+                >
+                <DefendNightBoard
+                  boardRef={boardRef}
+                  viewBox={camOn ? '0 0 798 1134' : plateFill ? boardFillBox(boardBox) : boardViewBox(boardBox)}
+                  shake={shake}
+                  won={won}
+                  phase={phase}
+                  fireBest={fireBest}
+                  fireAtRaider={fireAtRaider}
+                  easyTap={easyTap}
+                  pads={pads}
+                  planted={planted}
+                  progress={progress}
+                  raiders={raiders}
+                  raiderAt={raiderAt}
+                  walkIn={walkIn}
+                  ability={ability}
+                  towerType={plants}
+                  unlocked={unlocked}
+                  flash={flash}
+                  togglePad={togglePad}
+                  fire={fire}
+                  shots={shots}
+                  easy={easy}
+                  blasts={blasts}
+                  tapTarget={tapTarget}
+                  tapPos={tapPos}
+                  tapJuice={tapJuice}
+                  walkerCalls={easy ? [] : walkerCalls}
+                  loreLine={easy ? null : (loreMeet?.line ?? null)}
+                  runTier={runTier}
+                  runPaths={runPaths}
+                  boosting={boosting}
+                  onBoostTower={boostSelectedTool}
+                  onUpgradePath={boostSelectedPath}
+                  onArmPathBuy={armPathBuy}
+                  onBuyBright={buyBright}
+                  showBright={brightRoundOpen(waveIndex)}
+                  upgradeAt={upgradeAt}
+                  onOpenUpgrade={openUpgrade}
+                  roundIndex={waveIndex}
+                  spawnLog={easy && debugPanel}
+                  upFlashId={upFlash}
+                  levelBurst={
+                    levelBurst && upgradeAt === levelBurst.plotId
+                      ? { from: levelBurst.from, to: levelBurst.to }
+                      : null
+                  }
+                  upgradePoint={upgradePoint}
+                  boardBox={boardBox}
+                  runSparks={runSparks}
+                  onPullLamp={
+                    phase === 'plant' || phase === 'boost' ? pullUpgradeLamp : undefined
+                  }
+                  pullSparks={upgradeAt ? pullSparksFor(upgradeAt) : 0}
+                  onCloseUpgrade={closeUpgrade}
+                  heldLessons={progress.held}
+                  playtestSteps={tapReadoutOn}
+                  onOpenLessons={openLockInLessons}
+                  onBoardTap={closeUpgrade}
+                  onPlacePointer={onPlacePointer}
+                  ghost={ghost}
+                  groundHints={groundHints}
+                  reachMiss={reachMiss}
+                  plateFill={plateFill}
+                  cam={camOn && boardBox.w > 0 ? { s0: camS0, z: camZ, tx: camPan[0], ty: camPan[1] } : undefined}
+                  map={playingMap?.plate}
+                  roadD={roadD}
+                  porchCandy={!playingMap}
+                  roadLabel={
+                    playingMap
+                      ? `Night road through ${playingMap.name}`
+                      : 'Night road through Silver City'
+                  }
+                  armorFrom={tuneRef.current.armorFrom}
+                  cueNudge={cueNudge}
+                  mapFeatures={playingMap?.mapFeatures}
+                  pops={pops}
+                  mapId={mapId}
+                />
+                </div>
+              </div>
+            </div>
             {phase === 'wave' ? (
               <div className="nw-wave-overlay">
                 <span className="defend-wave">{roundLabel}</span>

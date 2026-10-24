@@ -15,6 +15,8 @@ import { FATHER_RUN_HINT } from '../src/easyTrail/father/fatherRun.ts'
 import { localDateKey } from '../src/lib/dates.ts'
 import { SAVE_KIND } from '../src/lib/save.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
+import { camClamp, camFrameInsets, camToPlate, focusPan, NW_CAMERA_FOCUS, NW_CAMERA_ZOOM } from '../src/components/nwCamera.ts'
+import { boardFillBox } from '../src/nightWatch/map/phoneFill.ts'
 
 const SIZES = [
   [375, 667],
@@ -1408,6 +1410,20 @@ async function finishRead(page, puzzle) {
       await page.waitForTimeout(250)
       continue
     }
+    const claimCards = page.locator('.recall-gate.is-easy-hold button.recall-card')
+    if ((await claimCards.count()) && !quizOpen) {
+      const brief = evidenceForTier(puzzle.challenge.id, 'easy')
+      assert.ok(brief, `evidence for ${puzzle.challenge.id}`)
+      await pointerClick(page, claimCards.filter({ hasText: easyFacingLine(puzzle.challenge.id, brief.claim) }).first())
+      await page.waitForTimeout(250)
+      continue
+    }
+    const lockIn = page.locator('.play.is-easy-sort .sort-lock .snap-bins')
+    if (await lockIn.count()) {
+      await lockIn.click()
+      await page.waitForTimeout(250)
+      continue
+    }
     await page.waitForTimeout(200)
   }
   assert.equal(await screenId(page), 'home', `day-2 Read returns Home (${puzzle.challenge.kind})`)
@@ -2559,8 +2575,859 @@ export async function proveHomePan(browser, origin) {
   return lines
 }
 
+// ---------------------------------------------------------------------------
+// Night Watch phone camera (#818). Real pointer, touch and key input only. Never el.click().
+// ---------------------------------------------------------------------------
+const NW_SIZES = [
+  [375, 667],
+  [390, 844],
+]
+const NW_SLUGS = ['a2', 'far-hills', 'map02', 'map03', 'map04', 'map05', 'map06']
+const NW_SLUG_ID = { map02: 'far-hills' }
+const nwId = (slug) => NW_SLUG_ID[slug] ?? slug
+const NW_CHROME = ['.nw-hud', '.nw-rail', '.defend-go', '.nw-skill-tray']
+
+async function nwOpen(browser, origin, [width, height], slug, { query = '', touch = false } = {}) {
+  const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1, hasTouch: touch })
+  await ctx.addInitScript(
+    ([storageKey, raw]) => {
+      localStorage.clear()
+      localStorage.setItem(storageKey, raw)
+    },
+    [STORAGE_KEY, JSON.stringify(hopSave({}))],
+  )
+  const page = await ctx.newPage()
+  const errors = []
+  const consoleErrors = []
+  page.on('pageerror', (error) => errors.push(String(error)))
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') consoleErrors.push(msg.text())
+  })
+  await page.goto(`${origin}?playtest=1&nwSeed=2&nwMap=${slug}${query}`)
+  await page.getByRole('button', { name: 'Settings' }).click()
+  await page.locator('summary', { hasText: 'Developer' }).click()
+  await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
+  await page.locator('.defend-board').waitFor()
+  if (await page.locator('[data-map-overlay]').count()) {
+    await page.locator(`[data-map="${nwId(slug)}"]`).click()
+    await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+  }
+  await page.locator('.nw-cam').waitFor()
+  await page.waitForTimeout(450)
+  return { ctx, page, errors, consoleErrors, width, height }
+}
+
+function nwK(view) {
+  return { s0: Math.max(view.W / 798, view.H / 1134) }
+}
+
+async function nwView(page) {
+  return page.evaluate(() => {
+    const cam = document.querySelector('.nw-cam')
+    if (!cam) return null
+    const pan = cam.querySelector('.nw-pan')
+    const zoom = cam.querySelector('.nw-zoom')
+    const m = new DOMMatrix(getComputedStyle(pan).transform)
+    const z = new DOMMatrix(getComputedStyle(zoom).transform).a
+    const f = cam.getBoundingClientRect()
+    const plate = document.querySelector('.defend-map-plate')?.getBoundingClientRect()
+    const box = (r) => (r ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom } : null)
+    return {
+      on: cam.getAttribute('data-nw-cam'),
+      W: cam.clientWidth,
+      H: cam.clientHeight,
+      tx: m.m41,
+      ty: m.m42,
+      z,
+      frame: box(f),
+      world: { w: 798 * Math.max(cam.clientWidth / 798, cam.clientHeight / 1134) * z, h: 1134 * Math.max(cam.clientWidth / 798, cam.clientHeight / 1134) * z },
+      plate: box(plate),
+      vw: window.innerWidth,
+      vh: window.innerHeight,
+    }
+  })
+}
+
+/** Rect of the n-th visible match, or null. */
+async function nwRect(page, selector, index = 0) {
+  return page.evaluate(
+    ([sel, i]) => {
+      const nodes = [...document.querySelectorAll(sel)].filter((node) => {
+        const r = node.getBoundingClientRect()
+        return r.width > 0.5 && r.height > 0.5
+      })
+      const node = nodes[i]
+      if (!node) return null
+      const r = node.getBoundingClientRect()
+      return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height, cx: r.left + r.width / 2, cy: r.top + r.height / 2 }
+    },
+    [selector, index],
+  )
+}
+
+async function nwCount(page, selector) {
+  return page.locator(selector).count()
+}
+
+async function nwTaps(page) {
+  return page.evaluate(() => {
+    const node = document.querySelector('.nw-tap-readout')
+    return {
+      hits: Number(node?.getAttribute('data-tap-hits') ?? '0'),
+      misses: Number(node?.getAttribute('data-tap-misses') ?? '0'),
+    }
+  })
+}
+
+async function nwGesture(page, points, steps = 3) {
+  await page.mouse.move(points[0].x, points[0].y)
+  await page.mouse.down()
+  for (const p of points.slice(1)) await page.mouse.move(p.x, p.y, { steps })
+  await page.mouse.up()
+  await page.waitForTimeout(70)
+}
+
+/** +1 when the map has room to slide right, else -1, so a drag is never eaten by the clamp. */
+const nwDir = (view) => (-view.tx >= 60 ? 1 : -1)
+
+const nwClamp = (value, lo, hi) => Math.min(hi, Math.max(lo, value))
+
+/** Drag the map until its pan is (tx, ty). Each drag starts on open ground well inside the frame. */
+async function nwPanTo(page, tx, ty) {
+  for (let i = 0; i < 16; i += 1) {
+    const v = await nwView(page)
+    const dx = tx - v.tx
+    const dy = ty - v.ty
+    if (Math.abs(dx) < 0.75 && Math.abs(dy) < 0.75) return v
+    const sx = nwClamp(dx, -200, 200)
+    const sy = nwClamp(dy, -200, 200)
+    const c = { x: v.frame.left + v.W * 0.42, y: v.frame.top + v.H * 0.4 }
+    const from = { x: c.x - sx / 2, y: c.y - sy / 2 }
+    const to = { x: c.x + sx / 2, y: c.y + sy / 2 }
+    // A move under the slop would be a tap. Swing out first so the pan always starts.
+    const swing = { x: from.x + (Math.abs(sx) < 20 ? 30 : 0), y: from.y + (Math.abs(sy) < 20 ? 30 : 0) }
+    await nwGesture(page, [from, swing, to], 3)
+  }
+  const last = await nwView(page)
+  assert.ok(Math.abs(tx - last.tx) < 1.5 && Math.abs(ty - last.ty) < 1.5, `nwPan could not reach ${tx.toFixed(1)},${ty.toFixed(1)} (at ${last.tx.toFixed(1)},${last.ty.toFixed(1)}; W ${last.W} H ${last.H} world ${last.world.w.toFixed(1)}x${last.world.h.toFixed(1)})`)
+  return last
+}
+
+async function nwPanMid(page) {
+  const v = await nwView(page)
+  return nwPanTo(page, (v.W - v.world.w) / 2, (v.H - v.world.h) / 2)
+}
+
+/** The pan that puts a plate point where the page wants it on screen. */
+function nwPanFor(v, plate, screen) {
+  const k = nwK(v).s0 * v.z
+  return camClamp(screen.x - v.frame.left - plate.x * k, screen.y - v.frame.top - plate.y * k, v.W, v.H, v.world)
+}
+
+function nwPlateOf(v, client) {
+  return camToPlate(client.x, client.y, v.frame, v.tx, v.ty, nwK(v).s0, v.z)
+}
+
+/** Pan until the first match sits where a finger can reach it, and return where it is. */
+async function nwBring(page, selector, index = 0) {
+  const spots = [
+    [0.4, 0.3],
+    [0.3, 0.45],
+    [0.45, 0.2],
+    [0.5, 0.5],
+    [0.25, 0.25],
+    [0.6, 0.4],
+  ]
+  for (const [fx, fy] of spots) {
+    const v = await nwView(page)
+    const r = await nwRect(page, selector, index)
+    assert.ok(r, `nwBring: ${selector} is in the page`)
+    const plate = nwPlateOf(v, { x: r.cx, y: r.cy })
+    const [tx, ty] = nwPanFor(v, plate, { x: v.frame.left + v.W * fx, y: v.frame.top + v.H * fy })
+    await nwPanTo(page, tx, ty)
+    const now = await nwRect(page, selector, index)
+    const hit = await page.evaluate(
+      ([sel, x, y]) => {
+        const top = document.elementFromPoint(x, y)
+        return Boolean(top && top.closest(sel))
+      },
+      [selector, now.cx, now.cy],
+    )
+    if (hit) return now
+  }
+  throw new Error(`nwBring: ${selector} never came clear`)
+}
+
+/** A point of open map, `room` px from every frame edge and off every control and actor. */
+async function nwOpenGround(page, room = 70) {
+  const v = await nwView(page)
+  const point = await page.evaluate(
+    ([f, r]) => {
+      for (let y = f.top + f.H * 0.28; y < f.top + f.H * 0.72; y += 18) {
+        for (let x = f.left + r; x < f.left + f.W - r; x += 18) {
+          const top = document.elementFromPoint(x, y)
+          if (!top || !top.closest('.defend-board')) continue
+          if (top.closest('.defend-raider, .defend-pad, .defend-walker-tap, .defend-clear-lamp, .defend-tower-card, .nw-rail, .nw-docks, .nw-hud, .nw-balloon-slot')) continue
+          let clear = true
+          for (const [dx, dy] of [[0, -r], [0, r], [-r, 0], [r, 0]]) {
+            const near = document.elementFromPoint(x + dx, y + dy)
+            if (!near || near.closest('.nw-docks, .nw-rail, .nw-hud, .defend-tower-card')) clear = false
+          }
+          if (clear) return { x, y }
+        }
+      }
+      return null
+    },
+    [{ top: v.frame.top, left: v.frame.left, W: v.W, H: v.H }, room],
+  )
+  assert.ok(point, 'nwOpenGround: open ground to start a drag')
+  return point
+}
+
+function nwNear(a, b, tol, label) {
+  assert.ok(Math.abs(a - b) <= tol, `${label}: ${a.toFixed(2)} vs ${b.toFixed(2)} (±${tol})`)
+}
+
+function nwHits(a, b, pad = 0) {
+  return a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad
+}
+
+/** Seats and arches the clamp keeps under the bottom chrome: judged by their centre, and counted. */
+const nwEdgeCases = []
+
+/** Whole bbox clears the chrome. At a clamp edge the pan cannot go further, so the centre (a tap on the seat) must stay off the chrome instead. */
+function nwClears(view, rect, boxes, label) {
+  const edge =
+    Math.abs(view.tx) < 1 || Math.abs(view.tx - (view.W - view.world.w)) < 1 || Math.abs(view.ty) < 1 || Math.abs(view.ty - (view.H - view.world.h)) < 1
+  const mid = { left: (rect.left + rect.right) / 2, right: (rect.left + rect.right) / 2, top: (rect.top + rect.bottom) / 2, bottom: (rect.top + rect.bottom) / 2 }
+  for (const sel of NW_CHROME) {
+    const box = boxes[sel]
+    if (!box) continue
+    if (!nwHits(rect, box, 8)) continue
+    assert.ok(edge, `${label} clears ${sel}`)
+    assert.equal(nwHits(mid, box, 0), false, `${label} centre is not under ${sel} at the clamp edge`)
+    nwEdgeCases.push(`${label} ${sel}`)
+  }
+}
+
+async function nwChrome(page) {
+  const out = {}
+  for (const sel of NW_CHROME) out[sel] = await nwRect(page, sel)
+  return out
+}
+
+async function nwBegin(page, where = '') {
+  const started = () => page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 2500 }).then(() => true, () => false)
+  // A jump seeds one lamp. On a map where it cannot reach the road Begin warns, so plant on real seats until it can.
+  const seatCount = await page.locator('.defend-plant-ground circle.is-live').count()
+  for (let seat = -1; seat < seatCount; seat += 1) {
+    if (seat >= 0) {
+      const v = await nwView(page)
+      const at = await page.evaluate((i) => {
+        const c = [...document.querySelectorAll('.defend-plant-ground circle.is-live')].filter((n) => n.getBoundingClientRect().width > 1)[i]
+        return c ? { x: Number(c.getAttribute('cx')), y: Number(c.getAttribute('cy')) } : null
+      }, seat)
+      if (!at) break
+      const [tx, ty] = focusPan(at, v.W, v.H, nwK(v).s0, v.z, camFrameInsets(v.frame.top))
+      await nwPanTo(page, tx, ty)
+      const now = await nwView(page)
+      const k = nwK(now).s0 * now.z
+      await page.mouse.click(now.frame.left + now.tx + at.x * k, now.frame.top + now.ty + at.y * k)
+      await page.waitForTimeout(250)
+    }
+    await page.locator('.defend-go').click()
+    if (await started()) return
+  }
+  throw new Error(`${where} the wave did not start`)
+}
+
+/** Wave started under ?nwDebug=1, so the countdown and walkers sit still until Resume. */
+async function nwWalkers(page, want = 3) {
+  await page.getByRole('button', { name: 'Resume walkers' }).click()
+  await page.waitForFunction(
+    (n) => document.querySelectorAll('.defend-walker-tap').length >= n,
+    want,
+    { timeout: 30_000 },
+  )
+  await page.getByRole('button', { name: 'Pause walkers' }).click()
+  await page.waitForTimeout(150)
+}
+
+async function nwPlantOne(page, v, seat) {
+  const k = nwK(v).s0 * v.z
+  return { x: seat.cx, y: seat.cy + 26 * k }
+}
+
+// -- 1. Plant step: on state, seats, clamp, inverse, insets, reach ----------------------------
+
+async function proveNwPlant(browser, origin, size, slug, errorsOut) {
+  const where = `${slug} ${size[0]}x${size[1]}`
+  const id = nwId(slug)
+  const { ctx, page, errors, consoleErrors } = await nwOpen(browser, origin, size, slug)
+  try {
+    const v = await nwView(page)
+    assert.equal(v.on, 'on', `nwPan on: ${where} camera is on`)
+    nwNear(v.z, NW_CAMERA_ZOOM[id], 1e-6, `${where} zoom`)
+    assert.ok(Math.abs(v.world.w - 798 * nwK(v).s0 * NW_CAMERA_ZOOM[id]) < 0.5, `${where} world width ${v.world.w}`)
+    const drawn = await page.evaluate(() => document.querySelector('.nw-zoom').offsetWidth)
+    assert.ok(Math.abs(drawn - 798 * nwK(v).s0) < 1, `${where} the board draws ${drawn} wide`)
+    const open = focusPan(NW_CAMERA_FOCUS[id], v.W, v.H, nwK(v).s0, v.z, camFrameInsets(v.frame.top))
+    nwNear(v.tx, open[0], 1, `${where} opens on the focus (x)`)
+    nwNear(v.ty, open[1], 1, `${where} opens on the focus (y)`)
+
+    const rc = await nwRect(page, '.nw-cam-recenter')
+    assert.ok(rc, `${where} Recenter shows`)
+    nwNear(rc.width, 48, 0.5, `${where} Recenter width`)
+    nwNear(rc.height, 48, 0.5, `${where} Recenter height`)
+    nwNear(v.frame.right - rc.right, 8, 1, `${where} Recenter right gap`)
+    nwNear(v.frame.bottom - rc.bottom, 8, 1, `${where} Recenter bottom gap`)
+    assert.equal(await page.locator('.nw-cam-recenter').getAttribute('aria-label'), 'Recenter map')
+    assert.equal(await page.getByRole('button', { name: 'Recenter map' }).count(), 1, `${where} Recenter has its name`)
+    const paint = await page.evaluate(() => {
+      const st = getComputedStyle(document.querySelector('.nw-cam-recenter'))
+      return { bg: st.backgroundColor, border: st.borderTopColor, img: st.backgroundImage }
+    })
+    assert.equal(isGoldPaint(paint.bg) || isGoldPaint(paint.border), false, `${where} Recenter is not gold ${JSON.stringify(paint)}`)
+    const chrome = await nwChrome(page)
+    for (const sel of ['.defend-go', '.nw-skill-tray', '.nw-rail']) {
+      const box = await nwRect(page, sel)
+      if (box) assert.equal(nwHits(rc, box), false, `${where} Recenter clears ${sel}`)
+    }
+
+    // 2. Seats are fingertip size.
+    const floor = size[0] === 375 ? 64 : 44
+    const seats = await page.evaluate(() =>
+      [...document.querySelectorAll('.defend-plant-ground circle.is-live')]
+        .map((c) => {
+          const r = c.getBoundingClientRect()
+          return { w: r.width, h: r.height, cx: Number(c.getAttribute('cx')), cy: Number(c.getAttribute('cy')) }
+        })
+        .filter((s) => s.w > 1),
+    )
+    assert.ok(seats.length > 0, `${where} has live seats`)
+    for (const seat of seats) assert.ok(seat.w >= floor && seat.h >= floor, `nwPan seats: ${where} a seat is ${seat.w.toFixed(1)}x${seat.h.toFixed(1)}`)
+
+    // 14. Insets hold.
+    assert.ok(chrome['.nw-hud'].bottom <= 89.5, `nwPan insets: ${where} hud bottom ${chrome['.nw-hud'].bottom}`)
+    assert.ok(chrome['.defend-go'].top >= (size[0] === 375 ? 602 : 779) - 0.5, `${where} Begin top ${chrome['.defend-go'].top}`)
+    assert.ok(chrome['.nw-rail'].left >= (size[0] === 375 ? 310 : 325) - 0.5, `${where} rail left ${chrome['.nw-rail'].left}`)
+    if (size[0] === 390) assert.ok(chrome['.nw-rail'].bottom <= 314.5, `${where} rail bottom ${chrome['.nw-rail'].bottom}`)
+
+    // 15. Reach, plant step: every live seat can be centred clear of the chrome.
+    for (const seat of seats) {
+      const now = await nwView(page)
+      const [tx, ty] = focusPan({ x: seat.cx, y: seat.cy }, now.W, now.H, nwK(now).s0, now.z, camFrameInsets(now.frame.top))
+      await nwPanTo(page, tx, ty)
+      const ring = await page.evaluate(
+        ([cx, cy]) => {
+          const c = [...document.querySelectorAll('.defend-plant-ground circle.is-live')].find(
+            (n) => Number(n.getAttribute('cx')) === cx && Number(n.getAttribute('cy')) === cy,
+          )
+          const r = c?.getBoundingClientRect()
+          return r ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom } : null
+        },
+        [seat.cx, seat.cy],
+      )
+      assert.ok(ring, `${where} seat ${seat.cx},${seat.cy} is drawn`)
+      const fr = (await nwView(page)).frame
+      assert.ok(ring.left >= fr.left - 0.5 && ring.right <= fr.right + 0.5 && ring.top >= fr.top - 0.5 && ring.bottom <= fr.bottom + 0.5, `nwPan reach: ${where} seat ${seat.cx},${seat.cy} is in view ${JSON.stringify(ring)}`)
+      const boxes = await nwChrome(page)
+      nwClears(await nwView(page), ring, boxes, `${where} seat ${seat.cx},${seat.cy}`)
+    }
+
+    // 3. Clamp: about 2000 px of drag each way.
+    const reachX = v.W - 90
+    const reachY = Math.round(v.H * 0.6)
+    const clampRead = async (label) => {
+      const now = await nwView(page)
+      assert.ok(now.tx <= 0.6 && now.tx >= v.W - now.world.w - 0.6, `nwPan clamp: ${where} ${label} tx ${now.tx}`)
+      assert.ok(now.ty <= 0.6 && now.ty >= v.H - now.world.h - 0.6, `${where} ${label} ty ${now.ty}`)
+      assert.ok(now.plate.left <= now.frame.left + 0.6 && now.plate.right >= now.frame.right - 0.6, `${where} ${label} no void left/right`)
+      assert.ok(now.plate.top <= now.frame.top + 0.6 && now.plate.bottom >= now.frame.bottom - 0.6, `${where} ${label} no void top/bottom`)
+      return now
+    }
+    const y = v.frame.top + v.H * 0.5
+    const x = v.frame.left + v.W * 0.4
+    for (let i = 0; i < Math.ceil(2000 / reachX); i += 1) await nwGesture(page, [{ x: v.frame.left + 30, y }, { x: v.frame.left + 30 + reachX, y }], 4)
+    let edge = await clampRead('dragged right')
+    nwNear(edge.tx, 0, 0.6, `${where} stops at the left plate edge`)
+    for (let i = 0; i < Math.ceil(2000 / reachX); i += 1) await nwGesture(page, [{ x: v.frame.left + 30 + reachX, y }, { x: v.frame.left + 30, y }], 4)
+    edge = await clampRead('dragged left')
+    nwNear(edge.tx, v.W - edge.world.w, 0.6, `${where} stops at the right plate edge`)
+    for (let i = 0; i < Math.ceil(2000 / reachY); i += 1) await nwGesture(page, [{ x, y: v.frame.top + 70 }, { x, y: v.frame.top + 70 + reachY }], 4)
+    edge = await clampRead('dragged down')
+    nwNear(edge.ty, 0, 0.6, `${where} stops at the top plate edge`)
+    for (let i = 0; i < Math.ceil(2000 / reachY); i += 1) await nwGesture(page, [{ x, y: v.frame.top + 70 + reachY }, { x, y: v.frame.top + 70 }], 4)
+    edge = await clampRead('dragged up')
+    nwNear(edge.ty, v.H - edge.world.h, 0.6, `${where} stops at the bottom plate edge`)
+
+    // 4. Inverse transform: the svg matrix and camToPlate agree.
+    await nwPanMid(page)
+    await nwGesture(page, [{ x: v.frame.left + v.W * 0.5, y: v.frame.top + v.H * 0.5 }, { x: v.frame.left + v.W * 0.5 - 60, y: v.frame.top + v.H * 0.5 - 80 }], 5)
+    const moved = await nwView(page)
+    const pts = [[0.2, 0.2], [0.8, 0.2], [0.5, 0.5], [0.2, 0.8], [0.8, 0.8]].map(([fx, fy]) => ({ x: moved.frame.left + moved.W * fx, y: moved.frame.top + moved.H * fy }))
+    const real = await page.evaluate((list) => {
+      const svg = document.querySelector('.defend-board')
+      const inv = svg.getScreenCTM().inverse()
+      return list.map((p) => {
+        const q = svg.createSVGPoint()
+        q.x = p.x
+        q.y = p.y
+        const r = q.matrixTransform(inv)
+        return { x: r.x, y: r.y }
+      })
+    }, pts)
+    pts.forEach((p, i) => {
+      const mine = nwPlateOf(moved, p)
+      nwNear(real[i].x, mine.x, 0.5, `nwPan inverse: ${where} point ${i} x`)
+      nwNear(real[i].y, mine.y, 0.5, `${where} point ${i} y`)
+    })
+    // Recenter puts it back.
+    const rcBox = await nwRect(page, '.nw-cam-recenter')
+    await page.mouse.click(rcBox.cx, rcBox.cy)
+    await page.waitForTimeout(100)
+    const home = await nwView(page)
+    nwNear(home.tx, open[0], 1, `${where} Recenter restores x`)
+    nwNear(home.ty, open[1], 1, `${where} Recenter restores y`)
+  } finally {
+    assert.deepEqual(errors, [], `${where} page errors`)
+    errorsOut.push(...consoleErrors.filter((text) => !/Failed to load resource/.test(text)))
+    await ctx.close()
+  }
+}
+
+// -- 2. Mid-wave: tray inset and spawn arch reach ----------------------------------------------
+
+async function proveNwWaveReach(browser, origin, size, slug, errorsOut) {
+  const where = `${slug} ${size[0]}x${size[1]} wave`
+  const { ctx, page, errors, consoleErrors } = await nwOpen(browser, origin, size, slug, { query: '&nwRound=3&nwDebug=1' })
+  try {
+    await nwBegin(page, where)
+    const tray = await nwRect(page, '.nw-skill-tray')
+    const hud = await nwRect(page, '.nw-hud')
+    const rail = await nwRect(page, '.nw-rail')
+    assert.ok(tray && hud && rail, `${where} chrome is up`)
+    assert.ok(hud.bottom <= 89.5, `nwPan insets: ${where} hud bottom ${hud.bottom}`)
+    assert.ok(tray.top >= (size[0] === 390 ? 736 : 736 - (844 - size[1])) - 0.5, `${where} tray top ${tray.top}`)
+    assert.ok(rail.left >= (size[0] === 375 ? 310 : 325) - 0.5, `${where} rail left ${rail.left}`)
+    const markers = await page.evaluate(() =>
+      [...document.querySelectorAll('[data-spawn-marker]')].map((node) => ({
+        id: node.getAttribute('data-spawn-marker'),
+        x: Number(node.getAttribute('x')) + Number(node.getAttribute('width')) / 2,
+        y: Number(node.getAttribute('y')) + Number(node.getAttribute('height')) / 2,
+      })),
+    )
+    assert.ok(markers.length > 0, `${where} has spawn arches`)
+    for (const marker of markers) {
+      const now = await nwView(page)
+      const [tx, ty] = focusPan(marker, now.W, now.H, nwK(now).s0, now.z, camFrameInsets(now.frame.top))
+      await nwPanTo(page, tx, ty)
+      const box = await page.evaluate((mid) => {
+        const node = document.querySelector(`[data-spawn-marker="${mid}"]`)
+        const r = node.getBoundingClientRect()
+        return { left: r.left, top: r.top, right: r.right, bottom: r.bottom }
+      }, marker.id)
+      const fr = (await nwView(page)).frame
+      assert.ok(box.left >= fr.left - 0.5 && box.right <= fr.right + 0.5 && box.top >= fr.top - 0.5 && box.bottom <= fr.bottom + 0.5, `nwPan reach: ${where} arch ${marker.id} is in view ${JSON.stringify(box)}`)
+      const boxes = await nwChrome(page)
+      nwClears(await nwView(page), box, boxes, `${where} arch ${marker.id}`)
+    }
+  } finally {
+    assert.deepEqual(errors, [], `${where} page errors`)
+    errorsOut.push(...consoleErrors.filter((text) => !/Failed to load resource/.test(text)))
+    await ctx.close()
+  }
+}
+
+// -- 3. Plant-step gestures --------------------------------------------------------------------
+
+async function proveNwPlantGestures(browser, origin, size, slug, errorsOut) {
+  const where = `${slug} ${size[0]}x${size[1]} plant`
+  const { ctx, page, errors, consoleErrors } = await nwOpen(browser, origin, size, slug)
+  try {
+    const lamps = () => nwCount(page, '.defend-clear-lamp')
+    const ghosts = () => nwCount(page, '.defend-ghost')
+    const seatSpot = async (index) => {
+      const v = await nwView(page)
+      const seat = await page.evaluate((i) => {
+        const c = [...document.querySelectorAll('.defend-plant-ground circle.is-live')].filter((n) => n.getBoundingClientRect().width > 1)[i]
+        return c ? { cx: Number(c.getAttribute('cx')), cy: Number(c.getAttribute('cy')) } : null
+      }, index)
+      assert.ok(seat, `${where} live seat ${index}`)
+      const [tx, ty] = focusPan({ x: seat.cx, y: seat.cy }, v.W, v.H, nwK(v).s0, v.z, camFrameInsets(v.frame.top))
+      await nwPanTo(page, tx, ty)
+      const now = await nwView(page)
+      const k = nwK(now).s0 * now.z
+      return { x: now.frame.left + now.tx + seat.cx * k, y: now.frame.top + now.ty + (seat.cy + 26) * k }
+    }
+    assert.equal(await lamps(), 0, `${where} starts with no lamp`)
+
+    // 7. A drag from a seat plants nothing and leaves no ghost.
+    let spot = await seatSpot(0)
+    let before = await nwView(page)
+    let d = nwDir(before)
+    await nwGesture(page, [spot, { x: spot.x + d * 15, y: spot.y - 15 }, { x: spot.x + d * 40, y: spot.y - 10 }], 4)
+    let after = await nwView(page)
+    assert.ok(Math.abs(after.tx - before.tx) + Math.abs(after.ty - before.ty) > 20, `nwPan drag: ${where} a 40px drag from a seat pans`)
+    assert.equal(await lamps(), 0, `${where} the drag plants nothing`)
+    assert.equal(await ghosts(), 0, `${where} the drag leaves no ghost`)
+    assert.equal(await nwCount(page, '.defend-tower-card'), 0, `${where} the drag opens no card`)
+
+    // 6. Slop edge: 9 px pans, 7 px plants.
+    spot = await seatSpot(0)
+    before = await nwView(page)
+    d = nwDir(before)
+    await nwGesture(page, [spot, { x: spot.x + d * 9, y: spot.y }], 2)
+    after = await nwView(page)
+    assert.ok(Math.abs(after.tx - before.tx - d * 9) < 1, `nwPan slop: ${where} a 9px move pans (${after.tx - before.tx})`)
+    assert.equal(await lamps(), 0, `${where} a 9px move plants nothing`)
+    spot = await seatSpot(0)
+    before = await nwView(page)
+    await nwGesture(page, [spot, { x: spot.x + 7, y: spot.y }], 2)
+    after = await nwView(page)
+    assert.equal(after.tx, before.tx, `${where} a 7px move does not pan`)
+    await page.waitForFunction(() => document.querySelectorAll('.defend-clear-lamp').length === 1, null, { timeout: 3000 })
+    assert.equal(await lamps(), 1, `${where} a 7px move is a tap and plants`)
+
+    // 11. Upgrade strip closes on a pan. 8. A drag from a lamp opens no card.
+    const lamp = await nwBring(page, '.defend-clear-lamp')
+    await page.mouse.click(lamp.cx, lamp.cy)
+    await page.locator('.defend-tower-card').waitFor({ timeout: 3000 })
+    assert.equal(await nwCount(page, '.defend-tower-card'), 1, `${where} a tap on the lamp opens its card`)
+    const ground = await nwOpenGround(page, 40)
+    await nwGesture(page, [ground, { x: ground.x - 20, y: ground.y }], 3)
+    assert.equal(await nwCount(page, '.defend-tower-card'), 0, `nwPan strip: ${where} a 20px pan closes the card`)
+    const pinned = await nwBring(page, '.defend-clear-lamp')
+    before = await nwView(page)
+    d = nwDir(before)
+    await nwGesture(page, [{ x: pinned.cx, y: pinned.cy }, { x: pinned.cx + d * 10, y: pinned.cy }, { x: pinned.cx + d * 20, y: pinned.cy }], 2)
+    after = await nwView(page)
+    assert.ok(Math.abs(after.tx - before.tx) > 10, `${where} a drag from the lamp pans`)
+    assert.equal(await nwCount(page, '.defend-tower-card'), 0, `${where} a drag from the lamp opens no card`)
+
+    // 10. Recenter in the plant step plants nothing.
+    const count = await lamps()
+    const rc = await nwRect(page, '.nw-cam-recenter')
+    await page.mouse.click(rc.cx, rc.cy)
+    await page.waitForTimeout(150)
+    assert.equal(await lamps(), count, `nwPan recenter: ${where} a Recenter tap plants nothing`)
+    const v = await nwView(page)
+    const open = focusPan(NW_CAMERA_FOCUS[nwId(slug)], v.W, v.H, nwK(v).s0, v.z, camFrameInsets(v.frame.top))
+    nwNear(v.tx, open[0], 1, `${where} Recenter restores x`)
+
+    // 13. Tab onto an off-screen lamp pans it into the clear window.
+    await nwPanTo(page, v.tx > (v.W - v.world.w) / 2 ? 0 : v.W - v.world.w, v.ty > (v.H - v.world.h) / 2 ? 0 : v.H - v.world.h)
+    const far = await page.evaluate(() => {
+      const r = document.querySelector('.defend-clear-lamp').getBoundingClientRect()
+      const f = document.querySelector('.nw-cam').getBoundingClientRect()
+      return r.left < f.left || r.right > f.right || r.top < f.top || r.bottom > f.bottom
+    })
+    assert.ok(far, `${where} the lamp starts off-screen`)
+    await page.locator('.nw-cam').focus()
+    let landed = false
+    for (let i = 0; i < 12 && !landed; i += 1) {
+      await page.keyboard.press('Tab')
+      landed = await page.evaluate(() => document.activeElement?.classList.contains('defend-clear-lamp'))
+    }
+    assert.ok(landed, `${where} Tab reaches the lamp`)
+    await page.waitForTimeout(100)
+    const seen = await nwRect(page, '.defend-clear-lamp')
+    const sv = await nwView(page)
+    const insets = camFrameInsets(sv.frame.top)
+    assert.ok(seen.left >= sv.frame.left - 1 && seen.right <= sv.frame.right + 1, `nwPan keys: ${where} Tab brings the lamp in across ${JSON.stringify(seen)}`)
+    assert.ok(seen.top >= sv.frame.top + insets.top - 1 && seen.bottom <= sv.frame.bottom - insets.bottom + 1, `${where} Tab brings the lamp inside the clear window ${JSON.stringify(seen)}`)
+
+    // 9. Chrome never pans (last: a rail drag may start a lamp drag).
+    const t0 = await nwView(page)
+    for (const sel of ['.defend-go', '.nw-balloon-slot', '.nw-cam-recenter', '.nw-rail']) {
+      const box = await nwRect(page, sel)
+      assert.ok(box, `${where} ${sel} is up`)
+      // The balloon slot lets taps through to the map, so only a button the finger can land on is chrome.
+      const lands = await page.evaluate(([q, x, y]) => Boolean(document.elementFromPoint(x, y)?.closest(q)), [sel, box.cx, box.cy])
+      if (!lands) continue
+      // A release back inside the button is a click, so a button drag ends outside it.
+      const to = { x: box.cx, y: box.cy - box.height / 2 - 24 }
+      await nwGesture(page, [{ x: box.cx, y: box.cy }, to], 4)
+      const t1 = await nwView(page)
+      assert.deepEqual([t1.tx, t1.ty], [t0.tx, t0.ty], `nwPan chrome: ${where} a drag from ${sel} leaves the map`)
+    }
+  } finally {
+    assert.deepEqual(errors, [], `${where} page errors`)
+    errorsOut.push(...consoleErrors.filter((text) => !/Failed to load resource/.test(text)))
+    await ctx.close()
+  }
+}
+
+// -- 4. Mid-wave gestures, walkers paused ------------------------------------------------------
+
+async function proveNwWaveGestures(browser, origin, size, slug, errorsOut) {
+  const where = `${slug} ${size[0]}x${size[1]} wave`
+  const { ctx, page, errors, consoleErrors } = await nwOpen(browser, origin, size, slug, { query: '&nwRound=3&nwDebug=1' })
+  try {
+    await nwBegin(page)
+    await nwWalkers(page, 3)
+    const id = nwId(slug)
+
+    // 12. The world moves with the pan. The chrome does not.
+    await nwPanMid(page)
+    const track = ['image.nw-feature', '[data-spawn-marker]', '.defend-clear-lamp', '.defend-walker-tap', '.nw-hud', '.nw-rail', '.nw-skill-tray']
+    const pos = async () => {
+      const out = {}
+      for (const sel of track) out[sel] = await nwRect(page, sel)
+      return out
+    }
+    const was = await pos()
+    const v0 = await nwView(page)
+    const ground = await nwOpenGround(page)
+    await nwGesture(page, [ground, { x: ground.x - 30, y: ground.y - 40 }, { x: ground.x - 60, y: ground.y - 80 }], 3)
+    const v1 = await nwView(page)
+    nwNear(v1.tx - v0.tx, -60, 1, `nwPan moves: ${where} pan x`)
+    nwNear(v1.ty - v0.ty, -80, 1, `${where} pan y`)
+    const now = await pos()
+    for (const sel of ['[data-spawn-marker]', '.defend-clear-lamp', '.defend-walker-tap']) {
+      assert.ok(was[sel] && now[sel], `${where} ${sel} is on the map`)
+      nwNear(now[sel].left - was[sel].left, -60, 1, `${where} ${sel} moves x`)
+      nwNear(now[sel].top - was[sel].top, -80, 1, `${where} ${sel} moves y`)
+    }
+    if (was['image.nw-feature'] && now['image.nw-feature']) {
+      nwNear(now['image.nw-feature'].left - was['image.nw-feature'].left, -60, 1, `${where} feature moves x`)
+      nwNear(now['image.nw-feature'].top - was['image.nw-feature'].top, -80, 1, `${where} feature moves y`)
+    }
+    for (const sel of ['.nw-hud', '.nw-rail', '.nw-skill-tray']) {
+      assert.deepEqual(now[sel], was[sel], `${where} ${sel} stays put`)
+    }
+
+    // 5. A tap with a 3px wobble pops a face.
+    let face = await nwBring(page, '.defend-walker-tap')
+    let taps = await nwTaps(page)
+    await page.mouse.move(face.cx, face.cy)
+    await page.mouse.down()
+    await page.mouse.move(face.cx + 3, face.cy, { steps: 2 })
+    await page.mouse.up()
+    await page.waitForTimeout(200)
+    let next = await nwTaps(page)
+    assert.equal(next.hits, taps.hits + 1, `nwPan tap: ${where} a 3px wobble pops the face`)
+    assert.equal(next.misses, taps.misses, `${where} the pop is no miss`)
+
+    // 6. A 7px move is a tap, a 9px move is a pan.
+    face = await nwBring(page, '.defend-walker-tap')
+    taps = await nwTaps(page)
+    let before = await nwView(page)
+    await page.mouse.move(face.cx, face.cy)
+    await page.mouse.down()
+    await page.mouse.move(face.cx + 7, face.cy, { steps: 2 })
+    await page.mouse.up()
+    await page.waitForTimeout(200)
+    next = await nwTaps(page)
+    assert.equal(next.hits, taps.hits + 1, `nwPan slop: ${where} a 7px move still pops`)
+    assert.equal((await nwView(page)).tx, before.tx, `${where} a 7px move does not pan`)
+    face = await nwBring(page, '.defend-walker-tap')
+    taps = await nwTaps(page)
+    before = await nwView(page)
+    const d9 = nwDir(before)
+    await nwGesture(page, [{ x: face.cx, y: face.cy }, { x: face.cx + d9 * 9, y: face.cy }], 2)
+    next = await nwTaps(page)
+    assert.ok(Math.abs((await nwView(page)).tx - before.tx - d9 * 9) < 1, `${where} a 9px move pans`)
+    assert.deepEqual(next, taps, `${where} a 9px move pops nothing and misses nothing`)
+
+    // 7. A 40px drag from open ground moves the map and taps nothing.
+    const g2 = await nwOpenGround(page)
+    taps = await nwTaps(page)
+    const lamps = await nwCount(page, '.defend-clear-lamp')
+    before = await nwView(page)
+    const d7 = nwDir(before)
+    await nwGesture(page, [g2, { x: g2.x + d7 * 20, y: g2.y }, { x: g2.x + d7 * 40, y: g2.y }], 3)
+    const dragged = await nwView(page)
+    assert.ok(Math.abs(dragged.tx - before.tx) > 20, `nwPan drag: ${where} a 40px drag moves the map`)
+    assert.deepEqual(await nwTaps(page), taps, `${where} the drag is no hit and no miss`)
+    assert.equal(await nwCount(page, '.defend-clear-lamp'), lamps, `${where} the drag plants nothing`)
+    assert.equal(await nwCount(page, '.defend-tower-card'), 0, `${where} the drag opens no card`)
+
+    // 8. A 20px drag from a face pans and pops nothing. A drag from a lamp opens no card.
+    face = await nwBring(page, '.defend-walker-tap')
+    taps = await nwTaps(page)
+    before = await nwView(page)
+    const d8 = nwDir(before)
+    await nwGesture(page, [{ x: face.cx, y: face.cy }, { x: face.cx + d8 * 10, y: face.cy + 4 }, { x: face.cx + d8 * 20, y: face.cy + 8 }], 2)
+    assert.ok(Math.abs((await nwView(page)).tx - before.tx) > 10, `nwPan walker: ${where} a drag from a face pans`)
+    assert.deepEqual(await nwTaps(page), taps, `${where} the drag from a face pops nothing and misses nothing`)
+    const lamp = await nwBring(page, '.defend-clear-lamp')
+    before = await nwView(page)
+    const d8l = nwDir(before)
+    await nwGesture(page, [{ x: lamp.cx, y: lamp.cy }, { x: lamp.cx + d8l * 10, y: lamp.cy }, { x: lamp.cx + d8l * 20, y: lamp.cy }], 2)
+    assert.ok(Math.abs((await nwView(page)).tx - before.tx) > 10, `${where} a drag from a lamp pans`)
+    assert.equal(await nwCount(page, '.defend-tower-card'), 0, `${where} the drag from a lamp opens no card`)
+
+    // 10. Recenter mid-wave is not a miss.
+    taps = await nwTaps(page)
+    const rc = await nwRect(page, '.nw-cam-recenter')
+    await page.mouse.click(rc.cx, rc.cy)
+    await page.waitForTimeout(150)
+    assert.deepEqual(await nwTaps(page), taps, `nwPan recenter: ${where} a Recenter tap is not a miss`)
+    const home = await nwView(page)
+    const open = focusPan(NW_CAMERA_FOCUS[id], home.W, home.H, nwK(home).s0, home.z, camFrameInsets(home.frame.top))
+    nwNear(home.tx, open[0], 1, `${where} Recenter restores x`)
+    nwNear(home.ty, open[1], 1, `${where} Recenter restores y`)
+
+    // 13. Keys.
+    await nwPanMid(page)
+    await page.locator('.nw-cam').focus()
+    const k0 = await nwView(page)
+    await page.keyboard.press('ArrowRight')
+    const lo = k0.W - k0.world.w
+    nwNear((await nwView(page)).tx, Math.max(lo, k0.tx - 40), 0.5, `nwPan keys: ${where} ArrowRight`)
+    await page.keyboard.press('Shift+ArrowRight')
+    nwNear((await nwView(page)).tx, Math.max(lo, k0.tx - 160), 0.5, `${where} Shift+ArrowRight`)
+    await page.keyboard.press('ArrowDown')
+    nwNear((await nwView(page)).ty, Math.max(k0.H - k0.world.h, k0.ty - 40), 0.5, `${where} ArrowDown`)
+    await page.keyboard.press('Home')
+    const k1 = await nwView(page)
+    nwNear(k1.tx, open[0], 1, `${where} Home restores x`)
+    nwNear(k1.ty, open[1], 1, `${where} Home restores y`)
+
+    // 9. Chrome never pans mid-wave either.
+    const t0 = await nwView(page)
+    for (const sel of ['.nw-skill-tray .btn', '.nw-pace', '.nw-cam-recenter', '.nw-balloon-slot']) {
+      const box = await nwRect(page, sel)
+      assert.ok(box, `${where} ${sel} is up`)
+      const lands = await page.evaluate(([q, x, y]) => Boolean(document.elementFromPoint(x, y)?.closest(q)), [sel, box.cx, box.cy])
+      if (!lands) continue
+      await nwGesture(page, [{ x: box.cx, y: box.cy }, { x: box.cx, y: box.cy - box.height / 2 - 24 }], 4)
+      const t1 = await nwView(page)
+      assert.deepEqual([t1.tx, t1.ty], [t0.tx, t0.ty], `nwPan chrome: ${where} a drag from ${sel} leaves the map`)
+    }
+  } finally {
+    assert.deepEqual(errors, [], `${where} page errors`)
+    errorsOut.push(...consoleErrors.filter((text) => !/Failed to load resource/.test(text)))
+    await ctx.close()
+  }
+
+  const touch = await nwOpen(browser, origin, size, slug, { query: '&nwRound=3&nwDebug=1', touch: true })
+  try {
+    await nwBegin(touch.page)
+    await nwWalkers(touch.page, 3)
+    let face = await nwBring(touch.page, '.defend-walker-tap')
+    const before = await nwView(touch.page)
+    await touchDrag(touch.page, { x: face.cx, y: face.cy }, { x: face.cx + nwDir(before) * 40, y: face.cy })
+    const after = await nwView(touch.page)
+    assert.ok(Math.abs(after.tx - before.tx) > 20, `${where} a finger drag from a face pans`)
+    const taps = await nwTaps(touch.page)
+    // Chromium swallows a tap that follows a scroll gesture within a beat.
+    await touch.page.waitForTimeout(700)
+    face = await nwBring(touch.page, '.defend-walker-tap')
+    await touch.page.touchscreen.tap(face.cx, face.cy)
+    await touch.page.waitForTimeout(250)
+    const next = await nwTaps(touch.page)
+    assert.equal(next.hits, taps.hits + 1, `${where} a finger tap pops the face`)
+    assert.equal(next.misses, taps.misses, `${where} the finger tap is no miss`)
+  } finally {
+    assert.deepEqual(touch.errors, [], `${where} touch page errors`)
+    errorsOut.push(...touch.consoleErrors.filter((text) => !/Failed to load resource/.test(text)))
+    await touch.ctx.close()
+  }
+}
+
+// -- 5. Off paths ------------------------------------------------------------------------------
+
+async function proveNwOff(browser, origin, errorsOut) {
+  for (const size of NW_SIZES) {
+    const where = `${size[0]}x${size[1]}`
+    const { ctx, page, errors, consoleErrors } = await nwOpen(browser, origin, size, 'a2', { query: '&nwCam=0' }).catch((error) => {
+      throw new Error(`nwCam=0 at ${where}: ${error.message}`)
+    })
+    try {
+      assert.equal(await page.locator('.nw-cam').getAttribute('data-nw-cam'), 'off', `nwPan off: ${where} ?nwCam=0 turns the camera off`)
+      assert.equal(await page.locator('.nw-cam-recenter').count(), 0, `${where} no Recenter when off`)
+      const read = await page.evaluate(() => {
+        const svg = document.querySelector('.defend-board')
+        const r = svg.getBoundingClientRect()
+        return { vb: svg.getAttribute('viewBox'), w: r.width, h: r.height }
+      })
+      assert.equal(read.vb, boardFillBox({ w: read.w, h: read.h }), `${where} the viewBox is boardFillBox`)
+    } finally {
+      assert.deepEqual(errors, [], `${where} page errors`)
+      errorsOut.push(...consoleErrors.filter((text) => !/Failed to load resource/.test(text)))
+      await ctx.close()
+    }
+  }
+
+  const wide = await nwOpen(browser, origin, [768, 1024], 'a2')
+  try {
+    assert.equal(await wide.page.locator('.nw-cam').getAttribute('data-nw-cam'), 'off', 'nwPan off: 768 keeps the camera off')
+    assert.equal(await wide.page.locator('.nw-cam-recenter').count(), 0, '768 has no Recenter')
+  } finally {
+    assert.deepEqual(wide.errors, [], '768 page errors')
+    errorsOut.push(...wide.consoleErrors.filter((text) => !/Failed to load resource/.test(text)))
+    await wide.ctx.close()
+  }
+
+  // Hard: Settings -> Hard -> Town -> Hold the night. The Developer jump forces Easy.
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 })
+  await ctx.addInitScript(
+    ([storageKey, raw]) => {
+      localStorage.clear()
+      localStorage.setItem(storageKey, raw)
+    },
+    [STORAGE_KEY, JSON.stringify(hopSave({}))],
+  )
+  const page = await ctx.newPage()
+  const errors = []
+  const consoleErrors = []
+  page.on('pageerror', (error) => errors.push(String(error)))
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') consoleErrors.push(msg.text())
+  })
+  try {
+    await page.goto(`${origin}?playtest=1`)
+    await page.getByRole('button', { name: 'Settings' }).click()
+    await page.getByRole('button', { name: 'Hard', exact: true }).click()
+    await page.getByRole('button', { name: 'Town' }).first().click()
+    await page.getByRole('button', { name: 'Hold the night' }).first().click()
+    await page.locator('.defend-board').waitFor()
+    assert.equal(await page.locator('.defend-page.is-easy-watch').count(), 0, 'nwPan hard: this is the Hard night')
+    assert.equal(await page.locator('[data-nw-cam="on"]').count(), 0, 'nwPan hard: Hard has no camera')
+    assert.equal(await page.locator('.defend-page').getAttribute('data-night-map'), 'a2', 'Hard loads A2')
+    // The Begin button pulses, so tap its middle by hand and again if the first press lands on a still-moving frame.
+    for (let attempt = 0; attempt < 6 && (await page.locator('.defend-go').count()); attempt += 1) {
+      const box = await page.getByRole('button', { name: 'The road is coming' }).boundingBox()
+      if (box) await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+      await page.waitForTimeout(700)
+    }
+    assert.equal(await page.locator('.defend-go').count(), 0, 'Hard: the round starts')
+    await page.waitForTimeout(500)
+    assert.equal(await page.locator('[data-nw-cam="on"]').count(), 0, 'Hard still has no camera once a round starts')
+    assert.deepEqual(errors, [], 'Hard page errors')
+    assert.deepEqual(consoleErrors.filter((text) => !/Failed to load resource/.test(text)), [], 'Hard console errors')
+  } finally {
+    await ctx.close()
+  }
+}
+
+export async function proveNwPan(browser, origin) {
+  const errors = []
+  const lines = []
+  for (const size of NW_SIZES) {
+    for (const slug of NW_SLUGS) {
+      await proveNwPlant(browser, origin, size, slug, errors)
+      await proveNwWaveReach(browser, origin, size, slug, errors)
+      lines.push(`nw-pan ${slug} ${size[0]}x${size[1]} ok`)
+    }
+    for (const slug of ['a2', 'far-hills']) {
+      await proveNwPlantGestures(browser, origin, size, slug, errors)
+      await proveNwWaveGestures(browser, origin, size, slug, errors)
+      lines.push(`nw-pan gestures ${slug} ${size[0]}x${size[1]} ok`)
+    }
+  }
+  await proveNwOff(browser, origin, errors)
+  lines.push('nw-pan off paths and Hard ok')
+  assert.deepEqual(errors, [], `nwPan console errors: ${errors.join('\n')}`)
+  lines.push(`nw-pan clamp-edge cases judged by centre: ${nwEdgeCases.length}${nwEdgeCases.length ? `\n  ${nwEdgeCases.join('\n  ')}` : ''}`)
+  return lines
+}
+
+
 export async function checkGoldenLive() {
-  if (process.env.GOLDEN_HOME_ONLY !== '1' || !existsSync('dist/sw.js')) await build({ logLevel: 'warn' })
+  if ((process.env.GOLDEN_HOME_ONLY !== '1' && process.env.GOLDEN_NW_ONLY !== '1') || !existsSync('dist/sw.js')) await build({ logLevel: 'warn' })
   assert.ok(existsSync('dist/sw.js'), 'dist/sw.js exists')
   assert.equal(existsSync('dist/qa-seed.html'), false, 'dist/qa-seed.html is not shipped')
   for (const file of ['sw.js', ...readdirSync('dist').filter((name) => /^workbox-.*\.js$/.test(name))]) {
@@ -2581,6 +3448,10 @@ export async function checkGoldenLive() {
   try {
     if (process.env.GOLDEN_HOME_ONLY === '1') {
       console.log((await proveHomePan(browser, origin)).join('\n'))
+      return
+    }
+    if (process.env.GOLDEN_NW_ONLY === '1') {
+      console.log((await proveNwPan(browser, origin)).join('\n'))
       return
     }
     for (const [width, height] of SIZES) {
@@ -3053,6 +3924,7 @@ export async function checkGoldenLive() {
     await proveGemToast(browser, origin)
     traces.push('hop-b not-quite and gem toast')
     traces.push((await proveHomePan(browser, origin)).join('\n'))
+    traces.push((await proveNwPan(browser, origin)).join('\n'))
   } finally {
     await browser.close()
     await server.close()

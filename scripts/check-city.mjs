@@ -23,6 +23,7 @@ import {
   SPINE_GROW,
 } from '../src/lib/city.ts'
 import { APP_VERSION } from '../src/config/app.ts'
+import { camClamp, camFrameInsets, camToPlate, camWorld, focusPan, nwCameraOn, NW_CAMERA_FOCUS, NW_CAMERA_INSETS, NW_CAMERA_ZOOM, NW_TAP_SLOP } from '../src/components/nwCamera.ts'
 import { clampPan, EASY_PAN_MAX_W, easyPanFrame, panToward } from '../src/lib/cityModel.ts'
 import { easyLoopLine as easyLoopFromLib, easyTrailView as easyTrailViewFromLib } from '../src/lib/easy.ts'
 import {
@@ -1863,8 +1864,71 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.530')
-assert.equal(CHANGELOG[0].version, '1.4.530', '1.4.530 is the newest row')
+assert.equal(APP_VERSION, '1.4.531')
+assert.equal(CHANGELOG[0].version, '1.4.531', '1.4.531 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.531'), '1.4.531 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.531').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.531 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.531').items.join('\n'), /Refs #818/, '1.4.531 changelog refs #818')
+assert.match(latestChange('1.4.531').items.join('\n'), /Hard stays the same\./)
+
+{
+  const camSrc = readFileSync(new URL('../src/components/nwCamera.ts', import.meta.url), 'utf8')
+  assert.match(camSrc, /export const NW_TAP_SLOP = 8\b/, '#818 the tap slop is 8')
+  assert.match(camSrc, /translate3d\(/, '#818 the pan is a translate3d')
+  assert.equal(NW_TAP_SLOP, 8)
+  assert.deepEqual(
+    NW_CAMERA_ZOOM,
+    { a2: 1.4, 'far-hills': 1.6, map03: 1.5, map04: 1.5, map05: 1.4, map06: 1.45 },
+    '#818 the zoom table',
+  )
+  assert.deepEqual(NW_CAMERA_FOCUS.a2, { x: 560, y: 900 })
+  assert.deepEqual(NW_CAMERA_FOCUS['far-hills'], { x: 300, y: 900 })
+  for (const id of ['map03', 'map04', 'map05', 'map06']) assert.deepEqual(NW_CAMERA_FOCUS[id], { x: 399, y: 880 })
+  assert.deepEqual(NW_CAMERA_INSETS, { top: 97, bottom: 116, right: 65, rightBand: [98, 314] })
+
+  const css818 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const camRules = [...css818.matchAll(/([^{}]*\.nw-cam\[data-nw-cam='on'\][^{}]*)\{([^}]*)\}/g)]
+  assert.ok(camRules.length >= 3, '#818 the camera rules are in defend.css')
+  assert.ok(
+    camRules.some(([, sel, body]) => !/\.nw-pan|\.nw-zoom|\.defend-board/.test(sel) && /touch-action:\s*none/.test(body)),
+    '#818 .nw-cam[data-nw-cam=on] has touch-action:none',
+  )
+  for (const [, sel, body] of css818.matchAll(/([^{}]*\.nw-(?:pan|zoom)\b[^{}]*)\{([^}]*)\}/g)) {
+    assert.doesNotMatch(body, /filter\s*:/, `#818 no filter on ${sel.trim()}`)
+  }
+  assert.doesNotMatch(camSrc, /filter/, '#818 the camera module draws no filter')
+
+  const world = { w: 565.6, h: 803.6 }
+  assert.deepEqual(camClamp(50, 50, 375, 574, world), [0, 0])
+  assert.deepEqual(camClamp(-2000, -2000, 375, 574, world), [375 - world.w, 574 - world.h])
+  const w818 = camWorld(390, 664, 1.4)
+  assert.ok(Math.abs(w818.w - 798 * w818.s0 * 1.4) < 1e-9)
+  const insets = camFrameInsets(97)
+  assert.equal(insets.top, 0)
+  assert.equal(insets.bottom, 116)
+  assert.deepEqual(insets.rightBand, [1, 217])
+  const s0 = camWorld(390, 664, 1.4).s0
+  const [tx, ty] = focusPan({ x: 560, y: 900 }, 390, 664, s0, 1.4, insets)
+  const big = camWorld(390, 664, 1.4)
+  assert.ok(tx >= 390 - big.w && tx <= 0 && ty >= 664 - big.h && ty <= 0, '#818 the focus pan is inside the clamp')
+  const back = camToPlate(10 + tx + 560 * s0 * 1.4, 97 + ty + 900 * s0 * 1.4, { left: 10, top: 97 }, tx, ty, s0, 1.4)
+  assert.ok(Math.abs(back.x - 560) < 1e-6 && Math.abs(back.y - 900) < 1e-6, '#818 camToPlate inverts the pan')
+  assert.equal(nwCameraOn(true, true, ''), true)
+  assert.equal(nwCameraOn(true, true, '?nwCam=0'), false, '#818 ?nwCam=0 turns the camera off')
+  assert.equal(nwCameraOn(false, true, ''), false, '#818 Hard has no camera')
+  assert.equal(nwCameraOn(true, false, ''), false, '#818 wide screens have no camera')
+
+  const screen818 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(screen818, /className="nw-cam"/)
+  assert.match(screen818, /aria-label="Recenter map"/)
+  assert.match(screen818, /\.defend-go, \.defend-ability, \.defend-new-lamp, \.nw-cam-recenter/, '#818 the plant listener skips Recenter')
+  assert.match(screen818, /if \(camPanning\.current\) \{\s*setGhost\(null\)\s*return/, '#818 a pan plants nothing')
+  assert.match(screen818, /NW_TAP_SLOP/, '#818 DefendScreen uses the tap slop')
+}
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.530'), '1.4.530 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.530').items.join('\n'),
@@ -2491,7 +2555,7 @@ assert.equal(applyCrossWait(700, 0.9), 630, '1.4.490 a lamp beside the planted c
 assert.equal(crossPaceFor({}, undefined, { x: 0, y: 0 }), 1, '1.4.490 no cross leaves the wait alone')
 assert.match(
   readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8'),
-  /closest\('\.defend-go, \.defend-ability, \.defend-new-lamp'\)/,
+  /closest\('\.defend-go, \.defend-ability, \.defend-new-lamp(, \.nw-cam-recenter)?'\)/,
   '1.4.490 a plant-phase lamp buy is not a ground tap',
 )
 {
@@ -15494,7 +15558,7 @@ console.log('check-city: ok')
   assert.doesNotMatch(defendSkySrc, /slice/)
   assert.match(
     defendScreenOnlySrc,
-    /viewBox=\{plateFill \? boardFillBox\(boardBox\) : boardViewBox\(boardBox\)\}/,
+    /viewBox=\{camOn \? '0 0 798 1134' : plateFill \? boardFillBox\(boardBox\) : boardViewBox\(boardBox\)\}/,
     '1.4.312 contain camera stays; 1.4.379 Easy phone fills the stage',
   )
   assert.match(surface312, /Math\.min\(box\.w \/ map\.width, box\.h \/ map\.height\)/, '1.4.312 contain scale')
