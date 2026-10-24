@@ -4645,6 +4645,21 @@ button.defend-new-lamp[aria-pressed='true'] {
   filter: drop-shadow(0 0 8px #ffcc33);
 }
 
+/* 1.4.533: before the first lamp the one gold cue is the first-seat ring. The Candle dock button waits in the Recenter look.
+   Hard never has .is-easy-watch, and the gold look returns once a lamp is planted. */
+.defend-page.is-easy-watch.is-need-lamp button.defend-candle-lamp,
+.defend-page.is-easy-watch.is-need-lamp .nw-docks:has(.defend-go) button.defend-candle-lamp {
+  border: 2px solid #fffce8;
+  background: #2a0f5c;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  color: #fffce8;
+}
+
+.defend-page.is-easy-watch.is-need-lamp .nw-docks:has(.defend-go) button.defend-candle-lamp::before,
+.defend-page.is-easy-watch.is-need-lamp .nw-docks:has(.defend-go) button.defend-candle-lamp::after {
+  color: #fffce8;
+}
+
 .defend-page.is-easy-watch .defend-plant-ground circle.is-dead {
   fill: rgba(72, 76, 86, 0.5);
   stroke: rgba(154, 158, 168, 0.78);

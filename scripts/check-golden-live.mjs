@@ -3429,6 +3429,48 @@ async function nwGoldCues(page) {
   return { total: rings.length, visible: visible.length, rings }
 }
 
+/**
+ * Every gold cue showing in the viewport: gradients, backgrounds, borders, shadows and outlines on HTML (and its ::before/::after),
+ * strokes and fills on SVG. Same gold test as isGoldPaint. The map road is board art, not a cue, so it is left out.
+ */
+async function nwAllGold(page) {
+  return page.evaluate(() => {
+    const goldish = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+      let m
+      while ((m = re.exec(value || ''))) {
+        const r = +m[1], g = +m[2], b = +m[3], a = m[4] === undefined ? 1 : +m[4]
+        if (a > 0.05 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const found = []
+    for (const el of document.querySelectorAll('.defend-page *')) {
+      if (el.closest('path.defend-road, [hidden]')) continue
+      for (const pseudo of [null, '::before', '::after']) {
+        const s = getComputedStyle(el, pseudo)
+        if (pseudo && s.content === 'none') continue
+        if (s.display === 'none' || s.visibility === 'hidden' || Number(s.opacity) === 0) continue
+        const r = el.getBoundingClientRect()
+        if (r.width <= 0 || r.height <= 0 || r.right <= 0 || r.bottom <= 0 || r.left >= innerWidth || r.top >= innerHeight) continue
+        const why = []
+        if (el instanceof SVGElement) {
+          if (s.stroke !== 'none' && parseFloat(s.strokeWidth) > 0 && goldish(s.stroke)) why.push('stroke')
+          if (s.fill !== 'none' && goldish(s.fill)) why.push('fill')
+        } else {
+          if (goldish(s.backgroundImage)) why.push('gradient')
+          if (goldish(s.backgroundColor)) why.push('background')
+          if (['Top', 'Right', 'Bottom', 'Left'].some((side) => parseFloat(s[`border${side}Width`]) > 0 && s[`border${side}Style`] !== 'none' && goldish(s[`border${side}Color`]))) why.push('border')
+          if (goldish(s.boxShadow)) why.push('shadow')
+          if (parseFloat(s.outlineWidth) > 0 && s.outlineStyle !== 'none' && goldish(s.outlineColor)) why.push('outline')
+        }
+        if (why.length) found.push(`${el.tagName.toLowerCase()}.${String(el.getAttribute('class') ?? '').split(' ').filter(Boolean).slice(0, 3).join('.')}${pseudo ?? ''} (${why.join('+')})`)
+      }
+    }
+    return found
+  })
+}
+
 /** Pre-plant, a real default view: exactly one gold first-seat ring, in view, and Recenter is not gold. */
 async function proveNwGold(browser, origin, size, slug, errorsOut) {
   const where = `${slug} ${size[0]}x${size[1]} gold`
@@ -3439,6 +3481,9 @@ async function proveNwGold(browser, origin, size, slug, errorsOut) {
     const gold = await nwGoldCues(page)
     assert.equal(gold.total, 1, `nwPan gold: ${where} one first-seat ring (${gold.total})`)
     assert.equal(gold.visible, 1, `nwPan gold: ${where} the ring is in view and clear of the chrome ${JSON.stringify(gold.rings)}`)
+    const everyGold = await nwAllGold(page)
+    assert.equal(everyGold.length, 1, `nwPan all gold: ${where} exactly one gold cue before planting, saw ${everyGold.length}: ${everyGold.join(' | ')}`)
+    assert.match(everyGold[0], /circle\..*is-first-seat/, `${where} the one gold cue is the first-seat ring`)
     const paint = await page.evaluate(() => {
       const st = getComputedStyle(document.querySelector('.nw-cam-recenter'))
       return { bg: st.backgroundColor, border: st.borderTopColor }
@@ -3449,7 +3494,9 @@ async function proveNwGold(browser, origin, size, slug, errorsOut) {
     const to = await nwPanTo(page, nwClamp(v.tx - 120, v.W - v.world.w, 0), nwClamp(v.ty - 90, v.H - v.world.h, 0))
     const moved = await nwGoldCues(page)
     assert.equal(moved.total, 1, `${where} one ring after a pan (${to.tx.toFixed(0)},${to.ty.toFixed(0)})`)
-    return { total: gold.total, visible: gold.visible, panned: moved.visible }
+    const pannedGold = await nwAllGold(page)
+    assert.equal(pannedGold.length, 1, `nwPan all gold: ${where} exactly one gold cue after a pan, saw ${pannedGold.length}: ${pannedGold.join(' | ')}`)
+    return { total: gold.total, visible: gold.visible, panned: moved.visible, every: everyGold.length, everyPanned: pannedGold.length }
   } finally {
     assert.deepEqual(errors, [], `${where} page errors`)
     errorsOut.push(...consoleErrors.filter((text) => !/Failed to load resource/.test(text)))
@@ -3537,7 +3584,7 @@ export async function proveNwPan(browser, origin) {
       await proveNwWaveReach(browser, origin, size, slug, errors)
       lines.push(`nw-pan ${slug} ${size[0]}x${size[1]} ok`)
       const gold = await proveNwGold(browser, origin, size, slug, errors)
-      lines.push(`nw-gold ${slug} ${size[0]}x${size[1]} first-seat cues in view ${gold.visible} of ${gold.total}, after a pan ${gold.panned}`)
+      lines.push(`nw-gold ${slug} ${size[0]}x${size[1]} first-seat cues in view ${gold.visible} of ${gold.total}, after a pan ${gold.panned}; all gold cues pre-plant ${gold.every}, panned ${gold.everyPanned}`)
     }
     for (const slug of ['a2', 'map05']) {
       for (const touch of [false, true]) {
