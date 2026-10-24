@@ -46,7 +46,7 @@ async function launchBrowser() {
 }
 
 async function openNight(page, seed) {
-  await page.goto(`/?playtest=1&nwSeed=${seed}`)
+  await page.goto(`/?playtest=1&nwSeed=${seed}&nwCam=0`)
   const begin = page.getByRole('button', { name: 'Begin the watch' }).first()
   await begin.waitFor({ timeout: 20_000 })
   if ((await page.locator('.defend-page').count()) === 0) {
@@ -215,7 +215,7 @@ export async function checkSeedFire() {
     )
     const bossPage = await bossContext.newPage()
     bossPage.on('pageerror', (error) => errors.push(String(error)))
-    await bossPage.goto('/?playtest=1&nwSeed=2&nwRound=5')
+    await bossPage.goto('/?playtest=1&nwSeed=2&nwRound=5&nwCam=0')
     const bossBegin = bossPage.getByRole('button', { name: 'Begin the watch' }).first()
     await bossBegin.waitFor({ timeout: 20_000 })
     if ((await bossPage.locator('.defend-page').count()) === 0) await bossBegin.click()

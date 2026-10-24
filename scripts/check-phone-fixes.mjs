@@ -103,7 +103,7 @@ async function assertReadoutClear(page, label) {
 }
 
 async function openNight(page) {
-  await page.goto('/?playtest=1')
+  await page.goto('/?playtest=1&nwCam=0')
   await page.getByRole('button', { name: 'Settings' }).click()
   await page.locator('summary', { hasText: 'Developer' }).click()
   await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
@@ -254,7 +254,7 @@ async function openMap(browser, port, width, height, map, { motion = false, sear
     { key: STORAGE_KEY, save: SAVE },
   )
   const page = await context.newPage()
-  await page.goto(map === 'a2' ? `/${search}` : `/${search}&nwMap=${map}`)
+  await page.goto(map === 'a2' ? `/${search}&nwCam=0` : `/${search}&nwMap=${map}&nwCam=0`)
   await page.getByRole('button', { name: 'Settings' }).click()
   await page.locator('summary', { hasText: 'Developer' }).click()
   await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
