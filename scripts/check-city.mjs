@@ -1864,9 +1864,41 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.532')
-assert.equal(CHANGELOG[0].version, '1.4.532', '1.4.532 is the newest row')
+assert.equal(APP_VERSION, '1.4.533')
+assert.equal(CHANGELOG[0].version, '1.4.533', '1.4.533 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.533'), '1.4.533 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.533').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.533 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.533').items.join('\n'), /Refs #818, Refs #834/, '1.4.533 changelog refs #818 and #834')
+assert.match(latestChange('1.4.533').items.join('\n'), /Hard stays the same\./)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.532'), '1.4.532 changelog row')
+assert.match(latestChange('1.4.532').items.join('\n'), /Refs #818, Refs #834/, '1.4.532 changelog refs #818 and #834')
+
+{
+  // #834: before the first lamp the Candle dock button is not gold, so the first-seat ring is the one gold cue.
+  const css533 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
+  const rules533 = [...css533.matchAll(/([^{}]*button\.defend-candle-lamp[^{}]*)\{([^}]*)\}/g)].filter(([, sel]) =>
+    /\.defend-page\.is-easy-watch\.is-need-lamp\b/.test(sel),
+  )
+  assert.ok(rules533.length >= 2, '#834 the need-lamp Candle rules are in defend.css')
+  for (const [, sel] of rules533) {
+    for (const part of sel.split(',')) {
+      assert.match(part.trim(), /^\.defend-page\.is-easy-watch\.is-need-lamp\b/, `#834 scoped to Easy before the first lamp: ${part.trim()}`)
+    }
+  }
+  const body533 = rules533.map(([, , body]) => body).join('\n')
+  assert.match(body533, /background:\s*#2a0f5c/, '#834 the Candle button waits in the Recenter purple')
+  assert.match(body533, /border:\s*2px solid #fffce8/, '#834 with the Recenter cream border')
+  assert.doesNotMatch(body533, /#ffcc33|#e09412|#ff9f1a|#fff6b8|gradient/i, '#834 no gold in the need-lamp Candle rules')
+  const hex533 = new Set(css533.match(/#[0-9a-f]{3,8}\b/gi)?.map((c) => c.toLowerCase()))
+  for (const color of body533.match(/#[0-9a-f]{3,8}\b/gi) ?? []) assert.ok(hex533.has(color.toLowerCase()), '#834 reuses an existing color')
+  assert.match(css533, /button\.defend-new-lamp \{[^}]*#ffcc33/, '#834 the after-plant gold look stays')
+  const goldHtml = readFileSync(new URL('./check-golden-live.mjs', import.meta.url), 'utf8')
+  assert.match(goldHtml, /nwAllGold/, '#834 the live proof counts every gold cue')
+}
 assert.doesNotMatch(
   latestChange('1.4.532').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
