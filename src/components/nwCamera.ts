@@ -139,10 +139,24 @@ export function camSeatClear(seat: { x: number; y: number }, view: CamSeatView, 
   )
 }
 
+/** A ring counts as in view when at least this share of it sits in the clear window. */
+export const NW_RING_MIN_SHARE = 0.6
+
+/** Share of the ring (0 to 1) inside the clear window: off the header, Begin and the lamp rail. */
+export function camSeatShare(seat: { x: number; y: number }, view: CamSeatView, insets: CamInsets): number {
+  const box = seatBox(seat, view)
+  const inBand = box.bottom >= insets.rightBand[0] && box.top <= insets.rightBand[1]
+  const w = Math.min(box.right, view.W - (inBand ? insets.right : 0)) - Math.max(box.left, 0)
+  const h = Math.min(box.bottom, view.H - insets.bottom) - Math.max(box.top, insets.top)
+  if (w <= 0 || h <= 0) return 0
+  return (w * h) / ((box.right - box.left) * (box.bottom - box.top))
+}
+
 /**
  * The one seat that wears the gold first-seat ring before the first lamp.
  * It is the first open seat in list order that sits whole in the clear window, and the earlier pick stays while it still does.
- * With none clear, the first open seat any part of which shows, so a pan never leaves the board with no cue.
+ * With none whole, the open seat with the most ring showing, if that is at least NW_RING_MIN_SHARE of it.
+ * With none at all, null: the edge arrow is the gold cue then.
  */
 export function camFirstSeat<T extends { x: number; y: number; live?: boolean }>(
   seats: readonly T[],
@@ -154,12 +168,62 @@ export function camFirstSeat<T extends { x: number; y: number; live?: boolean }>
   if (held && camSeatClear(held, view, insets)) return held
   const clear = seats.find((seat) => seat.live && camSeatClear(seat, view, insets))
   if (clear) return clear
-  const shown = seats.find((seat) => {
-    if (!seat.live) return false
-    const box = seatBox(seat, view)
-    return box.right > 0 && box.left < view.W && box.bottom > 0 && box.top < view.H
-  })
-  return shown ?? seats.find((seat) => seat.live) ?? seats[0] ?? null
+  let best: T | null = null
+  let bestShare = NW_RING_MIN_SHARE
+  for (const seat of seats) {
+    if (!seat.live) continue
+    const share = camSeatShare(seat, view, insets)
+    if (share >= bestShare && (best === null || share > bestShare)) {
+      best = seat
+      bestShare = share
+    }
+  }
+  return best
+}
+
+/** Radius of the edge arrow, and how far its centre stays from the edges of the clear window. */
+export const NW_ARROW_R = 22
+const ARROW_PAD = 18
+/** The Sparks and Candle chips sit down the left edge, so the arrow keeps clear of them. */
+const ARROW_LEFT = 72
+
+/** Frame px centre of the edge arrow and the way it points (degrees, 0 is right), toward the nearest open seat. */
+export function camSeatArrow<T extends { x: number; y: number; live?: boolean }>(
+  seats: readonly T[],
+  view: CamSeatView,
+  insets: CamInsets,
+): { x: number; y: number; angle: number; seat: T } | null {
+  const k = view.s0 * view.z
+  const left = ARROW_LEFT
+  const right = view.W - insets.right - NW_ARROW_R - ARROW_PAD
+  const top = insets.top + NW_ARROW_R + ARROW_PAD
+  const bottom = view.H - insets.bottom - NW_ARROW_R - ARROW_PAD
+  if (right <= left || bottom <= top) return null
+  const cx = (left + right) / 2
+  const cy = (top + bottom) / 2
+  let near: T | null = null
+  let nearDist = Infinity
+  let dx = 0
+  let dy = 0
+  for (const seat of seats) {
+    if (!seat.live) continue
+    const sx = view.tx + seat.x * k - cx
+    const sy = view.ty + seat.y * k - cy
+    const dist = Math.hypot(sx, sy)
+    if (dist < nearDist) {
+      near = seat
+      nearDist = dist
+      dx = sx
+      dy = sy
+    }
+  }
+  if (!near) return null
+  const reach = Math.min(
+    dx > 0 ? (right - cx) / dx : dx < 0 ? (left - cx) / dx : Infinity,
+    dy > 0 ? (bottom - cy) / dy : dy < 0 ? (top - cy) / dy : Infinity,
+    1,
+  )
+  return { x: cx + dx * reach, y: cy + dy * reach, angle: (Math.atan2(dy, dx) * 180) / Math.PI, seat: near }
 }
 
 export function camTransform(tx: number, ty: number): string {

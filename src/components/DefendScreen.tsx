@@ -284,6 +284,8 @@ import { DefendNightBoard } from './DefendNightBoard'
 import {
   camClamp,
   camFirstSeat,
+  camSeatArrow,
+  NW_ARROW_R,
   camFrameInsets,
   camPoint,
   camToPlate,
@@ -648,6 +650,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const [firing, setFiring] = useState(false)
   const [firingId, setFiringId] = useState<string | null>(null)
   const comboRef = useRef(0)
+  const fxKeySeq = useRef(0)
   const fxRef = useRef({
     shots: [] as (Shot & { until: number })[],
     blasts: [] as (Blast & { until: number })[],
@@ -854,6 +857,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const suppressClickUntil = useRef(0)
   const camSeen = useRef<{ node: HTMLElement | null; key: string }>({ node: null, key: '' })
   const camPointerAt = useRef(-Infinity)
+  const beginPress = useRef<{ id: number; x: number; y: number } | null>(null)
+  const beginClickSeen = useRef(false)
+  const beginFiredAt = useRef(-Infinity)
   const camFirstRef = useRef<{ x: number; y: number } | null>(null)
   const [camDims, setCamDims] = useState<{ W: number; H: number; top: number } | null>(null)
 
@@ -918,7 +924,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   useEffect(() => () => window.cancelAnimationFrame(camRaf.current), [])
 
-  const CAM_CHROME = '.nw-hud,.nw-rail,.nw-docks,.nw-balloon-slot,.nw-map-overlay,.defend-tower-card,.nw-cam-recenter,.nw-pace'
+  const CAM_CHROME = '.nw-hud,.nw-rail,.nw-docks,.nw-balloon-slot,.nw-map-overlay,.defend-tower-card,.nw-cam-recenter,.nw-seat-arrow,.nw-pace'
 
   function camDown(event: ReactPointerEvent<HTMLDivElement>) {
     if (!camOn || !event.isPrimary) return
@@ -961,6 +967,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     const start = camStart.current
     if (!camOn || !start || event.pointerId !== start.id) return
     camStart.current = null
+    try {
+      if (camRef.current?.hasPointerCapture(event.pointerId)) camRef.current.releasePointerCapture(event.pointerId)
+    } catch {
+      /* The pointer is already gone. */
+    }
     if (!camPanning.current) return
     suppressClickUntil.current = performance.now() + 400
     event.stopPropagation()
@@ -991,6 +1002,54 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   function camScroll(event: { currentTarget: HTMLElement }) {
     event.currentTarget.scrollLeft = 0
     event.currentTarget.scrollTop = 0
+  }
+
+  /** One Begin press. The click and the pointerup fallback both come here, and one press starts the night once. */
+  function pressBegin(className: string) {
+    const stamp = performance.now()
+    if (stamp - beginFiredAt.current < 800) return
+    if (easy && awaitingLamp && phase === 'plant' && !arming) {
+      beginFiredAt.current = stamp
+      setPlantPulse(true)
+      window.clearTimeout(plantPulseTimer.current)
+      plantPulseTimer.current = window.setTimeout(() => setPlantPulse(false), 900)
+      return
+    }
+    if (!startsNextRound(roundStartKind(className))) return
+    if (awaitingLamp || phase !== 'plant') return
+    if (roundChangeBlocked()) return
+    if (easy) {
+      const missed = plantedLampsTooFar(plantsRef.current, progress, runTier, (id) => placeBonus(id))
+      if (missed.length) {
+        beginFiredAt.current = stamp
+        warnDeadLamps(missed)
+        return
+      }
+    }
+    beginFiredAt.current = stamp
+    setGhost(null)
+    startWave()
+  }
+
+  function beginDown(event: ReactPointerEvent<HTMLButtonElement>) {
+    if (!event.isPrimary) return
+    beginClickSeen.current = false
+    beginPress.current = { id: event.pointerId, x: event.clientX, y: event.clientY }
+  }
+
+  /** A press that began and ended on Begin within the tap slop is a tap. If the browser sends no click, the tap still counts. */
+  function beginUp(event: ReactPointerEvent<HTMLButtonElement>) {
+    const press = beginPress.current
+    beginPress.current = null
+    if (!press || press.id !== event.pointerId) return
+    if (Math.hypot(event.clientX - press.x, event.clientY - press.y) >= NW_TAP_SLOP) return
+    const button = event.currentTarget
+    const box = button.getBoundingClientRect()
+    if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) return
+    window.setTimeout(() => {
+      if (beginClickSeen.current || !button.isConnected) return
+      pressBegin(button.className)
+    }, 120)
   }
 
   function camFocus(event: ReactFocusEvent<HTMLDivElement>) {
@@ -1069,7 +1128,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     const onDown = (event: PointerEvent) => {
       const target = event.target as Element | null
       if (!target?.closest) return
-      if (target.closest('.defend-go, .defend-ability, .defend-new-lamp, .nw-cam-recenter')) return
+      if (target.closest('.defend-go, .defend-ability, .defend-new-lamp, .nw-cam-recenter, .nw-seat-arrow')) return
       if (!target.closest('.nw-docks')) return
       if (!plantOpenGroundRef.current(event.clientX, event.clientY)) return
       event.preventDefault()
@@ -2398,7 +2457,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         mini: true,
       })
     }
-    const key = performance.now()
+    fxKeySeq.current += 1
+    const key = fxKeySeq.current
     setPops((current) => [...current, { key, x: at.x, y: at.y }])
     window.setTimeout(() => {
       setPops((current) => current.filter((pop) => pop.key !== key))
@@ -2464,8 +2524,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     fx.combo = nextCombo
     fx.shakeUntil = performance.now() + 160
     fx.dirty = true
+    fxKeySeq.current += 1
     const blast: Blast = {
-      key: now,
+      key: fxKeySeq.current,
       x: drawn.x,
       y: drawn.y,
       line: easy
@@ -2516,8 +2577,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       blast.spark = sparks
       if (easy) {
         const juiceAt = boardPoint(aim.x, aim.y)
+        fxKeySeq.current += 1
         fx.juice = {
-          key: now,
+          key: fxKeySeq.current,
           combo: nextCombo,
           left: juiceAt.left,
           top: juiceAt.top,
@@ -3648,6 +3710,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     nightWatchLampCap(jumpSearch) === 0 &&
     nightWatchJumpAllowed(jumpSearch, readNightWatchDebug())
   const awaitingLamp = planted.length < 1 && !playtestBare
+  // One gold cue: the edge arrow shows only while no ring is in view.
+  const seatArrow =
+    camSeatView && !firstSeatPick && groundHints.length > 0 && easy && phase === 'plant' && awaitingLamp
+      ? camSeatArrow(groundHints, camSeatView, camFrameInsets(camDims?.top ?? 0))
+      : null
 
   const tip =
     phase === 'wave'
@@ -3694,6 +3761,25 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     <>
       {camOn ? (
         <button type="button" className="nw-cam-recenter" aria-label="Recenter map" onClick={recenter} />
+      ) : null}
+      {seatArrow && camDims ? (
+        <button
+          type="button"
+          className="nw-seat-arrow"
+          aria-label="Show the open seat"
+          data-seat-arrow="yes"
+          style={{
+            left: seatArrow.x - NW_ARROW_R,
+            top: camDims.top + seatArrow.y - NW_ARROW_R,
+            transform: `rotate(${seatArrow.angle}deg)`,
+          }}
+          onClick={() => {
+            const f = camFrame()
+            if (!f) return
+            const [tx, ty] = focusPan(seatArrow.seat, f.W, f.H, f.world.s0, camZ, f.insets)
+            camApply(tx, ty, true)
+          }}
+        />
       ) : null}
       {tapReadoutOn && (phase === 'wave' || phase === 'boost' || phase === 'lost') ? (
         <p
@@ -4002,25 +4088,14 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           <button
             type="button"
             className={`btn primary xl defend-go${awaitingLamp ? ' is-awaiting-plant' : ' is-after-plant'}`}
+            onPointerDown={beginDown}
+            onPointerUp={beginUp}
+            onPointerCancel={() => {
+              beginPress.current = null
+            }}
             onClick={(event) => {
-              if (easy && awaitingLamp && phase === 'plant' && !arming) {
-                setPlantPulse(true)
-                window.clearTimeout(plantPulseTimer.current)
-                plantPulseTimer.current = window.setTimeout(() => setPlantPulse(false), 900)
-                return
-              }
-              if (!startsNextRound(roundStartKind(event.currentTarget.className))) return
-              if (awaitingLamp || phase !== 'plant') return
-              if (roundChangeBlocked()) return
-              if (easy) {
-                const missed = plantedLampsTooFar(plantsRef.current, progress, runTier, (id) => placeBonus(id))
-                if (missed.length) {
-                  warnDeadLamps(missed)
-                  return
-                }
-              }
-              setGhost(null)
-              startWave()
+              beginClickSeen.current = true
+              pressBegin(event.currentTarget.className)
             }}
             disabled={(awaitingLamp || arming || phase !== 'plant') && !(easy && awaitingLamp && phase === 'plant' && !arming)}
             aria-disabled={awaitingLamp || arming || phase !== 'plant' ? true : undefined}

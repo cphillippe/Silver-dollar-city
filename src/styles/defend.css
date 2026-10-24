@@ -4863,6 +4863,12 @@ button.defend-new-lamp[aria-pressed='true'] {
 .defend-page.is-easy-watch .nw-cam-recenter::before{content:'';position:absolute;inset:14px;border:3px solid #fffce8;border-radius:50%}
 .defend-page.is-easy-watch .nw-cam-recenter::after{content:'';position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;background:#fffce8;border-radius:50%}
 
+/* 1.4.534: when no first-seat ring is in view the edge arrow is the one gold cue. It leaves with the ring's return. */
+.defend-page.is-easy-watch.is-need-lamp .nw-seat-arrow{position:fixed;width:44px;height:44px;padding:0;border:0;
+  background:#ffcc33;clip-path:polygon(100% 50%,15% 2%,40% 50%,15% 98%);pointer-events:auto;z-index:6}
+/* The City of Heaven wall at the top of the plate wears the Recenter cream, not gold, until the first lamp is down. */
+.defend-page.is-easy-watch.is-need-lamp .defend-heaven-wall{stroke:#fffce8}
+
 /* 1.4.392: gold ring when the combat range meets the road, amber when it does not.
    The amber spot can still be planted. The pin sits on the plant point under the lamp. */
 .defend-ghost.is-short .defend-ghost-ring {

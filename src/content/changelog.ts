@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.534',
+    title: 'Night Watch: the gold cue follows you to the map corners',
+    when: '2026-10-24',
+    items: [
+      'Pan to a corner before your first lamp and the gold ring stays on a seat you can see. If every open seat is off screen, one small gold arrow points to the nearest.',
+      'Begin the watch always starts the night after a pan, once.',
+      'Hard stays the same.',
+      'Refs #834.',
+    ],
+  },
+  {
     version: '1.4.533',
     title: 'Night Watch: one gold spot before your first lamp',
     when: '2026-10-24',

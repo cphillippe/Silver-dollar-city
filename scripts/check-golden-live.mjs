@@ -3387,6 +3387,9 @@ async function proveNwOff(browser, origin, errorsOut) {
     assert.equal(await page.locator('.defend-page.is-easy-watch').count(), 0, 'nwPan hard: this is the Hard night')
     assert.equal(await page.locator('[data-nw-cam="on"]').count(), 0, 'nwPan hard: Hard has no camera')
     assert.equal(await page.locator('.defend-page').getAttribute('data-night-map'), 'a2', 'Hard loads A2')
+    assert.equal(await page.locator('.nw-seat-arrow, .nw-cam-recenter').count(), 0, 'Hard has no camera chrome and no edge arrow')
+    const savedMode = await page.evaluate((key) => (({ progress, easyMode }) => progress?.easyMode ?? easyMode)(JSON.parse(localStorage.getItem(key) ?? '{}')), STORAGE_KEY)
+    assert.equal(savedMode, false, 'the saved mode is Hard (Settings -> Hard), not the Developer jump Easy')
     // The Begin button pulses, so tap its middle by hand and again if the first press lands on a still-moving frame.
     for (let attempt = 0; attempt < 6 && (await page.locator('.defend-go').count()); attempt += 1) {
       const box = await page.getByRole('button', { name: 'The road is coming' }).boundingBox()
@@ -3471,6 +3474,84 @@ async function nwAllGold(page) {
   })
 }
 
+const NW_CORNERS = ['TL', 'TR', 'BL', 'BR']
+
+/** Pan target for a corner of the world: the clamp's own limits. */
+function nwCornerPan(v, corner) {
+  const far = camClamp(-1e6, -1e6, v.W, v.H, v.world)
+  const near = camClamp(1e6, 1e6, v.W, v.H, v.world)
+  return [corner.endsWith('L') ? near[0] : far[0], corner.startsWith('T') ? near[1] : far[1]]
+}
+
+/** Share of a client rect that sits in the clear window (frame minus header, Begin, rail and tray), as the page counts it. */
+function nwShareClear(v, rect) {
+  const ins = camFrameInsets(v.frame.top)
+  const left = rect.left - v.frame.left
+  const top = rect.top - v.frame.top
+  const right = rect.right - v.frame.left
+  const bottom = rect.bottom - v.frame.top
+  const inBand = bottom >= ins.rightBand[0] && top <= ins.rightBand[1]
+  const w = Math.min(right, v.W - (inBand ? ins.right : 0)) - Math.max(left, 0)
+  const h = Math.min(bottom, v.H - ins.bottom) - Math.max(top, ins.top)
+  return w <= 0 || h <= 0 ? 0 : (w * h) / ((right - left) * (bottom - top))
+}
+
+/** Pan to each corner. One gold cue each time: a ring at 60% or more, or the arrow when no ring qualifies. */
+async function proveNwCorners(page, where) {
+  const rows = []
+  for (const corner of NW_CORNERS) {
+    const v0 = await nwView(page)
+    const [tx, ty] = nwCornerPan(v0, corner)
+    await nwPanTo(page, tx, ty)
+    await page.waitForTimeout(120)
+    const v = await nwView(page)
+    const gold = await nwAllGold(page)
+    assert.equal(gold.length, 1, `nwPan corner gold: ${where} ${corner} exactly one gold cue, saw ${gold.length}: ${gold.join(' | ')}`)
+    const rings = await page.evaluate(() =>
+      [...document.querySelectorAll('.defend-plant-ground circle.is-first-seat')].map((n) => {
+        const r = n.getBoundingClientRect()
+        return { left: r.left, top: r.top, right: r.right, bottom: r.bottom }
+      }),
+    )
+    const arrow = await nwRect(page, '.nw-seat-arrow')
+    if (rings.length) {
+      assert.equal(rings.length, 1, `${where} ${corner} one ring`)
+      assert.equal(arrow, null, `nwPan corner gold: ${where} ${corner} the arrow hides while a ring is in view`)
+      assert.match(gold[0], /circle\..*is-first-seat/, `${where} ${corner} the gold is the ring`)
+      const share = nwShareClear(v, rings[0])
+      assert.ok(share >= 0.6 - 1e-6, `nwPan corner gold: ${where} ${corner} the ring shows ${(share * 100).toFixed(0)}% (needs 60%)`)
+      rows.push({ corner, kind: 'ring', share })
+    } else {
+      assert.ok(arrow, `nwPan corner gold: ${where} ${corner} no ring in view, so the arrow shows`)
+      assert.match(gold[0], /button\.nw-seat-arrow/, `${where} ${corner} the gold is the arrow`)
+      const boxes = [...Object.values(await nwChrome(page)), await nwRect(page, '.nw-cam-recenter'), await nwRect(page, '.nw-pace')].filter(Boolean)
+      for (const box of boxes) assert.equal(nwHits(arrow, box, 0), false, `${where} ${corner} the arrow clears the chrome`)
+      for (const button of await page.locator('.nw-docks button:not(.nw-seat-arrow)').all()) {
+        const r = await button.boundingBox()
+        if (r) assert.equal(nwHits(arrow, { left: r.x, top: r.y, right: r.x + r.width, bottom: r.y + r.height }, 0), false, `${where} ${corner} the arrow clears the docks`)
+      }
+      assert.ok(arrow.left >= v.frame.left && arrow.right <= v.frame.right && arrow.top >= v.frame.top && arrow.bottom <= v.frame.bottom, `${where} ${corner} the arrow is on screen`)
+      rows.push({ corner, kind: 'arrow', share: 0 })
+    }
+  }
+  // Tapping the arrow brings the seat back: one ring again, the arrow gone.
+  const away = rows.find((row) => row.kind === 'arrow')
+  if (away) {
+    const v0 = await nwView(page)
+    const [tx, ty] = nwCornerPan(v0, away.corner)
+    await nwPanTo(page, tx, ty)
+    await page.waitForTimeout(120)
+    const box = await nwRect(page, '.nw-seat-arrow')
+    assert.ok(box, `${where} the arrow is up for its recenter tap`)
+    await page.mouse.click(box.cx, box.cy)
+    await page.waitForTimeout(200)
+    assert.equal(await nwCount(page, '.nw-seat-arrow'), 0, `${where} tapping the arrow brings a seat into view`)
+    const back = await nwAllGold(page)
+    assert.equal(back.length, 1, `${where} one gold cue after the arrow tap, saw ${back.join(' | ')}`)
+  }
+  return rows
+}
+
 /** Pre-plant, a real default view: exactly one gold first-seat ring, in view, and Recenter is not gold. */
 async function proveNwGold(browser, origin, size, slug, errorsOut) {
   const where = `${slug} ${size[0]}x${size[1]} gold`
@@ -3493,13 +3574,92 @@ async function proveNwGold(browser, origin, size, slug, errorsOut) {
     const v = await nwView(page)
     const to = await nwPanTo(page, nwClamp(v.tx - 120, v.W - v.world.w, 0), nwClamp(v.ty - 90, v.H - v.world.h, 0))
     const moved = await nwGoldCues(page)
-    assert.equal(moved.total, 1, `${where} one ring after a pan (${to.tx.toFixed(0)},${to.ty.toFixed(0)})`)
+    assert.ok(moved.total <= 1, `${where} at most one ring after a pan (${to.tx.toFixed(0)},${to.ty.toFixed(0)})`)
     const pannedGold = await nwAllGold(page)
     assert.equal(pannedGold.length, 1, `nwPan all gold: ${where} exactly one gold cue after a pan, saw ${pannedGold.length}: ${pannedGold.join(' | ')}`)
-    return { total: gold.total, visible: gold.visible, panned: moved.visible, every: everyGold.length, everyPanned: pannedGold.length }
+    // Corner pans: exactly one gold cue each, a ring that shows at least 60% of itself or else the edge arrow, never both.
+    const corners = await proveNwCorners(page, where)
+    return { total: gold.total, visible: gold.visible, panned: moved.visible, every: everyGold.length, everyPanned: pannedGold.length, corners }
   } finally {
     assert.deepEqual(errors, [], `${where} page errors`)
     errorsOut.push(...consoleErrors.filter((text) => !/Failed to load resource/.test(text)))
+    await ctx.close()
+  }
+}
+
+/**
+ * Begin after a corner pan starts the night exactly once. `swallow` drops the click the way the lost-click device did
+ * (pointer and touch events fire, no click follows), so the pointer-up fallback has to carry it.
+ */
+async function proveNwBegin(browser, origin, size, slug, corner, { swallow = false, touch = false } = {}) {
+  const where = `${slug} ${size[0]}x${size[1]} ${corner} ${touch ? 'touch' : 'mouse'}${swallow ? ' no-click' : ''}`
+  const { ctx, page, errors, consoleErrors } = await nwOpen(browser, origin, size, slug, { touch })
+  try {
+    await page.evaluate(() => {
+      window.__nwStarts = 0
+      const page = document.querySelector('.defend-page')
+      let tapMode = page.classList.contains('is-easy-tap')
+      new MutationObserver(() => {
+        const now = page.classList.contains('is-easy-tap')
+        if (now && !tapMode) window.__nwStarts += 1
+        tapMode = now
+      }).observe(page, { attributes: true, attributeFilter: ['class'] })
+      window.__nwSwallow = 0
+      window.addEventListener(
+        'click',
+        (event) => {
+          if (window.__nwSwallowOn && event.target instanceof Element && event.target.closest('.defend-go')) {
+            window.__nwSwallow += 1
+            window.__nwSwallowOn = false
+            event.stopImmediatePropagation()
+            event.preventDefault()
+          }
+        },
+        true,
+      )
+    })
+    const seatCount = await page.locator('.defend-plant-ground circle.is-live').count()
+    let started = false
+    for (let seat = -1; seat < seatCount && !started; seat += 1) {
+      if (seat >= 0) {
+        const v = await nwView(page)
+        const at = await page.evaluate((i) => {
+          const c = [...document.querySelectorAll('.defend-plant-ground circle.is-live')].filter((n) => n.getBoundingClientRect().width > 1)[i]
+          return c ? { x: Number(c.getAttribute('cx')), y: Number(c.getAttribute('cy')) } : null
+        }, seat)
+        if (!at) break
+        const [px, py] = focusPan(at, v.W, v.H, nwK(v).s0, v.z, camFrameInsets(v.frame.top))
+        await nwPanTo(page, px, py)
+        const now = await nwView(page)
+        const k = nwK(now).s0 * now.z
+        await page.mouse.click(now.frame.left + now.tx + at.x * k, now.frame.top + now.ty + at.y * k)
+        await page.waitForTimeout(250)
+      }
+      const v0 = await nwView(page)
+      const [tx, ty] = nwCornerPan(v0, corner)
+      await nwPanTo(page, tx, ty)
+      await page.waitForTimeout(150)
+      const go = await nwRect(page, '.defend-go')
+      assert.ok(go, `${where} Begin is up after the pan`)
+      await page.evaluate((on) => {
+        window.__nwSwallowOn = on
+      }, swallow)
+      if (touch) await page.touchscreen.tap(go.cx, go.cy)
+      else await page.mouse.click(go.cx, go.cy)
+      started = await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 1800 }).then(() => true, () => false)
+      await page.evaluate(() => {
+        window.__nwSwallowOn = false
+      })
+    }
+    assert.ok(started, `nwPan begin: ${where} the night starts after a corner pan`)
+    await page.waitForTimeout(900)
+    const read = await page.evaluate(() => ({ starts: window.__nwStarts, swallowed: window.__nwSwallow, go: document.querySelectorAll('.defend-go').length }))
+    assert.equal(read.starts, 1, `nwPan begin: ${where} the night starts exactly once (saw ${read.starts})`)
+    assert.equal(read.go, 0, `${where} Begin is gone once the night runs`)
+    if (swallow) assert.ok(read.swallowed >= 1, `${where} the click really was dropped, so the fallback did the start`)
+    return `${where} started once${swallow ? ' by the pointer-up fallback' : ''}`
+  } finally {
+    assert.deepEqual(errors, [], `${where} page errors`)
     await ctx.close()
   }
 }
@@ -3585,6 +3745,9 @@ export async function proveNwPan(browser, origin) {
       lines.push(`nw-pan ${slug} ${size[0]}x${size[1]} ok`)
       const gold = await proveNwGold(browser, origin, size, slug, errors)
       lines.push(`nw-gold ${slug} ${size[0]}x${size[1]} first-seat cues in view ${gold.visible} of ${gold.total}, after a pan ${gold.panned}; all gold cues pre-plant ${gold.every}, panned ${gold.everyPanned}`)
+      lines.push(
+        `nw-gold-corners ${slug} ${size[0]}x${size[1]} ${gold.corners.map((row) => `${row.corner} ${row.kind}${row.kind === 'ring' ? ` ${(row.share * 100).toFixed(0)}%` : ''} (1 gold)`).join(', ')}`,
+      )
     }
     for (const slug of ['a2', 'map05']) {
       for (const touch of [false, true]) {
@@ -3600,6 +3763,18 @@ export async function proveNwPan(browser, origin) {
       await proveNwWaveGestures(browser, origin, size, slug, errors)
       lines.push(`nw-pan gestures ${slug} ${size[0]}x${size[1]} ok`)
     }
+  }
+  for (const size of NW_SIZES) {
+    // Every map, every corner, with the click dropped (the lost-click signature): the night starts exactly once.
+    for (const slug of NW_SLUGS) {
+      for (const corner of NW_CORNERS) lines.push(`nw-begin ${await proveNwBegin(browser, origin, size, slug, corner, { swallow: true })}`)
+    }
+    // And a normal click from a corner, so click and fallback never double up.
+    for (const [slug, corner] of [['far-hills', 'TL'], ['map03', 'TL'], ['a2', 'BR']]) {
+      lines.push(`nw-begin ${await proveNwBegin(browser, origin, size, slug, corner, { swallow: false })}`)
+    }
+    lines.push(`nw-begin ${await proveNwBegin(browser, origin, size, 'far-hills', 'TL', { touch: true })}`)
+    lines.push(`nw-begin ${await proveNwBegin(browser, origin, size, 'map03', 'TL', { touch: true, swallow: true })}`)
   }
   await proveNwOff(browser, origin, errors)
   lines.push('nw-pan off paths and Hard ok')
