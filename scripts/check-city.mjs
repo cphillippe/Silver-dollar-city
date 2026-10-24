@@ -23,7 +23,7 @@ import {
   SPINE_GROW,
 } from '../src/lib/city.ts'
 import { APP_VERSION } from '../src/config/app.ts'
-import { camClamp, camFirstSeat, camFrameInsets, camSeatClear, camToPlate, camWorld, focusPan, nwCameraOn, NW_CAMERA_FOCUS, NW_CAMERA_INSETS, NW_CAMERA_ZOOM, NW_TAP_SLOP } from '../src/components/nwCamera.ts'
+import { camClamp, camFirstSeat, camFrameInsets, camSeatArrow, camSeatClear, camSeatShare, camToPlate, camWorld, focusPan, nwCameraOn, NW_CAMERA_FOCUS, NW_CAMERA_INSETS, NW_CAMERA_ZOOM, NW_RING_MIN_SHARE, NW_TAP_SLOP } from '../src/components/nwCamera.ts'
 import { clampPan, EASY_PAN_MAX_W, easyPanFrame, panToward } from '../src/lib/cityModel.ts'
 import { easyLoopLine as easyLoopFromLib, easyTrailView as easyTrailViewFromLib } from '../src/lib/easy.ts'
 import {
@@ -1864,16 +1864,18 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.533')
-assert.equal(CHANGELOG[0].version, '1.4.533', '1.4.533 is the newest row')
-assert.ok(CHANGELOG.some((note) => note.version === '1.4.533'), '1.4.533 changelog row')
+assert.equal(APP_VERSION, '1.4.534')
+assert.equal(CHANGELOG[0].version, '1.4.534', '1.4.534 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.534'), '1.4.534 changelog row')
 assert.doesNotMatch(
-  latestChange('1.4.533').items.join('\n'),
+  latestChange('1.4.534').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
-  '1.4.533 changelog avoids GitHub close keywords',
+  '1.4.534 changelog avoids GitHub close keywords',
 )
+assert.match(latestChange('1.4.534').items.join('\n'), /Refs #834/, '1.4.534 changelog refs #834')
+assert.match(latestChange('1.4.534').items.join('\n'), /Hard stays the same\./)
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.533'), '1.4.533 changelog row')
 assert.match(latestChange('1.4.533').items.join('\n'), /Refs #818, Refs #834/, '1.4.533 changelog refs #818 and #834')
-assert.match(latestChange('1.4.533').items.join('\n'), /Hard stays the same\./)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.532'), '1.4.532 changelog row')
 assert.match(latestChange('1.4.532').items.join('\n'), /Refs #818, Refs #834/, '1.4.532 changelog refs #818 and #834')
 
@@ -1932,10 +1934,40 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
   assert.equal(camSeatClear(pick, view, frameInsets), true)
   const kept = camFirstSeat(seats, view, frameInsets, { x: 600, y: 904 })
   assert.deepEqual([kept.x, kept.y], [600, 904], '#834 an earlier pick stays while it is still clear')
-  const nowhere = camFirstSeat([seat(600, 88)], view, frameInsets)
-  assert.deepEqual([nowhere.x, nowhere.y], [600, 88], '#834 with no seat clear the cue still lands on an open seat')
+  assert.equal(camFirstSeat([seat(600, 88)], view, frameInsets), null, '#834 a seat with too little ring showing is not the cue')
   assert.equal(camFirstSeat([], view, frameInsets), null, '#834 no seats, no cue')
+  // #834 edge: a ring needs at least 60% showing; otherwise the edge arrow is the one gold cue.
+  const ringAt = (share) => ({ live: true, x: 464, y: (frameInsets.top - 46 * k834 + 2 * 46 * k834 * share - view.ty) / k834 })
+  assert.equal(NW_RING_MIN_SHARE, 0.6, '#834 a ring counts at 60% showing')
+  assert.ok(Math.abs(camSeatShare(ringAt(0.8), view, frameInsets) - 0.8) < 0.01, '#834 share counts the visible part of the ring')
+  assert.ok(camFirstSeat([ringAt(0.8)], view, frameInsets), '#834 a ring 80% showing is the cue')
+  assert.equal(camFirstSeat([ringAt(0.3)], view, frameInsets), null, '#834 a ring 30% showing is not the cue')
+  const arrow = camSeatArrow([seat(600, 88), seat(464, 224, false)], view, frameInsets)
+  assert.ok(arrow && arrow.seat.x === 600 && arrow.y < view.H / 2, '#834 the arrow points to the nearest open seat, never a dead one')
+  assert.ok(arrow.x >= 0 && arrow.x <= view.W && arrow.y >= frameInsets.top, '#834 the arrow stays inside the clear window')
+  assert.equal(camSeatArrow([seat(464, 224, false)], view, frameInsets), null, '#834 no open seat, no arrow')
   assert.ok(k834 > 0)
+  assert.match(actors834, /firstSeatAt === null \? -1/, '#834 with no ring in view the actors draw no first-seat ring')
+  assert.match(screen834, /camSeatArrow\(groundHints, camSeatView/, '#834 the edge arrow is placed from the camera view')
+  assert.match(screen834, /seatArrow =\s*camSeatView && !firstSeatPick/, '#834 the arrow shows only while no ring is in view')
+  assert.match(screen834, /className="nw-seat-arrow"/, '#834 the edge arrow renders')
+  assert.match(screen834, /\.nw-cam-recenter,\.nw-seat-arrow,\.nw-pace/, '#834 a drag from the arrow never pans')
+  assert.match(screen834, /fxKeySeq\.current \+= 1/, '#834 blast and juice keys come from a counter')
+  assert.doesNotMatch(screen834, /key: stamp,|key: now,|const blast: Blast = \{ key: performance/, '#834 no timestamp React keys')
+  assert.match(screen834, /onPointerUp=\{beginUp\}/, '#834 Begin has a pointer-up fallback')
+  assert.match(screen834, /beginFiredAt\.current < 800/, '#834 click and the fallback never both start the night')
+  const arrowCss = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const arrowRule = arrowCss.match(/\.defend-page\.is-easy-watch\.is-need-lamp \.nw-seat-arrow\{[^}]*\}/)?.[0] ?? ''
+  assert.ok(arrowRule.includes('#ffcc33'), '#834 the arrow is the existing gold, scoped to Easy and the first lamp')
+  assert.ok(arrowCss.indexOf('.nw-seat-arrow{') < arrowCss.indexOf('1.4.392:'), '#834 the arrow rule sits before the 1.4.392 block')
+  assert.match(
+    arrowCss,
+    /\.defend-page\.is-easy-watch\.is-need-lamp \.defend-heaven-wall\{stroke:#fffce8\}/,
+    '#834 the heaven wall is not gold before the first lamp (Easy only, Hard keeps its art)',
+  )
+  assert.match(screen834, /onPointerUp=\{beginUp\}/, '#834 the Begin fallback is generic: no map id in beginUp')
+  const beginUp834 = screen834.slice(screen834.indexOf('function beginUp'), screen834.indexOf('function camFocus'))
+  assert.doesNotMatch(beginUp834, /mapId|far-hills|map0\d|a2/, '#834 the Begin fallback has no map-specific branch')
 }
 assert.doesNotMatch(
   latestChange('1.4.531').items.join('\n'),
@@ -2625,7 +2657,7 @@ assert.equal(applyCrossWait(700, 0.9), 630, '1.4.490 a lamp beside the planted c
 assert.equal(crossPaceFor({}, undefined, { x: 0, y: 0 }), 1, '1.4.490 no cross leaves the wait alone')
 assert.match(
   readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8'),
-  /closest\('\.defend-go, \.defend-ability, \.defend-new-lamp(, \.nw-cam-recenter)?'\)/,
+  /closest\('\.defend-go, \.defend-ability, \.defend-new-lamp(, \.nw-cam-recenter)?(, \.nw-seat-arrow)?'\)/,
   '1.4.490 a plant-phase lamp buy is not a ground tap',
 )
 {
