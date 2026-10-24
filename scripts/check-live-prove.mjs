@@ -105,7 +105,7 @@ async function readLevelPips(page) {
 }
 
 async function openJump(page, search) {
-  await page.goto(`/${search}`)
+  await page.goto(`/${search}&nwCam=0`)
   await page.getByRole('button', { name: 'Settings' }).click()
   await page.locator('summary', { hasText: 'Developer' }).click()
   await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
@@ -3138,7 +3138,7 @@ async function pointerClick(page, locator) {
 }
 
 async function pointerOpenJump(page, search) {
-  await page.goto(`/${search}`)
+  await page.goto(`/${search}&nwCam=0`)
   await pointerClick(page, page.getByRole('button', { name: 'Settings' }))
   await pointerClick(page, page.locator('summary', { hasText: 'Developer' }))
   await pointerClick(page, page.getByRole('button', { name: 'Jump · Night Watch' }))
