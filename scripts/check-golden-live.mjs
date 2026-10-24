@@ -3403,6 +3403,131 @@ async function proveNwOff(browser, origin, errorsOut) {
   }
 }
 
+// -- 6. Gold first seat and tower taps in the top and bottom bands (#834) -----------------------
+
+/** Gold first-seat rings, and how many of them sit whole in the clear window (frame minus header, Begin, rail, tray, Recenter). */
+async function nwGoldCues(page) {
+  const chrome = await nwChrome(page)
+  const rc = await nwRect(page, '.nw-cam-recenter')
+  const v = await nwView(page)
+  const rings = await page.evaluate(() =>
+    [...document.querySelectorAll('.defend-plant-ground circle.is-first-seat')].map((n) => {
+      const r = n.getBoundingClientRect()
+      const st = getComputedStyle(n)
+      return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, stroke: st.stroke }
+    }),
+  )
+  const boxes = [...Object.values(chrome), rc].filter(Boolean)
+  const visible = rings.filter(
+    (r) =>
+      r.left >= v.frame.left &&
+      r.right <= v.frame.right &&
+      r.top >= Math.max(v.frame.top, chrome['.nw-hud']?.bottom ?? 0) &&
+      r.bottom <= v.frame.bottom &&
+      !boxes.some((b) => nwHits(r, b, 0)),
+  )
+  return { total: rings.length, visible: visible.length, rings }
+}
+
+/** Pre-plant, a real default view: exactly one gold first-seat ring, in view, and Recenter is not gold. */
+async function proveNwGold(browser, origin, size, slug, errorsOut) {
+  const where = `${slug} ${size[0]}x${size[1]} gold`
+  const { ctx, page, errors, consoleErrors } = await nwOpen(browser, origin, size, slug)
+  try {
+    assert.equal(await nwCount(page, '.defend-clear-lamp'), 0, `${where} starts with no lamp`)
+    assert.ok(await page.locator('.defend-page.is-need-lamp').count(), `${where} is waiting for the first lamp`)
+    const gold = await nwGoldCues(page)
+    assert.equal(gold.total, 1, `nwPan gold: ${where} one first-seat ring (${gold.total})`)
+    assert.equal(gold.visible, 1, `nwPan gold: ${where} the ring is in view and clear of the chrome ${JSON.stringify(gold.rings)}`)
+    const paint = await page.evaluate(() => {
+      const st = getComputedStyle(document.querySelector('.nw-cam-recenter'))
+      return { bg: st.backgroundColor, border: st.borderTopColor }
+    })
+    assert.equal(isGoldPaint(paint.bg) || isGoldPaint(paint.border), false, `${where} Recenter is not gold`)
+    // After a pan the ring is picked again: still exactly one, still in view.
+    const v = await nwView(page)
+    const to = await nwPanTo(page, nwClamp(v.tx - 120, v.W - v.world.w, 0), nwClamp(v.ty - 90, v.H - v.world.h, 0))
+    const moved = await nwGoldCues(page)
+    assert.equal(moved.total, 1, `${where} one ring after a pan (${to.tx.toFixed(0)},${to.ty.toFixed(0)})`)
+    return { total: gold.total, visible: gold.visible, panned: moved.visible }
+  } finally {
+    assert.deepEqual(errors, [], `${where} page errors`)
+    errorsOut.push(...consoleErrors.filter((text) => !/Failed to load resource/.test(text)))
+    await ctx.close()
+  }
+}
+
+/** A tap (under the slop) on a planted lamp opens its card in the top and bottom bands, and never moves the camera. */
+async function proveNwTapBands(browser, origin, size, slug, band, errorsOut, touch) {
+  const where = `${slug} ${size[0]}x${size[1]} ${touch ? 'touch' : 'mouse'} ${band} band`
+  const { ctx, page, errors, consoleErrors } = await nwOpen(browser, origin, size, slug, { touch })
+  const tap = async (x, y) => {
+    if (touch) await page.touchscreen.tap(x, y)
+    else await page.mouse.click(x, y)
+  }
+  try {
+    const v0 = await nwView(page)
+    const seats = await page.evaluate(() =>
+      [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((c) => ({ cx: Number(c.getAttribute('cx')), cy: Number(c.getAttribute('cy')) })),
+    )
+    assert.ok(seats.length > 0, `${where} has live seats`)
+    // The top band needs a lamp that stands high on the plate, the bottom band one that stands low.
+    const seat = seats.reduce((best, s) => ((band === 'top' ? s.cy < best.cy : s.cy > best.cy) ? s : best))
+    const [px, py] = focusPan({ x: seat.cx, y: seat.cy }, v0.W, v0.H, nwK(v0).s0, v0.z, camFrameInsets(v0.frame.top))
+    const at = await nwPanTo(page, px, py)
+    const k0 = nwK(at).s0 * at.z
+    await tap(at.frame.left + at.tx + seat.cx * k0, at.frame.top + at.ty + (seat.cy + 26) * k0)
+    await page.waitForFunction(() => document.querySelectorAll('.defend-clear-lamp').length === 1, null, { timeout: 3000 })
+    const insets = camFrameInsets(v0.frame.top)
+    const v = await nwView(page)
+    const k = nwK(v).s0 * v.z
+    const first = await nwRect(page, '.defend-clear-lamp')
+    const lampPlate = nwPlateOf(v, { x: first.cx, y: first.cy })
+    const want = {
+      x: v.frame.left + v.W * 0.4,
+      y: band === 'top' ? v.frame.top + insets.top + 6 : v.frame.top + v.H - insets.bottom + 6,
+    }
+    const [tx, ty] = camClamp(want.x - v.frame.left - lampPlate.x * k, want.y - v.frame.top - lampPlate.y * k, v.W, v.H, v.world)
+    await nwPanTo(page, tx, ty)
+    await page.waitForTimeout(150)
+    const lamp = await nwRect(page, '.defend-clear-lamp')
+    const now = await nwView(page)
+    const outside = lamp.top < now.frame.top + insets.top || lamp.bottom > now.frame.top + now.H - insets.bottom
+    const hit = await page.evaluate(([x, y]) => Boolean(document.elementFromPoint(x, y)?.closest('.defend-clear-lamp')), [lamp.cx, lamp.cy])
+    if (!outside || !hit) return `${band}: not reachable on this map (lamp y ${lamp.cy.toFixed(0)})`
+    let held = lamp
+    for (const wiggle of [0, 4]) {
+      assert.equal(await nwCount(page, '.defend-tower-card'), 0, `${where} no card before the tap`)
+      const before = await nwView(page)
+      if (wiggle && !touch) await nwGesture(page, [{ x: held.cx, y: held.cy }, { x: held.cx + wiggle, y: held.cy }], 2)
+      else await tap(held.cx, held.cy)
+      await page.waitForTimeout(250)
+      const after = await nwView(page)
+      assert.equal(await nwCount(page, '.defend-tower-card'), 1, `nwPan tap band: ${where} tap at y ${held.cy.toFixed(0)} opens the card`)
+      assert.deepEqual([after.tx, after.ty], [before.tx, before.ty], `${where} the tap leaves the camera`)
+      // A pan closes the card. Put the lamp back in the band for the next tap.
+      const ground = await nwOpenGround(page, 40)
+      await nwGesture(page, [ground, { x: ground.x - nwDir(after) * 10, y: ground.y }, { x: ground.x - nwDir(after) * 20, y: ground.y }], 3)
+      assert.equal(await nwCount(page, '.defend-tower-card'), 0, `${where} a pan closes the card`)
+      await nwPanTo(page, tx, ty)
+      await page.waitForTimeout(150)
+      held = await nwRect(page, '.defend-clear-lamp')
+    }
+    // A drag from the lamp past the slop still pans.
+    const lampNow = await nwBring(page, '.defend-clear-lamp')
+    const before = await nwView(page)
+    const d = nwDir(before)
+    await nwGesture(page, [{ x: lampNow.cx, y: lampNow.cy }, { x: lampNow.cx + d * 12, y: lampNow.cy }, { x: lampNow.cx + d * 30, y: lampNow.cy }], 2)
+    const after = await nwView(page)
+    assert.ok(Math.abs(after.tx - before.tx) > 10, `${where} a drag from the lamp pans`)
+    return `${band}: tap ok at y ${lamp.cy.toFixed(0)}`
+  } finally {
+    assert.deepEqual(errors, [], `${where} page errors`)
+    errorsOut.push(...consoleErrors.filter((text) => !/Failed to load resource/.test(text)))
+    await ctx.close()
+  }
+}
+
 export async function proveNwPan(browser, origin) {
   const errors = []
   const lines = []
@@ -3411,6 +3536,17 @@ export async function proveNwPan(browser, origin) {
       await proveNwPlant(browser, origin, size, slug, errors)
       await proveNwWaveReach(browser, origin, size, slug, errors)
       lines.push(`nw-pan ${slug} ${size[0]}x${size[1]} ok`)
+      const gold = await proveNwGold(browser, origin, size, slug, errors)
+      lines.push(`nw-gold ${slug} ${size[0]}x${size[1]} first-seat cues in view ${gold.visible} of ${gold.total}, after a pan ${gold.panned}`)
+    }
+    for (const slug of ['a2', 'map05']) {
+      for (const touch of [false, true]) {
+        for (const band of ['top', 'bottom']) {
+          const line = await proveNwTapBands(browser, origin, size, slug, band, errors, touch)
+          if (band === 'bottom' || slug === 'a2') assert.ok(line.includes('tap ok'), `nwPan tap band: ${slug} ${size[0]}x${size[1]} ${line}`)
+          lines.push(`nw-tap-bands ${slug} ${size[0]}x${size[1]} ${touch ? 'touch' : 'mouse'} ${line}`)
+        }
+      }
     }
     for (const slug of ['a2', 'far-hills']) {
       await proveNwPlantGestures(browser, origin, size, slug, errors)
