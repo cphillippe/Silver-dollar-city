@@ -514,3 +514,41 @@ html[data-easy='on'] .play.is-father-run .run-miss.is-arming .btn {
     z-index: 1;
   }
 }
+
+/* F11 house on the horizon, at the father's start (Easy only, CSS only).
+   Horizon = road top = just above the coin tops (actor bottom 14% + 120px coin + 4px bob room).
+   Box is cropped to the cottage art (no transparent padding), so the box itself sits ON the horizon
+   and never overlaps the father, son or Mercy pill boxes. */
+@media (max-height: 920px), (min-height: 921px) {
+  :is(html[data-easy='on'] .play.is-father-run,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-father-run,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run) .run-road {
+    height: calc(14% + 124px);
+  }
+  :is(html[data-easy='on'] .play.is-father-run,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-father-run,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run) .run-house {
+    left: 2%;
+    right: auto;
+    bottom: calc(14% + 124px);
+    width: 83px;
+    height: 59px;
+    background-size: 110px 110px;
+    background-position: -14px -25px;
+    z-index: 1;
+  }
+  /* taller phones: bigger cottage (art cropped the same way, scale 130/110) */
+  @media (min-height: 800px) {
+    :is(html[data-easy='on'] .play.is-father-run,
+        html[data-easy='on'] .daily-page.is-puzzle .play.is-father-run,
+        html[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run,
+        .app[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run) .run-house {
+      width: 98px;
+      height: 70px;
+      background-size: 130px 130px;
+      background-position: -16px -30px;
+    }
+  }
+}
