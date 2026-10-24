@@ -500,4 +500,17 @@ html[data-easy='on'] .play.is-father-run .run-miss.is-arming .btn {
 
   /* F9 de-gold the hug flash (2nd gold on hug) */
   html[data-easy='on'] .play.is-father-run .win-flash { background: radial-gradient(circle at 50% 42%, rgba(255,246,232,.92), rgba(200,107,255,.45) 34%, transparent 70%); }
+
+  /* F10 house on the son's side — clear father, son, and Mercy pill */
+  :is(html[data-easy='on'] .play.is-father-run,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-father-run,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run) .run-house {
+    left: auto;
+    right: 2%;
+    width: 72px;
+    height: 66px;
+    bottom: 48%;
+    z-index: 1;
+  }
 }
