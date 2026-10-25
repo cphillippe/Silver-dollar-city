@@ -1,7 +1,7 @@
 {
   "name": "silver-city",
   "private": true,
-  "version": "1.4.534",
+  "version": "1.4.535",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,6 +14,8 @@
     "ios:sync": "npm run build && node scripts/cap-sync.mjs ios",
     "cap:sync": "npm run build && node scripts/cap-sync.mjs",
     "android:apk": "npm run android:sync && node scripts/write-android-local-properties.mjs && cd android && ./gradlew assembleDebug",
+    "test:quick": "node scripts/run-checks.mjs quick",
+    "ship:update": "node scripts/ship-update.mjs",
     "test:core": "node scripts/run-checks.mjs core",
     "test:dig": "node scripts/run-checks.mjs dig",
     "test:arcade": "node scripts/run-checks.mjs arcade",
