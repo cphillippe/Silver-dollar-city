@@ -1864,8 +1864,10 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.534')
-assert.equal(CHANGELOG[0].version, '1.4.534', '1.4.534 is the newest row')
+assert.equal(APP_VERSION, '1.4.535')
+assert.equal(CHANGELOG[0].version, '1.4.535', '1.4.535 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.535'), '1.4.535 changelog row')
+assert.doesNotMatch(latestChange('1.4.535').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.535 changelog avoids GitHub close keywords')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.534'), '1.4.534 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.534').items.join('\n'),
@@ -19134,13 +19136,16 @@ assert.match(
   /a glowing tap on the round 5 boss deals more than 0 damage/,
   '1.4.460 the city scan taps the live round 5 boss and requires damage',
 )
-await import('./check-seed-fire.mjs').then((mod) => mod.checkSeedFire())
-await import('./check-night-jump.mjs').then((mod) => mod.checkNightJump())
-await import('./check-story-win.mjs').then((mod) => mod.checkStoryWins())
-await import('./check-easy-face.mjs').then((mod) => mod.checkEasyFace())
 const snapHoldScan = readFileSync(new URL('./check-story-snap.mjs', import.meta.url), 'utf8')
 assert.match(snapHoldScan, /win card stays at least 5s/, '1.4.481 the city scan holds STORY OPEN')
 assert.match(snapHoldScan, /replay is locked on the win/, '1.4.481 a second tap does not restart')
-await import('./check-story-snap.mjs').then((mod) => mod.checkSnapHold())
-await import('./check-live-prove.mjs').then((mod) => mod.checkLiveProve())
-await import('./check-golden-live.mjs').then((mod) => mod.checkGoldenLive())
+// Browser sims (~55 min). `npm run test:quick` sets CITY_SKIP_SIMS=1 to stop here; npm test and CI always run them.
+if (process.env.CITY_SKIP_SIMS !== '1') {
+  await import('./check-seed-fire.mjs').then((mod) => mod.checkSeedFire())
+  await import('./check-night-jump.mjs').then((mod) => mod.checkNightJump())
+  await import('./check-story-win.mjs').then((mod) => mod.checkStoryWins())
+  await import('./check-easy-face.mjs').then((mod) => mod.checkEasyFace())
+  await import('./check-story-snap.mjs').then((mod) => mod.checkSnapHold())
+  await import('./check-live-prove.mjs').then((mod) => mod.checkLiveProve())
+  await import('./check-golden-live.mjs').then((mod) => mod.checkGoldenLive())
+}
