@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.535',
+    title: 'Faster updates: quick test scope, one-command bump, incremental type-check',
+    when: '2026-10-25',
+    items: [
+      'New npm run test:quick runs the fast checks in about 11 seconds before a PR. npm test and CI still run every browser sim.',
+      'New npm run ship:update bumps the version in every spot, adds the changelog row, then runs test:quick and the build.',
+      'The type-check is incremental, so a local rebuild takes about 4 seconds instead of about 10.',
+      'Infra only, no gameplay change. Hard stays the same.',
+    ],
+  },
+  {
     version: '1.4.534',
     title: 'Night Watch: the gold cue follows you to the map corners',
     when: '2026-10-24',

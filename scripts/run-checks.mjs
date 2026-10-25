@@ -2,7 +2,8 @@
 /**
  * Scoped check runner — thin hops use a subset; `npm test` still runs all.
  * Usage: node scripts/run-checks.mjs <scope>
- * Scopes: all | core | dig | arcade | city | commerce | css | juice
+ * Scopes: all | quick | core | dig | arcade | city | commerce | css | juice
+ * quick = every browser-free check + check-city asserts without its browser sims (~15 s). Per-update default; CI runs all.
  * Phone Easy play-through is `npm run test:e2e` (not a scope here).
  */
 import { spawnSync } from 'node:child_process'
@@ -44,6 +45,29 @@ const SCOPES = {
       'check-founders-lamp.mjs',
       'check-launch-809.mjs',
       'check-share-card.mjs',
+    ],
+  },
+  // Per-update pre-PR scope: all browser-free checks + check-city static asserts (sims skipped). CI still runs `all`.
+  quick: {
+    embed: true,
+    checks: [
+      { script: 'check-dates.mjs', env: { TZ: 'America/Chicago' } },
+      { script: 'check-dates.mjs', env: { TZ: 'UTC' } },
+      'check-progress.mjs',
+      'check-save.mjs',
+      'check-learning.mjs',
+      'check-packs.mjs',
+      'check-why-blast.mjs',
+      'check-father-run.mjs',
+      'check-road-maze.mjs',
+      'check-claim-merge.mjs',
+      'check-source-dig.mjs',
+      'check-debug-plays.mjs',
+      'check-panel-blast.mjs',
+      'check-android-shell.mjs',
+      'check-commerce.mjs',
+      'check-share-card.mjs',
+      { script: 'check-city.mjs', env: { CITY_SKIP_SIMS: '1' } },
     ],
   },
   // Save / progress / learning / dates — no arcade or city mega-check
@@ -130,7 +154,7 @@ console.log(`run-checks: scope=${scopeName}`)
 // The version label the app shows must be the version package.json ships.
 const appVersion = /export const APP_VERSION = '([^']+)'/.exec(readFileSync(join(root, 'src/config/app.ts'), 'utf8'))?.[1]
 const pkgVersion = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version
-if (scopeName === 'all' || scopeName === 'core') {
+if (scopeName === 'all' || scopeName === 'core' || scopeName === 'quick') {
   if (appVersion !== pkgVersion) {
     console.error(`run-checks: APP_VERSION ${appVersion} !== package.json version ${pkgVersion}`)
     process.exit(1)
@@ -144,8 +168,10 @@ if (scope.embed) {
 for (const item of scope.checks) {
   const script = typeof item === 'string' ? item : item.script
   const env = typeof item === 'string' ? {} : item.env || {}
-  console.log(`→ ${script}${env.TZ ? ` (TZ=${env.TZ})` : ''}`)
+  console.log(`→ ${script}${env.TZ ? ` (TZ=${env.TZ})` : ''}${env.CITY_SKIP_SIMS ? ' (no sims)' : ''}`)
+  const t0 = Date.now()
   run(process.execPath, [...strip, join(root, 'scripts', script)], env)
+  console.log(`  ${script} ${((Date.now() - t0) / 1000).toFixed(1)}s`)
 }
 
 console.log(`run-checks: scope=${scopeName} OK`)

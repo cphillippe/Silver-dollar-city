@@ -27,3 +27,4 @@ android/**/build
 *.mobileprovision
 *.apk
 
+*.tsbuildinfo
