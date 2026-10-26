@@ -12,7 +12,7 @@
       <easy points="10" easyOrder="9">
         <learn>
           <shortStory>Duty feels like more than a taste or a mood. Romans 2 says even strangers already know enough to accuse one another — a pull toward real right and wrong that fits a good God.</shortStory>
-          <mainIdea>Duty is more than taste — a good God fits that pull.</mainIdea>
+          <mainIdea>Duty is more than taste — that pull points to a good God.</mainIdea>
           <gloss>Duty feels real — not like a taste for tea.</gloss>
           <loci>This idea lives at Meaning Ridge, with Hope.</loci>
           <word>
@@ -22,7 +22,7 @@
           <hint>Build the modest chain. Leave contempt and collapse.</hint>
         </learn>
         <match>
-          <sentenceCorrect>Duty is more than taste — a good God fits that pull.</sentenceCorrect>
+          <sentenceCorrect>Duty is more than taste — that pull points to a good God.</sentenceCorrect>
           <sentenceMisses>
             <miss>Duty is only a preference we pretend is law.</miss>
             <miss>Atheist moral realism is impossible to name.</miss>
@@ -34,7 +34,7 @@
           <whyEasy>Hope keeps Meaning Ridge. Duty is more than a taste.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>Duty is more than taste — a good God fits that pull.</claim>
+          <claim>Duty is more than taste — that pull points to a good God.</claim>
           <reason>We all know duty — strangers can still accuse.</reason>
           <source>Romans 2:14–15</source>
           <whyCorrect>We all know duty — strangers can still accuse.</whyCorrect>
@@ -44,7 +44,7 @@
             <miss>Duty is only a private feeling.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Duty is more than taste — a good God fits that pull.</choice>
+            <choice>Duty is more than taste — that pull points to a good God.</choice>
             <choice>Duty is only a preference we pretend is law.</choice>
             <choice>Atheist moral realism is impossible to name.</choice>
           </claimChoices>
@@ -58,7 +58,7 @@
       <medium points="12">
         <learn>
           <mediumTeach>Duty is more than taste. Romans 2 says even strangers already know enough to accuse one another. A good God is a natural home for that pull — not a shrug that calls every “ought” a preference.</mediumTeach>
-          <mainIdea>Duty is more than taste — a good God fits that pull.</mainIdea>
+          <mainIdea>Duty is more than taste — that pull points to a good God.</mainIdea>
           <gloss>Duty feels real — not like a taste for tea.</gloss>
           <loci>This idea lives at Meaning Ridge, with Hope.</loci>
           <word>
@@ -68,7 +68,7 @@
           <hint>Build the modest chain. Leave contempt and collapse.</hint>
         </learn>
         <match>
-          <sentenceCorrect>Duty is more than taste — a good God fits that pull.</sentenceCorrect>
+          <sentenceCorrect>Duty is more than taste — that pull points to a good God.</sentenceCorrect>
           <sentenceMisses>
             <miss>Duty is only a preference we pretend is law.</miss>
             <miss>Atheist moral realism is impossible to name.</miss>
@@ -80,7 +80,7 @@
           <whyMedium>Hope keeps Meaning Ridge. Duty is more than a taste.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>Duty is more than taste — a good God fits that pull.</claim>
+          <claim>Duty is more than taste — that pull points to a good God.</claim>
           <reason>We all know duty — strangers can still accuse.</reason>
           <source>Romans 2:14–15</source>
           <whyCorrect>We all know duty — strangers can still accuse.</whyCorrect>
@@ -90,7 +90,7 @@
             <miss>Duty is only a private feeling.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Duty is more than taste — a good God fits that pull.</choice>
+            <choice>Duty is more than taste — that pull points to a good God.</choice>
             <choice>Duty is only a preference we pretend is law.</choice>
             <choice>Atheist moral realism is impossible to name.</choice>
           </claimChoices>
@@ -112,7 +112,7 @@ Romans 2:14–15 speaks of a law “written on the heart.” That is not a sneer
           <challengeTiles />
         </learn>
         <match>
-          <sentenceCorrect>Duty is more than taste — a good God fits that pull.</sentenceCorrect>
+          <sentenceCorrect>Duty is more than taste — that pull points to a good God.</sentenceCorrect>
           <sentenceMisses>
             <miss>Duty is only a preference we pretend is law.</miss>
             <miss>Atheist moral realism is impossible to name.</miss>
@@ -124,7 +124,7 @@ Romans 2:14–15 speaks of a law “written on the heart.” That is not a sneer
           <whyHard>Hope Ridge keeps Meaning Ridge. Duty as more than taste looks over the town from the lookout.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>Duty is more than taste — a good God fits that pull.</claim>
+          <claim>Duty is more than taste — that pull points to a good God.</claim>
           <reason>We all know duty — strangers can still accuse.</reason>
           <source>Romans 2:14–15</source>
           <whyCorrect>We all know duty — strangers can still accuse.</whyCorrect>
@@ -134,7 +134,7 @@ Romans 2:14–15 speaks of a law “written on the heart.” That is not a sneer
             <miss>Duty is only a private feeling.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Duty is more than taste — a good God fits that pull.</choice>
+            <choice>Duty is more than taste — that pull points to a good God.</choice>
             <choice>Duty is only a preference we pretend is law.</choice>
             <choice>Atheist moral realism is impossible to name.</choice>
           </claimChoices>

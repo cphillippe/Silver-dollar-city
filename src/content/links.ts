@@ -313,7 +313,7 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'nora-sky',
     placeId: 'place-sky',
     personId: 'person-nora',
-    text: 'The heavens already speak of a Maker; fine-tuning fits that voice.',
+    text: 'The heavens already speak of a Maker; fine-tuning points to that voice.',
     caption: 'The heavens speak of a Maker.',
   },
   {
@@ -430,7 +430,7 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'hope-lookout',
     placeId: 'place-lookout',
     personId: 'person-hope',
-    text: 'Duty is more than taste — a good God fits that pull.',
+    text: 'Duty is more than taste — that pull points to a good God.',
     caption: 'Duty is more than taste.',
   },
   {
@@ -729,7 +729,7 @@ export const STREET_PLACE_WHYS = [
   'Mercy Wren keeps Story Creek: Jesus taught in pictures by the road and the water.',
   'Silas Whitman keeps Witness Square: died, buried, raised, appeared is a public creed.',
   'Juniper Wick keeps the east porch: a lamp is meant to be seen.',
-  'Nora Skye keeps Sky Watch: the heavens declare a Maker, and fine-tuning fits that voice.',
+  'Nora Skye keeps Sky Watch: the heavens declare a Maker, and fine-tuning points to that voice.',
   'Ansel Gate keeps Why Gate: the world exists and did not have to.',
   'Hope Ridge keeps Meaning Ridge: duty, mind, meaning, and beauty look over the town.',
   'Silas Whitman keeps Stone Court: Tacitus, Josephus, and Pliny name Christ from outside.',

@@ -37,7 +37,7 @@ export const EASY_CHROME: Record<string, string> = {
   'Multiple attestation, embarrassment, early reports, and context resist “late pious novel.”':
     'Many early, awkward reports beat a late tale.',
   'Luke records that the apostles dismissed them — a costly opening if the goal were instant respectability.':
-    'The apostles first called them wrong — Luke still wrote it.',
+    'At first the apostles did not believe them. Luke still wrote it.',
   'Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.':
     'Life needs tight numbers — chance does not explain that.',
   'Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.':
@@ -99,8 +99,8 @@ export const EASY_CHROME: Record<string, string> = {
     'Life, a livable world, and minds are gifts from a Maker.',
   'Scribes copy, later hands compare, then a modern page prints a recovered text.':
     'Scribes copy, later hands compare, then we print it.',
-  'The poem’s Servant suffers for others and does not answer with a sword; the church names that Servant as Jesus.':
-    'The Servant suffers for others — the church names Jesus.',
+  'The poem’s Servant suffers for others and does not answer with a sword; the New Testament names that Servant as Jesus.':
+    'The Servant suffers for others — the New Testament names Jesus.',
   'The claim is that God moves first — not that you finished the map.':
     'God moves first — you did not finish the map.',
   'The invitation is to a person — “Come to me” — not a performance.':

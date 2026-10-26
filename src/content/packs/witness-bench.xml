@@ -498,9 +498,9 @@ These criteria can be overused. They do not replace reading texts as wholes. The
         </match>
         <hold levelUpTo="medium" onFail="easy">
           <claim>Women were first to report Jesus’ empty tomb.</claim>
-          <reason>The apostles first called them wrong — Luke still wrote it.</reason>
+          <reason>At first the apostles did not believe them. Luke still wrote it.</reason>
           <source>Luke 24:1–11</source>
-          <whyCorrect>The apostles first called them wrong — Luke still wrote it.</whyCorrect>
+          <whyCorrect>At first the apostles did not believe them. Luke still wrote it.</whyCorrect>
           <whyMisses>
             <miss>Luke sands away any dismissal of the first report.</miss>
             <miss>Outside writers never mention Christus or Pilate.</miss>
@@ -512,7 +512,7 @@ These criteria can be overused. They do not replace reading texts as wholes. The
             <choice>Women were the most legally impressive public witnesses.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The apostles first called them wrong — Luke still wrote it.</choice>
+            <choice>At first the apostles did not believe them. Luke still wrote it.</choice>
             <choice>Luke sands away any dismissal of the first report.</choice>
             <choice>Outside writers never mention Christus or Pilate.</choice>
           </reasonChoices>
@@ -544,9 +544,9 @@ These criteria can be overused. They do not replace reading texts as wholes. The
         </match>
         <hold levelUpTo="hard" onFail="easy">
           <claim>Women were first to report Jesus’ empty tomb.</claim>
-          <reason>The apostles first called them wrong — Luke still wrote it.</reason>
+          <reason>At first the apostles did not believe them. Luke still wrote it.</reason>
           <source>Luke 24:1–11</source>
-          <whyCorrect>The apostles first called them wrong — Luke still wrote it.</whyCorrect>
+          <whyCorrect>At first the apostles did not believe them. Luke still wrote it.</whyCorrect>
           <whyMisses>
             <miss>Luke sands away any dismissal of the first report.</miss>
             <miss>Outside writers never mention Christus or Pilate.</miss>
@@ -558,7 +558,7 @@ These criteria can be overused. They do not replace reading texts as wholes. The
             <choice>Women were the most legally impressive public witnesses.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The apostles first called them wrong — Luke still wrote it.</choice>
+            <choice>At first the apostles did not believe them. Luke still wrote it.</choice>
             <choice>Luke sands away any dismissal of the first report.</choice>
             <choice>Outside writers never mention Christus or Pilate.</choice>
           </reasonChoices>
@@ -593,9 +593,9 @@ Josephus, Antiquities 18.63–64, is partly disputed because of later Christian 
         </match>
         <hold onFail="easy">
           <claim>Women were first to report Jesus’ empty tomb.</claim>
-          <reason>The apostles first called them wrong — Luke still wrote it.</reason>
+          <reason>At first the apostles did not believe them. Luke still wrote it.</reason>
           <source>Luke 24:1–11</source>
-          <whyCorrect>The apostles first called them wrong — Luke still wrote it.</whyCorrect>
+          <whyCorrect>At first the apostles did not believe them. Luke still wrote it.</whyCorrect>
           <whyMisses>
             <miss>Luke sands away any dismissal of the first report.</miss>
             <miss>Outside writers never mention Christus or Pilate.</miss>
@@ -607,7 +607,7 @@ Josephus, Antiquities 18.63–64, is partly disputed because of later Christian 
             <choice>Women were the most legally impressive public witnesses.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The apostles first called them wrong — Luke still wrote it.</choice>
+            <choice>At first the apostles did not believe them. Luke still wrote it.</choice>
             <choice>Luke sands away any dismissal of the first report.</choice>
             <choice>Outside writers never mention Christus or Pilate.</choice>
           </reasonChoices>
@@ -958,7 +958,7 @@ Christ died… he was buried… he was raised on the third day. Burial and raisi
         <hold levelUpTo="medium" onFail="easy">
           <claim>Jesus’ tomb was empty — women saw it first, with fear and wonder.</claim>
           <reason>They found the stone rolled away — they did not find the body.</reason>
-          <source>Luke 24:2–3</source>
+          <source>Luke 24:1–5</source>
           <whyCorrect>They found the stone rolled away — they did not find the body.</whyCorrect>
           <whyMisses>
             <miss>The tomb is found occupied and explained.</miss>
@@ -1004,7 +1004,7 @@ Christ died… he was buried… he was raised on the third day. Burial and raisi
         <hold levelUpTo="hard" onFail="easy">
           <claim>Jesus’ tomb was empty — women saw it first, with fear and wonder.</claim>
           <reason>They found the stone rolled away — they did not find the body.</reason>
-          <source>Luke 24:2–3</source>
+          <source>Luke 24:1–5</source>
           <whyCorrect>They found the stone rolled away — they did not find the body.</whyCorrect>
           <whyMisses>
             <miss>The tomb is found occupied and explained.</miss>
@@ -1053,7 +1053,7 @@ They found the stone rolled away from the tomb, but when they went in they did n
         <hold onFail="easy">
           <claim>Jesus’ tomb was empty — women saw it first, with fear and wonder.</claim>
           <reason>They found the stone rolled away — they did not find the body.</reason>
-          <source>Luke 24:2–3</source>
+          <source>Luke 24:1–5</source>
           <whyCorrect>They found the stone rolled away — they did not find the body.</whyCorrect>
           <whyMisses>
             <miss>The tomb is found occupied and explained.</miss>
@@ -1075,7 +1075,7 @@ They found the stone rolled away from the tomb, but when they went in they did n
       <journal id="j-wb-7" title="Morning" kicker="Witness Square" unlockAfter="daily-empty" scoreFromHeldTier="true">
         <p>Luke begins with an empty tomb. They did not find the body of Jesus. Women, fear, and wonder stay in the first report.</p>
         <sources>
-          <source>Luke 24:2–3</source>
+          <source>Luke 24:1–5</source>
         </sources>
       </journal>
     </lesson>
