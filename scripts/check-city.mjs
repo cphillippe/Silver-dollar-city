@@ -2037,7 +2037,8 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
   assert.match(screen834, /window\.addEventListener\('pointerup'/, '#834 a window pointer-up clears a stuck arrow press')
   assert.match(screen834, /camPanning\.current = false\n\s+keepReadoutClear/, '#834 pan end clears the panning flag so follow resumes')
   assert.match(screen834, /NW_CUE_ARROW_HIDE_SHARE/, '#834 the walker arrow hides at half face share')
-  assert.match(screen834, /resetCamFollowTouchState/, '#834 wave start clears stuck camera touch state')
+  assert.match(screen834, /resetCamWavePointerState/, '#834 wave start clears stuck pointer state without opening follow')
+  assert.match(screen834, /function recenter\(\) \{[\s\S]*?stampCamTouch\(\)/, '#834 Recenter pauses auto-follow like a map touch')
   {
     const followPaused = (pointerDown, lastTouchAt, now) =>
       pointerDown > 0 || now - lastTouchAt < NW_CAM_TOUCH_HOLD_MS

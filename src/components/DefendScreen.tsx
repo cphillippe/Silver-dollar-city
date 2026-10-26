@@ -918,8 +918,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     camPointerDown.current = Math.max(0, camPointerDown.current - 1)
   }
 
-  function resetCamFollowTouchState() {
-    abortArrowPointer()
+  /** Wave start: clear stuck pointer/pan state without opening auto-follow (B1 abort still clears the full gate). */
+  function resetCamWavePointerState() {
+    arrowPress.current = null
+    releaseArrowPointerCapture()
+    camPointerDown.current = 0
     camPanning.current = false
     camStart.current = null
   }
@@ -961,6 +964,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   function recenter() {
     const f = camFrame()
     if (!f) return
+    stampCamTouch()
     const [tx, ty] = focusPan(NW_CAMERA_FOCUS[mapId], f.W, f.H, f.world.s0, camZ, f.insets)
     camApply(tx, ty, true)
   }
@@ -3677,7 +3681,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   }
 
   function startWave() {
-    resetCamFollowTouchState()
+    resetCamWavePointerState()
     armWaveCount()
     setPhase('wave')
   }
@@ -3691,7 +3695,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setBossBonus(0)
     setLoreMeet(null)
     if (waveIndex + 1 < nightLength(easy)) {
-      resetCamFollowTouchState()
+      resetCamWavePointerState()
       setWaveIndex((i) => i + 1)
       armWaveCount()
       setPhase('wave')
@@ -3896,7 +3900,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       : null
   const mapArrow = seatArrow ?? walkerArrow
   arrowTargetRef.current = seatArrow ? { x: seatArrow.seat.x, y: seatArrow.seat.y } : camCuePlateRef.current
-  if (hadMapArrowRef.current && !mapArrow) resetCamFollowTouchState()
+  if (hadMapArrowRef.current && !mapArrow && (arrowPress.current !== null || camPointerDown.current > 0)) {
+    abortArrowPointer()
+  }
   hadMapArrowRef.current = !!mapArrow
 
   const tip =
