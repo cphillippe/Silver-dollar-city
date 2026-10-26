@@ -152,6 +152,9 @@ export const NW_RING_MIN_SHARE = 0.9
 /** A glowing face counts as in view at the same share as the first-seat ring. */
 export const NW_CUE_MIN_SHARE = NW_RING_MIN_SHARE
 
+/** After map or face touch, auto-follow waits this long before panning again. */
+export const NW_CAM_TOUCH_HOLD_MS = 1000
+
 /** Share of a marker (0 to 1) inside the clear window: off the header, Begin and the lamp rail. */
 export function camMarkerShare(
   point: { x: number; y: number },
@@ -174,9 +177,10 @@ export function camSeatShare(seat: { x: number; y: number }, view: CamSeatView, 
 
 /**
  * The one seat that wears the gold first-seat ring before the first lamp.
- * The earlier pick stays while at least NW_RING_MIN_SHARE of its ring is visible.
- * Otherwise the open seat with the most ring showing at or above that share, preferring a whole ring in the clear window.
- * With none at all, null: the edge arrow is the gold cue then.
+ * (a) the held seat while at least NW_RING_MIN_SHARE of its ring shows;
+ * (b) else the first live seat whole in the clear window;
+ * (c) else the live seat with the most ring at or above NW_RING_MIN_SHARE;
+ * (d) else null (edge arrow is the gold cue).
  */
 export function camFirstSeat<T extends { x: number; y: number; live?: boolean }>(
   seats: readonly T[],
@@ -186,21 +190,17 @@ export function camFirstSeat<T extends { x: number; y: number; live?: boolean }>
 ): T | null {
   const held = keep ? seats.find((seat) => seat.live && seat.x === keep.x && seat.y === keep.y) : undefined
   if (held && camSeatShare(held, view, insets) >= NW_RING_MIN_SHARE) return held
+  for (const seat of seats) {
+    if (seat.live && camSeatClear(seat, view, insets)) return seat
+  }
   let best: T | null = null
-  let bestClear = false
   let bestShare = NW_RING_MIN_SHARE
   for (const seat of seats) {
     if (!seat.live) continue
     const share = camSeatShare(seat, view, insets)
     if (share + 1e-9 < NW_RING_MIN_SHARE) continue
-    const clear = camSeatClear(seat, view, insets)
-    if (
-      best === null ||
-      (clear && !bestClear) ||
-      (clear === bestClear && share > bestShare + 1e-9)
-    ) {
+    if (best === null || share > bestShare + 1e-9) {
       best = seat
-      bestClear = clear
       bestShare = share
     }
   }

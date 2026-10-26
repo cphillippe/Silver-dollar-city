@@ -298,6 +298,7 @@ import {
   focusPan,
   NW_CAMERA_FOCUS,
   NW_CAMERA_ZOOM,
+  NW_CAM_TOUCH_HOLD_MS,
   NW_TAP_SLOP,
   nwCameraOn,
 } from './nwCamera'
@@ -870,7 +871,18 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const arrowTargetRef = useRef<{ x: number; y: number } | null>(null)
   const camFirstRef = useRef<{ x: number; y: number } | null>(null)
   const camCuePlateRef = useRef<{ x: number; y: number } | null>(null)
+  const camLastTouchAt = useRef(-Infinity)
+  const camPointerDown = useRef(0)
   const [camDims, setCamDims] = useState<{ W: number; H: number; top: number } | null>(null)
+
+  function stampCamTouch() {
+    camLastTouchAt.current = performance.now()
+  }
+
+  function camFollowPaused() {
+    if (camPointerDown.current > 0) return true
+    return performance.now() - camLastTouchAt.current < NW_CAM_TOUCH_HOLD_MS
+  }
 
   function camFrame() {
     const node = camRef.current
@@ -933,10 +945,39 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   useEffect(() => () => window.cancelAnimationFrame(camRaf.current), [])
 
+  useEffect(() => {
+    if (!camOn || phase !== 'wave' || won) return
+    let frame = 0
+    const followCue = () => {
+      const point = camCuePlateRef.current
+      if (point && !camPanning.current && !camFollowPaused()) {
+        const f = camFrame()
+        if (f) {
+          const view = {
+            W: f.W,
+            H: f.H,
+            s0: f.world.s0,
+            z: camZ,
+            tx: camPanRef.current[0],
+            ty: camPanRef.current[1],
+          }
+          if (camMarkerShare(point, NW_CUE_FACE_R, view, f.insets) + 1e-6 < NW_CUE_MIN_SHARE) {
+            const [tx, ty] = focusPan(point, f.W, f.H, f.world.s0, camZ, f.insets)
+            camApply(tx, ty, true)
+          }
+        }
+      }
+      frame = window.requestAnimationFrame(followCue)
+    }
+    frame = window.requestAnimationFrame(followCue)
+    return () => window.cancelAnimationFrame(frame)
+  }, [camOn, phase, won, mapId, boardBox.w, boardBox.h, camZ])
+
   const CAM_CHROME = '.nw-hud,.nw-rail,.nw-docks,.nw-balloon-slot,.nw-map-overlay,.defend-tower-card,.nw-cam-recenter,.nw-seat-arrow,.nw-pace'
 
   function camDown(event: ReactPointerEvent<HTMLDivElement>) {
     if (!camOn || !event.isPrimary) return
+    stampCamTouch()
     camPointerAt.current = performance.now()
     suppressClickUntil.current = 0
     camPanning.current = false
@@ -951,6 +992,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       tx: camPanRef.current[0],
       ty: camPanRef.current[1],
     }
+    camPointerDown.current += 1
   }
 
   function camMove(event: ReactPointerEvent<HTMLDivElement>) {
@@ -973,8 +1015,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   }
 
   function camUp(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!camOn) return
+    stampCamTouch()
     const start = camStart.current
-    if (!camOn || !start || event.pointerId !== start.id) return
+    if (!start || event.pointerId !== start.id) return
+    camPointerDown.current = Math.max(0, camPointerDown.current - 1)
     camStart.current = null
     try {
       if (camRef.current?.hasPointerCapture(event.pointerId)) camRef.current.releasePointerCapture(event.pointerId)
@@ -1032,6 +1077,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   function arrowDown(event: ReactPointerEvent<HTMLButtonElement>) {
     if (!event.isPrimary) return
+    stampCamTouch()
+    camPointerDown.current += 1
     arrowClickSeen.current = false
     arrowPress.current = { id: event.pointerId, x: event.clientX, y: event.clientY }
   }
@@ -1040,6 +1087,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   function arrowUp(event: ReactPointerEvent<HTMLButtonElement>) {
     const press = arrowPress.current
     arrowPress.current = null
+    stampCamTouch()
+    camPointerDown.current = Math.max(0, camPointerDown.current - 1)
     if (!press || press.id !== event.pointerId) return
     if (Math.hypot(event.clientX - press.x, event.clientY - press.y) >= NW_TAP_SLOP) return
     const button = event.currentTarget
@@ -2892,6 +2941,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     tap?: { x: number; y: number } | null,
     pointerType?: string,
   ) {
+    stampCamTouch()
     if (phase !== 'wave' || won) return
     if (countUntilRef.current > performance.now()) return
     const raider = live.current.raiders.find((item) => item.id === raiderId && !item.turned)
