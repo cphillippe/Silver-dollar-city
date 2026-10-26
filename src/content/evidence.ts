@@ -108,7 +108,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   'wb-women': brief(
     'wb-women',
     'Women were first to report Jesus’ empty tomb.',
-    'The apostles first called them wrong — Luke still wrote it.',
+    'At first the apostles did not believe them. Luke still wrote it.',
     'Luke 24:1–11',
     'The Gospels open with the Roman senate converting overnight.',
     'Women were the most legally impressive public witnesses.',
@@ -158,7 +158,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   'fg-order': brief(
     'fg-order',
     'You already trust that the world holds together in Christ.',
-    'All things were made through him and hold together in him.',
+    'All things were created through him and hold together in him.',
     'Colossians 1:16–17',
     'The world is a lucky pile with no holder.',
     'You do not actually trust order in ordinary life.',
@@ -237,7 +237,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   ),
   'hl-moral': brief(
     'hl-moral',
-    'Duty is more than taste — a good God fits that pull.',
+    'Duty is more than taste — that pull points to a good God.',
     'We all know duty — strangers can still accuse.',
     'Romans 2:14–15',
     'Duty is only a preference we pretend is law.',
@@ -327,7 +327,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   ),
   'daily-stars': brief(
     'daily-stars',
-    'The heavens already speak of a Maker; fine-tuning fits that voice.',
+    'The heavens already speak of a Maker; fine-tuning points to that voice.',
     'The sky speaks of a Maker — the numbers fit that.',
     'Psalm 19:1–4; Romans 1:20',
     'The heavens are silent about a Maker.',
@@ -358,7 +358,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   'daily-isaiah': brief(
     'daily-isaiah',
     'Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.',
-    'The poem’s Servant suffers for others and does not answer with a sword; the church names that Servant as Jesus.',
+    'The poem’s Servant suffers for others and does not answer with a sword; the New Testament names that Servant as Jesus.',
     'Isaiah 53:4–12',
     'The servant conquers Rome by sword.',
     'The poem is about estate planning.',
@@ -399,7 +399,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
     'daily-empty',
     'Jesus’ tomb was empty — women saw it first, with fear and wonder.',
     'They found the stone rolled away — they did not find the body.',
-    'Luke 24:2–3',
+    'Luke 24:1–5',
     'Rome instantly converts the senate.',
     'Women are absent from the first reports.',
     'The tomb is found occupied and explained.',

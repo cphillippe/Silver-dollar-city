@@ -140,7 +140,7 @@ export const journalEntries: JournalEntry[] = [
     body: [
       'Luke begins with an empty tomb. They did not find the body of Jesus. Women, fear, and wonder stay in the first report.',
     ],
-    sources: ['Luke 24:2–3'],
+    sources: ['Luke 24:1–5'],
   },
   {
     id: 'j-ob-1',

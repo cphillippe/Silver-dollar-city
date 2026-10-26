@@ -201,7 +201,7 @@ const PLAIN: Record<string, PlainLine> = {
     { term: 'Creed', sense: 'an old shared belief the churches already said out loud', hint: 'Keep “received.” Toss “Paul invented it while writing.”' },
   ),
   'daily-stars': line(
-    'The heavens already speak of a Maker. Fine-tuning fits that voice.',
+    'The heavens already speak of a Maker. Fine-tuning points to that voice.',
     'Psalm 19 and Romans 1 treat the sky as speech. The heavens already speak of a Maker.',
     { term: 'Maker', sense: 'the One who intended this world', hint: 'Keep the sky as speech. Toss “silent decoration.”' },
   ),
@@ -217,7 +217,7 @@ const PLAIN: Record<string, PlainLine> = {
   ),
   'daily-isaiah': line(
     'Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.',
-    'The poem’s Servant suffers for others and does not answer with a sword. The church names that Servant as Jesus.',
+    'The poem’s Servant suffers for others and does not answer with a sword. The New Testament names that Servant as Jesus.',
     { term: 'Servant', sense: 'the wounded one in Isaiah 53 — not a general on a horse', hint: 'Keep the wounds. Toss the sword.' },
   ),
   'daily-grace': line(

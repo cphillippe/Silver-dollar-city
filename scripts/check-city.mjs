@@ -1217,7 +1217,7 @@ const evidenceSrc = readFileSync(
   'utf8',
 )
 assert.match(evidenceSrc, /The universe is finely tuned for life — that fit points to a Designer/)
-assert.match(evidenceSrc, /The heavens already speak of a Maker; fine-tuning fits that voice/)
+assert.match(evidenceSrc, /The heavens already speak of a Maker; fine-tuning points to that voice/)
 assert.match(evidenceSrc, /Psalm 19:1–4; Romans 1:20/)
 assert.match(evidenceSrc, /The kingdom arrives in pictures, not slogans/)
 assert.match(evidenceSrc, /Fine-tuning is best explained by a mind that intended a habitable world/)
@@ -1241,7 +1241,7 @@ assert.doesNotMatch(evidenceSrc, /Clean is not uncontested/)
 assert.match(evidenceSrc, /Isaiah 53:4–12/)
 assert.match(evidenceSrc, /A beginning has a Cause/)
 assert.match(evidenceSrc, /Women were first to report Jesus’ empty tomb/)
-assert.match(evidenceSrc, /The apostles first called them wrong/)
+assert.match(evidenceSrc, /At first the apostles did not believe them/)
 assert.doesNotMatch(evidenceSrc, /costly opening if the goal were instant respectability/)
 assert.doesNotMatch(evidenceSrc, /if invented for respectability/)
 assert.match(evidenceSrc, /Life’s specified information is a mark of mind/)
@@ -1864,8 +1864,16 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.535')
-assert.equal(CHANGELOG[0].version, '1.4.535', '1.4.535 is the newest row')
+assert.equal(APP_VERSION, '1.4.536')
+assert.equal(CHANGELOG[0].version, '1.4.536', '1.4.536 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.536'), '1.4.536 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.536').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.536 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.536').items.join('\n'), /Refs #845/, '1.4.536 changelog refs #845')
+assert.match(latestChange('1.4.536').items.join('\n'), /Hard stays the same\./)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.535'), '1.4.535 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.535').items.join('\n'),
@@ -1874,13 +1882,6 @@ assert.doesNotMatch(
 )
 assert.match(latestChange('1.4.535').items.join('\n'), /Hard stays the same\./)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.534'), '1.4.534 changelog row')
-assert.doesNotMatch(
-  latestChange('1.4.534').items.join('\n'),
-  /Fixes #|Closes #|Resolves #/,
-  '1.4.534 changelog avoids GitHub close keywords',
-)
-assert.match(latestChange('1.4.534').items.join('\n'), /Refs #834/, '1.4.534 changelog refs #834')
-assert.match(latestChange('1.4.534').items.join('\n'), /Hard stays the same\./)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.533'), '1.4.533 changelog row')
 assert.match(latestChange('1.4.533').items.join('\n'), /Refs #818, Refs #834/, '1.4.533 changelog refs #818 and #834')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.532'), '1.4.532 changelog row')

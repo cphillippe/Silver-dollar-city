@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.536',
+    title: 'Easy: clearer words on a few lessons',
+    when: '2026-10-26',
+    items: [
+      'Some why lines now match what the Bible and sources actually say — apostles, James, Colossians, Isaiah, and the sky lesson.',
+      'Hard stays the same.',
+      'Refs #845.',
+    ],
+  },
+  {
     version: '1.4.535',
     title: "Easy Father's run: the story fills the screen",
     when: '2026-10-24',
