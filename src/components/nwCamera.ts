@@ -35,6 +35,10 @@ export interface CamInsets {
   bottom: number
   right: number
   rightBand: readonly [number, number]
+  /** Sparks / Candle column: frame px from the left edge (viewport x below this). */
+  hudColumnRight: number
+  /** Sparks / Candle column: frame px from the top of the cam frame down to this y. */
+  hudColumnBottom: number
 }
 
 export interface CamWorld {
@@ -78,13 +82,23 @@ export function camClamp(tx: number, ty: number, W: number, H: number, world: { 
   return [clamp(tx, W - world.w, 0), clamp(ty, H - world.h, 0)]
 }
 
+/** Viewport px: left dock column (Sparks badge + Candle) blocks rings and arrows. */
+export const NW_HUD_COLUMN_LEFT = 80
+/** Viewport px from the top of the screen through the dock column. */
+export const NW_HUD_COLUMN_VIEWPORT_BOTTOM = 290
+
 /** Viewport-px insets to frame px. */
-export function camFrameInsets(frameTop: number, insets: CamInsets = NW_CAMERA_INSETS): CamInsets {
+export function camFrameInsets(
+  frameTop: number,
+  insets: Pick<CamInsets, 'top' | 'bottom' | 'right' | 'rightBand'> = NW_CAMERA_INSETS,
+): CamInsets {
   return {
     top: insets.top - frameTop,
     bottom: insets.bottom,
     right: insets.right,
     rightBand: [insets.rightBand[0] - frameTop, insets.rightBand[1] - frameTop],
+    hudColumnRight: NW_HUD_COLUMN_LEFT,
+    hudColumnBottom: Math.max(0, NW_HUD_COLUMN_VIEWPORT_BOTTOM - frameTop),
   }
 }
 
@@ -134,12 +148,24 @@ function seatBox(seat: { x: number; y: number }, view: CamSeatView) {
   return markerBox(seat, SEAT_R, view)
 }
 
-/** The ring sits whole inside the clear window: off the header, Begin and the lamp rail. */
+function markerOverlapsHudColumn(
+  box: { left: number; top: number; right: number; bottom: number },
+  insets: CamInsets,
+): boolean {
+  if (insets.hudColumnBottom <= 0) return false
+  const w = Math.min(box.right, insets.hudColumnRight) - Math.max(box.left, 0)
+  const h = Math.min(box.bottom, insets.hudColumnBottom) - Math.max(box.top, 0)
+  return w > 0 && h > 0
+}
+
+/** The ring sits whole inside the clear window: off the header, Begin, the lamp rail, and the dock column. */
 export function camSeatClear(seat: { x: number; y: number }, view: CamSeatView, insets: CamInsets): boolean {
   const box = seatBox(seat, view)
   const inBand = box.bottom >= insets.rightBand[0] && box.top <= insets.rightBand[1]
+  if (markerOverlapsHudColumn(box, insets)) return false
   return (
     box.left >= 0 &&
+    box.right <= view.W &&
     box.right <= view.W - (inBand ? insets.right : 0) &&
     box.top >= insets.top &&
     box.bottom <= view.H - insets.bottom
@@ -151,6 +177,9 @@ export const NW_RING_MIN_SHARE = 0.9
 
 /** A glowing face counts as in view at the same share as the first-seat ring. */
 export const NW_CUE_MIN_SHARE = NW_RING_MIN_SHARE
+
+/** Hide the walker edge arrow once at least this much of the face disc is visible. */
+export const NW_CUE_ARROW_HIDE_SHARE = 0.5
 
 /** After map or face touch, auto-follow waits this long before panning again. */
 export const NW_CAM_TOUCH_HOLD_MS = 1000
@@ -164,7 +193,12 @@ export function camMarkerShare(
 ): number {
   const box = markerBox(point, radiusPlate, view)
   const inBand = box.bottom >= insets.rightBand[0] && box.top <= insets.rightBand[1]
-  const w = Math.min(box.right, view.W - (inBand ? insets.right : 0)) - Math.max(box.left, 0)
+  const clearLeft =
+    insets.hudColumnBottom > 0 && box.top < insets.hudColumnBottom
+      ? Math.max(0, insets.hudColumnRight)
+      : 0
+  const clearRight = view.W - (inBand ? insets.right : 0)
+  const w = Math.min(box.right, clearRight) - Math.max(box.left, clearLeft)
   const h = Math.min(box.bottom, view.H - insets.bottom) - Math.max(box.top, insets.top)
   if (w <= 0 || h <= 0) return 0
   return (w * h) / ((box.right - box.left) * (box.bottom - box.top))
@@ -207,11 +241,18 @@ export function camFirstSeat<T extends { x: number; y: number; live?: boolean }>
   return best
 }
 
-/** Radius of the edge arrow, and how far its centre stays from the edges of the clear window. */
+/** Radius of the edge arrow, and how far its centre stays from the screen edge. */
 export const NW_ARROW_R = 22
-const ARROW_PAD = 18
-/** The Sparks and Candle chips sit down the left edge, so the arrow keeps clear of them. */
-const ARROW_LEFT = 72
+export const NW_EDGE_ARROW_PAD = 18
+
+function camArrowWindow(view: CamSeatView, insets: CamInsets) {
+  const left = NW_EDGE_ARROW_PAD + NW_ARROW_R
+  const top = insets.top + NW_ARROW_R + NW_EDGE_ARROW_PAD
+  const bottom = view.H - insets.bottom - NW_ARROW_R - NW_EDGE_ARROW_PAD
+  const rightBelowRail = view.W - NW_ARROW_R - NW_EDGE_ARROW_PAD
+  const rightInBand = view.W - insets.right - NW_ARROW_R - NW_EDGE_ARROW_PAD
+  return { left, top, bottom, rightBelowRail, rightInBand, rightBand: insets.rightBand }
+}
 
 function camEdgeArrowAt(
   cx: number,
@@ -246,13 +287,10 @@ export function camSeatArrow<T extends { x: number; y: number; live?: boolean }>
   insets: CamInsets,
 ): { x: number; y: number; angle: number; seat: T } | null {
   const k = view.s0 * view.z
-  const left = ARROW_LEFT
-  const right = view.W - insets.right - NW_ARROW_R - ARROW_PAD
-  const top = insets.top + NW_ARROW_R + ARROW_PAD
-  const bottom = view.H - insets.bottom - NW_ARROW_R - ARROW_PAD
-  if (right <= left || bottom <= top) return null
-  const cx = (left + right) / 2
-  const cy = (top + bottom) / 2
+  const win = camArrowWindow(view, insets)
+  if (win.rightBelowRail <= win.left || win.bottom <= win.top) return null
+  const cx = (win.left + win.rightBelowRail) / 2
+  const cy = (win.top + win.bottom) / 2
   let near: T | null = null
   let nearDist = Infinity
   for (const seat of seats) {
@@ -266,7 +304,18 @@ export function camSeatArrow<T extends { x: number; y: number; live?: boolean }>
     }
   }
   if (!near) return null
-  const at = camEdgeArrowAt(cx, cy, view.tx + near.x * k, view.ty + near.y * k, left, top, right, bottom)
+  const ty = view.ty + near.y * k
+  const seatRight = ty >= win.rightBand[0] && ty <= win.rightBand[1] ? win.rightInBand : win.rightBelowRail
+  const at = camEdgeArrowAt(
+    cx,
+    cy,
+    view.tx + near.x * k,
+    ty,
+    win.left,
+    win.top,
+    seatRight,
+    win.bottom,
+  )
   if (!at) return null
   return { ...at, seat: near }
 }
@@ -278,14 +327,13 @@ export function camPointArrow(
   insets: CamInsets,
 ): { x: number; y: number; angle: number } | null {
   const k = view.s0 * view.z
-  const left = ARROW_LEFT
-  const right = view.W - insets.right - NW_ARROW_R - ARROW_PAD
-  const top = insets.top + NW_ARROW_R + ARROW_PAD
-  const bottom = view.H - insets.bottom - NW_ARROW_R - ARROW_PAD
-  if (right <= left || bottom <= top) return null
-  const cx = (left + right) / 2
-  const cy = (top + bottom) / 2
-  return camEdgeArrowAt(cx, cy, view.tx + point.x * k, view.ty + point.y * k, left, top, right, bottom)
+  const win = camArrowWindow(view, insets)
+  const py = view.ty + point.y * k
+  const right = py >= win.rightBand[0] && py <= win.rightBand[1] ? win.rightInBand : win.rightBelowRail
+  if (right <= win.left || win.bottom <= win.top) return null
+  const cx = (win.left + right) / 2
+  const cy = (win.top + win.bottom) / 2
+  return camEdgeArrowAt(cx, cy, view.tx + point.x * k, py, win.left, win.top, right, win.bottom)
 }
 
 export function camTransform(tx: number, ty: number): string {
