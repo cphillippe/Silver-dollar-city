@@ -559,6 +559,11 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   function onBoardUp(event?: ReactPointerEvent<HTMLDivElement>) {
     if (!drag.current) return
     if (event && event.pointerId !== dragPointerId.current) return
+    if (!moved.current && event) {
+      const last = rawRef.current[rawRef.current.length - 1]
+      const at = cellFromPoint(event.clientX, event.clientY)
+      if (last && (!at || !sameCell(last, at))) moved.current = true
+    }
     // A scored find already owns this gesture. Clear the trail and do not miss.
     if (scoredThisGesture.current) return endDrag()
     // A tap (no finger travel) keeps the built path so the next tap can extend it.
