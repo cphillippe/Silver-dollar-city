@@ -623,9 +623,9 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
     <lesson id="daily-stars" place="Sky Watch" person="Nora Skye" tripleId="nora-sky" ideaId="idea-stars" ideaLabel="The heavens speak of a Maker." challengeKind="sort" challengeTitle="Night air">
       <easy points="10" easyOrder="7">
         <learn>
-          <shortStory>Psalm 19 and Romans 1 treat the sky as speech. The heavens already speak of a Maker — and the careful fit of the world for life fits that voice.</shortStory>
-          <mainIdea>The heavens already speak of a Maker; fine-tuning fits that voice.</mainIdea>
-          <gloss>The heavens already speak of a Maker. Fine-tuning fits that voice.</gloss>
+          <shortStory>Psalm 19 and Romans 1 treat the sky as speech. The heavens already speak of a Maker — and the careful fit of the world for life points to that voice.</shortStory>
+          <mainIdea>The heavens already speak of a Maker; fine-tuning points to that voice.</mainIdea>
+          <gloss>The heavens already speak of a Maker. Fine-tuning points to that voice.</gloss>
           <loci>This idea lives at Sky Watch, with Nora.</loci>
           <word>
             <term>Maker</term>
@@ -634,7 +634,7 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
           <hint>Keep the sky as speech. Toss “silent decoration.”</hint>
         </learn>
         <match>
-          <sentenceCorrect>The heavens already speak of a Maker; fine-tuning fits that voice.</sentenceCorrect>
+          <sentenceCorrect>The heavens already speak of a Maker; fine-tuning points to that voice.</sentenceCorrect>
           <sentenceMisses>
             <miss>The heavens are silent about a Maker.</miss>
             <miss>Fine-tuning contradicts the psalm.</miss>
@@ -646,7 +646,7 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
           <whyEasy>Nora watches the sky. The heavens speak of a Maker.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>The heavens already speak of a Maker; fine-tuning fits that voice.</claim>
+          <claim>The heavens already speak of a Maker; fine-tuning points to that voice.</claim>
           <reason>The sky speaks of a Maker — the numbers fit that.</reason>
           <source>Psalm 19:1–4; Romans 1:20</source>
           <whyCorrect>The sky speaks of a Maker — the numbers fit that.</whyCorrect>
@@ -656,7 +656,7 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
             <miss>The sky is silent decoration.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The heavens already speak of a Maker; fine-tuning fits that voice.</choice>
+            <choice>The heavens already speak of a Maker; fine-tuning points to that voice.</choice>
             <choice>The heavens are silent about a Maker.</choice>
             <choice>Fine-tuning contradicts the psalm.</choice>
           </claimChoices>
@@ -669,9 +669,9 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
       </easy>
       <medium points="12">
         <learn>
-          <mediumTeach>Psalm 19 and Romans 1 treat the sky as speech: the heavens already declare a Maker. Fine-tuning fits that voice — the numbers and the psalm point the same way, not against each other.</mediumTeach>
-          <mainIdea>The heavens already speak of a Maker; fine-tuning fits that voice.</mainIdea>
-          <gloss>The heavens already speak of a Maker. Fine-tuning fits that voice.</gloss>
+          <mediumTeach>Psalm 19 and Romans 1 treat the sky as speech: the heavens already declare a Maker. Fine-tuning points to that voice — the numbers and the psalm point the same way, not against each other.</mediumTeach>
+          <mainIdea>The heavens already speak of a Maker; fine-tuning points to that voice.</mainIdea>
+          <gloss>The heavens already speak of a Maker. Fine-tuning points to that voice.</gloss>
           <loci>This idea lives at Sky Watch, with Nora.</loci>
           <word>
             <term>Maker</term>
@@ -680,7 +680,7 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
           <hint>Keep the sky as speech. Toss “silent decoration.”</hint>
         </learn>
         <match>
-          <sentenceCorrect>The heavens already speak of a Maker; fine-tuning fits that voice.</sentenceCorrect>
+          <sentenceCorrect>The heavens already speak of a Maker; fine-tuning points to that voice.</sentenceCorrect>
           <sentenceMisses>
             <miss>The heavens are silent about a Maker.</miss>
             <miss>Fine-tuning contradicts the psalm.</miss>
@@ -692,7 +692,7 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
           <whyMedium>Nora watches the sky. The heavens speak of a Maker.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>The heavens already speak of a Maker; fine-tuning fits that voice.</claim>
+          <claim>The heavens already speak of a Maker; fine-tuning points to that voice.</claim>
           <reason>The sky speaks of a Maker — the numbers fit that.</reason>
           <source>Psalm 19:1–4; Romans 1:20</source>
           <whyCorrect>The sky speaks of a Maker — the numbers fit that.</whyCorrect>
@@ -702,7 +702,7 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
             <miss>The sky is silent decoration.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The heavens already speak of a Maker; fine-tuning fits that voice.</choice>
+            <choice>The heavens already speak of a Maker; fine-tuning points to that voice.</choice>
             <choice>The heavens are silent about a Maker.</choice>
             <choice>Fine-tuning contradicts the psalm.</choice>
           </claimChoices>
@@ -715,9 +715,9 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
       </medium>
       <hard points="15">
         <learn>
-          <hardTeach>Psalm 19:1–4; Romans 1:20. Fine-tuning fits that voice.
+          <hardTeach>Psalm 19:1–4; Romans 1:20. Fine-tuning points to that voice.
 The heavens declare the glory of God, and the sky above proclaims his handiwork.</hardTeach>
-          <fullTeach>Psalm 19:1–4; Romans 1:20. Fine-tuning fits that voice.
+          <fullTeach>Psalm 19:1–4; Romans 1:20. Fine-tuning points to that voice.
 The heavens declare the glory of God, and the sky above proclaims his handiwork.</fullTeach>
           <prompt>Which notes belong in a careful night of looking?</prompt>
           <teachOnWrong>The sky speaks of a Maker — the numbers fit that. Keep that voice; toss the false choice.</teachOnWrong>
@@ -729,7 +729,7 @@ The heavens declare the glory of God, and the sky above proclaims his handiwork.
           </challengeTiles>
         </learn>
         <match>
-          <sentenceCorrect>The heavens already speak of a Maker; fine-tuning fits that voice.</sentenceCorrect>
+          <sentenceCorrect>The heavens already speak of a Maker; fine-tuning points to that voice.</sentenceCorrect>
           <sentenceMisses>
             <miss>The heavens are silent about a Maker.</miss>
             <miss>Fine-tuning contradicts the psalm.</miss>
@@ -741,7 +741,7 @@ The heavens declare the glory of God, and the sky above proclaims his handiwork.
           <whyHard>Nora Skye keeps Sky Watch. The heavens declare a Maker — that voice belongs on the ridge, not the porch lamp.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>The heavens already speak of a Maker; fine-tuning fits that voice.</claim>
+          <claim>The heavens already speak of a Maker; fine-tuning points to that voice.</claim>
           <reason>The sky speaks of a Maker — the numbers fit that.</reason>
           <source>Psalm 19:1–4; Romans 1:20</source>
           <whyCorrect>The sky speaks of a Maker — the numbers fit that.</whyCorrect>
@@ -751,7 +751,7 @@ The heavens declare the glory of God, and the sky above proclaims his handiwork.
             <miss>The sky is silent decoration.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The heavens already speak of a Maker; fine-tuning fits that voice.</choice>
+            <choice>The heavens already speak of a Maker; fine-tuning points to that voice.</choice>
             <choice>The heavens are silent about a Maker.</choice>
             <choice>Fine-tuning contradicts the psalm.</choice>
           </claimChoices>

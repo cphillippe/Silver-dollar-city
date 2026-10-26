@@ -156,7 +156,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       title: 'Night air',
       idea: 'the heavens already speak of a Maker',
       prompt: 'Which notes belong in a careful night of looking?',
-      context: 'Psalm 19:1–4; Romans 1:20. Fine-tuning fits that voice.',
+      context: 'Psalm 19:1–4; Romans 1:20. Fine-tuning points to that voice.',
       keepLabel: 'Keep',
       discardLabel: 'Set aside',
       tiles: [
@@ -168,7 +168,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
         },
         {
           id: 'b',
-          text: 'Fine-tuning fits the voice the heavens already speak.',
+          text: 'Fine-tuning points to the voice the heavens already speak.',
           bin: 'keep',
           why: 'A gift-shaped beauty is how the heavens declare a Giver — Psalm 19, not a shrug.',
         },

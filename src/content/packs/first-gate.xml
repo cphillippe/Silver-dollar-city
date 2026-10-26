@@ -11,7 +11,7 @@
     <lesson id="fg-order" place="Why Gate Arch" person="Ansel Gate" personId="ansel" plotId="gate" tripleId="order-gate" ideaId="idea-order" ideaLabel="The world holds together in Christ." challengeKind="sort" challengeTitle="We already trust order">
       <easy points="10" easyOrder="4">
         <learn>
-          <shortStory>You already live like the world hangs together — clocks, roads, promises. That is not a mood. Colossians names Christ: all things were made through him, and in him they hold together.</shortStory>
+          <shortStory>You already live like the world hangs together — clocks, roads, promises. That is not a mood. Colossians names Christ: all things were created through him, and in him they hold together.</shortStory>
           <mainIdea>You already trust that the world holds together in Christ.</mainIdea>
           <gloss>You already trust that the world holds together in Christ.</gloss>
           <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
@@ -35,9 +35,9 @@
         </match>
         <hold levelUpTo="medium" onFail="easy">
           <claim>You already trust that the world holds together in Christ.</claim>
-          <reason>All things were made through him and hold together in him.</reason>
+          <reason>All things were created through him and hold together in him.</reason>
           <source>Colossians 1:16–17</source>
-          <whyCorrect>All things were made through him and hold together in him.</whyCorrect>
+          <whyCorrect>All things were created through him and hold together in him.</whyCorrect>
           <whyMisses>
             <miss>Nothing holds the world together.</miss>
             <miss>Order is only a mood.</miss>
@@ -49,7 +49,7 @@
             <choice>You do not actually trust order in ordinary life.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>All things were made through him and hold together in him.</choice>
+            <choice>All things were created through him and hold together in him.</choice>
             <choice>Nothing holds the world together.</choice>
             <choice>Order is only a mood.</choice>
           </reasonChoices>
@@ -81,9 +81,9 @@
         </match>
         <hold levelUpTo="hard" onFail="easy">
           <claim>You already trust that the world holds together in Christ.</claim>
-          <reason>All things were made through him and hold together in him.</reason>
+          <reason>All things were created through him and hold together in him.</reason>
           <source>Colossians 1:16–17</source>
-          <whyCorrect>All things were made through him and hold together in him.</whyCorrect>
+          <whyCorrect>All things were created through him and hold together in him.</whyCorrect>
           <whyMisses>
             <miss>Nothing holds the world together.</miss>
             <miss>Order is only a mood.</miss>
@@ -95,7 +95,7 @@
             <choice>You do not actually trust order in ordinary life.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>All things were made through him and hold together in him.</choice>
+            <choice>All things were created through him and hold together in him.</choice>
             <choice>Nothing holds the world together.</choice>
             <choice>Order is only a mood.</choice>
           </reasonChoices>
@@ -123,9 +123,9 @@
         </match>
         <hold onFail="easy">
           <claim>You already trust that the world holds together in Christ.</claim>
-          <reason>All things were made through him and hold together in him.</reason>
+          <reason>All things were created through him and hold together in him.</reason>
           <source>Colossians 1:16–17</source>
-          <whyCorrect>All things were made through him and hold together in him.</whyCorrect>
+          <whyCorrect>All things were created through him and hold together in him.</whyCorrect>
           <whyMisses>
             <miss>Nothing holds the world together.</miss>
             <miss>Order is only a mood.</miss>
@@ -137,7 +137,7 @@
             <choice>You do not actually trust order in ordinary life.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>All things were made through him and hold together in him.</choice>
+            <choice>All things were created through him and hold together in him.</choice>
             <choice>Nothing holds the world together.</choice>
             <choice>Order is only a mood.</choice>
           </reasonChoices>
@@ -1493,7 +1493,7 @@ The grass withers, the flower fades; but the word of our God will stand for ever
     <lesson id="daily-isaiah" place="Why Gate Arch" person="Ansel Gate" personId="ansel" plotId="gate" tripleId="isaiah-gate" ideaId="idea-isaiah" ideaLabel="Isaiah’s Servant is Jesus." challengeKind="sort" challengeTitle="A hard poem">
       <easy points="10" easyOrder="33">
         <learn>
-          <shortStory>The poem’s Servant suffers for others and does not answer with a sword. The church names that Servant as Jesus.</shortStory>
+          <shortStory>The poem’s Servant suffers for others and does not answer with a sword. The New Testament names that Servant as Jesus.</shortStory>
           <mainIdea>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</mainIdea>
           <gloss>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</gloss>
           <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
@@ -1517,9 +1517,9 @@ The grass withers, the flower fades; but the word of our God will stand for ever
         </match>
         <hold levelUpTo="medium" onFail="easy">
           <claim>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</claim>
-          <reason>The poem’s Servant suffers for others and does not answer with a sword; the church names that Servant as Jesus.</reason>
+          <reason>The poem’s Servant suffers for others and does not answer with a sword; the New Testament names that Servant as Jesus.</reason>
           <source>Isaiah 53:4–12</source>
-          <whyCorrect>The poem’s Servant suffers for others and does not answer with a sword; the church names that Servant as Jesus.</whyCorrect>
+          <whyCorrect>The poem’s Servant suffers for others and does not answer with a sword; the New Testament names that Servant as Jesus.</whyCorrect>
           <whyMisses>
             <miss>The servant never suffers for anyone.</miss>
             <miss>Wounds are unrelated to healing in the poem.</miss>
@@ -1531,7 +1531,7 @@ The grass withers, the flower fades; but the word of our God will stand for ever
             <choice>The poem is about estate planning.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The poem’s Servant suffers for others and does not answer with a sword; the church names that Servant as Jesus.</choice>
+            <choice>The poem’s Servant suffers for others and does not answer with a sword; the New Testament names that Servant as Jesus.</choice>
             <choice>The servant never suffers for anyone.</choice>
             <choice>Wounds are unrelated to healing in the poem.</choice>
           </reasonChoices>
@@ -1563,9 +1563,9 @@ The grass withers, the flower fades; but the word of our God will stand for ever
         </match>
         <hold levelUpTo="hard" onFail="easy">
           <claim>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</claim>
-          <reason>The poem’s Servant suffers for others and does not answer with a sword; the church names that Servant as Jesus.</reason>
+          <reason>The poem’s Servant suffers for others and does not answer with a sword; the New Testament names that Servant as Jesus.</reason>
           <source>Isaiah 53:4–12</source>
-          <whyCorrect>The poem’s Servant suffers for others and does not answer with a sword; the church names that Servant as Jesus.</whyCorrect>
+          <whyCorrect>The poem’s Servant suffers for others and does not answer with a sword; the New Testament names that Servant as Jesus.</whyCorrect>
           <whyMisses>
             <miss>The servant never suffers for anyone.</miss>
             <miss>Wounds are unrelated to healing in the poem.</miss>
@@ -1577,7 +1577,7 @@ The grass withers, the flower fades; but the word of our God will stand for ever
             <choice>The poem is about estate planning.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The poem’s Servant suffers for others and does not answer with a sword; the church names that Servant as Jesus.</choice>
+            <choice>The poem’s Servant suffers for others and does not answer with a sword; the New Testament names that Servant as Jesus.</choice>
             <choice>The servant never suffers for anyone.</choice>
             <choice>Wounds are unrelated to healing in the poem.</choice>
           </reasonChoices>
@@ -1612,9 +1612,9 @@ He was pierced for our transgressions… and with his wounds we are healed.</ful
         </match>
         <hold onFail="easy">
           <claim>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</claim>
-          <reason>The poem’s Servant suffers for others and does not answer with a sword; the church names that Servant as Jesus.</reason>
+          <reason>The poem’s Servant suffers for others and does not answer with a sword; the New Testament names that Servant as Jesus.</reason>
           <source>Isaiah 53:4–12</source>
-          <whyCorrect>The poem’s Servant suffers for others and does not answer with a sword; the church names that Servant as Jesus.</whyCorrect>
+          <whyCorrect>The poem’s Servant suffers for others and does not answer with a sword; the New Testament names that Servant as Jesus.</whyCorrect>
           <whyMisses>
             <miss>The servant never suffers for anyone.</miss>
             <miss>Wounds are unrelated to healing in the poem.</miss>
@@ -1626,7 +1626,7 @@ He was pierced for our transgressions… and with his wounds we are healed.</ful
             <choice>The poem is about estate planning.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The poem’s Servant suffers for others and does not answer with a sword; the church names that Servant as Jesus.</choice>
+            <choice>The poem’s Servant suffers for others and does not answer with a sword; the New Testament names that Servant as Jesus.</choice>
             <choice>The servant never suffers for anyone.</choice>
             <choice>Wounds are unrelated to healing in the poem.</choice>
           </reasonChoices>
