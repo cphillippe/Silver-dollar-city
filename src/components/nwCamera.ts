@@ -175,7 +175,7 @@ export function camSeatShare(seat: { x: number; y: number }, view: CamSeatView, 
 /**
  * The one seat that wears the gold first-seat ring before the first lamp.
  * The earlier pick stays while at least NW_RING_MIN_SHARE of its ring is visible.
- * Otherwise the first open seat in list order with that much ring showing.
+ * Otherwise the open seat with the most ring showing at or above that share, preferring a whole ring in the clear window.
  * With none at all, null: the edge arrow is the gold cue then.
  */
 export function camFirstSeat<T extends { x: number; y: number; live?: boolean }>(
@@ -186,11 +186,25 @@ export function camFirstSeat<T extends { x: number; y: number; live?: boolean }>
 ): T | null {
   const held = keep ? seats.find((seat) => seat.live && seat.x === keep.x && seat.y === keep.y) : undefined
   if (held && camSeatShare(held, view, insets) >= NW_RING_MIN_SHARE) return held
+  let best: T | null = null
+  let bestClear = false
+  let bestShare = NW_RING_MIN_SHARE
   for (const seat of seats) {
     if (!seat.live) continue
-    if (camSeatShare(seat, view, insets) >= NW_RING_MIN_SHARE) return seat
+    const share = camSeatShare(seat, view, insets)
+    if (share + 1e-9 < NW_RING_MIN_SHARE) continue
+    const clear = camSeatClear(seat, view, insets)
+    if (
+      best === null ||
+      (clear && !bestClear) ||
+      (clear === bestClear && share > bestShare + 1e-9)
+    ) {
+      best = seat
+      bestClear = clear
+      bestShare = share
+    }
   }
-  return null
+  return best
 }
 
 /** Radius of the edge arrow, and how far its centre stays from the edges of the clear window. */
