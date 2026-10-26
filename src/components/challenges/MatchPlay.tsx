@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import { plainFor } from '../../content/plain'
-import { EASY, easyChromeLine, easyWrongTap, isEasy } from '../../lib/easy'
+import { EASY, easyChromeLine, easyMatchMiss, isEasy } from '../../lib/easy'
 import { easyLead } from '../../lib/words'
 import { useProgress } from '../../store/progress'
 import type { MatchChallenge, MatchSceneId } from '../../types'
@@ -212,7 +212,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       {status !== 'ok' && (status === 'wrong' || misses > 0) ? (
         <p className="match-toast" role="status">
           {easy ? (
-            <strong>{easyWrongTap(missCard ?? 'this card')}</strong>
+            <strong>{easyMatchMiss(missCard ?? 'the other line')}</strong>
           ) : (
             <>
               <strong>
@@ -271,7 +271,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
           })}
         </div>
         <div className="match-col is-claims">
-          <p className="match-col-label">{easy ? 'Main idea' : 'Claim'}</p>
+          <p className="match-col-label">{easy ? 'Lines' : 'Claim'}</p>
           {shownRight.map((item, index) => (
             <button
               key={item.id}
@@ -292,7 +292,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
 
       <p className="match-score">
         {easy
-          ? `${challenge.pairs.length - locked.length} left · ${locked.length} / ${challenge.pairs.length} kept`
+          ? `${locked.length} of ${challenge.pairs.length} matched`
           : `${challenge.pairs.length - locked.length} left · ${locked.length} / ${challenge.pairs.length} snapped`}
       </p>
       {easy && ready ? (

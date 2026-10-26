@@ -10,7 +10,7 @@ import { evidenceForTier } from '../src/content/evidence.ts'
 import { DAILY_POOL, dailyForDate } from '../src/content/daily.ts'
 import { findStraightSpelling } from '../src/lib/gemSearchGrid.ts'
 import { gemWordsFor } from '../src/lib/gemSearch.ts'
-import { EASY, easyChromeLine, easyFacingLine, easyReasonHint, easyWhyLine, easyWrongTap } from '../src/lib/easy.ts'
+import { EASY, easyChromeLine, easyFacingLine, easyReasonHint, easyWhyLine, easyMatchMiss } from '../src/lib/easy.ts'
 import { FATHER_RUN_HINT } from '../src/easyTrail/father/fatherRun.ts'
 import { localDateKey } from '../src/lib/dates.ts'
 import { SAVE_KIND } from '../src/lib/save.ts'
@@ -1615,7 +1615,7 @@ async function proveGemToast(browser, origin) {
     await pointerClick(page, page.locator(`[data-match-line]:not([data-match-line="${id}"])`).first())
     await page.locator('.match-toast').waitFor()
     const toast = ((await page.locator('.match-toast').innerText()) || '').replace(/\s+/g, ' ').trim()
-    assert.equal(toast, easyWrongTap(pair.right))
+    assert.equal(toast, easyMatchMiss(pair.right))
     for (let guard = 0; guard < 4; guard += 1) {
       if (await page.locator('.play.is-match.is-win').count()) break
       const picture = page.locator('[data-match-picture]').first()
