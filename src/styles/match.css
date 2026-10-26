@@ -1019,7 +1019,7 @@ html[data-easy='on'] .next-tap {
       html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
       html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
       .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='cephas'] .match-scene {
-    background: #33427a url('../assets/story-strip/creed4-appeared.webp') 50% 15% / cover no-repeat;
+    background: #33427a url('../assets/story-strip/creed4-appeared.webp') 50% 0% / cover no-repeat;
   }
   /* twelve: The Twelve (new twelve.webp) */
   :is(html[data-easy='on'] .play.is-match.is-deal,
@@ -1075,7 +1075,7 @@ html[data-easy='on'] .next-tap {
       html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
       html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
       .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='faith'] .match-scene {
-    background: #33427a url('../assets/story-strip/beat3-rest.webp') 50% 15% / cover no-repeat;
+    background: #33427a url('../assets/story-strip/beat3-rest.webp') 50% 0% / cover no-repeat;
   }
   /* boast: Boast (new boast.webp) */
   :is(html[data-easy='on'] .play.is-match.is-deal,
@@ -1107,7 +1107,7 @@ html[data-easy='on'] .next-tap {
       html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
       html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
       .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='anyone'] .match-scene {
-    background: #33427a url('../assets/story-strip/beat2-come.webp') 50% 15% / cover no-repeat;
+    background: #33427a url('../assets/story-strip/beat2-come.webp') 50% 0% / cover no-repeat;
   }
   /* sower: The sower (new sower.webp) */
   :is(html[data-easy='on'] .play.is-match.is-deal,
