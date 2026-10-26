@@ -933,34 +933,6 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   useEffect(() => () => window.cancelAnimationFrame(camRaf.current), [])
 
-  useEffect(() => {
-    if (!camOn || phase !== 'wave' || won) return
-    let frame = 0
-    const followCue = () => {
-      const point = camCuePlateRef.current
-      if (point && !camPanning.current) {
-        const f = camFrame()
-        if (f) {
-          const view = {
-            W: f.W,
-            H: f.H,
-            s0: f.world.s0,
-            z: camZ,
-            tx: camPanRef.current[0],
-            ty: camPanRef.current[1],
-          }
-          if (camMarkerShare(point, NW_CUE_FACE_R, view, f.insets) + 1e-6 < NW_CUE_MIN_SHARE) {
-            const [tx, ty] = focusPan(point, f.W, f.H, f.world.s0, camZ, f.insets)
-            camApply(tx, ty, true)
-          }
-        }
-      }
-      frame = window.requestAnimationFrame(followCue)
-    }
-    frame = window.requestAnimationFrame(followCue)
-    return () => window.cancelAnimationFrame(frame)
-  }, [camOn, phase, won, mapId, boardBox.w, boardBox.h, camZ])
-
   const CAM_CHROME = '.nw-hud,.nw-rail,.nw-docks,.nw-balloon-slot,.nw-map-overlay,.defend-tower-card,.nw-cam-recenter,.nw-seat-arrow,.nw-pace'
 
   function camDown(event: ReactPointerEvent<HTMLDivElement>) {
