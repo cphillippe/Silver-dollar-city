@@ -1775,9 +1775,42 @@ assert.match(
   assert.match(screenSrc, /HEAVEN_POINT\.x - units/, '#792 the slide is drawn from HEAVEN_POINT')
   assert.match(
     screenSrc,
-    /useLayoutEffect\(\(\) => \{\s*if \(!easy\) return\s*const sync = \(\) => keepHeavenClear\(\)[\s\S]*?\}, \[easy, phase, mapId\]\)/,
+    /useLayoutEffect\(\(\) => \{\s*if \(!easy\) return\s*const sync = \(\) => keepHeavenClear\(\)[\s\S]*?\}, \[easy, phase, mapId, camOn\]\)/,
     '#792 Heaven slide runs on Easy layout changes only',
   )
+  assert.match(
+    screenSrc,
+    /if \(rectsOverlap\(sign\.getBoundingClientRect\(\), rail\.getBoundingClientRect\(\), 6\)\) sign\.setAttribute\('data-heaven-tuck', 'hide'\)/,
+    '#818 camera on hides the Heaven sign while it touches the rail',
+  )
+  assert.match(
+    screenSrc,
+    /camTransform\(camPanRef\.current\[0\], camPanRef\.current\[1\]\)\s*if \(easy\) \{\s*keepHeavenClear\(\)\s*keepSeatRingInView\(\)/,
+    '#818 every camera write rechecks the Heaven sign and the edge ring',
+  )
+  assert.match(screenSrc, /const NW_SEAT_RING_SLIDE_MAX = 16\b/, '#818 C the ring slide is capped under SEAT_TAP_R')
+  assert.match(
+    screenSrc,
+    /ring\.setAttribute\('transform', `translate\(\$\{units\.toFixed\(2\)\} 0\)`\)/,
+    '#818 C the edge ring slides on draw only (no seat or hit-box change)',
+  )
+  assert.match(
+    screenSrc,
+    /useLayoutEffect\(\(\) => \{\s*if \(easy\) keepSeatRingInView\(\)\s*\}\)/,
+    '#818 C the edge ring is rechecked after every Easy render',
+  )
+  assert.match(
+    screenSrc,
+    /node\.addEventListener\('touchmove', stop, \{ passive: false \}\)/,
+    '#818 a live pan consumes touchmove so no native fling eats the next tap',
+  )
+  assert.match(
+    screenSrc,
+    /if \(camPanning\.current && event\.cancelable\) event\.preventDefault\(\)/,
+    '#818 only a live pan (past slop) blocks touchmove',
+  )
+  assert.match(screenSrc, /onPointerUp=\{recenterUp\}/, '#818 Recenter has a pointer-up fallback')
+  assert.match(screenSrc, /if \(stamp - recenterFiredAt\.current < 800\) return/, '#818 Recenter fires once per tap')
   const readout = screenSrc.match(/useLayoutEffect\(\(\) => \{\s*if \(!easy\) return\s*if \(!\(tapReadoutOn \|\| missCue !== 'off'\)\)[\s\S]*?\}, \[([^\]]*)\]\)/)
   assert.ok(readout, '#792 readout loop only runs while a cue needs it')
   assert.equal(readout[1], 'easy, tapReadoutOn, missCue, phase')
@@ -1785,6 +1818,11 @@ assert.match(
   const defendCss = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   assert.match(defendCss, /\.defend-page\.is-easy-watch \.defend-heaven-label \{\s*text-anchor: end;/)
   assert.match(defendCss, /\.defend-page\.is-easy-watch g\.defend-heaven\[data-heaven-tuck='yes'\] \.defend-heaven-label \{\s*display: none;/)
+  assert.match(
+    defendCss,
+    /\.defend-page\.is-easy-watch g\.defend-heaven\[data-heaven-tuck='hide'\] \{\s*display: none;/,
+    '#818 hidden Heaven sign CSS',
+  )
   const mapSrc792 = readFileSync(new URL('../src/components/CityMap.tsx', import.meta.url), 'utf8')
   const easyLegend = mapSrc792.slice(mapSrc792.indexOf('isEasy(progress) ? ('), mapSrc792.indexOf('<p className="eyebrow">Eden'))
   assert.doesNotMatch(easyLegend, /city-gift/, '#792 Easy Home drops the hidden town legend gift')
@@ -1864,15 +1902,15 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.541')
-assert.equal(CHANGELOG[0].version, '1.4.541', '1.4.541 is the newest row')
-assert.ok(CHANGELOG.some((note) => note.version === '1.4.541'), '1.4.541 changelog row')
+assert.equal(APP_VERSION, '1.4.542')
+assert.equal(CHANGELOG[0].version, '1.4.542', '1.4.542 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.542'), '1.4.542 changelog row')
 assert.doesNotMatch(
-  latestChange('1.4.541').items.join('\n'),
+  latestChange('1.4.542').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
-  '1.4.541 changelog avoids GitHub close keywords',
+  '1.4.542 changelog avoids GitHub close keywords',
 )
-assert.match(latestChange('1.4.541').items.join('\n'), /Hard stays the same\./)
+assert.match(latestChange('1.4.542').items.join('\n'), /Hard stays the same\./)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.540'), '1.4.540 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.540').items.join('\n'),
