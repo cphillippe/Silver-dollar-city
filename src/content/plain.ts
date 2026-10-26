@@ -105,7 +105,7 @@ const PLAIN: Record<string, PlainLine> = {
   ),
   'fg-order': line(
     'You already trust that the world holds together in Christ.',
-    'You already live like the world hangs together — clocks, roads, promises. Colossians names Christ: all things were made through him, and in him they hold together.',
+    'You already live like the world hangs together — clocks, roads, promises. Colossians names Christ: all things were created through him, and in him they hold together.',
     { term: 'Order', sense: 'the world hanging together — not a lucky pile', hint: 'Keep the lived trust. Toss the lucky pile.' },
   ),
   'fg-reason': line(
