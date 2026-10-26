@@ -492,7 +492,8 @@ img.gem-heart {
 .play.is-gem-search .gem-stage .match-toast {
   position: absolute;
   left: 50%;
-  top: 12%;
+  top: auto;
+  bottom: calc(100% + 8px);
   z-index: 8;
   width: min(92%, 240px);
   margin: 0;
@@ -528,11 +529,11 @@ img.gem-heart {
 
 @keyframes gem-overlay-pop {
   0% {
-    transform: translateX(-50%) scale(0.86);
+    transform: translateX(-50%) translateY(6px) scale(0.86);
     opacity: 0;
   }
   100% {
-    transform: translateX(-50%) scale(1);
+    transform: translateX(-50%) translateY(0) scale(1);
     opacity: 1;
   }
 }
@@ -660,13 +661,19 @@ html[data-easy='on'] .play.is-gem-search .gem-cell.is-start-gold {
 html[data-easy='on'] .play.is-gem-search .gem-start-hint {
   margin: 0 0 4px;
   padding: 6px 10px;
+  min-height: 2.4em;
+  flex: 0 0 auto;
   text-align: center;
-  font-size: 0.95rem;
+  font-size: 0.8125rem;
   font-weight: 750;
   line-height: 1.2;
   color: #2a2118;
   background: #fff6e8;
   border-radius: 12px;
+}
+
+html[data-easy='on'] .play.is-gem-search .gem-start-hint.is-reserved {
+  visibility: hidden;
 }
 
 /* Fixes #443: no board-wide .gem-cell.is-live after the first find.
