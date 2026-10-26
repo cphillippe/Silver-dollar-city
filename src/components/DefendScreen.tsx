@@ -288,6 +288,7 @@ import {
   camPointArrow,
   camSeatArrow,
   NW_ARROW_R,
+  NW_CUE_ARROW_HIDE_SHARE,
   NW_CUE_FACE_R,
   NW_CUE_MIN_SHARE,
   camFrameInsets,
@@ -869,6 +870,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const arrowClickSeen = useRef(false)
   const arrowFiredAt = useRef(-Infinity)
   const arrowTargetRef = useRef<{ x: number; y: number } | null>(null)
+  const arrowCaptureRef = useRef<{ id: number; node: HTMLButtonElement } | null>(null)
+  const hadMapArrowRef = useRef(false)
   const camFirstRef = useRef<{ x: number; y: number } | null>(null)
   const camCuePlateRef = useRef<{ x: number; y: number } | null>(null)
   const camLastTouchAt = useRef(-Infinity)
@@ -882,6 +885,43 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   function camFollowPaused() {
     if (camPointerDown.current > 0) return true
     return performance.now() - camLastTouchAt.current < NW_CAM_TOUCH_HOLD_MS
+  }
+
+  function releaseArrowPointerCapture() {
+    const cap = arrowCaptureRef.current
+    if (cap) {
+      try {
+        if (cap.node.hasPointerCapture(cap.id)) cap.node.releasePointerCapture(cap.id)
+      } catch {
+        /* The pointer is already gone. */
+      }
+      arrowCaptureRef.current = null
+    }
+  }
+
+  /** Clears the pointer-down count and touch hold so auto-follow can run again. */
+  function resetCamTouchFollowGate() {
+    camPointerDown.current = 0
+    camLastTouchAt.current = -Infinity
+  }
+
+  /** Cancel, lost capture, window pointer-up, or the arrow hiding mid-press. */
+  function abortArrowPointer() {
+    arrowPress.current = null
+    releaseArrowPointerCapture()
+    resetCamTouchFollowGate()
+  }
+
+  function finishArrowPointer() {
+    arrowPress.current = null
+    releaseArrowPointerCapture()
+    camPointerDown.current = Math.max(0, camPointerDown.current - 1)
+  }
+
+  function resetCamFollowTouchState() {
+    abortArrowPointer()
+    camPanning.current = false
+    camStart.current = null
   }
 
   function camFrame() {
@@ -944,6 +984,21 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   })
 
   useEffect(() => () => window.cancelAnimationFrame(camRaf.current), [])
+
+  useEffect(() => {
+    if (!camOn) return
+    const onWindowPointerEnd = (event: PointerEvent) => {
+      const press = arrowPress.current
+      if (!press || event.pointerId !== press.id) return
+      abortArrowPointer()
+    }
+    window.addEventListener('pointerup', onWindowPointerEnd)
+    window.addEventListener('pointercancel', onWindowPointerEnd)
+    return () => {
+      window.removeEventListener('pointerup', onWindowPointerEnd)
+      window.removeEventListener('pointercancel', onWindowPointerEnd)
+    }
+  }, [camOn])
 
   useEffect(() => {
     if (!camOn || phase !== 'wave' || won) return
@@ -1030,6 +1085,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     suppressClickUntil.current = performance.now() + 400
     event.stopPropagation()
     camApply(camPanRef.current[0], camPanRef.current[1], true)
+    camPanning.current = false
     keepReadoutClear()
   }
 
@@ -1081,15 +1137,23 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     camPointerDown.current += 1
     arrowClickSeen.current = false
     arrowPress.current = { id: event.pointerId, x: event.clientX, y: event.clientY }
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId)
+      arrowCaptureRef.current = { id: event.pointerId, node: event.currentTarget }
+    } catch {
+      /* A tap still works when capture is unavailable. */
+    }
   }
 
   /** Same pointer-up fallback as Begin: a tap still recenters when the browser skips click. */
   function arrowUp(event: ReactPointerEvent<HTMLButtonElement>) {
     const press = arrowPress.current
-    arrowPress.current = null
     stampCamTouch()
-    camPointerDown.current = Math.max(0, camPointerDown.current - 1)
-    if (!press || press.id !== event.pointerId) return
+    if (!press || press.id !== event.pointerId) {
+      abortArrowPointer()
+      return
+    }
+    finishArrowPointer()
     if (Math.hypot(event.clientX - press.x, event.clientY - press.y) >= NW_TAP_SLOP) return
     const button = event.currentTarget
     const box = button.getBoundingClientRect()
@@ -3613,6 +3677,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   }
 
   function startWave() {
+    resetCamFollowTouchState()
     armWaveCount()
     setPhase('wave')
   }
@@ -3626,7 +3691,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setBossBonus(0)
     setLoreMeet(null)
     if (waveIndex + 1 < nightLength(easy)) {
-      setWaveIndex((i) => i + 1); armWaveCount()
+      resetCamFollowTouchState()
+      setWaveIndex((i) => i + 1)
+      armWaveCount()
       setPhase('wave')
       return
     }
@@ -3822,13 +3889,15 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
             camSeatView,
             camFrameInsets(camDims?.top ?? 0),
           )
-          return share + 1e-6 < NW_CUE_MIN_SHARE
+          return share + 1e-6 < NW_CUE_ARROW_HIDE_SHARE
             ? camPointArrow(camCuePlateRef.current, camSeatView, camFrameInsets(camDims?.top ?? 0))
             : null
         })()
       : null
   const mapArrow = seatArrow ?? walkerArrow
   arrowTargetRef.current = seatArrow ? { x: seatArrow.seat.x, y: seatArrow.seat.y } : camCuePlateRef.current
+  if (hadMapArrowRef.current && !mapArrow) resetCamFollowTouchState()
+  hadMapArrowRef.current = !!mapArrow
 
   const tip =
     phase === 'wave'
@@ -3890,8 +3959,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           }}
           onPointerDown={arrowDown}
           onPointerUp={arrowUp}
-          onPointerCancel={() => {
-            arrowPress.current = null
+          onPointerCancel={abortArrowPointer}
+          onLostPointerCapture={() => {
+            if (arrowPress.current) abortArrowPointer()
           }}
           onClick={() => {
             arrowClickSeen.current = true
