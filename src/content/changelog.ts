@@ -15,6 +15,15 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.541',
+    title: 'Easy Match: final picture cards',
+    when: '2026-10-26',
+    items: [
+      'Picture cards in Easy Match now show final art instead of placeholder icons.',
+      'Hard stays the same.',
+    ],
+  },
+  {
     version: '1.4.540',
     title: 'Easy Night Watch: camera follow and edge arrow fixes',
     when: '2026-10-26',
