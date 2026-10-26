@@ -1784,13 +1784,14 @@ async function mouseTap(page, at, jitter = 0) {
   await page.waitForTimeout(120)
 }
 
-async function touchDrag(page, from, to, steps = 8) {
+async function touchDrag(page, from, to, steps = 8, gap = 0) {
   const cdp = await page.context().newCDPSession(page)
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: from.x, y: from.y }] })
   for (let i = 1; i <= steps; i += 1) {
     const x = from.x + ((to.x - from.x) * i) / steps
     const y = from.y + ((to.y - from.y) * i) / steps
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y }] })
+    if (gap) await page.waitForTimeout(gap)
   }
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
   await cdp.detach()
@@ -2583,6 +2584,11 @@ const NW_SIZES = [
   [375, 667],
   [390, 844],
 ]
+const NW_HEAVEN_SIZES = [
+  [375, 667],
+  [390, 844],
+  [412, 915],
+]
 const NW_SLUGS = ['a2', 'far-hills', 'map02', 'map03', 'map04', 'map05', 'map06']
 const NW_SLUG_ID = { map02: 'far-hills' }
 const nwId = (slug) => NW_SLUG_ID[slug] ?? slug
@@ -2791,6 +2797,63 @@ function nwNear(a, b, tol, label) {
 
 function nwHits(a, b, pad = 0) {
   return a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad
+}
+
+async function nwHeavenRail(page) {
+  return page.evaluate(() => {
+    const sign = document.querySelector('.defend-board g.defend-heaven')
+    const rail = document.querySelector('.nw-rail')
+    if (!sign || !rail) return { area: 0, shown: false }
+    const a = sign.getBoundingClientRect()
+    const b = rail.getBoundingClientRect()
+    const shown = a.width > 0.5
+    if (!shown) return { area: 0, shown: false }
+    const left = Math.max(a.left, b.left)
+    const right = Math.min(a.right, b.right)
+    const top = Math.max(a.top, b.top)
+    const bottom = Math.min(a.bottom, b.bottom)
+    const area = left < right && top < bottom ? (right - left) * (bottom - top) : 0
+    return { area, shown: true }
+  })
+}
+
+async function nwHeavenWatch(page, stop = false) {
+  if (!stop) {
+    await page.evaluate(() => {
+      window.__nwHeavenMax = 0
+      window.__nwHeavenHid = 0
+      let running = true
+      window.__nwHeavenStop = () => {
+        running = false
+      }
+      const tick = () => {
+        if (!running) return
+        const sign = document.querySelector('.defend-board g.defend-heaven')
+        const rail = document.querySelector('.nw-rail')
+        if (sign && rail) {
+          const a = sign.getBoundingClientRect()
+          const b = rail.getBoundingClientRect()
+          const shown = a.width > 0.5
+          if (!shown) window.__nwHeavenHid += 1
+          else {
+            const left = Math.max(a.left, b.left)
+            const right = Math.min(a.right, b.right)
+            const top = Math.max(a.top, b.top)
+            const bottom = Math.min(a.bottom, b.bottom)
+            const area = left < right && top < bottom ? (right - left) * (bottom - top) : 0
+            if (area > window.__nwHeavenMax) window.__nwHeavenMax = area
+          }
+        }
+        requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    })
+    return null
+  }
+  return page.evaluate(() => {
+    window.__nwHeavenStop?.()
+    return { max: window.__nwHeavenMax ?? 0, hid: window.__nwHeavenHid ?? 0 }
+  })
 }
 
 /** Seats and arches the clamp keeps under the bottom chrome: judged by their centre, and counted. */
@@ -3328,7 +3391,257 @@ async function proveNwWaveGestures(browser, origin, size, slug, errorsOut) {
   }
 }
 
+// -- 4b. Heaven sign vs rail and Recenter after edge drags (#818) --------------------------------
+
+async function proveNwHeavenSteps(page, slug, size, errorsOut, { wave = false } = {}) {
+  const where = `${slug} ${size[0]}x${size[1]}`
+  const v0 = await nwView(page)
+  let open = await nwHeavenRail(page)
+  assert.equal(open.area, 0, `nwPan heaven: ${where} at open the sign is clear of the rail ${JSON.stringify(open)}`)
+  assert.equal(open.shown, true, `nwPan heaven: ${where} at open the sign is visible`)
+
+  const txStar = await page.evaluate(({ tx, W, worldW }) => {
+    const sign = document.querySelector('.defend-board g.defend-heaven')?.getBoundingClientRect()
+    const rail = document.querySelector('.nw-rail')?.getBoundingClientRect()
+    if (!sign || !rail) return (W - worldW) / 2
+    const star = tx + (rail.left + rail.width / 2 - (sign.left + sign.width / 2))
+    const lo = W - worldW
+    return Math.min(0, Math.max(lo, star))
+  }, { tx: v0.tx, W: v0.W, worldW: v0.world.w })
+  const pans = [
+    [0, 0],
+    [v0.W - v0.world.w, 0],
+    [(v0.W - v0.world.w) / 2, 0],
+    [txStar, 0],
+    [v0.W - v0.world.w, v0.H - v0.world.h],
+  ]
+
+  for (const [tx, ty] of pans) {
+    await nwPanTo(page, tx, ty)
+    await page.waitForTimeout(80)
+    const read = await nwHeavenRail(page)
+    assert.equal(read.area, 0, `nwPan heaven: ${where} at tx=${tx.toFixed(0)},ty=${ty.toFixed(0)} ${JSON.stringify(read)}`)
+  }
+
+  await nwPanTo(page, 0, 0)
+  await nwHeavenWatch(page, false)
+  const frame = (await nwView(page)).frame
+  const W = size[0]
+  const H = size[1]
+  for (let drag = 0; drag < 6; drag += 1) {
+    const v = await nwView(page)
+    if (Math.abs(v.tx - (v.W - v.world.w)) < 1) break
+    await nwGesture(
+      page,
+      [
+        { x: frame.left + W * 0.85, y: frame.top + H * 0.4 },
+        { x: frame.left + W * 0.05, y: frame.top + H * 0.4 },
+      ],
+      40,
+    )
+    await page.waitForTimeout(80)
+  }
+  for (let drag = 0; drag < 6; drag += 1) {
+    const v = await nwView(page)
+    if (Math.abs(v.tx) < 1) break
+    await nwGesture(
+      page,
+      [
+        { x: frame.left + W * 0.05, y: frame.top + H * 0.4 },
+        { x: frame.left + W * 0.85, y: frame.top + H * 0.4 },
+      ],
+      40,
+    )
+    await page.waitForTimeout(80)
+  }
+  const sample = await nwHeavenWatch(page, true)
+  assert.equal(sample.max, 0, `nwPan heaven: ${where} live sweep max overlap ${JSON.stringify(sample)}`)
+  assert.ok(sample.hid > 0, `nwPan heaven: ${where} sweep hid the sign at least once ${JSON.stringify(sample)}`)
+
+  const rc = await nwRect(page, '.nw-cam-recenter')
+  if (rc) await page.mouse.click(rc.cx, rc.cy)
+  await page.waitForTimeout(200)
+  const after = await nwHeavenRail(page)
+  assert.equal(after.shown, true, `nwPan heaven: ${where} sign shows again after Recenter`)
+  return wave ? 'wave ok' : 'plant ok'
+}
+
+async function proveNwHeaven(browser, origin, size, slug, errorsOut, { query = '' } = {}) {
+  const where = `${slug} ${size[0]}x${size[1]}${query ? ' wave' : ''}`
+  const { ctx, page, errors, consoleErrors } = await nwOpen(browser, origin, size, slug, { query })
+  try {
+    assert.equal(await page.locator('[data-nw-cam="on"]').count(), 1, `${where} camera on`)
+    if (query.includes('nwRound=6')) await nwBegin(page, where)
+    await proveNwHeavenSteps(page, slug, size, errorsOut, { wave: query.includes('nwRound=6') })
+    return where
+  } finally {
+    assert.deepEqual(errors, [], `${where} page errors`)
+    errorsOut.push(...consoleErrors.filter((text) => !/Failed to load resource/.test(text)))
+    await ctx.close()
+  }
+}
+
+async function proveNwHeavenBoost(browser, origin, size, slug, errorsOut) {
+  const where = `${slug} ${size[0]}x${size[1]} boost`
+  const { ctx, page, errors, consoleErrors } = await nwOpen(browser, origin, size, slug, { query: '&nwRound=6' })
+  try {
+    await nwBegin(page, where)
+    const started = Date.now()
+    while (Date.now() - started < 90_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
+      const cue = await page.evaluate(() => {
+        const face = document.querySelector('.defend-raider.is-easy-cue')
+        if (!face) return null
+        const id = face.getAttribute('data-walker-id')
+        const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+        if (!tap) return null
+        const box = tap.getBoundingClientRect()
+        const x = box.x + box.width / 2
+        const y = box.y + box.height / 2
+        const node = document.elementFromPoint(x, y)
+        if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+        return { x, y }
+      })
+      if (cue) await page.mouse.click(cue.x, cue.y)
+      await page.waitForTimeout(80)
+    }
+    assert.ok((await page.locator('.defend-page.is-boost').count()) >= 1, 'R6 boost not reached')
+    await proveNwHeavenSteps(page, slug, size, errorsOut, { wave: true })
+    return where
+  } finally {
+    assert.deepEqual(errors, [], `${where} page errors`)
+    errorsOut.push(...consoleErrors.filter((text) => !/Failed to load resource/.test(text)))
+    await ctx.close()
+  }
+}
+
+async function proveNwRecenterAfterEdge(browser, origin, size, slug, { swallow = false } = {}) {
+  const where = `${slug} ${size[0]}x${size[1]}${swallow ? ' swallow' : ''}`
+  const { ctx, page, errors, consoleErrors } = await nwOpen(browser, origin, size, slug, { touch: true })
+  try {
+    await page.evaluate((on) => {
+      window.__nwSwallow = 0
+      window.__nwRailClick = 0
+      window.__nwSwallowOn = on
+      window.addEventListener(
+        'click',
+        (event) => {
+          if (event.target instanceof Element && event.target.closest('.nw-cam-recenter')) {
+            if (window.__nwSwallowOn) {
+              window.__nwSwallow += 1
+              window.__nwSwallowOn = false
+              event.stopImmediatePropagation()
+              event.preventDefault()
+            }
+          }
+          if (event.target instanceof Element && event.target.closest('.nw-rail button.defend-ability')) {
+            window.__nwRailClick += 1
+          }
+        },
+        true,
+      )
+    }, swallow)
+
+    await nwPanTo(page, 0, 0)
+    const v0 = await nwView(page)
+    const frame = v0.frame
+    const W = size[0]
+    const H = size[1]
+    const from = { x: frame.left + W * 0.4, y: frame.top + H * 0.45 }
+    const to = { x: from.x + 300, y: from.y + 300 }
+    await touchDrag(page, from, to, 10, 12)
+    await touchDrag(page, from, to, 10, 12)
+    const pinned = await nwView(page)
+    nwNear(pinned.tx, 0, 1, `${where} pinned x`)
+    nwNear(pinned.ty, 0, 1, `${where} pinned y`)
+
+    await page.waitForTimeout(800)
+    const lampsBefore = await nwCount(page, '.defend-clear-lamp')
+    const tapsBefore = await nwTaps(page)
+    const rc = await nwRect(page, '.nw-cam-recenter')
+    assert.ok(rc, `${where} Recenter visible`)
+    await page.touchscreen.tap(rc.cx, rc.cy)
+    await page.waitForTimeout(300)
+    const v1 = await nwView(page)
+    const open = focusPan(NW_CAMERA_FOCUS[nwId(slug)], v1.W, v1.H, nwK(v1).s0, v1.z, camFrameInsets(v1.frame.top))
+    nwNear(v1.tx, open[0], 1, `${where} Recenter pan x`)
+    nwNear(v1.ty, open[1], 1, `${where} Recenter pan y`)
+    assert.equal(await nwCount(page, '.defend-clear-lamp'), lampsBefore, `${where} Recenter plants nothing`)
+    assert.deepEqual(await nwTaps(page), tapsBefore, `${where} Recenter is not a miss`)
+    assert.equal(await nwCount(page, '.defend-tower-card'), 0, `${where} no tower card`)
+
+    await page.touchscreen.tap(rc.cx, rc.cy)
+    await page.waitForTimeout(100)
+    const vDedupe = await nwView(page)
+    nwNear(vDedupe.tx, open[0], 1, `${where} dedupe pan x`)
+    nwNear(vDedupe.ty, open[1], 1, `${where} dedupe pan y`)
+
+    if (!swallow) {
+      await page.waitForTimeout(850)
+      await nwGesture(page, [{ x: frame.left + W * 0.5, y: frame.top + H * 0.5 }, { x: frame.left + W * 0.5 + 40, y: frame.top + H * 0.5 }], 4)
+      await page.mouse.click(rc.cx, rc.cy)
+      await page.waitForTimeout(200)
+      const vRecent = await nwView(page)
+      nwNear(vRecent.tx, open[0], 1, `${where} mouse Recenter x`)
+      await nwGesture(page, [{ x: frame.left + W * 0.5, y: frame.top + H * 0.5 }, { x: frame.left + W * 0.5 + 40, y: frame.top + H * 0.5 }], 4)
+      await page.waitForTimeout(500)
+      const vStay = await nwView(page)
+      assert.ok(Math.abs(vStay.tx - vRecent.tx) > 5 || Math.abs(vStay.ty - vRecent.ty) > 5, `${where} no second fallback recenter`)
+    }
+
+    if (swallow) {
+      await nwPanTo(page, 0, 0)
+      await touchDrag(page, from, to, 10, 12)
+      await touchDrag(page, from, to, 10, 12)
+      await page.waitForTimeout(800)
+      await page.evaluate(() => {
+        window.__nwSwallowOn = true
+      })
+      await page.touchscreen.tap(rc.cx, rc.cy)
+      await page.waitForTimeout(300)
+      const vSw = await nwView(page)
+      nwNear(vSw.tx, open[0], 1, `${where} swallow fallback x`)
+      const swallowed = await page.evaluate(() => window.__nwSwallow)
+      assert.ok(swallowed >= 1, `${where} click was swallowed`)
+    }
+
+    await nwPanTo(page, 0, 0)
+    await touchDrag(page, from, to, 10, 12)
+    await touchDrag(page, from, to, 10, 12)
+    await page.waitForTimeout(800)
+    const railBtn = page.locator('.nw-rail button.defend-ability').first()
+    const railBox = await railBtn.boundingBox()
+    assert.ok(railBox, `${where} rail ability`)
+    await page.evaluate(() => {
+      window.__nwRailClick = 0
+    })
+    await page.touchscreen.tap(railBox.x + railBox.width / 2, railBox.y + railBox.height / 2)
+    await page.waitForTimeout(200)
+    const railClicks = await page.evaluate(() => window.__nwRailClick)
+    assert.ok(railClicks >= 1, `${where} rail button got a click after edge drags`)
+
+    return where
+  } finally {
+    assert.deepEqual(errors, [], `${where} page errors`)
+    await ctx.close()
+  }
+}
+
 // -- 5. Off paths ------------------------------------------------------------------------------
+
+async function assertNwHeavenOff(page, label) {
+  const read = await page.evaluate(() => {
+    const sign = document.querySelector('.defend-board g.defend-heaven')
+    const tuck = sign?.getAttribute('data-heaven-tuck')
+    const a = sign?.getBoundingClientRect()
+    const rail = document.querySelector('.nw-rail .defend-abilities')?.getBoundingClientRect()
+    const hit =
+      a && rail && a.width > 0.5 && a.left < rail.right && a.right > rail.left && a.top < rail.bottom && a.bottom > rail.top
+    return { tuck, shown: (a?.width ?? 0) > 0.5, hit }
+  })
+  assert.notEqual(read.tuck, 'hide', `${label} Heaven never uses camera hide tuck`)
+  assert.equal(read.shown, true, `${label} Heaven sign is visible`)
+  assert.equal(read.hit, false, `${label} Heaven sign clear of the lamp rail`)
+}
 
 async function proveNwOff(browser, origin, errorsOut) {
   for (const size of NW_SIZES) {
@@ -3345,6 +3658,7 @@ async function proveNwOff(browser, origin, errorsOut) {
         return { vb: svg.getAttribute('viewBox'), w: r.width, h: r.height }
       })
       assert.equal(read.vb, boardFillBox({ w: read.w, h: read.h }), `${where} the viewBox is boardFillBox`)
+      await assertNwHeavenOff(page, `nwPan off: ${where}`)
     } finally {
       assert.deepEqual(errors, [], `${where} page errors`)
       errorsOut.push(...consoleErrors.filter((text) => !/Failed to load resource/.test(text)))
@@ -3356,6 +3670,7 @@ async function proveNwOff(browser, origin, errorsOut) {
   try {
     assert.equal(await wide.page.locator('.nw-cam').getAttribute('data-nw-cam'), 'off', 'nwPan off: 768 keeps the camera off')
     assert.equal(await wide.page.locator('.nw-cam-recenter').count(), 0, '768 has no Recenter')
+    await assertNwHeavenOff(wide.page, 'nwPan off: 768')
   } finally {
     assert.deepEqual(wide.errors, [], '768 page errors')
     errorsOut.push(...wide.consoleErrors.filter((text) => !/Failed to load resource/.test(text)))
@@ -3398,6 +3713,12 @@ async function proveNwOff(browser, origin, errorsOut) {
     assert.equal(await page.locator('.defend-go').count(), 0, 'Hard: the round starts')
     await page.waitForTimeout(500)
     assert.equal(await page.locator('[data-nw-cam="on"]').count(), 0, 'Hard still has no camera once a round starts')
+    const hardHeaven = await page.evaluate(() => {
+      const sign = document.querySelector('g.defend-heaven')
+      return { tuck: sign?.getAttribute('data-heaven-tuck') ?? null, cam: document.querySelector('[data-nw-cam="on"]') }
+    })
+    assert.equal(hardHeaven.cam, null, 'Hard has no camera on node')
+    assert.equal(hardHeaven.tuck, null, 'Hard Heaven has no data-heaven-tuck')
     assert.deepEqual(errors, [], 'Hard page errors')
     assert.deepEqual(consoleErrors.filter((text) => !/Failed to load resource/.test(text)), [], 'Hard console errors')
   } finally {
@@ -3406,6 +3727,25 @@ async function proveNwOff(browser, origin, errorsOut) {
 }
 
 // -- 6. Gold first seat and tower taps in the top and bottom bands (#834) -----------------------
+
+/** #818 C: the first-seat ring and its painted stroke sit fully inside the screen (no edge clip). Null when no ring. */
+async function nwRingInScreen(page) {
+  return page.evaluate(() => {
+    const n = document.querySelector('.defend-plant-ground circle.is-first-seat')
+    if (!n) return null
+    const r = n.getBoundingClientRect()
+    const f = document.querySelector('.nw-cam').getBoundingClientRect()
+    const pad = (parseFloat(getComputedStyle(n).strokeWidth) / 2) * (r.width / 92)
+    const left = Math.max(f.left, 0)
+    const right = Math.min(f.right, innerWidth)
+    return {
+      ok: r.left - pad >= left - 0.5 && r.right + pad <= right + 0.5,
+      box: [r.left - pad, r.right + pad].map((x) => +x.toFixed(1)),
+      screen: [left, right],
+      slide: n.getAttribute('transform'),
+    }
+  })
+}
 
 /** Gold first-seat rings, and how many of them sit whole in the clear window (frame minus header, Begin, rail, tray, Recenter). */
 async function nwGoldCues(page) {
@@ -3519,6 +3859,8 @@ async function proveNwCorners(page, where) {
       assert.match(gold[0], /circle\..*is-first-seat/, `${where} ${corner} the gold is the ring`)
       const share = nwShareClear(v, rings[0])
       assert.ok(share >= 0.9 - 1e-6, `nwPan corner gold: ${where} ${corner} the ring shows ${(share * 100).toFixed(0)}% (needs 90%)`)
+      const edge = await nwRingInScreen(page)
+      assert.ok(edge?.ok, `nwPan corner gold: ${where} ${corner} the ring and its stroke sit inside the screen ${JSON.stringify(edge)}`)
       rows.push({ corner, kind: 'ring', share })
     } else {
       assert.ok(arrow, `nwPan corner gold: ${where} ${corner} no ring in view, so the arrow shows`)
@@ -3564,6 +3906,8 @@ async function proveNwGold(browser, origin, size, slug, errorsOut) {
     const everyGold = await nwAllGold(page)
     assert.equal(everyGold.length, 1, `nwPan all gold: ${where} exactly one gold cue before planting, saw ${everyGold.length}: ${everyGold.join(' | ')}`)
     assert.match(everyGold[0], /circle\..*is-first-seat/, `${where} the one gold cue is the first-seat ring`)
+    const edge = await nwRingInScreen(page)
+    assert.ok(edge?.ok, `nwPan gold: ${where} the ring and its stroke sit inside the screen ${JSON.stringify(edge)}`)
     const paint = await page.evaluate(() => {
       const st = getComputedStyle(document.querySelector('.nw-cam-recenter'))
       return { bg: st.backgroundColor, border: st.borderTopColor }
@@ -3775,6 +4119,23 @@ export async function proveNwPan(browser, origin) {
     lines.push(`nw-begin ${await proveNwBegin(browser, origin, size, 'far-hills', 'TL', { touch: true })}`)
     lines.push(`nw-begin ${await proveNwBegin(browser, origin, size, 'map03', 'TL', { touch: true, swallow: true })}`)
   }
+  for (const size of NW_HEAVEN_SIZES)
+    for (const slug of NW_SLUGS) lines.push(`nw-heaven ${await proveNwHeaven(browser, origin, size, slug, errors)}`)
+  for (const size of NW_HEAVEN_SIZES)
+    for (const slug of ['a2', 'map05'])
+      lines.push(`nw-heaven wave ${await proveNwHeaven(browser, origin, size, slug, errors, { query: '&nwRound=6&nwDebug=1' })}`)
+  for (const size of [
+    [390, 844],
+    [412, 915],
+  ])
+    lines.push(`nw-heaven boost ${await proveNwHeavenBoost(browser, origin, size, 'a2', errors)}`)
+  for (const size of [
+    [375, 667],
+    [412, 915],
+  ])
+    for (const slug of ['a2', 'far-hills'])
+      for (const swallow of [false, true])
+        lines.push(`nw-recenter-edge ${await proveNwRecenterAfterEdge(browser, origin, size, slug, { swallow })}`)
   await proveNwOff(browser, origin, errors)
   lines.push('nw-pan off paths and Hard ok')
   assert.deepEqual(errors, [], `nwPan console errors: ${errors.join('\n')}`)

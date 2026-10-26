@@ -430,7 +430,40 @@ function keepReadoutClear() {
   }
 }
 
-/** #792 Easy: slide the Heaven sign left (draw only) so it never touches the lamp rail. Sim keeps HEAVEN_POINT. */
+/** #818 C: how far inside the screen edge the first-seat ring's stroke stays, in screen px. */
+const NW_SEAT_RING_EDGE_PAD = 4
+/** #818 C: the ring never slides more than this many plate units, so it stays over its SEAT_TAP_R (46) tap circle. */
+const NW_SEAT_RING_SLIDE_MAX = 16
+
+/**
+ * #818 C Easy camera on, draw only: slide the gold first-seat ring sideways so its stroke sits inside the screen.
+ * The tap seat stays at its plate point (lampPlace SEAT_TAP_R); only the circle's transform moves.
+ */
+function keepSeatRingInView() {
+  for (const node of document.querySelectorAll('.defend-plant-ground circle[data-ring-slide]')) {
+    node.removeAttribute('transform')
+    node.removeAttribute('data-ring-slide')
+  }
+  const cam = document.querySelector('.nw-cam[data-nw-cam="on"]')
+  const ring = document.querySelector('.defend-plant-ground circle.is-first-seat')
+  if (!cam || !ring) return
+  const box = ring.getBoundingClientRect()
+  if (box.width <= 0) return
+  const k = box.width / (2 * SEAT_TAP_R)
+  const pad = NW_SEAT_RING_EDGE_PAD + (parseFloat(getComputedStyle(ring).strokeWidth) / 2) * k
+  const frame = cam.getBoundingClientRect()
+  const left = Math.max(frame.left, 0) + pad
+  const right = Math.min(frame.right, window.innerWidth) - pad
+  let dx = 0
+  if (box.left < left) dx = left - box.left
+  else if (box.right > right) dx = right - box.right
+  if (Math.abs(dx) < 0.5) return
+  const units = Math.max(-NW_SEAT_RING_SLIDE_MAX, Math.min(NW_SEAT_RING_SLIDE_MAX, dx / k))
+  ring.setAttribute('transform', `translate(${units.toFixed(2)} 0)`)
+  ring.setAttribute('data-ring-slide', 'yes')
+}
+
+/** #792 Easy: camera off: slide left; camera on: hide while touching. Sim keeps HEAVEN_POINT. */
 function keepHeavenClear() {
   const sign = document.querySelector('.defend-board g.defend-heaven')
   const rail = document.querySelector('.nw-rail .defend-abilities')
@@ -438,7 +471,11 @@ function keepHeavenClear() {
   if (!(sign instanceof SVGGElement) || !(rail instanceof HTMLElement) || !(svg instanceof SVGSVGElement)) return
   sign.style.transform = ''
   sign.removeAttribute('data-heaven-tuck')
-  if (document.querySelector('.nw-cam[data-nw-cam="on"]')) return
+  if (document.querySelector('.nw-cam[data-nw-cam="on"]')) {
+    // #818: camera on. The sign pans with the world, so no slide: hide it while it touches the rail.
+    if (rectsOverlap(sign.getBoundingClientRect(), rail.getBoundingClientRect(), 6)) sign.setAttribute('data-heaven-tuck', 'hide')
+    return
+  }
   const ctm = svg.getScreenCTM()
   if (!ctm || ctm.a <= 0) return
   const markers = () => [...document.querySelectorAll('.nw-spawn-marker')].map((el) => el.getBoundingClientRect())
@@ -869,6 +906,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const arrowPress = useRef<{ id: number; x: number; y: number } | null>(null)
   const arrowClickSeen = useRef(false)
   const arrowFiredAt = useRef(-Infinity)
+  const recenterPress = useRef<{ id: number; x: number; y: number } | null>(null)
+  const recenterClickSeen = useRef(false)
+  const recenterFiredAt = useRef(-Infinity)
   const arrowTargetRef = useRef<{ x: number; y: number } | null>(null)
   const arrowCaptureRef = useRef<{ id: number; node: HTMLButtonElement } | null>(null)
   const hadMapArrowRef = useRef(false)
@@ -940,6 +980,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   function camWrite() {
     const node = panRef.current
     if (node) node.style.transform = camTransform(camPanRef.current[0], camPanRef.current[1])
+    if (easy) {
+      keepHeavenClear()
+      keepSeatRingInView()
+    }
   }
 
   /** Drags write in rAF. Keys, Recenter and focus commit at once so the card follows. */
@@ -969,6 +1013,35 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     camApply(tx, ty, true)
   }
 
+  /** One Recenter per tap: the click and the pointer-up fallback never both fire. */
+  function pressRecenter() {
+    const stamp = performance.now()
+    if (stamp - recenterFiredAt.current < 800) return
+    recenterFiredAt.current = stamp
+    recenter()
+  }
+
+  function recenterDown(event: ReactPointerEvent<HTMLButtonElement>) {
+    if (!event.isPrimary) return
+    recenterClickSeen.current = false
+    recenterPress.current = { id: event.pointerId, x: event.clientX, y: event.clientY }
+  }
+
+  /** Same pointer-up fallback as Begin: a tap still recenters when the browser skips click. */
+  function recenterUp(event: ReactPointerEvent<HTMLButtonElement>) {
+    const press = recenterPress.current
+    recenterPress.current = null
+    if (!press || press.id !== event.pointerId) return
+    if (Math.hypot(event.clientX - press.x, event.clientY - press.y) >= NW_TAP_SLOP) return
+    const button = event.currentTarget
+    const box = button.getBoundingClientRect()
+    if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) return
+    window.setTimeout(() => {
+      if (recenterClickSeen.current || !button.isConnected) return
+      pressRecenter()
+    }, 120)
+  }
+
   useLayoutEffect(() => {
     const node = camRef.current
     if (!camOn || !node) {
@@ -988,6 +1061,23 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   })
 
   useEffect(() => () => window.cancelAnimationFrame(camRaf.current), [])
+
+  // #818 C: the first-seat ring can move to another seat on any render, so recheck its edge slide after each one.
+  useLayoutEffect(() => {
+    if (easy) keepSeatRingInView()
+  })
+
+  // #818: a fast drag that the clamp eats is still a native fling to the browser, and the next tap's click is dropped.
+  // Consume touchmove once our pan is live (past NW_TAP_SLOP). Taps and lamp drags never set camPanning.
+  useEffect(() => {
+    const node = camRef.current
+    if (!camOn || !node) return
+    const stop = (event: TouchEvent) => {
+      if (camPanning.current && event.cancelable) event.preventDefault()
+    }
+    node.addEventListener('touchmove', stop, { passive: false })
+    return () => node.removeEventListener('touchmove', stop)
+  }, [camOn])
 
   useEffect(() => {
     if (!camOn) return
@@ -1948,15 +2038,17 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     sync()
     const settle = window.requestAnimationFrame(() => window.requestAnimationFrame(sync))
     const frame = document.querySelector('.defend-frame')
+    const railNode = document.querySelector('.nw-rail')
     const observer = typeof ResizeObserver === 'undefined' || !frame ? null : new ResizeObserver(sync)
     if (frame) observer?.observe(frame)
+    if (railNode) observer?.observe(railNode)
     window.addEventListener('resize', sync)
     return () => {
       window.cancelAnimationFrame(settle)
       observer?.disconnect()
       window.removeEventListener('resize', sync)
     }
-  }, [easy, phase, mapId])
+  }, [easy, phase, mapId, camOn])
 
   function noteSpend(cost: number) {
     setSparkSpent(cost)
@@ -3949,7 +4041,20 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const docks = (
     <>
       {camOn ? (
-        <button type="button" className="nw-cam-recenter" aria-label="Recenter map" onClick={recenter} />
+        <button
+          type="button"
+          className="nw-cam-recenter"
+          aria-label="Recenter map"
+          onPointerDown={recenterDown}
+          onPointerUp={recenterUp}
+          onPointerCancel={() => {
+            recenterPress.current = null
+          }}
+          onClick={() => {
+            recenterClickSeen.current = true
+            pressRecenter()
+          }}
+        />
       ) : null}
       {mapArrow && camDims ? (
         <button
