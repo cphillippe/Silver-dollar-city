@@ -15,6 +15,18 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.540',
+    title: 'Easy Night Watch: camera follow and edge arrow fixes',
+    when: '2026-10-26',
+    items: [
+      'The gold ring stays off the Sparks and Candle column and wholly on screen, or the edge arrow points the way.',
+      'The edge arrow sits tight to the screen edge with a dark outline so it reads on the gold road.',
+      'During the wave, follow keeps up after you pan, arrow taps cannot freeze the camera, and the walker arrow hides once half the face is visible.',
+      'Hard stays the same.',
+      'Refs #834.',
+    ],
+  },
+  {
     version: '1.4.539',
     title: 'Easy-facing labels on Settings and Journal',
     when: '2026-10-26',
