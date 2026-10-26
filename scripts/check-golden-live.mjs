@@ -2135,6 +2135,7 @@ async function proveHomeTapSlop(browser, origin, size, errorsOut) {
     const dock = { x: dockBox.x + dockBox.width / 2, y: dockBox.y + 14 }
     await mouseDrag(page, dock, { x: dock.x - 40, y: dock.y }, 5)
     await mouseDrag(page, dock, { x: dock.x + 40, y: dock.y }, 5)
+    await page.waitForTimeout(150)
     assert.equal((await homeView(page)).tx, t0, `homePan tap: ${where} a drag from the dock leaves the map where it was`)
   } finally {
     errorsOut.push(...errors)
@@ -3496,7 +3497,7 @@ function nwShareClear(v, rect) {
   return w <= 0 || h <= 0 ? 0 : (w * h) / ((right - left) * (bottom - top))
 }
 
-/** Pan to each corner. One gold cue each time: a ring at 60% or more, or the arrow when no ring qualifies. */
+/** Pan to each corner. One gold cue each time: a ring at 90% or more, or the arrow when no ring qualifies. */
 async function proveNwCorners(page, where) {
   const rows = []
   for (const corner of NW_CORNERS) {
@@ -3519,7 +3520,7 @@ async function proveNwCorners(page, where) {
       assert.equal(arrow, null, `nwPan corner gold: ${where} ${corner} the arrow hides while a ring is in view`)
       assert.match(gold[0], /circle\..*is-first-seat/, `${where} ${corner} the gold is the ring`)
       const share = nwShareClear(v, rings[0])
-      assert.ok(share >= 0.6 - 1e-6, `nwPan corner gold: ${where} ${corner} the ring shows ${(share * 100).toFixed(0)}% (needs 60%)`)
+      assert.ok(share >= 0.9 - 1e-6, `nwPan corner gold: ${where} ${corner} the ring shows ${(share * 100).toFixed(0)}% (needs 90%)`)
       rows.push({ corner, kind: 'ring', share })
     } else {
       assert.ok(arrow, `nwPan corner gold: ${where} ${corner} no ring in view, so the arrow shows`)
@@ -3577,7 +3578,7 @@ async function proveNwGold(browser, origin, size, slug, errorsOut) {
     assert.ok(moved.total <= 1, `${where} at most one ring after a pan (${to.tx.toFixed(0)},${to.ty.toFixed(0)})`)
     const pannedGold = await nwAllGold(page)
     assert.equal(pannedGold.length, 1, `nwPan all gold: ${where} exactly one gold cue after a pan, saw ${pannedGold.length}: ${pannedGold.join(' | ')}`)
-    // Corner pans: exactly one gold cue each, a ring that shows at least 60% of itself or else the edge arrow, never both.
+    // Corner pans: exactly one gold cue each, a ring that shows at least 90% of itself or else the edge arrow, never both.
     const corners = await proveNwCorners(page, where)
     return { total: gold.total, visible: gold.visible, panned: moved.visible, every: everyGold.length, everyPanned: pannedGold.length, corners }
   } finally {
