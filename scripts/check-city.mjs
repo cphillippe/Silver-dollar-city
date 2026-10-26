@@ -1864,8 +1864,28 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.538')
-assert.equal(CHANGELOG[0].version, '1.4.538', '1.4.538 is the newest row')
+assert.equal(APP_VERSION, '1.4.539')
+assert.equal(CHANGELOG[0].version, '1.4.539', '1.4.539 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.539'), '1.4.539 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.539').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.539 changelog avoids GitHub close keywords',
+)
+assert.doesNotMatch(
+  latestChange('1.4.539').items.join('\n'),
+  /\bHard\b|\bMedium\b/,
+  '1.4.539 changelog avoids tier labels',
+)
+assert.match(latestChange('1.4.539').items.join('\n'), /Refs: Bill 2026-10-24 decision\./)
+{
+  const settingsHide = readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8')
+  assert.match(settingsHide, /playerVisibleChangeItems/, '1.4.539 Settings filters whats-new for players')
+  assert.doesNotMatch(settingsHide, />\s*Hard\s*</, '1.4.539 Settings drops the Hard mode button')
+  assert.doesNotMatch(settingsHide, /Hard still has/, '1.4.539 Town card drops Hard streets copy')
+  const journalHide = readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8')
+  assert.doesNotMatch(journalHide, /Medium ·/, '1.4.539 Journal drops tier counts in the header')
+}
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.538'), '1.4.538 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.538').items.join('\n'),
@@ -5321,6 +5341,11 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /EASY\.claimTeach/,
 )
+assert.doesNotMatch(
+  readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
+  /claimTeach\}\s+then\b/,
+  'Settings Reading must not drop the subject after claimTeach',
+)
 assert.match(
   readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8'),
   /EASY\.claimTeach/,
@@ -5465,9 +5490,10 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /setEasyMode\(true\)/,
 )
-assert.match(
+assert.doesNotMatch(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   />\s*Hard\s*</,
+  'Settings must not show Hard — Easy-only player chrome',
 )
 assert.doesNotMatch(
   readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8'),
@@ -5513,7 +5539,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/save.ts', import.meta.url), 'utf8'),
-  /easyMode: parsed\.easyMode === true/,
+  /easyMode: parsed\.easyMode !== false/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/save.ts', import.meta.url), 'utf8'),
@@ -19212,4 +19238,5 @@ assert.match(snapHoldScan, /win card stays at least 5s/, '1.4.481 the city scan 
 assert.match(snapHoldScan, /replay is locked on the win/, '1.4.481 a second tap does not restart')
 await import('./check-story-snap.mjs').then((mod) => mod.checkSnapHold())
 await import('./check-live-prove.mjs').then((mod) => mod.checkLiveProve())
+await import('./check-hide-hard-labels.mjs')
 await import('./check-golden-live.mjs').then((mod) => mod.checkGoldenLive())

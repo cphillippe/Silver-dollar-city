@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { APP_ID, APP_VERSION, SAVE_SCHEMA_VERSION } from '../config/app'
-import { CHANGELOG, latestChange } from '../content/changelog'
+import { CHANGELOG, latestChange, playerVisibleChangeItems } from '../content/changelog'
 import {
   adsEnabledDefault,
   softAdsVisible,
@@ -159,8 +159,7 @@ export function Settings({ onNavigate }: SettingsProps) {
         <p>
           {easy ? (
             <>
-              {EASY.claimTeach} Easy mode then says main idea. Shorter sentences and bigger taps.
-              You can switch anytime.
+              {EASY.claimTeach} Buttons then say main idea. Shorter sentences and bigger taps.
             </>
           ) : (
             <>
@@ -175,24 +174,6 @@ export function Settings({ onNavigate }: SettingsProps) {
             {EASY.mainIdeaTeach}
           </p>
         ) : null}
-        <div className="settings-actions">
-          <button
-            type="button"
-            className={`btn ${progress.easyMode ? 'primary' : ''}`}
-            aria-pressed={progress.easyMode}
-            onClick={() => setEasyMode(true)}
-          >
-            Easy
-          </button>
-          <button
-            type="button"
-            className={`btn ${progress.easyMode ? '' : 'primary'}`}
-            aria-pressed={!progress.easyMode}
-            onClick={() => setEasyMode(false)}
-          >
-            Hard
-          </button>
-        </div>
       </section>
 
       {foundersLamp(progress) ? (
@@ -279,8 +260,7 @@ export function Settings({ onNavigate }: SettingsProps) {
         <section className="settings-card" aria-label="Town">
           <p className="eyebrow">Town</p>
           <p>
-            {EASY.townSoon} — the map waits until the game is right. Hard still has
-            the streets.
+            {EASY.townSoon} — the map waits until the game is right.
           </p>
         </section>
       ) : null}
@@ -308,7 +288,7 @@ export function Settings({ onNavigate }: SettingsProps) {
         <h2>{drop.title}</h2>
         <p className="quiet">{drop.when}</p>
         <ul className="whats-new-list">
-          {drop.items.map((item) => (
+          {playerVisibleChangeItems(drop.items).map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>
@@ -321,7 +301,7 @@ export function Settings({ onNavigate }: SettingsProps) {
                   {note.version} · {note.title}
                 </p>
                 <ul className="whats-new-list">
-                  {note.items.map((item) => (
+                  {playerVisibleChangeItems(note.items).map((item) => (
                     <li key={item}>{item}</li>
                   ))}
                 </ul>

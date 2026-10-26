@@ -11,7 +11,7 @@ import { starLegend } from '../lib/stars'
 import { deployLabel, findLearning, storedLearnings, withLearningBeat } from '../lib/learning'
 import { bonusFace, journalBonusPoints, lineBonusPoints } from '../lib/matchBonus'
 import { SKILL_LADDER, skillsFor } from '../lib/gemJar'
-import { journalPoints, journalTierCounts, currentLessonTier, scoreFace } from '../lib/tiers'
+import { journalPoints, currentLessonTier, scoreFace } from '../lib/tiers'
 import { watchTool } from '../lib/watchTools'
 import { DigDeeper } from './DigDeeper'
 import { HeldTriad } from './HeldTriad'
@@ -51,13 +51,12 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
   }))
   const heldCount = progress.held.length
   const packPts = journalPoints(progress)
-  const packTiers = journalTierCounts(progress)
   const bonusPts = journalBonusPoints(progress)
   const jarPts = progress.matchLifetime ?? 0
   const jarSkillIds = skillsFor(jarPts)
   const jarLine = easy && jarPts ? ` · ${EASY.jarName} ${jarPts.toLocaleString('en-US')}` : ''
   const packScoreLine = packPts
-    ? ` · ${packPts} pts${!easy && bonusPts ? ` · +${bonusPts} bonus` : ''} · ${packTiers.easy} Easy · ${packTiers.medium} Medium · ${packTiers.hard} Hard`
+    ? ` · ${packPts} pts${!easy && bonusPts ? ` · +${bonusPts} bonus` : ''}`
     : ''
   const [later, setLater] = useState(() => readLater(today))
   const sessionItems = sessionDue(progress, today, later)
