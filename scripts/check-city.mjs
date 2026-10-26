@@ -23,7 +23,7 @@ import {
   SPINE_GROW,
 } from '../src/lib/city.ts'
 import { APP_VERSION } from '../src/config/app.ts'
-import { camClamp, camFirstSeat, camFrameInsets, camMarkerShare, camPointArrow, camSeatArrow, camSeatClear, camSeatShare, camToPlate, camWorld, focusPan, nwCameraOn, NW_CAMERA_FOCUS, NW_CAMERA_INSETS, NW_CAMERA_ZOOM, NW_CAM_TOUCH_HOLD_MS, NW_CUE_FACE_R, NW_CUE_MIN_SHARE, NW_RING_MIN_SHARE, NW_TAP_SLOP } from '../src/components/nwCamera.ts'
+import { camClamp, camFirstSeat, camFrameInsets, camMarkerShare, camPointArrow, camSeatArrow, camSeatClear, camSeatShare, camToPlate, camWorld, focusPan, nwCameraOn, NW_ARROW_R, NW_CAMERA_FOCUS, NW_CAMERA_INSETS, NW_CAMERA_ZOOM, NW_CAM_TOUCH_HOLD_MS, NW_CUE_ARROW_HIDE_SHARE, NW_CUE_FACE_R, NW_CUE_MIN_SHARE, NW_EDGE_ARROW_PAD, NW_HUD_COLUMN_LEFT, NW_RING_MIN_SHARE, NW_TAP_SLOP } from '../src/components/nwCamera.ts'
 import { clampPan, EASY_PAN_MAX_W, easyPanFrame, panToward } from '../src/lib/cityModel.ts'
 import { easyLoopLine as easyLoopFromLib, easyTrailView as easyTrailViewFromLib } from '../src/lib/easy.ts'
 import {
@@ -1864,8 +1864,16 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.539')
-assert.equal(CHANGELOG[0].version, '1.4.539', '1.4.539 is the newest row')
+assert.equal(APP_VERSION, '1.4.540')
+assert.equal(CHANGELOG[0].version, '1.4.540', '1.4.540 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.540'), '1.4.540 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.540').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.540 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.540').items.join('\n'), /Hard stays the same\./)
+assert.match(latestChange('1.4.540').items.join('\n'), /Refs #834/, '1.4.540 changelog refs #834')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.539'), '1.4.539 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.539').items.join('\n'),
@@ -1887,13 +1895,6 @@ assert.match(latestChange('1.4.539').items.join('\n'), /Refs: Bill 2026-10-24 de
   assert.doesNotMatch(journalHide, /Medium ·/, '1.4.539 Journal drops tier counts in the header')
 }
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.538'), '1.4.538 changelog row')
-assert.doesNotMatch(
-  latestChange('1.4.538').items.join('\n'),
-  /Fixes #|Closes #|Resolves #/,
-  '1.4.538 changelog avoids GitHub close keywords',
-)
-assert.match(latestChange('1.4.538').items.join('\n'), /Hard stays the same\./)
-assert.match(latestChange('1.4.538').items.join('\n'), /Refs #834/, '1.4.538 changelog refs #834')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.537'), '1.4.537 changelog row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.536'), '1.4.536 changelog row')
 assert.doesNotMatch(
@@ -1965,6 +1966,9 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
   assert.equal(camSeatClear(seat(464, 768), view, frameInsets), true, '#834 a seat in the middle is clear')
   assert.equal(camSeatClear(seat(600, 88), view, frameInsets), false, '#834 a seat above the header is not clear')
   assert.equal(camSeatClear(seat(600, 1040), view, frameInsets), false, '#834 a seat under Begin is not clear')
+  assert.equal(NW_HUD_COLUMN_LEFT, 80, '#834 the dock column blocks rings on the left')
+  assert.equal(frameInsets.hudColumnBottom, 290 - 93, '#834 the dock column height is viewport-relative')
+  assert.equal(camSeatClear(seat(464, 88), view, frameInsets), false, '#834 a ring under Sparks/Candle is not clear')
   const seats = [seat(600, 88), seat(464, 224, false), seat(464, 360), seat(464, 768), seat(600, 904)]
   const pick = camFirstSeat(seats, view, frameInsets)
   assert.deepEqual([pick.x, pick.y], [464, 768], '#834 the first clear open seat wins, dead seats never do')
@@ -1984,14 +1988,25 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
   // #834 edge: a ring needs at least 90% showing; otherwise the edge arrow is the one gold cue.
   const ringAt = (share) => ({ live: true, x: 464, y: (frameInsets.top - 46 * k834 + 2 * 46 * k834 * share - view.ty) / k834 })
   assert.equal(NW_RING_MIN_SHARE, 0.9, '#834 a ring counts at 90% showing')
-  assert.equal(NW_CUE_MIN_SHARE, 0.9, '#834 the glowing face uses the same in-view share')
+  assert.equal(NW_CUE_MIN_SHARE, 0.9, '#834 the glowing face uses the same in-view share for auto-follow')
+  assert.equal(NW_CUE_ARROW_HIDE_SHARE, 0.5, '#834 the walker arrow hides once half the face shows')
   assert.ok(Math.abs(camSeatShare(ringAt(0.8), view, frameInsets) - 0.8) < 0.01, '#834 share counts the visible part of the ring')
   assert.equal(camFirstSeat([ringAt(0.8)], view, frameInsets), null, '#834 a ring 80% showing is not the cue')
   assert.ok(camFirstSeat([ringAt(0.92)], view, frameInsets), '#834 a ring 92% showing is the cue')
   assert.equal(camFirstSeat([ringAt(0.3)], view, frameInsets), null, '#834 a ring 30% showing is not the cue')
   const arrow = camSeatArrow([seat(600, 88), seat(464, 224, false)], view, frameInsets)
   assert.ok(arrow && arrow.seat.x === 600 && arrow.y < view.H / 2, '#834 the arrow points to the nearest open seat, never a dead one')
-  assert.ok(arrow.x >= 72 && arrow.x <= view.W - frameInsets.right - 18, '#834 the arrow sits on the screen edge band, clear of the dock')
+  assert.ok(
+    arrow.x >= NW_EDGE_ARROW_PAD + NW_ARROW_R - 2 && arrow.x <= view.W - NW_EDGE_ARROW_PAD - NW_ARROW_R + 2,
+    '#834 the arrow centre stays ~18px from the screen edge below the rail band',
+  )
+  const view390 = { W: 390, H: 844, s0: Math.max(390 / 798, 844 / 1134), z: NW_CAMERA_ZOOM.a2, tx: -120, ty: -200 }
+  const in390 = camFrameInsets(0)
+  const arrow390 = camSeatArrow([seat(560, 900)], view390, in390)
+  assert.ok(
+    arrow390 && Math.abs(arrow390.x - (view390.W - NW_EDGE_ARROW_PAD - NW_ARROW_R)) < 6,
+    '#834 below the rail the arrow pins ~18px from the right screen edge',
+  )
   assert.ok(
     arrow.x <= 72 + 4 || arrow.x >= view.W - frameInsets.right - 40 || arrow.y <= frameInsets.top + 40 || arrow.y >= view.H - frameInsets.bottom - 40,
     '#834 the arrow is pinned to the edge of the clear window',
@@ -2014,6 +2029,23 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
   assert.doesNotMatch(screen834, /key: stamp,|key: now,|const blast: Blast = \{ key: performance/, '#834 no timestamp React keys')
   assert.match(screen834, /onPointerUp=\{beginUp\}/, '#834 Begin has a pointer-up fallback')
   assert.match(screen834, /onPointerUp=\{arrowUp\}/, '#834 the edge arrow has a pointer-up fallback')
+  assert.match(screen834, /setPointerCapture\(event\.pointerId\)/, '#834 the edge arrow captures the pointer')
+  assert.match(screen834, /abortArrowPointer/, '#834 the edge arrow abort clears capture and the touch gate')
+  assert.match(screen834, /resetCamTouchFollowGate/, '#834 arrow abort resets pointer-down and touch hold')
+  assert.match(screen834, /camPointerDown\.current = 0[\s\S]*camLastTouchAt\.current = -Infinity/, '#834 follow gate clears both counters')
+  assert.match(screen834, /if \(arrowPress\.current\) abortArrowPointer/, '#834 lost capture only aborts an active arrow press')
+  assert.match(screen834, /window\.addEventListener\('pointerup'/, '#834 a window pointer-up clears a stuck arrow press')
+  assert.match(screen834, /camPanning\.current = false\n\s+keepReadoutClear/, '#834 pan end clears the panning flag so follow resumes')
+  assert.match(screen834, /NW_CUE_ARROW_HIDE_SHARE/, '#834 the walker arrow hides at half face share')
+  assert.match(screen834, /resetCamWavePointerState/, '#834 wave start clears stuck pointer state without opening follow')
+  assert.match(screen834, /function recenter\(\) \{[\s\S]*?stampCamTouch\(\)/, '#834 Recenter pauses auto-follow like a map touch')
+  {
+    const followPaused = (pointerDown, lastTouchAt, now) =>
+      pointerDown > 0 || now - lastTouchAt < NW_CAM_TOUCH_HOLD_MS
+    const now = 1_000_000
+    assert.equal(followPaused(1, now, now + 1), true, '#834 a stuck pointer-down pauses follow')
+    assert.equal(followPaused(0, -Infinity, now + NW_CAM_TOUCH_HOLD_MS), false, '#834 arrow abort lets follow resume within the touch hold')
+  }
   assert.match(screen834, /beginFiredAt\.current < 800/, '#834 click and the fallback never both start the night')
   assert.match(screen834, /camCuePlateRef/, '#834 the camera keeps the glowing walker plate point')
   assert.match(screen834, /camLastTouchAt/, '#834 auto-follow reads the last map or face touch')
@@ -2024,6 +2056,7 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
   const arrowCss = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   const arrowRule = arrowCss.match(/\.defend-page\.is-easy-watch \.nw-seat-arrow\{[^}]*\}/)?.[0] ?? ''
   assert.ok(arrowRule.includes('#ffcc33'), '#834 the arrow is the existing gold on Easy Night Watch')
+  assert.ok(arrowRule.includes('drop-shadow'), '#834 the arrow wears a dark outline on the gold road')
   assert.ok(arrowCss.indexOf('.nw-seat-arrow{') < arrowCss.indexOf('1.4.392:'), '#834 the arrow rule sits before the 1.4.392 block')
   assert.match(
     arrowCss,
@@ -16328,7 +16361,7 @@ console.log('check-city: ok')
 
   const boostFn = defendScreenOnlySrc.slice(
     defendScreenOnlySrc.indexOf('function continueFromBoost'),
-    defendScreenOnlySrc.indexOf('function continueFromBoost') + 520,
+    defendScreenOnlySrc.indexOf('function continueFromBoost') + 620,
   )
   assert.match(boostFn, /waveIndex \+ 1 < nightLength\(easy\)/)
   assert.match(boostFn, /setWaveIndex\(\(i\) => i \+ 1\)/, '1.4.328 Continue advances the wave')

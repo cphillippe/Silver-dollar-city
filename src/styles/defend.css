@@ -4865,7 +4865,8 @@ button.defend-new-lamp[aria-pressed='true'] {
 
 /* 1.4.534: when no first-seat ring is in view the edge arrow is the one gold cue. It leaves with the ring's return. */
 .defend-page.is-easy-watch .nw-seat-arrow{position:fixed;width:44px;height:44px;padding:0;border:0;
-  background:#ffcc33;clip-path:polygon(100% 50%,15% 2%,40% 50%,15% 98%);pointer-events:auto;z-index:6}
+  background:#ffcc33;clip-path:polygon(100% 50%,15% 2%,40% 50%,15% 98%);pointer-events:auto;z-index:6;
+  filter:drop-shadow(0 0 1px #1a0a00) drop-shadow(0 0 2px #1a0a00) drop-shadow(0 1px 3px rgba(0,0,0,.55))}
 /* The City of Heaven wall at the top of the plate wears the Recenter cream, not gold, until the first lamp is down. */
 .defend-page.is-easy-watch.is-need-lamp .defend-heaven-wall{stroke:#fffce8}
 
