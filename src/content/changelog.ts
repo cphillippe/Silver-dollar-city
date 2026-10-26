@@ -14,7 +14,7 @@ export const CHANGELOG: ChangeNote[] = [
     items: [
       'Before your first lamp, the gold ring moves to an open seat you can see, or a gold arrow at the screen edge points the way.',
       'That arrow sits on the edge, away from the map art, and a tap on it always works.',
-      'During the wave, the same edge arrow points at the glowing walker when it is off screen.',
+      'During the wave, the map eases toward the glowing walker when it is off screen, and the edge arrow points the way if you are still touching the map.',
       'Hard stays the same.',
       'Refs #834.',
     ],
