@@ -6,7 +6,25 @@ export interface ChangeNote {
   items: string[]
 }
 
+const PLAYER_HIDDEN_TIER_LABEL = /\bHard\b|\bMedium\b/
+
+/** Drop changelog lines that name difficulty tiers — history stays in CHANGELOG. */
+export function playerVisibleChangeItems(items: string[]): string[] {
+  return items.filter((item) => !PLAYER_HIDDEN_TIER_LABEL.test(item))
+}
+
 export const CHANGELOG: ChangeNote[] = [
+  {
+    version: '1.4.539',
+    title: 'Easy-facing labels on Settings and Journal',
+    when: '2026-10-26',
+    items: [
+      'Settings Reading stays on the Easy walk with no mode switch on screen.',
+      'Journal score line shows points only.',
+      "What's new skips internal tier notes when you read the list.",
+      'Refs: Bill 2026-10-24 decision.',
+    ],
+  },
   {
     version: '1.4.538',
     title: 'Easy Night Watch: the map camera keeps the cues in view',

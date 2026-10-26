@@ -3362,14 +3362,14 @@ async function proveNwOff(browser, origin, errorsOut) {
     await wide.ctx.close()
   }
 
-  // Hard: Settings -> Hard -> Town -> Hold the night. The Developer jump forces Easy.
+  // Hard: save with easyMode false (no Settings toggle). The Developer jump forces Easy.
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 })
   await ctx.addInitScript(
     ([storageKey, raw]) => {
       localStorage.clear()
       localStorage.setItem(storageKey, raw)
     },
-    [STORAGE_KEY, JSON.stringify(hopSave({}))],
+    [STORAGE_KEY, JSON.stringify(hopSave({ easyMode: false }))],
   )
   const page = await ctx.newPage()
   const errors = []
@@ -3380,8 +3380,6 @@ async function proveNwOff(browser, origin, errorsOut) {
   })
   try {
     await page.goto(`${origin}?playtest=1`)
-    await page.getByRole('button', { name: 'Settings' }).click()
-    await page.getByRole('button', { name: 'Hard', exact: true }).click()
     await page.getByRole('button', { name: 'Town' }).first().click()
     await page.getByRole('button', { name: 'Hold the night' }).first().click()
     await page.locator('.defend-board').waitFor()
@@ -3390,7 +3388,7 @@ async function proveNwOff(browser, origin, errorsOut) {
     assert.equal(await page.locator('.defend-page').getAttribute('data-night-map'), 'a2', 'Hard loads A2')
     assert.equal(await page.locator('.nw-seat-arrow, .nw-cam-recenter').count(), 0, 'Hard has no camera chrome and no edge arrow')
     const savedMode = await page.evaluate((key) => (({ progress, easyMode }) => progress?.easyMode ?? easyMode)(JSON.parse(localStorage.getItem(key) ?? '{}')), STORAGE_KEY)
-    assert.equal(savedMode, false, 'the saved mode is Hard (Settings -> Hard), not the Developer jump Easy')
+    assert.equal(savedMode, false, 'the saved mode is Hard (easyMode false in save), not the Developer jump Easy')
     // The Begin button pulses, so tap its middle by hand and again if the first press lands on a still-moving frame.
     for (let attempt = 0; attempt < 6 && (await page.locator('.defend-go').count()); attempt += 1) {
       const box = await page.getByRole('button', { name: 'The road is coming' }).boundingBox()
