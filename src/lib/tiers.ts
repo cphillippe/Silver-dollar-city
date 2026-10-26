@@ -96,9 +96,6 @@ export function journalTierCounts(progress: Pick<ProgressState, 'lessonScore'>):
 }
 
 export function scoreFace(score: number | undefined): string {
-  const tier = tierFromScore(score)
-  if (tier === 'hard') return 'Hard 15'
-  if (tier === 'medium') return 'Medium 12'
-  if (tier === 'easy') return 'Easy 10'
-  return ''
+  if (score === undefined || !Number.isFinite(score) || score <= 0) return ''
+  return `${score} pts`
 }
