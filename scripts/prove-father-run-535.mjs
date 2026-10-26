@@ -6,17 +6,19 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { chromium } from 'playwright'
 import { preview } from 'vite'
 import { STORAGE_KEY } from '../src/config/app.ts'
+import { localDateKey } from '../src/lib/dates.ts'
 import { SAVE_KIND, SAVE_SCHEMA_VERSION } from '../src/lib/save.ts'
 
 const SHOTS = '/opt/cursor/artifacts/screenshots/father-run-535'
 const SIZES = [[390, 844], [375, 667]]
+const proofDateKey = localDateKey()
 
 function hopSave(progress) {
   return {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
     appVersion: '1.4.535',
-    savedAt: '2026-10-24T00:00:00.000Z',
+    savedAt: `${proofDateKey}T12:00:00.000Z`,
     progress: {
       started: true,
       easyMode: true,
@@ -25,8 +27,8 @@ function hopSave(progress) {
       held: ['ph-road'],
       easyHeld: ['ph-road'],
       easyTaught: ['ph-road'],
-      lastDailyDate: '2026-10-24',
-      dailyDates: ['2026-10-24'],
+      lastDailyDate: proofDateKey,
+      dailyDates: [proofDateKey],
       cityBuilt: { porch: 4, hollow: 2, bench: 1, observatory: 0, gate: 0, lookout: 0, journal: 0, lamps: 0 },
       ...progress,
     },
