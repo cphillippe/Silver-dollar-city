@@ -284,8 +284,12 @@ import { DefendNightBoard } from './DefendNightBoard'
 import {
   camClamp,
   camFirstSeat,
+  camMarkerShare,
+  camPointArrow,
   camSeatArrow,
   NW_ARROW_R,
+  NW_CUE_FACE_R,
+  NW_CUE_MIN_SHARE,
   camFrameInsets,
   camPoint,
   camToPlate,
@@ -860,7 +864,12 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const beginPress = useRef<{ id: number; x: number; y: number } | null>(null)
   const beginClickSeen = useRef(false)
   const beginFiredAt = useRef(-Infinity)
+  const arrowPress = useRef<{ id: number; x: number; y: number } | null>(null)
+  const arrowClickSeen = useRef(false)
+  const arrowFiredAt = useRef(-Infinity)
+  const arrowTargetRef = useRef<{ x: number; y: number } | null>(null)
   const camFirstRef = useRef<{ x: number; y: number } | null>(null)
+  const camCuePlateRef = useRef<{ x: number; y: number } | null>(null)
   const [camDims, setCamDims] = useState<{ W: number; H: number; top: number } | null>(null)
 
   function camFrame() {
@@ -923,6 +932,34 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   })
 
   useEffect(() => () => window.cancelAnimationFrame(camRaf.current), [])
+
+  useEffect(() => {
+    if (!camOn || phase !== 'wave' || won) return
+    let frame = 0
+    const followCue = () => {
+      const point = camCuePlateRef.current
+      if (point && !camPanning.current) {
+        const f = camFrame()
+        if (f) {
+          const view = {
+            W: f.W,
+            H: f.H,
+            s0: f.world.s0,
+            z: camZ,
+            tx: camPanRef.current[0],
+            ty: camPanRef.current[1],
+          }
+          if (camMarkerShare(point, NW_CUE_FACE_R, view, f.insets) + 1e-6 < NW_CUE_MIN_SHARE) {
+            const [tx, ty] = focusPan(point, f.W, f.H, f.world.s0, camZ, f.insets)
+            camApply(tx, ty, true)
+          }
+        }
+      }
+      frame = window.requestAnimationFrame(followCue)
+    }
+    frame = window.requestAnimationFrame(followCue)
+    return () => window.cancelAnimationFrame(frame)
+  }, [camOn, phase, won, mapId, boardBox.w, boardBox.h, camZ])
 
   const CAM_CHROME = '.nw-hud,.nw-rail,.nw-docks,.nw-balloon-slot,.nw-map-overlay,.defend-tower-card,.nw-cam-recenter,.nw-seat-arrow,.nw-pace'
 
@@ -1005,6 +1042,43 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   }
 
   /** One Begin press. The click and the pointerup fallback both come here, and one press starts the night once. */
+  function focusPlatePoint(point: { x: number; y: number }) {
+    const f = camFrame()
+    if (!f) return
+    const [tx, ty] = focusPan(point, f.W, f.H, f.world.s0, camZ, f.insets)
+    camApply(tx, ty, true)
+  }
+
+  function pressSeatArrow() {
+    const stamp = performance.now()
+    if (stamp - arrowFiredAt.current < 800) return
+    const target = arrowTargetRef.current
+    if (!target) return
+    arrowFiredAt.current = stamp
+    focusPlatePoint(target)
+  }
+
+  function arrowDown(event: ReactPointerEvent<HTMLButtonElement>) {
+    if (!event.isPrimary) return
+    arrowClickSeen.current = false
+    arrowPress.current = { id: event.pointerId, x: event.clientX, y: event.clientY }
+  }
+
+  /** Same pointer-up fallback as Begin: a tap still recenters when the browser skips click. */
+  function arrowUp(event: ReactPointerEvent<HTMLButtonElement>) {
+    const press = arrowPress.current
+    arrowPress.current = null
+    if (!press || press.id !== event.pointerId) return
+    if (Math.hypot(event.clientX - press.x, event.clientY - press.y) >= NW_TAP_SLOP) return
+    const button = event.currentTarget
+    const box = button.getBoundingClientRect()
+    if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) return
+    window.setTimeout(() => {
+      if (arrowClickSeen.current || !button.isConnected) return
+      pressSeatArrow()
+    }, 120)
+  }
+
   function pressBegin(className: string) {
     const stamp = performance.now()
     if (stamp - beginFiredAt.current < 800) return
@@ -3568,12 +3642,14 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     : undefined
   const tapTarget = cueRaider && !walkInHeld(cueRaider, walkNow) ? cueRaider : undefined
   const tapAt = tapTarget ? walkerDrawAt(tapTarget, walkNow) : null
+  const midWave = phase === 'wave' && !won
+  camCuePlateRef.current =
+    camOn && tapAt && midWave && easyTap && tapTarget && !walkInHeld(tapTarget, walkNow) ? { x: tapAt.x, y: tapAt.y } : null
   const tapPos = tapAt && boardBox.w > 0 ? boardPoint(tapAt.x, tapAt.y) : null
   const upgradePoint =
     upgradeAt && boardBox.w > 0
       ? boardPoint(nightTowers.anchor(upgradeAt).x, nightTowers.anchor(upgradeAt).y)
       : null
-  const midWave = phase === 'wave' && !won
   const debugPanel = nightWatchDebugPanel(nightSearch, nwDebug)
   debugPanelRef.current = debugPanel
   const debugHarness = easy && debugPanel && midWave
@@ -3715,6 +3791,22 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     camSeatView && !firstSeatPick && groundHints.length > 0 && easy && phase === 'plant' && awaitingLamp
       ? camSeatArrow(groundHints, camSeatView, camFrameInsets(camDims?.top ?? 0))
       : null
+  const walkerArrow =
+    camSeatView && camCuePlateRef.current && midWave && easyTap
+      ? (() => {
+          const share = camMarkerShare(
+            camCuePlateRef.current,
+            NW_CUE_FACE_R,
+            camSeatView,
+            camFrameInsets(camDims?.top ?? 0),
+          )
+          return share + 1e-6 < NW_CUE_MIN_SHARE
+            ? camPointArrow(camCuePlateRef.current, camSeatView, camFrameInsets(camDims?.top ?? 0))
+            : null
+        })()
+      : null
+  const mapArrow = seatArrow ?? walkerArrow
+  arrowTargetRef.current = seatArrow ? { x: seatArrow.seat.x, y: seatArrow.seat.y } : camCuePlateRef.current
 
   const tip =
     phase === 'wave'
@@ -3762,22 +3854,26 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       {camOn ? (
         <button type="button" className="nw-cam-recenter" aria-label="Recenter map" onClick={recenter} />
       ) : null}
-      {seatArrow && camDims ? (
+      {mapArrow && camDims ? (
         <button
           type="button"
           className="nw-seat-arrow"
-          aria-label="Show the open seat"
-          data-seat-arrow="yes"
+          aria-label={seatArrow ? 'Show the open seat' : 'Show the glowing walker'}
+          data-seat-arrow={seatArrow ? 'yes' : undefined}
+          data-walker-arrow={walkerArrow ? 'yes' : undefined}
           style={{
-            left: seatArrow.x - NW_ARROW_R,
-            top: camDims.top + seatArrow.y - NW_ARROW_R,
-            transform: `rotate(${seatArrow.angle}deg)`,
+            left: mapArrow.x - NW_ARROW_R,
+            top: camDims.top + mapArrow.y - NW_ARROW_R,
+            transform: `rotate(${mapArrow.angle}deg)`,
+          }}
+          onPointerDown={arrowDown}
+          onPointerUp={arrowUp}
+          onPointerCancel={() => {
+            arrowPress.current = null
           }}
           onClick={() => {
-            const f = camFrame()
-            if (!f) return
-            const [tx, ty] = focusPan(seatArrow.seat, f.W, f.H, f.world.s0, camZ, f.insets)
-            camApply(tx, ty, true)
+            arrowClickSeen.current = true
+            pressSeatArrow()
           }}
         />
       ) : null}

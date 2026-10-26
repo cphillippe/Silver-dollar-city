@@ -8,6 +8,18 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.538',
+    title: 'Easy Night Watch: the map camera keeps the cues in view',
+    when: '2026-10-26',
+    items: [
+      'Before your first lamp, the gold ring moves to an open seat you can see, or a gold arrow at the screen edge points the way.',
+      'That arrow sits on the edge, away from the map art, and a tap on it always works.',
+      'During the wave, the map follows the glowing walker, or the same edge arrow points at it.',
+      'Hard stays the same.',
+      'Refs #834.',
+    ],
+  },
+  {
     version: '1.4.537',
     title: 'Easy Find the gems: purple board and plain words',
     when: '2026-10-25',
