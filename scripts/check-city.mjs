@@ -1902,8 +1902,19 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.542')
-assert.equal(CHANGELOG[0].version, '1.4.542', '1.4.542 is the newest row')
+assert.equal(APP_VERSION, '1.4.543')
+assert.equal(CHANGELOG[0].version, '1.4.543', '1.4.543 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.543'), '1.4.543 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.543').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.543 changelog avoids GitHub close keywords',
+)
+assert.match(
+  latestChange('1.4.543').items.join('\n'),
+  /Refs: Bill 2026-10-26 1:43 PM CT \(Art Director's chat\): fix that game; Match UI spec \/workspace\/gemcheck\./,
+  '1.4.543 changelog refs Bill Match UI spec',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.542'), '1.4.542 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.542').items.join('\n'),
@@ -1911,6 +1922,13 @@ assert.doesNotMatch(
   '1.4.542 changelog avoids GitHub close keywords',
 )
 assert.match(latestChange('1.4.542').items.join('\n'), /Hard stays the same\./)
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.541'), '1.4.541 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.541').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.541 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.541').items.join('\n'), /Hard stays the same\./)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.540'), '1.4.540 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.540').items.join('\n'),
