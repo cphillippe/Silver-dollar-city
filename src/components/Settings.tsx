@@ -159,7 +159,7 @@ export function Settings({ onNavigate }: SettingsProps) {
         <p>
           {easy ? (
             <>
-              {EASY.claimTeach} then says main idea. Shorter sentences and bigger taps.
+              {EASY.claimTeach} Buttons then say main idea. Shorter sentences and bigger taps.
             </>
           ) : (
             <>

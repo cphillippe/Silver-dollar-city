@@ -5341,6 +5341,11 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /EASY\.claimTeach/,
 )
+assert.doesNotMatch(
+  readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
+  /claimTeach\}\s+then\b/,
+  'Settings Reading must not drop the subject after claimTeach',
+)
 assert.match(
   readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8'),
   /EASY\.claimTeach/,
