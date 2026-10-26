@@ -1864,8 +1864,15 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.534')
-assert.equal(CHANGELOG[0].version, '1.4.534', '1.4.534 is the newest row')
+assert.equal(APP_VERSION, '1.4.535')
+assert.equal(CHANGELOG[0].version, '1.4.535', '1.4.535 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.535'), '1.4.535 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.535').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.535 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.535').items.join('\n'), /Hard stays the same\./)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.534'), '1.4.534 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.534').items.join('\n'),
@@ -11385,6 +11392,28 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     /Fixes #|Closes #|Resolves #/i,
     '1.4.366 changelog avoids GitHub close keywords',
   )
+}
+
+// Easy Father run 1.4.535: hero scene + one gold cue (stage 1 CSS peel).
+{
+  const hint535 = readFileSync(new URL('../src/styles/fatherRunHint.css', import.meta.url), 'utf8')
+  assert.match(hint535, /Father run polish · Easy only · stage 1 \(1\.4\.535\)/)
+  assert.match(
+    hint535,
+    /:is\(html\[data-easy='on'\] \.play\.is-father-run,[\s\S]*?\) \.run-scene \{[\s\S]*?flex: 1 1 0/,
+  )
+  assert.match(
+    hint535,
+    /:is\(html\[data-easy='on'\] \.play\.is-father-run,[\s\S]*?\) \.run-speech \{[\s\S]*?flex: 0 0 auto/,
+  )
+  assert.match(hint535, /plot-hollow-built\.webp/)
+  assert.match(
+    hint535,
+    /html\[data-easy='on'\] \.play\.is-father-run \.match-toast \{[\s\S]*?background: var\(--parchment\)/,
+  )
+  assert.match(hint535, /min-height: 74px/)
+  assert.match(latestChange('1.4.535').title, /Father's run/)
+  assert.match(latestChange('1.4.535').items.join('\n'), /one gold cue/)
 }
 
 // Easy Match 1.4.360: win plate shows the kept line and a readable Lock In next (#510). Leave the issue open.
