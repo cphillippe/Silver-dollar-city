@@ -73,6 +73,12 @@ export function easyWrongTap(card: string): string {
   return `Wrong. Tap this one: ${label}.`
 }
 
+/** Easy picture-match miss line. Kind, names the right line. */
+export function easyMatchMiss(line: string): string {
+  const label = line.replace(/\.$/, '').trim()
+  return `Not that one. Try this line: ${label}.`
+}
+
 /** Hard Night Watch Love chrome — mechanic how-to, not a claim to hold. */
 export const LOVE_HOW_HARD =
   'Love — tap the matching face. A true line turns a lie toward heaven.'
