@@ -519,7 +519,7 @@ import {
   EASY_TAG_SLOT,
 } from '../src/lib/cityBuild.ts'
 import { emptyProgress, progressAfterReset } from '../src/lib/save.ts'
-import { EASY, EASY_LINE_ORDER, DIG_ARC, FOUNDATION_ARC, NAMES_ARC, STONE_ARC, INK_ARC, easyChromeLine, easyChromeNearDup, easyFacingLine, easyHomeFocus, easyHoldFields, easyHoldLine, easyHoldPractice, easyHoldView, easyLockInExit, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, easyTeachFields, easyTrailView, markEasyHeld, markEasyTaught, progressAfterMatchTaught, sameProofRecap, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
+import { EASY, EASY_LINE_ORDER, DIG_ARC, FOUNDATION_ARC, NAMES_ARC, STONE_ARC, INK_ARC, easyChromeLine, easyChromeNearDup, easyFacingLine, easyHomeFocus, easyHoldFields, easyHoldLine, easyHoldPractice, easyHoldView, easyLockInExit, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, easyTeachFields, easyTrailView, markEasyHeld, markEasyTaught, progressAfterMatchTaught, sameProofRecap, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, easyMatchMiss, uniqueHoldChoices } from '../src/lib/easy.ts'
 import { storyPlayFor } from '../src/lib/storyPlay.ts'
 import { STORY_SNAP_ON } from '../src/lib/storySnap.ts'
 import { DEBUG_LAYER_LINES, debugJumpView, debugStoryStripJump, storyStripLines } from '../src/lib/debugPlays.ts'
@@ -1864,8 +1864,16 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.536')
-assert.equal(CHANGELOG[0].version, '1.4.536', '1.4.536 is the newest row')
+assert.equal(APP_VERSION, '1.4.537')
+assert.equal(CHANGELOG[0].version, '1.4.537', '1.4.537 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.537'), '1.4.537 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.537').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.537 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.537').items.join('\n'), /Hard stays the same\./)
+assert.match(latestChange('1.4.537').items.join('\n'), /Refs #848/, '1.4.537 changelog refs #848')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.536'), '1.4.536 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.536').items.join('\n'),
@@ -3975,6 +3983,7 @@ assert.doesNotMatch(linkPlaySrc, /Those don/)
   assert.match(linkClue('juniper-porch', 'person'), /Juniper|porch/)
   assert.equal(easyWrongTap('Neighbor is the one who shows mercy.'), 'Wrong. Tap this one: Neighbor is the one who shows mercy.')
   assert.equal(linkMiss('mercy-hollow', 'idea'), easyWrongTap('Neighbor is the one who shows mercy.'))
+  assert.equal(easyMatchMiss('A light is meant to be seen'), 'Not that one. Try this line: A light is meant to be seen.')
   assert.doesNotMatch(linkMiss('mercy-hollow', 'idea'), /Tap This one\. Tap:/)
   assert.doesNotMatch(linkMiss('mercy-hollow', 'idea'), /neighbor-line/)
   assert.doesNotMatch(linkMiss('mercy-hollow', 'idea'), /This story is Mercy/)
@@ -5761,12 +5770,13 @@ assert.match(
 )
 
 assert.match(matchSrc, /match-col-label/)
-assert.match(matchSrc, /Main idea' : 'Claim'/)
+assert.match(matchSrc, /Lines' : 'Claim'/)
 assert.match(matchSrc, /EASY\.matchHow/)
 assert.match(matchSrc, /easyChromeLine/)
 assert.match(matchSrc, /showEasyPuzzleHint/)
 assert.match(matchSrc, /plainFor\(challenge\.id\)/)
-assert.match(matchSrc, /easyWrongTap/)
+assert.match(matchSrc, /easyMatchMiss/)
+assert.doesNotMatch(matchSrc, /easyWrongTap/)
 assert.match(matchSrc, /EASY\.holdNext/)
 assert.doesNotMatch(matchSrc, /A claim is the main idea we hold to be true/)
 assert.match(cssSrc, /\.word-school/)
@@ -5812,7 +5822,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
 
   assert.equal(easyLead('ph-father', 'x'), 'Toss the wrong picks. Keep the father running to his son.')
   assert.equal(easyLead('ph-seeds', 'x'), 'Match each Jesus story to the short line it is making.')
-  assert.equal(easyLead('daily-gems', 'x'), 'Match each picture to the short line.')
+  assert.equal(easyLead('daily-gems', 'x'), 'Drag the picture to the line that matches it.')
   assert.equal(easyLead('fg-kalam', 'x'), 'Keep the beginning argument. Toss the rest.')
   assert.equal(
     easyChromeNearDup(

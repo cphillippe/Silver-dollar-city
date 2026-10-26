@@ -889,3 +889,267 @@ html[data-easy='on'] .next-tap {
     max-height: 44px;
   }
 }
+/* Find the gems (Easy picture match, daily-gems) peel · Art Director · 2026-10-25 · base main 32c85b8 (1.4.534)
+   Easy only · CSS only · append verbatim to the END of src/styles/match.css.
+   Literal Direction A values are used where a theme remaps the token (--dusk, --ink, --parchment, --gold all remap).
+   Golden line: the focus picture card is the ONE gold thing while matching; on win only `.btn.gold` Lock In next. */
+@media (max-height: 920px), (min-height: 921px) {
+  /* P1 page: grape, not the 1.4.253 cream shell (match.css ~691-830) or the brown play topbar (index.css:190-195) */
+  html[data-easy='on'] .app.is-play:has(.play.is-match.is-deal) .topbar {
+    background: #1a0840; box-shadow: none; border-bottom: 0;
+  }
+  html[data-easy='on'] .app.is-play .app-body:has(.play.is-match.is-deal) {
+    background: linear-gradient(180deg, #2a0d58 0%, #1a0840 100%);
+  }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) {
+    background: transparent; border: 0; box-shadow: none; border-radius: 0;
+    padding: 4px 0 8px; gap: 10px; color: #fff6e8;
+  }
+
+  /* P6 prompt: cream Outfit 800, not gold serif */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) :is(.prompt, .sort-how) {
+    color: #fff6e8; font-family: var(--sans); font-weight: 800; font-size: 20px; line-height: 1.2;
+    text-shadow: none; margin: 0; padding: 0 2px;
+  }
+
+  /* P2 + P3 layout: picture on top (the hero), the two lines under it, sized to content. No plate, no stretch. */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-grid {
+    display: flex; flex-direction: column; gap: 12px; flex: 1 1 auto; min-height: 0;
+    grid-template-rows: none; background: transparent; border: 0; box-shadow: none; padding: 0; margin: 0;
+  }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-col {
+    display: flex; flex-direction: column; gap: 8px; grid-row: auto; min-height: 0;
+    background: transparent; border: 0; padding: 0;
+  }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-col.is-pictures { flex: 1 1 auto; }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-col.is-claims { flex: 0 0 auto; }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-col-label {
+    color: #e9d3ff; font-family: var(--sans); font-size: 13px; font-weight: 800; letter-spacing: 0.12em;
+    text-transform: uppercase; margin: 0; padding: 0 2px; line-height: 1.2;
+  }
+
+  /* P4 picture card: cream card, big art; the gold ring + gold lip here is the ONE cue (tap/drag this to its line) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture {
+    display: flex; flex-direction: column; align-items: stretch; gap: 6px;
+    flex: 1 1 auto; height: auto; min-height: 150px; max-height: none; align-self: stretch; width: 100%;
+    padding: 8px 8px 6px; margin: 0; border: 0; border-radius: 20px;
+    background: #fff6e8; background-image: none; color: #2a1458;
+    box-shadow: 0 0 0 3px #ffcc33, 0 6px 0 #e09412;
+  }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture .match-scene {
+    flex: 1 1 0; width: 100%; height: auto; min-height: 0; max-height: none; margin: 0;
+    border-radius: 14px; background-color: #1a0840; object-fit: cover; box-shadow: none; filter: none;
+  }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-caption {
+    position: static; display: block; width: auto; margin: 0; padding: 2px 4px 0;
+    background: transparent; background-image: none; border: 0; box-shadow: none; text-shadow: none;
+    color: #2a1458; font-family: var(--sans); font-size: 18px; font-weight: 800; line-height: 1.2;
+    text-align: center; text-transform: none; letter-spacing: 0;
+  }
+  /* P4 lamp art: reuse the Lantern story-strip lamp (same art daily-lantern uses), Easy deal only */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='lamp'] .match-scene {
+    background: #33427a url('../assets/story-strip/lantern2-lamp.webp') 30% 40% / cover no-repeat;
+  }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='lamp'] .match-scene > * {
+    visibility: hidden;
+  }
+  /* cup placeholder is filled with the cue's exact gold; tint it cream/lilac so the cue stays unique */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-scene [fill='#ffcc33'] { fill: #fff6e8; }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-scene :is([fill='#c4922a'], [fill='#ffe08a']) { fill: #c86bff; }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-scene [stroke='#ffe08a'] { stroke: #e9d3ff; }
+
+  /* P2 line cards: cream, no outline, height = content (was 375/278px gold slabs) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.right {
+    flex: 0 0 auto; height: auto; min-height: 60px; max-height: none; align-self: stretch; width: 100%;
+    display: flex; align-items: center; justify-content: flex-start; text-align: left;
+    padding: 12px 18px; margin: 0; border: 0; border-radius: 20px;
+    background: #fff6e8; background-image: none; color: #2a1458;
+    font-family: var(--sans); font-size: 18px; font-weight: 700; line-height: 1.3;
+    box-shadow: 0 5px 0 #12062e; text-shadow: none; outline: 0;
+  }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.right:active {
+    transform: translateY(3px); box-shadow: 0 2px 0 #12062e;
+  }
+  /* wrong = berry, right = mint, never gold */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.right.is-flash {
+    box-shadow: 0 0 0 3px #ff5a7a, 0 5px 0 #c01840;
+  }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-locked {
+    border: 0; box-shadow: 0 0 0 3px #3dcc7a, 0 5px 0 #0e7a3c;
+  }
+
+  /* P5 miss: the toast + Try again were cream-on-cream (invisible) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-toast {
+    margin: 0; padding: 10px 14px; border: 0; border-radius: 16px;
+    background: #fff6e8; color: #2a1458; box-shadow: inset 4px 0 0 #ff5a7a;
+    font-family: var(--sans); font-size: 16px; font-weight: 700; line-height: 1.3;
+  }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-toast strong { color: inherit; font-weight: 700; }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .btn.match-recover {
+    align-self: center; width: auto; min-width: 0; min-height: 44px; margin: 0; padding: 8px 22px;
+    border: 0; border-radius: 999px; background: #e9d3ff; background-image: none; color: #2a1458;
+    box-shadow: 0 4px 0 #6a28b8; text-shadow: none;
+    font-family: var(--sans); font-size: 16px; font-weight: 800;
+  }
+
+  /* score + dock: lilac on grape, no cream slab */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-score {
+    background: transparent; border: 0; box-shadow: none; margin: 0; padding: 2px 0 0;
+    color: #e9d3ff; font-family: var(--sans); font-size: 15px; font-weight: 600; letter-spacing: 0.04em;
+  }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .cta-dock {
+    background: transparent; background-image: none; border: 0; box-shadow: none; backdrop-filter: none;
+  }
+
+  /* P7 win: drop the empty grid (orphan PICTURE / MAIN IDEA labels) and the gold stamp glow; Lock In next is the one gold */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal).is-win .match-grid { display: none; }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal).is-win .cta-dock { margin-top: auto; }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .win-stamp.is-badge {
+    background: #3a1480; color: #fff6e8; border: 3px solid #c86bff; box-shadow: 0 5px 0 #12062e; text-shadow: none;
+    font-size: 22px; animation: win-stamp-pop 0.48s cubic-bezier(0.2, 1.45, 0.35, 1) both;
+  }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .win-flash {
+    background: radial-gradient(circle at 50% 42%, rgba(255, 246, 232, 0.9), rgba(233, 211, 255, 0.5) 34%, rgba(200, 107, 255, 0.2) 60%, transparent 78%);
+  }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .win-ring {
+    border-color: rgba(233, 211, 255, 0.95); box-shadow: 0 0 28px rgba(200, 107, 255, 0.7);
+  }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .win-gem {
+    background: linear-gradient(135deg, #ffe0e8, #ff5a7a 48%, #c01840);
+    box-shadow: 0 0 18px rgba(233, 211, 255, 0.9), inset 0 2px 0 rgba(255, 255, 255, 0.8);
+  }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .win-gem:nth-child(odd) {
+    background: linear-gradient(135deg, #fff6b8, #3dcc7a 50%, #148a48);
+  }
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .win-gem:nth-child(3n) {
+    background: linear-gradient(135deg, #ffe0e8, #c86bff 48%, #5a2ab8);
+  }
+}

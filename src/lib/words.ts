@@ -129,7 +129,7 @@ export function easyLead(id: string, prompt: string): string {
     return 'Sort the sentences. Only one belongs in the keep bin.'
   }
   if (id === 'daily-gems') {
-    return 'Match each picture to the short line.'
+    return 'Drag the picture to the line that matches it.'
   }
   if (id === 'wb-early' || id === 'wb-method') {
     return prompt.replace(/historical claim/, 'historical line').replace(/overclaims/, 'stretch')
