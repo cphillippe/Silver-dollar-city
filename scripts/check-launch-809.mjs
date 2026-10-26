@@ -156,7 +156,7 @@ async function openGems(page) {
   await page.locator('[data-match-picture]').waitFor()
   await page.waitForFunction(() => !document.querySelector('.is-arming'))
   const how = await page.locator('.sort-how').evaluate((node) => (node.textContent || '').trim())
-  assert.equal(how, 'Match each picture to the short line.')
+  assert.equal(how, 'Drag the picture to the line that matches it.')
 }
 
 async function currentPair(page) {
@@ -186,7 +186,7 @@ try {
 
   const first = await currentPair(match)
   await pointerClick(match, first.line)
-  await match.waitForFunction(() => /1 \/ 3 kept/.test(document.querySelector('.match-score')?.textContent || ''))
+  await match.waitForFunction(() => /1 of 3 matched/.test(document.querySelector('.match-score')?.textContent || ''))
   seen.push(first.id)
 
   const second = await currentPair(match)
@@ -209,7 +209,7 @@ try {
   seen.push(third.id)
   assert.equal(new Set(seen).size, 3, `pairs ${seen.join(',')}`)
   const score = await match.locator('.match-score').evaluate((node) => node.textContent || '')
-  assert.match(score, /0 left · 3 \/ 3 kept/)
+  assert.match(score, /3 of 3 matched/)
   await match.screenshot({ path: join(shotDir, 'launch-809-match-375.png') })
 
   const drag = await browser.newPage({ viewport: { width: 375, height: 667 } })
@@ -223,7 +223,7 @@ try {
   await drag.mouse.down()
   await drag.mouse.move(end.x + end.width / 2, end.y + end.height / 2, { steps: 12 })
   await drag.mouse.up()
-  await drag.waitForFunction(() => /1 \/ 3 kept/.test(document.querySelector('.match-score')?.textContent || ''))
+  await drag.waitForFunction(() => /1 of 3 matched/.test(document.querySelector('.match-score')?.textContent || ''))
 
   const home = await browser.newPage({ viewport: { width: 375, height: 667 } })
   await home.goto(`${origin}/`)

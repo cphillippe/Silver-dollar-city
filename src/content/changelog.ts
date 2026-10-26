@@ -8,6 +8,18 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.537',
+    title: 'Easy Find the gems: purple board and plain words',
+    when: '2026-10-25',
+    items: [
+      'The picture sits big on grape purple, with cream line cards that fit the words.',
+      'Drag the picture to the line that matches it — and one gold ring shows which picture to move.',
+      'A miss says which line to try; your score reads like 0 of 3 matched.',
+      'Hard stays the same.',
+      'Refs #848.',
+    ],
+  },
+  {
     version: '1.4.536',
     title: 'Easy: clearer words on a few lessons',
     when: '2026-10-26',
