@@ -986,19 +986,413 @@ html[data-easy='on'] .next-tap {
     color: #2a1458; font-family: var(--sans); font-size: 18px; font-weight: 800; line-height: 1.2;
     text-align: center; text-transform: none; letter-spacing: 0;
   }
-  /* P4 lamp art: reuse the Lantern story-strip lamp (same art daily-lantern uses), Easy deal only */
+  /* Match picture art (Easy deal only). Peel generated 2026-10-26 by Art Director; replaces match.css:989-1003 (old lamp rule).
+     New art = transparent 512x512 cutouts in src/assets/match/, shown whole (center / contain) on a per-picture backing colour.
+     Reuse picks = opaque story-strip / city art, cropped like the old lamp rule (30% 40% / cover). Doctrine text untouched. */
+  /* lamp: Lamp (new lamp.webp) */
   :is(html[data-easy='on'] .play.is-match.is-deal,
       html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
       html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
       html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
       .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='lamp'] .match-scene {
-    background: #33427a url('../assets/story-strip/lantern2-lamp.webp') 30% 40% / cover no-repeat;
+    background: #33427a url('../assets/match/lamp.webp') center / contain no-repeat;
   }
+  /* seed: Seed (new sower.webp) */
   :is(html[data-easy='on'] .play.is-match.is-deal,
       html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
       html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
       html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
-      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='lamp'] .match-scene > * {
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='seed'] .match-scene {
+    background: #3d6b3a url('../assets/match/sower.webp') center / contain no-repeat;
+  }
+  /* cup: Cup (new cup.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='cup'] .match-scene {
+    background: #6b3a5a url('../assets/match/cup.webp') center / contain no-repeat;
+  }
+  /* cephas: Cephas (Peter) (reuse story-strip/creed4-appeared.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='cephas'] .match-scene {
+    background: #33427a url('../assets/story-strip/creed4-appeared.webp') 50% 0% / cover no-repeat;
+  }
+  /* twelve: The Twelve (new twelve.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='twelve'] .match-scene {
+    background: #33427a url('../assets/match/twelve.webp') center / contain no-repeat;
+  }
+  /* crowd: More than five hundred (reuse story-strip/dcreed2-tell.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='crowd'] .match-scene {
+    background: #33427a url('../assets/story-strip/dcreed2-tell.webp') 50% 0% / cover no-repeat;
+  }
+  /* cells: Cells copy information (new cells.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='cells'] .match-scene {
+    background: #1f5a52 url('../assets/match/cells.webp') center / contain no-repeat;
+  }
+  /* band: Earth sits in a habitable band (new band.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='band'] .match-scene {
+    background: #1b2a5a url('../assets/match/band.webp') center / cover no-repeat;
+  }
+  /* science: We can do science at all (new science.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='science'] .match-scene {
+    background: #24305a url('../assets/match/science.webp') center / contain no-repeat;
+  }
+  /* grace: Grace (new cup.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='grace'] .match-scene {
+    background: #6b3a5a url('../assets/match/cup.webp') center / contain no-repeat;
+  }
+  /* faith: Faith (reuse story-strip/beat3-rest.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='faith'] .match-scene {
+    background: #33427a url('../assets/story-strip/beat3-rest.webp') 50% 0% / cover no-repeat;
+  }
+  /* boast: Boast (new boast.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='boast'] .match-scene {
+    background: #5a3a2a url('../assets/match/boast.webp') center / contain no-repeat;
+  }
+  /* door: A door (reuse city/plots/plot-gate-lit.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='door'] .match-scene {
+    background: #33427a url('../assets/city/plots/plot-gate-lit.webp') 30% 40% / cover no-repeat;
+  }
+  /* pasture: Pasture (new pasture.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='pasture'] .match-scene {
+    background: #2f5a3a url('../assets/match/pasture.webp') center / contain no-repeat;
+  }
+  /* anyone: Anyone (reuse story-strip/beat2-come.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='anyone'] .match-scene {
+    background: #33427a url('../assets/story-strip/beat2-come.webp') 50% 0% / cover no-repeat;
+  }
+  /* sower: The sower (new sower.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='sower'] .match-scene {
+    background: #3d6b3a url('../assets/match/sower.webp') center / contain no-repeat;
+  }
+  /* sheep: Lost sheep (new sheep.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='sheep'] .match-scene {
+    background: #4a5a2a url('../assets/match/sheep.webp') center / contain no-repeat;
+  }
+  /* mustard: Mustard seed (new mustard.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='mustard'] .match-scene {
+    background: #2a4a3a url('../assets/match/mustard.webp') center / contain no-repeat;
+  }
+  /* talents: The talents (new talents.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='talents'] .match-scene {
+    background: #4a3a2a url('../assets/match/talents.webp') center / contain no-repeat;
+  }
+  /* multi: Multiple attestation (reuse story-strip/creed4-appeared.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='multi'] .match-scene {
+    background: #33427a url('../assets/story-strip/creed4-appeared.webp') 30% 40% / cover no-repeat;
+  }
+  /* emb: Embarrassment (new emb.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='emb'] .match-scene {
+    background: #1e2450 url('../assets/match/emb.webp') center / contain no-repeat;
+  }
+  /* early: Early testimony (reuse story-strip/dcreed3-letter.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='early'] .match-scene {
+    background: #33427a url('../assets/story-strip/dcreed3-letter.webp') 30% 40% / cover no-repeat;
+  }
+  /* context: Contextual credibility (new context.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='context'] .match-scene {
+    background: #5a4a3a url('../assets/match/context.webp') center / contain no-repeat;
+  }
+  /* lambda: Cosmological constant (new lambda.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='lambda'] .match-scene {
+    background: #24124a url('../assets/match/lambda.webp') center / contain no-repeat;
+  }
+  /* strong: Strong nuclear force (new strong.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='strong'] .match-scene {
+    background: #1e3a4a url('../assets/match/strong.webp') center / contain no-repeat;
+  }
+  /* entropy: Early-universe entropy (new entropy.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='entropy'] .match-scene {
+    background: #3a2a5a url('../assets/match/entropy.webp') center / contain no-repeat;
+  }
+  /* ratio: Gravity vs. electromagnetism (new ratio.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='ratio'] .match-scene {
+    background: #24305a url('../assets/match/ratio.webp') center / contain no-repeat;
+  }
+  /* qualia: Felt redness (new qualia.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='qualia'] .match-scene {
+    background: #3a1e4a url('../assets/match/qualia.webp') center / contain no-repeat;
+  }
+  /* about: Thoughts about things (new about.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='about'] .match-scene {
+    background: #3a2a5a url('../assets/match/about.webp') center / contain no-repeat;
+  }
+  /* hard: Why it feels like something (new mindgap.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='hard'] .match-scene {
+    background: #2a1e5a url('../assets/match/mindgap.webp') center / contain no-repeat;
+  }
+  /* reason: Reason as norm (new reason.webp) */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='reason'] .match-scene {
+    background: #24305a url('../assets/match/reason.webp') center / contain no-repeat;
+  }
+  /* hide the SVG placeholder on every card that now has art */
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='lamp'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='seed'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='cup'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='cephas'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='twelve'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='crowd'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='cells'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='band'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='science'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='grace'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='faith'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='boast'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='door'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='pasture'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='anyone'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='sower'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='sheep'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='mustard'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='talents'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='multi'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='emb'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='early'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='context'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='lambda'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='strong'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='entropy'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='ratio'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='qualia'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='about'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='hard'] .match-scene > *,
+  :is(html[data-easy='on'] .play.is-match.is-deal,
+      html[data-easy='on'] .is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .daily-page.is-puzzle .play.is-match.is-deal,
+      html[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal,
+      .app[data-easy='on'] .challenge-page.is-puzzle .play.is-match.is-deal) .match-card.is-picture[data-match-picture='reason'] .match-scene > * {
     visibility: hidden;
   }
   /* cup placeholder is filled with the cue's exact gold; tint it cream/lilac so the cue stays unique */
