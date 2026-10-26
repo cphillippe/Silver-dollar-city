@@ -23,7 +23,7 @@ import {
   SPINE_GROW,
 } from '../src/lib/city.ts'
 import { APP_VERSION } from '../src/config/app.ts'
-import { camClamp, camFirstSeat, camFrameInsets, camSeatArrow, camSeatClear, camSeatShare, camToPlate, camWorld, focusPan, nwCameraOn, NW_CAMERA_FOCUS, NW_CAMERA_INSETS, NW_CAMERA_ZOOM, NW_RING_MIN_SHARE, NW_TAP_SLOP } from '../src/components/nwCamera.ts'
+import { camClamp, camFirstSeat, camFrameInsets, camMarkerShare, camPointArrow, camSeatArrow, camSeatClear, camSeatShare, camToPlate, camWorld, focusPan, nwCameraOn, NW_CAMERA_FOCUS, NW_CAMERA_INSETS, NW_CAMERA_ZOOM, NW_CAM_TOUCH_HOLD_MS, NW_CUE_FACE_R, NW_CUE_MIN_SHARE, NW_RING_MIN_SHARE, NW_TAP_SLOP } from '../src/components/nwCamera.ts'
 import { clampPan, EASY_PAN_MAX_W, easyPanFrame, panToward } from '../src/lib/cityModel.ts'
 import { easyLoopLine as easyLoopFromLib, easyTrailView as easyTrailViewFromLib } from '../src/lib/easy.ts'
 import {
@@ -1864,16 +1864,17 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.537')
-assert.equal(CHANGELOG[0].version, '1.4.537', '1.4.537 is the newest row')
-assert.ok(CHANGELOG.some((note) => note.version === '1.4.537'), '1.4.537 changelog row')
+assert.equal(APP_VERSION, '1.4.538')
+assert.equal(CHANGELOG[0].version, '1.4.538', '1.4.538 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.538'), '1.4.538 changelog row')
 assert.doesNotMatch(
-  latestChange('1.4.537').items.join('\n'),
+  latestChange('1.4.538').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
-  '1.4.537 changelog avoids GitHub close keywords',
+  '1.4.538 changelog avoids GitHub close keywords',
 )
-assert.match(latestChange('1.4.537').items.join('\n'), /Hard stays the same\./)
-assert.match(latestChange('1.4.537').items.join('\n'), /Refs #848/, '1.4.537 changelog refs #848')
+assert.match(latestChange('1.4.538').items.join('\n'), /Hard stays the same\./)
+assert.match(latestChange('1.4.538').items.join('\n'), /Refs #834/, '1.4.538 changelog refs #834')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.537'), '1.4.537 changelog row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.536'), '1.4.536 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.536').items.join('\n'),
@@ -1949,18 +1950,39 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
   assert.deepEqual([pick.x, pick.y], [464, 768], '#834 the first clear open seat wins, dead seats never do')
   assert.equal(camSeatClear(pick, view, frameInsets), true)
   const kept = camFirstSeat(seats, view, frameInsets, { x: 600, y: 904 })
-  assert.deepEqual([kept.x, kept.y], [600, 904], '#834 an earlier pick stays while it is still clear')
+  assert.deepEqual([kept.x, kept.y], [600, 904], '#834 an earlier pick stays while at least 90% of its ring shows')
+  assert.equal(NW_CAM_TOUCH_HOLD_MS, 1000, '#834 auto-follow waits 1s after map or face touch')
+  const map03View = { W: 375, H: 667, s0: Math.max(375 / 798, 667 / 1134), z: NW_CAMERA_ZOOM.map03, tx: 0, ty: 0 }
+  const map03Insets = camFrameInsets(0)
+  const [mTx, mTy] = focusPan(NW_CAMERA_FOCUS.map03, map03View.W, map03View.H, map03View.s0, map03View.z, map03Insets)
+  map03View.tx = mTx
+  map03View.ty = mTy
+  const map03Pick = camFirstSeat([seat(328, 360), seat(464, 768), seat(600, 904)], map03View, map03Insets)
+  assert.ok(map03Pick && camSeatClear(map03Pick, map03View, map03Insets), '#834 map03 375 default picks a whole ring in the clear window')
   assert.equal(camFirstSeat([seat(600, 88)], view, frameInsets), null, '#834 a seat with too little ring showing is not the cue')
   assert.equal(camFirstSeat([], view, frameInsets), null, '#834 no seats, no cue')
-  // #834 edge: a ring needs at least 60% showing; otherwise the edge arrow is the one gold cue.
+  // #834 edge: a ring needs at least 90% showing; otherwise the edge arrow is the one gold cue.
   const ringAt = (share) => ({ live: true, x: 464, y: (frameInsets.top - 46 * k834 + 2 * 46 * k834 * share - view.ty) / k834 })
-  assert.equal(NW_RING_MIN_SHARE, 0.6, '#834 a ring counts at 60% showing')
+  assert.equal(NW_RING_MIN_SHARE, 0.9, '#834 a ring counts at 90% showing')
+  assert.equal(NW_CUE_MIN_SHARE, 0.9, '#834 the glowing face uses the same in-view share')
   assert.ok(Math.abs(camSeatShare(ringAt(0.8), view, frameInsets) - 0.8) < 0.01, '#834 share counts the visible part of the ring')
-  assert.ok(camFirstSeat([ringAt(0.8)], view, frameInsets), '#834 a ring 80% showing is the cue')
+  assert.equal(camFirstSeat([ringAt(0.8)], view, frameInsets), null, '#834 a ring 80% showing is not the cue')
+  assert.ok(camFirstSeat([ringAt(0.92)], view, frameInsets), '#834 a ring 92% showing is the cue')
   assert.equal(camFirstSeat([ringAt(0.3)], view, frameInsets), null, '#834 a ring 30% showing is not the cue')
   const arrow = camSeatArrow([seat(600, 88), seat(464, 224, false)], view, frameInsets)
   assert.ok(arrow && arrow.seat.x === 600 && arrow.y < view.H / 2, '#834 the arrow points to the nearest open seat, never a dead one')
-  assert.ok(arrow.x >= 0 && arrow.x <= view.W && arrow.y >= frameInsets.top, '#834 the arrow stays inside the clear window')
+  assert.ok(arrow.x >= 72 && arrow.x <= view.W - frameInsets.right - 18, '#834 the arrow sits on the screen edge band, clear of the dock')
+  assert.ok(
+    arrow.x <= 72 + 4 || arrow.x >= view.W - frameInsets.right - 40 || arrow.y <= frameInsets.top + 40 || arrow.y >= view.H - frameInsets.bottom - 40,
+    '#834 the arrow is pinned to the edge of the clear window',
+  )
+  const cuePoint = { x: 120, y: 140 }
+  assert.ok(camPointArrow(cuePoint, view, frameInsets), '#834 a walker off screen gets an edge arrow')
+  assert.ok(
+    Math.abs(camMarkerShare(cuePoint, 46, view, frameInsets) - camSeatShare(cuePoint, view, frameInsets)) < 0.02,
+    '#834 marker share matches the seat math at the ring radius',
+  )
+  assert.ok(NW_CUE_FACE_R >= 46, '#834 the glowing face marker is at least as wide as a seat ring')
   assert.equal(camSeatArrow([seat(464, 224, false)], view, frameInsets), null, '#834 no open seat, no arrow')
   assert.ok(k834 > 0)
   assert.match(actors834, /firstSeatAt === null \? -1/, '#834 with no ring in view the actors draw no first-seat ring')
@@ -1971,10 +1993,17 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
   assert.match(screen834, /fxKeySeq\.current \+= 1/, '#834 blast and juice keys come from a counter')
   assert.doesNotMatch(screen834, /key: stamp,|key: now,|const blast: Blast = \{ key: performance/, '#834 no timestamp React keys')
   assert.match(screen834, /onPointerUp=\{beginUp\}/, '#834 Begin has a pointer-up fallback')
+  assert.match(screen834, /onPointerUp=\{arrowUp\}/, '#834 the edge arrow has a pointer-up fallback')
   assert.match(screen834, /beginFiredAt\.current < 800/, '#834 click and the fallback never both start the night')
+  assert.match(screen834, /camCuePlateRef/, '#834 the camera keeps the glowing walker plate point')
+  assert.match(screen834, /camLastTouchAt/, '#834 auto-follow reads the last map or face touch')
+  assert.match(screen834, /camFollowPaused/, '#834 auto-follow pauses while a pointer is down or right after touch')
+  assert.match(screen834, /NW_CAM_TOUCH_HOLD_MS/, '#834 the touch hold uses the shared camera constant')
+  assert.match(screen834, /camPointArrow/, '#834 the walker edge arrow is placed from the camera view')
+  assert.match(screen834, /data-walker-arrow/, '#834 the walker arrow is marked in the DOM')
   const arrowCss = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
-  const arrowRule = arrowCss.match(/\.defend-page\.is-easy-watch\.is-need-lamp \.nw-seat-arrow\{[^}]*\}/)?.[0] ?? ''
-  assert.ok(arrowRule.includes('#ffcc33'), '#834 the arrow is the existing gold, scoped to Easy and the first lamp')
+  const arrowRule = arrowCss.match(/\.defend-page\.is-easy-watch \.nw-seat-arrow\{[^}]*\}/)?.[0] ?? ''
+  assert.ok(arrowRule.includes('#ffcc33'), '#834 the arrow is the existing gold on Easy Night Watch')
   assert.ok(arrowCss.indexOf('.nw-seat-arrow{') < arrowCss.indexOf('1.4.392:'), '#834 the arrow rule sits before the 1.4.392 block')
   assert.match(
     arrowCss,
