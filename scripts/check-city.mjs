@@ -16136,6 +16136,22 @@ console.log('check-city: ok')
   assert.match(juice321, /\.gem-cell\.is-burst/)
 }
 
+// Easy Match: tap path + chip-prefix bonus guard (word search tapfix)
+{
+  const playTap = readFileSync(
+    new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  const tightTap = readFileSync(new URL('../src/styles/match-art-tight.css', import.meta.url), 'utf8')
+  const gemTapCss = readFileSync(new URL('../src/styles/gem.css', import.meta.url), 'utf8')
+  assert.match(playTap, /function endDrag\(keepPath = false\)/)
+  assert.match(playTap, /if \(!moved\.current\) return endDrag\(true\)/)
+  assert.match(playTap, /gem-start-hint\.is-reserved/)
+  assert.match(tightTap, /\.gem-stage \{\s*[\s\S]*?min-height: 70vh/)
+  assert.match(tightTap, /min-width: 42px/)
+  assert.match(gemTapCss, /bottom: calc\(100% \+ 8px\)/, 'banners sit above the board, not on cells')
+}
+
 // Night Watch 1.4.322: per-kind walker portraits (Fixes #450)
 {
   const parts322 = readFileSync(new URL('../src/nightWatch/parts/index.ts', import.meta.url), 'utf8')
@@ -19318,3 +19334,4 @@ await import('./check-story-snap.mjs').then((mod) => mod.checkSnapHold())
 await import('./check-live-prove.mjs').then((mod) => mod.checkLiveProve())
 await import('./check-hide-hard-labels.mjs')
 await import('./check-golden-live.mjs').then((mod) => mod.checkGoldenLive())
+await import('./check-gem-tap-live.mjs').then((mod) => mod.checkGemTapLive())

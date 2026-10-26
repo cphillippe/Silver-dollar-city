@@ -248,7 +248,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     )
   }
 
-  function endDrag() {
+  function endDrag(keepPath = false) {
     const node = boardPointer.current
     const pointerId = dragPointerId.current
     if (node && pointerId != null && node.hasPointerCapture?.(pointerId)) {
@@ -257,6 +257,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     boardPointer.current = null
     drag.current = false
     dragPointerId.current = null
+    if (keepPath) return
     rawRef.current = []
     writePath([])
   }
@@ -416,6 +417,13 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       return true
     }
     if (building && isStoryWordPrefix(nextPath, puzzle, bonusRef.current)) return false
+    if (puzzle.words.some((word) => {
+      if (foundRef.current.includes(word.id)) return false
+      const placed = puzzle.paths[word.id] ?? []
+      if (placed.length <= nextPath.length) return false
+      const same = (trail: GemCoord[]) => trail.slice(0, nextPath.length).every((cell, i) => cell.r === nextPath[i]!.r && cell.c === nextPath[i]!.c)
+      return same(placed) || same([...placed].reverse())
+    })) return false
     const extra = matchBonusWord(nextPath, puzzle, bonusRef.current)
     if (extra) {
       const nextBonus = [...bonusRef.current, extra.id]
@@ -553,6 +561,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     if (event && event.pointerId !== dragPointerId.current) return
     // A scored find already owns this gesture. Clear the trail and do not miss.
     if (scoredThisGesture.current) return endDrag()
+    // A tap (no finger travel) keeps the built path so the next tap can extend it.
+    if (!moved.current) return endDrag(true)
     const nextPath = rawRef.current.length ? rawRef.current.slice() : pathRef.current.slice()
     endDrag()
     if (nextPath.length >= 3) missIfSwipe(nextPath)
@@ -714,9 +724,13 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       />
       )}
       <div className="gem-scroll">
-      {easy && found.length === 0 && status !== 'ok' && puzzle.words[0] ? (
-        <p className="gem-start-hint" data-gem-start>
-          {EASY.bonusMissStraight}
+      {easy && status !== 'ok' && puzzle.words[0] ? (
+        <p
+          className={`gem-start-hint${found.length ? ' is-reserved' : ''}`}
+          data-gem-start
+          aria-hidden={found.length > 0}
+        >
+          {found.length === 0 ? EASY.bonusMissStraight : '\u00a0'}
         </p>
       ) : null}
       {/* Board-first 1.4.99: StoryStrip dock is a flex header above this scroll; board fills leftover — zero overlay. */}

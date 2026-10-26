@@ -1125,7 +1125,9 @@ async function playGem(page, lineId = 'ob-tuning', { watchLast = false, checkSta
       throw new Error(`${lineId} drag missed ${word} path=${JSON.stringify(path)} toast=${toast || 'none'}`)
     }
     if (checkStart) {
-      assert.equal(await page.locator('[data-gem-start]').count(), 0, `${lineId} start hint clears on the first find`)
+      const startHint = page.locator('[data-gem-start]')
+      assert.equal(await startHint.count(), 1, `${lineId} start hint slot stays reserved after the first find`)
+      assert.match((await startHint.innerText()).trim(), /^\s*$/, `${lineId} start hint text clears on the first find`)
       await page.waitForFunction(() => document.querySelectorAll('.gem-cell.is-burst').length === 0, undefined, {
         timeout: 4000,
       })
