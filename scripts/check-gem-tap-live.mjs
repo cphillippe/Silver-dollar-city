@@ -6,6 +6,7 @@
 import assert from 'node:assert/strict'
 import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
+import { tmpdir } from 'node:os'
 import { chromium } from '@playwright/test'
 import { createServer } from 'vite'
 import { STORAGE_KEY } from '../src/config/app.ts'
@@ -17,7 +18,9 @@ const VIEWPORTS = [
   [375, 667],
   [390, 844],
 ]
-const SHOT_ROOT = '/cursor/stores/self/gemsearch-fix'
+const SHOT_ROOT =
+  process.env.GEM_TAP_SHOT_ROOT ??
+  (process.env.CI ? join(tmpdir(), 'gemsearch-fix') : '/cursor/stores/self/gemsearch-fix')
 
 function savePayload() {
   const now = new Date()
