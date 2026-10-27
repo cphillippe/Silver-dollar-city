@@ -661,7 +661,7 @@ html[data-easy='on'] .play.is-gem-search .gem-cell.is-start-gold {
 html[data-easy='on'] .play.is-gem-search .gem-hint-slot {
   position: relative;
   flex: 0 0 auto;
-  min-height: 2.75rem;
+  min-height: 5.85rem;
   margin: 0 0 4px;
   display: grid;
   place-items: center;
@@ -770,10 +770,6 @@ html[data-easy='on'] .play.is-gem-search .gem-hint-slot .gem-combo.is-loud {
 }
 
 /* Combo on its own line above banners/toasts so ×N never tucks under BONUS! */
-html[data-easy='on'] .play.is-gem-search .gem-hint-slot:has(.gem-combo.is-loud) {
-  min-height: 5.85rem;
-}
-
 html[data-easy='on'] .play.is-gem-search .gem-hint-slot:has(.gem-combo.is-loud) .bonus-banner,
 html[data-easy='on'] .play.is-gem-search .gem-hint-slot:has(.gem-combo.is-loud) .miss-banner,
 html[data-easy='on'] .play.is-gem-search .gem-hint-slot:has(.gem-combo.is-loud) .match-toast,
