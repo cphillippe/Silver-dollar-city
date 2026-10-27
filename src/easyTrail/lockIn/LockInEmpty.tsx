@@ -20,7 +20,11 @@ export function LockInEmpty({ onNavigate }: LockInEmptyProps) {
         <p className="eyebrow">{EASY.saved}</p>
         <p>Nothing to lock in yet.</p>
       </header>
-      <button type="button" className="btn gold xl" onClick={() => onNavigate({ name: 'hub' })}>
+      <button
+        type="button"
+        className="btn primary xl snap-bins"
+        onClick={() => onNavigate({ name: 'hub' })}
+      >
         {EASY.home}
       </button>
       {readAvailable ? (

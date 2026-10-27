@@ -39,7 +39,7 @@ async function launchBrowser() {
   }
 }
 
-async function lockInTabGolds(page) {
+async function lockInTabFilledGolds(page) {
   return page.evaluate(() => {
     const hits = []
     for (const el of document.querySelectorAll('button, a.btn')) {
@@ -49,11 +49,40 @@ async function lockInTabGolds(page) {
       if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
       const box = el.getBoundingClientRect()
       if (box.width <= 0 || box.height <= 0) continue
-      if (!el.classList.contains('gold')) continue
+      const primary = el.classList.contains('primary')
+      const coach = el.classList.contains('easy-coach-step') && Boolean(el.closest('li.is-now'))
+      if (!primary && !coach) continue
       hits.push((el.innerText || el.getAttribute('aria-label') || '').replace(/\s+/g, ' ').trim())
     }
     return hits
   })
+}
+
+async function assertLockInEmptyHomeButton(page, where) {
+  const stats = await page.evaluate(() => {
+    const el = document.querySelector('.journal.is-lock-in-empty button.btn.primary')
+    if (!(el instanceof HTMLElement)) return null
+    const style = getComputedStyle(el)
+    return {
+      fg: style.color,
+      bg: style.backgroundColor,
+      bgImage: style.backgroundImage,
+      fs: parseFloat(style.fontSize),
+      text: (el.textContent || '').replace(/\s+/g, ' ').trim(),
+      classes: el.className,
+    }
+  })
+  assert.ok(stats, `${where} empty Lock In Home button`)
+  assert.match(stats.classes, /\bprimary\b/)
+  assert.match(stats.classes, /\bsnap-bins\b/)
+  assert.doesNotMatch(stats.classes, /\bgold\b/, `${where} Home is primary like gem-win Lock In next`)
+  assert.ok(stats.fs >= 16, `${where} Home label ≥16px (${stats.fs})`)
+  assert.match(stats.fg, /42,\s*28,\s*8|42,\s*33,\s*24/, `${where} Home uses dark primary label (${stats.fg})`)
+  assert.ok(
+    stats.bgImage.includes('linear-gradient') || stats.bg.includes('linear-gradient'),
+    `${where} Home uses the filled primary gradient (${stats.bgImage || stats.bg})`,
+  )
+  assert.doesNotMatch(stats.bgImage, /200,\s*107,\s*255|purple/i, `${where} Home is not the pale .btn.gold wash`)
 }
 
 async function tapLockInTab(page) {
@@ -102,8 +131,9 @@ async function proveLockInEmptyTab(browser, origin) {
     assert.match(await page.locator('.journal.is-lock-in-empty .journal-head').innerText(), /Nothing to lock in yet\./)
     assert.equal(await page.locator('.run-pad').count(), 0, 'empty Lock In has no Run pad')
     assert.equal(await page.locator('.play.is-father-run').count(), 0, 'empty Lock In has no Run play')
-    const golds = await lockInTabGolds(page)
+    const golds = await lockInTabFilledGolds(page)
     assert.deepEqual(golds, ['Home'], `${width}x${height} fresh empty Lock In one gold Home ${JSON.stringify(golds)}`)
+    await assertLockInEmptyHomeButton(page, `${width}x${height} no-read`)
     assert.equal(await page.locator('.journal.is-lock-in-empty .text-link').count(), 0, 'fresh empty has no Read')
     await page.screenshot({ path: `${SHOTS}/lock-in-empty-no-read-${width}x${height}.png` })
     traces.push(`${width}x${height} lock-in-empty-no-read ok`)
@@ -142,8 +172,9 @@ async function proveLockInEmptyTab(browser, origin) {
     await readPage.locator('.journal.is-lock-in-empty').waitFor()
     assert.equal(await readPage.locator('.journal.is-lock-in-empty .text-link').count(), 1, 'Read link when Read is open')
     assert.match(await readPage.locator('.journal.is-lock-in-empty .text-link').innerText(), /^Read$/)
-    const readGolds = await lockInTabGolds(readPage)
+    const readGolds = await lockInTabFilledGolds(readPage)
     assert.deepEqual(readGolds, ['Home'], `${width}x${height} empty with Read still one gold ${JSON.stringify(readGolds)}`)
+    await assertLockInEmptyHomeButton(readPage, `${width}x${height} with-read`)
     await readPage.screenshot({ path: `${SHOTS}/lock-in-empty-with-read-${width}x${height}.png` })
     traces.push(`${width}x${height} lock-in-empty-with-read ok`)
     await readCtx.close()

@@ -29,8 +29,23 @@ html[data-easy='on'] .play.is-gem-search.is-win .win-stamp {
   }
 }
 
+/* Easy gem win: no full-screen gold flash over the board or jar. */
+html[data-easy='on'] .play.is-gem-search.is-win .win-flash,
+html[data-easy='on'] .play.is-gem-search.is-win .win-ring,
+html[data-easy='on'] .play.is-gem-search.is-win .win-spark,
+html[data-easy='on'] .play.is-gem-search.is-win .win-gem {
+  display: none;
+}
+
+html[data-easy='on'] .play.is-gem-search.is-win .win-burst {
+  overflow: hidden;
+  contain: paint;
+  max-width: 100%;
+}
+
 /* 2) Generic +50 banner: pine fill, parchment text. */
-html[data-easy='on'] .play.is-gem-search.is-panel-blast .gem-stage .bonus-banner {
+html[data-easy='on'] .play.is-gem-search.is-panel-blast .gem-stage .bonus-banner,
+html[data-easy='on'] .play.is-gem-search.is-panel-blast .gem-hint-slot .bonus-banner {
   background: var(--pine);
   color: var(--parchment);
   border: 2px solid var(--parchment);
@@ -38,7 +53,8 @@ html[data-easy='on'] .play.is-gem-search.is-panel-blast .gem-stage .bonus-banner
 }
 
 /* 3) Story word! toast: opaque ink pill. */
-html[data-easy='on'] .play.is-gem-search .gem-stage .match-toast.gem-toast.is-yes {
+html[data-easy='on'] .play.is-gem-search .gem-stage .match-toast.gem-toast.is-yes,
+html[data-easy='on'] .play.is-gem-search .gem-hint-slot .match-toast.gem-toast.is-yes {
   background: var(--ink);
   color: var(--parchment);
   border: 1px solid var(--ink);
