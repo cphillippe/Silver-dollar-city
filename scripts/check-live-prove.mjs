@@ -4705,18 +4705,20 @@ async function walkHeldState(page, id) {
   }, id)
 }
 
-/** Steps an entering walker until its drawn face is open board, and returns that point. Stays inside the tap lock. */
-async function stepToOpenFace(page, id, lockMs, label, away = []) {
+/** Steps until the drawn face is on open board while the walker is still walking in. */
+async function stepToOpenFace(page, id, lockMs, label, away = [], runMs = 1800) {
   let elapsed = 0
-  while (elapsed + WALK_STEP_MS < lockMs - 60) {
+  const budget = Math.min(runMs - 60, Math.max(lockMs + 240, 500))
+  while (elapsed + WALK_STEP_MS < budget) {
     const face = await walkerFaceNow(page, id)
     const client = await walkClient(page, face)
     const clear = away.every((other) => Math.hypot(other.x - face.x, other.y - face.y) > EASY_FACE_HIT_R * 2 + 8)
-    if (client?.open && clear) return { face, client, elapsed }
+    const held = await page.locator(`.defend-raider[data-walk-id="${id}"]`).getAttribute('data-walk-in')
+    if (client?.open && clear && held === 'yes') return { face, client, elapsed }
     await walkStep(page, WALK_STEP_MS)
     elapsed += WALK_STEP_MS
   }
-  assert.fail(`${label} walker ${id} never showed an open face inside its ${lockMs} ms lock`)
+  assert.fail(`${label} walker ${id} never showed an open face during its run-in (lock ${lockMs} ms)`)
 }
 
 async function checkWalkInTaps(browser, port, errors) {
@@ -4729,7 +4731,7 @@ async function checkWalkInTaps(browser, port, errors) {
     const [row] = await nextWalkIn(run, new Set(), label)
     const spawn = walkSpawnRoad(map, row.line)
     const lockMs = spawn.lockMs
-    const open = await stepToOpenFace(run.page, row.id, lockMs, label)
+    const open = await stepToOpenFace(run.page, row.id, lockMs, label, [], spawn.runMs)
     const held = await walkHeldState(run.page, row.id)
     assert.equal(held.walkIn, 'yes', `${label} walker is still walking in`)
     assert.match(held.cls, /is-walk-in/, `${label} walker is held`)
@@ -4789,7 +4791,7 @@ async function checkWalkInTaps(browser, port, errors) {
     assert.ok(target, `${label} a second walker walks in behind the lead`)
     const spawn = walkSpawnRoad(map, target.line)
     const away = leads.map(walkTranslate).filter(Boolean).map((at) => ({ x: at.x, y: at.y + PATH_WALKER_FACE_DY }))
-    const open = await stepToOpenFace(run.page, target.id, spawn.lockMs, label, away)
+    const open = await stepToOpenFace(run.page, target.id, spawn.lockMs, label, away, spawn.runMs)
     const held = await walkHeldState(run.page, target.id)
     assert.equal(held.walkIn, 'yes', `${label} walker is still walking in`)
     assert.doesNotMatch(held.cls, /is-easy-cue|is-easy-tap-target/, `${label} entering walker does not glow`)
