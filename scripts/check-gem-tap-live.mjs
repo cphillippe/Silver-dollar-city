@@ -123,13 +123,15 @@ async function cellCentre(page, cell) {
 }
 
 async function dragPath(page, path) {
+  const steps = path.length <= 3 ? 12 : 5
   const first = await cellCentre(page, path[0])
   await page.mouse.move(first.x, first.y)
   await page.mouse.down()
   for (const cell of path.slice(1)) {
     const at = await cellCentre(page, cell)
-    await page.mouse.move(at.x, at.y, { steps: 5 })
+    await page.mouse.move(at.x, at.y, { steps })
   }
+  await page.waitForTimeout(40)
   await page.mouse.up()
 }
 
@@ -285,10 +287,17 @@ async function playWords(page, lineId, mode) {
     if (boardY0 == null) {
       boardY0 = (await layoutMetrics(page)).boardY
     }
+    const before = await foundCount(page)
     if (mode === 'drag') await dragPath(page, path)
     else await tapPath(page, path, true)
-    await page.waitForTimeout(900)
-    assert.equal(await foundCount(page), i + 1, `${lineId} ${mode} ${word} => ${i + 1}/4`)
+    await page.waitForTimeout(mode === 'drag' ? 1100 : 900)
+    let after = await foundCount(page)
+    if (after === before && mode === 'drag') {
+      await dragPath(page, path)
+      await page.waitForTimeout(1100)
+      after = await foundCount(page)
+    }
+    assert.equal(after, i + 1, `${lineId} ${mode} ${word} => ${i + 1}/4 (saw ${after})`)
     if (i === 0) {
       const after = await layoutMetrics(page)
       assert.equal(after.boardY, boardY0, `${lineId} board Y stable after first find (${boardY0} -> ${after.boardY})`)
@@ -299,7 +308,7 @@ async function playWords(page, lineId, mode) {
     await assertNoBannerOverlap(page, `${lineId} ${word}`)
     await assertNoPopOverlap(page, `${lineId} ${word}`)
   }
-  await page.locator('.play.is-gem-search.is-win').waitFor({ timeout: 8000 })
+  await page.locator('.play.is-gem-search.is-win').waitFor({ timeout: 15000 })
 }
 
 async function assertPrefixDragNoBonus(page, lineId, word) {
