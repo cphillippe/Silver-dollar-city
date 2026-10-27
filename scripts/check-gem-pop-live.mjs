@@ -205,6 +205,36 @@ async function popOverlapHit(page) {
   }, POP_SELECTOR)
 }
 
+async function popHintOverlapHit(page) {
+  return page.evaluate((popSelector) => {
+    const hint = document.querySelector('.gem-hint-slot .gem-start-hint')
+    if (!hint) return null
+    const hintStyle = getComputedStyle(hint)
+    if (hintStyle.display === 'none' || hintStyle.visibility === 'hidden' || Number(hintStyle.opacity) < 0.05) {
+      return null
+    }
+    const hintRect = hint.getBoundingClientRect()
+    if (hintRect.height < 2 || hintRect.width < 2) return null
+    const pops = [...document.querySelectorAll(popSelector)].filter((el) => {
+      const style = getComputedStyle(el)
+      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0.05
+    })
+    for (const el of pops) {
+      const rect = el.getBoundingClientRect()
+      if (rect.width < 1 || rect.height < 1) continue
+      if (
+        hintRect.left < rect.right &&
+        hintRect.right > rect.left &&
+        hintRect.top < rect.bottom &&
+        hintRect.bottom > rect.top
+      ) {
+        return `${el.className} ∩ gem-start-hint`
+      }
+    }
+    return null
+  }, POP_SELECTOR)
+}
+
 async function popPopOverlapHit(page) {
   return page.evaluate((popSelector) => {
     const pops = [...document.querySelectorAll(popSelector)]
@@ -233,6 +263,8 @@ async function assertPopsClear(page, tag) {
   assert.equal(hit, null, `${tag} pop outside cells (hit ${hit ?? 'none'})`)
   const popHit = await popPopOverlapHit(page)
   assert.equal(popHit, null, `${tag} pops disjoint (hit ${popHit ?? 'none'})`)
+  const hintHit = await popHintOverlapHit(page)
+  assert.equal(hintHit, null, `${tag} pops clear hint line (hit ${hintHit ?? 'none'})`)
 }
 
 async function goldCueOffenders(page) {
@@ -319,6 +351,21 @@ async function playWinHome(page, origin, lineId, viewport) {
     await page.waitForTimeout(700)
   }
   await page.locator('.play.is-gem-search.is-win').waitFor({ timeout: 8000 })
+  await page.waitForTimeout(400)
+  const boardHeader = await page.evaluate(() => {
+    const topbar = document.querySelector('.topbar')
+    const board = document.querySelector('.play.is-gem-search.is-win .gem-board')
+    const tb = topbar?.getBoundingClientRect()
+    const bb = board?.getBoundingClientRect()
+    return {
+      headerBottom: tb ? tb.bottom : 0,
+      boardTop: bb ? bb.top : 0,
+    }
+  })
+  assert.ok(
+    boardHeader.boardTop >= boardHeader.headerBottom - 1,
+    `${lineId} board top below header at ${w}x${h} (board ${boardHeader.boardTop.toFixed(1)} header ${boardHeader.headerBottom.toFixed(1)})`,
+  )
   const home = page.locator('.play.is-gem-search.is-win .cta-dock .btn').filter({ hasText: /^Home$/ })
   await home.waitFor()
   const box = await home.boundingBox()

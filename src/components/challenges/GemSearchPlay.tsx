@@ -121,6 +121,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const scoredThisGesture = useRef(false)
   const dockJuiced = useRef(false)
   const boardPointer = useRef<HTMLElement | null>(null)
+  const gemScrollRef = useRef<HTMLDivElement>(null)
   const stripRef = useRef(stripMode)
   const findUntil = useRef(0)
   stripRef.current = stripMode
@@ -186,6 +187,19 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     // line change only — new Match deal, not the leftover extras
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lineId])
+
+  useEffect(() => {
+    if (status !== 'ok' || !easy) return
+    const scrollWinIntoView = () => {
+      window.scrollTo(0, 0)
+      const page = document.querySelector('.challenge-page.is-puzzle')
+      if (page instanceof HTMLElement) page.scrollTop = 0
+      gemScrollRef.current?.scrollTo(0, 0)
+    }
+    scrollWinIntoView()
+    const id = window.requestAnimationFrame(scrollWinIntoView)
+    return () => window.cancelAnimationFrame(id)
+  }, [status, easy])
 
   useEffect(() => {
     if (round === 0) return
@@ -584,6 +598,9 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   }
 
   const selected = new Set(path.map(cellKey))
+  const popOverlayActive =
+    comboFlash > 1 || plusFlash || findPop > 0 || Boolean(toast) || toastBonus || toastMiss
+  const hideStartHint = found.length > 0 || popOverlayActive
 
   return (
     <div
@@ -728,16 +745,16 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         onSheetClose={() => closeSheet()}
       />
       )}
-      <div className="gem-scroll">
+      <div className="gem-scroll" ref={gemScrollRef}>
       {easy && status !== 'ok' ? (
         <div className="gem-hint-slot">
           {puzzle.words[0] ? (
             <p
-              className={`gem-start-hint${found.length ? ' is-reserved' : ''}`}
+              className={`gem-start-hint${hideStartHint ? ' is-suppressed' : ''}${found.length && !popOverlayActive ? ' is-reserved' : ''}`}
               data-gem-start
-              aria-hidden={found.length > 0}
+              aria-hidden={hideStartHint}
             >
-              {found.length === 0 ? EASY.bonusMissStraight : '\u00a0'}
+              {found.length === 0 && !popOverlayActive ? EASY.bonusMissStraight : '\u00a0'}
             </p>
           ) : null}
           {plusFlash ? (
