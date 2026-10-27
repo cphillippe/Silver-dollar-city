@@ -782,7 +782,7 @@
   }
 
   html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked.is-win .cta-dock {
-    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   }
 }
 

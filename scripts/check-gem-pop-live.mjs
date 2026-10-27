@@ -205,9 +205,34 @@ async function popOverlapHit(page) {
   }, POP_SELECTOR)
 }
 
+async function popPopOverlapHit(page) {
+  return page.evaluate((popSelector) => {
+    const pops = [...document.querySelectorAll(popSelector)]
+      .filter((el) => {
+        const style = getComputedStyle(el)
+        return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0.05
+      })
+      .map((el) => ({ rect: el.getBoundingClientRect(), cls: el.className }))
+    for (let i = 0; i < pops.length; i += 1) {
+      const a = pops[i].rect
+      if (a.width < 1 || a.height < 1) continue
+      for (let j = i + 1; j < pops.length; j += 1) {
+        const b = pops[j].rect
+        if (b.width < 1 || b.height < 1) continue
+        if (a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top) {
+          return `${pops[i].cls} ∩ ${pops[j].cls}`
+        }
+      }
+    }
+    return null
+  }, POP_SELECTOR)
+}
+
 async function assertPopsClear(page, tag) {
   const hit = await popOverlapHit(page)
   assert.equal(hit, null, `${tag} pop outside cells (hit ${hit ?? 'none'})`)
+  const popHit = await popPopOverlapHit(page)
+  assert.equal(popHit, null, `${tag} pops disjoint (hit ${popHit ?? 'none'})`)
 }
 
 async function goldCueOffenders(page) {
