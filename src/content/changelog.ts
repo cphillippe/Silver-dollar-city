@@ -15,7 +15,7 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.546',
+    version: '1.4.547',
     title: 'Easy Match: skip WINE and SMOKE as bonus extras',
     when: '2026-10-27',
     items: [
