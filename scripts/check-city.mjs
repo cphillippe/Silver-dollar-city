@@ -16185,7 +16185,7 @@ console.log('check-city: ok')
   )
   assert.match(
     tightTap,
-    /@media \(max-width: 430px\) and \(max-height: 720px\) \{[\s\S]*?\.is-story-docked\.is-win \.gem-board \{[\s\S]*?30svh/,
+    /@media \(max-width: 430px\) and \(max-height: 720px\) \{[\s\S]*?\.is-story-docked\.is-win \.gem-board \{[\s\S]*?28svh/,
     'Easy short-phone win caps board height so Lock In stays on the 667 fold',
   )
   assert.match(gemTapCss, /bottom: calc\(100% \+ 8px\)/, 'banners sit above the board, not on cells')
