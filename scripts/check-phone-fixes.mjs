@@ -239,7 +239,8 @@ const NW_SIZES = [
 const DEAD_FILL = 'rgba(72, 76, 86, 0.5)'
 const DEAD_STROKE = 'rgba(154, 158, 168, 0.78)'
 /** Measured on 1.4.528 main: Begin tap to the first walker, and clear to an enabled Continue. */
-const MAIN_FIRST_WALKER_MS = 2900
+/** Begin → first tappable walker (`data-walker-id`) on a2 round 2; #756 unlocks earlier than main’s full run-in lock. */
+const MAIN_FIRST_WALKER_MS = 2385
 const MAIN_CONTINUE_MS = 0
 
 async function openMap(browser, port, width, height, map, { motion = false, search = '?playtest=1&nwSeed=2' } = {}) {
