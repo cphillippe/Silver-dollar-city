@@ -16167,8 +16167,17 @@ console.log('check-city: ok')
   assert.match(playTap, /gem-hint-slot/)
   assert.match(playTap, /gem-start-hint\$\{found\.length \? ' is-reserved' : ''\}/)
   assert.match(playTap, /gem-find-pop gem-score-pop/)
-  assert.match(tightTap, /\.gem-stage \{\s*[\s\S]*?min-height: 70vh/)
-  assert.match(tightTap, /flex: 1 1 0/)
+  assert.match(
+    tightTap,
+    /html\[data-easy='on'\][\s\S]*?\.gem-stage \{[\s\S]*?flex: 1 1 0[\s\S]*?min-height: 0/,
+    'Easy phone gem-stage fills the play band via flex, not a fixed vh',
+  )
+  assert.match(tightTap, /max-height: min\(100cqh, 100cqw\)/, 'Easy phone board uses gem-scroll container sizing')
+  assert.match(
+    tightTap,
+    /\.is-story-docked\.is-win \.gem-board \{[\s\S]*?max-height: none !important/,
+    'Easy phone win board drops cqh cap when matchWin shrink-wraps the scroll container',
+  )
   assert.match(gemTapCss, /bottom: calc\(100% \+ 8px\)/, 'banners sit above the board, not on cells')
 }
 
