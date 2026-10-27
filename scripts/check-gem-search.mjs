@@ -316,6 +316,21 @@ assert.equal(shouldMissAfterSwipe(false, 0), false)
 assert.equal(shouldMissAfterSwipe(false, 1), false)
 assert.equal(shouldMissAfterSwipe(false, 4), true, 'unscored swipe of 4 can miss')
 
+{
+  const ob = buildGemPuzzle('ob-tuning', 0)
+  const steps = ob.words.find((word) => word.text === 'STEPS')
+  assert.ok(steps, 'ob-tuning has STEPS chip')
+  const placed = ob.paths[steps.id]
+  assert.ok(placed.length >= 5, 'STEPS is 5 letters')
+  const stepPrefix = placed.slice(0, 4)
+  assert.equal(matchBonusWord(stepPrefix, ob, [])?.text, 'STEP', 'dictionary still knows STEP')
+  assert.match(
+    readFileSync(new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url), 'utf8'),
+    /function isChipWordPrefix\(/,
+    'chip prefix guard lives in GemSearchPlay (src/lib locked)',
+  )
+}
+
 const overlapBoard = {
   ...puzzleFrom(lettersFromRows(['CATXXXXX', 'XXRXXXXX', 'XXRXXXXX'])),
   planted: [
@@ -474,12 +489,9 @@ assert.match(playSrc, /Combo/)
 assert.ok(playSrc.lastIndexOf('EASY.holdNext') < playSrc.lastIndexOf('EASY.moreMatch'))
 assert.match(playSrc, /function closeSheet/)
 assert.match(playSrc, /function endDrag\(keepPath = false\)/)
-assert.match(playSrc, /if \(!moved\.current\) return endDrag\(true\)/)
-assert.match(
-  playSrc,
-  /puzzle\.words\.some\(\(word\) => \{[\s\S]*?same\(placed\) \|\| same\(\[\.\.\.placed\]\.reverse\(\)\)/,
-  'chip prefixes block bonus scoring while a lesson word is still open',
-)
+assert.match(playSrc, /if \(!moved\.current\)[\s\S]{0,220}applyCell\(cell, 'tap'\)/)
+assert.match(playSrc, /isChipWordPrefix\(nextPath, puzzle, foundRef\.current\)/, 'chip prefixes block bonus while a lesson word is still open')
+assert.doesNotMatch(playSrc, /onCellDown[\s\S]{0,420}applyCell\(cell, 'tap'\)/, 'pointerdown must not submit tap (drag stays live)')
 assert.match(playSrc, /heroFlash/)
 assert.doesNotMatch(playSrc, /setStripMode\('hero'\)/, '1.4.321 first find must not hero-reflow the board')
 assert.doesNotMatch(playSrc, /is-live/, '1.4.321 idle letters must not take a board-wide is-live glow')
