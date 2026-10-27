@@ -15,6 +15,15 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.546',
+    title: 'Easy Match: skip WINE and SMOKE as bonus extras',
+    when: '2026-10-27',
+    items: [
+      'Easy word search no longer plants or scores WINE or SMOKE as common bonus words.',
+      'Refs #753.',
+    ],
+  },
+  {
     version: '1.4.543',
     title: 'Easy Match: tap words work again on the letter board',
     when: '2026-10-26',
