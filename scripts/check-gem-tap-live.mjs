@@ -28,7 +28,7 @@ function savePayload() {
   return {
     kind: 'silver-city-save',
     schemaVersion: 1,
-    appVersion: '1.4.543',
+    appVersion: '1.4.544',
     savedAt: now.toISOString(),
     progress: {
       started: true,
@@ -212,6 +212,8 @@ async function assertNoPopOverlap(page, tag) {
   const hit = await page.evaluate(() => {
     const cells = [...document.querySelectorAll('[data-gem-cell]')].map((el) => el.getBoundingClientRect())
     const pops = [
+      ...document.querySelectorAll('.gem-hint-slot .gem-score-pop, .gem-hint-slot .gem-find-pop, .gem-hint-slot .bonus-plus'),
+      ...document.querySelectorAll('.gem-hint-slot .gem-combo, .gem-hint-slot .bonus-banner, .gem-hint-slot .miss-banner, .gem-hint-slot .match-toast'),
       ...document.querySelectorAll('.gem-score-pop, .gem-find-pop, .bonus-plus'),
       ...document.querySelectorAll('.gem-stage .bonus-banner, .gem-stage .miss-banner, .gem-stage .match-toast'),
     ]
@@ -237,7 +239,10 @@ async function assertNoPopOverlap(page, tag) {
 async function assertNoBannerOverlap(page, tag) {
   const hit = await page.evaluate(() => {
     const cells = [...document.querySelectorAll('[data-gem-cell]')].map((el) => el.getBoundingClientRect())
-    const banners = [...document.querySelectorAll('.gem-stage .bonus-banner, .gem-stage .miss-banner, .gem-stage .match-toast')]
+    const banners = [
+      ...document.querySelectorAll('.gem-hint-slot .bonus-banner, .gem-hint-slot .miss-banner, .gem-hint-slot .match-toast, .gem-hint-slot .gem-combo'),
+      ...document.querySelectorAll('.gem-stage .bonus-banner, .gem-stage .miss-banner, .gem-stage .match-toast'),
+    ]
       .filter((el) => {
         const style = getComputedStyle(el)
         return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0'
