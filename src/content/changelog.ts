@@ -25,6 +25,19 @@ export const CHANGELOG: ChangeNote[] = [
     ],
   },
   {
+    version: '1.4.544',
+    title: 'Easy Match: score pops stay above the board',
+    when: '2026-10-27',
+    items: [
+      'Combo stamps and bonus banners show in the hint band above the grid instead of covering letters.',
+      'The letter board sits centered in the play area between dock and score.',
+      'A wrong drag still lets you swipe the next word; a short bonus no longer steals letters from a story word you are still spelling.',
+      'The win screen fits the phone without side or inner scrollbars.',
+      'Hard stays the same.',
+      'Refs #855.',
+    ],
+  },
+  {
     version: '1.4.543',
     title: 'Easy Match: tap words work again on the letter board',
     when: '2026-10-26',
@@ -32,7 +45,7 @@ export const CHANGELOG: ChangeNote[] = [
       'Tap each letter in order to spell a word — the path stays until the word scores.',
       'Dragging through a long lesson word no longer scores a short bonus by mistake.',
       'The board stays put after your first find, with square cells and room for the whole grid.',
-      'Refs: Bill 2026-10-26 1:43 PM CT (Art Director\'s chat): fix that game; Match UI spec /workspace/gemcheck.',
+      'Refs: Bill 2026-10-26 1:43 PM CT (Art Director\'s chat): fix that game; Match UI spec.',
     ],
   },
   {
