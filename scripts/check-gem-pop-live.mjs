@@ -14,10 +14,12 @@ import { buildGemPuzzle, findStraightSpelling, isBonusSpelling, MATCH_CHIPS } fr
 import { debugMiniGames } from '../src/lib/debugPlays.ts'
 
 const VIEWPORTS = [
+  [375, 667],
   [375, 812],
   [390, 844],
   [412, 915],
 ]
+const STEP_DRAG_SHOTS = [375, 390]
 const WIN_HOME_LINES = ['hl-mind', 'ob-tuning']
 const WIN_VIEWPORTS = [
   [375, 667],
@@ -38,7 +40,7 @@ function savePayload({ lifetime = 5000, seen = 2 } = {}) {
   return {
     kind: 'silver-city-save',
     schemaVersion: 1,
-    appVersion: '1.4.544',
+    appVersion: '1.4.545',
     savedAt: now.toISOString(),
     progress: {
       started: true,
@@ -319,22 +321,78 @@ async function samplePopMoments(page, tag, delays, { gold = false } = {}) {
   }
 }
 
+async function boardTopY(page) {
+  return page.evaluate(() => document.querySelector('.gem-board')?.getBoundingClientRect().top ?? NaN)
+}
+
+async function assertBoardTopStable(page, y0, tag, label) {
+  const y = await boardTopY(page)
+  assert.ok(Number.isFinite(y), `${tag} board top readable (${label})`)
+  assert.ok(Math.abs(y - y0) <= 1, `${tag} board Y within 1px (${label}: ${y0.toFixed(1)} -> ${y.toFixed(1)})`)
+}
+
+async function sampleBoardStable(page, y0, tag, delays) {
+  for (const ms of delays) {
+    if (ms > 0) await page.waitForTimeout(ms)
+    await assertBoardTopStable(page, y0, tag, `+${ms}ms`)
+  }
+}
+
+async function foundChipCount(page) {
+  return page.locator('.match-teach-chip.is-found').count()
+}
+
+async function assertStepDragThenSteps(page, origin, w, { shot = false } = {}) {
+  await openLesson(page, origin, 'ob-tuning', 0)
+  const board = buildGemPuzzle('ob-tuning', 0)
+  const steps = board.words.find((word) => word.text === 'STEPS')
+  assert.ok(steps, 'ob-tuning STEPS chip')
+  const full = board.paths[steps.id]
+  const stepPath = full.slice(0, 4)
+  await swipe(page, stepPath)
+  await page.waitForTimeout(800)
+  assert.equal(await page.locator('.miss-banner').count(), 0, 'STEP drag release scores without Miss')
+  assert.ok((await page.locator('.bonus-banner').count()) >= 1, 'STEP drag scores bonus banner')
+  assert.equal(await foundChipCount(page), 0, 'STEP is bonus not a chip find')
+  await swipe(page, full)
+  await page.waitForTimeout(900)
+  assert.equal(await foundChipCount(page), 1, 'STEPS chip scores after STEP bonus')
+  if (shot) {
+    await page.screenshot({ path: join(POP_SHOT_ROOT, `ob-tuning-${w}-step-then-steps.png`) })
+  }
+}
+
 async function playPopScenario(page, origin, viewport, main) {
   const [w, h] = viewport
   const tag = `${main.line}-${w}x${h}`
   await openLesson(page, origin, main.line, main.seed)
   await page.waitForTimeout(200)
+  const boardY0 = await boardTopY(page)
+  await assertBoardTopStable(page, boardY0, tag, 'idle')
 
   await swipe(page, main.story[0].path)
   await samplePopMoments(page, `${tag} story-toast`, [120, 320, 700], { gold: true })
+  await sampleBoardStable(page, boardY0, `${tag} story-toast`, [0])
 
   await swipe(page, main.generic.path)
   await page.waitForTimeout(180)
   await assertPopsClear(page, `${tag} combo+bonus peak`)
   await assertOneGoldCue(page, `${tag} combo+bonus peak`)
-  await page.screenshot({ path: join(POP_SHOT_ROOT, `${main.line}-${w}-combo-bonus-peak.png`) })
+  await sampleBoardStable(page, boardY0, `${tag} combo+bonus`, [0, 80, 220, 320, 500, 700, 1100])
+  if (w === 375 || w === 390) {
+    await page.screenshot({ path: join(POP_SHOT_ROOT, `${main.line}-${w}-combo-bonus-peak.png`) })
+  }
+  if (w === 375 && h === 667) {
+    const scroll = await page.evaluate(() => ({
+      docH: document.documentElement.scrollHeight,
+      vh: window.innerHeight,
+      scrollY: window.scrollY,
+    }))
+    assert.ok(scroll.docH <= scroll.vh + 2 && scroll.scrollY === 0, `${tag} no page scroll at 375×667`)
+  }
 
   await samplePopMoments(page, `${tag} bonus-banner`, [200, 600, 1200], { gold: true })
+  await sampleBoardStable(page, boardY0, `${tag} after-bonus`, [0])
 
   for (let i = 0; i < main.chips.length; i += 1) {
     await swipe(page, main.chips[i].path)
@@ -463,6 +521,19 @@ export async function checkGemPopLive() {
       const page = await context.newPage()
       page.on('pageerror', (err) => errors.push(String(err)))
       await playPopScenario(page, origin, viewport, main)
+      await context.close()
+    }
+    for (const w of STEP_DRAG_SHOTS) {
+      const context = await browser.newContext({
+        viewport: { width: w, height: w === 375 ? 667 : 844 },
+        isMobile: true,
+      })
+      await context.addInitScript(({ key, payload }) => {
+        window.localStorage.setItem(key, JSON.stringify(payload))
+      }, { key: STORAGE_KEY, payload: savePayload() })
+      const page = await context.newPage()
+      page.on('pageerror', (err) => errors.push(String(err)))
+      await assertStepDragThenSteps(page, origin, w, { shot: true })
       await context.close()
     }
     for (const viewport of WIN_VIEWPORTS) {

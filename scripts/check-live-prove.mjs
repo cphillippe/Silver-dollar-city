@@ -4742,7 +4742,13 @@ async function stepToOpenFace(page, id, lockMs, label, away = [], runMs = 1800) 
     }
     const client = await walkClient(page, face)
     const clear = away.every((other) => Math.hypot(other.x - face.x, other.y - face.y) > EASY_FACE_HIT_R * 2 + 8)
-    if (client?.open && clear) return { face, client, elapsed }
+    const onScreen =
+      client &&
+      client.x > 4 &&
+      client.y > 4 &&
+      client.x < (await page.viewportSize())?.width - 4 &&
+      client.y < (await page.viewportSize())?.height - 4
+    if (onScreen && clear) return { face, client, elapsed }
     await walkStep(page, WALK_STEP_MS)
     elapsed += WALK_STEP_MS
   }
