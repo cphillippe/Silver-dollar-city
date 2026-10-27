@@ -254,7 +254,7 @@ assert.doesNotMatch(readme, /ANDROID_KEYSTORE_BASE64|silver-city-debug\.keystore
 assert.doesNotMatch(readme, /silver_city_debug\.apk/)
 assert.doesNotMatch(readme, /cursor\/silver-city-unending-evidence-8233/)
 
-assert.equal(APP_VERSION, '1.4.543')
+assert.equal(APP_VERSION, '1.4.547')
 assert.equal(BUNDLED_SHELL_ORIGIN, 'https://localhost')
 assert.equal(shellUpdateNoticeEnabled(), true)
 setPlayBuildForTest(true)

@@ -1902,8 +1902,19 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.543')
-assert.equal(CHANGELOG[0].version, '1.4.543', '1.4.543 is the newest row')
+assert.equal(APP_VERSION, '1.4.547')
+assert.equal(CHANGELOG[0].version, '1.4.547', '1.4.547 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.547'), '1.4.547 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.547').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.547 changelog avoids GitHub close keywords',
+)
+assert.match(
+  latestChange('1.4.547').items.join('\n'),
+  /Refs #756, Refs #768/,
+  '1.4.547 changelog refs #756 and #768',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.543'), '1.4.543 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.543').items.join('\n'),
@@ -2021,6 +2032,16 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
   assert.match(actors834, /firstSeatAt !== undefined/, '#834 the page-measured pick is only for the static board')
   assert.match(screen834, /camPointerAt\.current < 500 && !target\.matches\(':focus-visible'\)/, '#834 a pointer focus never pans the camera')
   assert.match(screen834, /suppressClickUntil\.current = 0\n\s+camPanning\.current = false/, '#834 a new press clears the click swallow')
+  assert.match(
+    screen834,
+    /if \(!camOn\) \{\s*const startOff = camStart\.current[\s\S]*?if \(camPanning\.current\) \{\s*suppressClickUntil\.current = performance\.now\(\) \+ 400\s*event\.stopPropagation\(\)/,
+    '#768 a cam-off drag past NW_TAP_SLOP plants nothing',
+  )
+  assert.match(
+    screen834,
+    /function camEatClick\(event: ReactMouseEvent<HTMLDivElement>\) \{\s*if \(performance\.now\(\) >= suppressClickUntil\.current\) return/,
+    '#768 the post-drag click is eaten with the camera off too',
+  )
 
   const seat = (x, y, live = true) => ({ x, y, live })
   const view = { W: 375, H: 574, s0: 0.5063, z: 1.4, tx: -200, ty: -250 }
@@ -19044,7 +19065,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(walk526.WALK_IN_MAX_MS, 1800)
   assert.equal(walk526.WALK_IN_U_PER_S, 900, '1.4.526 walkers run in at 900 map units a second')
   assert.equal(walk526.WALK_IN_TAP_MAX_MS, 840, '1.4.526 the tap lock is 0.84 s at most')
-  assert.equal(Math.round(100 / (0.01 * 6.8 * 1.75)), 840, '1.4.526 0.84 s is 0.1 of the road for the fastest Easy walker')
+  assert.equal(walk526.WALK_IN_WALKER_R, 24, '1.4.547 the tap lock ends once the walker body is on the plate')
   assert.equal(walk526.WALK_IN_SPAWN_T_CAP, defend526.EASY_ON_SCREEN_T, '1.4.526 the run-in cap is the live spawn cap')
 
   const roads526 = (id) => {
@@ -19129,11 +19150,13 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.deepEqual(seen526.find((row) => row[8] === 784).slice(0, 2), ['map06', 'c'], '1.4.526 map06 road c is the shortest')
   assert.equal(Math.max(...r1Runs526), 1705, '1.4.526 the longest round 1 run-in is 1705 ms')
   assert.deepEqual(seen526.find((row) => row[8] === 1705).slice(0, 2), ['far-hills', 'main'], '1.4.526 far-hills is the longest')
-  assert.deepEqual(
-    [...new Set(seen526.filter((row) => row[8] > walk526.WALK_IN_TAP_MAX_MS).map((row) => row[0]))],
-    ['a2', 'far-hills', 'map03', 'map04'],
-    '1.4.526 round 1 run-ins past 0.84 s take taps at the drawn spot before they land',
-  )
+  const r1Lock547 = seen526.map((row) => {
+    const road = roads526(row[0]).find((item) => item.id === row[1])
+    const entry = walk526.walkInEntry(road.points, plate526)
+    return walk526.walkInTapLockMs(row[8], walk526.walkInLength(entry, road.points, r1T526))
+  })
+  assert.equal(Math.min(...r1Lock547), 202, '1.4.547 the shortest round 1 tap lock is geometry-based')
+  assert.equal(Math.max(...r1Lock547), 280, '1.4.547 the longest round 1 tap lock stays under the 0.84 s cap')
 
   const ts526 = new Set()
   for (let wave = 0; wave < 40; wave += 1) {
@@ -19153,7 +19176,10 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
         low526 = Math.min(low526, ms)
         high526 = Math.max(high526, ms)
         assert.ok(ms >= 600 && ms <= 1800, `1.4.526 ${id}:${road.id} t ${t} runs ${ms} ms`)
-        assert.equal(walk526.walkInTapLockMs(ms), Math.min(ms, 840), `1.4.526 ${id}:${road.id} t ${t} the lock is the run-in, at most 0.84 s`)
+        const entry547 = walk526.walkInEntry(road.points, plate526)
+        const len547 = walk526.walkInLength(entry547, road.points, t)
+        const lock547 = walk526.walkInTapLockMs(ms, len547)
+        assert.ok(lock547 <= ms && lock547 <= walk526.WALK_IN_TAP_MAX_MS, `1.4.547 ${id}:${road.id} t ${t} lock ${lock547} ms`)
       }
     }
   }
@@ -19167,8 +19193,8 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(walk526.walkInMs(900), 1000, '1.4.526 900 u is one second')
   assert.equal(walk526.walkInMs(1000), 1111)
   assert.equal(walk526.walkInMs(500), 600)
-  assert.equal(walk526.walkInTapLockMs(700), 700)
-  assert.equal(walk526.walkInTapLockMs(1800), 840)
+  assert.equal(walk526.walkInTapLockMs(700, 100), 700, '1.4.547 a short trail keeps the full run-in locked')
+  assert.equal(walk526.walkInTapLockMs(1800, 4000), 183, '1.4.547 a long trail unlocks once the walker reaches the plate')
   assert.equal(walk526.walkInEase(0), 0)
   assert.equal(walk526.walkInEase(0.5), 0.5)
   assert.equal(walk526.walkInEase(1), 1)
@@ -19184,7 +19210,8 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const sim526 = point526(0.3, path526)
   const run526 = ms526(a2Entry526, path526, 0.3)
   assert.deepEqual(clock526.drawAt(walker526, sim526, 1000), a2Entry526.start, '1.4.526 first frame is the start')
-  const lock526 = walk526.walkInTapLockMs(run526)
+  const lock526 = walk526.walkInTapLockMs(run526, walk526.walkInLength(a2Entry526, path526, 0.3))
+  assert.equal(lock526, 194, '1.4.547 a2 t 0.3 unlocks when the walker reaches the plate')
   assert.equal(clock526.entering(walker526, 1000 + run526 - 1), true)
   assert.equal(clock526.tapLocked(walker526, 1000 + lock526 - 1), true)
   assert.equal(clock526.entering(walker526, 1000 + run526), false)
@@ -19194,8 +19221,8 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const hillWalker526 = { id: 3, t: r1T526 }
   const hillSim526 = point526(r1T526, hills526)
   assert.equal(long526.see(hillWalker526, 0).runMs, 1705)
-  assert.equal(long526.tapLocked(hillWalker526, 839), true)
-  assert.equal(long526.tapLocked(hillWalker526, 840), false, '1.4.526 a long run-in takes taps after 0.84 s')
+  assert.equal(long526.tapLocked(hillWalker526, 279), true)
+  assert.equal(long526.tapLocked(hillWalker526, 280), false, '1.4.547 far-hills unlocks when the walker is on the plate')
   assert.equal(long526.entering(hillWalker526, 840), true, '1.4.526 and is still walking in')
   const hillAt526 = long526.drawAt(hillWalker526, hillSim526, 840)
   assert.ok(hillAt526.x >= 0 && hillAt526.y >= 0 && hillAt526.x <= 798 && hillAt526.y <= 1134, '1.4.526 its drawn spot is on the map by then')
