@@ -1915,15 +1915,17 @@ assert.doesNotMatch(
   /\/box\//,
   '1.4.549 changelog avoids box paths',
 )
-assert.equal(CHANGELOG[1].version, '1.4.544', '1.4.544 stays under 1.4.549')
-assert.ok(CHANGELOG.some((note) => note.version === '1.4.544'), '1.4.544 changelog row')
+assert.equal(CHANGELOG[1].version, '1.4.545', '1.4.545 stays under 1.4.549')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.545'), '1.4.545 changelog row')
 assert.doesNotMatch(
-  latestChange('1.4.544').items.join('\n'),
+  latestChange('1.4.545').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
-  '1.4.544 changelog avoids GitHub close keywords',
+  '1.4.545 changelog avoids GitHub close keywords',
 )
-assert.match(latestChange('1.4.544').items.join('\n'), /Refs #855/, '1.4.544 changelog refs #855')
-assert.match(latestChange('1.4.544').items.join('\n'), /Hard stays the same\./)
+assert.match(latestChange('1.4.545').items.join('\n'), /Refs #855/, '1.4.545 changelog refs #855')
+assert.match(latestChange('1.4.545').items.join('\n'), /Hard stays the same\./)
+assert.equal(CHANGELOG[2].version, '1.4.544', '1.4.544 stays under 1.4.545')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.544'), '1.4.544 changelog row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.543'), '1.4.543 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.543').items.join('\n'),
@@ -16266,6 +16268,13 @@ console.log('check-city: ok')
   assert.match(playTap, /gemScrollRef/)
   assert.match(playTap, /scrollWinIntoView/)
   assert.match(playTap, /gem-find-pop gem-score-pop/)
+  assert.match(playTap, /submit\(line, true\)/)
+  assert.match(gemTapCss, /\.gem-hint-slot \{[\s\S]*?min-height: 5\.85rem/)
+  assert.doesNotMatch(
+    gemTapCss,
+    /:has\(\.gem-combo\.is-loud\) \{\s*min-height: 5\.85rem/,
+    'hint slot height is fixed — combo must not grow the band',
+  )
   assert.match(
     tightTap,
     /html\[data-easy='on'\][\s\S]*?\.gem-stage \{[\s\S]*?flex: 1 1 0[\s\S]*?min-height: 0/,
