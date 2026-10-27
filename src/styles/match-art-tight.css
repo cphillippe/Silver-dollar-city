@@ -764,7 +764,8 @@
   }
 
   html[data-easy='on'] .challenge-page.is-puzzle:has(.play.is-gem-search.is-win) {
-    overflow-y: auto;
+    overflow-x: hidden;
+    overflow-y: hidden;
     scroll-behavior: auto;
   }
 

@@ -19,6 +19,12 @@ const VIEWPORTS = [
   [412, 915],
 ]
 const WIN_HOME_LINES = ['hl-mind', 'ob-tuning']
+const WIN_VIEWPORTS = [
+  [375, 667],
+  [375, 812],
+  [390, 844],
+  [412, 915],
+]
 const POP_SHOT_ROOT =
   process.env.GEM_POP_SHOT_ROOT ??
   (process.env.CI ? join(tmpdir(), 'gemsearch-fix', 'pops') : '/cursor/stores/self/gemsearch-fix/pops')
@@ -337,9 +343,27 @@ async function playPopScenario(page, origin, viewport, main) {
   }
 }
 
+async function assertWinNoScroll(page, tag) {
+  await page.waitForTimeout(600)
+  const bad = await page.evaluate(() => {
+    const hits = []
+    for (const sel of ['.challenge-page.is-puzzle', '.play.is-gem-search.is-win']) {
+      const el = document.querySelector(sel)
+      if (!el) continue
+      if (el.scrollWidth > el.clientWidth + 1) hits.push(`${sel}-x`)
+      if (el.scrollHeight > el.clientHeight + 1) hits.push(`${sel}-y`)
+    }
+    const card = document.querySelector('.play.is-gem-search.is-win .match-yes')
+    if (card && (card.scrollWidth > card.clientWidth + 1 || card.scrollHeight > card.clientHeight + 1)) {
+      hits.push('match-yes')
+    }
+    return hits
+  })
+  assert.deepEqual(bad, [], `${tag} win without scrollbars (${bad.join(', ')})`)
+}
+
 async function playWinHome(page, origin, lineId, viewport) {
   const [w, h] = viewport
-  if (w !== 375 || h !== 812) return
   const board = buildGemPuzzle(lineId, 0)
   await openLesson(page, origin, lineId, 0)
   const letters = board.letters
@@ -374,6 +398,7 @@ async function playWinHome(page, origin, lineId, viewport) {
     box.y >= -0.5 && box.y + box.height <= h + 0.5,
     `${lineId} Home fully visible at ${w}x${h} (y=${box.y.toFixed(1)} h=${box.height.toFixed(1)})`,
   )
+  await assertWinNoScroll(page, `${lineId} ${w}x${h}`)
   await page.screenshot({ path: join(POP_SHOT_ROOT, `${lineId}-${w}-win-home.png`) })
 }
 
@@ -406,18 +431,20 @@ export async function checkGemPopLive() {
       await playPopScenario(page, origin, viewport, main)
       await context.close()
     }
-    for (const lineId of WIN_HOME_LINES) {
-      const context = await browser.newContext({
-        viewport: { width: 375, height: 812 },
-        isMobile: true,
-      })
-      await context.addInitScript(({ key, payload }) => {
-        window.localStorage.setItem(key, JSON.stringify(payload))
-      }, { key: STORAGE_KEY, payload: savePayload() })
-      const page = await context.newPage()
-      page.on('pageerror', (err) => errors.push(String(err)))
-      await playWinHome(page, origin, lineId, [375, 812])
-      await context.close()
+    for (const viewport of WIN_VIEWPORTS) {
+      for (const lineId of WIN_HOME_LINES) {
+        const context = await browser.newContext({
+          viewport: { width: viewport[0], height: viewport[1] },
+          isMobile: true,
+        })
+        await context.addInitScript(({ key, payload }) => {
+          window.localStorage.setItem(key, JSON.stringify(payload))
+        }, { key: STORAGE_KEY, payload: savePayload() })
+        const page = await context.newPage()
+        page.on('pageerror', (err) => errors.push(String(err)))
+        await playWinHome(page, origin, lineId, viewport)
+        await context.close()
+      }
     }
   } finally {
     await browser.close()

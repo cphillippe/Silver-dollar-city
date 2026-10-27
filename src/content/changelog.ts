@@ -21,6 +21,8 @@ export const CHANGELOG: ChangeNote[] = [
     items: [
       'Combo stamps and bonus banners show in the hint band above the grid instead of covering letters.',
       'The letter board sits centered in the play area between dock and score.',
+      'A wrong drag still lets you swipe the next word; a short bonus no longer steals letters from a story word you are still spelling.',
+      'The win screen fits the phone without side or inner scrollbars.',
       'Hard stays the same.',
       'Refs #855.',
     ],
