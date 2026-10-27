@@ -15,7 +15,7 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.549',
+    version: '1.4.545',
     title: 'Easy Match: STEP drag scores; board stays put during pops',
     when: '2026-10-27',
     items: [
