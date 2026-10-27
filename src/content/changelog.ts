@@ -15,6 +15,16 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.547',
+    title: 'Easy Night Watch: walk-in taps and tablet drags',
+    when: '2026-10-27',
+    items: [
+      'The first walker on each wave can be tapped as soon as it steps onto the map — no silent wait while it is already visible.',
+      'On a wide tablet with the camera off, dragging across the board no longer plants lamps or fires stray shots; quick taps still work.',
+      'Easy only. Refs #756, Refs #768.',
+    ],
+  },
+  {
     version: '1.4.543',
     title: 'Easy Match: tap words work again on the letter board',
     when: '2026-10-26',
