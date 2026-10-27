@@ -1902,28 +1902,29 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.547')
-assert.equal(CHANGELOG[0].version, '1.4.547', '1.4.547 is the newest row')
-assert.ok(CHANGELOG.some((note) => note.version === '1.4.547'), '1.4.547 changelog row')
+assert.equal(APP_VERSION, '1.4.546')
+assert.equal(CHANGELOG[0].version, '1.4.546', '1.4.546 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.546'), '1.4.546 changelog row')
 assert.doesNotMatch(
-  latestChange('1.4.547').items.join('\n'),
+  latestChange('1.4.546').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
-  '1.4.547 changelog avoids GitHub close keywords',
+  '1.4.546 changelog avoids GitHub close keywords',
 )
 assert.doesNotMatch(
-  latestChange('1.4.547').items.join('\n'),
+  latestChange('1.4.546').items.join('\n'),
   /\/workspace\/|gemcheck/,
-  '1.4.547 changelog drops box paths',
+  '1.4.546 changelog drops box paths',
 )
-assert.match(latestChange('1.4.547').items.join('\n'), /Refs #753/, '1.4.547 changelog refs #753')
-assert.ok(CHANGELOG.some((note) => note.version === '1.4.544'), '1.4.544 changelog row')
+assert.match(latestChange('1.4.546').items.join('\n'), /Refs #753/, '1.4.546 changelog refs #753')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.545'), '1.4.545 changelog row')
 assert.doesNotMatch(
-  latestChange('1.4.544').items.join('\n'),
+  latestChange('1.4.545').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
-  '1.4.544 changelog avoids GitHub close keywords',
+  '1.4.545 changelog avoids GitHub close keywords',
 )
-assert.match(latestChange('1.4.544').items.join('\n'), /Refs #855/, '1.4.544 changelog refs #855')
-assert.match(latestChange('1.4.544').items.join('\n'), /Hard stays the same\./)
+assert.match(latestChange('1.4.545').items.join('\n'), /Refs #855/, '1.4.545 changelog refs #855')
+assert.match(latestChange('1.4.545').items.join('\n'), /Hard stays the same\./)
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.544'), '1.4.544 changelog row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.543'), '1.4.543 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.543').items.join('\n'),
@@ -16199,6 +16200,13 @@ console.log('check-city: ok')
   assert.match(playTap, /gemScrollRef/)
   assert.match(playTap, /scrollWinIntoView/)
   assert.match(playTap, /gem-find-pop gem-score-pop/)
+  assert.match(playTap, /submit\(line, true\)/)
+  assert.match(gemTapCss, /\.gem-hint-slot \{[\s\S]*?min-height: 5\.85rem/)
+  assert.doesNotMatch(
+    gemTapCss,
+    /:has\(\.gem-combo\.is-loud\) \{\s*min-height: 5\.85rem/,
+    'hint slot height is fixed — combo must not grow the band',
+  )
   assert.match(
     tightTap,
     /html\[data-easy='on'\][\s\S]*?\.gem-stage \{[\s\S]*?flex: 1 1 0[\s\S]*?min-height: 0/,
