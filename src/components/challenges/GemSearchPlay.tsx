@@ -9,7 +9,6 @@ import {
   bonusPointsFor,
   gemHue,
   isStoryWord,
-  isChipWordPrefix,
   isStoryWordPrefix,
   isStraightPath,
   matchBonusWord,
@@ -19,6 +18,7 @@ import {
   snapFingerPath,
   tryAddToPath,
   type GemCoord,
+  type GemPuzzle,
 } from '../../lib/gemSearch'
 import { MATCH_DOCK_JUICE_POINTS } from '../../lib/matchBonus'
 import { skillBonusPoints, skillsFor } from '../../lib/gemJar'
@@ -52,6 +52,19 @@ function dealRound(): number {
     if (Number.isInteger(seed) && seed >= 0) return seed
   }
   return Date.now()
+}
+
+/** True while the path is a strict prefix of an unfound required chip (STEP on the way to STEPS). */
+function isChipWordPrefix(path: GemCoord[], puzzle: GemPuzzle, found: string[]): boolean {
+  if (path.length < 1) return false
+  return puzzle.words.some((word) => {
+    if (found.includes(word.id)) return false
+    const placed = puzzle.paths[word.id] ?? []
+    if (path.length >= placed.length) return false
+    const prefixOf = (trail: GemCoord[]) =>
+      trail.slice(0, path.length).every((cell, i) => cell.r === path[i]!.r && cell.c === path[i]!.c)
+    return prefixOf(placed) || prefixOf([...placed].reverse())
+  })
 }
 
 function cellFromPoint(x: number, y: number): GemCoord | null {

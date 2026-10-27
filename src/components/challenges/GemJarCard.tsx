@@ -89,7 +89,7 @@ export function GemJarCard(props: GemJarCardProps) {
       >
         <div className="gem-jar-row">
           <span className="gem-jar-name">{EASY.jarName}</span>
-          {boardPts > 0 ? (
+          {boardPts > 0 && (reduced || !flying) ? (
             <strong className="gem-jar-count" data-gem-jar-count>
               +{fmt(boardPts)}
             </strong>
