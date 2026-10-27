@@ -6006,6 +6006,11 @@ button.defend-new-lamp[aria-pressed='true'] {
   display: none;
 }
 
+/* #818 camera on: the sign pans under the lamp rail, so it hides while it touches it. */
+.defend-page.is-easy-watch g.defend-heaven[data-heaven-tuck='hide'] {
+  display: none;
+}
+
 /* 792b B6: Easy plant step. Grey seat rings wait until the kid picks a lamp (data-lamp-picked). Draw only. */
 .defend-page.is-easy-watch:not([data-lamp-picked='yes']) .defend-plant-ground circle.is-dead {
   display: none;
