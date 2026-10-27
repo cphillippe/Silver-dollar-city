@@ -31,8 +31,16 @@ html[data-easy='on'] .play.is-gem-search.is-win .win-stamp {
 
 /* Easy gem win: no full-screen gold flash over the board or jar. */
 html[data-easy='on'] .play.is-gem-search.is-win .win-flash,
-html[data-easy='on'] .play.is-gem-search.is-win .win-ring {
+html[data-easy='on'] .play.is-gem-search.is-win .win-ring,
+html[data-easy='on'] .play.is-gem-search.is-win .win-spark,
+html[data-easy='on'] .play.is-gem-search.is-win .win-gem {
   display: none;
+}
+
+html[data-easy='on'] .play.is-gem-search.is-win .win-burst {
+  overflow: hidden;
+  contain: paint;
+  max-width: 100%;
 }
 
 /* 2) Generic +50 banner: pine fill, parchment text. */

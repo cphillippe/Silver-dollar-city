@@ -1,6 +1,7 @@
 /* Match win — the solved board stays a whole square; Matched! + Lock In stay in the play flow. */
 .play.is-gem-search.is-win {
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: hidden;
   justify-content: flex-start;
 }
 
@@ -42,8 +43,29 @@ html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked.is-win .
 
 html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked.is-win,
 html[data-easy='on'] .challenge-page.is-puzzle .play.is-gem-search.is-panel-blast.is-story-docked.is-win {
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: hidden;
   justify-content: flex-start;
+}
+
+html[data-easy='on'] .challenge-page.is-puzzle:has(.play.is-gem-search.is-win) {
+  overflow-x: clip;
+  overflow-y: clip;
+  max-width: 100%;
+}
+
+html[data-easy='on'] .challenge-page.is-puzzle .play.is-gem-search.is-panel-blast.is-story-docked.is-win {
+  overflow: hidden;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+html[data-easy='on'] .play.is-gem-search.is-win .match-yes {
+  overflow: hidden;
+  max-height: none;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Paint-only found ring. Inset shadow does not change the cell box. */
@@ -634,6 +656,24 @@ html[data-easy='on'] .play.is-father-run.is-miss .run-miss .btn:not(.primary) {
   }
   html[data-easy='on'] .play.is-gem-search.is-win .win-burst { min-height: 30px; margin: 0 0 4px; }
   html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked.is-win .gem-board {
-    width: min(100%, 520px, 30svh);
+    width: min(100%, 520px, 26svh);
+    max-width: min(100%, 520px, 26svh);
+    max-height: min(100%, 520px, 26svh);
+  }
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked.is-win.has-gem-jar .gem-board {
+    width: min(100%, 520px, 24svh);
+    max-width: min(100%, 520px, 24svh);
+    max-height: min(100%, 520px, 24svh);
+  }
+  html[data-easy='on'] .play.is-gem-search.is-win .match-yes {
+    padding: 8px 10px;
+  }
+  html[data-easy='on'] .play.is-gem-search.is-win .match-yes strong {
+    font-size: 1rem;
+    line-height: 1.22;
+  }
+  html[data-easy='on'] .play.is-gem-search.is-win .match-yes span {
+    font-size: 0.84rem;
+    line-height: 1.25;
   }
 }

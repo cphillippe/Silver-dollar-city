@@ -9,6 +9,7 @@ import {
   bonusPointsFor,
   gemHue,
   isStoryWord,
+  isChipWordPrefix,
   isStoryWordPrefix,
   isStraightPath,
   matchBonusWord,
@@ -121,6 +122,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const scoredThisGesture = useRef(false)
   const dockJuiced = useRef(false)
   const boardPointer = useRef<HTMLElement | null>(null)
+  const downCell = useRef<GemCoord | null>(null)
   const gemScrollRef = useRef<HTMLDivElement>(null)
   const stripRef = useRef(stripMode)
   const findUntil = useRef(0)
@@ -409,7 +411,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     }, stampAt)
   }
 
-  function submit(nextPath: GemCoord[], building = false) {
+  function submit(nextPath: GemCoord[]) {
     const hit = matchGemWord(nextPath, puzzle, foundRef.current)
     if (hit) {
       const nextFound = [...foundRef.current, hit.id]
@@ -430,14 +432,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       if (done) finishBoard()
       return true
     }
-    if (building && isStoryWordPrefix(nextPath, puzzle, bonusRef.current)) return false
-    if (puzzle.words.some((word) => {
-      if (foundRef.current.includes(word.id)) return false
-      const placed = puzzle.paths[word.id] ?? []
-      if (placed.length <= nextPath.length) return false
-      const same = (trail: GemCoord[]) => trail.slice(0, nextPath.length).every((cell, i) => cell.r === nextPath[i]!.r && cell.c === nextPath[i]!.c)
-      return same(placed) || same([...placed].reverse())
-    })) return false
+    if (isStoryWordPrefix(nextPath, puzzle, bonusRef.current)) return false
+    if (isChipWordPrefix(nextPath, puzzle, foundRef.current)) return false
     const extra = matchBonusWord(nextPath, puzzle, bonusRef.current)
     if (extra) {
       const nextBonus = [...bonusRef.current, extra.id]
@@ -535,7 +531,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     rawRef.current = next
     const line = snapFingerPath(next, puzzle.size)
     writePath(line)
-    submit(line, true)
+    submit(line)
   }
 
   function onCellDown(event: ReactPointerEvent<HTMLDivElement>, cell: GemCoord) {
@@ -556,8 +552,9 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     moved.current = false
     scoredThisGesture.current = false
     setShake(false)
+    downCell.current = cell
     rawRef.current = [cell]
-    applyCell(cell, 'tap')
+    if (!pathRef.current.length) writePath([cell])
   }
 
   function onBoardMove(event: ReactPointerEvent<HTMLDivElement>) {
@@ -580,8 +577,14 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     }
     // A scored find already owns this gesture. Clear the trail and do not miss.
     if (scoredThisGesture.current) return endDrag()
-    // A tap (no finger travel) keeps the built path so the next tap can extend it.
-    if (!moved.current) return endDrag(true)
+    // A tap (no finger travel) extends the path; pointerdown must not submit (drag stays live).
+    if (!moved.current) {
+      const cell = downCell.current ?? rawRef.current[rawRef.current.length - 1]
+      downCell.current = null
+      if (cell) applyCell(cell, 'tap')
+      return endDrag(true)
+    }
+    downCell.current = null
     const nextPath = rawRef.current.length ? rawRef.current.slice() : pathRef.current.slice()
     endDrag()
     if (nextPath.length >= 3) missIfSwipe(nextPath)

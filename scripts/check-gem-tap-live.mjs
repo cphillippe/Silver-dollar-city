@@ -21,6 +21,9 @@ const VIEWPORTS = [
 const SHOT_ROOT =
   process.env.GEM_TAP_SHOT_ROOT ??
   (process.env.CI ? join(tmpdir(), 'gemsearch-fix') : '/cursor/stores/self/gemsearch-fix')
+const POP_SHOT_ROOT =
+  process.env.GEM_POP_SHOT_ROOT ??
+  (process.env.CI ? join(tmpdir(), 'gemsearch-fix', 'pops') : '/cursor/stores/self/gemsearch-fix/pops')
 
 function savePayload() {
   const now = new Date()
@@ -311,6 +314,74 @@ async function playWords(page, lineId, mode) {
   await page.locator('.play.is-gem-search.is-win').waitFor({ timeout: 15000 })
 }
 
+async function tapCell(page, cell) {
+  const at = await cellCentre(page, cell)
+  await page.touchscreen.tap(at.x, at.y)
+}
+
+async function assertWinNoScroll(page, tag) {
+  await page.waitForTimeout(600)
+  const bad = await page.evaluate(() => {
+    const hits = []
+    for (const sel of ['.challenge-page.is-puzzle', '.play.is-gem-search.is-win']) {
+      const el = document.querySelector(sel)
+      if (!el) continue
+      if (el.scrollWidth > el.clientWidth + 1) hits.push(`${sel}-x`)
+      if (el.scrollHeight > el.clientHeight + 1) hits.push(`${sel}-y`)
+    }
+    const card = document.querySelector('.play.is-gem-search.is-win .match-yes')
+    if (card && (card.scrollWidth > card.clientWidth + 1 || card.scrollHeight > card.clientHeight + 1)) {
+      hits.push('match-yes')
+    }
+    return hits
+  })
+  assert.deepEqual(bad, [], `${tag} win without scrollbars (${bad.join(', ')})`)
+}
+
+async function assertObTuningMisdragThenDrag(page, origin) {
+  mkdirSync(POP_SHOT_ROOT, { recursive: true })
+  await openLesson(page, origin, 'ob-tuning', 0)
+  const board = buildGemPuzzle('ob-tuning', 0)
+  const lark = board.words.find((word) => word.text === 'LARK')
+  const steps = board.words.find((word) => word.text === 'STEPS')
+  assert.ok(lark && steps, 'ob-tuning LARK and STEPS')
+  await dragPath(page, board.paths[lark.id])
+  await page.waitForTimeout(900)
+  assert.equal(await foundCount(page), 1, 'LARK found by drag')
+  const wrong = [
+    { r: 0, c: 0 },
+    { r: 0, c: 1 },
+    { r: 0, c: 2 },
+  ]
+  await dragPath(page, wrong)
+  await page.waitForTimeout(600)
+  await dragPath(page, board.paths[steps.id])
+  await page.waitForTimeout(1100)
+  const after = await foundCount(page)
+  if (after < 2) {
+    await dragPath(page, board.paths[steps.id])
+    await page.waitForTimeout(1100)
+  }
+  assert.equal(await foundCount(page), 2, 'STEPS drag works after mis-drag')
+  await page.screenshot({ path: join(POP_SHOT_ROOT, 'ob-tuning-375-misdrag-then-drag.png') })
+}
+
+async function assertStepPrefixThenStepsTap(page, origin) {
+  await openLesson(page, origin, 'ob-tuning', 0)
+  const board = buildGemPuzzle('ob-tuning', 0)
+  const steps = board.words.find((word) => word.text === 'STEPS')
+  const path = board.paths[steps.id]
+  assert.ok(path.length >= 5, 'STEPS path length')
+  for (const cell of path.slice(0, 4)) {
+    await tapCell(page, cell)
+    await page.waitForTimeout(300)
+    assert.equal(await page.locator('.bonus-banner').count(), 0, 'STEP prefix tap scores no bonus banner')
+  }
+  await tapCell(page, path[4])
+  await page.waitForTimeout(900)
+  assert.equal(await foundCount(page), 1, 'STEPS completes after STEP prefix taps')
+}
+
 async function assertPrefixDragNoBonus(page, lineId, word) {
   const letters = await page.evaluate(() => {
     const size = 8
@@ -375,6 +446,7 @@ export async function checkGemTapLive() {
           await assertPlayAreaFill(page, `${lineId} ${w}x${h}`)
           assert.ok(layout0.docH <= layout0.vh + 2 && layout0.scrollY === 0, `${lineId} ${w}x${h} no page scroll`)
           await playWords(page, lineId, mode)
+          await assertWinNoScroll(page, `${lineId} ${w}x${h} ${mode}`)
           await page.screenshot({ path: join(SHOT_ROOT, `${lineId}-${w}-win-${mode}.png`) })
           await context.close()
         }
@@ -409,6 +481,34 @@ export async function checkGemTapLive() {
           await context.close()
         }
       }
+    }
+    {
+      const context = await browser.newContext({
+        viewport: { width: 375, height: 812 },
+        hasTouch: true,
+        isMobile: true,
+      })
+      await context.addInitScript(({ key, payload }) => {
+        window.localStorage.setItem(key, JSON.stringify(payload))
+      }, { key: STORAGE_KEY, payload: savePayload() })
+      const page = await context.newPage()
+      page.on('pageerror', (err) => errors.push(String(err)))
+      await assertObTuningMisdragThenDrag(page, origin)
+      await context.close()
+    }
+    {
+      const context = await browser.newContext({
+        viewport: { width: 390, height: 844 },
+        hasTouch: true,
+        isMobile: true,
+      })
+      await context.addInitScript(({ key, payload }) => {
+        window.localStorage.setItem(key, JSON.stringify(payload))
+      }, { key: STORAGE_KEY, payload: savePayload() })
+      const page = await context.newPage()
+      page.on('pageerror', (err) => errors.push(String(err)))
+      await assertStepPrefixThenStepsTap(page, origin)
+      await context.close()
     }
   } finally {
     await browser.close()
