@@ -1,22 +1,22 @@
 #!/usr/bin/env node
 /**
  * Issue #753 proof: fresh save, gold-path prefix, lesson 1 (ph-road) word search,
- * common bonus +50 toast. Shots → HOP753_OUT (default /cursor/stores/self/hop-753/).
+ * common bonus +50 toast. Shots → HOP753_OUT (default: OS temp dir / hop-753).
  */
 import assert from 'node:assert/strict'
 import { mkdirSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { chromium } from 'playwright'
 import { createServer } from 'vite'
-import { APP_VERSION, STORAGE_KEY } from '../src/config/app.ts'
+import { APP_VERSION, SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 import { SAVE_KIND } from '../src/lib/save.ts'
-import { SAVE_SCHEMA_VERSION } from '../src/config/app.ts'
 import { buildGemPuzzle, bonusPointsFor, gemWordsFor, isBonusSpelling } from '../src/lib/gemSearch.ts'
 import { findStraightSpelling } from '../src/lib/gemSearchGrid.ts'
 import { MATCH_GENERIC_POINTS } from '../src/lib/matchBonus.ts'
 import { COMMON_BONUS_WORDS, isPlantableBonusWord } from '../src/lib/commonBonusWords.ts'
 
-const OUT = process.env.HOP753_OUT ?? '/cursor/stores/self/hop-753'
+const OUT = process.env.HOP753_OUT ?? join(tmpdir(), 'hop-753')
 /** First word search on the golden path (after ph-road maze + ph-father run). */
 const LINE = 'ob-tuning'
 const SEED = 0
