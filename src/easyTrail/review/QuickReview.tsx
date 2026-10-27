@@ -387,7 +387,7 @@ export function QuickReview({
           {phase === 'prompt' && !revealed ? (
             <p className="quick-review-prompt">{prompt}</p>
           ) : null}
-          {revealed && phase !== 'honesty' ? (
+          {revealed ? (
             <>
               <p className="quick-review-reveal-line">
                 {faceForRung(lineId, intervalIndex, targetLine)}
