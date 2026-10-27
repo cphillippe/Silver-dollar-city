@@ -424,7 +424,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     }, stampAt)
   }
 
-  function submit(nextPath: GemCoord[]) {
+  function submit(nextPath: GemCoord[], final = false) {
     const hit = matchGemWord(nextPath, puzzle, foundRef.current)
     if (hit) {
       const nextFound = [...foundRef.current, hit.id]
@@ -446,7 +446,9 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       return true
     }
     if (isStoryWordPrefix(nextPath, puzzle, bonusRef.current)) return false
-    if (isChipWordPrefix(nextPath, puzzle, foundRef.current)) return false
+    if (isChipWordPrefix(nextPath, puzzle, foundRef.current)) {
+      if (!final || nextPath.length < 4) return false
+    }
     const extra = matchBonusWord(nextPath, puzzle, bonusRef.current)
     if (extra) {
       const nextBonus = [...bonusRef.current, extra.id]
@@ -487,7 +489,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       return
     }
     writePath(line)
-    if (submit(line)) return
+    if (submit(line, true)) return
     if (!shouldMissAfterSwipe(scoredThisGesture.current, line.length)) {
       writePath([])
       return
