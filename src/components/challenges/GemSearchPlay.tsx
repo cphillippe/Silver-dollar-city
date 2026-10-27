@@ -248,7 +248,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     )
   }
 
-  function endDrag() {
+  function endDrag(keepPath = false) {
     const node = boardPointer.current
     const pointerId = dragPointerId.current
     if (node && pointerId != null && node.hasPointerCapture?.(pointerId)) {
@@ -257,6 +257,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     boardPointer.current = null
     drag.current = false
     dragPointerId.current = null
+    if (keepPath) return
     rawRef.current = []
     writePath([])
   }
@@ -416,6 +417,13 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       return true
     }
     if (building && isStoryWordPrefix(nextPath, puzzle, bonusRef.current)) return false
+    if (puzzle.words.some((word) => {
+      if (foundRef.current.includes(word.id)) return false
+      const placed = puzzle.paths[word.id] ?? []
+      if (placed.length <= nextPath.length) return false
+      const same = (trail: GemCoord[]) => trail.slice(0, nextPath.length).every((cell, i) => cell.r === nextPath[i]!.r && cell.c === nextPath[i]!.c)
+      return same(placed) || same([...placed].reverse())
+    })) return false
     const extra = matchBonusWord(nextPath, puzzle, bonusRef.current)
     if (extra) {
       const nextBonus = [...bonusRef.current, extra.id]
@@ -551,8 +559,15 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   function onBoardUp(event?: ReactPointerEvent<HTMLDivElement>) {
     if (!drag.current) return
     if (event && event.pointerId !== dragPointerId.current) return
+    if (!moved.current && event) {
+      const last = rawRef.current[rawRef.current.length - 1]
+      const at = cellFromPoint(event.clientX, event.clientY)
+      if (last && (!at || !sameCell(last, at))) moved.current = true
+    }
     // A scored find already owns this gesture. Clear the trail and do not miss.
     if (scoredThisGesture.current) return endDrag()
+    // A tap (no finger travel) keeps the built path so the next tap can extend it.
+    if (!moved.current) return endDrag(true)
     const nextPath = rawRef.current.length ? rawRef.current.slice() : pathRef.current.slice()
     endDrag()
     if (nextPath.length >= 3) missIfSwipe(nextPath)
@@ -714,10 +729,26 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       />
       )}
       <div className="gem-scroll">
-      {easy && found.length === 0 && status !== 'ok' && puzzle.words[0] ? (
-        <p className="gem-start-hint" data-gem-start>
-          {EASY.bonusMissStraight}
-        </p>
+      {easy && status !== 'ok' && puzzle.words[0] ? (
+        <div className="gem-hint-slot">
+          <p
+            className={`gem-start-hint${found.length ? ' is-reserved' : ''}`}
+            data-gem-start
+            aria-hidden={found.length > 0}
+          >
+            {found.length === 0 ? EASY.bonusMissStraight : '\u00a0'}
+          </p>
+          {plusFlash ? (
+            <p className="bonus-plus gem-score-pop" aria-hidden>
+              +{bonusPts || 100}
+            </p>
+          ) : null}
+          {findPop > 0 ? (
+            <p className="gem-find-pop gem-score-pop" aria-hidden>
+              +{findPop}
+            </p>
+          ) : null}
+        </div>
       ) : null}
       {/* Board-first 1.4.99: StoryStrip dock is a flex header above this scroll; board fills leftover — zero overlay. */}
       {stripMode === 'hero' ? (
@@ -734,16 +765,6 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           </li>
         ))}
       </ul>
-      ) : null}
-      {plusFlash ? (
-        <p className="bonus-plus" aria-hidden>
-          +{bonusPts || 100}
-        </p>
-      ) : null}
-      {findPop > 0 ? (
-        <p className="gem-find-pop" aria-hidden>
-          +{findPop}
-        </p>
       ) : null}
       {comboFlash > 1 ? (
         <p className="gem-combo is-loud" role="status">

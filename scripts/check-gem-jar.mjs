@@ -509,19 +509,25 @@ async function run() {
       }
       await page.locator('[data-gem-jar]').waitFor({ timeout: 6000 })
 
-      // G: Lock In next must not wait for the count-up, so check the dock is live right away
+      // G: Lock In next must not wait for orb/reveal — board pts and post-board jar read show immediately
       const lock = page.getByRole('button', { name: 'Lock In next', exact: true })
       await lock.waitFor()
+      const expected = totalFor(main.chips, 150)
       const earlyCount = await page.locator('[data-gem-jar-count]').innerText()
-      assert.notEqual(earlyCount, `+${totalFor(main.chips, 150).toLocaleString('en-US')}`, `${tag} count-up is still running at the start`)
+      assert.equal(earlyCount, `+${expected.toLocaleString('en-US')}`, `${tag} board pts visible when Lock In appears`)
+      assert.equal(
+        await page.locator('[data-gem-jar-caption]').innerText(),
+        jarCaption(expected),
+        `${tag} caption reflects post-board total immediately`,
+      )
+      const fillPctEarly = await page.locator('.gem-jar-fill').evaluate((el) => {
+        const track = el.parentElement
+        if (!track) return 0
+        return (el.getBoundingClientRect().width / track.getBoundingClientRect().width) * 100
+      })
+      assert.ok(fillPctEarly > 5, `${tag} jar fill reflects earned points (${fillPctEarly.toFixed(1)}%)`)
 
       // C + D
-      const expected = totalFor(main.chips, 150)
-      await page.waitForFunction(
-        (text) => document.querySelector('[data-gem-jar-count]')?.textContent === text,
-        `+${expected.toLocaleString('en-US')}`,
-        { timeout: 4000 },
-      )
       await page.locator('.gem-jar.is-tipped').waitFor({ timeout: 4000 })
       assert.deepEqual(await goldCueOffenders(page), [], `${tag} tipping screen: Lock In next is the only gold`)
       await page.locator('[data-gem-jar-reveal]').waitFor({ timeout: 4000 })

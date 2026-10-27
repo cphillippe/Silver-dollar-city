@@ -473,7 +473,13 @@ assert.match(playSrc, /data-match-again/)
 assert.match(playSrc, /Combo/)
 assert.ok(playSrc.lastIndexOf('EASY.holdNext') < playSrc.lastIndexOf('EASY.moreMatch'))
 assert.match(playSrc, /function closeSheet/)
-assert.match(playSrc, /function endDrag/)
+assert.match(playSrc, /function endDrag\(keepPath = false\)/)
+assert.match(playSrc, /if \(!moved\.current\) return endDrag\(true\)/)
+assert.match(
+  playSrc,
+  /puzzle\.words\.some\(\(word\) => \{[\s\S]*?same\(placed\) \|\| same\(\[\.\.\.placed\]\.reverse\(\)\)/,
+  'chip prefixes block bonus scoring while a lesson word is still open',
+)
 assert.match(playSrc, /heroFlash/)
 assert.doesNotMatch(playSrc, /setStripMode\('hero'\)/, '1.4.321 first find must not hero-reflow the board')
 assert.doesNotMatch(playSrc, /is-live/, '1.4.321 idle letters must not take a board-wide is-live glow')

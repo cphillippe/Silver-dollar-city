@@ -188,6 +188,16 @@
   }
 }
 
+/* Easy: score pops live in the reserved hint slot, not over the grid. */
+html[data-easy='on'] .play.is-gem-search .gem-hint-slot .gem-find-pop,
+html[data-easy='on'] .play.is-gem-search .gem-hint-slot .bonus-plus {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  font-size: clamp(1.35rem, 6vw, 1.85rem);
+}
+
 /* #792 Easy: the find pop keeps an ink edge so it reads on bright tiles. Hard keeps the base look. */
 html[data-easy='on'] .gem-find-pop {
   -webkit-text-stroke: 1.5px #2a2118;
