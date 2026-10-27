@@ -195,6 +195,13 @@ function asStringArray(value: unknown): string[] {
   return next
 }
 
+const MEMORY_LAST_FORMAT = new Set(['A', 'B', 'C', 'F'])
+
+function readMemoryLastFormat(value: unknown): MemoryTrace['lastFormat'] {
+  if (typeof value !== 'string' || !MEMORY_LAST_FORMAT.has(value)) return undefined
+  return value as MemoryTrace['lastFormat']
+}
+
 function asMemoryMap(value: unknown): Record<string, MemoryTrace> {
   const next = Object.create(null) as Record<string, MemoryTrace>
   if (!isPlainObject(value)) return next
@@ -205,6 +212,7 @@ function asMemoryMap(value: unknown): Record<string, MemoryTrace> {
     if (!isPlainObject(raw)) continue
     const today = localDateKey()
     const id = isSafeId(raw.id) ? raw.id : key
+    const lastFormat = readMemoryLastFormat(raw.lastFormat)
     next[key] = {
       id,
       pillar: isSafeId(raw.pillar) ? raw.pillar : 'unspecified',
@@ -214,6 +222,7 @@ function asMemoryMap(value: unknown): Record<string, MemoryTrace> {
       reviews: finiteInt(raw.reviews, 0, SAVE_MAX_COUNT, 0),
       cleanRecalls: finiteInt(raw.cleanRecalls, 0, SAVE_MAX_COUNT, 0),
       elaborated: Boolean(raw.elaborated),
+      ...(lastFormat ? { lastFormat } : {}),
     }
     count += 1
   }

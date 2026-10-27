@@ -19,6 +19,7 @@ export interface ReviewEvent {
   peeked: boolean
   elaborated: boolean
   text?: string
+  format?: 'A' | 'B' | 'C' | 'F'
 }
 
 export function emptyTrace(id: string, pillar: string, today: string): MemoryTrace {

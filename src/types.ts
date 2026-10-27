@@ -204,6 +204,7 @@ export interface MemoryTrace {
   reviews: number
   cleanRecalls: number
   elaborated: boolean
+  lastFormat?: 'A' | 'B' | 'C' | 'F'
 }
 
 export interface DefenseState {
@@ -382,3 +383,4 @@ export type View =
   | { name: 'profile' }
   | { name: 'shop' }
   | { name: 'pack-street'; packId: string }
+  | { name: 'quick-review'; lineId: string; practice?: boolean }

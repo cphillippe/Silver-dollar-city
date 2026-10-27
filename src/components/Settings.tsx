@@ -23,6 +23,9 @@ import {
   debugNightWatchJump,
   debugPlayGroups,
   debugPlayLabel,
+  debugQuickReviewJump,
+  debugQuickReviewLabel,
+  debugQuickReviewLines,
   debugStoryStripJump,
   debugStoryStripLabel,
   storyStripLines,
@@ -504,6 +507,24 @@ export function Settings({ onNavigate }: SettingsProps) {
             >
               Jump · Night Watch
             </button>
+          </div>
+        </section>
+        <section className="settings-debug-group" aria-label="Quick review">
+          <p className="eyebrow">Quick review</p>
+          <div className="settings-actions">
+            {debugQuickReviewLines().map((item) => (
+              <button
+                key={item.lineId}
+                type="button"
+                className="btn"
+                onClick={() => {
+                  setEasyMode(true)
+                  onNavigate(debugQuickReviewJump(item))
+                }}
+              >
+                {debugQuickReviewLabel(item)}
+              </button>
+            ))}
           </div>
         </section>
         <section className="settings-debug-group" aria-label="Story Strip">

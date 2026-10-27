@@ -17,6 +17,7 @@ import { ShellUpdateNotice } from './components/ShellUpdateNotice'
 import { WebBuildRefresh } from './components/WebBuildRefresh'
 import { Vista } from './components/Vista'
 import { Welcome } from './components/Welcome'
+import { QuickReviewScreen } from './easyTrail/review/QuickReviewScreen'
 import { findPlayable } from './content'
 import { adsAreVisible, quietPauseAllowed, scenePauseMountsOn } from './config/ads'
 import { liveInterstitialReady, showBetweenSceneInterstitial } from './lib/adAdapter'
@@ -38,10 +39,18 @@ function sequenceBoot(): View | null {
   return { name: 'challenge', areaId: found.areaId, challengeId: id }
 }
 
+/** Playwright / check script entry — not linked from live UI. */
+function quickReviewBoot(): View | null {
+  if (typeof window === 'undefined') return null
+  const lineId = new URLSearchParams(window.location.search).get('quickReview')
+  if (!lineId) return null
+  return { name: 'quick-review', lineId, practice: true }
+}
+
 export default function App() {
   const { progress } = useProgress()
   const [view, setView] = useState<View>(() => {
-    const forced = sequenceBoot()
+    const forced = sequenceBoot() ?? quickReviewBoot()
     if (forced) return forced
     const walked =
       progress.completed.length > 0 || Boolean(progress.lastDailyDate)
@@ -163,6 +172,14 @@ export default function App() {
         />
       ) : null}
       {view.name === 'learn' ? <LearnScreen onNavigate={go} /> : null}
+      {view.name === 'quick-review' ? (
+        <QuickReviewScreen
+          key={view.lineId}
+          lineId={view.lineId}
+          practice={view.practice}
+          onNavigate={go}
+        />
+      ) : null}
       {view.name === 'profile' ? <Profile onNavigate={go} /> : null}
       {sceneAd && scenePauseMountsOn(view.name) ? (
         <SceneAd onContinue={continueFromAd} onSupport={supportFromAd} />
