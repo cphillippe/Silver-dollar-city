@@ -121,8 +121,10 @@
   html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked.is-win.has-gem-jar .gem-board {
     width: 100%;
     max-width: 100%;
-    flex: 1 1 0;
-    max-height: 100%;
+    flex: 0 0 auto;
+    max-height: none;
+    aspect-ratio: 1 / 1;
+    height: auto;
   }
 }
 
