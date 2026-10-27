@@ -729,15 +729,17 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       />
       )}
       <div className="gem-scroll">
-      {easy && status !== 'ok' && puzzle.words[0] ? (
+      {easy && status !== 'ok' ? (
         <div className="gem-hint-slot">
-          <p
-            className={`gem-start-hint${found.length ? ' is-reserved' : ''}`}
-            data-gem-start
-            aria-hidden={found.length > 0}
-          >
-            {found.length === 0 ? EASY.bonusMissStraight : '\u00a0'}
-          </p>
+          {puzzle.words[0] ? (
+            <p
+              className={`gem-start-hint${found.length ? ' is-reserved' : ''}`}
+              data-gem-start
+              aria-hidden={found.length > 0}
+            >
+              {found.length === 0 ? EASY.bonusMissStraight : '\u00a0'}
+            </p>
+          ) : null}
           {plusFlash ? (
             <p className="bonus-plus gem-score-pop" aria-hidden>
               +{bonusPts || 100}
@@ -746,6 +748,29 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           {findPop > 0 ? (
             <p className="gem-find-pop gem-score-pop" aria-hidden>
               +{findPop}
+            </p>
+          ) : null}
+          {comboFlash > 1 ? (
+            <p className="gem-combo is-loud" role="status">
+              Combo ×{comboFlash}
+            </p>
+          ) : null}
+          {toastBonus && toast ? (
+            <p className="bonus-banner" role="status">
+              <strong>{toast}</strong>
+              {toastWhy ? <span>{toastWhy}</span> : null}
+            </p>
+          ) : null}
+          {toastMiss && toast ? (
+            <p className="miss-banner" role="status">
+              <strong>{toast}</strong>
+              {toastWhy ? <span>{toastWhy}</span> : null}
+            </p>
+          ) : null}
+          {toast && !toastBonus && !toastMiss ? (
+            <p className="match-toast gem-toast is-yes" role="status">
+              <strong>{toast}</strong>
+              {toastWhy ? <span className="toast-why">{toastWhy}</span> : null}
             </p>
           ) : null}
         </div>
@@ -766,23 +791,25 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         ))}
       </ul>
       ) : null}
-      {comboFlash > 1 ? (
+      {!easy && comboFlash > 1 ? (
         <p className="gem-combo is-loud" role="status">
           Combo ×{comboFlash}
         </p>
       ) : null}
       <div className="gem-stage">
-      {toastBonus && toast ? (
+      {!easy && toastBonus && toast ? (
         <p className="bonus-banner" role="status">
           <strong>{toast}</strong>
           {toastWhy ? <span>{toastWhy}</span> : null}
         </p>
-      ) : toastMiss && toast ? (
+      ) : null}
+      {!easy && toastMiss && toast ? (
         <p className="miss-banner" role="status">
           <strong>{toast}</strong>
           {toastWhy ? <span>{toastWhy}</span> : null}
         </p>
-      ) : toast ? (
+      ) : null}
+      {!easy && toast && !toastBonus && !toastMiss ? (
         <p className="match-toast gem-toast is-yes" role="status">
           <strong>{toast}</strong>
           {toastWhy ? <span className="toast-why">{toastWhy}</span> : null}
