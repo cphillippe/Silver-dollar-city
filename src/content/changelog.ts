@@ -15,7 +15,7 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.545',
+    version: '1.4.546',
     title: 'Behind the scenes: a quick review card for saved ideas',
     when: '2026-10-27',
     items: [

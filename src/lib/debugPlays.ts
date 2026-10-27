@@ -7,15 +7,15 @@ import { witnessBench } from '../content/witnessBench.ts'
 import { packLesson } from '../content/packCatalog.ts'
 import { CLAIM_MERGE_LINE } from './claimMerge.ts'
 import { EASY_LINE_ORDER } from './easy.ts'
+import { FATHER_RUN_LINE } from './fatherRun.ts'
+import { ROAD_MAZE_LINE } from './roadMaze.ts'
+import { STORY_SNAP_LINE } from './storySnap.ts'
+import { storyPlayFor, type StoryPlayKind } from './storyPlay.ts'
 
 export interface DebugQuickReviewLine {
   lineId: string
   name: string
 }
-import { FATHER_RUN_LINE } from './fatherRun.ts'
-import { ROAD_MAZE_LINE } from './roadMaze.ts'
-import { STORY_SNAP_LINE } from './storySnap.ts'
-import { storyPlayFor, type StoryPlayKind } from './storyPlay.ts'
 
 /** Hold Why Blast is journal lock-in, not a Match arcade. */
 export type DebugPlayKind = StoryPlayKind | 'why-blast'
@@ -146,7 +146,6 @@ export function debugStoryStripLabel(item: StoryStripLine): string {
   return `${item.lineId} · ${item.name}`
 }
 
-/** One tap into the strip. Daily lines open the morning trail; the rest open the street puzzle. */
 /** Settings debug — Quick Review card (no Home entry). */
 export function debugQuickReviewLines(): DebugQuickReviewLine[] {
   return EASY_LINE_ORDER.map((lineId) => ({
@@ -167,6 +166,7 @@ export function debugQuickReviewJump(item: DebugQuickReviewLine): {
   return { name: 'quick-review', lineId: item.lineId, skipWrite: true }
 }
 
+/** One tap into the strip. Daily lines open the morning trail; the rest open the street puzzle. */
 export function debugStoryStripJump(item: StoryStripLine):
   | { name: 'daily'; forceId: string; debugStrip: true }
   | { name: 'challenge'; areaId: string; challengeId: string; debugStrip: true } {
