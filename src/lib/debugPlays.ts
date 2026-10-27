@@ -7,6 +7,11 @@ import { witnessBench } from '../content/witnessBench.ts'
 import { packLesson } from '../content/packCatalog.ts'
 import { CLAIM_MERGE_LINE } from './claimMerge.ts'
 import { EASY_LINE_ORDER } from './easy.ts'
+
+export interface DebugQuickReviewLine {
+  lineId: string
+  name: string
+}
 import { FATHER_RUN_LINE } from './fatherRun.ts'
 import { ROAD_MAZE_LINE } from './roadMaze.ts'
 import { STORY_SNAP_LINE } from './storySnap.ts'
@@ -142,6 +147,26 @@ export function debugStoryStripLabel(item: StoryStripLine): string {
 }
 
 /** One tap into the strip. Daily lines open the morning trail; the rest open the street puzzle. */
+/** Settings debug — Quick Review card (no Home entry). */
+export function debugQuickReviewLines(): DebugQuickReviewLine[] {
+  return EASY_LINE_ORDER.map((lineId) => ({
+    lineId,
+    name: lessonName(lineId),
+  }))
+}
+
+export function debugQuickReviewLabel(item: DebugQuickReviewLine): string {
+  return `Quick · ${item.lineId} · ${item.name}`
+}
+
+export function debugQuickReviewJump(item: DebugQuickReviewLine): {
+  name: 'quick-review'
+  lineId: string
+  practice: true
+} {
+  return { name: 'quick-review', lineId: item.lineId, practice: true }
+}
+
 export function debugStoryStripJump(item: StoryStripLine):
   | { name: 'daily'; forceId: string; debugStrip: true }
   | { name: 'challenge'; areaId: string; challengeId: string; debugStrip: true } {

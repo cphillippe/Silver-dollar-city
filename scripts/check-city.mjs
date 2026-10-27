@@ -1902,9 +1902,19 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.543')
-assert.equal(CHANGELOG[0].version, '1.4.543', '1.4.543 is the newest row')
-assert.ok(CHANGELOG.some((note) => note.version === '1.4.543'), '1.4.543 changelog row')
+assert.equal(APP_VERSION, '1.4.545')
+assert.equal(CHANGELOG[0].version, '1.4.545', '1.4.545 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.545'), '1.4.545 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.545').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.545 changelog avoids GitHub close keywords',
+)
+assert.match(
+  latestChange('1.4.545').items.join('\n'),
+  /Refs: Bill 2026-10-25 7:50 AM CT, review mix \(Memory Coach\)/,
+  '1.4.545 changelog refs Bill review mix',
+)
 assert.doesNotMatch(
   latestChange('1.4.543').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
