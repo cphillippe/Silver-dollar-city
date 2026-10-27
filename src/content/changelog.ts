@@ -15,7 +15,7 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.547',
+    version: '1.4.548',
     title: 'Easy Night Watch: walk-in taps and tablet drags',
     when: '2026-10-27',
     items: [

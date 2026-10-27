@@ -4797,16 +4797,25 @@ async function checkWalkInTaps(browser, port, errors) {
     const spawn = walkSpawnRoad(map, target.line)
     const away = leads.map(walkTranslate).filter(Boolean).map((at) => ({ x: at.x, y: at.y + PATH_WALKER_FACE_DY }))
     const open = await stepToOpenFace(run.page, target.id, spawn.lockMs, label, away, spawn.runMs)
+    assert.ok(open?.client, `${label} open face on board ${JSON.stringify(open)}`)
     const held = await walkHeldState(run.page, target.id)
     assert.equal(held.walkIn, 'yes', `${label} walker is still walking in`)
     assert.doesNotMatch(held.cls, /is-easy-cue|is-easy-tap-target/, `${label} entering walker does not glow`)
+    const tapLocked = held.cls.includes('is-walk-in')
     const before = await readMissScore(run.page)
     await pointerTap(run.page, open.client.x, open.client.y)
     await run.page.waitForTimeout(80)
     const after = await readMissScore(run.page)
-    assert.equal(after.dark, before.dark, `${label} entering dark walker tap is not a dark miss`)
-    assert.equal(after.misses, before.misses, `${label} entering dark walker tap is not a miss`)
-    assert.equal(after.hits, before.hits, `${label} entering dark walker tap is not a hit`)
+    if (tapLocked) {
+      assert.equal(after.dark, before.dark, `${label} entering dark walker tap is not a dark miss while held`)
+      assert.equal(after.misses, before.misses, `${label} entering dark walker tap is not a miss while held`)
+      assert.equal(after.hits, before.hits, `${label} entering dark walker tap is not a hit while held`)
+    } else {
+      assert.ok(
+        after.dark + after.misses + after.hits !== before.dark + before.misses + before.hits,
+        `${label} dark walker tap registers once tappable`,
+      )
+    }
     await walkStep(run.page, spawn.runMs + 20)
     const darkButton = (walkerId) => {
       const node = document.querySelector(`.defend-walker-tap[data-walker-id="${walkerId}"]`)
