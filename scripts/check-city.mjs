@@ -1902,20 +1902,20 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.548')
-assert.equal(CHANGELOG[0].version, '1.4.548', '1.4.548 is the newest row')
-assert.ok(CHANGELOG.some((note) => note.version === '1.4.548'), '1.4.548 changelog row')
+assert.equal(APP_VERSION, '1.4.549')
+assert.equal(CHANGELOG[0].version, '1.4.549', '1.4.549 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.549'), '1.4.549 changelog row')
 assert.doesNotMatch(
-  latestChange('1.4.548').items.join('\n'),
+  latestChange('1.4.549').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
-  '1.4.548 changelog avoids GitHub close keywords',
+  '1.4.549 changelog avoids GitHub close keywords',
 )
 assert.doesNotMatch(
-  latestChange('1.4.548').items.join('\n'),
+  latestChange('1.4.549').items.join('\n'),
   /\/box\//,
-  '1.4.548 changelog avoids box paths',
+  '1.4.549 changelog avoids box paths',
 )
-assert.equal(CHANGELOG[1].version, '1.4.544', '1.4.544 stays under 1.4.548')
+assert.equal(CHANGELOG[1].version, '1.4.544', '1.4.544 stays under 1.4.549')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.544'), '1.4.544 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.544').items.join('\n'),
@@ -6227,7 +6227,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
 }
 
-// Easy Lock In 1.4.548: top-bar Lock In tab empty state — never Run (#858).
+// Easy Lock In 1.4.549: top-bar Lock In tab empty state — never Run (#858).
 {
   const fresh858 = { ...emptyProgress(), easyMode: true }
   assert.deepEqual(easyLockInExit(fresh858), { name: 'journal', lockInEmpty: true })
@@ -6256,7 +6256,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.doesNotMatch(
     readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8'),
     /journal\.is-lock-in-empty > \.btn/,
-    '1.4.548 empty Home reuses gem-win primary; no welcome.css button peel',
+    '1.4.549 empty Home reuses gem-win primary; no welcome.css button peel',
   )
   {
     const hex = (h) => {
@@ -6270,7 +6270,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     const fg = hex('#2a1c08')
     const bg = hex('#ffcc33')
     const ratio = (Math.max(lum(fg), lum(bg)) + 0.05) / (Math.min(lum(fg), lum(bg)) + 0.05)
-    assert.ok(ratio >= 4.5, `1.4.548 .btn.primary token contrast ${ratio.toFixed(2)}`)
+    assert.ok(ratio >= 4.5, `1.4.549 .btn.primary token contrast ${ratio.toFixed(2)}`)
   }
   const loop858 = readFileSync(new URL('../src/easyTrail/trail/loop.ts', import.meta.url), 'utf8')
   assert.match(loop858, /lockInEmpty: true/)
@@ -6283,7 +6283,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8'),
     /1\.4\.548: Lock In tab empty/,
   )
-  assert.match(latestChange('1.4.548').title, /Lock In/i)
+  assert.match(latestChange('1.4.549').title, /Lock In/i)
 }
 
 // Easy Keep/Toss 1.4.356: first miss with empty Toss + a pending line is unfinished (#527).
@@ -17295,7 +17295,7 @@ console.log('check-city: ok')
   assert.match(
     src335('types.ts'),
     /lockInEmpty\?: boolean/,
-    '1.4.548 journal route can mark the Lock In empty tab',
+    '1.4.549 journal route can mark the Lock In empty tab',
   )
   const viewUnion335 = src335('types.ts').match(/export type View =([\s\S]*?)(?:\n\n|\n?$)/)?.[1] ?? ''
   assert.doesNotMatch(viewUnion335, /name: 'lock|name: 'hold|name: 'practice/i, '1.4.335 no Lock In-only App view')
