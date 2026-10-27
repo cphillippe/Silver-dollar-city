@@ -18,6 +18,7 @@ import {
   snapFingerPath,
   tryAddToPath,
   type GemCoord,
+  type GemPuzzle,
 } from '../../lib/gemSearch'
 import { MATCH_DOCK_JUICE_POINTS } from '../../lib/matchBonus'
 import { skillBonusPoints, skillsFor } from '../../lib/gemJar'
@@ -51,6 +52,19 @@ function dealRound(): number {
     if (Number.isInteger(seed) && seed >= 0) return seed
   }
   return Date.now()
+}
+
+/** True while the path is a strict prefix of an unfound required chip (STEP on the way to STEPS). */
+function isChipWordPrefix(path: GemCoord[], puzzle: GemPuzzle, found: string[]): boolean {
+  if (path.length < 1) return false
+  return puzzle.words.some((word) => {
+    if (found.includes(word.id)) return false
+    const placed = puzzle.paths[word.id] ?? []
+    if (path.length >= placed.length) return false
+    const prefixOf = (trail: GemCoord[]) =>
+      trail.slice(0, path.length).every((cell, i) => cell.r === path[i]!.r && cell.c === path[i]!.c)
+    return prefixOf(placed) || prefixOf([...placed].reverse())
+  })
 }
 
 function cellFromPoint(x: number, y: number): GemCoord | null {
@@ -121,6 +135,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const scoredThisGesture = useRef(false)
   const dockJuiced = useRef(false)
   const boardPointer = useRef<HTMLElement | null>(null)
+  const downCell = useRef<GemCoord | null>(null)
+  const gemScrollRef = useRef<HTMLDivElement>(null)
   const stripRef = useRef(stripMode)
   const findUntil = useRef(0)
   stripRef.current = stripMode
@@ -186,6 +202,19 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     // line change only — new Match deal, not the leftover extras
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lineId])
+
+  useEffect(() => {
+    if (status !== 'ok' || !easy) return
+    const scrollWinIntoView = () => {
+      window.scrollTo(0, 0)
+      const page = document.querySelector('.challenge-page.is-puzzle')
+      if (page instanceof HTMLElement) page.scrollTop = 0
+      gemScrollRef.current?.scrollTo(0, 0)
+    }
+    scrollWinIntoView()
+    const id = window.requestAnimationFrame(scrollWinIntoView)
+    return () => window.cancelAnimationFrame(id)
+  }, [status, easy])
 
   useEffect(() => {
     if (round === 0) return
@@ -395,7 +424,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     }, stampAt)
   }
 
-  function submit(nextPath: GemCoord[], building = false) {
+  function submit(nextPath: GemCoord[]) {
     const hit = matchGemWord(nextPath, puzzle, foundRef.current)
     if (hit) {
       const nextFound = [...foundRef.current, hit.id]
@@ -416,14 +445,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       if (done) finishBoard()
       return true
     }
-    if (building && isStoryWordPrefix(nextPath, puzzle, bonusRef.current)) return false
-    if (puzzle.words.some((word) => {
-      if (foundRef.current.includes(word.id)) return false
-      const placed = puzzle.paths[word.id] ?? []
-      if (placed.length <= nextPath.length) return false
-      const same = (trail: GemCoord[]) => trail.slice(0, nextPath.length).every((cell, i) => cell.r === nextPath[i]!.r && cell.c === nextPath[i]!.c)
-      return same(placed) || same([...placed].reverse())
-    })) return false
+    if (isStoryWordPrefix(nextPath, puzzle, bonusRef.current)) return false
+    if (isChipWordPrefix(nextPath, puzzle, foundRef.current)) return false
     const extra = matchBonusWord(nextPath, puzzle, bonusRef.current)
     if (extra) {
       const nextBonus = [...bonusRef.current, extra.id]
@@ -521,7 +544,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     rawRef.current = next
     const line = snapFingerPath(next, puzzle.size)
     writePath(line)
-    submit(line, true)
+    submit(line)
   }
 
   function onCellDown(event: ReactPointerEvent<HTMLDivElement>, cell: GemCoord) {
@@ -542,8 +565,9 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     moved.current = false
     scoredThisGesture.current = false
     setShake(false)
+    downCell.current = cell
     rawRef.current = [cell]
-    applyCell(cell, 'tap')
+    if (!pathRef.current.length) writePath([cell])
   }
 
   function onBoardMove(event: ReactPointerEvent<HTMLDivElement>) {
@@ -566,8 +590,14 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     }
     // A scored find already owns this gesture. Clear the trail and do not miss.
     if (scoredThisGesture.current) return endDrag()
-    // A tap (no finger travel) keeps the built path so the next tap can extend it.
-    if (!moved.current) return endDrag(true)
+    // A tap (no finger travel) extends the path; pointerdown must not submit (drag stays live).
+    if (!moved.current) {
+      const cell = downCell.current ?? rawRef.current[rawRef.current.length - 1]
+      downCell.current = null
+      if (cell) applyCell(cell, 'tap')
+      return endDrag(true)
+    }
+    downCell.current = null
     const nextPath = rawRef.current.length ? rawRef.current.slice() : pathRef.current.slice()
     endDrag()
     if (nextPath.length >= 3) missIfSwipe(nextPath)
@@ -584,6 +614,9 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   }
 
   const selected = new Set(path.map(cellKey))
+  const popOverlayActive =
+    comboFlash > 1 || plusFlash || findPop > 0 || Boolean(toast) || toastBonus || toastMiss
+  const hideStartHint = found.length > 0 || popOverlayActive
 
   return (
     <div
@@ -728,16 +761,18 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         onSheetClose={() => closeSheet()}
       />
       )}
-      <div className="gem-scroll">
-      {easy && status !== 'ok' && puzzle.words[0] ? (
+      <div className="gem-scroll" ref={gemScrollRef}>
+      {easy && status !== 'ok' ? (
         <div className="gem-hint-slot">
-          <p
-            className={`gem-start-hint${found.length ? ' is-reserved' : ''}`}
-            data-gem-start
-            aria-hidden={found.length > 0}
-          >
-            {found.length === 0 ? EASY.bonusMissStraight : '\u00a0'}
-          </p>
+          {puzzle.words[0] ? (
+            <p
+              className={`gem-start-hint${hideStartHint ? ' is-suppressed' : ''}${found.length && !popOverlayActive ? ' is-reserved' : ''}`}
+              data-gem-start
+              aria-hidden={hideStartHint}
+            >
+              {found.length === 0 && !popOverlayActive ? EASY.bonusMissStraight : '\u00a0'}
+            </p>
+          ) : null}
           {plusFlash ? (
             <p className="bonus-plus gem-score-pop" aria-hidden>
               +{bonusPts || 100}
@@ -746,6 +781,29 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           {findPop > 0 ? (
             <p className="gem-find-pop gem-score-pop" aria-hidden>
               +{findPop}
+            </p>
+          ) : null}
+          {comboFlash > 1 ? (
+            <p className="gem-combo is-loud" role="status">
+              Combo ×{comboFlash}
+            </p>
+          ) : null}
+          {toastBonus && toast ? (
+            <p className="bonus-banner" role="status">
+              <strong>{toast}</strong>
+              {toastWhy ? <span>{toastWhy}</span> : null}
+            </p>
+          ) : null}
+          {toastMiss && toast ? (
+            <p className="miss-banner" role="status">
+              <strong>{toast}</strong>
+              {toastWhy ? <span>{toastWhy}</span> : null}
+            </p>
+          ) : null}
+          {toast && !toastBonus && !toastMiss ? (
+            <p className="match-toast gem-toast is-yes" role="status">
+              <strong>{toast}</strong>
+              {toastWhy ? <span className="toast-why">{toastWhy}</span> : null}
             </p>
           ) : null}
         </div>
@@ -766,23 +824,25 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         ))}
       </ul>
       ) : null}
-      {comboFlash > 1 ? (
+      {!easy && comboFlash > 1 ? (
         <p className="gem-combo is-loud" role="status">
           Combo ×{comboFlash}
         </p>
       ) : null}
       <div className="gem-stage">
-      {toastBonus && toast ? (
+      {!easy && toastBonus && toast ? (
         <p className="bonus-banner" role="status">
           <strong>{toast}</strong>
           {toastWhy ? <span>{toastWhy}</span> : null}
         </p>
-      ) : toastMiss && toast ? (
+      ) : null}
+      {!easy && toastMiss && toast ? (
         <p className="miss-banner" role="status">
           <strong>{toast}</strong>
           {toastWhy ? <span>{toastWhy}</span> : null}
         </p>
-      ) : toast ? (
+      ) : null}
+      {!easy && toast && !toastBonus && !toastMiss ? (
         <p className="match-toast gem-toast is-yes" role="status">
           <strong>{toast}</strong>
           {toastWhy ? <span className="toast-why">{toastWhy}</span> : null}

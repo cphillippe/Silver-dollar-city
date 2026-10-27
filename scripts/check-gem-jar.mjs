@@ -422,7 +422,7 @@ async function contrastOf(page, selector) {
 }
 
 async function toastText(page) {
-  const toast = page.locator('.gem-stage .match-toast, .gem-stage .bonus-banner')
+  const toast = page.locator('.gem-hint-slot .match-toast, .gem-hint-slot .bonus-banner, .gem-stage .match-toast, .gem-stage .bonus-banner')
   await toast.first().waitFor({ timeout: 3000 })
   return ((await toast.first().innerText()) || '').replace(/\s+/g, ' ').trim()
 }
@@ -465,12 +465,12 @@ async function run() {
       const story = main.story[0]
       await swipe(page, story.path)
       assert.match(await toastText(page), /Story word! \+100/, `${tag} story word pops +100`)
-      assert.deepEqual(await typeOffenders(page, '.gem-stage .match-toast'), [], `${tag} Story word! pop type is >= 13px sans`)
-      const toastLook = await contrastOf(page, '.gem-stage .match-toast')
+      assert.deepEqual(await typeOffenders(page, '.gem-hint-slot .match-toast, .gem-stage .match-toast'), [], `${tag} Story word! pop type is >= 13px sans`)
+      const toastLook = await contrastOf(page, '.gem-hint-slot .match-toast, .gem-stage .match-toast')
       assert.ok(toastLook.ratio >= 4.5, `${tag} Story word! toast text contrast ${toastLook.ratio.toFixed(2)} >= 4.5`)
       assert.equal(toastLook.alpha, 1, `${tag} Story word! toast fill is opaque`)
       assert.equal(toastLook.opacity, 1, `${tag} Story word! toast has no translucency`)
-      const toastShape = await page.locator('.gem-stage .match-toast').first().evaluate((n) => {
+      const toastShape = await page.locator('.gem-hint-slot .match-toast, .gem-stage .match-toast').first().evaluate((n) => {
         const s = getComputedStyle(n)
         return { bg: s.backgroundColor, radius: parseFloat(s.borderTopLeftRadius) }
       })
@@ -487,7 +487,7 @@ async function run() {
       await page.waitForTimeout(700)
       await swipe(page, main.generic.path)
       assert.match(await toastText(page), /BONUS! \+50/, `${tag} ${main.generic.text} scores instead of "Not a bonus word"`)
-      const bannerLook = await page.locator('.gem-stage .bonus-banner').first().evaluate((n) => {
+      const bannerLook = await page.locator('.gem-hint-slot .bonus-banner, .gem-stage .bonus-banner').first().evaluate((n) => {
         const s = getComputedStyle(n)
         return { bg: s.backgroundColor, bgImage: s.backgroundImage, color: s.color }
       })
