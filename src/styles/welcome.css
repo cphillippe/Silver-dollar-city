@@ -2711,6 +2711,33 @@ html[data-easy='on'] .play.is-road-maze .maze-beat.is-now {
     color: #8a5a12;
   }
 
+  /* 1.4.548: Lock In tab empty — one gold Home, plain Read (#858) */
+  html[data-easy='on'] .journal.is-lock-in-empty {
+    gap: 10px;
+  }
+
+  html[data-easy='on'] .journal.is-lock-in-empty .journal-head > p:not(.eyebrow) {
+    font-size: max(13px, 1rem);
+    margin: 0;
+  }
+
+  html[data-easy='on'] .journal.is-lock-in-empty > .btn.gold {
+    flex: 0 0 auto;
+    align-self: stretch;
+    font-size: max(13px, 1rem);
+  }
+
+  html[data-easy='on'] .journal.is-lock-in-empty > .text-link {
+    font-size: max(13px, 0.92rem);
+    font-weight: 600;
+    background: none;
+    border: none;
+    padding: 4px 0;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    color: #2a2118;
+  }
+
   html[data-easy='on'] .journal.is-easy-hold .journal-head {
     flex: 0 0 auto;
     margin-bottom: 8px;

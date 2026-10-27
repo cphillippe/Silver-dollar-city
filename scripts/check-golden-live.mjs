@@ -15,6 +15,7 @@ import { FATHER_RUN_HINT } from '../src/easyTrail/father/fatherRun.ts'
 import { localDateKey } from '../src/lib/dates.ts'
 import { SAVE_KIND } from '../src/lib/save.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
+import { EASY_OPEN_DAY_KEY } from '../src/content/goldenPath.ts'
 import { camClamp, camFrameInsets, camToPlate, focusPan, NW_CAMERA_FOCUS, NW_CAMERA_ZOOM } from '../src/components/nwCamera.ts'
 import { boardFillBox } from '../src/nightWatch/map/phoneFill.ts'
 
@@ -36,6 +37,150 @@ async function launchBrowser() {
   } catch {
     return await chromium.launch({ headless: true, channel: 'chrome' })
   }
+}
+
+async function lockInTabGolds(page) {
+  return page.evaluate(() => {
+    const hits = []
+    for (const el of document.querySelectorAll('button, a.btn')) {
+      if (!(el instanceof HTMLElement)) continue
+      if (el.closest('[hidden]')) continue
+      const style = getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+      const box = el.getBoundingClientRect()
+      if (box.width <= 0 || box.height <= 0) continue
+      if (!el.classList.contains('gold')) continue
+      hits.push((el.innerText || el.getAttribute('aria-label') || '').replace(/\s+/g, ' ').trim())
+    }
+    return hits
+  })
+}
+
+async function tapLockInTab(page) {
+  const tab = page.getByRole('banner').getByRole('button', { name: 'Lock In', exact: true })
+  await tab.waitFor()
+  await tab.scrollIntoViewIfNeeded()
+  const box = await tab.boundingBox()
+  assert.ok(box, 'Lock In tab has a box')
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+}
+
+async function openEasyHome(page, origin) {
+  await page.goto(origin)
+  if (await page.locator('.welcome').count()) {
+    await tapFilledGold(page)
+  }
+  await page.locator('main.hub').waitFor({ timeout: 30_000 })
+}
+
+async function proveLockInEmptyTab(browser, origin) {
+  const traces = []
+  mkdirSync(SHOTS, { recursive: true })
+  for (const [width, height] of [
+    [375, 667],
+    [390, 844],
+  ]) {
+    const freshSave = {
+      kind: SAVE_KIND,
+      schemaVersion: SAVE_SCHEMA_VERSION,
+      appVersion: '1.4.548',
+      savedAt: '2026-10-27T00:00:00.000Z',
+      progress: { started: true, easyMode: true, theme: 'candy', completed: [] },
+    }
+    const ctx = await browser.newContext({ viewport: { width, height } })
+    await ctx.addInitScript(
+      ([key, raw]) => {
+        localStorage.clear()
+        localStorage.setItem(key, raw)
+      },
+      [STORAGE_KEY, JSON.stringify(freshSave)],
+    )
+    const page = await ctx.newPage()
+    await openEasyHome(page, origin)
+    await tapLockInTab(page)
+    await page.locator('.journal.is-lock-in-empty').waitFor()
+    assert.match(await page.locator('.journal.is-lock-in-empty .journal-head').innerText(), /Nothing to lock in yet\./)
+    assert.equal(await page.locator('.run-pad').count(), 0, 'empty Lock In has no Run pad')
+    assert.equal(await page.locator('.play.is-father-run').count(), 0, 'empty Lock In has no Run play')
+    const golds = await lockInTabGolds(page)
+    assert.deepEqual(golds, ['Home'], `${width}x${height} fresh empty Lock In one gold Home ${JSON.stringify(golds)}`)
+    assert.equal(await page.locator('.journal.is-lock-in-empty .text-link').count(), 0, 'fresh empty has no Read')
+    await page.screenshot({ path: `${SHOTS}/lock-in-empty-no-read-${width}x${height}.png` })
+    traces.push(`${width}x${height} lock-in-empty-no-read ok`)
+    await ctx.close()
+
+    const readSave = {
+      kind: SAVE_KIND,
+      schemaVersion: SAVE_SCHEMA_VERSION,
+      appVersion: '1.4.548',
+      savedAt: '2026-10-27T00:00:00.000Z',
+      progress: {
+        started: true,
+        easyMode: true,
+        theme: 'candy',
+        completed: [],
+        easyTaught: ['ph-road'],
+        easyHeld: ['ph-road'],
+        held: ['ph-road'],
+        learnings: [{ id: 'ph-road' }],
+        lastDailyDate: '2020-01-01',
+        dailyDates: ['2020-01-01'],
+      },
+    }
+    const readCtx = await browser.newContext({ viewport: { width, height } })
+    await readCtx.addInitScript(
+      ([key, raw, openKey]) => {
+        localStorage.clear()
+        localStorage.setItem(key, raw)
+        localStorage.setItem(openKey, '2020-01-01')
+      },
+      [STORAGE_KEY, JSON.stringify(readSave), EASY_OPEN_DAY_KEY],
+    )
+    const readPage = await readCtx.newPage()
+    await openEasyHome(readPage, origin)
+    await tapLockInTab(readPage)
+    await readPage.locator('.journal.is-lock-in-empty').waitFor()
+    assert.equal(await readPage.locator('.journal.is-lock-in-empty .text-link').count(), 1, 'Read link when Read is open')
+    assert.match(await readPage.locator('.journal.is-lock-in-empty .text-link').innerText(), /^Read$/)
+    const readGolds = await lockInTabGolds(readPage)
+    assert.deepEqual(readGolds, ['Home'], `${width}x${height} empty with Read still one gold ${JSON.stringify(readGolds)}`)
+    await readPage.screenshot({ path: `${SHOTS}/lock-in-empty-with-read-${width}x${height}.png` })
+    traces.push(`${width}x${height} lock-in-empty-with-read ok`)
+    await readCtx.close()
+
+    const holdSave = {
+      kind: SAVE_KIND,
+      schemaVersion: SAVE_SCHEMA_VERSION,
+      appVersion: '1.4.548',
+      savedAt: '2026-10-27T00:00:00.000Z',
+      progress: {
+        started: true,
+        easyMode: true,
+        theme: 'candy',
+        completed: [],
+        easyTaught: ['ph-road'],
+        tierTaught: { 'ph-road': 'easy' },
+      },
+    }
+    const holdCtx = await browser.newContext({ viewport: { width, height } })
+    await holdCtx.addInitScript(
+      ([key, raw]) => {
+        localStorage.clear()
+        localStorage.setItem(key, raw)
+      },
+      [STORAGE_KEY, JSON.stringify(holdSave)],
+    )
+    const holdPage = await holdCtx.newPage()
+    await openEasyHome(holdPage, origin)
+    await tapLockInTab(holdPage)
+    await holdPage.locator('.why-blast, .journal.is-rehearse').first().waitFor()
+    assert.equal(await holdPage.locator('.journal.is-lock-in-empty').count(), 0, 'pending hold opens practice')
+    assert.equal(await holdPage.locator('.play.is-father-run').count(), 0, 'pending hold is not Run')
+    await holdPage.screenshot({ path: `${SHOTS}/lock-in-pending-hold-${width}x${height}.png` })
+    traces.push(`${width}x${height} lock-in-pending-hold ok`)
+    await holdCtx.close()
+  }
+  return traces.join('\n')
 }
 
 async function filledGolds(page) {
@@ -4639,6 +4784,8 @@ export async function checkGoldenLive() {
     assert.equal(humanErrors.join('\n'), '', 'human page errors')
     traces.push(humanTrace.join('\n'))
     await human.close()
+
+    traces.push(await proveLockInEmptyTab(browser, origin))
 
     await proveNotQuite(browser, origin)
     await proveGemToast(browser, origin)

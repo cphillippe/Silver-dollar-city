@@ -15,6 +15,17 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.548',
+    title: 'Easy Lock In: empty tab stays on Lock In',
+    when: '2026-10-27',
+    items: [
+      'When nothing is waiting to lock, the Lock In tab shows “Nothing to lock in yet.” with one gold Home button — it never opens Run.',
+      'If Read is available, a plain Read link opens Today’s Trail; otherwise the screen stays Home-only.',
+      'When a line is ready to lock, Lock In still opens that hold as before.',
+      'Refs #858.',
+    ],
+  },
+  {
     version: '1.4.543',
     title: 'Easy Match: tap words work again on the letter board',
     when: '2026-10-26',
