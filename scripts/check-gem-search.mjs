@@ -490,7 +490,12 @@ assert.ok(playSrc.lastIndexOf('EASY.holdNext') < playSrc.lastIndexOf('EASY.moreM
 assert.match(playSrc, /function closeSheet/)
 assert.match(playSrc, /function endDrag\(keepPath = false\)/)
 assert.match(playSrc, /if \(!moved\.current\)[\s\S]{0,220}applyCell\(cell, 'tap'\)/)
-assert.match(playSrc, /isChipWordPrefix\(nextPath, puzzle, foundRef\.current\)/, 'chip prefixes block bonus while a lesson word is still open')
+assert.match(
+  playSrc,
+  /isChipWordPrefix\(nextPath, puzzle, foundRef\.current\)[\s\S]{0,80}!final \|\| nextPath\.length < 4/,
+  'chip prefix guard skips on final release for 4+ letter paths (STEP)',
+)
+assert.match(playSrc, /if \(submit\(line, true\)\) return/, 'miss swipe submits with final=true')
 assert.doesNotMatch(playSrc, /onCellDown[\s\S]{0,420}applyCell\(cell, 'tap'\)/, 'pointerdown must not submit tap (drag stays live)')
 assert.match(playSrc, /heroFlash/)
 assert.doesNotMatch(playSrc, /setStripMode\('hero'\)/, '1.4.321 first find must not hero-reflow the board')

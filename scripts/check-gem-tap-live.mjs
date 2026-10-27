@@ -31,7 +31,7 @@ function savePayload() {
   return {
     kind: 'silver-city-save',
     schemaVersion: 1,
-    appVersion: '1.4.544',
+    appVersion: '1.4.545',
     savedAt: now.toISOString(),
     progress: {
       started: true,
@@ -366,6 +366,27 @@ async function assertObTuningMisdragThenDrag(page, origin) {
   await page.screenshot({ path: join(POP_SHOT_ROOT, 'ob-tuning-375-misdrag-then-drag.png') })
 }
 
+async function assertStepDragThenSteps(page, origin, w, shot = false) {
+  mkdirSync(POP_SHOT_ROOT, { recursive: true })
+  await openLesson(page, origin, 'ob-tuning', 0)
+  const board = buildGemPuzzle('ob-tuning', 0)
+  const steps = board.words.find((word) => word.text === 'STEPS')
+  assert.ok(steps, 'ob-tuning STEPS chip')
+  const full = board.paths[steps.id]
+  const stepPath = full.slice(0, 4)
+  await dragPath(page, stepPath)
+  await page.waitForTimeout(800)
+  assert.equal(await page.locator('.miss-banner').count(), 0, 'STEP drag release scores without Miss')
+  assert.ok((await page.locator('.bonus-banner').count()) >= 1, 'STEP drag scores bonus banner')
+  assert.equal(await foundCount(page), 0, 'STEP is bonus not a chip find')
+  await dragPath(page, full)
+  await page.waitForTimeout(900)
+  assert.equal(await foundCount(page), 1, 'STEPS chip scores after STEP bonus')
+  if (shot) {
+    await page.screenshot({ path: join(POP_SHOT_ROOT, `ob-tuning-${w}-step-then-steps.png`) })
+  }
+}
+
 async function assertStepPrefixThenStepsTap(page, origin) {
   await openLesson(page, origin, 'ob-tuning', 0)
   const board = buildGemPuzzle('ob-tuning', 0)
@@ -508,6 +529,19 @@ export async function checkGemTapLive() {
       const page = await context.newPage()
       page.on('pageerror', (err) => errors.push(String(err)))
       await assertStepPrefixThenStepsTap(page, origin)
+      await context.close()
+    }
+    for (const w of [375, 390]) {
+      const context = await browser.newContext({
+        viewport: { width: w, height: w === 375 ? 667 : 844 },
+        isMobile: true,
+      })
+      await context.addInitScript(({ key, payload }) => {
+        window.localStorage.setItem(key, JSON.stringify(payload))
+      }, { key: STORAGE_KEY, payload: savePayload() })
+      const page = await context.newPage()
+      page.on('pageerror', (err) => errors.push(String(err)))
+      await assertStepDragThenSteps(page, origin, w, true)
       await context.close()
     }
   } finally {
