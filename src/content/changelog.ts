@@ -15,12 +15,23 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.547',
+    version: '1.4.546',
     title: 'Easy Match: skip WINE and SMOKE as bonus extras',
     when: '2026-10-27',
     items: [
       'Easy word search no longer plants or scores WINE or SMOKE as common bonus words.',
       'Refs #753.',
+    ],
+  },
+  {
+    version: '1.4.545',
+    title: 'Easy Match: STEP drag scores; board stays put during pops',
+    when: '2026-10-27',
+    items: [
+      'Releasing a drag on STEP scores the bonus instead of a miss when STEPS is still on the board.',
+      'Combo and bonus banners no longer stretch the hint band and drop the letter grid.',
+      'Hard stays the same.',
+      'Refs #855.',
     ],
   },
   {
