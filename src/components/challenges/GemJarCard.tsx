@@ -69,9 +69,9 @@ export function GemJarCard(props: GemJarCardProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const fromState = jarState(before)
   const toState = jarState(after)
-  const fillPct = landed ? toState.fillPct : fromState.fillPct
+  // Win card shows the post-board total immediately; orb/tip animation is decorative only.
+  const fillPct = toState.fillPct
   const revealed = landed && crossing
   const reveal = revealed
     ? crossing.skill
@@ -95,7 +95,7 @@ export function GemJarCard(props: GemJarCardProps) {
             </strong>
           ) : null}
           <span className="gem-jar-caption" data-gem-jar-caption>
-            {jarCaption(landed ? after : before)}
+            {jarCaption(after)}
           </span>
           <svg className="gem-jar-icon" viewBox="0 0 24 28" aria-hidden>
             <rect className="gem-jar-lid" x="6" y="1.5" width="12" height="4" rx="1.5" />
