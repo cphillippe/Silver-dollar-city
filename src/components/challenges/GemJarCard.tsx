@@ -3,8 +3,6 @@ import { EASY } from '../../lib/easy'
 import { jarCaption, jarCrossing, jarState } from '../../lib/gemJar'
 import { playGemPop, prefersReducedMotion } from '../../lib/juice'
 
-const COUNT_START_MS = 250
-const COUNT_MS = 700
 const ORB_AT_MS = 950
 const ORB_FLY_MS = 450
 const SPARKS = [0, 1, 2, 3, 4, 5]
@@ -40,7 +38,6 @@ export function GemJarCard(props: GemJarCardProps) {
   const after = before + boardPts
   const reduced = useMemo(() => prefersReducedMotion(), [])
   const crossing = useMemo(() => jarCrossing(before, after, seen), [before, after, seen])
-  const [shown, setShown] = useState(reduced ? boardPts : 0)
   const [landed, setLanded] = useState(reduced)
   const [flying, setFlying] = useState(false)
   const [tipped, setTipped] = useState(false)
@@ -52,25 +49,12 @@ export function GemJarCard(props: GemJarCardProps) {
       if (crossing) seenRef.current(crossing.step)
       return
     }
-    let raf = 0
     const timers: number[] = []
-    timers.push(
-      window.setTimeout(() => {
-        const t0 = performance.now()
-        const tick = (now: number) => {
-          const k = Math.min(1, (now - t0) / COUNT_MS)
-          setShown(Math.round(boardPts * (1 - (1 - k) * (1 - k))))
-          if (k < 1) raf = window.requestAnimationFrame(tick)
-        }
-        raf = window.requestAnimationFrame(tick)
-      }, COUNT_START_MS),
-    )
     timers.push(window.setTimeout(() => setFlying(true), ORB_AT_MS))
     timers.push(
       window.setTimeout(() => {
         setFlying(false)
         setLanded(true)
-        setShown(boardPts)
         playGemPop('jar')
         if (crossing) {
           setTipped(true)
@@ -79,16 +63,15 @@ export function GemJarCard(props: GemJarCardProps) {
       }, ORB_AT_MS + ORB_FLY_MS),
     )
     return () => {
-      window.cancelAnimationFrame(raf)
       for (const id of timers) window.clearTimeout(id)
     }
     // one run per win
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const fromState = jarState(before)
   const toState = jarState(after)
-  const fillPct = landed ? toState.fillPct : fromState.fillPct
+  // Win card shows the post-board total immediately; orb/tip animation is decorative only.
+  const fillPct = toState.fillPct
   const revealed = landed && crossing
   const reveal = revealed
     ? crossing.skill
@@ -106,11 +89,13 @@ export function GemJarCard(props: GemJarCardProps) {
       >
         <div className="gem-jar-row">
           <span className="gem-jar-name">{EASY.jarName}</span>
-          <strong className="gem-jar-count" data-gem-jar-count>
-            +{fmt(shown)}
-          </strong>
+          {boardPts > 0 ? (
+            <strong className="gem-jar-count" data-gem-jar-count>
+              +{fmt(boardPts)}
+            </strong>
+          ) : null}
           <span className="gem-jar-caption" data-gem-jar-caption>
-            {jarCaption(landed ? after : before)}
+            {jarCaption(after)}
           </span>
           <svg className="gem-jar-icon" viewBox="0 0 24 28" aria-hidden>
             <rect className="gem-jar-lid" x="6" y="1.5" width="12" height="4" rx="1.5" />

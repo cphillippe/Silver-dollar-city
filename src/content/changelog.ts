@@ -15,6 +15,17 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.543',
+    title: 'Easy Match: tap words work again on the letter board',
+    when: '2026-10-26',
+    items: [
+      'Tap each letter in order to spell a word — the path stays until the word scores.',
+      'Dragging through a long lesson word no longer scores a short bonus by mistake.',
+      'The board stays put after your first find, with square cells and room for the whole grid.',
+      'Refs: Bill 2026-10-26 1:43 PM CT (Art Director\'s chat): fix that game; Match UI spec /workspace/gemcheck.',
+    ],
+  },
+  {
     version: '1.4.542',
     title: 'Easy Night Watch: Heaven sign, Recenter, edge rings',
     when: '2026-10-26',

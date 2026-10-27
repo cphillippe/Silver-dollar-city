@@ -1902,8 +1902,19 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.542')
-assert.equal(CHANGELOG[0].version, '1.4.542', '1.4.542 is the newest row')
+assert.equal(APP_VERSION, '1.4.543')
+assert.equal(CHANGELOG[0].version, '1.4.543', '1.4.543 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.543'), '1.4.543 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.543').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.543 changelog avoids GitHub close keywords',
+)
+assert.match(
+  latestChange('1.4.543').items.join('\n'),
+  /Refs: Bill 2026-10-26 1:43 PM CT \(Art Director's chat\): fix that game; Match UI spec \/workspace\/gemcheck\./,
+  '1.4.543 changelog refs Bill Match UI spec',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.542'), '1.4.542 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.542').items.join('\n'),
@@ -1911,6 +1922,13 @@ assert.doesNotMatch(
   '1.4.542 changelog avoids GitHub close keywords',
 )
 assert.match(latestChange('1.4.542').items.join('\n'), /Hard stays the same\./)
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.541'), '1.4.541 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.541').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.541 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.541').items.join('\n'), /Hard stays the same\./)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.540'), '1.4.540 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.540').items.join('\n'),
@@ -16136,6 +16154,43 @@ console.log('check-city: ok')
   assert.match(juice321, /\.gem-cell\.is-burst/)
 }
 
+// Easy Match: tap path + chip-prefix bonus guard (word search tapfix)
+{
+  const playTap = readFileSync(
+    new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  const tightTap = readFileSync(new URL('../src/styles/match-art-tight.css', import.meta.url), 'utf8')
+  const gemTapCss = readFileSync(new URL('../src/styles/gem.css', import.meta.url), 'utf8')
+  assert.match(playTap, /function endDrag\(keepPath = false\)/)
+  assert.match(playTap, /if \(!moved\.current\) return endDrag\(true\)/)
+  assert.match(playTap, /gem-hint-slot/)
+  assert.match(playTap, /gem-start-hint\$\{found\.length \? ' is-reserved' : ''\}/)
+  assert.match(playTap, /gem-find-pop gem-score-pop/)
+  assert.match(
+    tightTap,
+    /html\[data-easy='on'\][\s\S]*?\.gem-stage \{[\s\S]*?flex: 1 1 0[\s\S]*?min-height: 0/,
+    'Easy phone gem-stage fills the play band via flex, not a fixed vh',
+  )
+  assert.match(tightTap, /max-height: min\(100cqh, 100cqw\)/, 'Easy phone board uses gem-scroll container sizing')
+  assert.match(
+    tightTap,
+    /\.is-story-docked\.is-win \.gem-board \{[\s\S]*?max-height: none !important/,
+    'Easy phone win board drops cqh cap when matchWin shrink-wraps the scroll container',
+  )
+  assert.match(
+    tightTap,
+    /\.is-story-docked\.is-win \.gem-scroll \{[\s\S]*?container-type: normal !important/,
+    'Easy phone win scroll drops size container so MATCHED! follows the jar',
+  )
+  assert.match(
+    tightTap,
+    /@media \(max-width: 430px\) and \(max-height: 720px\) \{[\s\S]*?\.is-story-docked\.is-win \.gem-board \{[\s\S]*?28svh/,
+    'Easy short-phone win caps board height so Lock In stays on the 667 fold',
+  )
+  assert.match(gemTapCss, /bottom: calc\(100% \+ 8px\)/, 'banners sit above the board, not on cells')
+}
+
 // Night Watch 1.4.322: per-kind walker portraits (Fixes #450)
 {
   const parts322 = readFileSync(new URL('../src/nightWatch/parts/index.ts', import.meta.url), 'utf8')
@@ -19318,3 +19373,4 @@ await import('./check-story-snap.mjs').then((mod) => mod.checkSnapHold())
 await import('./check-live-prove.mjs').then((mod) => mod.checkLiveProve())
 await import('./check-hide-hard-labels.mjs')
 await import('./check-golden-live.mjs').then((mod) => mod.checkGoldenLive())
+await import('./check-gem-tap-live.mjs').then((mod) => mod.checkGemTapLive())
