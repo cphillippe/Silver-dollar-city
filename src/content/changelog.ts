@@ -15,6 +15,17 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.545',
+    title: 'Easy Match: STEP drag scores; board stays put during pops',
+    when: '2026-10-27',
+    items: [
+      'Releasing a drag on STEP scores the bonus instead of a miss when STEPS is still on the board.',
+      'Combo and bonus banners no longer stretch the hint band and drop the letter grid.',
+      'Hard stays the same.',
+      'Refs #855.',
+    ],
+  },
+  {
     version: '1.4.544',
     title: 'Easy Match: score pops stay above the board',
     when: '2026-10-27',
