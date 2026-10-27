@@ -1915,15 +1915,29 @@ assert.doesNotMatch(
   /\/box\//,
   '1.4.548 changelog avoids box paths',
 )
+assert.equal(CHANGELOG[1].version, '1.4.544', '1.4.544 stays under 1.4.548')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.544'), '1.4.544 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.544').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.544 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.544').items.join('\n'), /Refs #855/, '1.4.544 changelog refs #855')
+assert.match(latestChange('1.4.544').items.join('\n'), /Hard stays the same\./)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.543'), '1.4.543 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.543').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
   '1.4.543 changelog avoids GitHub close keywords',
 )
+assert.doesNotMatch(
+  latestChange('1.4.543').items.join('\n'),
+  /\/workspace\/gemcheck/,
+  '1.4.543 changelog drops the gemcheck box path',
+)
 assert.match(
   latestChange('1.4.543').items.join('\n'),
-  /Refs: Bill 2026-10-26 1:43 PM CT \(Art Director's chat\): fix that game; Match UI spec \/workspace\/gemcheck\./,
+  /Refs: Bill 2026-10-26 1:43 PM CT \(Art Director's chat\): fix that game; Match UI spec\./,
   '1.4.543 changelog refs Bill Match UI spec',
 )
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.542'), '1.4.542 changelog row')
@@ -6235,9 +6249,29 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   })
   const lockEmptySrc = readFileSync(new URL('../src/easyTrail/lockIn/LockInEmpty.tsx', import.meta.url), 'utf8')
   assert.match(lockEmptySrc, /Nothing to lock in yet\./)
-  assert.match(lockEmptySrc, /btn gold xl/)
+  assert.match(lockEmptySrc, /btn primary xl snap-bins/)
+  assert.doesNotMatch(lockEmptySrc, /btn gold/)
   assert.match(lockEmptySrc, /easyReadMarkedTomorrow/)
   assert.doesNotMatch(lockEmptySrc, /name: 'link'/)
+  assert.doesNotMatch(
+    readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8'),
+    /journal\.is-lock-in-empty > \.btn/,
+    '1.4.548 empty Home reuses gem-win primary; no welcome.css button peel',
+  )
+  {
+    const hex = (h) => {
+      const n = h.replace('#', '')
+      return [parseInt(n.slice(0, 2), 16), parseInt(n.slice(2, 4), 16), parseInt(n.slice(4, 6), 16)].map((v) => {
+        const x = v / 255
+        return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4
+      })
+    }
+    const lum = (rgb) => 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]
+    const fg = hex('#2a1c08')
+    const bg = hex('#ffcc33')
+    const ratio = (Math.max(lum(fg), lum(bg)) + 0.05) / (Math.min(lum(fg), lum(bg)) + 0.05)
+    assert.ok(ratio >= 4.5, `1.4.548 .btn.primary token contrast ${ratio.toFixed(2)}`)
+  }
   const loop858 = readFileSync(new URL('../src/easyTrail/trail/loop.ts', import.meta.url), 'utf8')
   assert.match(loop858, /lockInEmpty: true/)
   assert.doesNotMatch(
@@ -16221,9 +16255,16 @@ console.log('check-city: ok')
   const tightTap = readFileSync(new URL('../src/styles/match-art-tight.css', import.meta.url), 'utf8')
   const gemTapCss = readFileSync(new URL('../src/styles/gem.css', import.meta.url), 'utf8')
   assert.match(playTap, /function endDrag\(keepPath = false\)/)
-  assert.match(playTap, /if \(!moved\.current\) return endDrag\(true\)/)
+  assert.match(playTap, /if \(!moved\.current\)[\s\S]{0,220}applyCell\(cell, 'tap'\)/)
+  assert.match(playTap, /isChipWordPrefix/)
+  assert.match(playTap, /writePath\(\[cell\]\)/)
+  assert.doesNotMatch(playTap, /onCellDown[\s\S]{0,420}applyCell\(cell, 'tap'\)/)
   assert.match(playTap, /gem-hint-slot/)
-  assert.match(playTap, /gem-start-hint\$\{found\.length \? ' is-reserved' : ''\}/)
+  assert.match(playTap, /popOverlayActive/)
+  assert.match(playTap, /hideStartHint/)
+  assert.match(playTap, /is-suppressed/)
+  assert.match(playTap, /gemScrollRef/)
+  assert.match(playTap, /scrollWinIntoView/)
   assert.match(playTap, /gem-find-pop gem-score-pop/)
   assert.match(
     tightTap,
@@ -19440,3 +19481,4 @@ await import('./check-live-prove.mjs').then((mod) => mod.checkLiveProve())
 await import('./check-hide-hard-labels.mjs')
 await import('./check-golden-live.mjs').then((mod) => mod.checkGoldenLive())
 await import('./check-gem-tap-live.mjs').then((mod) => mod.checkGemTapLive())
+await import('./check-gem-pop-live.mjs').then((mod) => mod.checkGemPopLive())
