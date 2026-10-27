@@ -21,6 +21,17 @@ import {
   type DefendNightActorsProps,
 } from './DefendNightActors'
 
+/** Easy HUD: hide the walker tap disc while it would overlap the pace chip bbox (#792b NWUI-2). */
+function walkerTapDiscOverlapsPace(face: { left: number; top: number }, radius: number): boolean {
+  const pace = document.querySelector('.nw-pace')?.getBoundingClientRect()
+  if (!pace || pace.width <= 1 || pace.height <= 1) return false
+  const left = face.left - radius
+  const top = face.top - radius
+  const right = face.left + radius
+  const bottom = face.top + radius
+  return left < pace.right && right > pace.left && top < pace.bottom && bottom > pace.top
+}
+
 export type DefendNightBoardProps = Omit<DefendNightSkyProps, 'children'> &
   DefendNightActorsProps & {
     upgradePoint?: TowerCardPoint | null
@@ -349,6 +360,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
               const at = walkIn ? walkIn.drawAt(raider) : raiderAt(raider)
               const face = place(boardBox, { x: at.x, y: at.y + PATH_WALKER_FACE_DY })
               const radius = (raider.boss ? EASY_CROWN_HIT_R : EASY_FACE_HIT_R) * (cameraScale > 0 ? cameraScale : 1)
+              if (walkerTapDiscOverlapsPace(face, radius)) return null
               const glowing = easyFaceGlows(raider, raiders, roundIndex, armorFrom)
               return (
                 <button
