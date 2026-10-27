@@ -156,13 +156,29 @@ async function layoutMetrics(page) {
     const cell = document.querySelector('[data-gem-cell]')
     const board = document.querySelector('.gem-board')
     const stage = document.querySelector('.gem-stage')
+    const play = document.querySelector('.play.is-gem-search.is-panel-blast')
+    const dock = document.querySelector('.match-teach-dock, .story-strip.is-dock')
+    const score = document.querySelector('.match-score, .gem-jar-slot')
     const cb = cell?.getBoundingClientRect()
     const bb = board?.getBoundingClientRect()
     const sb = stage?.getBoundingClientRect()
+    const pr = play?.getBoundingClientRect()
+    const style = play ? getComputedStyle(play) : null
+    const padL = style ? parseFloat(style.paddingLeft) || 0 : 0
+    const padR = style ? parseFloat(style.paddingRight) || 0 : 0
+    const playTop = dock?.getBoundingClientRect().bottom ?? pr?.top ?? 0
+    const playBottom = score?.getBoundingClientRect().top ?? pr?.bottom ?? window.innerHeight
+    const playH = Math.max(0, playBottom - playTop)
     return {
       cellW: cb ? Math.round(cb.width) : 0,
       cellH: cb ? Math.round(cb.height) : 0,
       boardH: bb ? Math.round(bb.height) : 0,
+      boardW: bb ? Math.round(bb.width) : 0,
+      boardLeft: bb ? Math.round(bb.left) : 0,
+      boardRight: bb ? Math.round(bb.right) : 0,
+      cardInnerLeft: pr ? Math.round(pr.left + padL) : 0,
+      cardInnerRight: pr ? Math.round(pr.right - padR) : 0,
+      playH: Math.round(playH),
       stageH: sb ? Math.round(sb.height) : 0,
       boardY: bb ? Math.round(bb.y) : 0,
       vh: window.innerHeight,
@@ -170,6 +186,52 @@ async function layoutMetrics(page) {
       scrollY: window.scrollY,
     }
   })
+}
+
+async function assertBoardInCard(page, tag) {
+  const m = await layoutMetrics(page)
+  assert.ok(m.boardW > 0, `${tag} board has width`)
+  assert.ok(
+    m.boardLeft >= m.cardInnerLeft - 1 && m.boardRight <= m.cardInnerRight + 1,
+    `${tag} board inside card padding (${m.boardLeft}-${m.boardRight} in ${m.cardInnerLeft}-${m.cardInnerRight})`,
+  )
+}
+
+async function assertPlayAreaFill(page, tag) {
+  const m = await layoutMetrics(page)
+  assert.ok(m.playH > 0, `${tag} play band has height`)
+  const innerW = m.cardInnerRight - m.cardInnerLeft
+  const target = Math.min(innerW, m.playH)
+  assert.ok(
+    Math.min(m.boardW, m.boardH) >= target * 0.7 - 4,
+    `${tag} board fills >=70% of dock-to-score band (${Math.min(m.boardW, m.boardH)}/${target})`,
+  )
+}
+
+async function assertNoPopOverlap(page, tag) {
+  const hit = await page.evaluate(() => {
+    const cells = [...document.querySelectorAll('[data-gem-cell]')].map((el) => el.getBoundingClientRect())
+    const pops = [
+      ...document.querySelectorAll('.gem-score-pop, .gem-find-pop, .bonus-plus'),
+      ...document.querySelectorAll('.gem-stage .bonus-banner, .gem-stage .miss-banner, .gem-stage .match-toast'),
+    ]
+      .filter((el) => {
+        const style = getComputedStyle(el)
+        return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0.05
+      })
+      .map((el) => el.getBoundingClientRect())
+    for (const pop of pops) {
+      if (pop.width < 1 || pop.height < 1) continue
+      for (const cell of cells) {
+        if (cell.width < 1) continue
+        if (cell.left < pop.right && cell.right > pop.left && cell.top < pop.bottom && cell.bottom > pop.top) {
+          return true
+        }
+      }
+    }
+    return false
+  })
+  assert.equal(hit, false, `${tag} no score pop overlaps a cell`)
 }
 
 async function assertNoBannerOverlap(page, tag) {
@@ -230,6 +292,7 @@ async function playWords(page, lineId, mode) {
       assert.match((await hint.innerText()).trim(), /^\s*$/, `${lineId} hint text clears but slot remains`)
     }
     await assertNoBannerOverlap(page, `${lineId} ${word}`)
+    await assertNoPopOverlap(page, `${lineId} ${word}`)
   }
   await page.locator('.play.is-gem-search.is-win').waitFor({ timeout: 8000 })
 }
@@ -288,9 +351,14 @@ export async function checkGemTapLive() {
           page.on('pageerror', (err) => errors.push(String(err)))
           await openLesson(page, origin, lineId, 0)
           const layout0 = await layoutMetrics(page)
-          assert.ok(layout0.cellW >= 42 && layout0.cellH >= 42, `${lineId} ${w}x${h} cells >= 42px (${layout0.cellW}x${layout0.cellH})`)
+          const minCellH = w >= 390 ? 44 : 42
+          assert.ok(
+            layout0.cellW >= 42 && layout0.cellH >= minCellH,
+            `${lineId} ${w}x${h} cells >= 42×${minCellH} (${layout0.cellW}x${layout0.cellH})`,
+          )
           assert.ok(Math.abs(layout0.cellW - layout0.cellH) <= 1, `${lineId} ${w}x${h} cells square (${layout0.cellW}x${layout0.cellH})`)
-          assert.ok(layout0.stageH >= layout0.vh * 0.7 - 2, `${lineId} ${w}x${h} stage >= 70vh (${layout0.stageH}/${layout0.vh})`)
+          await assertBoardInCard(page, `${lineId} ${w}x${h}`)
+          await assertPlayAreaFill(page, `${lineId} ${w}x${h}`)
           assert.ok(layout0.docH <= layout0.vh + 2 && layout0.scrollY === 0, `${lineId} ${w}x${h} no page scroll`)
           await playWords(page, lineId, mode)
           await page.screenshot({ path: join(SHOT_ROOT, `${lineId}-${w}-win-${mode}.png`) })
@@ -305,6 +373,8 @@ export async function checkGemTapLive() {
           await openLesson(page, origin, lineId, 0)
           await dragPath(page, locateWord(buildGemPuzzle(lineId, 0).letters, 'MICAH'))
           await page.waitForTimeout(900)
+          await assertBoardInCard(page, `${lineId} ${w}x${h} mid`)
+          await assertPlayAreaFill(page, `${lineId} ${w}x${h} mid`)
           await page.screenshot({ path: join(SHOT_ROOT, `${lineId}-${w}-mid-after-find.png`) })
           await assertPrefixDragNoBonus(page, lineId, 'PARABLE')
           await assertPrefixDragNoBonus(page, lineId, 'KINGDOM')
@@ -319,6 +389,8 @@ export async function checkGemTapLive() {
           await openLesson(page, origin, lineId, 0)
           await dragPath(page, locateWord(buildGemPuzzle(lineId, 0).letters, 'LARK'))
           await page.waitForTimeout(900)
+          await assertBoardInCard(page, `${lineId} ${w}x${h} mid`)
+          await assertPlayAreaFill(page, `${lineId} ${w}x${h} mid`)
           await page.screenshot({ path: join(SHOT_ROOT, `${lineId}-${w}-mid-after-find.png`) })
           await context.close()
         }
@@ -330,4 +402,8 @@ export async function checkGemTapLive() {
   }
   assert.equal(errors.join('\n'), '', 'gem tap live: no page errors')
   console.log('check-gem-tap-live: ok')
+}
+
+if (import.meta.url.startsWith('file:') && process.argv[1]?.endsWith('check-gem-tap-live.mjs')) {
+  await checkGemTapLive()
 }

@@ -658,11 +658,21 @@ html[data-easy='on'] .play.is-gem-search .gem-cell.is-start-gold {
   }
 }
 
-html[data-easy='on'] .play.is-gem-search .gem-start-hint {
-  margin: 0 0 4px;
-  padding: 6px 10px;
-  min-height: 2.4em;
+html[data-easy='on'] .play.is-gem-search .gem-hint-slot {
+  position: relative;
   flex: 0 0 auto;
+  min-height: 2.75rem;
+  margin: 0 0 4px;
+  display: grid;
+  place-items: center;
+}
+
+html[data-easy='on'] .play.is-gem-search .gem-start-hint {
+  grid-area: 1 / 1;
+  margin: 0;
+  padding: 6px 10px;
+  width: 100%;
+  box-sizing: border-box;
   text-align: center;
   font-size: 0.8125rem;
   font-weight: 750;
@@ -674,6 +684,17 @@ html[data-easy='on'] .play.is-gem-search .gem-start-hint {
 
 html[data-easy='on'] .play.is-gem-search .gem-start-hint.is-reserved {
   visibility: hidden;
+}
+
+html[data-easy='on'] .play.is-gem-search .gem-hint-slot .gem-score-pop {
+  grid-area: 1 / 1;
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  margin: 0;
+  z-index: 2;
+  pointer-events: none;
 }
 
 /* Fixes #443: no board-wide .gem-cell.is-live after the first find.

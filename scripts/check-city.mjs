@@ -16164,9 +16164,11 @@ console.log('check-city: ok')
   const gemTapCss = readFileSync(new URL('../src/styles/gem.css', import.meta.url), 'utf8')
   assert.match(playTap, /function endDrag\(keepPath = false\)/)
   assert.match(playTap, /if \(!moved\.current\) return endDrag\(true\)/)
+  assert.match(playTap, /gem-hint-slot/)
   assert.match(playTap, /gem-start-hint\$\{found\.length \? ' is-reserved' : ''\}/)
+  assert.match(playTap, /gem-find-pop gem-score-pop/)
   assert.match(tightTap, /\.gem-stage \{\s*[\s\S]*?min-height: 70vh/)
-  assert.match(tightTap, /min-width: 42px/)
+  assert.match(tightTap, /flex: 1 1 0/)
   assert.match(gemTapCss, /bottom: calc\(100% \+ 8px\)/, 'banners sit above the board, not on cells')
 }
 
