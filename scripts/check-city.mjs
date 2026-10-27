@@ -6281,7 +6281,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
   assert.match(
     readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8'),
-    /1\.4\.548: Lock In tab empty/,
+    /1\.4\.549: Lock In tab empty/,
   )
   assert.match(latestChange('1.4.549').title, /Lock In/i)
 }
