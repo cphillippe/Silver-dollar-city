@@ -16178,7 +16178,11 @@ console.log('check-city: ok')
   assert.match(playTap, /function endDrag\(keepPath = false\)/)
   assert.match(playTap, /if \(!moved\.current\) return endDrag\(true\)/)
   assert.match(playTap, /gem-hint-slot/)
-  assert.match(playTap, /gem-start-hint\$\{found\.length \? ' is-reserved' : ''\}/)
+  assert.match(playTap, /popOverlayActive/)
+  assert.match(playTap, /hideStartHint/)
+  assert.match(playTap, /is-suppressed/)
+  assert.match(playTap, /gemScrollRef/)
+  assert.match(playTap, /scrollWinIntoView/)
   assert.match(playTap, /gem-find-pop gem-score-pop/)
   assert.match(
     tightTap,
