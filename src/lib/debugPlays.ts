@@ -162,9 +162,9 @@ export function debugQuickReviewLabel(item: DebugQuickReviewLine): string {
 export function debugQuickReviewJump(item: DebugQuickReviewLine): {
   name: 'quick-review'
   lineId: string
-  practice: true
+  skipWrite: true
 } {
-  return { name: 'quick-review', lineId: item.lineId, practice: true }
+  return { name: 'quick-review', lineId: item.lineId, skipWrite: true }
 }
 
 export function debugStoryStripJump(item: StoryStripLine):

@@ -17,7 +17,7 @@ import { ShellUpdateNotice } from './components/ShellUpdateNotice'
 import { WebBuildRefresh } from './components/WebBuildRefresh'
 import { Vista } from './components/Vista'
 import { Welcome } from './components/Welcome'
-import { QuickReviewScreen } from './easyTrail/review/QuickReviewScreen'
+import { QuickReviewScreen } from './components/QuickReviewDebugScreen'
 import { findPlayable } from './content'
 import { adsAreVisible, quietPauseAllowed, scenePauseMountsOn } from './config/ads'
 import { liveInterstitialReady, showBetweenSceneInterstitial } from './lib/adAdapter'
@@ -44,7 +44,7 @@ function quickReviewBoot(): View | null {
   if (typeof window === 'undefined') return null
   const lineId = new URLSearchParams(window.location.search).get('quickReview')
   if (!lineId) return null
-  return { name: 'quick-review', lineId, practice: true }
+  return { name: 'quick-review', lineId, skipWrite: true }
 }
 
 export default function App() {
@@ -176,7 +176,7 @@ export default function App() {
         <QuickReviewScreen
           key={view.lineId}
           lineId={view.lineId}
-          practice={view.practice}
+          skipWrite={view.skipWrite}
           onNavigate={go}
         />
       ) : null}

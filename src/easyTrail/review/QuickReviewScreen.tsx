@@ -6,7 +6,7 @@ import { QuickReview, type QuickReviewProps } from './QuickReview'
 
 interface QuickReviewScreenProps {
   lineId: string
-  practice?: boolean
+  skipWrite?: boolean
   onNavigate: (view: View) => void
 }
 
@@ -25,7 +25,7 @@ function readInitialSitting(): { bUsed?: boolean; streak?: number } {
   return Number.isFinite(streak) && streak > 0 ? { streak } : {}
 }
 
-export function QuickReviewScreen({ lineId, practice = true, onNavigate }: QuickReviewScreenProps) {
+export function QuickReviewScreen({ lineId, skipWrite = true, onNavigate }: QuickReviewScreenProps) {
   const today = localDateKey()
   const [sitting, setSitting] = useState<{ bUsed?: boolean; streak?: number }>(readInitialSitting)
   const debugFormat = readDebugFormat()
@@ -35,7 +35,7 @@ export function QuickReviewScreen({ lineId, practice = true, onNavigate }: Quick
       <QuickReview
         lineId={lineId}
         today={today}
-        practice={practice}
+        practice={skipWrite}
         sitting={sitting}
         onSittingUpdate={setSitting}
         debugFormat={debugFormat}

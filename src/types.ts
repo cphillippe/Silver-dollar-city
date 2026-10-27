@@ -383,4 +383,4 @@ export type View =
   | { name: 'profile' }
   | { name: 'shop' }
   | { name: 'pack-street'; packId: string }
-  | { name: 'quick-review'; lineId: string; practice?: boolean }
+  | { name: 'quick-review'; lineId: string; skipWrite?: boolean }
