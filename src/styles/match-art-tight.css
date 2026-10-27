@@ -693,4 +693,15 @@
     flex: 0 0 auto !important;
     aspect-ratio: 1 / 1 !important;
   }
+
+  /* Win: matchWin.css flexes gem-scroll/stage to 0 — cqh is 0, so drop cqh cap; square from width. */
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked.is-win .gem-board {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    height: auto !important;
+    flex: 0 0 auto !important;
+    aspect-ratio: 1 / 1 !important;
+    align-self: stretch !important;
+  }
 }
