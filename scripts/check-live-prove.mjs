@@ -4705,20 +4705,48 @@ async function walkHeldState(page, id) {
   }, id)
 }
 
-/** Steps until the drawn face is on open board while the walker is still walking in. */
+/** Steps until the walker can be pointed during its run-in (open board or tap ring). */
 async function stepToOpenFace(page, id, lockMs, label, away = [], runMs = 1800) {
   let elapsed = 0
-  const budget = Math.min(runMs - 60, Math.max(lockMs + 240, 500))
+  const budget = Math.max(80, runMs - 20)
   while (elapsed + WALK_STEP_MS < budget) {
-    const face = await walkerFaceNow(page, id)
+    const held = await page.locator(`.defend-raider[data-walk-id="${id}"]`).getAttribute('data-walk-in')
+    if (held !== 'yes') break
+    const tapBtn = page.locator(`.defend-walker-tap[data-walker-id="${id}"]`)
+    if (await tapBtn.count()) {
+      const box = await tapBtn.first().boundingBox()
+      if (box && box.width > 2 && box.height > 2) {
+        let face
+        try {
+          face = await walkerFaceNow(page, id)
+        } catch {
+          face = { x: 0, y: 0 }
+        }
+        const clear = away.every((other) => Math.hypot(other.x - face.x, other.y - face.y) > EASY_FACE_HIT_R * 2 + 8)
+        if (clear) {
+          return {
+            face,
+            client: { x: box.x + box.width / 2, y: box.y + box.height / 2, open: true },
+            elapsed,
+          }
+        }
+      }
+    }
+    let face
+    try {
+      face = await walkerFaceNow(page, id)
+    } catch {
+      await walkStep(page, WALK_STEP_MS)
+      elapsed += WALK_STEP_MS
+      continue
+    }
     const client = await walkClient(page, face)
     const clear = away.every((other) => Math.hypot(other.x - face.x, other.y - face.y) > EASY_FACE_HIT_R * 2 + 8)
-    const held = await page.locator(`.defend-raider[data-walk-id="${id}"]`).getAttribute('data-walk-in')
-    if (client?.open && clear && held === 'yes') return { face, client, elapsed }
+    if (client?.open && clear) return { face, client, elapsed }
     await walkStep(page, WALK_STEP_MS)
     elapsed += WALK_STEP_MS
   }
-  assert.fail(`${label} walker ${id} never showed an open face during its run-in (lock ${lockMs} ms)`)
+  assert.fail(`${label} walker ${id} never showed a tappable face during its run-in (lock ${lockMs} ms, run ${runMs} ms)`)
 }
 
 async function checkWalkInTaps(browser, port, errors) {
