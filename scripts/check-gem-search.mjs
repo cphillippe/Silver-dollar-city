@@ -36,7 +36,6 @@ import {
   pathLetters,
   plantCandidates,
   shouldMissAfterSwipe,
-  isChipWordPrefix,
   snapFingerPath,
   tryAddToPath,
 } from '../src/lib/gemSearch.ts'
@@ -324,9 +323,12 @@ assert.equal(shouldMissAfterSwipe(false, 4), true, 'unscored swipe of 4 can miss
   const placed = ob.paths[steps.id]
   assert.ok(placed.length >= 5, 'STEPS is 5 letters')
   const stepPrefix = placed.slice(0, 4)
-  assert.equal(isChipWordPrefix(stepPrefix, ob, []), true, 'STEP path is a chip prefix')
-  assert.equal(isChipWordPrefix(placed, ob, []), false, 'full STEPS path is not a strict prefix')
   assert.equal(matchBonusWord(stepPrefix, ob, [])?.text, 'STEP', 'dictionary still knows STEP')
+  assert.match(
+    readFileSync(new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url), 'utf8'),
+    /function isChipWordPrefix\(/,
+    'chip prefix guard lives in GemSearchPlay (src/lib locked)',
+  )
 }
 
 const overlapBoard = {

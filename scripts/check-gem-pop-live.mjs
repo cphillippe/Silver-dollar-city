@@ -343,6 +343,37 @@ async function playPopScenario(page, origin, viewport, main) {
   }
 }
 
+async function assertJarOrbMissesCount(page, tag) {
+  const bad = await page.evaluate(() => {
+    const count = document.querySelector('[data-gem-jar-count]')
+    if (!count) return ''
+    const cr = count.getBoundingClientRect()
+    if (cr.width < 1 || cr.height < 1) return ''
+    for (const orb of document.querySelectorAll('.gem-jar-orb')) {
+      const style = getComputedStyle(orb)
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) < 0.05) continue
+      const or = orb.getBoundingClientRect()
+      if (or.width < 1 || or.height < 1) continue
+      if (cr.left < or.right && cr.right > or.left && cr.top < or.bottom && cr.bottom > or.top) {
+        return 'gem-jar-orb overlaps +N count'
+      }
+    }
+    for (const pop of document.querySelectorAll(
+      '.gem-hint-slot .gem-combo, .gem-hint-slot .bonus-banner, .gem-hint-slot .gem-find-pop, .gem-hint-slot .bonus-plus, .gem-hint-slot .match-toast',
+    )) {
+      const style = getComputedStyle(pop)
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) < 0.05) continue
+      const pr = pop.getBoundingClientRect()
+      if (pr.width < 1 || pr.height < 1) continue
+      if (cr.left < pr.right && cr.right > pr.left && cr.top < pr.bottom && cr.bottom > pr.top) {
+        return 'score pop overlaps gem-jar count'
+      }
+    }
+    return ''
+  })
+  assert.equal(bad, '', `${tag} jar count clear (${bad || 'ok'})`)
+}
+
 async function assertWinNoScroll(page, tag) {
   await page.waitForTimeout(600)
   const bad = await page.evaluate(() => {
@@ -375,7 +406,9 @@ async function playWinHome(page, origin, lineId, viewport) {
     await page.waitForTimeout(700)
   }
   await page.locator('.play.is-gem-search.is-win').waitFor({ timeout: 8000 })
-  await page.waitForTimeout(400)
+  await page.waitForTimeout(1100)
+  await assertJarOrbMissesCount(page, `${lineId} ${w}x${h} mid-orb`)
+  await page.waitForTimeout(600)
   const boardHeader = await page.evaluate(() => {
     const topbar = document.querySelector('.topbar')
     const board = document.querySelector('.play.is-gem-search.is-win .gem-board')
@@ -399,6 +432,7 @@ async function playWinHome(page, origin, lineId, viewport) {
     `${lineId} Home fully visible at ${w}x${h} (y=${box.y.toFixed(1)} h=${box.height.toFixed(1)})`,
   )
   await assertWinNoScroll(page, `${lineId} ${w}x${h}`)
+  await assertJarOrbMissesCount(page, `${lineId} ${w}x${h} win-home`)
   await page.screenshot({ path: join(POP_SHOT_ROOT, `${lineId}-${w}-win-home.png`) })
 }
 

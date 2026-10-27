@@ -894,19 +894,6 @@ export function matchBonusWord(
 }
 
 
-/** True while the path is a strict prefix of an unfound required chip (STEP on the way to STEPS). */
-export function isChipWordPrefix(path: GemCoord[], puzzle: GemPuzzle, found: string[]): boolean {
-  if (path.length < 1) return false
-  return puzzle.words.some((word) => {
-    if (found.includes(word.id)) return false
-    const placed = puzzle.paths[word.id] ?? []
-    if (path.length >= placed.length) return false
-    const prefixOf = (trail: GemCoord[]) =>
-      trail.slice(0, path.length).every((cell, i) => cell.r === path[i]!.r && cell.c === path[i]!.c)
-    return prefixOf(placed) || prefixOf([...placed].reverse())
-  })
-}
-
 /** True while a tap-by-tap path is still the front of an unfound Story word (TUNE on the way to TUNED). */
 export function isStoryWordPrefix(path: GemCoord[], puzzle: GemPuzzle, foundBonus: string[]): boolean {
   if (path.length < 1) return false
