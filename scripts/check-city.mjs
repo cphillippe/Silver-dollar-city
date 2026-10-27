@@ -16178,6 +16178,11 @@ console.log('check-city: ok')
     /\.is-story-docked\.is-win \.gem-board \{[\s\S]*?max-height: none !important/,
     'Easy phone win board drops cqh cap when matchWin shrink-wraps the scroll container',
   )
+  assert.match(
+    tightTap,
+    /\.is-story-docked\.is-win \.gem-scroll \{[\s\S]*?container-type: normal !important/,
+    'Easy phone win scroll drops size container so MATCHED! follows the jar',
+  )
   assert.match(gemTapCss, /bottom: calc\(100% \+ 8px\)/, 'banners sit above the board, not on cells')
 }
 

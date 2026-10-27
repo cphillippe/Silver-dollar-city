@@ -704,4 +704,19 @@
     aspect-ratio: 1 / 1 !important;
     align-self: stretch !important;
   }
+
+  /* Win: shrink-wrap scroll/stage to the square board + jar so MATCHED! sits under the grid. */
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked.is-win .gem-scroll {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: fit-content !important;
+    overflow: visible !important;
+    container-type: normal !important;
+  }
+
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked.is-win .gem-stage {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
 }
