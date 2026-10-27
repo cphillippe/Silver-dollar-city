@@ -1,4 +1,5 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawn } from 'node:child_process'
@@ -7,8 +8,7 @@ import { APP_VERSION } from '../src/config/app.ts'
 import { STORAGE_KEY } from '../src/config/app.ts'
 import { SAVE_KIND, SAVE_SCHEMA_VERSION, wrapSave } from '../src/lib/save.ts'
 
-const bcId = 'bc-324d2788-b003-538c-8e09-2b0e61770ca2'
-const outDir = join('/cursor/stores', bcId, 'hop-841-quickreview')
+const outDir = process.env.HOP841_SHOTS_DIR ?? join(tmpdir(), 'hop-841-quickreview')
 mkdirSync(outDir, { recursive: true })
 
 function seedProgress(extra = {}) {
