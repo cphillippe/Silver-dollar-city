@@ -106,9 +106,11 @@ export function GemJarCard(props: GemJarCardProps) {
       >
         <div className="gem-jar-row">
           <span className="gem-jar-name">{EASY.jarName}</span>
-          <strong className="gem-jar-count" data-gem-jar-count>
-            +{fmt(shown)}
-          </strong>
+          {boardPts > 0 ? (
+            <strong className="gem-jar-count" data-gem-jar-count>
+              +{fmt(boardPts)}
+            </strong>
+          ) : null}
           <span className="gem-jar-caption" data-gem-jar-caption>
             {jarCaption(landed ? after : before)}
           </span>

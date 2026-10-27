@@ -730,13 +730,25 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       )}
       <div className="gem-scroll">
       {easy && status !== 'ok' && puzzle.words[0] ? (
-        <p
-          className={`gem-start-hint${found.length ? ' is-reserved' : ''}`}
-          data-gem-start
-          aria-hidden={found.length > 0}
-        >
-          {found.length === 0 ? EASY.bonusMissStraight : '\u00a0'}
-        </p>
+        <div className="gem-hint-slot">
+          <p
+            className={`gem-start-hint${found.length ? ' is-reserved' : ''}`}
+            data-gem-start
+            aria-hidden={found.length > 0}
+          >
+            {found.length === 0 ? EASY.bonusMissStraight : '\u00a0'}
+          </p>
+          {plusFlash ? (
+            <p className="bonus-plus gem-score-pop" aria-hidden>
+              +{bonusPts || 100}
+            </p>
+          ) : null}
+          {findPop > 0 ? (
+            <p className="gem-find-pop gem-score-pop" aria-hidden>
+              +{findPop}
+            </p>
+          ) : null}
+        </div>
       ) : null}
       {/* Board-first 1.4.99: StoryStrip dock is a flex header above this scroll; board fills leftover — zero overlay. */}
       {stripMode === 'hero' ? (
@@ -753,16 +765,6 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           </li>
         ))}
       </ul>
-      ) : null}
-      {plusFlash ? (
-        <p className="bonus-plus" aria-hidden>
-          +{bonusPts || 100}
-        </p>
-      ) : null}
-      {findPop > 0 ? (
-        <p className="gem-find-pop" aria-hidden>
-          +{findPop}
-        </p>
       ) : null}
       {comboFlash > 1 ? (
         <p className="gem-combo is-loud" role="status">
