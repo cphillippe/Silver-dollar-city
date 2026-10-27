@@ -15,6 +15,18 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.542',
+    title: 'Easy Night Watch: Heaven sign, Recenter, edge rings',
+    when: '2026-10-26',
+    items: [
+      'In camera mode the Heaven sign hides while it touches the lamp column instead of sliding under your finger.',
+      'Recenter and edge pans behave reliably after fast drags that hit the map edge.',
+      'The gold first-seat ring stays fully on screen at narrow widths without moving where you tap to plant.',
+      'Hard stays the same.',
+      'Refs #818.',
+    ],
+  },
+  {
     version: '1.4.541',
     title: 'Easy Match: final picture cards',
     when: '2026-10-26',
