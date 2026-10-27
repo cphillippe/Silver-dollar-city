@@ -119,6 +119,7 @@
 @media (prefers-reduced-motion: reduce) {
   .gem-find-pop,
   .gem-combo.is-loud,
+  html[data-easy='on'] .play.is-gem-search .gem-hint-slot .gem-combo.is-loud,
   .play.is-gem-search.is-find-pop .gem-cell.is-burst {
     animation: none;
   }
@@ -157,6 +158,17 @@
    floor. Invent Fun/Clear — panel-blast SNAG only; Match cream / Learn / Lock In /
    Samaritan / Father / Manage / Dig / Creed peels untouched. */
 @media (max-height: 920px) {
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast .gem-hint-slot .bonus-banner {
+    width: min(94%, 260px);
+    padding: 8px 12px 6px;
+  }
+
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast .gem-hint-slot .bonus-banner strong {
+    font-size: clamp(0.95rem, 4.6vw, 1.2rem);
+    letter-spacing: 0.06em;
+    line-height: 1.05;
+  }
+
   .play.is-gem-search.is-panel-blast .gem-stage .bonus-banner {
     top: 10%;
     width: min(94%, 280px);
