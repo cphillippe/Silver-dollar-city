@@ -710,11 +710,29 @@ html[data-easy='on'] .play.is-gem-search .gem-hint-slot .match-toast {
   margin: 0;
   pointer-events: none;
   transform: translateX(-50%);
+  opacity: 1;
+}
+
+html[data-easy='on'] .play.is-gem-search .gem-hint-slot .bonus-banner,
+html[data-easy='on'] .play.is-gem-search .gem-hint-slot .miss-banner {
   animation: gem-hint-overlay-pop 0.32s cubic-bezier(0.2, 1.4, 0.3, 1) both;
 }
 
 html[data-easy='on'] .play.is-gem-search .gem-hint-slot .miss-banner {
   animation: gem-hint-overlay-pop 0.28s cubic-bezier(0.2, 1.2, 0.3, 1) both;
+}
+
+html[data-easy='on'] .play.is-gem-search .gem-hint-slot .match-toast {
+  animation: gem-hint-toast-pop 0.32s cubic-bezier(0.2, 1.4, 0.3, 1) both;
+}
+
+@keyframes gem-hint-toast-pop {
+  0% {
+    transform: translateX(-50%) translateY(6px) scale(0.86);
+  }
+  100% {
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
 }
 
 html[data-easy='on'] .play.is-gem-search .gem-hint-slot .gem-combo.is-loud {
