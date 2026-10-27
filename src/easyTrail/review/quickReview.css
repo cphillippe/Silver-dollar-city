@@ -15,7 +15,7 @@ html[data-easy='on'] .quick-review .quick-review-cue {
 }
 
 html[data-easy='on'] .quick-review .quick-review-prompt {
-  font-size: 1.0625rem;
+  font-size: 13px;
   line-height: 1.35;
   margin: 0;
 }
@@ -52,8 +52,8 @@ html[data-easy='on'] .quick-review-map-plate {
 html[data-easy='on'] .quick-review-plot-hit {
   position: absolute;
   transform: translate(-50%, -50%);
-  min-width: 2.75rem;
-  min-height: 2.75rem;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0;
   border: none;
   background: transparent;
@@ -109,7 +109,7 @@ html[data-easy='on'] .quick-review-lines {
 
 html[data-easy='on'] .quick-review-lines .match-card.recall-card {
   font-size: 0.8125rem;
-  min-height: 2.75rem;
+  min-height: 44px;
 }
 
 html[data-easy='on'] .quick-review-lines .match-card.recall-card.is-flash {
@@ -117,7 +117,7 @@ html[data-easy='on'] .quick-review-lines .match-card.recall-card.is-flash {
 }
 
 html[data-easy='on'] .quick-review-flip {
-  min-height: 2.75rem;
+  min-height: 44px;
   border: none;
   border-radius: 0.75rem;
   padding: 0.75rem;
@@ -133,7 +133,7 @@ html[data-easy='on'] .quick-review-flip img {
 }
 
 html[data-easy='on'] .quick-review-reveal-line {
-  font-size: 0.9375rem;
+  font-size: 13px;
   line-height: 1.4;
   margin: 0;
 }
@@ -161,4 +161,11 @@ html[data-easy='on'] .quick-review-actions {
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
+}
+
+html[data-easy='on'] .quick-review-actions .text-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
 }
