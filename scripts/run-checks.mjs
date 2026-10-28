@@ -31,6 +31,7 @@ const SCOPES = {
       'check-why-blast.mjs',
       'check-father-run.mjs',
       'check-road-maze.mjs',
+      'check-maze-drag-live.mjs',
       'check-claim-merge.mjs',
       'check-source-dig.mjs',
       'check-story-snap.mjs',
