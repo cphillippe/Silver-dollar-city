@@ -28,7 +28,7 @@ const SIZES = [
   [412, 915],
   [768, 1024],
 ]
-const SHOTS = '/opt/cursor/artifacts/screenshots'
+const SHOTS = process.env.GOLDEN_LIVE_SHOTS ?? join(tmpdir(), 'golden-live-shots')
 
 function playScreens(id) {
   return id === 'maze' || id === 'run' || id === 'gem' || id === 'quiz' || id === 'sort' || id === 'match' || id === 'sequence'

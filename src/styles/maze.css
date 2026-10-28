@@ -533,6 +533,12 @@ html[data-easy='on'] .play.is-road-maze .maze-how {
   box-shadow: 0 0 10px rgba(255, 204, 51, 0.55);
 }
 
+html[data-easy='on'] .maze-cell.is-help-cue .maze-cell-label {
+  font-size: 0.8125rem;
+  line-height: 1.15;
+  padding: 2px 6px;
+}
+
 .maze-actor.is-hurt.is-with-you {
   inset: auto 4% 28% auto;
   width: 42%;

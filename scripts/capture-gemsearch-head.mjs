@@ -5,6 +5,7 @@
  */
 import assert from 'node:assert/strict'
 import { mkdirSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { chromium } from '@playwright/test'
 import { createServer } from 'vite'
@@ -19,7 +20,7 @@ const VIEWPORTS = [
   [390, 844],
   [412, 915],
 ]
-const OUT = process.env.GEMSEARCH_HEAD_DIR ?? '/cursor/stores/self/gemsearch-fix/head'
+const OUT = process.env.GEMSEARCH_HEAD_DIR ?? join(tmpdir(), 'gemsearch-fix', 'head')
 const JAR_SETTLE_MS = 1500
 
 function savePayload() {

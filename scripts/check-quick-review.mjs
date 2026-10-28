@@ -230,6 +230,7 @@ await withPage(
 await withPage(
   `/?quickReview=ph-road&reviewFormat=C&${PLAYTEST}`,
   async (page) => {
+  await page.locator('.quick-review-plot-hit.is-now').first().waitFor({ timeout: 8000 })
   const promptGold = await page.locator('.quick-review-plot-hit.is-now').count()
   assert.equal(promptGold, 1)
   await page.locator('.quick-review-plot-hit.is-now').click()
@@ -245,6 +246,7 @@ await withPage(
   async (page) => {
     await page.getByText('Think first…').waitFor()
     await page.waitForTimeout(3200)
+    await page.locator('.quick-review-drain-bar.is-now').first().waitFor({ timeout: 8000 })
     const drainGold = await page.locator('.quick-review-drain-bar.is-now').count()
     assert.equal(drainGold, 1)
     await page.locator('.match-card.recall-card').first().click()
@@ -258,6 +260,7 @@ await withPage(
 await withPage(
   `/?quickReview=ph-road&reviewFormat=A&${PLAYTEST}`,
   async (page) => {
+  await page.locator('.quick-review-flip.is-now').first().waitFor({ timeout: 8000 })
   const faceGold = await page.locator('.quick-review-flip.is-now').count()
   assert.equal(faceGold, 1)
   await page.getByRole('button', { name: 'Show me' }).click()
