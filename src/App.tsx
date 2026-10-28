@@ -159,6 +159,7 @@ export default function App() {
         <Journal
           focusId={view.focusId}
           autoQuiz={view.autoQuiz}
+          lockInEmpty={view.lockInEmpty}
           onNavigate={go}
         />
       ) : null}

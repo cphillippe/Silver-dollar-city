@@ -15,13 +15,25 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.548',
+    version: '1.4.549',
     title: 'Behind the scenes: a quick review card for saved ideas',
     when: '2026-10-28',
     items: [
       'Memory Coach review mix is landing in the engine first — map spot, think-first, and flip-card formats.',
       'Nothing changes on Home yet; playtests need ?playtest=1 or Night Watch debug freeze for this visit.',
       'Refs: Bill 2026-10-25 7:50 AM CT, review mix (Memory Coach).',
+    ],
+  },
+  {
+    version: '1.4.547',
+    title: 'Easy Lock In: empty tab stays on Lock In',
+    when: '2026-10-27',
+    items: [
+      'When nothing is waiting to lock, the Lock In tab shows “Nothing to lock in yet.” with one gold Home button — it never opens Run.',
+      'The empty-state Home button uses the same solid gold primary style as Lock In next on a Match win.',
+      'If Read is available, a plain Read link opens Today’s Trail; otherwise the screen stays Home-only.',
+      'When a line is ready to lock, Lock In still opens that hold as before.',
+      'Refs #858.',
     ],
   },
   {
