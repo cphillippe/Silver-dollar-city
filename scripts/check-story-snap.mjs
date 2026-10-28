@@ -452,6 +452,8 @@ async function checkSnapHidden() {
     })
     assert.equal(linked.snap, 0, 'Hard street is not Story Snap')
     assert.ok(linked.h > 80, 'Hard street link has a board')
+    await page.goto('/?playtest=1', { waitUntil: 'domcontentloaded' })
+    await page.locator('.hub.is-town').waitFor()
     await page.getByRole('button', { name: 'Settings' }).click()
     await page.locator('.settings-debug').waitFor()
     assert.equal(
