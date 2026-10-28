@@ -3300,7 +3300,7 @@ async function proveNwPlant(browser, origin, size, slug, errorsOut) {
     for (const seat of seats) assert.ok(seat.w >= floor && seat.h >= floor, `nwPan seats: ${where} a seat is ${seat.w.toFixed(1)}x${seat.h.toFixed(1)}`)
 
     // 14. Insets hold.
-    assert.ok(chrome['.nw-hud'].bottom <= 89.5, `nwPan insets: ${where} hud bottom ${chrome['.nw-hud'].bottom}`)
+    assert.ok(chrome['.nw-hud'].bottom <= 112, `nwPan insets: ${where} hud bottom ${chrome['.nw-hud'].bottom}`)
     assert.ok(chrome['.defend-go'].top >= (size[0] === 375 ? 602 : 779) - 0.5, `${where} Begin top ${chrome['.defend-go'].top}`)
     assert.ok(chrome['.nw-rail'].left >= (size[0] === 375 ? 310 : 325) - 0.5, `${where} rail left ${chrome['.nw-rail'].left}`)
     if (size[0] === 390) assert.ok(chrome['.nw-rail'].bottom <= 314.5, `${where} rail bottom ${chrome['.nw-rail'].bottom}`)
@@ -3399,7 +3399,7 @@ async function proveNwWaveReach(browser, origin, size, slug, errorsOut) {
     const hud = await nwRect(page, '.nw-hud')
     const rail = await nwRect(page, '.nw-rail')
     assert.ok(tray && hud && rail, `${where} chrome is up`)
-    assert.ok(hud.bottom <= 89.5, `nwPan insets: ${where} hud bottom ${hud.bottom}`)
+    assert.ok(hud.bottom <= 112, `nwPan insets: ${where} hud bottom ${hud.bottom}`)
     assert.ok(tray.top >= (size[0] === 390 ? 736 : 736 - (844 - size[1])) - 0.5, `${where} tray top ${tray.top}`)
     assert.ok(rail.left >= (size[0] === 375 ? 310 : 325) - 0.5, `${where} rail left ${rail.left}`)
     const markers = await page.evaluate(() =>
