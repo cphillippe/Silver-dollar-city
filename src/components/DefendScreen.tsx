@@ -3933,6 +3933,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   const heartShown = Math.min(DEFEND_HEARTS, Math.max(0, Math.floor(hearts) || 0))
   const hud = (
+    <>
     <p
       ref={hudRef}
       className="defend-hud"
@@ -3986,6 +3987,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
             : `${planted.length} planted`}
       </span>
     </p>
+    {showPace ? (
+      <NightPaceControl waveIndex={waveIndex} fastOn={fastOn} onToggle={togglePace} />
+    ) : null}
+    </>
   )
 
   // Pale Begin and the plant line follow how many lamps are standing, not ring slots.
@@ -4804,9 +4809,6 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               <p className="nw-skill-toast is-candle" role="status">
                 {CANDLE_INTRO}
               </p>
-            ) : null}
-            {showPace ? (
-              <NightPaceControl waveIndex={waveIndex} fastOn={fastOn} onToggle={togglePace} />
             ) : null}
             {createPortal(
               <>
