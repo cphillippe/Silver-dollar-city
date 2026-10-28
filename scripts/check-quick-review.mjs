@@ -53,6 +53,7 @@ const allowed = new Set([
   'Home',
   'No review brief for this line.',
   'Settings',
+  'Tap where you learned it',
 ])
 
 for (const id of EASY_LINE_ORDER.slice(0, 12)) {

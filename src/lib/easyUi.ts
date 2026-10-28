@@ -125,6 +125,7 @@ export const EASY = {
   deployTeach: 'Use a main idea you kept.',
   saved: 'Lock In',
   savedSub: 'saved lines',
+  reviewMapTap: 'Tap where you learned it',
   connections: 'Connections',
   uses: 'Things you can use',
   resetWalk: 'Reset this Easy walk',

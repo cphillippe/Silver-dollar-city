@@ -385,49 +385,56 @@ export function QuickReview({
 
       {format === 'C' && (phase === 'prompt' || (phase === 'reveal' && !showHonesty)) ? (
         <>
-          <div className="quick-review-map" aria-hidden={phase !== 'prompt'}>
-            <img className="quick-review-map-bg" src={cityMapBg} alt="" draggable={false} />
-            <div className="quick-review-map-plate">
-              {(Object.keys(PLOT_IMG) as CityPlotId[]).map((plotId) => {
-                const anchor = ANCHOR[plotId]
-                const left = (anchor.x / 640) * 100
-                const top = (anchor.y / 420) * 100
-                const stage = plotStage(plotId)
-                const img = PLOT_IMG[plotId as keyof typeof PLOT_IMG]?.[stage]
-                const glow = plotId === stamp.plotId && phase === 'prompt' && !revealed
-                if (!img) return null
-                if (plotId === stamp.plotId) {
-                  return (
-                    <button
-                      key={plotId}
-                      type="button"
-                      className={`quick-review-plot-hit ${glow ? 'is-now' : ''}`}
-                      style={{ left: `${left}%`, top: `${top}%` }}
-                      onClick={onMapTap}
-                      aria-label={glow ? prompt : undefined}
-                    >
-                      <span className="quick-review-avatar">
-                        <Avatar who={stamp.whoId} size="sm" />
-                      </span>
-                      <img src={img} alt="" draggable={false} />
-                    </button>
-                  )
-                }
-                return (
-                  <div
-                    key={plotId}
-                    className="quick-review-plot-hit"
-                    style={{ left: `${left}%`, top: `${top}%`, opacity: 0.55 }}
-                    aria-hidden
-                  >
-                    <img src={img} alt="" draggable={false} />
-                  </div>
-                )
-              })}
-            </div>
-          </div>
           {phase === 'prompt' && !revealed ? (
-            <p className="quick-review-prompt">{prompt}</p>
+            <div className="quick-review-stage">
+              <div className="quick-review-prompt-panel">
+                <p className="quick-review-prompt quick-review-prompt-title">{prompt}</p>
+              </div>
+              <div className="quick-review-map" aria-hidden={false}>
+                <div className="quick-review-map-frame">
+                  <img className="quick-review-map-bg" src={cityMapBg} alt="" draggable={false} />
+                  <div className="quick-review-map-plate">
+                    {(Object.keys(PLOT_IMG) as CityPlotId[]).map((plotId) => {
+                      const anchor = ANCHOR[plotId]
+                      const left = (anchor.x / 640) * 100
+                      const top = (anchor.y / 420) * 100
+                      const stage = plotStage(plotId)
+                      const img = PLOT_IMG[plotId as keyof typeof PLOT_IMG]?.[stage]
+                      const glow = plotId === stamp.plotId
+                      if (!img) return null
+                      if (plotId === stamp.plotId) {
+                        return (
+                          <button
+                            key={plotId}
+                            type="button"
+                            className={`quick-review-plot-hit ${glow ? 'is-now' : ''}`}
+                            style={{ left: `${left}%`, top: `${top}%` }}
+                            onClick={onMapTap}
+                            aria-label={`${prompt}. ${EASY.reviewMapTap}`}
+                          >
+                            <span className="quick-review-avatar">
+                              <Avatar who={stamp.whoId} size="sm" />
+                            </span>
+                            <img src={img} alt="" draggable={false} />
+                          </button>
+                        )
+                      }
+                      return (
+                        <div
+                          key={plotId}
+                          className="quick-review-plot-hit"
+                          style={{ left: `${left}%`, top: `${top}%`, opacity: 0.55 }}
+                          aria-hidden
+                        >
+                          <img src={img} alt="" draggable={false} />
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+              <p className="quick-review-map-tap">{EASY.reviewMapTap}</p>
+            </div>
           ) : null}
           {revealed ? (
             <>
@@ -454,8 +461,10 @@ export function QuickReview({
             <span>{stamp.placeLabel}</span>
           </div>
           {!revealed ? (
-            <>
-              <p className="quick-review-prompt">{prompt}</p>
+            <div className="quick-review-stage">
+              <div className="quick-review-prompt-panel">
+                <p className="quick-review-prompt quick-review-prompt-title">{prompt}</p>
+              </div>
               <button
                 type="button"
                 className="quick-review-flip is-now"
@@ -471,7 +480,7 @@ export function QuickReview({
                   />
                 ) : null}
               </button>
-            </>
+            </div>
           ) : (
             <>
               <p className="quick-review-reveal-line">
