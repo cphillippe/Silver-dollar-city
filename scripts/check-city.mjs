@@ -1902,8 +1902,23 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.548')
-assert.equal(CHANGELOG[0].version, '1.4.548', '1.4.548 is the newest row')
+assert.equal(APP_VERSION, '1.4.552')
+assert.equal(CHANGELOG[0].version, '1.4.552', '1.4.552 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.552'), '1.4.552 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.552').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.552 changelog avoids GitHub close keywords',
+)
+assert.doesNotMatch(latestChange('1.4.552').items.join('\n'), /\/box\//, '1.4.552 changelog avoids box paths')
+assert.match(
+  latestChange('1.4.552').items.join('\n'),
+  /BONUS \+50 instead of Miss −25/,
+  '1.4.552 changelog names the bonus-on-release fix',
+)
+assert.match(latestChange('1.4.552').items.join('\n'), /Story word! \+100/, '1.4.552 changelog keeps the story payoff')
+assert.match(latestChange('1.4.552').items.join('\n'), /Refs #870/, '1.4.552 changelog refs #870')
+assert.match(latestChange('1.4.552').items.join('\n'), /Hard stays the same\./)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.548'), '1.4.548 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.548').items.join('\n'),
@@ -1921,6 +1936,7 @@ assert.doesNotMatch(
   /\?playtest=1|Night Watch debug/,
   '1.4.548 changelog stays player-facing',
 )
+assert.equal(CHANGELOG[1].version, '1.4.548', '1.4.548 follows the 1.4.552 row')
 const quickReviewGateApp = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
 assert.match(quickReviewGateApp, /function quickReviewBoot\(\)/, 'QuickReview boot helper exists')
 assert.match(quickReviewGateApp, /if \(isPlayBuild\(\)\) return null/, 'QuickReview boot stays off Play builds')
@@ -1929,7 +1945,7 @@ assert.match(
   /nightWatchJumpAllowed\(search, readNightWatchDebug\(\)\)/,
   'QuickReview boot uses the playtest gate',
 )
-assert.equal(CHANGELOG[1].version, '1.4.547', '1.4.547 follows QuickReview row')
+assert.equal(CHANGELOG[2].version, '1.4.547', '1.4.547 follows QuickReview row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.547'), '1.4.547 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.547').items.join('\n'),
@@ -1942,7 +1958,7 @@ assert.doesNotMatch(
   '1.4.547 changelog avoids box paths',
 )
 assert.match(latestChange('1.4.547').items.join('\n'), /Refs #858/, '1.4.547 changelog refs #858')
-assert.equal(CHANGELOG[2].version, '1.4.546', '1.4.546 stays under 1.4.547')
+assert.equal(CHANGELOG[3].version, '1.4.546', '1.4.546 stays under 1.4.547')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.546'), '1.4.546 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.546').items.join('\n'),
@@ -1955,7 +1971,7 @@ assert.doesNotMatch(
   '1.4.546 changelog drops box paths',
 )
 assert.match(latestChange('1.4.546').items.join('\n'), /Refs #753/, '1.4.546 changelog refs #753')
-assert.equal(CHANGELOG[3].version, '1.4.545', '1.4.545 stays under 1.4.546')
+assert.equal(CHANGELOG[4].version, '1.4.545', '1.4.545 stays under 1.4.546')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.545'), '1.4.545 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.545').items.join('\n'),
@@ -1964,7 +1980,7 @@ assert.doesNotMatch(
 )
 assert.match(latestChange('1.4.545').items.join('\n'), /Refs #855/, '1.4.545 changelog refs #855')
 assert.match(latestChange('1.4.545').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[4].version, '1.4.544', '1.4.544 stays under 1.4.545')
+assert.equal(CHANGELOG[5].version, '1.4.544', '1.4.544 stays under 1.4.545')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.544'), '1.4.544 changelog row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.543'), '1.4.543 changelog row')
 assert.doesNotMatch(
@@ -16296,6 +16312,7 @@ console.log('check-city: ok')
   assert.match(playTap, /function endDrag\(keepPath = false\)/)
   assert.match(playTap, /if \(!moved\.current\)[\s\S]{0,220}applyCell\(cell, 'tap'\)/)
   assert.match(playTap, /isChipWordPrefix/)
+  assert.match(playTap, /!final && isStoryWordPrefix\(nextPath, puzzle, bonusRef\.current\)/)
   assert.match(playTap, /writePath\(\[cell\]\)/)
   assert.doesNotMatch(playTap, /onCellDown[\s\S]{0,420}applyCell\(cell, 'tap'\)/)
   assert.match(playTap, /gem-hint-slot/)
