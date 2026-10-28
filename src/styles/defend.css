@@ -6067,12 +6067,7 @@ button.defend-new-lamp[aria-pressed='true'] {
     left: auto;
     right: 8px;
     transform: none;
-  }
-
-  /* Playtest debug shares the dock column; tuck it away from the pace chip. */
-  .defend-page.is-easy-watch .defend-nw-debug {
-    align-self: flex-end;
-    max-width: min(46vw, 168px);
+    z-index: 9;
   }
 }
 
