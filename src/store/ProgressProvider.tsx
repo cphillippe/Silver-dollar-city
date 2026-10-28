@@ -124,6 +124,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       nextTrace = {
         ...nextTrace,
         elaborated: nextTrace.elaborated || event.elaborated,
+        ...(event.format ? { lastFormat: event.format } : {}),
       }
 
       kept = bestStars(

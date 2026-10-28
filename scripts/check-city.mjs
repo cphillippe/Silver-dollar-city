@@ -1902,8 +1902,34 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.547')
-assert.equal(CHANGELOG[0].version, '1.4.547', '1.4.547 is the newest row')
+assert.equal(APP_VERSION, '1.4.548')
+assert.equal(CHANGELOG[0].version, '1.4.548', '1.4.548 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.548'), '1.4.548 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.548').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.548 changelog avoids GitHub close keywords',
+)
+assert.match(
+  latestChange('1.4.548').items.join('\n'),
+  /Refs: Bill 2026-10-25 7:50 AM CT, review mix \(Memory Coach\)/,
+  '1.4.548 changelog refs Bill review mix',
+)
+assert.match(latestChange('1.4.548').items.join('\n'), /Nothing changes for players yet\./)
+assert.doesNotMatch(
+  latestChange('1.4.548').items.join('\n'),
+  /\?playtest=1|Night Watch debug/,
+  '1.4.548 changelog stays player-facing',
+)
+const quickReviewGateApp = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
+assert.match(quickReviewGateApp, /function quickReviewBoot\(\)/, 'QuickReview boot helper exists')
+assert.match(quickReviewGateApp, /if \(isPlayBuild\(\)\) return null/, 'QuickReview boot stays off Play builds')
+assert.match(
+  quickReviewGateApp,
+  /nightWatchJumpAllowed\(search, readNightWatchDebug\(\)\)/,
+  'QuickReview boot uses the playtest gate',
+)
+assert.equal(CHANGELOG[1].version, '1.4.547', '1.4.547 follows QuickReview row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.547'), '1.4.547 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.547').items.join('\n'),
@@ -1915,7 +1941,8 @@ assert.doesNotMatch(
   /\/box\//,
   '1.4.547 changelog avoids box paths',
 )
-assert.equal(CHANGELOG[1].version, '1.4.546', '1.4.546 stays under 1.4.547')
+assert.match(latestChange('1.4.547').items.join('\n'), /Refs #858/, '1.4.547 changelog refs #858')
+assert.equal(CHANGELOG[2].version, '1.4.546', '1.4.546 stays under 1.4.547')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.546'), '1.4.546 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.546').items.join('\n'),
@@ -1928,7 +1955,7 @@ assert.doesNotMatch(
   '1.4.546 changelog drops box paths',
 )
 assert.match(latestChange('1.4.546').items.join('\n'), /Refs #753/, '1.4.546 changelog refs #753')
-assert.equal(CHANGELOG[2].version, '1.4.545', '1.4.545 stays under 1.4.546')
+assert.equal(CHANGELOG[3].version, '1.4.545', '1.4.545 stays under 1.4.546')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.545'), '1.4.545 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.545').items.join('\n'),
@@ -1937,7 +1964,7 @@ assert.doesNotMatch(
 )
 assert.match(latestChange('1.4.545').items.join('\n'), /Refs #855/, '1.4.545 changelog refs #855')
 assert.match(latestChange('1.4.545').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[3].version, '1.4.544', '1.4.544 stays under 1.4.545')
+assert.equal(CHANGELOG[4].version, '1.4.544', '1.4.544 stays under 1.4.545')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.544'), '1.4.544 changelog row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.543'), '1.4.543 changelog row')
 assert.doesNotMatch(
