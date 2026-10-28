@@ -422,6 +422,71 @@ async function assertPrefixDragNoBonus(page, lineId, word) {
   await page.waitForTimeout(700)
   assert.equal(await foundCount(page), before, `${lineId} ${word.slice(0, 3)} prefix drag scores no chip`)
   assert.equal(await page.locator('.bonus-banner').count(), 0, `${lineId} ${word.slice(0, 3)} prefix drag scores no bonus`)
+  assert.equal(await page.locator('.miss-banner').count(), 0, `${lineId} ${word.slice(0, 3)} prefix drag scores no miss`)
+}
+
+const PH_SEEDS_STORY_SEED = 1793300000002
+const OB_TUNING_STORY_SEED = 5
+const HL_MIND_STORY_SEED = 0
+
+function bonusPath(board, text) {
+  const word = board.bonus.find((item) => item.text === text)
+  assert.ok(word, `${text} is a bonus on the board`)
+  return board.bonusPaths[word.id]
+}
+
+function plantedPath(board, text) {
+  const word = board.planted.find((item) => item.text === text)
+  assert.ok(word, `${text} is planted on the board`)
+  return board.bonusPaths[word.id]
+}
+
+function denPathFromTuned(board) {
+  const tuned = board.planted.find((item) => item.text === 'TUNED')
+  assert.ok(tuned, 'TUNED is planted')
+  return [...board.bonusPaths[tuned.id]].reverse().slice(0, 3)
+}
+
+async function assertStoryBonusRelease(page, tag, shortPath, storyPath, shortLabel, storyLabel) {
+  await dragPath(page, shortPath)
+  await page.waitForTimeout(800)
+  assert.equal(await page.locator('.miss-banner').count(), 0, `${tag} ${shortLabel} release scores no Miss`)
+  const bonusText = ((await page.locator('.bonus-banner').first().innerText()) || '').replace(/\s+/g, ' ')
+  assert.match(bonusText, /BONUS! \+50\b/, `${tag} ${shortLabel} release scores BONUS +50 (${bonusText})`)
+  await dragPath(page, storyPath)
+  await page.waitForTimeout(900)
+  const storyText = (
+    (await page.locator('.gem-hint-slot .match-toast, .gem-hint-slot .bonus-banner').first().innerText()) || ''
+  ).replace(/\s+/g, ' ')
+  assert.match(storyText, /Story word! \+100\b/, `${tag} ${storyLabel} scores Story word! +100 (${storyText})`)
+}
+
+async function assertPhSeedsSeeSeed(page, origin, w, h) {
+  await openLesson(page, origin, 'ph-seeds', PH_SEEDS_STORY_SEED)
+  const board = buildGemPuzzle('ph-seeds', PH_SEEDS_STORY_SEED)
+  const tag = `ph-seeds ${w}x${h}`
+  await assertStoryBonusRelease(page, tag, bonusPath(board, 'SEE'), plantedPath(board, 'SEED'), 'SEE', 'SEED')
+}
+
+async function assertObTuningTuneTuned(page, origin, w, h) {
+  await openLesson(page, origin, 'ob-tuning', OB_TUNING_STORY_SEED)
+  const board = buildGemPuzzle('ob-tuning', OB_TUNING_STORY_SEED)
+  const tag = `ob-tuning ${w}x${h} TUNE`
+  await assertStoryBonusRelease(page, tag, bonusPath(board, 'TUNE'), plantedPath(board, 'TUNED'), 'TUNE', 'TUNED')
+}
+
+async function assertObTuningDenTuned(page, origin, w, h) {
+  await openLesson(page, origin, 'ob-tuning', OB_TUNING_STORY_SEED)
+  const board = buildGemPuzzle('ob-tuning', OB_TUNING_STORY_SEED)
+  const tag = `ob-tuning ${w}x${h} DEN`
+  await assertStoryBonusRelease(page, tag, denPathFromTuned(board), plantedPath(board, 'TUNED'), 'DEN', 'TUNED')
+}
+
+async function assertHlMindThinThink(page, origin, w, h) {
+  await openLesson(page, origin, 'hl-mind', HL_MIND_STORY_SEED)
+  const board = buildGemPuzzle('hl-mind', HL_MIND_STORY_SEED)
+  const tag = `hl-mind ${w}x${h}`
+  await assertStoryBonusRelease(page, tag, bonusPath(board, 'THIN'), plantedPath(board, 'THINK'), 'THIN', 'THINK')
 }
 
 export async function checkGemTapLive() {
@@ -540,6 +605,26 @@ export async function checkGemTapLive() {
       page.on('pageerror', (err) => errors.push(String(err)))
       await assertStepDragThenSteps(page, origin, w, true)
       await context.close()
+    }
+    for (const [w, h] of VIEWPORTS) {
+      for (const run of [
+        (page, origin) => assertPhSeedsSeeSeed(page, origin, w, h),
+        (page, origin) => assertObTuningTuneTuned(page, origin, w, h),
+        (page, origin) => assertObTuningDenTuned(page, origin, w, h),
+        (page, origin) => assertHlMindThinThink(page, origin, w, h),
+      ]) {
+        const context = await browser.newContext({
+          viewport: { width: w, height: h },
+          isMobile: true,
+        })
+        await context.addInitScript(({ key, payload }) => {
+          window.localStorage.setItem(key, JSON.stringify(payload))
+        }, { key: STORAGE_KEY, payload: savePayload() })
+        const page = await context.newPage()
+        page.on('pageerror', (err) => errors.push(String(err)))
+        await run(page, origin)
+        await context.close()
+      }
     }
   } finally {
     await browser.close()
