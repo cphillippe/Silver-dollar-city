@@ -468,11 +468,18 @@ async function assertPhSeedsSeeSeed(page, origin, w, h) {
   await assertStoryBonusRelease(page, tag, bonusPath(board, 'SEE'), plantedPath(board, 'SEED'), 'SEE', 'SEED')
 }
 
-async function assertObTuningTuneDen(page, origin, w, h) {
+async function assertObTuningTuneTuned(page, origin, w, h) {
   await openLesson(page, origin, 'ob-tuning', OB_TUNING_STORY_SEED)
   const board = buildGemPuzzle('ob-tuning', OB_TUNING_STORY_SEED)
-  const tag = `ob-tuning ${w}x${h}`
-  await assertStoryBonusRelease(page, tag, bonusPath(board, 'TUNE'), denPathFromTuned(board), 'TUNE', 'DEN')
+  const tag = `ob-tuning ${w}x${h} TUNE`
+  await assertStoryBonusRelease(page, tag, bonusPath(board, 'TUNE'), plantedPath(board, 'TUNED'), 'TUNE', 'TUNED')
+}
+
+async function assertObTuningDenTuned(page, origin, w, h) {
+  await openLesson(page, origin, 'ob-tuning', OB_TUNING_STORY_SEED)
+  const board = buildGemPuzzle('ob-tuning', OB_TUNING_STORY_SEED)
+  const tag = `ob-tuning ${w}x${h} DEN`
+  await assertStoryBonusRelease(page, tag, denPathFromTuned(board), plantedPath(board, 'TUNED'), 'DEN', 'TUNED')
 }
 
 async function assertHlMindThinThink(page, origin, w, h) {
@@ -602,7 +609,8 @@ export async function checkGemTapLive() {
     for (const [w, h] of VIEWPORTS) {
       for (const run of [
         (page, origin) => assertPhSeedsSeeSeed(page, origin, w, h),
-        (page, origin) => assertObTuningTuneDen(page, origin, w, h),
+        (page, origin) => assertObTuningTuneTuned(page, origin, w, h),
+        (page, origin) => assertObTuningDenTuned(page, origin, w, h),
         (page, origin) => assertHlMindThinThink(page, origin, w, h),
       ]) {
         const context = await browser.newContext({

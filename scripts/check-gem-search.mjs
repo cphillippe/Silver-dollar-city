@@ -510,8 +510,8 @@ assert.match(playSrc, /function endDrag\(keepPath = false\)/)
 assert.match(playSrc, /if \(!moved\.current\)[\s\S]{0,220}applyCell\(cell, 'tap'\)/)
 assert.match(
   playSrc,
-  /isChipWordPrefix\(nextPath, puzzle, foundRef\.current\)[\s\S]{0,80}!final \|\| nextPath\.length < 4/,
-  'chip prefix guard skips on final release for 4+ letter paths (STEP)',
+  /isChipWordPrefix\(nextPath, puzzle, foundRef\.current\)[\s\S]{0,120}if \(!final\) return false[\s\S]{0,120}nextPath\.length < 4/,
+  'chip prefix guard clears short final release (PAR) and lets 4-letter STEP score',
 )
 assert.match(
   playSrc,
