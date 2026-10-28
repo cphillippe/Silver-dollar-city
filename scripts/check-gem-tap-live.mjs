@@ -31,7 +31,7 @@ function savePayload() {
   return {
     kind: 'silver-city-save',
     schemaVersion: 1,
-    appVersion: '1.4.545',
+    appVersion: '1.4.546',
     savedAt: now.toISOString(),
     progress: {
       started: true,
