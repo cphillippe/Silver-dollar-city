@@ -15,13 +15,24 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.549',
+    version: '1.4.551',
     title: 'Easy Night Watch: walk-in taps and tablet drags',
     when: '2026-10-28',
     items: [
       'The first walker on each wave can be tapped as soon as it steps onto the map — no silent wait while it is already visible.',
       'On a wide tablet with the camera off, dragging across the board no longer plants lamps or fires stray shots; quick taps still work.',
       'Easy only. Refs #756, Refs #768.',
+    ],
+  },
+  {
+    version: '1.4.549',
+    title: 'Easy Story Creek: road maze drags follow your finger around corners',
+    when: '2026-10-28',
+    items: [
+      'On Easy, dragging on the blue pawn walks the open road toward your finger — through turns and along straight corridors.',
+      'A long straight drag moves one tile per step for the full distance; dragging past a dead end stops on the last road tile.',
+      'Tapping the next road tile still moves one step, the same as before.',
+      'Refs #861.',
     ],
   },
   {

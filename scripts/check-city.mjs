@@ -1902,20 +1902,34 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.549')
-assert.equal(CHANGELOG[0].version, '1.4.549', '1.4.549 is the newest row')
+assert.equal(APP_VERSION, '1.4.551')
+assert.equal(CHANGELOG[0].version, '1.4.551', '1.4.551 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.551'), '1.4.551 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.551').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.551 changelog avoids GitHub close keywords',
+)
+assert.match(
+  latestChange('1.4.551').items.join('\n'),
+  /Refs #756, Refs #768/,
+  '1.4.551 changelog refs #756 and #768',
+)
+assert.equal(CHANGELOG[1].version, '1.4.549', '1.4.549 sits under 1.4.551')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.549'), '1.4.549 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.549').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
   '1.4.549 changelog avoids GitHub close keywords',
 )
-assert.match(
+assert.match(latestChange('1.4.549').title, /road maze drag|Story Creek/i, '1.4.549 changelog title names the maze drag fix')
+assert.match(latestChange('1.4.549').items.join('\n'), /Refs #861/, '1.4.549 changelog refs #861')
+assert.doesNotMatch(
   latestChange('1.4.549').items.join('\n'),
-  /Refs #756, Refs #768/,
-  '1.4.549 changelog refs #756 and #768',
+  /\?playtest=1|Night Watch debug/,
+  '1.4.549 changelog stays player-facing',
 )
-assert.equal(CHANGELOG[1].version, '1.4.548', '1.4.548 sits under 1.4.549')
+assert.equal(CHANGELOG[2].version, '1.4.548', '1.4.548 follows the maze drag row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.548'), '1.4.548 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.548').items.join('\n'),
@@ -1941,7 +1955,7 @@ assert.match(
   /nightWatchJumpAllowed\(search, readNightWatchDebug\(\)\)/,
   'QuickReview boot uses the playtest gate',
 )
-assert.equal(CHANGELOG[2].version, '1.4.547', '1.4.547 follows QuickReview row')
+assert.equal(CHANGELOG[3].version, '1.4.547', '1.4.547 follows QuickReview row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.547'), '1.4.547 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.547').items.join('\n'),
@@ -1954,7 +1968,7 @@ assert.doesNotMatch(
   '1.4.547 changelog avoids box paths',
 )
 assert.match(latestChange('1.4.547').items.join('\n'), /Refs #858/, '1.4.547 changelog refs #858')
-assert.equal(CHANGELOG[3].version, '1.4.546', '1.4.546 stays under 1.4.547')
+assert.equal(CHANGELOG[4].version, '1.4.546', '1.4.546 stays under 1.4.547')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.546'), '1.4.546 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.546').items.join('\n'),
@@ -1967,7 +1981,7 @@ assert.doesNotMatch(
   '1.4.546 changelog drops box paths',
 )
 assert.match(latestChange('1.4.546').items.join('\n'), /Refs #753/, '1.4.546 changelog refs #753')
-assert.equal(CHANGELOG[4].version, '1.4.545', '1.4.545 stays under 1.4.546')
+assert.equal(CHANGELOG[5].version, '1.4.545', '1.4.545 stays under 1.4.546')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.545'), '1.4.545 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.545').items.join('\n'),
@@ -1976,7 +1990,7 @@ assert.doesNotMatch(
 )
 assert.match(latestChange('1.4.545').items.join('\n'), /Refs #855/, '1.4.545 changelog refs #855')
 assert.match(latestChange('1.4.545').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[5].version, '1.4.544', '1.4.544 stays under 1.4.545')
+assert.equal(CHANGELOG[6].version, '1.4.544', '1.4.544 stays under 1.4.545')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.544'), '1.4.544 changelog row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.543'), '1.4.543 changelog row')
 assert.doesNotMatch(
@@ -19236,7 +19250,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(walk526.WALK_IN_MAX_MS, 1800)
   assert.equal(walk526.WALK_IN_U_PER_S, 900, '1.4.526 walkers run in at 900 map units a second')
   assert.equal(walk526.WALK_IN_TAP_MAX_MS, 840, '1.4.526 the tap lock is 0.84 s at most')
-  assert.equal(walk526.WALK_IN_WALKER_R, 24, '1.4.549 the tap lock ends once the walker body is on the plate')
+  assert.equal(walk526.WALK_IN_WALKER_R, 24, '1.4.551 the tap lock ends once the walker body is on the plate')
   assert.equal(walk526.WALK_IN_SPAWN_T_CAP, defend526.EASY_ON_SCREEN_T, '1.4.526 the run-in cap is the live spawn cap')
 
   const roads526 = (id) => {
@@ -19326,8 +19340,8 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     const entry = walk526.walkInEntry(road.points, plate526)
     return walk526.walkInTapLockMs(row[8], walk526.walkInLength(entry, road.points, r1T526))
   })
-  assert.equal(Math.min(...r1Lock547), 202, '1.4.549 the shortest round 1 tap lock is geometry-based')
-  assert.equal(Math.max(...r1Lock547), 280, '1.4.549 the longest round 1 tap lock stays under the 0.84 s cap')
+  assert.equal(Math.min(...r1Lock547), 202, '1.4.551 the shortest round 1 tap lock is geometry-based')
+  assert.equal(Math.max(...r1Lock547), 280, '1.4.551 the longest round 1 tap lock stays under the 0.84 s cap')
 
   const ts526 = new Set()
   for (let wave = 0; wave < 40; wave += 1) {
@@ -19350,7 +19364,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
         const entry547 = walk526.walkInEntry(road.points, plate526)
         const len547 = walk526.walkInLength(entry547, road.points, t)
         const lock547 = walk526.walkInTapLockMs(ms, len547)
-        assert.ok(lock547 <= ms && lock547 <= walk526.WALK_IN_TAP_MAX_MS, `1.4.549 ${id}:${road.id} t ${t} lock ${lock547} ms`)
+        assert.ok(lock547 <= ms && lock547 <= walk526.WALK_IN_TAP_MAX_MS, `1.4.551 ${id}:${road.id} t ${t} lock ${lock547} ms`)
       }
     }
   }
@@ -19364,8 +19378,8 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(walk526.walkInMs(900), 1000, '1.4.526 900 u is one second')
   assert.equal(walk526.walkInMs(1000), 1111)
   assert.equal(walk526.walkInMs(500), 600)
-  assert.equal(walk526.walkInTapLockMs(700, 100), 700, '1.4.549 a short trail keeps the full run-in locked')
-  assert.equal(walk526.walkInTapLockMs(1800, 4000), 183, '1.4.549 a long trail unlocks once the walker reaches the plate')
+  assert.equal(walk526.walkInTapLockMs(700, 100), 700, '1.4.551 a short trail keeps the full run-in locked')
+  assert.equal(walk526.walkInTapLockMs(1800, 4000), 183, '1.4.551 a long trail unlocks once the walker reaches the plate')
   assert.equal(walk526.walkInEase(0), 0)
   assert.equal(walk526.walkInEase(0.5), 0.5)
   assert.equal(walk526.walkInEase(1), 1)
@@ -19382,7 +19396,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const run526 = ms526(a2Entry526, path526, 0.3)
   assert.deepEqual(clock526.drawAt(walker526, sim526, 1000), a2Entry526.start, '1.4.526 first frame is the start')
   const lock526 = walk526.walkInTapLockMs(run526, walk526.walkInLength(a2Entry526, path526, 0.3))
-  assert.equal(lock526, 194, '1.4.549 a2 t 0.3 unlocks when the walker reaches the plate')
+  assert.equal(lock526, 194, '1.4.551 a2 t 0.3 unlocks when the walker reaches the plate')
   assert.equal(clock526.entering(walker526, 1000 + run526 - 1), true)
   assert.equal(clock526.tapLocked(walker526, 1000 + lock526 - 1), true)
   assert.equal(clock526.entering(walker526, 1000 + run526), false)
@@ -19393,7 +19407,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const hillSim526 = point526(r1T526, hills526)
   assert.equal(long526.see(hillWalker526, 0).runMs, 1705)
   assert.equal(long526.tapLocked(hillWalker526, 279), true)
-  assert.equal(long526.tapLocked(hillWalker526, 280), false, '1.4.549 far-hills unlocks when the walker is on the plate')
+  assert.equal(long526.tapLocked(hillWalker526, 280), false, '1.4.551 far-hills unlocks when the walker is on the plate')
   assert.equal(long526.entering(hillWalker526, 840), true, '1.4.526 and is still walking in')
   const hillAt526 = long526.drawAt(hillWalker526, hillSim526, 840)
   assert.ok(hillAt526.x >= 0 && hillAt526.y >= 0 && hillAt526.x <= 798 && hillAt526.y <= 1134, '1.4.526 its drawn spot is on the map by then')
