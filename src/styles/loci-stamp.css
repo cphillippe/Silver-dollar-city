@@ -469,5 +469,31 @@ html[data-easy='on'] .match-teach-kind {
   html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .loci-stamp.is-dock .loci-stamp-place,
   html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .loci-stamp.is-dock .loci-stamp-idea {
     font-size: 0.8125rem;
+    line-height: 1.15;
+  }
+
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-chip {
+    padding: 0.08rem 0.28rem;
+    min-width: 2.85rem;
+  }
+
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-say {
+    padding: 0.12rem 0.38rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .loci-stamp.is-dock {
+    min-height: 34px;
+    max-height: 44px;
+    padding: 0.06rem 0.35rem;
+    gap: 0.28rem;
+  }
+
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .loci-stamp.is-dock .avatar.size-sm {
+    width: 22px;
+    height: 22px;
   }
 }

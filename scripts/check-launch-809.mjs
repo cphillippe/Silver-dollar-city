@@ -67,11 +67,13 @@ async function visibleTinyType(page, scope = 'body') {
     const roots =
       scope === 'body'
         ? [document.body]
-        : scope
-            .split(',')
-            .map((part) => document.querySelector(part.trim()))
-            .filter(Boolean)
-    if (!roots.length) return ['missing root']
+        : scope.split(',').flatMap((part) => {
+            const sel = part.trim()
+            if (!sel) return []
+            const nodes = [...document.querySelectorAll(sel)]
+            return nodes.length ? nodes : [`missing root: ${sel}`]
+          })
+    if (roots.some((root) => typeof root === 'string')) return roots.filter((root) => typeof root === 'string')
     const bad = []
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
     let node
@@ -80,7 +82,7 @@ async function visibleTinyType(page, scope = 'body') {
       if (!raw) continue
       const el = node.parentElement
       if (!el || !roots.some((root) => root.contains(el))) continue
-      if (el.closest('svg, [aria-hidden="true"]')) continue
+      if (el.closest('svg')) continue
       if (typeof el.checkVisibility === 'function' && !el.checkVisibility()) continue
       const style = getComputedStyle(el)
       if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
@@ -597,6 +599,8 @@ async function walkMaze(page) {
   const inn = await readCell(page.locator('[data-maze-cell].is-inn'))
   await walkUntil(page, hurt)
   await page.locator('.play.is-road-maze.is-found').waitFor()
+  await page.locator('.maze-cell.is-help-cue').waitFor()
+  await assertEasyTypeFloor(page, 'L1 maze help cue', '.play.is-road-maze .maze-cell.is-help-cue')
   await pointerClick(page, page.locator('[data-maze-cell].is-hurt'))
   await page.locator('.play.is-road-maze.is-helped').waitFor()
   await walkUntil(page, inn, true)
