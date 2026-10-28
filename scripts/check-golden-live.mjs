@@ -199,13 +199,19 @@ async function openEasyHome(page, origin) {
   await page.locator('main.hub').waitFor({ timeout: 30_000 })
 }
 
-async function openGemTuningViaDebug(page) {
+async function openGemTuningViaDebug(page, origin) {
+  await page.goto(`${origin.replace(/\/$/, '')}?playtest=1`)
+  if (await page.locator('.welcome').count()) {
+    await tapFilledGold(page)
+  }
   await page.locator('main.hub').waitFor({ timeout: 30_000 })
   await pointerClick(page, page.getByRole('button', { name: 'Settings' }))
-  const summary = page.locator('summary', { hasText: 'Developer · mini-game jumps' })
-  await summary.waitFor()
-  await pointerClick(page, summary)
-  const jump = page.getByRole('button', { name: /ob-tuning ·/ })
+  const debug = page.locator('details.settings-debug')
+  await debug.waitFor()
+  await pointerClick(page, debug.locator('summary'))
+  await page.waitForFunction(() => document.querySelector('details.settings-debug')?.open === true)
+  const jump = page.getByRole('button', { name: 'ob-tuning · Narrow ranges', exact: true })
+  await jump.scrollIntoViewIfNeeded()
   await jump.waitFor()
   await pointerClick(page, jump)
 }
@@ -214,7 +220,7 @@ async function captureGemWinLockInReference(browser, origin, shotsDir) {
   const freshSave = {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.547',
+    appVersion: '1.4.551',
     savedAt: '2026-10-27T00:00:00.000Z',
     progress: { started: true, easyMode: true, theme: 'candy', completed: [] },
   }
@@ -228,7 +234,7 @@ async function captureGemWinLockInReference(browser, origin, shotsDir) {
   )
   const page = await ctx.newPage()
   await openEasyHome(page, origin)
-  await openGemTuningViaDebug(page)
+  await openGemTuningViaDebug(page, origin)
   await page.locator('.play.is-gem-search').waitFor({ timeout: 30_000 })
   await playGem(page, 'ob-tuning')
   await page.locator('.play.is-gem-search.is-win .cta-dock .btn.primary').waitFor()
@@ -249,7 +255,7 @@ async function proveLockInEmptyTab(browser, origin) {
     const freshSave = {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.547',
+      appVersion: '1.4.551',
       savedAt: '2026-10-27T00:00:00.000Z',
       progress: { started: true, easyMode: true, theme: 'candy', completed: [] },
     }
@@ -282,7 +288,7 @@ async function proveLockInEmptyTab(browser, origin) {
     const readSave = {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.547',
+      appVersion: '1.4.551',
       savedAt: '2026-10-27T00:00:00.000Z',
       progress: {
         started: true,
@@ -325,7 +331,7 @@ async function proveLockInEmptyTab(browser, origin) {
     const holdSave = {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.547',
+      appVersion: '1.4.551',
       savedAt: '2026-10-27T00:00:00.000Z',
       progress: {
         started: true,
@@ -1801,13 +1807,20 @@ async function pointerClick(page, locator) {
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
 }
 
-async function openRoadLockIn(page) {
+async function openRoadLockIn(page, origin) {
+  await page.goto(`${origin.replace(/\/$/, '')}?playtest=1`)
+  if (await page.locator('.welcome').count()) {
+    await tapFilledGold(page)
+  }
   await page.locator('main.hub').waitFor()
   await pointerClick(page, page.getByRole('button', { name: 'Settings' }))
-  const summary = page.locator('summary', { hasText: 'Developer · mini-game jumps' })
-  await summary.waitFor()
-  await pointerClick(page, summary)
-  await pointerClick(page, page.getByRole('button', { name: 'ph-road · Lock In Why Blast', exact: true }))
+  const debug = page.locator('details.settings-debug')
+  await debug.waitFor()
+  await pointerClick(page, debug.locator('summary'))
+  await page.waitForFunction(() => document.querySelector('details.settings-debug')?.open === true)
+  const jump = page.getByRole('button', { name: 'ph-road · Lock In Why Blast', exact: true })
+  await jump.scrollIntoViewIfNeeded()
+  await pointerClick(page, jump)
 }
 
 async function tapWrongWhy(page, why) {
@@ -1847,7 +1860,7 @@ async function proveNotQuite(browser, origin) {
   for (const viewport of [{ width: 375, height: 667 }, { width: 390, height: 844 }]) {
     const blast = await openSeeded(browser, origin, {}, viewport)
     try {
-      await openRoadLockIn(blast.page)
+      await openRoadLockIn(blast.page, origin)
       await blast.page.locator('button.why-chip').first().waitFor()
       const startCue = await lockInGoldCues(blast.page)
       assert.equal(startCue.length, 1, `Lock In start one gold ${JSON.stringify(startCue)}`)
@@ -1897,7 +1910,7 @@ async function proveNotQuite(browser, origin) {
     lessonTier: { 'ph-road': 'easy' },
   })
   try {
-    await openRoadLockIn(review.page)
+    await openRoadLockIn(review.page, origin)
     await review.page.locator('button.recall-card').first().waitFor()
     assert.equal(await review.page.locator('.why-blast').count(), 0, 'Easy review uses RecallGate')
     await tapWrongRecall(review.page, claim)

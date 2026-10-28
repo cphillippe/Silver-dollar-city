@@ -264,6 +264,10 @@ html[data-easy='on'] button.loci-stamp:active {
   box-shadow: 0 0 0 2px rgba(138, 100, 24, 0.35);
 }
 
+html[data-easy='on'] .match-teach-kind {
+  font-size: 0.8125rem;
+}
+
 .match-teach-kind {
   font-size: 0.58rem;
   font-weight: 800;
@@ -338,6 +342,14 @@ html[data-easy='on'] button.loci-stamp:active {
   .match-teach-chip {
     min-width: 3.2rem;
     padding: 0.22rem 0.35rem;
+  }
+
+  html[data-easy='on'] .match-teach-label {
+    font-size: 0.8125rem;
+  }
+
+  html[data-easy='on'] .match-teach-say {
+    font-size: 0.8125rem;
   }
 
   .match-teach-label {
@@ -449,5 +461,13 @@ html[data-easy='on'] button.loci-stamp:active {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-kind,
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-label,
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-say,
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .loci-stamp.is-dock .loci-stamp-place,
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .loci-stamp.is-dock .loci-stamp-idea {
+    font-size: 0.8125rem;
   }
 }

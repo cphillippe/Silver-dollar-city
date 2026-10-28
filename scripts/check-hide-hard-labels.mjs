@@ -4,7 +4,7 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { playerVisibleChangeItems } from '../src/content/changelog.ts'
+import { playerVisibleChangeItems, playerVisibleChangeTitle } from '../src/content/changelog.ts'
 
 const root = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 const src = join(root, 'src')
@@ -37,8 +37,13 @@ assert.deepEqual(
   `player-visible .tsx must not name Hard/Medium tiers: ${hits.join(', ') || '(none)'}`,
 )
 
-const filtered = playerVisibleChangeItems(['Hard stays the same.', 'A plain note.'])
-assert.deepEqual(filtered, ['A plain note.'], 'changelog render filter drops tier lines')
+const filtered = playerVisibleChangeItems(['Hard stays the same.', 'A plain note.', 'Refs #871.'])
+assert.deepEqual(filtered, ['A plain note.'], 'changelog render filter drops tier and Refs lines')
+assert.equal(
+  playerVisibleChangeTitle('Behind the scenes: groundwork for quick review cards on saved ideas'),
+  'Coming soon: quick review cards for ideas you saved.',
+  'dev changelog titles rewrite for players',
+)
 assert.doesNotMatch(
   playerVisibleChangeItems(latest538Items()).join('\n'),
   /\bHard\b|\bMedium\b/,

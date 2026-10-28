@@ -245,6 +245,10 @@ img.gem-heart {
   font-size: 0.82rem;
 }
 
+html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-score {
+  font-size: 0.8125rem;
+}
+
 .story-sheet-bonus.gem-words.is-bonus {
   margin: 0 0 8px;
   justify-content: flex-start;
@@ -443,6 +447,10 @@ img.gem-heart {
   font-weight: 800;
   letter-spacing: 0.04em;
   line-height: 1.1;
+}
+
+html[data-easy='on'] .play.is-gem-search .gem-word-kind {
+  font-size: 0.8125rem;
 }
 
 .gem-word-kind {
@@ -1018,4 +1026,28 @@ html[data-easy='on'] .play.is-gem-search .gem-hint-slot:has(.gem-combo.is-loud) 
 html[data-easy='on'] .play.is-gem-search .gem-cell:active:not(.is-sel):not(.is-burst) {
   transform: scale(0.92) translateZ(0);
   transition: transform 0.05s ease-out;
+}
+
+/* #871: Easy word search labels and clue chips stay at least 13px. */
+html[data-easy='on'] .play.is-gem-search :is(
+  .gem-word-kind,
+  .gem-word-label,
+  .match-teach-kind,
+  .match-teach-label,
+  .match-teach-say,
+  .match-score,
+  .story-dock-word,
+  .story-caption,
+  .story-kicker,
+  .sort-how,
+  .gem-bonus-hint,
+  .toast-why
+) {
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 430px) {
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .story-dock-word {
+    font-size: 0.8125rem;
+  }
 }
