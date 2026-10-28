@@ -15,7 +15,7 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.552',
+    version: '1.4.550',
     title: 'Easy Match: bonus words that start a story word score on release',
     when: '2026-10-28',
     items: [
@@ -24,6 +24,17 @@ export const CHANGELOG: ChangeNote[] = [
       'A short release that only prefixes a chip word still clears with no penalty.',
       'Hard stays the same.',
       'Refs #870.',
+    ],
+  },
+  {
+    version: '1.4.549',
+    title: 'Easy Story Creek: road maze drags follow your finger around corners',
+    when: '2026-10-28',
+    items: [
+      'On Easy, dragging on the blue pawn walks the open road toward your finger — through turns and along straight corridors.',
+      'A long straight drag moves one tile per step for the full distance; dragging past a dead end stops on the last road tile.',
+      'Tapping the next road tile still moves one step, the same as before.',
+      'Refs #861.',
     ],
   },
   {

@@ -33,6 +33,7 @@ import {
   isNextToHurt,
   isMazeRoad,
   mazeNeighbors,
+  mazeDragStepsToward,
   mazeStepToward,
   roadCtaLabel,
 } from '../src/lib/roadMaze.ts'
@@ -98,6 +99,12 @@ assert.equal(isAdjacentRoadStep(MAZE_START, MAZE_HURT), false)
 assert.equal(isAdjacentRoadStep(MAZE_START, MAZE_INN), false)
 const stepA = mazeStepToward(MAZE_START, MAZE_HURT)
 assert.ok(stepA && isAdjacentRoadStep(MAZE_START, stepA))
+
+setMazePreset(0)
+const lLeg = mazeDragStepsToward(MAZE_START, { r: 0, c: 1 })
+assert.equal(lLeg.length, 1, 'drag graph step toward an adjacent tile')
+const lFar = mazeDragStepsToward(MAZE_START, MAZE_HURT)
+assert.ok(lFar.length >= 4, 'drag graph walks around corners toward a far road tile')
 
 setMazePreset(1)
 assert.ok(swipeStep(MAZE_START, 1, 0), 'preset B: first move down')
@@ -182,6 +189,8 @@ assert.doesNotMatch(
   'play must not auto-path / teleport on tap',
 )
 assert.match(playSrc, /mazeStepToward/)
+assert.match(playSrc, /mazeDragStepsToward/)
+assert.match(playSrc, /extendDragToward/)
 assert.match(playSrc, /maze-board/)
 assert.match(playSrc, /onBoardKey/)
 assert.doesNotMatch(
@@ -394,5 +403,8 @@ assert.match(
   )
   assert.match(playSrc, /1\.4\.191: ≤720 fills purple void/)
 }
+
+const runChecks = readFileSync(new URL('./run-checks.mjs', import.meta.url), 'utf8')
+assert.match(runChecks, /check-maze-drag-live\.mjs/, 'full check suite runs maze drag live proof')
 
 console.log('check-road-maze: ok')
