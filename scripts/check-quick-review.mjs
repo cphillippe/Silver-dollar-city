@@ -180,7 +180,6 @@ function seedSave(intervalIndex = 1, lastFormat) {
   return {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.551',
     savedAt: new Date().toISOString(),
     progress: {
       started: true,
@@ -331,7 +330,7 @@ await withPage(
     seed: {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.551',
+      appVersion: '1.4.550',
       savedAt: new Date().toISOString(),
       progress: {
         started: true,
@@ -370,7 +369,7 @@ await withPage(
     seed: {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.551',
+      appVersion: '1.4.550',
       savedAt: new Date().toISOString(),
       progress: {
         started: true,

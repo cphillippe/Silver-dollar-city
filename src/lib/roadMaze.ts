@@ -168,6 +168,14 @@ export function mazeStepToward(from: MazeCoord, to: MazeCoord): MazeCoord | null
   return path && path.length >= 2 ? (path[1] ?? null) : null
 }
 
+/** Open-road steps from `from` to `target` along the maze graph (Easy drag queue). */
+export function mazeDragStepsToward(from: MazeCoord, target: MazeCoord): MazeCoord[] {
+  if (!isMazeRoad(from) || !isMazeRoad(target)) return []
+  if (mazeSame(from, target)) return []
+  const path = shortestMazePath(from, target)
+  return path && path.length >= 2 ? path.slice(1) : []
+}
+
 export function mazeBeatAt(cell: MazeCoord): MazeBeat | null {
   if (mazeSame(cell, MAZE_HURT)) return MAZE_BEATS[0] ?? null
   if (mazeSame(cell, MAZE_INN)) return MAZE_BEATS[2] ?? null
