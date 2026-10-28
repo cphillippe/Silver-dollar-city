@@ -1902,20 +1902,20 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.549')
-assert.equal(CHANGELOG[0].version, '1.4.549', '1.4.549 is the newest row')
-assert.ok(CHANGELOG.some((note) => note.version === '1.4.549'), '1.4.549 changelog row')
+assert.equal(APP_VERSION, '1.4.547')
+assert.equal(CHANGELOG[0].version, '1.4.547', '1.4.547 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.547'), '1.4.547 changelog row')
 assert.doesNotMatch(
-  latestChange('1.4.549').items.join('\n'),
+  latestChange('1.4.547').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
-  '1.4.549 changelog avoids GitHub close keywords',
+  '1.4.547 changelog avoids GitHub close keywords',
 )
 assert.doesNotMatch(
-  latestChange('1.4.549').items.join('\n'),
+  latestChange('1.4.547').items.join('\n'),
   /\/box\//,
-  '1.4.549 changelog avoids box paths',
+  '1.4.547 changelog avoids box paths',
 )
-assert.equal(CHANGELOG[1].version, '1.4.546', '1.4.546 stays under 1.4.549')
+assert.equal(CHANGELOG[1].version, '1.4.546', '1.4.546 stays under 1.4.547')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.546'), '1.4.546 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.546').items.join('\n'),
@@ -6242,7 +6242,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
 }
 
-// Easy Lock In 1.4.549: top-bar Lock In tab empty state — never Run (#858).
+// Easy Lock In 1.4.547: top-bar Lock In tab empty state — never Run (#858).
 {
   const fresh858 = { ...emptyProgress(), easyMode: true }
   assert.deepEqual(easyLockInExit(fresh858), { name: 'journal', lockInEmpty: true })
@@ -6272,17 +6272,17 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.doesNotMatch(
     readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8'),
     /journal\.is-lock-in-empty > \.btn/,
-    '1.4.549 empty Home reuses gem-win primary; no welcome.css direct-child button peel',
+    '1.4.547 empty Home reuses gem-win primary; no welcome.css direct-child button peel',
   )
   assert.match(
     readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8'),
     /journal\.is-lock-in-empty \.cta-dock \.btn\.primary/,
-    '1.4.549 empty Home cta-dock primary matches gem-win Lock In next',
+    '1.4.547 empty Home cta-dock primary matches gem-win Lock In next',
   )
   assert.match(
     readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8'),
     /journal\.is-lock-in-empty \.cta-dock[\s\S]*?background:\s*transparent[\s\S]*?backdrop-filter:\s*none/,
-    '1.4.549 empty cta-dock has no purple plate on the cream card',
+    '1.4.547 empty cta-dock has no purple plate on the cream card',
   )
   const loop858 = readFileSync(new URL('../src/easyTrail/trail/loop.ts', import.meta.url), 'utf8')
   assert.match(loop858, /lockInEmpty: true/)
@@ -6293,9 +6293,9 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
   assert.match(
     readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8'),
-    /1\.4\.549: Lock In tab empty/,
+    /1\.4\.547: Lock In tab empty/,
   )
-  assert.match(latestChange('1.4.549').title, /Lock In/i)
+  assert.match(latestChange('1.4.547').title, /Lock In/i)
 }
 
 // Easy Keep/Toss 1.4.356: first miss with empty Toss + a pending line is unfinished (#527).
@@ -17314,7 +17314,7 @@ console.log('check-city: ok')
   assert.match(
     src335('types.ts'),
     /lockInEmpty\?: boolean/,
-    '1.4.549 journal route can mark the Lock In empty tab',
+    '1.4.547 journal route can mark the Lock In empty tab',
   )
   const viewUnion335 = src335('types.ts').match(/export type View =([\s\S]*?)(?:\n\n|\n?$)/)?.[1] ?? ''
   assert.doesNotMatch(viewUnion335, /name: 'lock|name: 'hold|name: 'practice/i, '1.4.335 no Lock In-only App view')
