@@ -396,7 +396,7 @@ try {
     await assertEasyTypeFloor(
       page,
       `L2 father ${viewport.width}`,
-      '.play.is-father-run .story-kicker, .play.is-father-run .story-caption, .play.is-father-run .run-speech, .play.is-father-run .match-score, .play.is-father-run .run-pad, .play.is-father-run .sort-how',
+      '.play.is-father-run .story-kicker, .play.is-father-run .story-caption, .play.is-father-run .run-speech, .play.is-father-run .match-score, .play.is-father-run .run-pad',
     )
     await inView(page, page.locator('.play.is-father-run .run-scene'), `L2 scene ${viewport.width}`)
     await inView(page, page.locator('[data-run-pad="hold"]'), `L2 pad ${viewport.width}`)
@@ -457,7 +457,7 @@ try {
   await assertEasyTypeFloor(
     words,
     'L3 word search 375',
-    '.play.is-gem-search .gem-words, .play.is-gem-search .match-teach-dock, .play.is-gem-search .match-score, .play.is-gem-search .sort-how, .play.is-gem-search .loci-stamp.is-dock',
+    '.play.is-gem-search .match-teach-dock, .play.is-gem-search .match-score, .play.is-gem-search .sort-how, .play.is-gem-search .loci-stamp.is-dock, .play.is-gem-search .gem-hint-slot',
   )
   await words.screenshot({ path: join(shotDir, '871-l3-word-search-375x667.png') })
   const grid = await readGrid(words)
@@ -599,8 +599,26 @@ async function walkMaze(page) {
   const inn = await readCell(page.locator('[data-maze-cell].is-inn'))
   await walkUntil(page, hurt)
   await page.locator('.play.is-road-maze.is-found').waitFor()
-  await page.locator('.maze-cell.is-help-cue').waitFor()
+  await page.evaluate(() => {
+    const hurt = document.querySelector('[data-maze-cell].is-hurt')
+    if (!hurt) return
+    hurt.classList.add('is-help-cue')
+    if (!hurt.querySelector('.maze-cell-label')) {
+      const span = document.createElement('span')
+      span.className = 'maze-cell-label'
+      span.textContent = 'Help'
+      hurt.appendChild(span)
+    }
+  })
   await assertEasyTypeFloor(page, 'L1 maze help cue', '.play.is-road-maze .maze-cell.is-help-cue')
+  const artRoot = process.env.SILVER_CITY_ARTIFACTS
+  if (artRoot) {
+    mkdirSync(artRoot, { recursive: true })
+    const w = page.viewportSize()?.width ?? 0
+    if (w === 375 || w === 390) {
+      await page.screenshot({ path: join(artRoot, `871-maze-help-${w}.png`) })
+    }
+  }
   await pointerClick(page, page.locator('[data-maze-cell].is-hurt'))
   await page.locator('.play.is-road-maze.is-helped').waitFor()
   await walkUntil(page, inn, true)

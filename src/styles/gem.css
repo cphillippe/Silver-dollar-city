@@ -1033,6 +1033,7 @@ html[data-easy='on'] .play.is-gem-search .gem-cell:active:not(.is-sel):not(.is-b
 html[data-easy='on'] .play.is-gem-search :is(
   .gem-word-kind,
   .gem-word-label,
+  .gem-letter,
   .match-teach-kind,
   .match-teach-label,
   .match-teach-say,
