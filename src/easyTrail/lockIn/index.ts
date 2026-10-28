@@ -3,5 +3,6 @@
  * RecallGate stays in its component file. The hold helpers live in the A4 trail home (trail/loop.ts).
  */
 export { HoldPractice } from './HoldPractice'
+export { LockInEmpty } from './LockInEmpty'
 export { RecallGate } from '../../components/RecallGate'
 export { easyHoldFields, easyHoldPractice, easyHoldView } from '../trail/loop.ts'

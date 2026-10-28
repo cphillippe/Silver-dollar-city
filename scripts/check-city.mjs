@@ -1902,22 +1902,35 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.548')
-assert.equal(CHANGELOG[0].version, '1.4.548', '1.4.548 is the newest row')
-assert.ok(CHANGELOG.some((note) => note.version === '1.4.548'), '1.4.548 changelog row')
+assert.equal(APP_VERSION, '1.4.549')
+assert.equal(CHANGELOG[0].version, '1.4.549', '1.4.549 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.549'), '1.4.549 changelog row')
 assert.doesNotMatch(
-  latestChange('1.4.548').items.join('\n'),
+  latestChange('1.4.549').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
-  '1.4.548 changelog avoids GitHub close keywords',
+  '1.4.549 changelog avoids GitHub close keywords',
 )
 assert.match(
-  latestChange('1.4.548').items.join('\n'),
+  latestChange('1.4.549').items.join('\n'),
   /Refs: Bill 2026-10-25 7:50 AM CT, review mix \(Memory Coach\)/,
-  '1.4.548 changelog refs Bill review mix',
+  '1.4.549 changelog refs Bill review mix',
 )
-assert.match(latestChange('1.4.548').items.join('\n'), /\?playtest=1/)
-assert.equal(CHANGELOG.some((note) => note.version === '1.4.547'), false, '1.4.547 row reserved for #867')
-assert.equal(CHANGELOG[1].version, '1.4.546', '1.4.546 follows the #867 gap')
+assert.match(latestChange('1.4.549').items.join('\n'), /\?playtest=1/)
+assert.equal(CHANGELOG.some((note) => note.version === '1.4.548'), false, '1.4.548 row reserved for #868')
+assert.equal(CHANGELOG[1].version, '1.4.547', '1.4.547 follows QuickReview row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.547'), '1.4.547 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.547').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.547 changelog avoids GitHub close keywords',
+)
+assert.doesNotMatch(
+  latestChange('1.4.547').items.join('\n'),
+  /\/box\//,
+  '1.4.547 changelog avoids box paths',
+)
+assert.match(latestChange('1.4.547').items.join('\n'), /Refs #858/, '1.4.547 changelog refs #858')
+assert.equal(CHANGELOG[2].version, '1.4.546', '1.4.546 stays under 1.4.547')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.546'), '1.4.546 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.546').items.join('\n'),
@@ -1930,7 +1943,7 @@ assert.doesNotMatch(
   '1.4.546 changelog drops box paths',
 )
 assert.match(latestChange('1.4.546').items.join('\n'), /Refs #753/, '1.4.546 changelog refs #753')
-assert.equal(CHANGELOG[2].version, '1.4.545', '1.4.545 follows #865 row')
+assert.equal(CHANGELOG[3].version, '1.4.545', '1.4.545 stays under 1.4.546')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.545'), '1.4.545 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.545').items.join('\n'),
@@ -1939,6 +1952,7 @@ assert.doesNotMatch(
 )
 assert.match(latestChange('1.4.545').items.join('\n'), /Refs #855/, '1.4.545 changelog refs #855')
 assert.match(latestChange('1.4.545').items.join('\n'), /Hard stays the same\./)
+assert.equal(CHANGELOG[4].version, '1.4.544', '1.4.544 stays under 1.4.545')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.544'), '1.4.544 changelog row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.543'), '1.4.543 changelog row')
 assert.doesNotMatch(
@@ -6189,7 +6203,11 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
 // Easy Lock In 1.4.355: Lock In exit recites the proof just kept. The Hurt Man maze stays on Match.
 {
   const fresh355 = { ...emptyProgress(), easyMode: true }
-  assert.deepEqual(easyLockInExit(fresh355), { name: 'journal' }, '1.4.355 fresh Lock In is a recap, not the maze')
+  assert.deepEqual(
+    easyLockInExit(fresh355),
+    { name: 'journal', lockInEmpty: true },
+    '1.4.355 fresh Lock In is empty, not the maze',
+  )
   assert.notEqual(easyLockInExit(fresh355).name, 'link')
   const taughtMercy355 = progressAfterMatchTaught(fresh355, 'ph-road')
   assert.deepEqual(easyLockInExit(taughtMercy355), {
@@ -6214,7 +6232,11 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     learnings: [{ id: 'ph-road' }],
   }
   assert.equal(easyLoopLine(afterMercy355), 'ph-father')
-  assert.deepEqual(easyLockInExit(afterMercy355), { name: 'link' }, '1.4.355 a later beat still opens from Lock In')
+  assert.deepEqual(
+    easyLockInExit(afterMercy355),
+    { name: 'journal', lockInEmpty: true },
+    '1.4.355 a later beat opens Lock In empty, not Run',
+  )
   const hub355 = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
   const shell355 = readFileSync(new URL('../src/components/AppShell.tsx', import.meta.url), 'utf8')
   assert.match(hub355, /easyLockInExit\(progress\)/)
@@ -6233,6 +6255,62 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     /Fixes #504|Closes #504|Resolves #504|Fixes #520|Closes #520|Fixes #508|Closes #508/i,
     '1.4.355 changelog avoids GitHub close keywords',
   )
+}
+
+// Easy Lock In 1.4.547: top-bar Lock In tab empty state — never Run (#858).
+{
+  const fresh858 = { ...emptyProgress(), easyMode: true }
+  assert.deepEqual(easyLockInExit(fresh858), { name: 'journal', lockInEmpty: true })
+  assert.notEqual(easyLockInExit(fresh858).name, 'link')
+  const afterRoad858 = {
+    ...fresh858,
+    easyTaught: ['ph-road'],
+    easyHeld: ['ph-road'],
+    held: ['ph-road'],
+    learnings: [{ id: 'ph-road' }],
+  }
+  assert.equal(easyLoopLine(afterRoad858), 'ph-father')
+  assert.deepEqual(easyLockInExit(afterRoad858), { name: 'journal', lockInEmpty: true })
+  const hold858 = progressAfterMatchTaught(fresh858, 'ph-road')
+  assert.deepEqual(easyLockInExit(hold858), {
+    name: 'journal',
+    focusId: 'ph-road',
+    autoQuiz: true,
+  })
+  const lockEmptySrc = readFileSync(new URL('../src/easyTrail/lockIn/LockInEmpty.tsx', import.meta.url), 'utf8')
+  assert.match(lockEmptySrc, /Nothing to lock in yet\./)
+  assert.match(lockEmptySrc, /cta-dock/)
+  assert.match(lockEmptySrc, /btn primary xl snap-bins/)
+  assert.doesNotMatch(lockEmptySrc, /btn gold/)
+  assert.match(lockEmptySrc, /easyReadMarkedTomorrow/)
+  assert.doesNotMatch(lockEmptySrc, /name: 'link'/)
+  assert.doesNotMatch(
+    readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8'),
+    /journal\.is-lock-in-empty > \.btn/,
+    '1.4.547 empty Home reuses gem-win primary; no welcome.css direct-child button peel',
+  )
+  assert.match(
+    readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8'),
+    /journal\.is-lock-in-empty \.cta-dock \.btn\.primary/,
+    '1.4.547 empty Home cta-dock primary matches gem-win Lock In next',
+  )
+  assert.match(
+    readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8'),
+    /journal\.is-lock-in-empty \.cta-dock[\s\S]*?background:\s*transparent[\s\S]*?backdrop-filter:\s*none/,
+    '1.4.547 empty cta-dock has no purple plate on the cream card',
+  )
+  const loop858 = readFileSync(new URL('../src/easyTrail/trail/loop.ts', import.meta.url), 'utf8')
+  assert.match(loop858, /lockInEmpty: true/)
+  assert.doesNotMatch(
+    loop858,
+    /export function easyLockInExit[\s\S]*?return \{ name: 'link' \}/,
+    'easyLockInExit never opens Match/Run',
+  )
+  assert.match(
+    readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8'),
+    /1\.4\.547: Lock In tab empty/,
+  )
+  assert.match(latestChange('1.4.547').title, /Lock In/i)
 }
 
 // Easy Keep/Toss 1.4.356: first miss with empty Toss + a pending line is unfinished (#527).
@@ -17082,7 +17160,7 @@ console.log('check-city: ok')
 
   assert.deepEqual(
     readdirSync(new URL('easyTrail/lockIn/', srcRoot335)).sort(),
-    ['HoldPractice.tsx', 'index.ts'],
+    ['HoldPractice.tsx', 'LockInEmpty.tsx', 'index.ts'],
     '1.4.335 Lock In home is HoldPractice + shelf only (no new stylesheet)',
   )
   assert.match(
@@ -17136,6 +17214,10 @@ console.log('check-city: ok')
         '    !easyLineTaught(progress, openLine)',
         '  const holdPractice =',
         '    Boolean(autoQuiz && quizBrief && !quizReplacesMatch && (easy || !focusedEntry || focusedOpen))',
+        '',
+        '  if (easy && lockInEmpty) {',
+        '    return <LockInEmpty onNavigate={onNavigate} />',
+        '  }',
         '',
         '  if (holdPractice && quizBrief) {',
         '    return (',
@@ -17206,8 +17288,8 @@ console.log('check-city: ok')
   assert.equal(journalCard335.match(/<RecallGate\b/g)?.length, 1, '1.4.335 Journal keeps only the page-card recall')
   assert.deepEqual(
     [...journal335.matchAll(/ from '(\.\.\/easyTrail[^']*)'/g)].map((m) => m[1]),
-    ['../easyTrail/lockIn/HoldPractice'],
-    '1.4.335 Journal imports only HoldPractice from Easy Trail',
+    ['../easyTrail/lockIn/HoldPractice', '../easyTrail/lockIn/LockInEmpty'],
+    '1.4.335 Journal imports Lock In screens from Easy Trail',
   )
 
   const srcFiles335 = readdirSync(srcRoot335, { recursive: true })
@@ -17216,7 +17298,11 @@ console.log('check-city: ok')
   const filesWith335 = (pattern) =>
     srcFiles335.filter((rel) => pattern.test(readFileSync(new URL(rel, srcRoot335), 'utf8'))).sort()
   assert.deepEqual(filesWith335(/export function HoldPractice\b/), ['easyTrail/lockIn/HoldPractice.tsx'], '1.4.335 one HoldPractice')
-  assert.deepEqual(filesWith335(/<HoldPractice\b/), ['components/Journal.tsx'], '1.4.335 only Journal mounts HoldPractice')
+  assert.deepEqual(
+    filesWith335(/<HoldPractice\b|<LockInEmpty\b/),
+    ['components/Journal.tsx'],
+    '1.4.335 only Journal mounts Lock In screens',
+  )
   assert.deepEqual(
     filesWith335(/(?:import|export) \{[^}]*\bHoldPractice\b[^}]*\} from/),
     ['components/Journal.tsx', 'easyTrail/lockIn/index.ts'],
@@ -17237,16 +17323,16 @@ console.log('check-city: ok')
   assert.doesNotMatch(src335('App.tsx'), /HoldPractice|easyTrail/, '1.4.335 App has no Lock In route')
   assert.match(
     src335('App.tsx'),
-    /\{view\.name === 'journal' \? \(\n\s*<Journal\n\s*focusId=\{view\.focusId\}\n\s*autoQuiz=\{view\.autoQuiz\}\n\s*onNavigate=\{go\}\n\s*\/>\n\s*\) : null\}/,
+    /\{view\.name === 'journal' \? \(\n\s*<Journal\n\s*focusId=\{view\.focusId\}\n\s*autoQuiz=\{view\.autoQuiz\}\n\s*lockInEmpty=\{view\.lockInEmpty\}\n\s*onNavigate=\{go\}\n\s*\/>\n\s*\) : null\}/,
     '1.4.335 App still mounts Journal the same way',
   )
   assert.match(
     src335('types.ts'),
-    /\| \{ name: 'journal'; focusId\?: string; autoQuiz\?: boolean; sceneRecap\?: boolean \}/,
-    '1.4.335 journal stays the route, with the 1.4.362 recap flag',
+    /lockInEmpty\?: boolean/,
+    '1.4.547 journal route can mark the Lock In empty tab',
   )
   const viewUnion335 = src335('types.ts').match(/export type View =([\s\S]*?)(?:\n\n|\n?$)/)?.[1] ?? ''
-  assert.doesNotMatch(viewUnion335, /lock|hold|practice/i, '1.4.335 no Lock In-only App view')
+  assert.doesNotMatch(viewUnion335, /name: 'lock|name: 'hold|name: 'practice/i, '1.4.335 no Lock In-only App view')
 
   assert.match(
     readFileSync(new URL('../android/app/build.gradle', import.meta.url), 'utf8'),

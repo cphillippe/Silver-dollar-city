@@ -2711,6 +2711,43 @@ html[data-easy='on'] .play.is-road-maze .maze-beat.is-now {
     color: #8a5a12;
   }
 
+  /* 1.4.547: Lock In tab empty — plain Read link only (#858); Home in cta-dock like gem-win Lock In next */
+  html[data-easy='on'] .journal.is-lock-in-empty .cta-dock {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    align-items: stretch;
+    flex: 0 0 auto;
+    margin-top: 12px;
+    padding: 0;
+    background: transparent;
+    background-color: transparent;
+    background-image: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  html[data-easy='on'] .journal.is-lock-in-empty .cta-dock .btn.primary {
+    min-height: 60px;
+    flex-shrink: 0;
+    font-size: 1.12rem;
+    font-weight: 900;
+    color: #2a2118;
+  }
+
+  html[data-easy='on'] .journal.is-lock-in-empty > .text-link {
+    font-size: max(13px, 0.92rem);
+    font-weight: 600;
+    background: none;
+    border: none;
+    padding: 4px 0;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    color: #2a2118;
+  }
+
   html[data-easy='on'] .journal.is-easy-hold .journal-head {
     flex: 0 0 auto;
     margin-bottom: 8px;
