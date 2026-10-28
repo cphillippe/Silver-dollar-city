@@ -66,7 +66,7 @@ export async function checkNightJump() {
       (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
       { key: STORAGE_KEY, save: SAVE },
     )
-    await page.goto(`http://127.0.0.1:${port}/`)
+    await page.goto(`http://127.0.0.1:${port}/?playtest=1`)
     await page.getByRole('button', { name: 'Settings' }).click()
     await page.locator('summary', { hasText: 'Developer' }).click()
     await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
