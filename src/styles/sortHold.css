@@ -1209,6 +1209,22 @@ html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-win):not(.is-miss-t
   }
 }
 
+html[data-easy='on'] .recall-gate.is-easy-hold > .eyebrow {
+  font-size: 0.8125rem;
+}
+
+html[data-easy='on'] .recall-gate.is-easy-hold :is(
+  .why-miss-label,
+  .held-from,
+  .memory-pipe,
+  .quiet,
+  .learning-store,
+  .match-yes span,
+  .match-yes .held-from
+) {
+  font-size: 0.8125rem;
+}
+
 .recall-gate.is-easy-hold .recall-line {
   margin: 0;
 }

@@ -223,7 +223,9 @@ html[data-easy='on'] .play.is-father-run .run-miss.is-arming .btn {
   }
 
   html[data-easy='on'] .play.is-father-run .story-caption {
-    font: 700 15px/1.2 var(--sans);
+    display: block;
+    font: 700 max(13px, 15px) / 1.2 var(--sans);
+    font-size: max(13px, 0.9375rem);
   }
 
   html[data-easy='on'] .play.is-father-run .story-kicker {
@@ -551,4 +553,9 @@ html[data-easy='on'] .play.is-father-run .run-miss.is-arming .btn {
       background-position: -16px -30px;
     }
   }
+}
+
+/* #871: Father run caption and speech stay at least 13px on Easy phones. */
+html[data-easy='on'] .play.is-father-run :is(.story-caption, .run-speech-line, .run-speech-kicker, .run-speech-count, .match-score) {
+  font-size: max(13px, 0.8125rem);
 }

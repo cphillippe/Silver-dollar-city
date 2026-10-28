@@ -33,11 +33,11 @@ const appSrc = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
 assert.match(appSrc, /if \(isPlayBuild\(\)\) return null/, 'quickReviewBoot blocks Play builds')
 assert.match(
   appSrc,
-  /nightWatchJumpAllowed\(search, readNightWatchDebug\(\)\)/,
-  'quickReviewBoot uses playtest gate',
+  /playtestUrlAllowed\(search\)/,
+  'quickReviewBoot uses playtest URL only',
 )
 const settingsSrc = readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8')
-assert.match(settingsSrc, /nightWatchJumpAllowed\(/, 'Settings Quick review uses playtest gate')
+assert.match(settingsSrc, /playtestUrlAllowed\(urlSearch\)/, 'Settings dev UI uses playtest URL gate')
 
 const allowed = new Set([
   "What's the main idea?",
@@ -164,7 +164,7 @@ function seedSave(intervalIndex = 1, lastFormat) {
   return {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.549',
+    appVersion: '1.4.551',
     savedAt: new Date().toISOString(),
     progress: {
       started: true,
@@ -198,7 +198,7 @@ await withPage(
     const settings = page.locator('header').getByRole('button', { name: 'Settings', exact: true })
     await settings.scrollIntoViewIfNeeded()
     await settings.click()
-    await page.locator('details.settings-debug summary').click()
+    assert.equal(await page.locator('details.settings-debug').count(), 0)
     assert.equal(await page.locator('section[aria-label="Quick review"]').count(), 0)
   },
   { seed: hubSeed },
