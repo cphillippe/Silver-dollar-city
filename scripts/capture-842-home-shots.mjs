@@ -102,6 +102,8 @@ try {
 
   const queue = 'ph-road,ph-father,ob-tuning'
   const reviewUrl = `http://127.0.0.1:${port}/?playtest=1&from=home&reviewQueue=${queue}&quickReview=ph-road`
+  const formatAUrl = `http://127.0.0.1:${port}/?playtest=1&from=home&quickReview=ph-road&reviewFormat=A`
+  const formatCUrl = `http://127.0.0.1:${port}/?playtest=1&from=home&quickReview=ph-road&reviewFormat=C`
 
   for (const viewport of [
     { width: 375, height: 667 },
@@ -136,6 +138,18 @@ try {
     await tapPlot(page, 'ob-tuning')
     await page.getByRole('button', { name: 'I had it' }).waitFor()
     paths.push(await snap(page, '842-home-streak-reveal-actions', viewport))
+
+    await page.goto(formatCUrl, { waitUntil: 'networkidle' })
+    await page.locator('.quick-review-prompt-panel').waitFor()
+    paths.push(await snap(page, '842-coach-C-prompt-before-tap', viewport))
+    await tapPlot(page, 'ph-road')
+    await page.getByRole('button', { name: 'I had it' }).waitFor()
+    paths.push(await snap(page, '842-coach-C-reveal', viewport))
+
+    await page.goto(formatAUrl, { waitUntil: 'networkidle' })
+    await page.getByRole('button', { name: 'Show me' }).click()
+    await page.getByRole('button', { name: 'I had it' }).waitFor()
+    paths.push(await snap(page, '842-coach-A-reveal', viewport))
   }
 
   await context.close()

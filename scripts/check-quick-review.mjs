@@ -55,7 +55,7 @@ const allowed = new Set([
   'No review brief for this line.',
   'Settings',
   'Tap where you learned it',
-  'Not here, try another spot.',
+  'Not here. Try another spot.',
 ])
 
 for (const id of EASY_LINE_ORDER.slice(0, 12)) {
@@ -210,51 +210,52 @@ const hubSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url
 assert.match(hubSrc, /nightWatchJumpAllowed\(/, 'Hub Read review uses playtest gate')
 assert.match(hubSrc, /from: 'home'/, 'Hub Read navigates home quick-review')
 
-async function countGoldCues(page, scope = '.quick-review') {
-  return page.evaluate(
-    (scopeSel) => {
-      const goldish = (value) => {
-        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g
-        let match
-        while ((match = re.exec(value || ''))) {
-          const r = Number(match[1])
-          const g = Number(match[2])
-          const b = Number(match[3])
-          if (r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
-        }
-        return false
+async function countGoldCues(page) {
+  return page.evaluate(() => {
+    const goldish = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = Number(match[1])
+        const g = Number(match[2])
+        const b = Number(match[3])
+        if (r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
       }
-      const visible = (el) => {
-        const st = getComputedStyle(el)
-        const box = el.getBoundingClientRect()
-        return st.display !== 'none' && st.visibility !== 'hidden' && box.width > 2 && box.height > 2
-      }
-      const root = document.querySelector(scopeSel) ?? document.body
-      let cues = 0
-      for (const sel of [
-        '.btn.gold',
-        '.quick-review-plot-hit.is-now',
-        '.quick-review-prompt-panel.is-now',
-        '.quick-review-flip.is-now',
-        '.quick-review-drain-bar.is-now',
-        '.quick-review-prompt.is-now',
+      return false
+    }
+    const visible = (el) => {
+      const st = getComputedStyle(el)
+      const box = el.getBoundingClientRect()
+      return st.display !== 'none' && st.visibility !== 'hidden' && box.width > 2 && box.height > 2
+    }
+    const paintsGold = (st) => {
+      for (const key of [
+        'color',
+        'backgroundColor',
+        'borderTopColor',
+        'borderRightColor',
+        'borderBottomColor',
+        'borderLeftColor',
+        'outlineColor',
+        'boxShadow',
       ]) {
-        const el = root.querySelector(sel)
-        if (el && visible(el)) cues += 1
+        if (goldish(st[key])) return true
       }
-      for (const el of root.querySelectorAll('.text-link')) {
-        if (!visible(el)) continue
-        if (goldish(getComputedStyle(el).color)) cues += 1
-      }
-      for (const el of root.querySelectorAll('.quick-review-streak-pip.is-lit')) {
-        if (!visible(el)) continue
-        const st = getComputedStyle(el)
-        if (goldish(st.backgroundColor) || goldish(st.boxShadow)) cues += 1
-      }
-      return cues
-    },
-    scope,
-  )
+      return false
+    }
+    const hits = []
+    for (const el of document.querySelectorAll('*')) {
+      if (!visible(el)) continue
+      const st = getComputedStyle(el)
+      const classHit =
+        (el.classList.contains('btn') && el.classList.contains('gold')) || el.classList.contains('is-now')
+      if (classHit || paintsGold(st)) hits.push(el)
+    }
+    const top = hits.filter(
+      (el) => !hits.some((other) => other !== el && other.contains(el)),
+    )
+    return top.length
+  })
 }
 
 async function assertOneGold(page, label) {
@@ -286,6 +287,16 @@ await withPage(
   { seed: hubSeed },
 )
 
+async function assertPlotsUniform(page) {
+  const opacities = await page.evaluate(() => {
+    const hits = [...document.querySelectorAll('.quick-review-plot-hit')]
+    return hits.map((el) => getComputedStyle(el).opacity)
+  })
+  assert.ok(opacities.length > 1, 'map plots render')
+  const first = opacities[0]
+  assert.ok(opacities.every((o) => o === first), `plots share opacity (got ${opacities.join(',')})`)
+}
+
 async function assertFormatCBeforeTap(page, lineId) {
   assert.equal(await page.locator('.quick-review-plot-hit.is-now').count(), 0, 'no plot ring before tap')
   assert.equal(
@@ -293,7 +304,17 @@ async function assertFormatCBeforeTap(page, lineId) {
     0,
     'no guide portrait on map before tap',
   )
+  await assertPlotsUniform(page)
   await assertOneGold(page, `${lineId} format C prompt`)
+}
+
+async function assertFormatAPrompt(page, lineId) {
+  assert.equal(await page.locator('.quick-review-reveal-cue').count(), 0, 'no guide cue before A reveal')
+  await assertOneGold(page, `${lineId} format A prompt`)
+}
+
+async function assertFormatAReveal(page, lineId) {
+  await assertFormatCReveal(page, lineId)
 }
 
 async function assertFormatCReveal(page, lineId) {
@@ -331,6 +352,40 @@ for (const viewport of [
     },
     { seed: seedSave(1, 'A') },
   )
+
+  await withPage(
+    `/?quickReview=ph-road&reviewFormat=A&${PLAYTEST}`,
+    async (page) => {
+      await page.setViewportSize(viewport)
+      await assertFormatAPrompt(page, 'ph-road')
+      await page.getByRole('button', { name: 'Show me' }).click()
+      await page.getByRole('button', { name: 'I had it' }).waitFor()
+      await assertFormatAReveal(page, 'ph-road')
+    },
+    { seed: seedSave(1, 'A') },
+  )
+
+  await withPage(
+    `/?quickReview=ph-road&reviewFormat=C&${PLAYTEST}`,
+    async (page) => {
+      await page.setViewportSize(viewport)
+      await assertFormatCBeforeTap(page, 'ph-road')
+      const wrongPlot = await page.evaluate((correct) => {
+        const hit = [...document.querySelectorAll('[data-plot-id]')].find(
+          (el) => el.getAttribute('data-plot-id') !== correct,
+        )
+        return hit?.getAttribute('data-plot-id') ?? null
+      }, lociStampFor('ph-road').plotId)
+      assert.ok(wrongPlot)
+      await page.locator(`[data-plot-id="${wrongPlot}"]`).click()
+      await page.getByText('Not here. Try another spot.').waitFor()
+      await page.locator(`[data-plot-id="${wrongPlot}"]`).click()
+      await page.locator('.quick-review-plot-hit.is-now').waitFor()
+      assert.equal(await page.locator('.quick-review-prompt-panel.is-now').count(), 0)
+      await assertOneGold(page, 'format C after hint')
+    },
+    { seed: seedSave(1, 'A') },
+  )
 }
 
 await withPage(
@@ -344,17 +399,6 @@ await withPage(
     await assertOneGold(page, 'format B reveal')
   },
   { seed: seedSave(2) },
-)
-
-await withPage(
-  `/?quickReview=ph-road&reviewFormat=A&${PLAYTEST}`,
-  async (page) => {
-  await assertOneGold(page, 'format A prompt')
-  await page.getByRole('button', { name: 'Show me' }).click()
-  await page.getByRole('button', { name: 'I had it' }).waitFor()
-  await assertOneGold(page, 'format A reveal')
-  },
-  { seed: seedSave(1) },
 )
 
 await withPage(
@@ -399,9 +443,9 @@ await withPage(
   `/?quickReview=ph-father&reviewFormat=C&${PLAYTEST}`,
   async (page) => {
     await tapCorrectPlot(page, 'ph-father')
-    await page.getByRole('button', { name: 'I had it' }).click()
+    await page.getByRole('button', { name: 'Not yet' }).click()
     await page.getByText("Where's it from?").waitFor()
-    assert.equal(await page.locator('.quick-review-reveal-panel').count(), 0)
+    assert.equal(await page.locator('.quick-review-reveal-source').count(), 0)
     await assertFormatCBeforeTap(page, 'ph-father')
   },
   {

@@ -106,6 +106,8 @@ export function QuickReview({
   const [pendingClean, setPendingClean] = useState<boolean | null>(null)
   const [wrongMapTaps, setWrongMapTaps] = useState(0)
   const [mapMiss, setMapMiss] = useState(false)
+  /** Format C: wrong plot or post-hint correct tap — never a clean recall. */
+  const [mapTapClean, setMapTapClean] = useState(true)
   const drainHalf = useRef(false)
   const graded = useRef(false)
 
@@ -123,6 +125,7 @@ export function QuickReview({
     setFlashLine(null)
     setWrongMapTaps(0)
     setMapMiss(false)
+    setMapTapClean(true)
     graded.current = false
   }, [lineId, format])
 
@@ -265,9 +268,12 @@ export function QuickReview({
     if (plotId !== stamp.plotId) {
       setWrongMapTaps((count) => count + 1)
       setMapMiss(true)
+      setMapTapClean(false)
       return
     }
     setMapMiss(false)
+    const hintShowing = wrongMapTaps >= 2
+    if (hintShowing) setMapTapClean(false)
     setRevealed(true)
     playGemPop('win')
     setPhase('reveal')
@@ -287,6 +293,9 @@ export function QuickReview({
     setRevealed(false)
     setPendingClean(null)
     setFlashLine(null)
+    setWrongMapTaps(0)
+    setMapMiss(false)
+    setMapTapClean(true)
     setPhase('prompt')
   }
 
@@ -304,10 +313,15 @@ export function QuickReview({
       setPhase('honesty')
       return
     }
-    finishGrade(true)
+    const selfGradeClean = format === 'C' ? mapTapClean : true
+    finishGrade(selfGradeClean)
   }
 
   function onNotYet() {
+    if (intervalIndex === 2 && !sourceBeatActive && revealed) {
+      beginSourceBeat()
+      return
+    }
     finishGrade(false)
   }
 
@@ -344,7 +358,7 @@ export function QuickReview({
   const rung = reviewRung(beatIndex)
   const guideName = CAST[stamp.whoId]?.name ?? stamp.whoId
 
-  function formatCRevealBody() {
+  function acRevealBody() {
     if (!brief) return null
     const showReason = rung === 'reason' || (intervalIndex === 2 && sourceBeatActive)
     const showSource = rung === 'source' || (intervalIndex === 2 && sourceBeatActive)
@@ -359,6 +373,19 @@ export function QuickReview({
         {showReason ? <p className="quick-review-reveal-reason">{brief.reason}</p> : null}
         {showSource ? <p className="quick-review-reveal-source">{brief.source}</p> : null}
       </>
+    )
+  }
+
+  function acRevealActions() {
+    return (
+      <div className="quick-review-actions">
+        <button type="button" className="btn gold xl" onClick={onHadIt}>
+          I had it
+        </button>
+        <button type="button" className="text-link" onClick={onNotYet}>
+          Not yet
+        </button>
+      </div>
     )
   }
 
@@ -441,11 +468,7 @@ export function QuickReview({
                           type="button"
                           data-plot-id={plotId}
                           className={`quick-review-plot-hit ${hint ? 'is-now' : ''}`}
-                          style={{
-                            left: `${left}%`,
-                            top: `${top}%`,
-                            opacity: plotId === stamp.plotId ? 1 : 0.55,
-                          }}
+                          style={{ left: `${left}%`, top: `${top}%` }}
                           onClick={() => onPlotTap(plotId)}
                           aria-label={`${prompt}. ${EASY.reviewMapTap}`}
                         >
@@ -466,15 +489,8 @@ export function QuickReview({
           ) : null}
           {revealed ? (
             <div className="quick-review-stage">
-              <div className="quick-review-reveal-panel">{formatCRevealBody()}</div>
-              <div className="quick-review-actions">
-                <button type="button" className="btn gold xl" onClick={onHadIt}>
-                  I had it
-                </button>
-                <button type="button" className="text-link" onClick={onNotYet}>
-                  Not yet
-                </button>
-              </div>
+              <div className="quick-review-reveal-panel">{acRevealBody()}</div>
+              {acRevealActions()}
             </div>
           ) : null}
         </>
@@ -482,10 +498,6 @@ export function QuickReview({
 
       {format === 'A' && (phase === 'prompt' || phase === 'reveal') && !showHonesty ? (
         <>
-          <div className="quick-review-cue">
-            <Avatar who={stamp.whoId} size="sm" />
-            <span>{stamp.placeLabel}</span>
-          </div>
           {!revealed ? (
             <div className="quick-review-stage">
               <div className="quick-review-prompt-panel">
@@ -508,19 +520,10 @@ export function QuickReview({
               </button>
             </div>
           ) : (
-            <>
-              <p className="quick-review-reveal-line">
-                {faceForRung(lineId, beatIndex, targetLine)}
-              </p>
-              <div className="quick-review-actions">
-                <button type="button" className="btn gold xl" onClick={onHadIt}>
-                  I had it
-                </button>
-                <button type="button" className="text-link" onClick={onNotYet}>
-                  Not yet
-                </button>
-              </div>
-            </>
+            <div className="quick-review-stage">
+              <div className="quick-review-reveal-panel">{acRevealBody()}</div>
+              {acRevealActions()}
+            </div>
           )}
         </>
       ) : null}
