@@ -477,6 +477,85 @@ async function provePassByNoHelp(page, label) {
   assert.notEqual(await scoreStatusLine(page), 'He is with you', `${label}: pass-by must not show helped score line`)
 }
 
+/** #877 a2: lifting at 6,2 while the walker is still passing 4,3 must not help him. */
+async function proveLiftMidWalkPastManNoHelp(page, label) {
+  setMazePreset(0)
+  let open = await roadKeys(page)
+  const leg1 = shortestPath({ r: 0, c: 0 }, { r: 4, c: 2 }, open)
+  assert.ok(leg1 && leg1.length >= 2, `${label}: need leg1 to 4,2`)
+  await dragMazeThrough(page, leg1.slice(1))
+  await waitHere(page, { r: 4, c: 2 })
+
+  open = await roadKeys(page)
+  const leg2 = shortestPath({ r: 4, c: 2 }, { r: 6, c: 2 }, open)
+  assert.ok(leg2 && leg2.length >= 2, `${label}: need leg2 to 6,2`)
+  assert.ok(
+    leg2.some((cell) => cell.r === 4 && cell.c === 3),
+    `${label}: leg2 must pass beside the hurt man`,
+  )
+
+  const start = await cellBox(page, { r: 4, c: 2 })
+  const end = await cellBox(page, { r: 6, c: 2 })
+  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2)
+  await page.mouse.down()
+  for (let i = 1; i < leg2.length; i += 1) {
+    const cell = leg2[i]
+    const box = await cellBox(page, cell)
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 6 })
+    await page.waitForTimeout(25)
+  }
+  await page.mouse.move(end.x + end.width / 2, end.y + end.height / 2, { steps: 4 })
+  await page.mouse.up()
+
+  assert.equal(
+    await page.locator('.play.is-road-maze.is-helped').count(),
+    0,
+    `${label}: finger up at 6,2 while queue drains must not help`,
+  )
+  assert.notEqual(await scoreStatusLine(page), 'He is with you')
+  await waitHere(page, { r: 6, c: 2 }, 20_000)
+  assert.equal(
+    await page.locator('.play.is-road-maze.is-helped').count(),
+    0,
+    `${label}: ending at 6,2 after the queue drains must not help`,
+  )
+}
+
+async function proveMazeHowMin13NoJump(page, label, width, height) {
+  await page.locator('[data-maze-how]').waitFor()
+  const howPx = await page.locator('[data-maze-how]').evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
+  assert.ok(howPx >= 13, `${label}: maze-how font is ${howPx}px (need ≥13px)`)
+  const boardBefore = await page.locator('.maze-board').evaluate((el) => {
+    const r = el.getBoundingClientRect()
+    return { x: r.x, y: r.y, w: r.width, h: r.height }
+  })
+  mkdirSync(SHOT_ROOT, { recursive: true })
+  await page.screenshot({ path: join(SHOT_ROOT, `maze-how-${width}x${height}-before.png`) })
+
+  const at = await readCell(page.locator('[data-maze-cell].is-here'))
+  const open = await roadKeys(page)
+  const next = STEP_DIRS.map((dir) => ({ r: at.r + dir.r, c: at.c + dir.c })).find((cell) => open.has(key(cell)))
+  assert.ok(next, `${label}: need a road step to hide maze-how`)
+  await tapMaze(page, next)
+  await waitHere(page, next)
+  assert.equal(await page.locator('[data-maze-how]').count(), 0, `${label}: maze-how unmounts after the first step`)
+  assert.ok(
+    (await page.locator('.maze-how-slot').count()) > 0,
+    `${label}: maze-how slot keeps layout space after the first step`,
+  )
+  const boardAfter = await page.locator('.maze-board').evaluate((el) => {
+    const r = el.getBoundingClientRect()
+    return { x: r.x, y: r.y, w: r.width, h: r.height }
+  })
+  await page.screenshot({ path: join(SHOT_ROOT, `maze-how-${width}x${height}-after.png`) })
+  for (const dim of ['x', 'y', 'w', 'h']) {
+    assert.ok(
+      Math.abs(boardBefore[dim] - boardAfter[dim]) < 0.6,
+      `${label}: maze-board ${dim} jumped ${boardBefore[dim]} → ${boardAfter[dim]}`,
+    )
+  }
+}
+
 async function sideRoadBesideHurt(page) {
   const hurt = await readCell(page.locator('[data-maze-cell].is-hurt'))
   const open = await roadKeys(page)
@@ -669,7 +748,11 @@ async function runViewport(browser, origin, width, height) {
   const where = `${width}x${height}`
   try {
     await openFreshMaze(page, origin)
+    await proveMazeHowMin13NoJump(page, `${where} maze-how`, width, height)
+    await openFreshMaze(page, origin)
     await provePassByNoHelp(page, `${where} pass-by`)
+    await openFreshMaze(page, origin)
+    await proveLiftMidWalkPastManNoHelp(page, `${where} lift-mid-walk`)
     await openFreshMaze(page, origin)
     await proveSideTileStillHelps(page, `${where} side-tile`, origin)
     await proveMazeDragAcceptance(page, {

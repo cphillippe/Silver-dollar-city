@@ -212,6 +212,11 @@ assert.match(
   /dragQueue\.current\.length === 0 && !roadPointer\.current/,
   'drag mid-path steps do not count as stopping beside the hurt man',
 )
+assert.match(
+  playSrc,
+  /dragQueue\.current\.length === 0 &&[\s\S]*?isNextToHurt\(atRef\.current\)/,
+  'pointer-up beside-hurt help waits until the drag queue drains',
+)
 assert.equal(EASY.mazeHow, 'Drag or tap the road.')
 assert.doesNotMatch(playSrc, /useEffect\(\(\) => \{\s*setMazePreset\(attempt\)/)
 assert.equal(EASY.mazeInnCue, 'Now walk him to the pink house.')
@@ -279,6 +284,14 @@ assert.match(
   /maze-cell\.is-rock \{[\s\S]*touch-action: pan-y/,
 )
 const mazeCss = readAppCss()
+assert.match(
+  mazeCss,
+  /html\[data-easy='on'\] \.play\.is-road-maze \.maze-how[\s\S]*?font-size: 0\.8125rem/,
+)
+assert.match(
+  mazeCss,
+  /@media \(max-height: 920px\)[\s\S]*?html\[data-easy='on'\] \.play\.is-road-maze \.maze-how[\s\S]*?font-size: 0\.8125rem/,
+)
 assert.match(
   mazeCss,
   /play\.is-road-maze \{[\s\S]*overflow: hidden/,
