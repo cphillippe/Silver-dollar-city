@@ -126,6 +126,7 @@ export const EASY = {
   saved: 'Lock In',
   savedSub: 'saved lines',
   reviewMapTap: 'Tap where you learned it',
+  reviewMapMiss: 'Not here, try another spot.',
   connections: 'Connections',
   uses: 'Things you can use',
   resetWalk: 'Reset this Easy walk',

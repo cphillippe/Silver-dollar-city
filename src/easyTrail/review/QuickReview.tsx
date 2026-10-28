@@ -4,6 +4,7 @@ import { Avatar } from '../../components/Avatar'
 import { StoryPanelArt } from '../../components/StoryPanelArt'
 import { WinBurst } from '../../components/challenges/WinBurst'
 import { pillarFor } from '../../content'
+import { CAST } from '../../content/story'
 import { evidenceFor } from '../../content/evidence'
 import { ANCHOR, PLOT_IMG } from '../../components/city/CityPlotArt'
 import { EASY, easyFacingLine, easyWhyLine, uniqueHoldChoices } from '../../lib/easy'
@@ -103,6 +104,8 @@ export function QuickReview({
   const [flashLine, setFlashLine] = useState<string | null>(null)
   const [winBurst, setWinBurst] = useState(false)
   const [pendingClean, setPendingClean] = useState<boolean | null>(null)
+  const [wrongMapTaps, setWrongMapTaps] = useState(0)
+  const [mapMiss, setMapMiss] = useState(false)
   const drainHalf = useRef(false)
   const graded = useRef(false)
 
@@ -118,6 +121,8 @@ export function QuickReview({
     setPhase(format === 'B' ? 'think' : 'prompt')
     setPendingClean(null)
     setFlashLine(null)
+    setWrongMapTaps(0)
+    setMapMiss(false)
     graded.current = false
   }, [lineId, format])
 
@@ -255,8 +260,14 @@ export function QuickReview({
     return 'built'
   }
 
-  function onMapTap() {
+  function onPlotTap(plotId: CityPlotId) {
     if (format !== 'C' || phase !== 'prompt' || revealed) return
+    if (plotId !== stamp.plotId) {
+      setWrongMapTaps((count) => count + 1)
+      setMapMiss(true)
+      return
+    }
+    setMapMiss(false)
     setRevealed(true)
     playGemPop('win')
     setPhase('reveal')
@@ -328,6 +339,28 @@ export function QuickReview({
 
   const streak = sitting?.streak ?? 0
   const streakLabel = streak >= 2 ? (streak >= 3 ? '3 in a row' : '2 in a row') : null
+  const mapPlotHint = wrongMapTaps >= 2
+  const promptPanelGold = format === 'C' && phase === 'prompt' && !revealed && !mapPlotHint
+  const rung = reviewRung(beatIndex)
+  const guideName = CAST[stamp.whoId]?.name ?? stamp.whoId
+
+  function formatCRevealBody() {
+    if (!brief) return null
+    const showReason = rung === 'reason' || (intervalIndex === 2 && sourceBeatActive)
+    const showSource = rung === 'source' || (intervalIndex === 2 && sourceBeatActive)
+    return (
+      <>
+        <div className="quick-review-cue quick-review-reveal-cue">
+          <Avatar who={stamp.whoId} size="sm" />
+          <span>{stamp.placeLabel}</span>
+          <span className="quick-review-guide-name">{guideName}</span>
+        </div>
+        <p className="quick-review-reveal-claim">{brief.claim}</p>
+        {showReason ? <p className="quick-review-reveal-reason">{brief.reason}</p> : null}
+        {showSource ? <p className="quick-review-reveal-source">{brief.source}</p> : null}
+      </>
+    )
+  }
 
   return (
     <section className="quick-review" aria-label={EASY.saved}>
@@ -387,7 +420,7 @@ export function QuickReview({
         <>
           {phase === 'prompt' && !revealed ? (
             <div className="quick-review-stage">
-              <div className="quick-review-prompt-panel">
+              <div className={`quick-review-prompt-panel ${promptPanelGold ? 'is-now' : ''}`}>
                 <p className="quick-review-prompt quick-review-prompt-title">{prompt}</p>
               </div>
               <div className="quick-review-map" aria-hidden={false}>
@@ -400,47 +433,40 @@ export function QuickReview({
                       const top = (anchor.y / 420) * 100
                       const stage = plotStage(plotId)
                       const img = PLOT_IMG[plotId as keyof typeof PLOT_IMG]?.[stage]
-                      const glow = plotId === stamp.plotId
+                      const hint = mapPlotHint && plotId === stamp.plotId
                       if (!img) return null
-                      if (plotId === stamp.plotId) {
-                        return (
-                          <button
-                            key={plotId}
-                            type="button"
-                            className={`quick-review-plot-hit ${glow ? 'is-now' : ''}`}
-                            style={{ left: `${left}%`, top: `${top}%` }}
-                            onClick={onMapTap}
-                            aria-label={`${prompt}. ${EASY.reviewMapTap}`}
-                          >
-                            <span className="quick-review-avatar">
-                              <Avatar who={stamp.whoId} size="sm" />
-                            </span>
-                            <img src={img} alt="" draggable={false} />
-                          </button>
-                        )
-                      }
                       return (
-                        <div
+                        <button
                           key={plotId}
-                          className="quick-review-plot-hit"
-                          style={{ left: `${left}%`, top: `${top}%`, opacity: 0.55 }}
-                          aria-hidden
+                          type="button"
+                          data-plot-id={plotId}
+                          className={`quick-review-plot-hit ${hint ? 'is-now' : ''}`}
+                          style={{
+                            left: `${left}%`,
+                            top: `${top}%`,
+                            opacity: plotId === stamp.plotId ? 1 : 0.55,
+                          }}
+                          onClick={() => onPlotTap(plotId)}
+                          aria-label={`${prompt}. ${EASY.reviewMapTap}`}
                         >
                           <img src={img} alt="" draggable={false} />
-                        </div>
+                        </button>
                       )
                     })}
                   </div>
                 </div>
               </div>
               <p className="quick-review-map-tap">{EASY.reviewMapTap}</p>
+              {mapMiss ? (
+                <p className="quick-review-map-miss" role="status">
+                  {EASY.reviewMapMiss}
+                </p>
+              ) : null}
             </div>
           ) : null}
           {revealed ? (
-            <>
-              <p className="quick-review-reveal-line">
-                {faceForRung(lineId, beatIndex, targetLine)}
-              </p>
+            <div className="quick-review-stage">
+              <div className="quick-review-reveal-panel">{formatCRevealBody()}</div>
               <div className="quick-review-actions">
                 <button type="button" className="btn gold xl" onClick={onHadIt}>
                   I had it
@@ -449,7 +475,7 @@ export function QuickReview({
                   Not yet
                 </button>
               </div>
-            </>
+            </div>
           ) : null}
         </>
       ) : null}
