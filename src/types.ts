@@ -389,4 +389,11 @@ export type View =
   | { name: 'profile' }
   | { name: 'shop' }
   | { name: 'pack-street'; packId: string }
-  | { name: 'quick-review'; lineId: string; skipWrite?: boolean }
+  | {
+      name: 'quick-review'
+      lineId: string
+      skipWrite?: boolean
+      /** Home Read queue — up to 3 line ids, walked in order. */
+      queue?: string[]
+      from?: 'home' | 'settings'
+    }

@@ -36,6 +36,10 @@ export interface QuickReviewProps {
   onSittingUpdate?: (next: { bUsed?: boolean; streak?: number }) => void
   onDone: () => void
   debugFormat?: ReviewFormatId
+  /** Home route — formats A and C only until Scholar OKs decoys. */
+  formatsACOnly?: boolean
+  /** Home route — no post-reveal honesty check until decoys are approved. */
+  skipHonesty?: boolean
 }
 
 function faceForRung(lineId: string, intervalIndex: number, line: string): string {
@@ -73,6 +77,8 @@ export function QuickReview({
   onSittingUpdate,
   onDone,
   debugFormat,
+  formatsACOnly = false,
+  skipHonesty = false,
 }: QuickReviewProps) {
   const { progress, recordReview } = useProgress()
   const brief = evidenceFor(lineId)
@@ -82,7 +88,13 @@ export function QuickReview({
   const format =
     debugFormat && debugFormat !== 'F'
       ? debugFormat
-      : pickFormat(lineId, today, lastFormat, sitting, intervalIndex)
+      : pickFormat(lineId, today, lastFormat, sitting, intervalIndex, {
+          acOnly: formatsACOnly,
+        })
+
+  const [sourceBeatActive, setSourceBeatActive] = useState(false)
+  const [reasonBeatClean, setReasonBeatClean] = useState(false)
+  const beatIndex = intervalIndex === 2 && sourceBeatActive ? 3 : intervalIndex
 
   const [phase, setPhase] = useState<Phase>(() => (format === 'B' ? 'think' : 'prompt'))
   const [revealed, setRevealed] = useState(false)
@@ -95,14 +107,24 @@ export function QuickReview({
   const graded = useRef(false)
 
   const stamp = lociStampFor(lineId)
-  const targetLine = brief ? reviewTargetLine(brief, intervalIndex) : ''
-  const prompt = reviewPrompt(intervalIndex)
+  const targetLine = brief ? reviewTargetLine(brief, beatIndex) : ''
+  const prompt = reviewPrompt(beatIndex)
   const storyPanel = storyPanelsFor(lineId)[0]
+
+  useEffect(() => {
+    setSourceBeatActive(false)
+    setReasonBeatClean(false)
+    setRevealed(false)
+    setPhase(format === 'B' ? 'think' : 'prompt')
+    setPendingClean(null)
+    setFlashLine(null)
+    graded.current = false
+  }, [lineId, format])
 
   const choiceLines = useMemo(() => {
     if (!brief) return []
-    return threeChoices(lineId, intervalIndex, targetLine, brief)
-  }, [brief, intervalIndex, lineId, targetLine])
+    return threeChoices(lineId, beatIndex, targetLine, brief)
+  }, [beatIndex, brief, lineId, targetLine])
 
   const shuffledDrain = useMemo(() => {
     if (!brief) return []
@@ -125,8 +147,10 @@ export function QuickReview({
     (clean: boolean) => {
       if (graded.current) return
       graded.current = true
+      const cardClean =
+        intervalIndex === 2 ? clean && reasonBeatClean : clean
       const streak = sitting?.streak ?? 0
-      const nextStreak = clean ? Math.min(3, streak + 1) : 0
+      const nextStreak = cardClean ? Math.min(3, streak + 1) : 0
       onSittingUpdate?.({
         bUsed: sitting?.bUsed || format === 'B',
         streak: nextStreak,
@@ -137,14 +161,14 @@ export function QuickReview({
           pillar: pillarFor(lineId),
           kind: 'recall',
           today,
-          clean,
-          peeked: !clean,
+          clean: cardClean,
+          peeked: !cardClean,
           elaborated: false,
           format,
         })
       }
       const finish = () => onDone()
-      if (clean && nextStreak === 3) {
+      if (cardClean && nextStreak === 3) {
         setWinBurst(true)
         window.setTimeout(() => {
           setWinBurst(false)
@@ -157,10 +181,12 @@ export function QuickReview({
     [
       brief,
       format,
+      intervalIndex,
       lineId,
       onDone,
       onSittingUpdate,
       practice,
+      reasonBeatClean,
       recordReview,
       sitting?.bUsed,
       sitting?.streak,
@@ -219,9 +245,10 @@ export function QuickReview({
   }
 
   const showHonesty =
+    !skipHonesty &&
     (format === 'A' || format === 'C') &&
     phase === 'honesty' &&
-    honestyCheckDue(lineId, today, intervalIndex)
+    honestyCheckDue(lineId, today, beatIndex)
 
   function plotStage(plotId: CityPlotId): 'built' | 'lit' {
     if (format === 'C' && revealed && plotId === stamp.plotId) return 'lit'
@@ -242,11 +269,26 @@ export function QuickReview({
     setPhase('reveal')
   }
 
+  function beginSourceBeat() {
+    graded.current = false
+    setReasonBeatClean(true)
+    setSourceBeatActive(true)
+    setRevealed(false)
+    setPendingClean(null)
+    setFlashLine(null)
+    setPhase('prompt')
+  }
+
   function onHadIt() {
     if (!revealed || phase === 'honesty') return
+    if (intervalIndex === 2 && !sourceBeatActive) {
+      beginSourceBeat()
+      return
+    }
     if (
+      !skipHonesty &&
       (format === 'A' || format === 'C') &&
-      honestyCheckDue(lineId, today, intervalIndex)
+      honestyCheckDue(lineId, today, beatIndex)
     ) {
       setPhase('honesty')
       return
@@ -334,7 +376,7 @@ export function QuickReview({
                 className="match-card recall-card"
                 onClick={() => onDrainPick(line)}
               >
-                {faceForRung(lineId, intervalIndex, line)}
+                {faceForRung(lineId, beatIndex, line)}
               </button>
             ))}
           </div>
@@ -390,7 +432,7 @@ export function QuickReview({
           {revealed ? (
             <>
               <p className="quick-review-reveal-line">
-                {faceForRung(lineId, intervalIndex, targetLine)}
+                {faceForRung(lineId, beatIndex, targetLine)}
               </p>
               <div className="quick-review-actions">
                 <button type="button" className="btn gold xl" onClick={onHadIt}>
@@ -433,7 +475,7 @@ export function QuickReview({
           ) : (
             <>
               <p className="quick-review-reveal-line">
-                {faceForRung(lineId, intervalIndex, targetLine)}
+                {faceForRung(lineId, beatIndex, targetLine)}
               </p>
               <div className="quick-review-actions">
                 <button type="button" className="btn gold xl" onClick={onHadIt}>
@@ -451,7 +493,7 @@ export function QuickReview({
       {format === 'B' && phase === 'reveal' ? (
         <>
           <p className="quick-review-reveal-line">
-            {faceForRung(lineId, intervalIndex, targetLine)}
+            {faceForRung(lineId, beatIndex, targetLine)}
           </p>
           <div className="quick-review-actions">
             <button type="button" className="btn gold xl" onClick={onBNext}>
@@ -472,7 +514,7 @@ export function QuickReview({
                 className={`match-card recall-card ${flashLine === line ? 'is-flash' : ''}`}
                 onClick={() => onHonestyPick(line)}
               >
-                {faceForRung(lineId, intervalIndex, line)}
+                {faceForRung(lineId, beatIndex, line)}
               </button>
             ))}
           </div>

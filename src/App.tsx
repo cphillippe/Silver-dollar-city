@@ -180,9 +180,10 @@ export default function App() {
       {view.name === 'learn' ? <LearnScreen onNavigate={go} /> : null}
       {view.name === 'quick-review' ? (
         <QuickReviewScreen
-          key={view.lineId}
           lineId={view.lineId}
           skipWrite={view.skipWrite}
+          queue={view.queue}
+          from={view.from}
           onNavigate={go}
         />
       ) : null}

@@ -133,7 +133,7 @@ html[data-easy='on'] .quick-review-flip img {
 }
 
 html[data-easy='on'] .quick-review-reveal-line {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.4;
   margin: 0;
 }
@@ -153,7 +153,8 @@ html[data-easy='on'] .quick-review-streak-pip {
 }
 
 html[data-easy='on'] .quick-review-streak-pip.is-lit {
-  background: #f6c255;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: none;
 }
 
 html[data-easy='on'] .quick-review-actions {
@@ -168,4 +169,18 @@ html[data-easy='on'] .quick-review-actions .text-link {
   display: inline-flex;
   align-items: center;
   font-size: 13px;
+  color: #2a2118;
+}
+
+html[data-easy='on'] .journal.is-rehearse:has(.quick-review) > .text-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: #2a2118;
+}
+
+html[data-easy='on'] .quick-review .quick-review-prompt.is-now {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }

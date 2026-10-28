@@ -92,6 +92,15 @@ for (const id of EASY_LINE_ORDER.slice(0, 8)) {
   assert.notEqual(pickFormat(id, '2026-10-27', undefined, undefined, 4), 'B', `${id} source never B`)
 }
 
+for (let i = 0; i < 300; i += 1) {
+  const id = EASY_LINE_ORDER[i % EASY_LINE_ORDER.length]
+  assert.notEqual(
+    pickFormat(id, '2026-10-28', i % 2 ? 'C' : 'A', { bUsed: i % 5 === 0 }, 0, { acOnly: true }),
+    'B',
+    'Home route never picks B',
+  )
+}
+
 const weightCounts = { C: 0, B: 0, A: 0 }
 for (let i = 0; i < 1000; i += 1) {
   const id = `line-${i}`
@@ -130,7 +139,7 @@ async function launchBrowser() {
   return chromium.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] })
 }
 
-async function withPage(url, fn, { seed } = {}) {
+async function withPage(url, fn, { seed, openDay } = {}) {
   const root = fileURLToPath(new URL('..', import.meta.url))
   const server = await createServer({
     root,
@@ -146,10 +155,16 @@ async function withPage(url, fn, { seed } = {}) {
   try {
     if (seed) {
       await page.addInitScript(
-        ({ key, save }) => {
+        ({ key, save, openDayKey, openDayValue }) => {
           localStorage.setItem(key, JSON.stringify(save))
+          if (openDayValue) localStorage.setItem(openDayKey, openDayValue)
         },
-        { key: STORAGE_KEY, save: seed },
+        {
+          key: STORAGE_KEY,
+          save: seed,
+          openDayKey: 'silver-city-easy-open-v1',
+          openDayValue: openDay ?? '',
+        },
       )
     }
     await page.goto(`http://127.0.0.1:${port}${url}`, { waitUntil: 'networkidle' })
@@ -164,7 +179,7 @@ function seedSave(intervalIndex = 1, lastFormat) {
   return {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.548',
+    appVersion: '1.4.551',
     savedAt: new Date().toISOString(),
     progress: {
       started: true,
@@ -188,6 +203,61 @@ function seedSave(intervalIndex = 1, lastFormat) {
 }
 
 const PLAYTEST = 'playtest=1'
+
+const hubSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
+assert.match(hubSrc, /nightWatchJumpAllowed\(/, 'Hub Read review uses playtest gate')
+assert.match(hubSrc, /from: 'home'/, 'Hub Read navigates home quick-review')
+
+async function countGoldCues(page, scope = '.quick-review') {
+  return page.evaluate(
+    (scopeSel) => {
+      const goldish = (value) => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g
+        let match
+        while ((match = re.exec(value || ''))) {
+          const r = Number(match[1])
+          const g = Number(match[2])
+          const b = Number(match[3])
+          if (r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
+      const visible = (el) => {
+        const st = getComputedStyle(el)
+        const box = el.getBoundingClientRect()
+        return st.display !== 'none' && st.visibility !== 'hidden' && box.width > 2 && box.height > 2
+      }
+      const root = document.querySelector(scopeSel) ?? document.body
+      let cues = 0
+      for (const sel of [
+        '.btn.gold',
+        '.quick-review-plot-hit.is-now',
+        '.quick-review-flip.is-now',
+        '.quick-review-drain-bar.is-now',
+        '.quick-review-prompt.is-now',
+      ]) {
+        const el = root.querySelector(sel)
+        if (el && visible(el)) cues += 1
+      }
+      for (const el of root.querySelectorAll('.text-link')) {
+        if (!visible(el)) continue
+        if (goldish(getComputedStyle(el).color)) cues += 1
+      }
+      for (const el of root.querySelectorAll('.quick-review-streak-pip.is-lit')) {
+        if (!visible(el)) continue
+        const st = getComputedStyle(el)
+        if (goldish(st.backgroundColor) || goldish(st.boxShadow)) cues += 1
+      }
+      return cues
+    },
+    scope,
+  )
+}
+
+async function assertOneGold(page, label) {
+  const gold = await countGoldCues(page)
+  assert.equal(gold, 1, `${label} has one gold cue (got ${gold})`)
+}
 
 const hubSeed = seedSave(1)
 
@@ -216,12 +286,10 @@ await withPage(
 await withPage(
   `/?quickReview=ph-road&reviewFormat=C&${PLAYTEST}`,
   async (page) => {
-  const promptGold = await page.locator('.quick-review-plot-hit.is-now').count()
-  assert.equal(promptGold, 1)
-  await page.locator('.quick-review-plot-hit.is-now').click()
-  await page.getByRole('button', { name: 'I had it' }).waitFor()
-  const revealGold = await page.locator('.btn.gold, .is-now').count()
-  assert.equal(revealGold, 1)
+    await assertOneGold(page, 'format C prompt')
+    await page.locator('.quick-review-plot-hit.is-now').click()
+    await page.getByRole('button', { name: 'I had it' }).waitFor()
+    await assertOneGold(page, 'format C reveal')
   },
   { seed: seedSave(1) },
 )
@@ -231,12 +299,10 @@ await withPage(
   async (page) => {
     await page.getByText('Think first…').waitFor()
     await page.waitForTimeout(3200)
-    const drainGold = await page.locator('.quick-review-drain-bar.is-now').count()
-    assert.equal(drainGold, 1)
+    await assertOneGold(page, 'format B drain')
     await page.locator('.match-card.recall-card').first().click()
     await page.getByRole('button', { name: 'Next' }).waitFor()
-    const revealGold = await page.locator('.btn.gold').count()
-    assert.equal(revealGold, 1)
+    await assertOneGold(page, 'format B reveal')
   },
   { seed: seedSave(2) },
 )
@@ -244,11 +310,102 @@ await withPage(
 await withPage(
   `/?quickReview=ph-road&reviewFormat=A&${PLAYTEST}`,
   async (page) => {
-  const faceGold = await page.locator('.quick-review-flip.is-now').count()
-  assert.equal(faceGold, 1)
+  await assertOneGold(page, 'format A prompt')
   await page.getByRole('button', { name: 'Show me' }).click()
   await page.getByRole('button', { name: 'I had it' }).waitFor()
-  assert.equal(await page.locator('.btn.gold').count(), 1)
+  await assertOneGold(page, 'format A reveal')
+  },
+  { seed: seedSave(1) },
+)
+
+await withPage(
+  `/?${PLAYTEST}`,
+  async (page) => {
+    await page.getByRole('main', { name: 'Home' }).waitFor()
+    await page.getByRole('button', { name: /Read/i }).click()
+    await page.locator('.quick-review').waitFor()
+    await assertOneGold(page, 'Home Read queue card 1')
+  },
+  {
+    seed: {
+      kind: SAVE_KIND,
+      schemaVersion: SAVE_SCHEMA_VERSION,
+      appVersion: '1.4.551',
+      savedAt: new Date().toISOString(),
+      progress: {
+        started: true,
+        easyMode: true,
+        theme: 'candy',
+        completed: ['ph-road', 'ph-father'],
+        easyHeld: ['ph-road'],
+        lastDailyDate: '2026-01-01',
+        memory: {
+          'ph-road': {
+            id: 'ph-road',
+            pillar: 'parable-hollow',
+            intervalIndex: 1,
+            nextReviewAt: today,
+            reviews: 1,
+            cleanRecalls: 1,
+            elaborated: false,
+          },
+        },
+      },
+    },
+    openDay: '2026-01-01',
+  },
+)
+
+await withPage(
+  `/?quickReview=ph-father&reviewFormat=C&${PLAYTEST}`,
+  async (page) => {
+    await page.locator('.quick-review-plot-hit.is-now').click()
+    await page.getByRole('button', { name: 'I had it' }).click()
+    await page.getByText("Where's it from?").waitFor()
+    assert.equal(await page.locator('.quick-review-reveal-line').count(), 0)
+    await assertOneGold(page, 'index-2 source beat before reveal')
+  },
+  {
+    seed: {
+      kind: SAVE_KIND,
+      schemaVersion: SAVE_SCHEMA_VERSION,
+      appVersion: '1.4.551',
+      savedAt: new Date().toISOString(),
+      progress: {
+        started: true,
+        easyMode: true,
+        theme: 'candy',
+        completed: ['ph-road', 'ph-father'],
+        memory: {
+          'ph-father': {
+            id: 'ph-father',
+            pillar: 'parable-hollow',
+            intervalIndex: 2,
+            nextReviewAt: today,
+            reviews: 2,
+            cleanRecalls: 2,
+            elaborated: false,
+          },
+        },
+      },
+    },
+  },
+)
+
+await withPage(
+  `/?quickReview=ph-father&reviewFormat=C&reviewStreak=2&${PLAYTEST}`,
+  async (page) => {
+    await page.locator('.quick-review-streak').waitFor()
+    await page.locator('.quick-review-plot-hit.is-now').click()
+    await page.getByRole('button', { name: 'I had it' }).waitFor()
+    await assertOneGold(page, 'streak card reveal')
+    const pipGold = await page.evaluate(() => {
+      const pip = document.querySelector('.quick-review-streak-pip.is-lit')
+      if (!pip) return true
+      const bg = getComputedStyle(pip).backgroundColor
+      return /246,\s*194,\s*85|f6c255/i.test(bg)
+    })
+    assert.equal(pipGold, false, 'lit streak pips are not gold')
   },
   { seed: seedSave(1) },
 )
