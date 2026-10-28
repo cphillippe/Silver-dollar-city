@@ -50,7 +50,12 @@ import {
 } from '../src/content/showIt.ts'
 import { lociStampFor } from '../src/lib/lociStamp.ts'
 import { CAST } from '../src/content/story.ts'
-import { CHANGELOG, latestChange, playerVisibleChangeItems } from '../src/content/changelog.ts'
+import {
+  CHANGELOG,
+  latestChange,
+  playerVisibleChangeItems,
+  playerVisibleChangeTitle,
+} from '../src/content/changelog.ts'
 import { sortMissCopy } from '../src/lib/sortFeedback.ts'
 import { CONTENT_PACKS } from '../src/content/packs.ts'
 import { DAILY_POOL, dailyForDate } from '../src/content/daily.ts'
@@ -1918,7 +1923,7 @@ assert.doesNotMatch(
 )
 assert.match(
   latestChange('1.4.552').items.join('\n'),
-  /above the letter grid/,
+  /below the letter grid/,
   '1.4.552 changelog names the Match banner layout fix',
 )
 assert.equal(CHANGELOG[1].version, '1.4.551', '1.4.551 follows the #871 row')
@@ -1955,6 +1960,12 @@ assert.match(latestChange('1.4.550').items.join('\n'), /Refs #870/, '1.4.550 cha
 assert.match(latestChange('1.4.550').items.join('\n'), /Hard stays the same\./)
 assert.equal(CHANGELOG[3].version, '1.4.549', '1.4.549 follows the 1.4.550 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.549'), '1.4.549 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.549').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.549 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.549').title, /road maze drag|Story Creek/i, '1.4.549 changelog title names the maze drag fix')
 assert.match(latestChange('1.4.549').items.join('\n'), /Refs #861/, '1.4.549 changelog refs #861')
 assert.doesNotMatch(
   latestChange('1.4.549').items.join('\n'),
@@ -1963,16 +1974,31 @@ assert.doesNotMatch(
 )
 assert.equal(CHANGELOG[4].version, '1.4.548', '1.4.548 follows the maze drag row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.548'), '1.4.548 changelog row')
-assert.match(latestChange('1.4.548').title, /Coming soon: quick review cards/i, '1.4.548 title is player-facing')
+assert.doesNotMatch(
+  latestChange('1.4.548').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.548 changelog avoids GitHub close keywords',
+)
 assert.match(
   latestChange('1.4.548').items.join('\n'),
   /Refs: Bill 2026-10-25 7:50 AM CT, review mix \(Memory Coach\)/,
-  '1.4.548 changelog keeps Bill ref in history',
+  '1.4.548 changelog refs Bill review mix',
+)
+assert.match(latestChange('1.4.548').items.join('\n'), /Nothing changes for players yet\./)
+assert.doesNotMatch(
+  latestChange('1.4.548').items.join('\n'),
+  /\?playtest=1|Night Watch debug/,
+  '1.4.548 changelog stays player-facing',
 )
 assert.deepEqual(
   playerVisibleChangeItems(latestChange('1.4.548').items),
-  ['Coming soon: quick review cards for ideas you saved.'],
+  [],
   '1.4.548 player list drops Refs and dev-only lines',
+)
+assert.equal(
+  playerVisibleChangeTitle(latestChange('1.4.548').title),
+  null,
+  '1.4.548 Behind the scenes title stays out of What’s new',
 )
 const quickReviewGateApp = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
 assert.match(quickReviewGateApp, /function quickReviewBoot\(\)/, 'QuickReview boot helper exists')
@@ -1986,7 +2012,7 @@ assert.match(
   const settings871 = readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8')
   assert.match(settings871, /playtestUrlAllowed\(urlSearch\)/, '#871 Settings gates dev UI on playtest URL')
   assert.match(settings871, /playtestOn \? \(/, '#871 Settings renders debug only when playtest is on')
-  assert.match(settings871, /playerVisibleChangeTitle/, '#871 Settings rewrites dev changelog titles')
+  assert.match(settings871, /playerVisibleChangeTitle/, '#871 Settings filters dev changelog titles')
 }
 for (const script of [
   'check-gem-pop-live.mjs',

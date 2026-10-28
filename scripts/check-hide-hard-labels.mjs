@@ -57,8 +57,8 @@ assert.ok(drop550, '1.4.550 changelog row')
 assert.doesNotMatch(playerVisibleChangeItems(drop550.items).join('\n'), /\bRefs\b/, '1.4.550 player list hides Refs #870')
 assert.equal(
   playerVisibleChangeTitle('Behind the scenes: groundwork for quick review cards on saved ideas'),
-  'Coming soon: quick review cards for ideas you saved.',
-  'dev changelog titles rewrite for players',
+  null,
+  'Behind the scenes changelog titles stay out of What’s new',
 )
 assert.doesNotMatch(
   playerVisibleChangeItems(latest538Items()).join('\n'),
