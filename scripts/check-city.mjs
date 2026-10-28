@@ -6251,6 +6251,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   })
   const lockEmptySrc = readFileSync(new URL('../src/easyTrail/lockIn/LockInEmpty.tsx', import.meta.url), 'utf8')
   assert.match(lockEmptySrc, /Nothing to lock in yet\./)
+  assert.match(lockEmptySrc, /cta-dock/)
   assert.match(lockEmptySrc, /btn primary xl snap-bins/)
   assert.doesNotMatch(lockEmptySrc, /btn gold/)
   assert.match(lockEmptySrc, /easyReadMarkedTomorrow/)
@@ -6258,22 +6259,13 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.doesNotMatch(
     readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8'),
     /journal\.is-lock-in-empty > \.btn/,
-    '1.4.549 empty Home reuses gem-win primary; no welcome.css button peel',
+    '1.4.549 empty Home reuses gem-win primary; no welcome.css direct-child button peel',
   )
-  {
-    const hex = (h) => {
-      const n = h.replace('#', '')
-      return [parseInt(n.slice(0, 2), 16), parseInt(n.slice(2, 4), 16), parseInt(n.slice(4, 6), 16)].map((v) => {
-        const x = v / 255
-        return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4
-      })
-    }
-    const lum = (rgb) => 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]
-    const fg = hex('#2a1c08')
-    const bg = hex('#ffcc33')
-    const ratio = (Math.max(lum(fg), lum(bg)) + 0.05) / (Math.min(lum(fg), lum(bg)) + 0.05)
-    assert.ok(ratio >= 4.5, `1.4.549 .btn.primary token contrast ${ratio.toFixed(2)}`)
-  }
+  assert.match(
+    readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8'),
+    /journal\.is-lock-in-empty \.cta-dock \.btn\.primary/,
+    '1.4.549 empty Home cta-dock primary matches gem-win Lock In next',
+  )
   const loop858 = readFileSync(new URL('../src/easyTrail/trail/loop.ts', import.meta.url), 'utf8')
   assert.match(loop858, /lockInEmpty: true/)
   assert.doesNotMatch(

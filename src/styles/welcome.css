@@ -2711,7 +2711,24 @@ html[data-easy='on'] .play.is-road-maze .maze-beat.is-now {
     color: #8a5a12;
   }
 
-  /* 1.4.549: Lock In tab empty — plain Read link only (#858); Home uses btn primary xl like gem win */
+  /* 1.4.549: Lock In tab empty — plain Read link only (#858); Home in cta-dock like gem-win Lock In next */
+  html[data-easy='on'] .journal.is-lock-in-empty .cta-dock {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    align-items: stretch;
+    flex: 0 0 auto;
+    margin-top: 12px;
+  }
+
+  html[data-easy='on'] .journal.is-lock-in-empty .cta-dock .btn.primary {
+    min-height: 60px;
+    flex-shrink: 0;
+    font-size: 1.12rem;
+    font-weight: 900;
+    color: #2a2118;
+  }
+
   html[data-easy='on'] .journal.is-lock-in-empty > .text-link {
     font-size: max(13px, 0.92rem);
     font-weight: 600;
