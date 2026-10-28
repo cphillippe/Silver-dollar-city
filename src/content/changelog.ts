@@ -15,12 +15,12 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.547',
+    version: '1.4.548',
     title: 'Behind the scenes: a quick review card for saved ideas',
-    when: '2026-10-27',
+    when: '2026-10-28',
     items: [
       'Memory Coach review mix is landing in the engine first — map spot, think-first, and flip-card formats.',
-      'Nothing changes on Home yet; playtests reach it from Settings debug only.',
+      'Nothing changes on Home yet; playtests need ?playtest=1 or Night Watch debug freeze for this visit.',
       'Refs: Bill 2026-10-25 7:50 AM CT, review mix (Memory Coach).',
     ],
   },

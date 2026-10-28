@@ -120,7 +120,7 @@ async function launchBrowser() {
   return chromium.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] })
 }
 
-async function withPage(url, fn) {
+async function withPage(url, fn, { seed } = {}) {
   const root = fileURLToPath(new URL('..', import.meta.url))
   const server = await createServer({
     root,
@@ -134,6 +134,14 @@ async function withPage(url, fn) {
   const browser = await launchBrowser()
   const page = await browser.newPage()
   try {
+    if (seed) {
+      await page.addInitScript(
+        ({ key, save }) => {
+          localStorage.setItem(key, JSON.stringify(save))
+        },
+        { key: STORAGE_KEY, save: seed },
+      )
+    }
     await page.goto(`http://127.0.0.1:${port}${url}`, { waitUntil: 'networkidle' })
     await fn(page)
   } finally {
@@ -146,7 +154,7 @@ function seedSave(intervalIndex = 1, lastFormat) {
   return {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.547',
+    appVersion: '1.4.548',
     savedAt: new Date().toISOString(),
     progress: {
       started: true,
@@ -169,45 +177,71 @@ function seedSave(intervalIndex = 1, lastFormat) {
   }
 }
 
-await withPage('/?quickReview=ph-road&reviewFormat=C', async (page) => {
-  await page.evaluate((key, save) => {
-    localStorage.setItem(key, JSON.stringify(save))
-  }, STORAGE_KEY, seedSave(1))
-  await page.reload({ waitUntil: 'networkidle' })
+const PLAYTEST = 'playtest=1'
+
+const hubSeed = seedSave(1)
+
+await withPage(
+  '/',
+  async (page) => {
+    await page.getByRole('main', { name: 'Home' }).waitFor()
+    const settings = page.locator('header').getByRole('button', { name: 'Settings', exact: true })
+    await settings.scrollIntoViewIfNeeded()
+    await settings.click()
+    await page.locator('details.settings-debug summary').click()
+    assert.equal(await page.locator('section[aria-label="Quick review"]').count(), 0)
+  },
+  { seed: hubSeed },
+)
+
+await withPage(
+  '/?quickReview=ph-road',
+  async (page) => {
+    await page.getByRole('main', { name: 'Home' }).waitFor()
+    assert.equal(await page.locator('.quick-review-prompt').count(), 0)
+  },
+  { seed: hubSeed },
+)
+
+await withPage(
+  `/?quickReview=ph-road&reviewFormat=C&${PLAYTEST}`,
+  async (page) => {
   const promptGold = await page.locator('.quick-review-plot-hit.is-now').count()
   assert.equal(promptGold, 1)
   await page.locator('.quick-review-plot-hit.is-now').click()
   await page.getByRole('button', { name: 'I had it' }).waitFor()
   const revealGold = await page.locator('.btn.gold, .is-now').count()
   assert.equal(revealGold, 1)
-})
+  },
+  { seed: seedSave(1) },
+)
 
-await withPage('/?quickReview=ph-road&reviewFormat=B', async (page) => {
-  await page.evaluate((key, save) => {
-    localStorage.setItem(key, JSON.stringify(save))
-  }, STORAGE_KEY, seedSave(2))
-  await page.reload({ waitUntil: 'networkidle' })
-  await page.getByText('Think first…').waitFor()
-  await page.waitForTimeout(3200)
-  const drainGold = await page.locator('.quick-review-drain-bar.is-now').count()
-  assert.equal(drainGold, 1)
-  await page.locator('.match-card.recall-card').first().click()
-  await page.getByRole('button', { name: 'Next' }).waitFor()
-  const revealGold = await page.locator('.btn.gold').count()
-  assert.equal(revealGold, 1)
-})
+await withPage(
+  `/?quickReview=ph-road&reviewFormat=B&${PLAYTEST}`,
+  async (page) => {
+    await page.getByText('Think first…').waitFor()
+    await page.waitForTimeout(3200)
+    const drainGold = await page.locator('.quick-review-drain-bar.is-now').count()
+    assert.equal(drainGold, 1)
+    await page.locator('.match-card.recall-card').first().click()
+    await page.getByRole('button', { name: 'Next' }).waitFor()
+    const revealGold = await page.locator('.btn.gold').count()
+    assert.equal(revealGold, 1)
+  },
+  { seed: seedSave(2) },
+)
 
-await withPage('/?quickReview=ph-road&reviewFormat=A', async (page) => {
-  await page.evaluate((key, save) => {
-    localStorage.setItem(key, JSON.stringify(save))
-  }, STORAGE_KEY, seedSave(1))
-  await page.reload({ waitUntil: 'networkidle' })
+await withPage(
+  `/?quickReview=ph-road&reviewFormat=A&${PLAYTEST}`,
+  async (page) => {
   const faceGold = await page.locator('.quick-review-flip.is-now').count()
   assert.equal(faceGold, 1)
   await page.getByRole('button', { name: 'Show me' }).click()
   await page.getByRole('button', { name: 'I had it' }).waitFor()
   assert.equal(await page.locator('.btn.gold').count(), 1)
-})
+  },
+  { seed: seedSave(1) },
+)
 
 const brief = evidenceFor('ph-road')
 assert.ok(brief)
