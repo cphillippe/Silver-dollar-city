@@ -225,9 +225,9 @@ function newestLockedId(progress: LockExitProgress): string | undefined {
  */
 export function easyLockInExit(progress: LockExitProgress): View {
   if (easyHomeFocus(progress) === 'hold') return easyHoldView(progress)
-  if (easyLoopLine(progress) !== ROAD_MAZE_LINE) return { name: 'link' }
+  if (easyLoopLine(progress) !== ROAD_MAZE_LINE) return { name: 'journal', lockInEmpty: true }
   const id = newestLockedId(progress)
-  if (!id) return { name: 'journal' }
+  if (!id) return { name: 'journal', lockInEmpty: true }
   return { name: 'journal', focusId: `learn-${id}` }
 }
 
