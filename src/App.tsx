@@ -17,10 +17,13 @@ import { ShellUpdateNotice } from './components/ShellUpdateNotice'
 import { WebBuildRefresh } from './components/WebBuildRefresh'
 import { Vista } from './components/Vista'
 import { Welcome } from './components/Welcome'
+import { QuickReviewScreen } from './components/QuickReviewDebugScreen'
 import { findPlayable } from './content'
 import { adsAreVisible, quietPauseAllowed, scenePauseMountsOn } from './config/ads'
 import { liveInterstitialReady, showBetweenSceneInterstitial } from './lib/adAdapter'
 import { offerStoresComingNotice } from './lib/supportToast'
+import { isPlayBuild } from './config/playBuild'
+import { nightWatchJumpAllowed, readNightWatchDebug } from './lib/nightWatchDebug'
 import { readNightReturn } from './nightWatch/nightReturn'
 import { useProgress } from './store/progress'
 import type { View } from './types'
@@ -38,10 +41,21 @@ function sequenceBoot(): View | null {
   return { name: 'challenge', areaId: found.areaId, challengeId: id }
 }
 
+/** Playwright / check entry — playtest URL or Night Watch debug switch only. */
+function quickReviewBoot(): View | null {
+  if (typeof window === 'undefined') return null
+  if (isPlayBuild()) return null
+  const search = window.location.search
+  if (!nightWatchJumpAllowed(search, readNightWatchDebug())) return null
+  const lineId = new URLSearchParams(search).get('quickReview')
+  if (!lineId) return null
+  return { name: 'quick-review', lineId, skipWrite: true }
+}
+
 export default function App() {
   const { progress } = useProgress()
   const [view, setView] = useState<View>(() => {
-    const forced = sequenceBoot()
+    const forced = sequenceBoot() ?? quickReviewBoot()
     if (forced) return forced
     const walked =
       progress.completed.length > 0 || Boolean(progress.lastDailyDate)
@@ -164,6 +178,14 @@ export default function App() {
         />
       ) : null}
       {view.name === 'learn' ? <LearnScreen onNavigate={go} /> : null}
+      {view.name === 'quick-review' ? (
+        <QuickReviewScreen
+          key={view.lineId}
+          lineId={view.lineId}
+          skipWrite={view.skipWrite}
+          onNavigate={go}
+        />
+      ) : null}
       {view.name === 'profile' ? <Profile onNavigate={go} /> : null}
       {sceneAd && scenePauseMountsOn(view.name) ? (
         <SceneAd onContinue={continueFromAd} onSupport={supportFromAd} />
