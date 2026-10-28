@@ -18,12 +18,9 @@ const VIEWPORTS = [
   [375, 667],
   [390, 844],
 ]
-const SHOT_ROOT =
-  process.env.GEM_TAP_SHOT_ROOT ??
-  (process.env.CI ? join(tmpdir(), 'gemsearch-fix') : '/cursor/stores/self/gemsearch-fix')
+const SHOT_ROOT = process.env.GEM_TAP_SHOT_ROOT ?? join(tmpdir(), 'gemsearch-fix')
 const POP_SHOT_ROOT =
-  process.env.GEM_POP_SHOT_ROOT ??
-  (process.env.CI ? join(tmpdir(), 'gemsearch-fix', 'pops') : '/cursor/stores/self/gemsearch-fix/pops')
+  process.env.GEM_POP_SHOT_ROOT ?? join(tmpdir(), 'gemsearch-fix', 'pops')
 
 function savePayload() {
   const now = new Date()
@@ -31,7 +28,7 @@ function savePayload() {
   return {
     kind: 'silver-city-save',
     schemaVersion: 1,
-    appVersion: '1.4.545',
+    appVersion: '1.4.547',
     savedAt: now.toISOString(),
     progress: {
       started: true,

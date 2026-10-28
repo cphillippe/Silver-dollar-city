@@ -58,6 +58,7 @@ const SKIP_BONUS = new Set([
   'SLOB',
   'SNOB',
   'SMUG',
+  'SMOKE',
   'THUG',
   'PUNK',
   'WIMP',
@@ -85,6 +86,7 @@ const SKIP_BONUS = new Set([
   'CANCER',
   'VIRUS',
   'WHIP',
+  'WINE',
 ])
 
 /**
