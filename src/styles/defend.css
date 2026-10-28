@@ -6059,15 +6059,24 @@ button.defend-new-lamp[aria-pressed='true'] {
   color: transparent;
 }
 
-/* 792b NWUI-2: pace sits under the Sparks badge on the left rail, outside the road (walker taps stay above at z 11). */
+/* 792b NWUI-2: pace on the left rail, 8px above the skill tray and clear of the whole Sparks stack (walker taps stay above at z 11). */
 @media (max-width: 480px) {
   .defend-page.is-easy-watch .nw-pace {
-    top: calc(10px + 32px + 8px);
-    bottom: auto;
+    top: auto;
+    bottom: 116px;
     left: max(18px, calc(env(safe-area-inset-left, 0px) + 14px));
     right: auto;
     transform: none;
-    z-index: 5;
+    z-index: 20;
+  }
+}
+
+/* Playtest debug sits in the dock column; keep it off the NWUI-2 pace band on narrow phones. */
+@media (max-width: 480px) {
+  .defend-page.is-easy-watch .defend-nw-debug {
+    align-self: flex-end;
+    max-width: min(46vw, 168px);
+    margin-bottom: 0;
   }
 }
 
