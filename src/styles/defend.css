@@ -6071,15 +6071,6 @@ button.defend-new-lamp[aria-pressed='true'] {
   }
 }
 
-/* Playtest debug sits in the dock column; keep it off the NWUI-2 pace band on narrow phones. */
-@media (max-width: 480px) {
-  .defend-page.is-easy-watch .defend-nw-debug {
-    align-self: flex-end;
-    max-width: min(46vw, 168px);
-    margin-bottom: 0;
-  }
-}
-
 .defend-page.is-easy-watch .nw-pace.is-fast,
 .defend-page.is-easy-watch .nw-pace[data-state='fast'] {
   background: var(--berry);
