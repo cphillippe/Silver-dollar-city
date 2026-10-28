@@ -1967,6 +1967,17 @@ assert.match(
   assert.match(settings871, /playtestOn \? \(/, '#871 Settings renders debug only when playtest is on')
   assert.match(settings871, /playerVisibleChangeTitle/, '#871 Settings rewrites dev changelog titles')
 }
+for (const script of [
+  'check-gem-pop-live.mjs',
+  'check-gem-tap-live.mjs',
+  'check-gem-jar.mjs',
+  'check-live-prove.mjs',
+  'check-incense-lamps.mjs',
+  'check-night-jump.mjs',
+]) {
+  const live871 = readFileSync(new URL(`./${script}`, import.meta.url), 'utf8')
+  assert.match(live871, /dev-ui-playtest\.mjs/, `#871 ${script} opens developer UI via playtest helper`)
+}
 assert.equal(CHANGELOG[4].version, '1.4.547', '1.4.547 follows QuickReview row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.547'), '1.4.547 changelog row')
 assert.doesNotMatch(

@@ -7,7 +7,7 @@ export interface ChangeNote {
 }
 
 const PLAYER_HIDDEN_TIER = /\bHard\b|\bMedium\b/
-const PLAYER_HIDDEN_REFS = /^Refs[:\s#]/i
+const PLAYER_HIDDEN_REFS = /^\s*Refs\b/i
 const PLAYER_HIDDEN_DEV_ONLY = /Nothing changes for players yet\./i
 
 /** Drop dev-only and tier lines — full history stays in CHANGELOG. */

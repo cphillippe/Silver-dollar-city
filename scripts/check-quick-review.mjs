@@ -22,6 +22,7 @@ import {
 } from '../src/easyTrail/review/reviewFormat.ts'
 import { STORAGE_KEY } from '../src/config/app.ts'
 import { SAVE_KIND, SAVE_SCHEMA_VERSION } from '../src/lib/save.ts'
+import { NW_DEBUG_SESSION } from '../src/lib/nightWatchDebug.ts'
 
 const quickSrc = readFileSync(
   new URL('../src/easyTrail/review/QuickReview.tsx', import.meta.url),
@@ -130,7 +131,7 @@ async function launchBrowser() {
   return chromium.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] })
 }
 
-async function withPage(url, fn, { seed } = {}) {
+async function withPage(url, fn, { seed, sessionNwDebug = false } = {}) {
   const root = fileURLToPath(new URL('..', import.meta.url))
   const server = await createServer({
     root,
@@ -144,12 +145,13 @@ async function withPage(url, fn, { seed } = {}) {
   const browser = await launchBrowser()
   const page = await browser.newPage()
   try {
-    if (seed) {
+    if (seed || sessionNwDebug) {
       await page.addInitScript(
-        ({ key, save }) => {
-          localStorage.setItem(key, JSON.stringify(save))
+        ({ key, save, nwKey, nwOn }) => {
+          if (save) localStorage.setItem(key, JSON.stringify(save))
+          if (nwOn) sessionStorage.setItem(nwKey, 'on')
         },
-        { key: STORAGE_KEY, save: seed },
+        { key: STORAGE_KEY, save: seed ?? null, nwKey: NW_DEBUG_SESSION, nwOn: sessionNwDebug },
       )
     }
     await page.goto(`http://127.0.0.1:${port}${url}`, { waitUntil: 'networkidle' })
@@ -211,6 +213,18 @@ await withPage(
     assert.equal(await page.locator('.quick-review-prompt').count(), 0)
   },
   { seed: hubSeed },
+)
+
+await withPage(
+  '/?quickReview=ph-road',
+  async (page) => {
+    await page.getByRole('main', { name: 'Home' }).waitFor()
+    assert.equal(await page.locator('.quick-review-prompt').count(), 0)
+  },
+  {
+    seed: hubSeed,
+    sessionNwDebug: true,
+  },
 )
 
 await withPage(

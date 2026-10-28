@@ -11,6 +11,7 @@ import { createServer } from 'vite'
 import { STORAGE_KEY } from '../src/config/app.ts'
 import { buildGemPuzzle, gemWordsFor } from '../src/lib/gemSearch.ts'
 import { packLesson } from '../src/content/packCatalog.ts'
+import { withPlaytest1 } from './dev-ui-playtest.mjs'
 
 const LESSONS = ['ph-seeds', 'ob-tuning', 'hl-mind']
 const VIEWPORTS = [
@@ -66,7 +67,7 @@ async function pointerClick(page, locator) {
 }
 
 async function openLesson(page, origin, lineId, seed = 0) {
-  await page.goto(`${origin}?gemSeed=${seed}`)
+  await page.goto(withPlaytest1(`${origin}?gemSeed=${seed}`))
   await page.getByRole('main', { name: 'Home' }).waitFor()
   await pointerClick(page, page.getByRole('button', { name: 'Settings', exact: true }))
   await pointerClick(page, page.locator('details.settings-debug summary'))

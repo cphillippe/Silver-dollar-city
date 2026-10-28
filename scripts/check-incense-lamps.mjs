@@ -3,6 +3,7 @@
  * One phone width. The cloud is not the hit. nwLamps=0..2 trims a jump.
  */
 import assert from 'node:assert/strict'
+import { devUiAppPath } from './dev-ui-playtest.mjs'
 import { fileURLToPath } from 'node:url'
 import { createServer } from 'vite'
 import { chromium } from '@playwright/test'
@@ -41,7 +42,7 @@ async function openNight(page, search) {
   await page.addInitScript((save) => {
     localStorage.setItem('silver-city-progress-v1', JSON.stringify(save))
   }, SAVE)
-  await page.goto(`/${search}`)
+  await page.goto(devUiAppPath(search))
   await page.getByRole('button', { name: 'Settings' }).click()
   await page.locator('summary', { hasText: 'Developer' }).click()
   await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
