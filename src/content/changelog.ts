@@ -15,6 +15,16 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.551',
+    title: 'Behind the scenes: Easy Home Read can open saved review cards',
+    when: '2026-10-28',
+    items: [
+      'Nothing changes for players yet.',
+      'Behind the scenes: when ideas are due, Read can walk a short review queue before the daily story.',
+      'Refs: Bill 2026-10-25 7:50 AM CT, review mix (Memory Coach).',
+    ],
+  },
+  {
     version: '1.4.548',
     title: 'Behind the scenes: groundwork for quick review cards on saved ideas',
     when: '2026-10-28',
