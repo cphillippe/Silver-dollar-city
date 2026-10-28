@@ -110,7 +110,7 @@ try {
     shots.push(await snap(page, '10-home-unchanged', viewport, 'ol.easy-home-steps'))
 
     await page.goto(
-      `http://127.0.0.1:${port}/?quickReview=ph-father&reviewFormat=C`,
+      `http://127.0.0.1:${port}/?playtest=1&quickReview=ph-father&reviewFormat=C`,
       { waitUntil: 'networkidle' },
     )
     await page.locator('.quick-review-plot-hit.is-now').waitFor()
@@ -120,7 +120,7 @@ try {
     shots.push(await snap(page, '02-C-reveal', viewport))
 
     await page.goto(
-      `http://127.0.0.1:${port}/?quickReview=ph-father&reviewFormat=B`,
+      `http://127.0.0.1:${port}/?playtest=1&quickReview=ph-father&reviewFormat=B`,
       { waitUntil: 'networkidle' },
     )
     await page.getByText('Think first…').waitFor()
@@ -133,7 +133,7 @@ try {
     shots.push(await snap(page, '05-B-reveal', viewport))
 
     await page.goto(
-      `http://127.0.0.1:${port}/?quickReview=ph-father&reviewFormat=A`,
+      `http://127.0.0.1:${port}/?playtest=1&quickReview=ph-father&reviewFormat=A`,
       { waitUntil: 'networkidle' },
     )
     await page.getByRole('button', { name: 'Show me' }).waitFor()
@@ -142,7 +142,7 @@ try {
     await page.getByRole('button', { name: 'I had it' }).waitFor()
     shots.push(await snap(page, '07-A-reveal', viewport))
 
-    await page.goto(`http://127.0.0.1:${port}/?quickReview=ph-road&reviewFormat=C`, {
+    await page.goto(`http://127.0.0.1:${port}/?playtest=1&quickReview=ph-road&reviewFormat=C`, {
       waitUntil: 'networkidle',
     })
     await page.locator('.quick-review-plot-hit.is-now').click()
@@ -151,7 +151,7 @@ try {
     shots.push(await snap(page, '08-honesty-check', viewport))
 
     await page.goto(
-      `http://127.0.0.1:${port}/?quickReview=ph-father&reviewFormat=C&reviewStreak=2`,
+      `http://127.0.0.1:${port}/?playtest=1&quickReview=ph-father&reviewFormat=C&reviewStreak=2`,
       { waitUntil: 'networkidle' },
     )
     await page.locator('.quick-review-plot-hit.is-now').click()
