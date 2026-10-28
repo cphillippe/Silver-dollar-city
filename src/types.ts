@@ -373,7 +373,13 @@ export type View =
   | { name: 'daily'; forceId?: string; debugStrip?: boolean }
   | { name: 'area'; areaId: string }
   | { name: 'challenge'; areaId: string; challengeId: string; debugStrip?: boolean }
-  | { name: 'journal'; focusId?: string; autoQuiz?: boolean; sceneRecap?: boolean }
+  | {
+      name: 'journal'
+      focusId?: string
+      autoQuiz?: boolean
+      sceneRecap?: boolean
+      lockInEmpty?: boolean
+    }
   | { name: 'vista' }
   | { name: 'settings' }
   | { name: 'defend' }

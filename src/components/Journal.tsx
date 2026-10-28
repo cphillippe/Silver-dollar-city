@@ -5,6 +5,7 @@ import { guideForArea, STORY } from '../content/story'
 import { localDateKey } from '../lib/dates'
 import { EASY, easyFacingLine, easyJournalMeta, easyLineTaught, easyLoopLine, isEasy } from '../lib/easy'
 import { HoldPractice } from '../easyTrail/lockIn/HoldPractice'
+import { LockInEmpty } from '../easyTrail/lockIn/LockInEmpty'
 import { EasyBack } from './EasyBack'
 import { isDue, nextGapLabel } from '../lib/memory'
 import { starLegend } from '../lib/stars'
@@ -36,10 +37,11 @@ import type { JournalEntry, Learning, MemoryTrace, View } from '../types'
 interface JournalProps {
   focusId?: string
   autoQuiz?: boolean
+  lockInEmpty?: boolean
   onNavigate: (view: View) => void
 }
 
-export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
+export function Journal({ focusId, autoQuiz, lockInEmpty, onNavigate }: JournalProps) {
   const { progress, snoozeReviews } = useProgress()
   const easy = isEasy(progress)
   const today = localDateKey()
@@ -92,6 +94,10 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
     !easyLineTaught(progress, openLine)
   const holdPractice =
     Boolean(autoQuiz && quizBrief && !quizReplacesMatch && (easy || !focusedEntry || focusedOpen))
+
+  if (easy && lockInEmpty) {
+    return <LockInEmpty onNavigate={onNavigate} />
+  }
 
   if (holdPractice && quizBrief) {
     return (
