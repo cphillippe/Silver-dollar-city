@@ -29,6 +29,16 @@ const quickSrc = readFileSync(
 )
 assert.doesNotMatch(quickSrc, /recordHeld|recordLessonHold/)
 
+const appSrc = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
+assert.match(appSrc, /if \(isPlayBuild\(\)\) return null/, 'quickReviewBoot blocks Play builds')
+assert.match(
+  appSrc,
+  /nightWatchJumpAllowed\(search, readNightWatchDebug\(\)\)/,
+  'quickReviewBoot uses playtest gate',
+)
+const settingsSrc = readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8')
+assert.match(settingsSrc, /nightWatchJumpAllowed\(/, 'Settings Quick review uses playtest gate')
+
 const allowed = new Set([
   "What's the main idea?",
   "Where's it from?",
@@ -154,7 +164,7 @@ function seedSave(intervalIndex = 1, lastFormat) {
   return {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.549',
+    appVersion: '1.4.548',
     savedAt: new Date().toISOString(),
     progress: {
       started: true,
