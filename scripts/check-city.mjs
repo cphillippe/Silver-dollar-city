@@ -6279,6 +6279,11 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     /journal\.is-lock-in-empty \.cta-dock \.btn\.primary/,
     '1.4.549 empty Home cta-dock primary matches gem-win Lock In next',
   )
+  assert.match(
+    readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8'),
+    /journal\.is-lock-in-empty \.cta-dock[\s\S]*?background:\s*transparent[\s\S]*?backdrop-filter:\s*none/,
+    '1.4.549 empty cta-dock has no purple plate on the cream card',
+  )
   const loop858 = readFileSync(new URL('../src/easyTrail/trail/loop.ts', import.meta.url), 'utf8')
   assert.match(loop858, /lockInEmpty: true/)
   assert.doesNotMatch(

@@ -153,8 +153,32 @@ async function assertPrimaryButtonRendered(page, selector, where) {
   return stats
 }
 
+async function assertLockInEmptyDockClear(page, where) {
+  const dock = await page.locator('.journal.is-lock-in-empty .cta-dock').first().evaluate((el) => {
+    const s = getComputedStyle(el)
+    return {
+      bg: s.backgroundColor,
+      img: s.backgroundImage,
+      backdrop: s.backdropFilter,
+      boxShadow: s.boxShadow,
+    }
+  })
+  const alpha = dock.bg.match(/[\d.]+/g)?.map(Number).at(-1)
+  assert.ok(
+    dock.bg === 'transparent' || alpha === 0,
+    `${where} cta-dock background is transparent (${dock.bg})`,
+  )
+  assert.equal(dock.img, 'none', `${where} cta-dock has no background plate (${dock.img})`)
+  assert.equal(dock.backdrop, 'none', `${where} cta-dock has no backdrop-filter (${dock.backdrop})`)
+  assert.equal(dock.boxShadow, 'none', `${where} cta-dock has no plate shadow (${dock.boxShadow})`)
+}
+
 async function assertLockInEmptyHomeButton(page, where) {
-  await assertPrimaryButtonRendered(page, LOCK_IN_EMPTY_HOME, where)
+  await assertLockInEmptyDockClear(page, where)
+  const stats = await assertPrimaryButtonRendered(page, LOCK_IN_EMPTY_HOME, where)
+  assert.match(stats.bgImage, /linear-gradient/, `${where} Home keeps its primary gradient glow`)
+  const btnGlow = await page.locator(LOCK_IN_EMPTY_HOME).first().evaluate((el) => getComputedStyle(el).boxShadow)
+  assert.notEqual(btnGlow, 'none', `${where} Home button keeps box-shadow glow (${btnGlow})`)
 }
 
 async function tapLockInTab(page) {
