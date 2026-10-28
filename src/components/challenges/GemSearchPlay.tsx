@@ -445,7 +445,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       if (done) finishBoard()
       return true
     }
-    if (isStoryWordPrefix(nextPath, puzzle, bonusRef.current)) return false
+    if (!final && isStoryWordPrefix(nextPath, puzzle, bonusRef.current)) return false
     if (isChipWordPrefix(nextPath, puzzle, foundRef.current)) {
       if (!final || nextPath.length < 4) return false
     }

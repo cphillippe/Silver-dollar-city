@@ -35,6 +35,7 @@ import {
   MIN_BONUS_PLANT,
   pathLetters,
   plantCandidates,
+  isStoryWordPrefix,
   shouldMissAfterSwipe,
   snapFingerPath,
   tryAddToPath,
@@ -333,6 +334,21 @@ assert.equal(shouldMissAfterSwipe(false, 4), true, 'unscored swipe of 4 can miss
   )
 }
 
+{
+  const seedsBoard = buildGemPuzzle('ph-seeds', 1793300000002)
+  const see = seedsBoard.bonus.find((word) => word.text === 'SEE')
+  assert.ok(see, 'ph-seeds#1793300000002 has SEE bonus')
+  const seePath = seedsBoard.bonusPaths[see.id]
+  assert.equal(isStoryWordPrefix(seePath, seedsBoard, []), true, 'SEE is a story-word prefix while dragging')
+  assert.equal(matchBonusWord(seePath, seedsBoard, [])?.text, 'SEE', 'SEE still matches as bonus on release')
+  const ob = buildGemPuzzle('ob-tuning', 5)
+  const tune = ob.bonus.find((word) => word.text === 'TUNE')
+  assert.ok(tune, 'ob-tuning#5 has TUNE bonus')
+  const tunePath = ob.bonusPaths[tune.id]
+  assert.equal(isStoryWordPrefix(tunePath, ob, []), true, 'TUNE is a story-word prefix while dragging')
+  assert.equal(matchBonusWord(tunePath, ob, [])?.text, 'TUNE', 'TUNE still matches as bonus on release')
+}
+
 const overlapBoard = {
   ...puzzleFrom(lettersFromRows(['CATXXXXX', 'XXRXXXXX', 'XXRXXXXX'])),
   planted: [
@@ -496,6 +512,11 @@ assert.match(
   playSrc,
   /isChipWordPrefix\(nextPath, puzzle, foundRef\.current\)[\s\S]{0,80}!final \|\| nextPath\.length < 4/,
   'chip prefix guard skips on final release for 4+ letter paths (STEP)',
+)
+assert.match(
+  playSrc,
+  /!final && isStoryWordPrefix\(nextPath, puzzle, bonusRef\.current\)/,
+  'story-word prefix guard skips on final release (SEE, TUNE, THIN)',
 )
 assert.match(playSrc, /if \(submit\(line, true\)\) return/, 'miss swipe submits with final=true')
 assert.doesNotMatch(playSrc, /onCellDown[\s\S]{0,420}applyCell\(cell, 'tap'\)/, 'pointerdown must not submit tap (drag stays live)')
