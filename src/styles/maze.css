@@ -450,13 +450,18 @@ html[data-easy='on'] .play.is-road-maze .maze-stage {
   flex-direction: column;
 }
 
-html[data-easy='on'] .play.is-road-maze .maze-how {
+html[data-easy='on'] .play.is-road-maze .maze-how-slot {
   flex: 0 0 auto;
+  width: 100%;
+  min-height: calc(0.8125rem * 1.15 + 4px);
+}
+
+html[data-easy='on'] .play.is-road-maze .maze-how {
   width: 100%;
   margin: 0;
   padding: 0 2px 2px;
   text-align: center;
-  font-size: 0.78rem;
+  font-size: 0.8125rem;
   line-height: 1.15;
   font-weight: 750;
   color: #fff6e8;
@@ -465,7 +470,7 @@ html[data-easy='on'] .play.is-road-maze .maze-how {
 @media (max-height: 920px) {
   html[data-easy='on'] .play.is-road-maze .maze-how {
     color: var(--ink, #2a2118);
-    font-size: 0.74rem;
+    font-size: 0.8125rem;
     line-height: 1.1;
     padding: 0 2px;
   }
