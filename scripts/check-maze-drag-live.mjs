@@ -24,8 +24,7 @@ const STEP_DIRS = [
   { r: 0, c: -1 },
   { r: 0, c: 1 },
 ]
-const ARTIFACT_SHOTS = '/opt/cursor/artifacts/screenshots'
-const SHOT_ROOT = process.env.MAZE_DRAG_SHOT_ROOT ?? join(tmpdir(), 'maze-drag-live')
+const SHOT_ROOT = join(tmpdir(), 'maze-drag-861')
 
 function key(cell) {
   return `${cell.r}:${cell.c}`
@@ -189,15 +188,20 @@ async function waitHere(page, cell, timeout = 15000) {
   )
 }
 
-async function dragMazeThrough(page, cells) {
+async function dragMazeThrough(page, cells, midShotPath) {
   const start = await page.locator('[data-maze-cell].is-here').boundingBox()
   if (!start) throw new Error('pawn drag has no box')
   await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2)
   await page.mouse.down()
-  for (const cell of cells) {
+  for (let i = 0; i < cells.length; i += 1) {
+    const cell = cells[i]
     const box = await cellBox(page, cell)
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 14 })
     await page.waitForTimeout(40)
+    if (midShotPath && i === 2) {
+      await page.waitForTimeout(160)
+      await page.screenshot({ path: midShotPath })
+    }
   }
   await page.mouse.up()
   const last = cells[cells.length - 1]
@@ -289,15 +293,16 @@ export async function proveMazeDragAcceptance(page, opts = {}) {
   }
 
   if (opts.capture375) {
-    mkdirSync(ARTIFACT_SHOTS, { recursive: true })
-    await page.screenshot({ path: join(ARTIFACT_SHOTS, 'maze-drag-before-375.png') })
+    mkdirSync(SHOT_ROOT, { recursive: true })
+    await page.screenshot({ path: join(SHOT_ROOT, 'maze-drag-before-375.png') })
   }
 
   let at = await readCell(page.locator('[data-maze-cell].is-here'))
   let open = await loadOpen()
   const lPath = findLPath(at, open, 2)
   assert.ok(lPath, `${label}: need an L-shaped 4-tile corridor`)
-  await dragMazeThrough(page, lPath)
+  const midShot = opts.capture375 ? join(SHOT_ROOT, 'maze-drag-l-mid-375.png') : undefined
+  await dragMazeThrough(page, lPath, midShot)
   assert.deepEqual(
     await readCell(page.locator('[data-maze-cell].is-here')),
     lPath[lPath.length - 1],
@@ -354,7 +359,7 @@ export async function proveMazeDragAcceptance(page, opts = {}) {
   assert.deepEqual(await readCell(page.locator('[data-maze-cell].is-here')), tapNext, `${label}: tap moves one tile`)
 
   if (opts.capture375) {
-    await page.screenshot({ path: join(ARTIFACT_SHOTS, 'maze-drag-after-375.png') })
+    await page.screenshot({ path: join(SHOT_ROOT, 'maze-drag-after-375.png') })
   }
 }
 
@@ -433,6 +438,7 @@ async function runViewport(browser, origin, width, height) {
 }
 
 export async function checkMazeDragLive() {
+  mkdirSync(SHOT_ROOT, { recursive: true })
   setMazePreset(0)
   assert.deepEqual(MAZE_START, { r: 0, c: 0 })
   if (!existsSync(join(process.cwd(), 'dist/index.html'))) {

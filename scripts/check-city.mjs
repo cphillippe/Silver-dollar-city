@@ -1902,20 +1902,20 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.550')
-assert.equal(CHANGELOG[0].version, '1.4.550', '1.4.550 is the newest row')
-assert.ok(CHANGELOG.some((note) => note.version === '1.4.550'), '1.4.550 changelog row')
+assert.equal(APP_VERSION, '1.4.549')
+assert.equal(CHANGELOG[0].version, '1.4.549', '1.4.549 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.549'), '1.4.549 changelog row')
 assert.doesNotMatch(
-  latestChange('1.4.550').items.join('\n'),
+  latestChange('1.4.549').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
-  '1.4.550 changelog avoids GitHub close keywords',
+  '1.4.549 changelog avoids GitHub close keywords',
 )
-assert.match(latestChange('1.4.550').title, /road maze drag|Story Creek/i, '1.4.550 changelog title names the maze drag fix')
-assert.match(latestChange('1.4.550').items.join('\n'), /Refs #861/, '1.4.550 changelog refs #861')
+assert.match(latestChange('1.4.549').title, /road maze drag|Story Creek/i, '1.4.549 changelog title names the maze drag fix')
+assert.match(latestChange('1.4.549').items.join('\n'), /Refs #861/, '1.4.549 changelog refs #861')
 assert.doesNotMatch(
-  latestChange('1.4.550').items.join('\n'),
+  latestChange('1.4.549').items.join('\n'),
   /\?playtest=1|Night Watch debug/,
-  '1.4.550 changelog stays player-facing',
+  '1.4.549 changelog stays player-facing',
 )
 assert.equal(CHANGELOG[1].version, '1.4.548', '1.4.548 follows the maze drag row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.548'), '1.4.548 changelog row')

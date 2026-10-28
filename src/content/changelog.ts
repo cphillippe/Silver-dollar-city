@@ -15,7 +15,7 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.550',
+    version: '1.4.549',
     title: 'Easy Story Creek: road maze drags follow your finger around corners',
     when: '2026-10-28',
     items: [
