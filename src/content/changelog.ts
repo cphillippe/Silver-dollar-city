@@ -34,7 +34,7 @@ export const CHANGELOG: ChangeNote[] = [
     items: [
       'Settings and What’s new stay free of developer notes on a normal link.',
       'Easy text on Home, Settings, Lock In, Match, and early lessons is at least 13 pixels tall.',
-      'Match bonus messages stay below the letter grid on small phones without overlapping cells.',
+      'Match bonus messages stay above the letter grid on small phones without overlapping cells.',
       'Refs #871.',
     ],
   },

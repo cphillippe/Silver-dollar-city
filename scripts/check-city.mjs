@@ -1923,7 +1923,7 @@ assert.doesNotMatch(
 )
 assert.match(
   latestChange('1.4.552').items.join('\n'),
-  /below the letter grid/,
+  /above the letter grid/,
   '1.4.552 changelog names the Match banner layout fix',
 )
 assert.equal(CHANGELOG[1].version, '1.4.551', '1.4.551 follows the #871 row')
@@ -16404,7 +16404,7 @@ console.log('check-city: ok')
   assert.match(playTap, /scrollWinIntoView/)
   assert.match(playTap, /gem-find-pop gem-score-pop/)
   assert.match(playTap, /submit\(line, true\)/)
-  assert.match(gemTapCss, /\.gem-hint-slot \{[\s\S]*?min-height: 7\.35rem/)
+  assert.match(gemTapCss, /\.gem-hint-slot \{[\s\S]*?min-height: 6\.54rem/)
   assert.doesNotMatch(
     gemTapCss,
     /:has\(\.gem-combo\.is-loud\) \{\s*min-height: 5\.85rem/,
