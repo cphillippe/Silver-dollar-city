@@ -15,13 +15,26 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.551',
-    title: 'Easy Night Watch: walk-in taps and tablet drags',
+    version: '1.4.552',
+    title: 'Easy Night Watch: walk-in taps, tablet drags, pace chip in HUD',
     when: '2026-10-28',
     items: [
       'The first walker on each wave can be tapped as soon as it steps onto the map — no silent wait while it is already visible.',
       'On a wide tablet with the camera off, dragging across the board no longer plants lamps or fires stray shots; quick taps still work.',
+      'The pace chip sits in the top HUD bar so it never covers walker taps when the map camera is on.',
       'Easy only. Refs #756, Refs #768.',
+    ],
+  },
+  {
+    version: '1.4.551',
+    title: 'Easy road maze: pass-by no longer helps; replay shows the new map right away',
+    when: '2026-10-28',
+    items: [
+      'The maze now counts the hurt man only when you stop beside him, and a new road shows right away.',
+      'After you help him, dragging to the inn shows One more road right away — no extra tap on the win card.',
+      'Drag or tap the road — the hint says both.',
+      'Hard stays the same.',
+      'Refs #877.',
     ],
   },
   {
