@@ -15,6 +15,18 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.550',
+    title: 'Easy Match: bonus words that start a story word score on release',
+    when: '2026-10-28',
+    items: [
+      'Releasing a drag on SEE, SHE, TUNE, THIN, or other real bonus words that start a story word scores BONUS +50 instead of Miss −25.',
+      'After that bonus, dragging the full story word still awards Story word! +100.',
+      'A short release that only prefixes a chip word still clears with no penalty.',
+      'Hard stays the same.',
+      'Refs #870.',
+    ],
+  },
+  {
     version: '1.4.549',
     title: 'Easy Story Creek: road maze drags follow your finger around corners',
     when: '2026-10-28',
