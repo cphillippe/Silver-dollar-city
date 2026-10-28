@@ -86,12 +86,12 @@ export function QuickReview({
   const trace = progress.memory[lineId]
   const intervalIndex = trace?.intervalIndex ?? 0
   const lastFormat = trace?.lastFormat
-  const format =
-    debugFormat && debugFormat !== 'F'
-      ? debugFormat
-      : pickFormat(lineId, today, lastFormat, sitting, intervalIndex, {
-          acOnly: formatsACOnly,
-        })
+  const [format] = useState<Exclude<ReviewFormatId, 'F'>>(() => {
+    if (debugFormat && debugFormat !== 'F') return debugFormat
+    return pickFormat(lineId, today, lastFormat, sitting, intervalIndex, {
+      acOnly: formatsACOnly,
+    })
+  })
 
   const [sourceBeatActive, setSourceBeatActive] = useState(false)
   const [reasonBeatClean, setReasonBeatClean] = useState(false)
@@ -127,7 +127,7 @@ export function QuickReview({
     setMapMiss(false)
     setMapTapClean(true)
     graded.current = false
-  }, [lineId, format])
+  }, [lineId])
 
   const choiceLines = useMemo(() => {
     if (!brief) return []

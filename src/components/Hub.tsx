@@ -39,7 +39,7 @@ import { RecallOffer } from './RecallOffer'
 import { StoresComingNotice } from './StoresComingNotice'
 import { easyNightWatchOnHome, easyReadIsHomeGold, easyReadMarkedTomorrow, noteEasyOpenDay } from '../content/goldenPath'
 import { isPlayBuild } from '../config/playBuild'
-import { nightWatchJumpAllowed, readNightWatchDebug } from '../lib/nightWatchDebug'
+import { playtestUrlAllowed } from '../lib/nightWatchDebug'
 import { FoundersGiftLine } from './FoundersGift'
 
 interface HubProps {
@@ -213,9 +213,8 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                   if (readTomorrow) return
                   const playtestReview =
                     !isPlayBuild() &&
-                    nightWatchJumpAllowed(
+                    playtestUrlAllowed(
                       typeof window !== 'undefined' ? window.location.search : '',
-                      readNightWatchDebug(),
                     )
                   if (playtestReview && recallItems.length > 0) {
                     const queue = recallItems.slice(0, 3).map((item) => item.id)

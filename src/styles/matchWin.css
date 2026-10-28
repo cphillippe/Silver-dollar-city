@@ -577,14 +577,7 @@ html[data-easy='on'] .play.is-gem-search.is-win .match-yes {
   html[data-easy='on'] .play.is-road-maze.is-win .match-yes .held-from {
     color: #3a2418;
     opacity: 1;
-    font-size: 14px;
   }
-}
-
-html[data-easy='on'] .play.is-gem-search.is-win .match-yes .held-from,
-html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-keep-card .match-yes .held-from {
-  font-size: 14px;
-  opacity: 1;
 }
 
 /* 1.4.360: Easy road win — dark ink on the result card and on every dock label.
