@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { spawn } from 'node:child_process'
+import { build, preview } from 'vite'
 import { chromium } from '@playwright/test'
 import { APP_VERSION } from '../src/config/app.ts'
 import { STORAGE_KEY } from '../src/config/app.ts'
@@ -75,14 +75,27 @@ function tapPlot(page, lineId) {
   return page.locator(`[data-plot-id="${plotId}"]`).click()
 }
 
+async function launchBrowser() {
+  const sandboxArgs = ['--no-sandbox', '--disable-setuid-sandbox']
+  try {
+    return await chromium.launch({ args: sandboxArgs })
+  } catch {
+    return await chromium.launch({ channel: 'chrome', args: sandboxArgs })
+  }
+}
+
 const root = fileURLToPath(new URL('..', import.meta.url))
-const preview = spawn('npx', ['vite', 'preview', '--host', '127.0.0.1', '--port', '4173'], {
-  cwd: root,
-  stdio: 'ignore',
+const envPort = process.env.HOP842_PREVIEW_PORT
+  ? Number.parseInt(process.env.HOP842_PREVIEW_PORT, 10)
+  : 0
+const server = await preview({
+  root,
+  preview: { host: '127.0.0.1', port: Number.isFinite(envPort) ? envPort : 0, strictPort: false },
+  logLevel: 'warn',
 })
-await new Promise((resolve) => setTimeout(resolve, 2500))
-const port = 4173
-const browser = await chromium.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] })
+const address = server.httpServer?.address()
+const port = typeof address === 'object' && address ? address.port : envPort || 4173
+const browser = await launchBrowser()
 const paths = []
 
 try {
@@ -109,36 +122,6 @@ try {
     { width: 375, height: 667 },
     { width: 390, height: 844 },
   ]) {
-    await page.goto(`http://127.0.0.1:${port}/?playtest=1`, { waitUntil: 'networkidle' })
-    await page.getByRole('main', { name: 'Home' }).waitFor()
-    paths.push(await snap(page, '842-home-read-entry', viewport))
-
-    await page.goto(reviewUrl, { waitUntil: 'networkidle' })
-    await page.locator('.quick-review').waitFor()
-    await page.locator('.quick-review-prompt-panel').waitFor()
-    paths.push(await snap(page, '842-home-card1-prompt', viewport))
-    await tapPlot(page, 'ph-road')
-    await page.getByRole('button', { name: 'I had it' }).waitFor()
-    paths.push(await snap(page, '842-home-card1-reveal', viewport))
-    await page.getByRole('button', { name: 'I had it' }).click()
-
-    await page.getByText('Why is it true?').waitFor()
-    paths.push(await snap(page, '842-home-card2-why-prompt', viewport))
-    await tapPlot(page, 'ph-father')
-    await page.getByRole('button', { name: 'I had it' }).waitFor()
-    await page.getByRole('button', { name: 'I had it' }).click()
-
-    await page.getByText("Where's it from?").waitFor()
-    await tapPlot(page, 'ph-father')
-    await page.getByRole('button', { name: 'I had it' }).waitFor()
-    paths.push(await snap(page, '842-home-card2-source-reveal', viewport))
-    await page.getByRole('button', { name: 'I had it' }).click()
-
-    await page.locator('.quick-review-streak').waitFor()
-    await tapPlot(page, 'ob-tuning')
-    await page.getByRole('button', { name: 'I had it' }).waitFor()
-    paths.push(await snap(page, '842-home-streak-reveal-actions', viewport))
-
     await page.goto(formatCUrl, { waitUntil: 'networkidle' })
     await page.locator('.quick-review-prompt-panel').waitFor()
     paths.push(await snap(page, '842-coach-C-prompt-before-tap', viewport))
@@ -150,12 +133,28 @@ try {
     await page.getByRole('button', { name: 'Show me' }).click()
     await page.getByRole('button', { name: 'I had it' }).waitFor()
     paths.push(await snap(page, '842-coach-A-reveal', viewport))
+
+    if (viewport.width === 390) {
+      await page.goto(formatCUrl, { waitUntil: 'networkidle' })
+      const wrongPlot = await page.evaluate((correct) => {
+        const hit = [...document.querySelectorAll('[data-plot-id]')].find(
+          (el) => el.getAttribute('data-plot-id') !== correct,
+        )
+        return hit?.getAttribute('data-plot-id') ?? null
+      }, lociStampFor('ph-road').plotId)
+      if (wrongPlot) {
+        await page.locator(`[data-plot-id="${wrongPlot}"]`).click()
+        await page.locator(`[data-plot-id="${wrongPlot}"]`).click()
+        await page.locator('.quick-review-plot-hit.is-now').waitFor()
+        paths.push(await snap(page, '842-coach-C-hint-after-2-misses', viewport))
+      }
+    }
   }
 
   await context.close()
 } finally {
   await browser.close()
-  preview.kill('SIGTERM')
+  await server.close()
 }
 
 writeFileSync(join(outDir, 'paths.json'), JSON.stringify({ version: APP_VERSION, paths }, null, 2))

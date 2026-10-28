@@ -354,13 +354,13 @@ export function QuickReview({
   const streak = sitting?.streak ?? 0
   const streakLabel = streak >= 2 ? (streak >= 3 ? '3 in a row' : '2 in a row') : null
   const mapPlotHint = wrongMapTaps >= 2
-  const promptPanelGold = format === 'C' && phase === 'prompt' && !revealed && !mapPlotHint
+  const mapTapGold = format === 'C' && phase === 'prompt' && !revealed && !mapPlotHint
   const rung = reviewRung(beatIndex)
   const guideName = CAST[stamp.whoId]?.name ?? stamp.whoId
 
   function acRevealBody() {
     if (!brief) return null
-    const showReason = rung === 'reason' || (intervalIndex === 2 && sourceBeatActive)
+    const showReason = Boolean(brief.reason)
     const showSource = rung === 'source' || (intervalIndex === 2 && sourceBeatActive)
     return (
       <>
@@ -447,7 +447,7 @@ export function QuickReview({
         <>
           {phase === 'prompt' && !revealed ? (
             <div className="quick-review-stage">
-              <div className={`quick-review-prompt-panel ${promptPanelGold ? 'is-now' : ''}`}>
+              <div className="quick-review-prompt-panel quick-review-prompt-panel--flat">
                 <p className="quick-review-prompt quick-review-prompt-title">{prompt}</p>
               </div>
               <div className="quick-review-map" aria-hidden={false}>
@@ -479,7 +479,7 @@ export function QuickReview({
                   </div>
                 </div>
               </div>
-              <p className="quick-review-map-tap">{EASY.reviewMapTap}</p>
+              <p className={`quick-review-map-tap ${mapTapGold ? 'is-now' : ''}`}>{EASY.reviewMapTap}</p>
               {mapMiss ? (
                 <p className="quick-review-map-miss" role="status">
                   {EASY.reviewMapMiss}

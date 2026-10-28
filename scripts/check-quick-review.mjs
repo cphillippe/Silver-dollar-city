@@ -325,6 +325,14 @@ async function assertFormatCReveal(page, lineId) {
   assert.match((await claimEl.textContent()) ?? '', new RegExp(briefLine.claim.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
   const claimPx = await claimEl.evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
   assert.ok(claimPx >= 18, `claim font ${claimPx}px`)
+  const reasonEl = page.locator('.quick-review-reveal-reason')
+  await reasonEl.waitFor()
+  assert.match(
+    (await reasonEl.textContent()) ?? '',
+    new RegExp(briefLine.reason.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+  )
+  const reasonPx = await reasonEl.evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
+  assert.ok(reasonPx >= 15, `reason font ${reasonPx}px`)
   const sourceEl = page.locator('.quick-review-reveal-source')
   if (await sourceEl.count()) {
     assert.match((await sourceEl.textContent()) ?? '', new RegExp(briefLine.source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
