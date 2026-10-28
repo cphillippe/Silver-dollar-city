@@ -28,8 +28,7 @@ const WIN_VIEWPORTS = [
   [412, 915],
 ]
 const POP_SHOT_ROOT =
-  process.env.GEM_POP_SHOT_ROOT ??
-  (process.env.CI ? join(tmpdir(), 'gemsearch-fix', 'pops') : '/cursor/stores/self/gemsearch-fix/pops')
+  process.env.GEM_POP_SHOT_ROOT ?? join(tmpdir(), 'gemsearch-fix', 'pops')
 
 const POP_SELECTOR =
   '.gem-hint-slot .gem-combo, .gem-hint-slot .bonus-banner, .gem-hint-slot .gem-find-pop, .gem-hint-slot .bonus-plus, .gem-hint-slot .match-toast'
@@ -40,7 +39,7 @@ function savePayload({ lifetime = 5000, seen = 2 } = {}) {
   return {
     kind: 'silver-city-save',
     schemaVersion: 1,
-    appVersion: '1.4.547',
+    appVersion: '1.4.548',
     savedAt: now.toISOString(),
     progress: {
       started: true,

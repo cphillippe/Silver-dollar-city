@@ -1,0 +1,171 @@
+html[data-easy='on'] .quick-review {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0 0 1.25rem;
+  max-width: 100%;
+}
+
+html[data-easy='on'] .quick-review .quick-review-cue {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+html[data-easy='on'] .quick-review .quick-review-prompt {
+  font-size: 13px;
+  line-height: 1.35;
+  margin: 0;
+}
+
+html[data-easy='on'] .quick-review .quick-review-prompt.is-now {
+  font-weight: 600;
+}
+
+html[data-easy='on'] .quick-review-map {
+  position: relative;
+  width: 100%;
+  max-width: 20rem;
+  margin: 0 auto;
+  aspect-ratio: 640 / 420;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: #a8d070;
+}
+
+html[data-easy='on'] .quick-review-map-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+html[data-easy='on'] .quick-review-map-plate {
+  position: absolute;
+  inset: 0;
+}
+
+html[data-easy='on'] .quick-review-plot-hit {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+html[data-easy='on'] .quick-review-plot-hit img {
+  width: 4.5rem;
+  height: auto;
+  pointer-events: none;
+}
+
+html[data-easy='on'] .quick-review-plot-hit.is-now {
+  filter: drop-shadow(0 0 0.45rem rgba(255, 210, 80, 0.95));
+}
+
+html[data-easy='on'] .quick-review-plot-hit .quick-review-avatar {
+  position: absolute;
+  bottom: 3.1rem;
+}
+
+html[data-easy='on'] .quick-review-think-bar,
+html[data-easy='on'] .quick-review-drain-bar {
+  height: 0.5rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+html[data-easy='on'] .quick-review-think-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f6c255, #ffe9a8);
+  transition: width 0.08s linear;
+}
+
+html[data-easy='on'] .quick-review-drain-bar.is-now {
+  box-shadow: 0 0 0 2px rgba(255, 210, 80, 0.85);
+}
+
+html[data-easy='on'] .quick-review-drain-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f6c255, #ffe9a8);
+  transition: width 0.08s linear;
+}
+
+html[data-easy='on'] .quick-review-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+html[data-easy='on'] .quick-review-lines .match-card.recall-card {
+  font-size: 0.8125rem;
+  min-height: 44px;
+}
+
+html[data-easy='on'] .quick-review-lines .match-card.recall-card.is-flash {
+  box-shadow: 0 0 0 2px rgba(255, 210, 80, 0.9);
+}
+
+html[data-easy='on'] .quick-review-flip {
+  min-height: 44px;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 2px rgba(255, 210, 80, 0.85);
+}
+
+html[data-easy='on'] .quick-review-flip img {
+  width: 100%;
+  max-height: 12rem;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+
+html[data-easy='on'] .quick-review-reveal-line {
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+html[data-easy='on'] .quick-review-streak {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  font-size: 0.8125rem;
+}
+
+html[data-easy='on'] .quick-review-streak-pip {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+html[data-easy='on'] .quick-review-streak-pip.is-lit {
+  background: #f6c255;
+}
+
+html[data-easy='on'] .quick-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+html[data-easy='on'] .quick-review-actions .text-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+}

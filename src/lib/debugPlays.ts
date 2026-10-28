@@ -12,6 +12,11 @@ import { ROAD_MAZE_LINE } from './roadMaze.ts'
 import { STORY_SNAP_LINE } from './storySnap.ts'
 import { storyPlayFor, type StoryPlayKind } from './storyPlay.ts'
 
+export interface DebugQuickReviewLine {
+  lineId: string
+  name: string
+}
+
 /** Hold Why Blast is journal lock-in, not a Match arcade. */
 export type DebugPlayKind = StoryPlayKind | 'why-blast'
 
@@ -139,6 +144,26 @@ export function storyStripLines(): StoryStripLine[] {
 
 export function debugStoryStripLabel(item: StoryStripLine): string {
   return `${item.lineId} · ${item.name}`
+}
+
+/** Settings debug — Quick Review card (no Home entry). */
+export function debugQuickReviewLines(): DebugQuickReviewLine[] {
+  return EASY_LINE_ORDER.map((lineId) => ({
+    lineId,
+    name: lessonName(lineId),
+  }))
+}
+
+export function debugQuickReviewLabel(item: DebugQuickReviewLine): string {
+  return `Quick · ${item.lineId} · ${item.name}`
+}
+
+export function debugQuickReviewJump(item: DebugQuickReviewLine): {
+  name: 'quick-review'
+  lineId: string
+  skipWrite: true
+} {
+  return { name: 'quick-review', lineId: item.lineId, skipWrite: true }
 }
 
 /** One tap into the strip. Daily lines open the morning trail; the rest open the street puzzle. */

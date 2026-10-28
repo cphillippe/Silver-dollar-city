@@ -23,11 +23,18 @@ import {
   debugNightWatchJump,
   debugPlayGroups,
   debugPlayLabel,
+  debugQuickReviewJump,
+  debugQuickReviewLabel,
+  debugQuickReviewLines,
   debugStoryStripJump,
   debugStoryStripLabel,
   storyStripLines,
 } from '../lib/debugPlays'
-import { readNightWatchDebug, writeNightWatchDebug } from '../lib/nightWatchDebug'
+import {
+  nightWatchJumpAllowed,
+  readNightWatchDebug,
+  writeNightWatchDebug,
+} from '../lib/nightWatchDebug'
 import { EASY, isEasy } from '../lib/easy'
 import { activeLampStyle, foundersLamp } from '../lib/foundersLamp'
 import { EASY_HOME } from '../lib/easyNav'
@@ -506,6 +513,33 @@ export function Settings({ onNavigate }: SettingsProps) {
             </button>
           </div>
         </section>
+        {nightWatchJumpAllowed(
+          typeof window !== 'undefined' ? window.location.search : '',
+          nwDebug,
+        ) ? (
+          <section className="settings-debug-group" aria-label="Quick review">
+            <p className="eyebrow">Quick review</p>
+            <p className="quiet">
+              Playtest only — add <code>?playtest=1</code> to the link, or turn on Night Watch debug
+              freeze for this visit.
+            </p>
+            <div className="settings-actions">
+              {debugQuickReviewLines().map((item) => (
+                <button
+                  key={item.lineId}
+                  type="button"
+                  className="btn"
+                  onClick={() => {
+                    setEasyMode(true)
+                    onNavigate(debugQuickReviewJump(item))
+                  }}
+                >
+                  {debugQuickReviewLabel(item)}
+                </button>
+              ))}
+            </div>
+          </section>
+        ) : null}
         <section className="settings-debug-group" aria-label="Story Strip">
           <p className="eyebrow">Story Strip</p>
           <div className="settings-actions">
