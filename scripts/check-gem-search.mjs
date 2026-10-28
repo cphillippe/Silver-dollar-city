@@ -198,6 +198,8 @@ assert.equal(isKidFriendlyBonusWord('BED'), true)
 assert.equal(isKidFriendlyBonusWord('NUDE'), false)
 assert.equal(isKidFriendlyBonusWord('SUCK'), false)
 assert.equal(isKidFriendlyBonusWord('HELL'), false)
+assert.equal(isKidFriendlyBonusWord('WINE'), false)
+assert.equal(isKidFriendlyBonusWord('smoke'), false)
 assert.equal(isKidFriendlyBonusWord('SNAG'), true, 'SNAG is a real English bonus')
 assert.equal(isKidFriendlyBonusWord('SNAP'), true)
 assert.equal(isKidFriendlyBonusWord('SNOW'), true)
@@ -820,8 +822,8 @@ for (const id of Object.keys(MATCH_CHIPS)) {
   assert.equal(new Set(authoredRow).size, authoredRow.length, `${id} row has no duplicates`)
   for (const word of authoredRow) {
     assert.ok(word.length >= 3 && word.length <= 6, `${id} ${word} length`)
-    // wb-creed keeps its original DIED; it still scores there but is never planted.
-    if (word !== 'DIED') assert.equal(isKidFriendlyBonusWord(word), true, `${id} ${word} kid-safe`)
+    // wb-creed keeps its original DIED; ph-road keeps WINE — still in bonusPool, never planted.
+    if (word !== 'DIED' && word !== 'WINE') assert.equal(isKidFriendlyBonusWord(word), true, `${id} ${word} kid-safe`)
   }
   for (let seed = 0; seed < 40; seed += 1) {
     const board = buildGemPuzzle(id, seed)
@@ -855,6 +857,12 @@ for (const id of Object.keys(MATCH_CHIPS)) {
       const spot = findStraightSpelling(board.letters, text)
       if (!spot) continue
       const hit = matchBonusWord(spot, board, [])
+      if (hit?.text !== text) {
+        assert.equal(pathLetters(spot, board.letters), text, `${id}#${seed} path spells ${text}`)
+        assert.equal(isBonusSpelling(text, board), true, `${id}#${seed} ${text} still scores as story`)
+        assert.equal(bonusPointsFor(text, board), MATCH_STORY_POINTS, `${id}#${seed} ${text} pays +100`)
+        continue
+      }
       assert.equal(hit?.text, text, `${id}#${seed} swiping ${text} scores ${text}`)
       assert.equal(bonusPointsFor(hit.text, board), MATCH_STORY_POINTS, `${id}#${seed} ${text} pays +100`)
     }
@@ -871,6 +879,21 @@ for (const id of Object.keys(MATCH_CHIPS)) {
   }
 }
 assert.ok(fourWord / boards >= 0.5, `most boards fit a 4th related word (${fourWord}/${boards})`)
+
+const NEVER_PLANT = new Set(['WINE', 'SMOKE'])
+const EASY_SEED_SWEEP = 24
+for (const id of EASY_LINE_ORDER) {
+  for (let seed = 0; seed < EASY_SEED_SWEEP; seed += 1) {
+    const board = buildGemPuzzle(id, seed)
+    for (const word of board.planted) {
+      assert.equal(NEVER_PLANT.has(word.text), false, `${id}#${seed} planted must not include ${word.text}`)
+    }
+    for (const text of board.lessonPlanted) {
+      assert.equal(NEVER_PLANT.has(text), false, `${id}#${seed} lessonPlanted must not include ${text}`)
+    }
+  }
+}
+
 const genericProbe = buildGemPuzzle('ph-father', 3)
 assert.equal(bonusPointsFor('THE', genericProbe), MATCH_GENERIC_POINTS, 'a generic extra pays +50')
 assert.equal(bonusPointsFor('HELP', buildGemPuzzle('wb-creed', 1)), MATCH_GENERIC_POINTS, 'shared HELP stays generic off its lesson')
