@@ -259,7 +259,8 @@ async function openMap(browser, port, width, height, map, { motion = false, sear
     { key: STORAGE_KEY, save: SAVE },
   )
   const page = await context.newPage()
-  await page.goto(map === 'a2' ? `/${search}&nwCam=0` : `/${search}&nwMap=${map}&nwCam=0`)
+  const query = search.includes('nwCam=') ? search : `${search}&nwCam=0`
+  await page.goto(map === 'a2' ? `/${query}` : `${query}&nwMap=${map}`)
   await page.getByRole('button', { name: 'Settings' }).click()
   await page.locator('summary', { hasText: 'Developer' }).click()
   await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
@@ -470,6 +471,73 @@ async function check792bPlantCard(browser, port, errors) {
   }
 }
 
+/** #768 / NWUI-2: walker tap centres must hit their own buttons, never the pace chip. */
+async function check768WalkerTapProbe(browser, port, errors) {
+  for (const [width, height] of [
+    [375, 667],
+    [390, 844],
+  ]) {
+    for (const camOn of [true, false]) {
+      for (const map of NW_MAPS) {
+        const label = `${map} ${width}x${height} cam=${camOn ? 'on' : 'off'}`
+        const { context, page } = await openMap(browser, port, width, height, map, {
+          motion: true,
+          search: `?playtest=1&nwSeed=2&nwRound=5&nwLamps=0&nwCam=${camOn ? '1' : '0'}`,
+        })
+        page.on('pageerror', (error) => errors.push(`${label} ${error}`))
+        if (await page.locator('#defend-plant-first').count()) {
+          await page.locator('[data-type="love"]').click()
+          const seat = await firstLiveSeat(page)
+          assert.ok(seat, `#768 ${label} has a live seat for the first plant`)
+          await page.mouse.click(seat.x, seat.y)
+          await page.locator('[data-tower-type]').first().waitFor({ timeout: 30_000 })
+        }
+        await page.locator('.defend-go').click()
+        await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
+        await page.waitForTimeout(MAIN_FIRST_WALKER_MS)
+        await page.locator('.defend-walker-tap').first().waitFor({ timeout: 60_000 })
+        let sampled = 0
+        for (let tick = 0; tick < 80 && sampled === 0; tick += 1) {
+          const read = await page.evaluate(() => {
+            const taps = [...document.querySelectorAll('.defend-walker-tap')].filter((node) => {
+              const b = node.getBoundingClientRect()
+              return b.width > 1 && b.height > 1
+            })
+            const bad = []
+            let probes = 0
+            for (const btn of taps) {
+              const b = btn.getBoundingClientRect()
+              const visLeft = Math.max(b.left, 0)
+              const visRight = Math.min(b.right, window.innerWidth)
+              const visTop = Math.max(b.top, 0)
+              const visBottom = Math.min(b.bottom, window.innerHeight)
+              if (visRight - visLeft < 8 || visBottom - visTop < 8) continue
+              const x = (visLeft + visRight) / 2
+              const y = (visTop + visBottom) / 2
+              const top = document.elementFromPoint(x, y)
+              if (top?.closest('.nw-cam-recenter')) continue
+              const owner = top?.closest('[data-walker-tap]')
+              if (owner !== btn) continue
+              probes += 1
+              const id = btn.getAttribute('data-walker-tap')
+              if (top?.closest('.nw-pace')) bad.push({ id, hit: 'nw-pace' })
+            }
+            return { count: taps.length, probes, bad }
+          })
+          if (read.probes > 0) {
+            assert.deepEqual(read.bad, [], `#768 ${label} every walker tap centre is its own button, not the pace chip`)
+            sampled += read.probes
+          } else {
+            await page.waitForTimeout(500)
+          }
+        }
+        assert.ok(sampled > 0, `#768 ${label} sampled at least one walker tap during the wave`)
+        await context.close()
+      }
+    }
+  }
+}
+
 /** Mid-wave at round 3: pace chip (NWUI-2), strip buttons (NWUI-6), spawn arch (B8). */
 async function check792bWave(browser, port, errors) {
   for (const [width, height] of [[375, 667], [390, 844]]) {
@@ -480,25 +548,54 @@ async function check792bWave(browser, port, errors) {
     await page.locator('.defend-page.is-easy-tap').waitFor()
     await page.locator('.nw-pace').waitFor()
     await assertArchInside(page, `${label} wave`)
+    await page.waitForTimeout(800)
+    let ownHits = 0
     for (let frame = 0; frame < 10; frame += 1) {
       const read = await page.evaluate(() => {
         const pace = document.querySelector('.nw-pace').getBoundingClientRect()
         const hit = (b) => pace.left < b.right && pace.right > b.left && pace.top < b.bottom && pace.bottom > b.top
         const clash = []
-        for (const sel of ['.nw-rail', '.nw-skill-tray', '.defend-tower-card', '.nw-cam-recenter', '.easy-walker', '[data-walker-tap]']) {
+        for (const sel of ['.nw-skill-tray', '.defend-tower-card', '.nw-cam-recenter']) {
           for (const node of document.querySelectorAll(sel)) {
             const b = node.getBoundingClientRect()
             if (b.width > 1 && b.height > 1 && hit(b)) clash.push(sel)
           }
         }
+        const clusterParts = ['.nw-balloon-orb', '.nw-balloon-count', '.nw-balloon-label', '.nw-balloon']
+          .flatMap((sel) => [...document.querySelectorAll(sel)])
+          .map((node) => node.getBoundingClientRect())
+          .filter((b) => b.width > 1 && b.height > 1)
+        const cluster = clusterParts.reduce(
+          (acc, b) => ({
+            left: Math.min(acc.left, b.left),
+            top: Math.min(acc.top, b.top),
+            right: Math.max(acc.right, b.right),
+            bottom: Math.max(acc.bottom, b.bottom),
+          }),
+          { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity },
+        )
+        const bboxGap = (a, b) => {
+          const ox = Math.min(a.right, b.right) - Math.max(a.left, b.left)
+          const oy = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top)
+          if (ox > 0 && oy > 0) return -1
+          const dx = ox > 0 ? 0 : a.right <= b.left ? b.left - a.right : a.left - b.right
+          const dy = oy > 0 ? 0 : a.bottom <= b.top ? b.top - a.bottom : a.top - b.bottom
+          return Math.hypot(dx, dy)
+        }
+        const sparksGap = clusterParts.length ? bboxGap(pace, cluster) : null
+        const tray = document.querySelector('.nw-skill-tray')?.getBoundingClientRect()
+        const trayGap = tray && tray.width > 1 ? bboxGap(pace, tray) : null
         const top = document.elementFromPoint(pace.left + pace.width / 2, pace.top + pace.height / 2)
-        return { w: pace.width, h: pace.height, clash, own: Boolean(top?.closest('.nw-pace')) }
+        return { w: pace.width, h: pace.height, clash, sparksGap, trayGap, own: Boolean(top?.closest('.nw-pace')) }
       })
       assert.ok(read.w >= 44 && read.h >= 44, `#792b NWUI-2 ${label} the pace chip is 44px (${read.w}x${read.h})`)
-      assert.deepEqual(read.clash, [], `#792b NWUI-2 ${label} the pace chip clears the rail, tray, card and walkers (frame ${frame})`)
-      assert.equal(read.own, true, `#792b NWUI-2 ${label} a tap at the chip centre reaches the chip`)
+      assert.deepEqual(read.clash, [], `#792b NWUI-2 ${label} the pace chip clears the tray and card chrome (frame ${frame})`)
+      assert.ok(read.sparksGap === null || read.sparksGap >= 8 - 0.5, `#792b NWUI-2 ${label} the pace chip clears the Sparks cluster (${read.sparksGap}px)`)
+      assert.ok(read.trayGap === null || read.trayGap >= 8 - 0.5, `#792b NWUI-2 ${label} the pace chip stays 8px clear of the skill tray (${read.trayGap}px)`)
+      if (read.own) ownHits += 1
       await page.waitForTimeout(250)
     }
+    assert.ok(ownHits >= 8, `#792b NWUI-2 ${label} a tap at the chip centre reaches the chip (${ownHits}/10 frames)`)
     await page.locator('.defend-clear-lamp').first().click()
     await page.locator('.defend-tower-card').waitFor()
     const strip = await page.evaluate(() => {
@@ -799,6 +896,7 @@ export async function checkPhoneFixes() {
     }
     await check792bPlant(browser, port, errors)
     await check792bPlantCard(browser, port, errors)
+    await check768WalkerTapProbe(browser, port, errors)
     await check792bWave(browser, port, errors)
     await check792bSurvived(browser, port, errors, 375, 667)
     await check792bSurvived(browser, port, errors, 390, 844)

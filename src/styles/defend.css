@@ -6059,15 +6059,20 @@ button.defend-new-lamp[aria-pressed='true'] {
   color: transparent;
 }
 
-/* 792b NWUI-2: pace on the left rail, 8px above the skill tray and clear of the whole Sparks stack (walker taps stay above at z 11). */
+/* 792b NWUI-2: the pace chip rides the bottom-right, off the road (below walker taps in the dock stack). */
 @media (max-width: 480px) {
   .defend-page.is-easy-watch .nw-pace {
     top: auto;
-    bottom: 116px;
-    left: max(18px, calc(env(safe-area-inset-left, 0px) + 14px));
-    right: auto;
+    bottom: 64px;
+    left: auto;
+    right: 8px;
     transform: none;
-    z-index: 20;
+  }
+
+  /* Playtest debug shares the dock column; tuck it away from the pace chip. */
+  .defend-page.is-easy-watch .defend-nw-debug {
+    align-self: flex-end;
+    max-width: min(46vw, 168px);
   }
 }
 

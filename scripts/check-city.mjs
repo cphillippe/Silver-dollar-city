@@ -2100,15 +2100,31 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
   assert.match(actors834, /firstSeatAt !== undefined/, '#834 the page-measured pick is only for the static board')
   assert.match(screen834, /camPointerAt\.current < 500 && !target\.matches\(':focus-visible'\)/, '#834 a pointer focus never pans the camera')
   assert.match(screen834, /suppressClickUntil\.current = 0\n\s+camPanning\.current = false/, '#834 a new press clears the click swallow')
+  assert.match(screen834, /function camDown\(event: ReactPointerEvent<HTMLDivElement>\) \{\s*if \(!event\.isPrimary\) return\s*if \(!camOn && !easy\) return/, '#768 cam-off drag tracking is Easy-only in camDown')
   assert.match(
     screen834,
-    /if \(!camOn\) \{\s*const startOff = camStart\.current[\s\S]*?if \(camPanning\.current\) \{\s*suppressClickUntil\.current = performance\.now\(\) \+ 400\s*event\.stopPropagation\(\)/,
-    '#768 a cam-off drag past NW_TAP_SLOP plants nothing',
+    /if \(!camOn\) \{\s*if \(!easy\) return[\s\S]*?if \(camPanning\.current\) \{\s*suppressClickUntil\.current = performance\.now\(\) \+ 400\s*event\.stopPropagation\(\)/,
+    '#768 a cam-off drag past NW_TAP_SLOP is Easy-only',
   )
   assert.match(
     screen834,
-    /function camEatClick\(event: ReactMouseEvent<HTMLDivElement>\) \{\s*if \(performance\.now\(\) >= suppressClickUntil\.current\) return/,
-    '#768 the post-drag click is eaten with the camera off too',
+    /function camEatClick\(event: ReactMouseEvent<HTMLDivElement>\) \{\s*if \(\(!camOn && !easy\) \|\| performance\.now\(\) >= suppressClickUntil\.current\) return/,
+    '#768 the post-drag click swallow is Easy-only when the camera is off',
+  )
+  assert.match(
+    screen834,
+    /if \(!camOn\) \{\s*if \(!easy\) return[\s\S]*?closeUpgrade\(true\)/,
+    '#768 only Easy cam-off drags may close the tower card',
+  )
+  assert.match(
+    defendCss,
+    /@media \(max-width: 480px\) \{\s*\.defend-page\.is-easy-watch \.nw-pace \{[\s\S]*?bottom:\s*64px;[\s\S]*?right:\s*8px;/,
+    '#768 NWUI-2 pace chip stays bottom-right on narrow Easy phones',
+  )
+  assert.doesNotMatch(
+    defendCss,
+    /\.defend-page\.is-easy-watch \.nw-pace \{[^}]*z-index:\s*20/,
+    '#768 NWUI-2 pace chip does not paint above walker taps',
   )
 
   const seat = (x, y, live = true) => ({ x, y, live })

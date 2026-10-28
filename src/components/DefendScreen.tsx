@@ -1126,6 +1126,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   function camDown(event: ReactPointerEvent<HTMLDivElement>) {
     if (!event.isPrimary) return
+    if (!camOn && !easy) return
     if (camOn) {
       stampCamTouch()
       camPointerAt.current = performance.now()
@@ -1152,6 +1153,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     const dx = event.clientX - start.x
     const dy = event.clientY - start.y
     if (!camOn) {
+      if (!easy) return
       if (!camPanning.current) {
         if (Math.hypot(dx, dy) < NW_TAP_SLOP) return
         camPanning.current = true
@@ -1176,6 +1178,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   function camUp(event: ReactPointerEvent<HTMLDivElement>) {
     if (!camOn) {
+      if (!easy) return
       const startOff = camStart.current
       if (!startOff || event.pointerId !== startOff.id) return
       if (camPanning.current) {
@@ -1205,7 +1208,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   }
 
   function camEatClick(event: ReactMouseEvent<HTMLDivElement>) {
-    if (performance.now() >= suppressClickUntil.current) return
+    if ((!camOn && !easy) || performance.now() >= suppressClickUntil.current) return
     suppressClickUntil.current = 0
     event.stopPropagation()
     event.preventDefault()
