@@ -30,13 +30,26 @@ export function playerVisibleChangeTitle(title: string): string {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.551',
+    version: '1.4.552',
     title: 'Easy: cleaner settings and easier-to-read type',
     when: '2026-10-28',
     items: [
       'Settings and What’s new stay free of developer notes on a normal link.',
-      'Easy text on Home, Settings, Lock In, and early lessons is at least 13 pixels tall.',
+      'Easy text on Home, Settings, Lock In, Match, and early lessons is at least 13 pixels tall.',
+      'Match bonus messages stay above the letter grid on small phones.',
       'Refs #871.',
+    ],
+  },
+  {
+    version: '1.4.551',
+    title: 'Easy road maze: pass-by no longer helps; replay shows the new map right away',
+    when: '2026-10-28',
+    items: [
+      'The maze now counts the hurt man only when you stop beside him, and a new road shows right away.',
+      'After you help him, dragging to the inn shows One more road right away — no extra tap on the win card.',
+      'Drag or tap the road — the hint says both.',
+      'Hard stays the same.',
+      'Refs #877',
     ],
   },
   {

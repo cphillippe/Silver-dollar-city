@@ -220,7 +220,7 @@ async function captureGemWinLockInReference(browser, origin, shotsDir) {
   const freshSave = {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.551',
+    appVersion: '1.4.552',
     savedAt: '2026-10-27T00:00:00.000Z',
     progress: { started: true, easyMode: true, theme: 'candy', completed: [] },
   }
@@ -255,7 +255,7 @@ async function proveLockInEmptyTab(browser, origin) {
     const freshSave = {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.551',
+      appVersion: '1.4.552',
       savedAt: '2026-10-27T00:00:00.000Z',
       progress: { started: true, easyMode: true, theme: 'candy', completed: [] },
     }
@@ -288,7 +288,7 @@ async function proveLockInEmptyTab(browser, origin) {
     const readSave = {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.551',
+      appVersion: '1.4.552',
       savedAt: '2026-10-27T00:00:00.000Z',
       progress: {
         started: true,
@@ -331,7 +331,7 @@ async function proveLockInEmptyTab(browser, origin) {
     const holdSave = {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.551',
+      appVersion: '1.4.552',
       savedAt: '2026-10-27T00:00:00.000Z',
       progress: {
         started: true,
