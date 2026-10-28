@@ -2149,8 +2149,8 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
   )
   assert.match(
     defendCss834,
-    /@media \(max-width: 480px\) \{\s*\.defend-page\.is-easy-watch \.nw-pace \{[\s\S]*?bottom:\s*64px;[\s\S]*?right:\s*8px;/,
-    '#768 NWUI-2 pace chip stays bottom-right on narrow Easy phones',
+    /\.defend-page\.is-easy-watch \.nw-hud \.nw-pace \{[\s\S]*?margin-left:\s*auto;/,
+    '#768 NWUI-2 pace chip lives in the HUD strip outside the board frame',
   )
   assert.doesNotMatch(
     defendCss834,

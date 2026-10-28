@@ -471,8 +471,9 @@ async function check792bPlantCard(browser, port, errors) {
   }
 }
 
-/** #768 / NWUI-2: walker tap centres must hit their own buttons, never the pace chip. */
+/** #768 / NWUI-2: the pace chip must never sit on top of a walker tap centre (cam on or off). */
 async function check768WalkerTapProbe(browser, port, errors) {
+  const rows = []
   for (const [width, height] of [
     [375, 667],
     [390, 844],
@@ -496,15 +497,17 @@ async function check768WalkerTapProbe(browser, port, errors) {
         await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
         await page.waitForTimeout(MAIN_FIRST_WALKER_MS)
         await page.locator('.defend-walker-tap').first().waitFor({ timeout: 60_000 })
-        let sampled = 0
-        for (let tick = 0; tick < 80 && sampled === 0; tick += 1) {
+        let samples = 0
+        let covers = 0
+        for (let tick = 0; tick < 90; tick += 1) {
+          if (tick > 0) await page.waitForTimeout(150)
           const read = await page.evaluate(() => {
             const taps = [...document.querySelectorAll('.defend-walker-tap')].filter((node) => {
               const b = node.getBoundingClientRect()
               return b.width > 1 && b.height > 1
             })
-            const bad = []
-            let probes = 0
+            let samples = 0
+            let covers = 0
             for (const btn of taps) {
               const b = btn.getBoundingClientRect()
               const visLeft = Math.max(b.left, 0)
@@ -515,26 +518,32 @@ async function check768WalkerTapProbe(browser, port, errors) {
               const x = (visLeft + visRight) / 2
               const y = (visTop + visBottom) / 2
               const top = document.elementFromPoint(x, y)
-              if (top?.closest('.nw-cam-recenter')) continue
-              const owner = top?.closest('[data-walker-tap]')
-              if (owner !== btn) continue
-              probes += 1
-              const id = btn.getAttribute('data-walker-tap')
-              if (top?.closest('.nw-pace')) bad.push({ id, hit: 'nw-pace' })
+              samples += 1
+              if (top?.closest('.nw-pace')) covers += 1
             }
-            return { count: taps.length, probes, bad }
+            return { samples, covers }
           })
-          if (read.probes > 0) {
-            assert.deepEqual(read.bad, [], `#768 ${label} every walker tap centre is its own button, not the pace chip`)
-            sampled += read.probes
-          } else {
-            await page.waitForTimeout(500)
-          }
+          samples += read.samples
+          covers += read.covers
         }
-        assert.ok(sampled > 0, `#768 ${label} sampled at least one walker tap during the wave`)
+        assert.ok(samples > 0, `#768 ${label} sampled walker tap centres during the wave (${samples})`)
+        assert.equal(covers, 0, `#768 ${label} pace chip covers (${covers}) must be 0`)
+        rows.push({ map, width, height, cam: camOn ? 'on' : 'off', samples, covers })
+        if (camOn && map === 'a2') {
+          await page.screenshot({
+            path: join(SHOTS, `nw-pace-dock-${width}x${height}.png`),
+            fullPage: false,
+          })
+        }
         await context.close()
       }
     }
+  }
+  console.log('#768 walker tap probe (samples / pace covers):')
+  for (const row of rows) {
+    console.log(
+      `  ${row.map} ${row.width}x${row.height} cam=${row.cam} samples=${row.samples} covers=${row.covers}`,
+    )
   }
 }
 

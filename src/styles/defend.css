@@ -4492,12 +4492,6 @@ button.defend-new-lamp[aria-pressed='true'] {
   box-shadow: 0 0 12px rgba(255, 204, 51, 0.55);
 }
 
-@media (max-width: 480px) {
-  .defend-page.is-easy-watch .nw-pace {
-    top: 56px;
-    padding: 5px 10px;
-  }
-}
 
 /* 1.4.383: Begin stays readable until the first plant.
    The disabled banner used to fade while the count was still 0.
@@ -5293,17 +5287,22 @@ button.defend-new-lamp[aria-pressed='true'] {
   border: 0;
 }
 
-.defend-page.is-easy-watch .nw-pace {
-  top: 56px;
-  left: 50%;
+.defend-page.is-easy-watch .nw-hud .nw-pace {
+  position: relative;
+  top: auto;
+  left: auto;
   right: auto;
-  transform: translateX(-50%);
+  bottom: auto;
+  flex: 0 0 auto;
+  margin-left: auto;
+  transform: none;
   width: 44px;
   height: 44px;
   min-width: 44px;
   min-height: 44px;
   padding: 0;
   gap: 0;
+  z-index: auto;
 }
 
 .defend-page.is-easy-watch .nw-pace::before {
@@ -6059,17 +6058,7 @@ button.defend-new-lamp[aria-pressed='true'] {
   color: transparent;
 }
 
-/* 792b NWUI-2: the pace chip rides the bottom-right, off the road (below walker taps in the dock stack). */
-@media (max-width: 480px) {
-  .defend-page.is-easy-watch .nw-pace {
-    top: auto;
-    bottom: 64px;
-    left: auto;
-    right: 8px;
-    transform: none;
-    z-index: 9;
-  }
-}
+/* 768 NWUI-2: the pace chip sits in the top HUD strip, outside the board frame and pan stacking context. */
 
 .defend-page.is-easy-watch .nw-pace.is-fast,
 .defend-page.is-easy-watch .nw-pace[data-state='fast'] {
