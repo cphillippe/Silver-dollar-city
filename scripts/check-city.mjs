@@ -1902,26 +1902,42 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.551')
-assert.equal(CHANGELOG[0].version, '1.4.551', '1.4.551 is the newest row')
+assert.equal(APP_VERSION, '1.4.552')
+assert.equal(CHANGELOG[0].version, '1.4.552', '1.4.552 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.552'), '1.4.552 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.552').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.552 changelog avoids GitHub close keywords',
+)
+assert.match(
+  latestChange('1.4.552').items.join('\n'),
+  /Refs: Bill 2026-10-25 7:50 AM CT, review mix \(Memory Coach\)/,
+  '1.4.552 changelog refs Bill review mix',
+)
+assert.match(latestChange('1.4.552').items.join('\n'), /Nothing changes for players yet\./)
+assert.doesNotMatch(
+  latestChange('1.4.552').items.join('\n'),
+  /\?playtest=1|Night Watch debug/,
+  '1.4.552 changelog stays player-facing',
+)
+assert.equal(CHANGELOG[1].version, '1.4.551', '1.4.551 follows the Home Read row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.551'), '1.4.551 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.551').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
   '1.4.551 changelog avoids GitHub close keywords',
 )
+assert.doesNotMatch(latestChange('1.4.551').items.join('\n'), /\/box\//, '1.4.551 changelog avoids box paths')
 assert.match(
   latestChange('1.4.551').items.join('\n'),
-  /Refs: Bill 2026-10-25 7:50 AM CT, review mix \(Memory Coach\)/,
-  '1.4.551 changelog refs Bill review mix',
+  /stop beside him/,
+  '1.4.551 changelog names the pass-by help fix',
 )
-assert.match(latestChange('1.4.551').items.join('\n'), /Nothing changes for players yet\./)
-assert.doesNotMatch(
-  latestChange('1.4.551').items.join('\n'),
-  /\?playtest=1|Night Watch debug/,
-  '1.4.551 changelog stays player-facing',
-)
-assert.equal(CHANGELOG[1].version, '1.4.550', '1.4.550 follows the Home Read row')
+assert.match(latestChange('1.4.551').items.join('\n'), /Drag or tap the road/, '1.4.551 changelog names the maze hint')
+assert.match(latestChange('1.4.551').items.join('\n'), /Refs #877/, '1.4.551 changelog refs #877')
+assert.match(latestChange('1.4.551').items.join('\n'), /Hard stays the same\./)
+assert.equal(CHANGELOG[2].version, '1.4.550', '1.4.550 follows the 1.4.551 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.550'), '1.4.550 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.550').items.join('\n'),
@@ -1937,7 +1953,7 @@ assert.match(
 assert.match(latestChange('1.4.550').items.join('\n'), /Story word! \+100/, '1.4.550 changelog keeps the story payoff')
 assert.match(latestChange('1.4.550').items.join('\n'), /Refs #870/, '1.4.550 changelog refs #870')
 assert.match(latestChange('1.4.550').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[2].version, '1.4.549', '1.4.549 follows the 1.4.550 row')
+assert.equal(CHANGELOG[3].version, '1.4.549', '1.4.549 follows the 1.4.550 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.549'), '1.4.549 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.549').items.join('\n'),
@@ -1951,7 +1967,7 @@ assert.doesNotMatch(
   /\?playtest=1|Night Watch debug/,
   '1.4.549 changelog stays player-facing',
 )
-assert.equal(CHANGELOG[3].version, '1.4.548', '1.4.548 follows the maze drag row')
+assert.equal(CHANGELOG[4].version, '1.4.548', '1.4.548 follows the maze drag row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.548'), '1.4.548 changelog row')
 const quickReviewGateApp = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
 assert.match(quickReviewGateApp, /function quickReviewBoot\(\)/, 'QuickReview boot helper exists')
@@ -1961,7 +1977,7 @@ assert.match(
   /nightWatchJumpAllowed\(search, readNightWatchDebug\(\)\)/,
   'QuickReview boot uses the playtest gate',
 )
-assert.equal(CHANGELOG[4].version, '1.4.547', '1.4.547 follows QuickReview row')
+assert.equal(CHANGELOG[5].version, '1.4.547', '1.4.547 follows QuickReview row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.547'), '1.4.547 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.547').items.join('\n'),
@@ -1974,7 +1990,7 @@ assert.doesNotMatch(
   '1.4.547 changelog avoids box paths',
 )
 assert.match(latestChange('1.4.547').items.join('\n'), /Refs #858/, '1.4.547 changelog refs #858')
-assert.equal(CHANGELOG[5].version, '1.4.546', '1.4.546 stays under 1.4.547')
+assert.equal(CHANGELOG[6].version, '1.4.546', '1.4.546 stays under 1.4.547')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.546'), '1.4.546 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.546').items.join('\n'),
@@ -1987,7 +2003,7 @@ assert.doesNotMatch(
   '1.4.546 changelog drops box paths',
 )
 assert.match(latestChange('1.4.546').items.join('\n'), /Refs #753/, '1.4.546 changelog refs #753')
-assert.equal(CHANGELOG[6].version, '1.4.545', '1.4.545 stays under 1.4.546')
+assert.equal(CHANGELOG[7].version, '1.4.545', '1.4.545 stays under 1.4.546')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.545'), '1.4.545 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.545').items.join('\n'),
@@ -1996,7 +2012,7 @@ assert.doesNotMatch(
 )
 assert.match(latestChange('1.4.545').items.join('\n'), /Refs #855/, '1.4.545 changelog refs #855')
 assert.match(latestChange('1.4.545').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[7].version, '1.4.544', '1.4.544 stays under 1.4.545')
+assert.equal(CHANGELOG[8].version, '1.4.544', '1.4.544 stays under 1.4.545')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.544'), '1.4.544 changelog row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.543'), '1.4.543 changelog row')
 assert.doesNotMatch(
@@ -6184,8 +6200,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     mazePlaySrc,
     /1\.4\.350: HELPED! closes the maze grid; teach clear runs after the stamp \(#514\)/,
   )
-  assert.match(mazePlaySrc, /useEffect\(\(\) => \{\s*setMazePreset\(attempt\)/)
-  assert.doesNotMatch(mazePlaySrc, /\n  setMazePreset\(attempt\)\n/)
+  assert.doesNotMatch(mazePlaySrc, /useEffect\(\(\) => \{\s*setMazePreset\(attempt\)/)
+  assert.match(mazePlaySrc, /\n  setMazePreset\(attempt\)\n/)
   assert.match(mazePlaySrc, /stampTimer/)
   assert.match(
     mazePlaySrc,

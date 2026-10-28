@@ -15,13 +15,25 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.551',
+    version: '1.4.552',
     title: 'Behind the scenes: Easy Home Read can open saved review cards',
     when: '2026-10-28',
     items: [
       'Nothing changes for players yet.',
       'Behind the scenes: when ideas are due, Read can walk a short review queue before the daily story.',
       'Refs: Bill 2026-10-25 7:50 AM CT, review mix (Memory Coach).',
+    ],
+  },
+  {
+    version: '1.4.551',
+    title: 'Easy road maze: pass-by no longer helps; replay shows the new map right away',
+    when: '2026-10-28',
+    items: [
+      'The maze now counts the hurt man only when you stop beside him, and a new road shows right away.',
+      'After you help him, dragging to the inn shows One more road right away — no extra tap on the win card.',
+      'Drag or tap the road — the hint says both.',
+      'Hard stays the same.',
+      'Refs #877',
     ],
   },
   {
