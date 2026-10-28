@@ -1915,6 +1915,19 @@ assert.match(
   /Refs #756, Refs #768/,
   '1.4.548 changelog refs #756 and #768',
 )
+assert.equal(CHANGELOG[1].version, '1.4.546', '1.4.546 sits under 1.4.548')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.546'), '1.4.546 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.546').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.546 changelog avoids GitHub close keywords',
+)
+assert.doesNotMatch(
+  latestChange('1.4.546').items.join('\n'),
+  /\/workspace\/|gemcheck/,
+  '1.4.546 changelog drops box paths',
+)
+assert.match(latestChange('1.4.546').items.join('\n'), /Refs #753/, '1.4.546 changelog refs #753')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.545'), '1.4.545 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.545').items.join('\n'),
