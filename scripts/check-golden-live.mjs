@@ -20,6 +20,7 @@ import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 import { EASY_OPEN_DAY_KEY } from '../src/content/goldenPath.ts'
 import { camClamp, camFrameInsets, camToPlate, focusPan, NW_CAMERA_FOCUS, NW_CAMERA_ZOOM } from '../src/components/nwCamera.ts'
 import { boardFillBox } from '../src/nightWatch/map/phoneFill.ts'
+import { proveMazeDragAcceptance } from './check-maze-drag-live.mjs'
 
 const SIZES = [
   [375, 667],
@@ -787,7 +788,7 @@ async function playRoad(page) {
   await page.locator('[data-maze-dock], .play.is-road-maze.is-win').first().waitFor({ timeout: 8000 })
 }
 
-async function playRoadAdjacent(page) {
+async function playRoadAdjacent(page, opts = {}) {
   await page.locator('[data-maze-cell].is-here').waitFor()
   const hurt = await readCell(page.locator('[data-maze-cell].is-hurt'))
   const inn = await readCell(page.locator('[data-maze-cell].is-inn'))
@@ -808,6 +809,9 @@ async function playRoadAdjacent(page) {
   if (!beside) throw new Error('no road beside the hurt man that avoids him')
   await walkUntil(page, beside, false)
   await page.locator('.play.is-road-maze.is-helped').waitFor({ timeout: 1000 })
+  if (opts.mazeDragPhase2) {
+    await proveMazeDragAcceptance(page, { label: opts.mazeDragPhase2, avoidInn: true })
+  }
   const how = ((await page.locator('[data-maze-how]').innerText()) || '').replace(/\s+/g, ' ').trim()
   assert.equal(how, EASY.mazeInnCue)
   assert.equal(await page.locator('[data-maze-cell].is-inn.is-goal').count(), 1, 'the pink house wears the gold ring')
@@ -4566,9 +4570,19 @@ export async function checkGoldenLive() {
       await shotHop(page, 'l1-start')
       if (width === 375 && height === 667) {
         await assertMazeStart(page)
-        await assertMazeDrag(page)
       }
-      if (width === 375 || width === 768) await playRoadAdjacent(page)
+      if ((width === 375 && height === 667) || (width === 390 && height === 844)) {
+        await proveMazeDragAcceptance(page, {
+          label: `${width}x${height} phase 1`,
+          capture375: width === 375 && height === 667,
+          origin,
+        })
+      }
+      const mazeDragPhase2 =
+        (width === 375 && height === 667) || (width === 390 && height === 844)
+          ? `${width}x${height} phase 2`
+          : undefined
+      if (width === 375 || width === 768) await playRoadAdjacent(page, { mazeDragPhase2 })
       else await playRoad(page)
       await page.locator('[data-maze-next]').waitFor()
       shot = await stamp('maze-win')
