@@ -1956,7 +1956,7 @@ assert.doesNotMatch(
   '1.4.547 changelog avoids box paths',
 )
 assert.match(latestChange('1.4.547').items.join('\n'), /Refs #858/, '1.4.547 changelog refs #858')
-assert.equal(CHANGELOG[2].version, '1.4.546', '1.4.546 stays under 1.4.547')
+assert.equal(CHANGELOG[3].version, '1.4.546', '1.4.546 stays under 1.4.547')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.546'), '1.4.546 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.546').items.join('\n'),
@@ -1969,7 +1969,7 @@ assert.doesNotMatch(
   '1.4.546 changelog drops box paths',
 )
 assert.match(latestChange('1.4.546').items.join('\n'), /Refs #753/, '1.4.546 changelog refs #753')
-assert.equal(CHANGELOG[3].version, '1.4.545', '1.4.545 stays under 1.4.546')
+assert.equal(CHANGELOG[4].version, '1.4.545', '1.4.545 stays under 1.4.546')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.545'), '1.4.545 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.545').items.join('\n'),
@@ -1978,7 +1978,7 @@ assert.doesNotMatch(
 )
 assert.match(latestChange('1.4.545').items.join('\n'), /Refs #855/, '1.4.545 changelog refs #855')
 assert.match(latestChange('1.4.545').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[4].version, '1.4.544', '1.4.544 stays under 1.4.545')
+assert.equal(CHANGELOG[5].version, '1.4.544', '1.4.544 stays under 1.4.545')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.544'), '1.4.544 changelog row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.543'), '1.4.543 changelog row')
 assert.doesNotMatch(
