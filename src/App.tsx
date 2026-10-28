@@ -47,9 +47,24 @@ function quickReviewBoot(): View | null {
   if (isPlayBuild()) return null
   const search = window.location.search
   if (!nightWatchJumpAllowed(search, readNightWatchDebug())) return null
-  const lineId = new URLSearchParams(search).get('quickReview')
+  const params = new URLSearchParams(search)
+  const lineId = params.get('quickReview')
   if (!lineId) return null
-  return { name: 'quick-review', lineId, skipWrite: true }
+  const fromHome = params.get('from') === 'home'
+  const queueRaw = params.get('reviewQueue')
+  const queue = queueRaw
+    ? queueRaw
+        .split(',')
+        .map((id) => id.trim())
+        .filter(Boolean)
+    : undefined
+  return {
+    name: 'quick-review',
+    lineId: queue?.[0] ?? lineId,
+    queue,
+    from: fromHome ? 'home' : undefined,
+    skipWrite: fromHome ? false : true,
+  }
 }
 
 export default function App() {

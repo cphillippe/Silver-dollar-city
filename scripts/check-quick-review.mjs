@@ -21,6 +21,7 @@ import {
   reviewTargetLine,
 } from '../src/easyTrail/review/reviewFormat.ts'
 import { STORAGE_KEY } from '../src/config/app.ts'
+import { lociStampFor } from '../src/lib/lociStamp.ts'
 import { SAVE_KIND, SAVE_SCHEMA_VERSION } from '../src/lib/save.ts'
 
 const quickSrc = readFileSync(
@@ -54,6 +55,7 @@ const allowed = new Set([
   'No review brief for this line.',
   'Settings',
   'Tap where you learned it',
+  'Not here, try another spot.',
 ])
 
 for (const id of EASY_LINE_ORDER.slice(0, 12)) {
@@ -176,7 +178,7 @@ async function withPage(url, fn, { seed, openDay } = {}) {
   }
 }
 
-function seedSave(intervalIndex = 1, lastFormat) {
+function seedSave(intervalIndex = 1, lastFormat = undefined) {
   return {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
@@ -232,6 +234,7 @@ async function countGoldCues(page, scope = '.quick-review') {
       for (const sel of [
         '.btn.gold',
         '.quick-review-plot-hit.is-now',
+        '.quick-review-prompt-panel.is-now',
         '.quick-review-flip.is-now',
         '.quick-review-drain-bar.is-now',
         '.quick-review-prompt.is-now',
@@ -283,16 +286,52 @@ await withPage(
   { seed: hubSeed },
 )
 
-await withPage(
-  `/?quickReview=ph-road&reviewFormat=C&${PLAYTEST}`,
-  async (page) => {
-    await assertOneGold(page, 'format C prompt')
-    await page.locator('.quick-review-plot-hit.is-now').click()
-    await page.getByRole('button', { name: 'I had it' }).waitFor()
-    await assertOneGold(page, 'format C reveal')
-  },
-  { seed: seedSave(1) },
-)
+async function assertFormatCBeforeTap(page, lineId) {
+  assert.equal(await page.locator('.quick-review-plot-hit.is-now').count(), 0, 'no plot ring before tap')
+  assert.equal(
+    await page.locator('.quick-review-map-plate .quick-review-avatar').count(),
+    0,
+    'no guide portrait on map before tap',
+  )
+  await assertOneGold(page, `${lineId} format C prompt`)
+}
+
+async function assertFormatCReveal(page, lineId) {
+  const briefLine = evidenceFor(lineId)
+  assert.ok(briefLine, lineId)
+  const claimEl = page.locator('.quick-review-reveal-claim')
+  await claimEl.waitFor()
+  assert.match((await claimEl.textContent()) ?? '', new RegExp(briefLine.claim.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+  const claimPx = await claimEl.evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
+  assert.ok(claimPx >= 18, `claim font ${claimPx}px`)
+  const sourceEl = page.locator('.quick-review-reveal-source')
+  if (await sourceEl.count()) {
+    assert.match((await sourceEl.textContent()) ?? '', new RegExp(briefLine.source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+  }
+  await assertOneGold(page, `${lineId} format C reveal`)
+}
+
+async function tapCorrectPlot(page, lineId) {
+  const plotId = lociStampFor(lineId).plotId
+  await page.locator(`[data-plot-id="${plotId}"]`).click()
+}
+
+for (const viewport of [
+  { width: 375, height: 667 },
+  { width: 390, height: 844 },
+]) {
+  await withPage(
+    `/?quickReview=ph-road&reviewFormat=C&${PLAYTEST}`,
+    async (page) => {
+      await page.setViewportSize(viewport)
+      await assertFormatCBeforeTap(page, 'ph-road')
+      await tapCorrectPlot(page, 'ph-road')
+      await page.getByRole('button', { name: 'I had it' }).waitFor()
+      await assertFormatCReveal(page, 'ph-road')
+    },
+    { seed: seedSave(1, 'A') },
+  )
+}
 
 await withPage(
   `/?quickReview=ph-road&reviewFormat=B&${PLAYTEST}`,
@@ -359,11 +398,11 @@ await withPage(
 await withPage(
   `/?quickReview=ph-father&reviewFormat=C&${PLAYTEST}`,
   async (page) => {
-    await page.locator('.quick-review-plot-hit.is-now').click()
+    await tapCorrectPlot(page, 'ph-father')
     await page.getByRole('button', { name: 'I had it' }).click()
     await page.getByText("Where's it from?").waitFor()
-    assert.equal(await page.locator('.quick-review-reveal-line').count(), 0)
-    await assertOneGold(page, 'index-2 source beat before reveal')
+    assert.equal(await page.locator('.quick-review-reveal-panel').count(), 0)
+    await assertFormatCBeforeTap(page, 'ph-father')
   },
   {
     seed: {
@@ -396,9 +435,9 @@ await withPage(
   `/?quickReview=ph-father&reviewFormat=C&reviewStreak=2&${PLAYTEST}`,
   async (page) => {
     await page.locator('.quick-review-streak').waitFor()
-    await page.locator('.quick-review-plot-hit.is-now').click()
+    await tapCorrectPlot(page, 'ph-father')
     await page.getByRole('button', { name: 'I had it' }).waitFor()
-    await assertOneGold(page, 'streak card reveal')
+    await assertFormatCReveal(page, 'ph-father')
     const pipGold = await page.evaluate(() => {
       const pip = document.querySelector('.quick-review-streak-pip.is-lit')
       if (!pip) return true

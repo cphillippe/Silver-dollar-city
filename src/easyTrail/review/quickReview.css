@@ -40,6 +40,60 @@ html[data-easy='on'] .quick-review-prompt-panel {
   text-align: center;
 }
 
+html[data-easy='on'] .quick-review-prompt-panel.is-now {
+  animation: quick-review-gold-pulse 1.25s ease-in-out infinite;
+}
+
+html[data-easy='on'] .quick-review-reveal-panel {
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-width: 20rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+html[data-easy='on'] .quick-review-reveal-cue {
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+html[data-easy='on'] .quick-review-guide-name {
+  font-weight: 600;
+}
+
+html[data-easy='on'] .quick-review-reveal-claim {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight: 650;
+}
+
+html[data-easy='on'] .quick-review-reveal-reason {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+html[data-easy='on'] .quick-review-reveal-source {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+html[data-easy='on'] .quick-review-map-miss {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.35;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.88);
+}
+
 html[data-easy='on'] .quick-review .quick-review-cue {
   display: flex;
   align-items: center;
@@ -145,12 +199,6 @@ html[data-easy='on'] .quick-review-plot-hit.is-now {
       0 0 0 4px rgba(246, 194, 85, 1),
       0 0 18px rgba(246, 194, 85, 0.7);
   }
-}
-
-html[data-easy='on'] .quick-review-plot-hit .quick-review-avatar {
-  position: absolute;
-  bottom: 3.25rem;
-  z-index: 1;
 }
 
 html[data-easy='on'] .quick-review-think-bar,
@@ -263,7 +311,8 @@ html[data-easy='on'] .quick-review .quick-review-prompt.is-now {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html[data-easy='on'] .quick-review-plot-hit.is-now {
+  html[data-easy='on'] .quick-review-plot-hit.is-now,
+  html[data-easy='on'] .quick-review-prompt-panel.is-now {
     animation: none;
     box-shadow: 0 0 0 3px rgba(246, 194, 85, 0.95);
   }
