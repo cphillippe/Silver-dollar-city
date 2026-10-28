@@ -95,7 +95,6 @@ export function RecallGate({
   const [heldNote, setHeldNote] = useState(false)
   const [reasonLocked, setReasonLocked] = useState(false)
   const [sealed, setSealed] = useState(false)
-  const [dismissedClaims, setDismissedClaims] = useState<string[]>([])
   const heldClaim = chosen?.claim ?? brief.claim
   const heldReason = chosen?.reason ?? brief.reason
   const confirmReason = encode || reasonOptions.length === 1 || reasonLocked
@@ -167,15 +166,12 @@ export function RecallGate({
 
   function pickClaim(line: string) {
     if (easySortClaimPick) {
-      if (dismissedClaims.includes(line)) return
       if (line === brief.claim) {
-        setDismissedClaims(claimOptions.filter((choice) => choice !== brief.claim))
         setChosen({ claim: brief.claim, reason: brief.reason })
         setHeldNote(true)
         return
       }
-      setDismissedClaims((current) => [...current, line])
-      playGemPop('miss')
+      pick(line, brief.claim, 'reason')
       return
     }
     if (encode && own) {
@@ -227,18 +223,16 @@ export function RecallGate({
             {/* Easy Clear 1.4.142: one next-tap action cue — Main idea already taught on Learn (140) + labeled on Lock In live/miss (141/139). */}
             <p className="next-tap">{EASY.rememberSentence}</p>
             <div className="recall-choices">
-              {claimOptions.map((line) =>
-                dismissedClaims.includes(line) ? null : (
-                  <button
-                    key={line}
-                    type="button"
-                    className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
-                    onClick={() => pickClaim(line)}
-                  >
-                    {easyFacingLine(brief.id, line)}
-                  </button>
-                ),
-              )}
+              {claimOptions.map((line) => (
+                <button
+                  key={line}
+                  type="button"
+                  className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
+                  onClick={() => pickClaim(line)}
+                >
+                  {easyFacingLine(brief.id, line)}
+                </button>
+              ))}
             </div>
           </>
         ) : (
