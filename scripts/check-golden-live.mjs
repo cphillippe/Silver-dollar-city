@@ -4,6 +4,8 @@
  */
 import assert from 'node:assert/strict'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { chromium } from 'playwright'
 import { build, preview } from 'vite'
 import { evidenceForTier } from '../src/content/evidence.ts'
@@ -58,31 +60,101 @@ async function lockInTabFilledGolds(page) {
   })
 }
 
-async function assertLockInEmptyHomeButton(page, where) {
-  const stats = await page.evaluate(() => {
-    const el = document.querySelector('.journal.is-lock-in-empty button.btn.primary')
-    if (!(el instanceof HTMLElement)) return null
+const LOCK_IN_EMPTY_HOME =
+  '.journal.is-lock-in-empty .cta-dock .btn.primary'
+
+async function waitForAnimationsSettled(page, selector) {
+  await page.locator(selector).first().waitFor()
+  await page.evaluate(async (sel) => {
+    const el = document.querySelector(sel)
+    if (!(el instanceof HTMLElement)) return
+    const minMs = 800
+    const start = performance.now()
+    const settled = () => {
+      const anims = el.getAnimations({ subtree: true })
+      return anims.length === 0 || anims.every((a) => a.playState === 'finished' || a.playState === 'idle')
+    }
+    while (!settled() && performance.now() - start < minMs) {
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+    }
+    const elapsed = performance.now() - start
+    if (elapsed < minMs) {
+      await new Promise((resolve) => setTimeout(resolve, minMs - elapsed))
+    }
+  }, selector)
+}
+
+async function assertPrimaryButtonRendered(page, selector, where) {
+  await waitForAnimationsSettled(page, selector)
+  const stats = await page.locator(selector).first().evaluate((el) => {
+    const parseRgb = (css) => {
+      const m = css.match(/rgba?\(([^)]+)\)/)
+      if (!m) return null
+      const parts = m[1].split(',').map((s) => parseFloat(s.trim()))
+      if (parts.length === 4 && parts[3] <= 0.02) return null
+      return parts.slice(0, 3)
+    }
+    const hexToRgb = (hex) => {
+      const n = hex.replace('#', '')
+      return [parseInt(n.slice(0, 2), 16), parseInt(n.slice(2, 4), 16), parseInt(n.slice(4, 6), 16)]
+    }
+    const relLum = ([r, g, b]) => {
+      const [lr, lg, lb] = [r, g, b].map((v) => {
+        const c = v / 255
+        return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+      })
+      return 0.2126 * lr + 0.7152 * lg + 0.0722 * lb
+    }
+    const contrast = (fg, bg) => {
+      const a = relLum(fg)
+      const b = relLum(bg)
+      return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
+    }
+    const gradientStops = (bgImage) => {
+      if (!bgImage || bgImage === 'none') return []
+      const stops = []
+      for (const m of bgImage.matchAll(/#([0-9a-fA-F]{6})/g)) stops.push(hexToRgb(`#${m[1]}`))
+      for (const m of bgImage.matchAll(/rgb\(([^)]+)\)/g)) {
+        stops.push(m[1].split(',').map((s) => parseFloat(s.trim())))
+      }
+      return stops
+    }
     const style = getComputedStyle(el)
+    const fg = parseRgb(style.color)
+    let bg = parseRgb(style.backgroundColor)
+    if (!bg) {
+      const stops = gradientStops(style.backgroundImage)
+      if (stops.length) {
+        bg = stops.reduce((darkest, stop) => (relLum(stop) < relLum(darkest) ? stop : darkest), stops[0])
+      }
+    }
+    const opacity = Number(style.opacity)
+    const ratio = fg && bg ? contrast(fg, bg) : 0
     return {
       fg: style.color,
       bg: style.backgroundColor,
       bgImage: style.backgroundImage,
       fs: parseFloat(style.fontSize),
+      fw: style.fontWeight,
       text: (el.textContent || '').replace(/\s+/g, ' ').trim(),
       classes: el.className,
+      opacity,
+      ratio,
     }
   })
-  assert.ok(stats, `${where} empty Lock In Home button`)
+  assert.ok(stats, `${where} primary button`)
   assert.match(stats.classes, /\bprimary\b/)
   assert.match(stats.classes, /\bsnap-bins\b/)
-  assert.doesNotMatch(stats.classes, /\bgold\b/, `${where} Home is primary like gem-win Lock In next`)
-  assert.ok(stats.fs >= 16, `${where} Home label ≥16px (${stats.fs})`)
-  assert.match(stats.fg, /42,\s*28,\s*8|42,\s*33,\s*24/, `${where} Home uses dark primary label (${stats.fg})`)
-  assert.ok(
-    stats.bgImage.includes('linear-gradient') || stats.bg.includes('linear-gradient'),
-    `${where} Home uses the filled primary gradient (${stats.bgImage || stats.bg})`,
-  )
-  assert.doesNotMatch(stats.bgImage, /200,\s*107,\s*255|purple/i, `${where} Home is not the pale .btn.gold wash`)
+  assert.doesNotMatch(stats.classes, /\bgold\b/, `${where} is primary like gem-win Lock In next`)
+  assert.ok(stats.fs >= 16, `${where} label ≥16px (${stats.fs})`)
+  assert.equal(stats.opacity, 1, `${where} computed opacity is 1 (${stats.opacity})`)
+  assert.ok(stats.ratio >= 4.5, `${where} rendered text/background contrast ${stats.ratio.toFixed(2)} ≥4.5 (fg=${stats.fg} bg=${stats.bg} img=${stats.bgImage})`)
+  assert.doesNotMatch(stats.bgImage, /200,\s*107,\s*255|purple/i, `${where} is not the pale .btn.gold wash`)
+  return stats
+}
+
+async function assertLockInEmptyHomeButton(page, where) {
+  await assertPrimaryButtonRendered(page, LOCK_IN_EMPTY_HOME, where)
 }
 
 async function tapLockInTab(page) {
@@ -102,9 +174,49 @@ async function openEasyHome(page, origin) {
   await page.locator('main.hub').waitFor({ timeout: 30_000 })
 }
 
+async function openGemTuningViaDebug(page) {
+  await page.locator('main.hub').waitFor({ timeout: 30_000 })
+  await pointerClick(page, page.getByRole('button', { name: 'Settings' }))
+  const summary = page.locator('summary', { hasText: 'Developer · mini-game jumps' })
+  await summary.waitFor()
+  await pointerClick(page, summary)
+  const jump = page.getByRole('button', { name: /ob-tuning ·/ })
+  await jump.waitFor()
+  await pointerClick(page, jump)
+}
+
+async function captureGemWinLockInReference(browser, origin, shotsDir) {
+  const freshSave = {
+    kind: SAVE_KIND,
+    schemaVersion: SAVE_SCHEMA_VERSION,
+    appVersion: '1.4.549',
+    savedAt: '2026-10-27T00:00:00.000Z',
+    progress: { started: true, easyMode: true, theme: 'candy', completed: [] },
+  }
+  const ctx = await browser.newContext({ viewport: { width: 375, height: 667 } })
+  await ctx.addInitScript(
+    ([key, raw]) => {
+      localStorage.clear()
+      localStorage.setItem(key, raw)
+    },
+    [STORAGE_KEY, JSON.stringify(freshSave)],
+  )
+  const page = await ctx.newPage()
+  await openEasyHome(page, origin)
+  await openGemTuningViaDebug(page)
+  await page.locator('.play.is-gem-search').waitFor({ timeout: 30_000 })
+  await playGem(page, 'ob-tuning')
+  await page.locator('.play.is-gem-search.is-win .cta-dock .btn.primary').waitFor()
+  await assertPrimaryButtonRendered(page, '.play.is-gem-search.is-win .cta-dock .btn.primary', '375x667 gem-win Lock In next')
+  await page.screenshot({ path: join(shotsDir, 'gem-win-lock-in-next-375x667.png') })
+  await ctx.close()
+  return join(shotsDir, 'gem-win-lock-in-next-375x667.png')
+}
+
 async function proveLockInEmptyTab(browser, origin) {
   const traces = []
-  mkdirSync(SHOTS, { recursive: true })
+  const shotsDir = join(tmpdir(), 'lock-in-empty-shots')
+  mkdirSync(shotsDir, { recursive: true })
   for (const [width, height] of [
     [375, 667],
     [390, 844],
@@ -135,7 +247,10 @@ async function proveLockInEmptyTab(browser, origin) {
     assert.deepEqual(golds, ['Home'], `${width}x${height} fresh empty Lock In one gold Home ${JSON.stringify(golds)}`)
     await assertLockInEmptyHomeButton(page, `${width}x${height} no-read`)
     assert.equal(await page.locator('.journal.is-lock-in-empty .text-link').count(), 0, 'fresh empty has no Read')
-    await page.screenshot({ path: `${SHOTS}/lock-in-empty-no-read-${width}x${height}.png` })
+    await waitForAnimationsSettled(page, LOCK_IN_EMPTY_HOME)
+    const noReadShot = join(shotsDir, `lock-in-empty-no-read-${width}x${height}.png`)
+    await page.screenshot({ path: noReadShot })
+    traces.push(`shot ${noReadShot}`)
     traces.push(`${width}x${height} lock-in-empty-no-read ok`)
     await ctx.close()
 
@@ -175,7 +290,10 @@ async function proveLockInEmptyTab(browser, origin) {
     const readGolds = await lockInTabFilledGolds(readPage)
     assert.deepEqual(readGolds, ['Home'], `${width}x${height} empty with Read still one gold ${JSON.stringify(readGolds)}`)
     await assertLockInEmptyHomeButton(readPage, `${width}x${height} with-read`)
-    await readPage.screenshot({ path: `${SHOTS}/lock-in-empty-with-read-${width}x${height}.png` })
+    await waitForAnimationsSettled(readPage, LOCK_IN_EMPTY_HOME)
+    const withReadShot = join(shotsDir, `lock-in-empty-with-read-${width}x${height}.png`)
+    await readPage.screenshot({ path: withReadShot })
+    traces.push(`shot ${withReadShot}`)
     traces.push(`${width}x${height} lock-in-empty-with-read ok`)
     await readCtx.close()
 
@@ -207,10 +325,14 @@ async function proveLockInEmptyTab(browser, origin) {
     await holdPage.locator('.why-blast, .journal.is-rehearse').first().waitFor()
     assert.equal(await holdPage.locator('.journal.is-lock-in-empty').count(), 0, 'pending hold opens practice')
     assert.equal(await holdPage.locator('.play.is-father-run').count(), 0, 'pending hold is not Run')
-    await holdPage.screenshot({ path: `${SHOTS}/lock-in-pending-hold-${width}x${height}.png` })
+    const holdShot = join(shotsDir, `lock-in-pending-hold-${width}x${height}.png`)
+    await holdPage.screenshot({ path: holdShot })
     traces.push(`${width}x${height} lock-in-pending-hold ok`)
+    traces.push(`shot ${holdShot}`)
     await holdCtx.close()
   }
+  const gemRef = await captureGemWinLockInReference(browser, origin, shotsDir)
+  traces.push(`shot ${gemRef}`)
   return traces.join('\n')
 }
 
@@ -4834,6 +4956,29 @@ export async function checkGoldenLive() {
   console.log('check-golden-live: ok')
 }
 
+export { proveLockInEmptyTab }
+
+async function checkLockInEmptyOnly() {
+  await build({ logLevel: 'warn' })
+  const server = await preview({
+    preview: { host: '127.0.0.1', port: 0 },
+    logLevel: 'warn',
+  })
+  const address = server.httpServer?.address()
+  const port = typeof address === 'object' && address ? address.port : 4173
+  const origin = `http://127.0.0.1:${port}/`
+  const browser = await launchBrowser()
+  try {
+    const text = await proveLockInEmptyTab(browser, origin)
+    console.log(text)
+    console.log('check-lock-in-empty: ok')
+  } finally {
+    await browser.close()
+    await server.close()
+  }
+}
+
 if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop())) {
-  await checkGoldenLive()
+  if (process.env.GOLDEN_LOCK_IN_EMPTY_ONLY === '1') await checkLockInEmptyOnly()
+  else await checkGoldenLive()
 }
