@@ -353,7 +353,7 @@ html[data-easy='on'] .match-teach-kind {
   }
 
   html[data-easy='on'] .match-teach-say {
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
   }
 
   .match-teach-label {
@@ -469,11 +469,14 @@ html[data-easy='on'] .match-teach-kind {
 
   html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-kind,
   html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-label,
-  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-say,
   html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .loci-stamp.is-dock .loci-stamp-place,
   html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .loci-stamp.is-dock .loci-stamp-idea {
     font-size: 0.8125rem;
     line-height: 1.15;
+  }
+
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-say {
+    font-size: 0.875rem;
   }
 
   html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-chip {

@@ -18,6 +18,7 @@ import {
   webRefreshSurface,
   waitForFreshWorker,
 } from '../src/lib/webRefresh.ts'
+import { assertMainEasyTypeBaselines } from './check-type-floor-baseline.mjs'
 
 const shotDir = join(tmpdir(), 'silver-city-871-shots')
 mkdirSync(shotDir, { recursive: true })
@@ -393,6 +394,9 @@ try {
     const fatherText = await fatherKicker.evaluate((node) => (node.textContent || '').replace(/\s+/g, ' ').trim())
     assert.match(fatherText, /Mercy · Story Creek/)
     await inView(page, fatherKicker, `L2 kicker ${viewport.width}`)
+    if (viewport.width === 375 && viewport.height === 667) {
+      await assertMainEasyTypeBaselines(page, 'L2 father 375×667')
+    }
     await assertEasyTypeFloor(
       page,
       `L2 father ${viewport.width}`,
@@ -454,6 +458,7 @@ try {
   await tuning.scrollIntoViewIfNeeded()
   await pointerClick(words, tuning)
   await words.locator('.gem-board').waitFor()
+  await assertMainEasyTypeBaselines(words, 'L3 word search 375×667')
   await assertEasyTypeFloor(
     words,
     'L3 word search 375',

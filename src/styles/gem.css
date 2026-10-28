@@ -1036,16 +1036,18 @@ html[data-easy='on'] .play.is-gem-search :is(
   .gem-letter,
   .match-teach-kind,
   .match-teach-label,
-  .match-teach-say,
   .match-score,
   .story-dock-word,
   .story-caption,
   .story-kicker,
-  .sort-how,
   .gem-bonus-hint,
   .toast-why
 ) {
   font-size: 0.8125rem;
+}
+
+html[data-easy='on'] .play.is-gem-search .match-teach-say {
+  font-size: 0.875rem;
 }
 
 @media (max-width: 430px) {
