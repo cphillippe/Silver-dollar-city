@@ -15,7 +15,7 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.549',
+    version: '1.4.547',
     title: 'Easy Lock In: empty tab stays on Lock In',
     when: '2026-10-27',
     items: [
