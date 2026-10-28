@@ -75,12 +75,19 @@ export function nightWatchRoundJump(search: string, nightLen: number, allowed: b
 }
 
 /**
+ * `?playtest=1` on this URL only. The Night Watch debug switch does not pass.
+ */
+export function playtestUrlAllowed(search: string): boolean {
+  return new URLSearchParams(search).get('playtest') === '1'
+}
+
+/**
  * Current search string has `playtest=1`, or Night Watch debug freeze is explicitly on.
  * A dev build is not a pass. An old URL is not remembered.
  */
 export function nightWatchJumpAllowed(search: string, debugOn: boolean): boolean {
   if (debugOn === true) return true
-  return new URLSearchParams(search).get('playtest') === '1'
+  return playtestUrlAllowed(search)
 }
 
 /**

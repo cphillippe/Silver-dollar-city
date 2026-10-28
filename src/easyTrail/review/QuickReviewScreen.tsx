@@ -60,7 +60,7 @@ export function QuickReviewScreen({
     <main className="journal is-rehearse is-easy-hold-practice">
       <EasyBack onNavigate={onNavigate} debugToSettings={!fromHome} />
       <QuickReview
-        key={lineId}
+        key={`${lineId}-${cardIndex}`}
         lineId={lineId}
         today={today}
         practice={skipWrite}

@@ -32,11 +32,7 @@ assert.doesNotMatch(quickSrc, /recordHeld|recordLessonHold/)
 
 const appSrc = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
 assert.match(appSrc, /if \(isPlayBuild\(\)\) return null/, 'quickReviewBoot blocks Play builds')
-assert.match(
-  appSrc,
-  /nightWatchJumpAllowed\(search, readNightWatchDebug\(\)\)/,
-  'quickReviewBoot uses playtest gate',
-)
+assert.match(appSrc, /playtestUrlAllowed\(search\)/, 'quickReviewBoot uses URL playtest gate')
 const settingsSrc = readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8')
 assert.match(settingsSrc, /nightWatchJumpAllowed\(/, 'Settings Quick review uses playtest gate')
 
@@ -142,7 +138,7 @@ async function launchBrowser() {
   return chromium.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] })
 }
 
-async function withPage(url, fn, { seed, openDay } = {}) {
+async function withPage(url, fn, { seed, openDay, nwDebugSession } = {}) {
   const root = fileURLToPath(new URL('..', import.meta.url))
   const server = await createServer({
     root,
@@ -158,15 +154,18 @@ async function withPage(url, fn, { seed, openDay } = {}) {
   try {
     if (seed) {
       await page.addInitScript(
-        ({ key, save, openDayKey, openDayValue }) => {
+        ({ key, save, openDayKey, openDayValue, nwSessionKey, nwSessionOn }) => {
           localStorage.setItem(key, JSON.stringify(save))
           if (openDayValue) localStorage.setItem(openDayKey, openDayValue)
+          if (nwSessionOn) sessionStorage.setItem(nwSessionKey, 'on')
         },
         {
           key: STORAGE_KEY,
           save: seed,
           openDayKey: 'silver-city-easy-open-v1',
           openDayValue: openDay ?? '',
+          nwSessionKey: 'silver-city-nw-debug-session',
+          nwSessionOn: Boolean(nwDebugSession),
         },
       )
     }
@@ -207,8 +206,19 @@ function seedSave(intervalIndex = 1, lastFormat = undefined) {
 const PLAYTEST = 'playtest=1'
 
 const hubSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
-assert.match(hubSrc, /nightWatchJumpAllowed\(/, 'Hub Read review uses playtest gate')
+assert.match(hubSrc, /playtestUrlAllowed\(/, 'Hub Read review uses URL playtest gate')
 assert.match(hubSrc, /from: 'home'/, 'Hub Read navigates home quick-review')
+assert.doesNotMatch(hubSrc, /readNightWatchDebug\(\)/, 'Hub Read ignores NW debug switch')
+
+const screenSrc = readFileSync(
+  new URL('../src/easyTrail/review/QuickReviewScreen.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(
+  screenSrc,
+  /key=\{`\$\{lineId\}-\$\{cardIndex\}`\}/,
+  'QuickReview remounts per queue slot',
+)
 
 async function countGoldCues(page) {
   return page.evaluate(() => {
@@ -340,6 +350,12 @@ async function assertFormatCReveal(page, lineId) {
   await assertOneGold(page, `${lineId} format C reveal`)
 }
 
+async function assertRevealClaimReasonStable(page, lineId) {
+  await assertFormatCReveal(page, lineId)
+  await page.waitForTimeout(450)
+  await assertFormatCReveal(page, lineId)
+}
+
 async function tapCorrectPlot(page, lineId) {
   const plotId = lociStampFor(lineId).plotId
   await page.locator(`[data-plot-id="${plotId}"]`).click()
@@ -409,6 +425,55 @@ await withPage(
   { seed: seedSave(2) },
 )
 
+function homeQueueSeed() {
+  return {
+    kind: SAVE_KIND,
+    schemaVersion: SAVE_SCHEMA_VERSION,
+    appVersion: '1.4.552',
+    savedAt: new Date().toISOString(),
+    progress: {
+      started: true,
+      easyMode: true,
+      theme: 'candy',
+      completed: ['ph-road', 'ph-father', 'ob-tuning'],
+      easyHeld: ['ph-road'],
+      lastDailyDate: '2026-01-01',
+      memory: {
+        'ph-road': {
+          id: 'ph-road',
+          pillar: 'parable-hollow',
+          intervalIndex: 1,
+          nextReviewAt: today,
+          reviews: 1,
+          cleanRecalls: 1,
+          elaborated: false,
+          lastFormat: 'A',
+        },
+        'ph-father': {
+          id: 'ph-father',
+          pillar: 'parable-hollow',
+          intervalIndex: 2,
+          nextReviewAt: today,
+          reviews: 2,
+          cleanRecalls: 2,
+          elaborated: false,
+          lastFormat: 'C',
+        },
+        'ob-tuning': {
+          id: 'ob-tuning',
+          pillar: 'observatory',
+          intervalIndex: 1,
+          nextReviewAt: today,
+          reviews: 1,
+          cleanRecalls: 1,
+          elaborated: false,
+          lastFormat: 'C',
+        },
+      },
+    },
+  }
+}
+
 await withPage(
   `/?${PLAYTEST}`,
   async (page) => {
@@ -418,31 +483,55 @@ await withPage(
     await assertOneGold(page, 'Home Read queue card 1')
   },
   {
-    seed: {
-      kind: SAVE_KIND,
-      schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.552',
-      savedAt: new Date().toISOString(),
-      progress: {
-        started: true,
-        easyMode: true,
-        theme: 'candy',
-        completed: ['ph-road', 'ph-father'],
-        easyHeld: ['ph-road'],
-        lastDailyDate: '2026-01-01',
-        memory: {
-          'ph-road': {
-            id: 'ph-road',
-            pillar: 'parable-hollow',
-            intervalIndex: 1,
-            nextReviewAt: today,
-            reviews: 1,
-            cleanRecalls: 1,
-            elaborated: false,
-          },
-        },
-      },
-    },
+    seed: homeQueueSeed(),
+    openDay: '2026-01-01',
+  },
+)
+
+await withPage(
+  '/',
+  async (page) => {
+    await page.getByRole('main', { name: 'Home' }).waitFor()
+    await page.getByRole('button', { name: /Read/i }).click()
+    assert.equal(await page.locator('.quick-review').count(), 0, 'NW debug alone does not open QuickReview')
+    await page.locator('.daily-page').waitFor()
+  },
+  {
+    seed: homeQueueSeed(),
+    openDay: '2026-01-01',
+    nwDebugSession: true,
+  },
+)
+
+const queueUrl = `/?playtest=1&from=home&reviewQueue=ph-road,ph-father,ob-tuning&quickReview=ph-road&reviewFormat=C`
+
+await withPage(
+  queueUrl,
+  async (page) => {
+    await page.locator('.quick-review-prompt-title').filter({ hasText: "What's the main idea?" }).waitFor()
+    await tapCorrectPlot(page, 'ph-road')
+    await assertRevealClaimReasonStable(page, 'ph-road')
+    await page.getByRole('button', { name: 'I had it' }).click()
+
+    await page.locator('.quick-review-prompt-title').filter({ hasText: 'Why is it true?' }).waitFor()
+    await tapCorrectPlot(page, 'ph-father')
+    await assertRevealClaimReasonStable(page, 'ph-father')
+    await page.getByRole('button', { name: 'Not yet' }).click()
+
+    await page.locator('.quick-review-prompt-title').filter({ hasText: "Where's it from?" }).waitFor()
+    await tapCorrectPlot(page, 'ph-father')
+    await assertRevealClaimReasonStable(page, 'ph-father')
+    await page.getByRole('button', { name: 'I had it' }).click()
+
+    await page.locator('.quick-review-prompt-title').filter({ hasText: "What's the main idea?" }).waitFor()
+    await tapCorrectPlot(page, 'ob-tuning')
+    await assertRevealClaimReasonStable(page, 'ob-tuning')
+    await page.getByRole('button', { name: 'I had it' }).click()
+
+    await page.getByRole('main', { name: 'Home' }).waitFor()
+  },
+  {
+    seed: homeQueueSeed(),
     openDay: '2026-01-01',
   },
 )
