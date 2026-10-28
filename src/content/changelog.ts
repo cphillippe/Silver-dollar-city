@@ -21,10 +21,8 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 }
 
 /** Player-facing What's new titles — dev-only rows stay in CHANGELOG only. */
-export function playerVisibleChangeTitle(title: string): string {
-  if (/^Behind the scenes:/i.test(title)) {
-    return 'Coming soon: quick review cards for ideas you saved.'
-  }
+export function playerVisibleChangeTitle(title: string): string | null {
+  if (/^Behind the scenes:/i.test(title)) return null
   return title
 }
 
@@ -36,7 +34,7 @@ export const CHANGELOG: ChangeNote[] = [
     items: [
       'Settings and What’s new stay free of developer notes on a normal link.',
       'Easy text on Home, Settings, Lock In, Match, and early lessons is at least 13 pixels tall.',
-      'Match bonus messages stay above the letter grid on small phones.',
+      'Match bonus messages stay below the letter grid on small phones without overlapping cells.',
       'Refs #871.',
     ],
   },
@@ -77,10 +75,10 @@ export const CHANGELOG: ChangeNote[] = [
   },
   {
     version: '1.4.548',
-    title: 'Coming soon: quick review cards for ideas you saved.',
+    title: 'Behind the scenes: groundwork for quick review cards on saved ideas',
     when: '2026-10-28',
     items: [
-      'Coming soon: quick review cards for ideas you saved.',
+      'Nothing changes for players yet.',
       'Refs: Bill 2026-10-25 7:50 AM CT, review mix (Memory Coach).',
     ],
   },

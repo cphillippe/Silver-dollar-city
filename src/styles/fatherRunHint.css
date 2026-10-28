@@ -224,8 +224,7 @@ html[data-easy='on'] .play.is-father-run .run-miss.is-arming .btn {
 
   html[data-easy='on'] .play.is-father-run .story-caption {
     display: block;
-    font: 700 max(13px, 15px) / 1.2 var(--sans);
-    font-size: max(13px, 0.9375rem);
+    font: 700 15px / 1.2 var(--sans);
   }
 
   html[data-easy='on'] .play.is-father-run .story-kicker {

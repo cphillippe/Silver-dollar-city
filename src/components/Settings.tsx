@@ -68,6 +68,7 @@ export function Settings({ onNavigate }: SettingsProps) {
   const held = progress.held.length
   const open = progress.journal.length
   const drop = latestChange(APP_VERSION)
+  const dropTitle = playerVisibleChangeTitle(drop.title)
   const savedLabel = saveMeta.savedAt
     ? `Progress saved on this device · ${formatSaved(saveMeta.savedAt)}`
     : 'Progress saved on this device as you walk'
@@ -299,7 +300,7 @@ export function Settings({ onNavigate }: SettingsProps) {
 
       <section className="settings-card whats-new" aria-label="What’s new">
         <p className="eyebrow">What’s new · {APP_VERSION}</p>
-        <h2>{playerVisibleChangeTitle(drop.title)}</h2>
+        {dropTitle ? <h2>{dropTitle}</h2> : null}
         <p className="quiet">{drop.when}</p>
         <ul className="whats-new-list">
           {playerVisibleChangeItems(drop.items).map((item) => (
@@ -309,7 +310,9 @@ export function Settings({ onNavigate }: SettingsProps) {
         {CHANGELOG.length > 1 && !easy ? (
           <details className="whats-new-more">
             <summary>Earlier drops</summary>
-            {CHANGELOG.filter((note) => note.version !== APP_VERSION).map((note) => (
+            {CHANGELOG.filter(
+              (note) => note.version !== APP_VERSION && playerVisibleChangeTitle(note.title),
+            ).map((note) => (
               <div key={note.version} className="whats-new-past">
                 <p className="eyebrow">
                   {note.version} · {playerVisibleChangeTitle(note.title)}

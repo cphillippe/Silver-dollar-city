@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Proof shots for Easy Match tapfix at HEAD — mid after first find + win after tap.
- * Writes to GEMSEARCH_HEAD_DIR (default /cursor/stores/self/gemsearch-fix/head).
+ * Writes to GEMSEARCH_HEAD_DIR (default: os.tmpdir()/gemsearch-fix/head).
  */
 import assert from 'node:assert/strict'
 import { mkdirSync } from 'node:fs'

@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { chromium } from 'playwright'
 import { build, preview } from 'vite'
 import { evidenceForTier } from '../src/content/evidence.ts'
@@ -29,6 +29,7 @@ const SIZES = [
   [768, 1024],
 ]
 const SHOTS = process.env.GOLDEN_LIVE_SHOTS ?? join(tmpdir(), 'golden-live-shots')
+const TRACE_FILE = process.env.GOLDEN_LIVE_TRACE ?? join(tmpdir(), 'golden-live-trace.txt')
 
 function playScreens(id) {
   return id === 'maze' || id === 'run' || id === 'gem' || id === 'quiz' || id === 'sort' || id === 'match' || id === 'sequence'
@@ -5001,8 +5002,8 @@ export async function checkGoldenLive() {
     await server.close()
   }
   const text = traces.join('\n\n')
-  mkdirSync('/opt/cursor/artifacts', { recursive: true })
-  writeFileSync('/opt/cursor/artifacts/golden-live-trace.txt', text)
+  mkdirSync(dirname(TRACE_FILE), { recursive: true })
+  writeFileSync(TRACE_FILE, text)
   console.log(text)
   console.log('check-golden-live: ok')
 }
