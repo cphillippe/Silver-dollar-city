@@ -1902,8 +1902,24 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.550')
-assert.equal(CHANGELOG[0].version, '1.4.550', '1.4.550 is the newest row')
+assert.equal(APP_VERSION, '1.4.551')
+assert.equal(CHANGELOG[0].version, '1.4.551', '1.4.551 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.551'), '1.4.551 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.551').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.551 changelog avoids GitHub close keywords',
+)
+assert.doesNotMatch(latestChange('1.4.551').items.join('\n'), /\/box\//, '1.4.551 changelog avoids box paths')
+assert.match(
+  latestChange('1.4.551').items.join('\n'),
+  /stop beside him/,
+  '1.4.551 changelog names the pass-by help fix',
+)
+assert.match(latestChange('1.4.551').items.join('\n'), /Drag or tap the road/, '1.4.551 changelog names the maze hint')
+assert.match(latestChange('1.4.551').items.join('\n'), /Refs #877/, '1.4.551 changelog refs #877')
+assert.match(latestChange('1.4.551').items.join('\n'), /Hard stays the same\./)
+assert.equal(CHANGELOG[1].version, '1.4.550', '1.4.550 follows the 1.4.551 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.550'), '1.4.550 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.550').items.join('\n'),
@@ -1919,7 +1935,7 @@ assert.match(
 assert.match(latestChange('1.4.550').items.join('\n'), /Story word! \+100/, '1.4.550 changelog keeps the story payoff')
 assert.match(latestChange('1.4.550').items.join('\n'), /Refs #870/, '1.4.550 changelog refs #870')
 assert.match(latestChange('1.4.550').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[1].version, '1.4.549', '1.4.549 follows the 1.4.550 row')
+assert.equal(CHANGELOG[2].version, '1.4.549', '1.4.549 follows the 1.4.550 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.549'), '1.4.549 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.549').items.join('\n'),

@@ -120,9 +120,7 @@ export function RoadMazePlay({
   const dragWalking = useRef(false)
   const dragPoint = useRef<{ x: number; y: number } | null>(null)
 
-  useEffect(() => {
-    setMazePreset(attempt)
-  }, [attempt])
+  setMazePreset(attempt)
 
   useEffect(() => {
     return () => {
@@ -267,7 +265,9 @@ export function RoadMazePlay({
     setBeatPop('')
     setComboFlash(0)
     setStepped(false)
-    setAttempt((n) => n + 1)
+    const nextAttempt = attempt + 1
+    setMazePreset(nextAttempt)
+    setAttempt(nextAttempt)
   }
 
   function blocked(message: string) {
@@ -306,6 +306,11 @@ export function RoadMazePlay({
     setToastWhy('')
     setScore((pts) => pts + MAZE_INN_SCORE)
     playGemPop('win')
+    window.clearTimeout(walkRef.current)
+    walkingRef.current = false
+    dragQueue.current = []
+    dragWalking.current = false
+    dragPawn.current = false
     window.clearTimeout(stampTimer.current)
     // 1.4.358: the inn tap unmounts the grid. One more road must not sit under that finger (#531).
     if (gesture === 'down') {
@@ -314,9 +319,14 @@ export function RoadMazePlay({
         clearDockRelease()
         armDockAfterPointer()
       }
-      dockRelease.current = up
-      window.addEventListener('pointerup', up, true)
-      window.addEventListener('pointercancel', up, true)
+      // Queued drag can reach the inn after pointerup; do not wait for a second tap (#877).
+      if (roadPointer.current) {
+        dockRelease.current = up
+        window.addEventListener('pointerup', up, true)
+        window.addEventListener('pointercancel', up, true)
+      } else {
+        up()
+      }
     } else if (gesture === 'up') {
       armDockAfterPointer()
     }
@@ -331,14 +341,19 @@ export function RoadMazePlay({
     }, stampAt)
   }
 
-  function landOn(cell: MazeCoord) {
+  function landOn(cell: MazeCoord, stop = false) {
     atRef.current = cell
     setAt(cell)
     setStepped(true)
     if (mazeSame(cell, MAZE_HURT)) {
       if (!foundRef.current) markFound(cell)
       if (document.documentElement.dataset.easy === 'on' && !helpedRef.current) markHelped(cell)
-    } else if (document.documentElement.dataset.easy === 'on' && !foundRef.current && isNextToHurt(cell)) {
+    } else if (
+      stop &&
+      document.documentElement.dataset.easy === 'on' &&
+      !foundRef.current &&
+      isNextToHurt(cell)
+    ) {
       markFound(MAZE_HURT)
       markHelped(MAZE_HURT)
     } else if (mazeSame(cell, MAZE_INN) && !canWin(helpedRef.current, cell)) {
@@ -359,7 +374,7 @@ export function RoadMazePlay({
         walkingRef.current = false
         return
       }
-      landOn(next)
+      landOn(next, true)
       i += 1
       if (i >= steps.length) {
         walkingRef.current = false
@@ -439,8 +454,9 @@ export function RoadMazePlay({
       return
     }
     dragQueue.current.shift()
+    const stop = dragQueue.current.length === 0 && !roadPointer.current
     dragWalking.current = true
-    landOn(next)
+    landOn(next, stop)
     walkRef.current = window.setTimeout(() => {
       dragWalking.current = false
       pumpDrag()
@@ -489,6 +505,15 @@ export function RoadMazePlay({
     // Tap already stepped on pointerdown. Drop the latch if capture retargeted pointerup here.
     // Queued drag steps keep walking after the finger lifts.
     usedTap.current = false
+    if (
+      document.documentElement.dataset.easy === 'on' &&
+      !foundRef.current &&
+      isNextToHurt(atRef.current)
+    ) {
+      markFound(MAZE_HURT)
+      markHelped(MAZE_HURT)
+    }
+    pumpDrag()
   }
 
   function onPlayPointerMove(event: ReactPointerEvent<HTMLElement>) {

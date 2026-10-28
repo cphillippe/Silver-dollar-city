@@ -204,10 +204,16 @@ assert.match(playSrc, /EASY\.mazeHow/)
 assert.match(playSrc, /EASY\.mazeInnCue/)
 assert.match(
   playSrc,
-  /dataset\.easy === 'on' && !foundRef\.current && isNextToHurt\(cell\)/,
-  'the tile next to the hurt man counts only on Easy',
+  /stop &&[\s\S]*?dataset\.easy === 'on'[\s\S]*?!foundRef\.current[\s\S]*?isNextToHurt\(cell\)/,
+  'the tile next to the hurt man counts only when the walker stops beside him on Easy',
 )
-assert.equal(EASY.mazeHow, 'Tap the road to walk.')
+assert.match(
+  playSrc,
+  /dragQueue\.current\.length === 0 && !roadPointer\.current/,
+  'drag mid-path steps do not count as stopping beside the hurt man',
+)
+assert.equal(EASY.mazeHow, 'Drag or tap the road.')
+assert.doesNotMatch(playSrc, /useEffect\(\(\) => \{\s*setMazePreset\(attempt\)/)
 assert.equal(EASY.mazeInnCue, 'Now walk him to the pink house.')
 assert.match(playSrc, /EASY\.holdNext/)
 assert.match(playSrc, /ROAD_MAZE_AGAIN/)
@@ -218,8 +224,12 @@ assert.match(playSrc, /story-caption/)
 assert.match(playSrc, /maze-beats/)
 assert.match(playSrc, /maze-cell-label/)
 assert.match(playSrc, /mazeStepToward/)
-assert.match(playSrc, /useEffect\(\(\) => \{\s*setMazePreset\(attempt\)/)
 assert.match(playSrc, /stampTimer/)
+assert.match(
+  playSrc,
+  /roadPointer\.current[\s\S]*?armDockAfterPointer/,
+  'queued drag inn win arms the dock when the pointer is already up',
+)
 assert.match(
   playSrc,
   /setWinStamp\(true\)[\s\S]*?if \(!cleared\.current\) \{[\s\S]*?onClear\?\.\(\)/,
