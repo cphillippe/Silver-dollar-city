@@ -36,6 +36,7 @@ import {
   ROAD_MAZE_WIN,
   roadCtaLabel,
   isMazePathSwipe,
+  mazeDragStepsToward,
   mazeStepToward,
   setMazePreset,
   swipeStep,
@@ -410,6 +411,24 @@ export function RoadMazePlay({
     queued.push(cell)
   }
 
+  function dragAimCell(point: { x: number; y: number }, prev: { x: number; y: number }): MazeCoord | null {
+    let target = cellFromBoardPoint(point.x, point.y)
+    if (!target) {
+      const along = cellsAlong(prev, point)
+      target = along.length ? along[along.length - 1]! : null
+    }
+    return target
+  }
+
+  function extendDragToward(target: MazeCoord) {
+    let tail = dragQueue.current[dragQueue.current.length - 1] ?? atRef.current
+    if (mazeSame(tail, target)) return
+    for (const step of mazeDragStepsToward(tail, target)) {
+      enqueueDrag(step)
+      tail = step
+    }
+  }
+
   function pumpDrag() {
     if (dragWalking.current || wonRef.current) return
     const next = dragQueue.current[0]
@@ -479,7 +498,8 @@ export function RoadMazePlay({
     const prev = dragPoint.current
     dragPoint.current = point
     if (!prev) return
-    for (const cell of cellsAlong(prev, point)) enqueueDrag(cell)
+    const aim = dragAimCell(point, prev)
+    if (aim) extendDragToward(aim)
     pumpDrag()
   }
 

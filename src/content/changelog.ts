@@ -15,13 +15,24 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.551',
+    version: '1.4.550',
     title: 'Behind the scenes: Easy Home Read can open saved review cards',
     when: '2026-10-28',
     items: [
       'Nothing changes for players yet.',
       'Behind the scenes: when ideas are due, Read can walk a short review queue before the daily story.',
       'Refs: Bill 2026-10-25 7:50 AM CT, review mix (Memory Coach).',
+    ],
+  },
+  {
+    version: '1.4.549',
+    title: 'Easy Story Creek: road maze drags follow your finger around corners',
+    when: '2026-10-28',
+    items: [
+      'On Easy, dragging on the blue pawn walks the open road toward your finger — through turns and along straight corridors.',
+      'A long straight drag moves one tile per step for the full distance; dragging past a dead end stops on the last road tile.',
+      'Tapping the next road tile still moves one step, the same as before.',
+      'Refs #861.',
     ],
   },
   {
