@@ -2093,6 +2093,7 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
   const camSrc834 = readFileSync(new URL('../src/components/nwCamera.ts', import.meta.url), 'utf8')
   const screen834 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   const actors834 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  const defendCss834 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   assert.match(camSrc834, /export const NW_TAP_SLOP = 8\b/, '#834 the tap slop stays 8')
   assert.match(camSrc834, /export function camFirstSeat/, '#834 the first seat is picked from the camera view')
   assert.match(screen834, /firstSeatAt=\{camOn \? firstSeatPick : undefined\}/, '#834 DefendScreen passes the camera pick down')
@@ -2117,12 +2118,12 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
     '#768 only Easy cam-off drags may close the tower card',
   )
   assert.match(
-    defendCss,
+    defendCss834,
     /@media \(max-width: 480px\) \{\s*\.defend-page\.is-easy-watch \.nw-pace \{[\s\S]*?bottom:\s*64px;[\s\S]*?right:\s*8px;/,
     '#768 NWUI-2 pace chip stays bottom-right on narrow Easy phones',
   )
   assert.doesNotMatch(
-    defendCss,
+    defendCss834,
     /\.defend-page\.is-easy-watch \.nw-pace \{[^}]*z-index:\s*20/,
     '#768 NWUI-2 pace chip does not paint above walker taps',
   )
