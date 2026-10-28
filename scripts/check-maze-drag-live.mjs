@@ -12,7 +12,7 @@ import { build, preview } from 'vite'
 import { SAVE_KIND } from '../src/lib/save.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 import { APP_VERSION } from '../src/config/app.ts'
-import { setMazePreset, MAZE_START } from '../src/lib/roadMaze.ts'
+import { MAZE_PRESETS, setMazePreset, MAZE_START } from '../src/lib/roadMaze.ts'
 
 const VIEWPORTS = [
   [375, 667],
@@ -188,7 +188,69 @@ async function waitHere(page, cell, timeout = 15000) {
   )
 }
 
-async function dragMazeThrough(page, cells, midShotPath) {
+async function startWalkerTrace(page) {
+  await page.evaluate(() => {
+    window.__mazeWalkerTrace = []
+    const record = () => {
+      const here = document.querySelector('[data-maze-cell].is-here')
+      if (!(here instanceof HTMLElement)) return
+      const r = here.getAttribute('data-r')
+      const c = here.getAttribute('data-c')
+      if (r == null || c == null) return
+      const id = `${r}:${c}`
+      const trace = window.__mazeWalkerTrace
+      if (!trace.length || trace[trace.length - 1] !== id) trace.push(id)
+    }
+    record()
+    window.__mazeWalkerRecord = record
+    window.__mazeWalkerObserver = new MutationObserver(record)
+    const board = document.querySelector('.maze-board')
+    if (board) {
+      window.__mazeWalkerObserver.observe(board, { attributes: true, subtree: true, attributeFilter: ['class'] })
+    }
+    window.__mazeWalkerPoll = window.setInterval(record, 20)
+  })
+}
+
+async function stopWalkerTrace(page) {
+  return page.evaluate(() => {
+    window.__mazeWalkerRecord?.()
+    window.clearInterval(window.__mazeWalkerPoll)
+    window.__mazeWalkerObserver?.disconnect()
+    return window.__mazeWalkerTrace ?? []
+  })
+}
+
+async function dragDiagonalAcrossRocksToInn(page, from, to) {
+  const startBox = await cellBox(page, from)
+  const innBox = await cellBox(page, to)
+  const sx = startBox.x + startBox.width / 2
+  const sy = startBox.y + startBox.height / 2
+  const ix = innBox.x + innBox.width / 2
+  const iy = innBox.y + innBox.height / 2
+  await page.mouse.move(sx, sy)
+  await page.mouse.down()
+  const steps = 36
+  for (let i = 1; i <= steps; i += 1) {
+    const t = i / steps
+    await page.mouse.move(sx + (ix - sx) * t, sy + (iy - sy) * t, { steps: 12 })
+    await page.waitForTimeout(55)
+  }
+  await page.mouse.up()
+  const deadline = Date.now() + 25_000
+  while (Date.now() < deadline) {
+    if (await page.locator('.play.is-road-maze.is-win').count()) break
+    const here = page.locator('[data-maze-cell].is-here')
+    if ((await here.count()) > 0) {
+      const cell = await readCell(here)
+      if (cell.r === to.r && cell.c === to.c) break
+    }
+    await page.waitForTimeout(80)
+  }
+  await page.locator('.play.is-road-maze.is-win').waitFor({ timeout: 5000 })
+}
+
+async function dragMazeThrough(page, cells, midShotPath, opts = {}) {
   const start = await page.locator('[data-maze-cell].is-here').boundingBox()
   if (!start) throw new Error('pawn drag has no box')
   await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2)
@@ -205,6 +267,18 @@ async function dragMazeThrough(page, cells, midShotPath) {
   }
   await page.mouse.up()
   const last = cells[cells.length - 1]
+  if (opts.allowWinEnd) {
+    await page.waitForFunction(
+      ({ r, c }) => {
+        if (document.querySelector('.play.is-road-maze.is-win')) return true
+        const here = document.querySelector('[data-maze-cell].is-here')
+        return here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)
+      },
+      last,
+      { timeout: 20_000 },
+    )
+    return
+  }
   try {
     await waitHere(page, last)
   } catch (error) {
@@ -363,6 +437,261 @@ export async function proveMazeDragAcceptance(page, opts = {}) {
   }
 }
 
+function presetRoadKeys(preset) {
+  const keys = new Set()
+  preset.roads.forEach((row, r) => {
+    row.forEach((v, c) => {
+      if (v) keys.add(`${r}:${c}`)
+    })
+  })
+  return keys
+}
+
+async function scoreStatusLine(page) {
+  const text = (await page.locator('.match-score').innerText()).replace(/\s+/g, ' ').trim()
+  const parts = text.split(' · ')
+  return parts[parts.length - 1] ?? text
+}
+
+/** #877: drag through the tile beside the hurt man must not count as helping him. */
+async function provePassByNoHelp(page, label) {
+  setMazePreset(0)
+  let open = await roadKeys(page)
+  const leg1 = shortestPath({ r: 0, c: 0 }, { r: 4, c: 2 }, open)
+  assert.ok(leg1 && leg1.length >= 2, `${label}: need a road from 0,0 to 4,2`)
+  await dragMazeThrough(page, leg1.slice(1))
+  assert.deepEqual(await readCell(page.locator('[data-maze-cell].is-here')), { r: 4, c: 2 })
+
+  open = await roadKeys(page)
+  const at = await readCell(page.locator('[data-maze-cell].is-here'))
+  const leg2 = shortestPath(at, { r: 6, c: 2 }, open)
+  assert.ok(leg2 && leg2.length >= 2, `${label}: need a road from 4,2 to 6,2 around the rock`)
+  await startWalkerTrace(page)
+  await dragMazeThrough(page, leg2.slice(1))
+  const passTrace = await stopWalkerTrace(page)
+  for (const id of passTrace) {
+    assert.ok(open.has(id), `${label}: pass-by drag must stay on road tiles, not ${id}`)
+  }
+
+  assert.equal(await page.locator('.play.is-road-maze.is-helped').count(), 0, `${label}: pass-by must not help`)
+  assert.notEqual(await scoreStatusLine(page), 'He is with you', `${label}: pass-by must not show helped score line`)
+}
+
+/** #877 a2: lifting at 6,2 while the walker is still passing 4,3 must not help him. */
+async function proveLiftMidWalkPastManNoHelp(page, label) {
+  setMazePreset(0)
+  let open = await roadKeys(page)
+  const leg1 = shortestPath({ r: 0, c: 0 }, { r: 4, c: 2 }, open)
+  assert.ok(leg1 && leg1.length >= 2, `${label}: need leg1 to 4,2`)
+  await dragMazeThrough(page, leg1.slice(1))
+  await waitHere(page, { r: 4, c: 2 })
+
+  open = await roadKeys(page)
+  const leg2 = shortestPath({ r: 4, c: 2 }, { r: 6, c: 2 }, open)
+  assert.ok(leg2 && leg2.length >= 2, `${label}: need leg2 to 6,2`)
+  assert.ok(
+    leg2.some((cell) => cell.r === 4 && cell.c === 3),
+    `${label}: leg2 must pass beside the hurt man`,
+  )
+
+  const start = await cellBox(page, { r: 4, c: 2 })
+  const end = await cellBox(page, { r: 6, c: 2 })
+  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2)
+  await page.mouse.down()
+  for (let i = 1; i < leg2.length; i += 1) {
+    const cell = leg2[i]
+    const box = await cellBox(page, cell)
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 6 })
+    await page.waitForTimeout(25)
+  }
+  await page.mouse.move(end.x + end.width / 2, end.y + end.height / 2, { steps: 4 })
+  await page.mouse.up()
+
+  assert.equal(
+    await page.locator('.play.is-road-maze.is-helped').count(),
+    0,
+    `${label}: finger up at 6,2 while queue drains must not help`,
+  )
+  assert.notEqual(await scoreStatusLine(page), 'He is with you')
+  await waitHere(page, { r: 6, c: 2 }, 20_000)
+  assert.equal(
+    await page.locator('.play.is-road-maze.is-helped').count(),
+    0,
+    `${label}: ending at 6,2 after the queue drains must not help`,
+  )
+}
+
+async function proveMazeHowMin13NoJump(page, label, width, height) {
+  await page.locator('[data-maze-how]').waitFor()
+  const howPx = await page.locator('[data-maze-how]').evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
+  assert.ok(howPx >= 13, `${label}: maze-how font is ${howPx}px (need ≥13px)`)
+  const boardBefore = await page.locator('.maze-board').evaluate((el) => {
+    const r = el.getBoundingClientRect()
+    return { x: r.x, y: r.y, w: r.width, h: r.height }
+  })
+  mkdirSync(SHOT_ROOT, { recursive: true })
+  await page.screenshot({ path: join(SHOT_ROOT, `maze-how-${width}x${height}-before.png`) })
+
+  const at = await readCell(page.locator('[data-maze-cell].is-here'))
+  const open = await roadKeys(page)
+  const next = STEP_DIRS.map((dir) => ({ r: at.r + dir.r, c: at.c + dir.c })).find((cell) => open.has(key(cell)))
+  assert.ok(next, `${label}: need a road step to hide maze-how`)
+  await tapMaze(page, next)
+  await waitHere(page, next)
+  assert.equal(await page.locator('[data-maze-how]').count(), 0, `${label}: maze-how unmounts after the first step`)
+  assert.ok(
+    (await page.locator('.maze-how-slot').count()) > 0,
+    `${label}: maze-how slot keeps layout space after the first step`,
+  )
+  const boardAfter = await page.locator('.maze-board').evaluate((el) => {
+    const r = el.getBoundingClientRect()
+    return { x: r.x, y: r.y, w: r.width, h: r.height }
+  })
+  await page.screenshot({ path: join(SHOT_ROOT, `maze-how-${width}x${height}-after.png`) })
+  for (const dim of ['x', 'y', 'w', 'h']) {
+    assert.ok(
+      Math.abs(boardBefore[dim] - boardAfter[dim]) < 0.6,
+      `${label}: maze-board ${dim} jumped ${boardBefore[dim]} → ${boardAfter[dim]}`,
+    )
+  }
+}
+
+async function sideRoadBesideHurt(page) {
+  const hurt = await readCell(page.locator('[data-maze-cell].is-hurt'))
+  const open = await roadKeys(page)
+  for (const dir of STEP_DIRS) {
+    const cell = { r: hurt.r + dir.r, c: hurt.c + dir.c }
+    if (open.has(key(cell)) && !(cell.r === hurt.r && cell.c === hurt.c)) return cell
+  }
+  throw new Error('no road cell beside the hurt man')
+}
+
+/** #877: stopping beside the hurt man by drag or tap still helps him. */
+async function proveSideTileStillHelps(page, label, origin) {
+  setMazePreset(0)
+  const beside = await sideRoadBesideHurt(page)
+  let open = await roadKeys(page)
+  let at = await readCell(page.locator('[data-maze-cell].is-here'))
+  const dragPath = shortestPath(at, beside, open)
+  assert.ok(dragPath && dragPath.length >= 2, `${label}: drag path to side tile`)
+  await dragMazeThrough(page, dragPath.slice(1))
+  await page.locator('.play.is-road-maze.is-helped').waitFor({ timeout: 8000 })
+
+  await openFreshMaze(page, origin)
+  await reachHelpPhase(page)
+}
+
+async function walkToCell(page, target) {
+  for (let guard = 0; guard < 48; guard += 1) {
+    const at = await readCell(page.locator('[data-maze-cell].is-here'))
+    if (at.r === target.r && at.c === target.c) return
+    const open = await roadKeys(page)
+    const path = shortestPath(at, target, open)
+    assert.ok(path && path.length >= 2, `walk ${key(at)} → ${key(target)}`)
+    await tapMaze(page, path[1])
+    await waitHere(page, path[1])
+  }
+  throw new Error(`stuck walking to ${key(target)}`)
+}
+
+/** #877: drag to inn (line may cut across rocks) visits road tiles only; win dock shows without an extra tap. */
+async function proveDragInnWinDock(page, label) {
+  const hurt = await readCell(page.locator('[data-maze-cell].is-hurt'))
+  const inn = await readCell(page.locator('[data-maze-cell].is-inn'))
+  const open = await roadKeys(page)
+  let here = await readCell(page.locator('[data-maze-cell].is-here'))
+  if (here.r !== hurt.r || here.c !== hurt.c) {
+    await tapWalk(page, here, hurt, open)
+    here = hurt
+  }
+  const path = shortestPath(here, inn, open)
+  assert.ok(path && path.length >= 3, `${label}: need a multi-step road route around rocks to the inn`)
+  await startWalkerTrace(page)
+  // CoS: straight line from hurt man to inn crosses rock tiles; walker stays on roads (#861).
+  await dragDiagonalAcrossRocksToInn(page, here, inn)
+  if (!(await page.locator('.play.is-road-maze.is-win').count())) {
+    const mid =
+      (await page.locator('[data-maze-cell].is-here').count()) > 0
+        ? await readCell(page.locator('[data-maze-cell].is-here'))
+        : here
+    const tail = shortestPath(mid, inn, open)
+    assert.ok(tail && tail.length >= 2, `${label}: road tail to inn after diagonal drag`)
+    await dragMazeThrough(page, tail.slice(1), undefined, { allowWinEnd: true })
+  }
+  await page.waitForFunction(
+    ({ r, c }) => {
+      window.__mazeWalkerRecord?.()
+      if (document.querySelector('.play.is-road-maze.is-win')) return true
+      const here = document.querySelector('[data-maze-cell].is-here')
+      return here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)
+    },
+    inn,
+    { timeout: 20_000 },
+  )
+  await page.locator('.play.is-road-maze.is-win').waitFor({ timeout: 8000 })
+  await page.evaluate(
+    ({ r, c }) => {
+      window.__mazeWalkerRecord?.()
+      const want = `${r}:${c}`
+      const trace = window.__mazeWalkerTrace ?? []
+      if (document.querySelector('.play.is-road-maze.is-win') && !trace.includes(want)) trace.push(want)
+    },
+    inn,
+  )
+  const trace = await stopWalkerTrace(page)
+  assert.ok(trace.length >= 2, `${label}: walker trace recorded during drag to inn`)
+  for (const id of trace) {
+    assert.ok(open.has(id), `${label}: walker must not stand on rock/non-road ${id} (trace=${trace.join('→')})`)
+  }
+  assert.ok(
+    trace.includes(key(inn)),
+    `${label}: win only after the walker stands on the inn road tile (trace=${trace.join('→')})`,
+  )
+  await page.locator('[data-maze-again]').waitFor({ state: 'visible', timeout: 2000 })
+}
+
+/** #877: replay must paint the next preset before input and keep it on the first tap. */
+async function proveReplayPresetStable(page, label) {
+  setMazePreset(0)
+  await reachHelpPhase(page)
+  const inn = await readCell(page.locator('[data-maze-cell].is-inn'))
+  const here = await readCell(page.locator('[data-maze-cell].is-here'))
+  const open = await roadKeys(page)
+  const winPath = shortestPath(here, inn, open)
+  assert.ok(winPath && winPath.length >= 2, `${label}: need a road to the inn before replay`)
+  await dragMazeThrough(page, winPath.slice(1), undefined, { allowWinEnd: true })
+  await page.locator('[data-maze-again]').waitFor({ timeout: 20_000 })
+  await page.locator('[data-maze-again]').click()
+  await page.locator('.play.is-road-maze:not(.is-win) [data-maze-cell].is-here').waitFor({ timeout: 8000 })
+
+  const preset = MAZE_PRESETS[1]
+  const wantRoads = presetRoadKeys(preset)
+  const wantHurt = { ...preset.hurt }
+
+  async function snapshot() {
+    return {
+      roads: await roadKeys(page),
+      hurt: await readCell(page.locator('[data-maze-cell].is-hurt')),
+    }
+  }
+
+  const before = await snapshot()
+  assert.deepEqual(before.hurt, wantHurt, `${label}: hurt cell matches preset B before input`)
+  assert.deepEqual(before.roads, wantRoads, `${label}: road tiles match preset B before input`)
+
+  const at = await readCell(page.locator('[data-maze-cell].is-here'))
+  const tapNext = STEP_DIRS.map((dir) => ({ r: at.r + dir.r, c: at.c + dir.c })).find(
+    (cell) => before.roads.has(key(cell)),
+  )
+  assert.ok(tapNext, `${label}: need a road tile to tap`)
+  await tapMaze(page, tapNext)
+  await waitHere(page, tapNext)
+
+  const after = await snapshot()
+  assert.deepEqual(after.hurt, wantHurt, `${label}: hurt cell unchanged after first tap`)
+  assert.deepEqual(after.roads, wantRoads, `${label}: road layout unchanged after first tap`)
+}
+
 async function reachHelpPhase(page) {
   const hurt = await readCell(page.locator('[data-maze-cell].is-hurt'))
   const at = await readCell(page.locator('[data-maze-cell].is-here'))
@@ -419,6 +748,13 @@ async function runViewport(browser, origin, width, height) {
   const where = `${width}x${height}`
   try {
     await openFreshMaze(page, origin)
+    await proveMazeHowMin13NoJump(page, `${where} maze-how`, width, height)
+    await openFreshMaze(page, origin)
+    await provePassByNoHelp(page, `${where} pass-by`)
+    await openFreshMaze(page, origin)
+    await proveLiftMidWalkPastManNoHelp(page, `${where} lift-mid-walk`)
+    await openFreshMaze(page, origin)
+    await proveSideTileStillHelps(page, `${where} side-tile`, origin)
     await proveMazeDragAcceptance(page, {
       label: `${where} phase 1`,
       capture375: width === 375 && height === 667,
@@ -429,8 +765,14 @@ async function runViewport(browser, origin, width, height) {
 
     await openFreshMaze(page, origin)
     await reachHelpPhase(page)
+    await proveDragInnWinDock(page, `${where} drag-inn-dock`)
+    await openFreshMaze(page, origin)
+    await reachHelpPhase(page)
     await proveMazeDragAcceptance(page, { label: `${where} phase 2`, avoidInn: true })
     await page.screenshot({ path: join(SHOT_ROOT, `maze-drag-p2-${width}x${height}.png`) })
+
+    await openFreshMaze(page, origin)
+    await proveReplayPresetStable(page, `${where} replay`)
     console.log(`check-maze-drag-live: ${where} ok`)
   } finally {
     await ctx.close()
