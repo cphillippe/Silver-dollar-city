@@ -15,6 +15,18 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.551',
+    title: 'Easy road maze: pass-by no longer helps; replay shows the new map right away',
+    when: '2026-10-28',
+    items: [
+      'The maze now counts the hurt man only when you stop beside him, and a new road shows right away.',
+      'After you help him, dragging to the inn shows One more road right away — no extra tap on the win card.',
+      'Drag or tap the road — the hint says both.',
+      'Hard stays the same.',
+      'Refs #877',
+    ],
+  },
+  {
     version: '1.4.550',
     title: 'Easy Match: bonus words that start a story word score on release',
     when: '2026-10-28',
