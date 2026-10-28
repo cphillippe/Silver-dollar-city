@@ -1910,7 +1910,15 @@ assert.doesNotMatch(
   /Fixes #|Closes #|Resolves #/,
   '1.4.551 changelog avoids GitHub close keywords',
 )
-assert.match(latestChange('1.4.551').items.join('\n'), /Refs #793/)
+assert.doesNotMatch(latestChange('1.4.551').items.join('\n'), /\/box\//, '1.4.551 changelog avoids box paths')
+assert.match(
+  latestChange('1.4.551').items.join('\n'),
+  /stop beside him/,
+  '1.4.551 changelog names the pass-by help fix',
+)
+assert.match(latestChange('1.4.551').items.join('\n'), /Drag or tap the road/, '1.4.551 changelog names the maze hint')
+assert.match(latestChange('1.4.551').items.join('\n'), /Refs #877/, '1.4.551 changelog refs #877')
+assert.match(latestChange('1.4.551').items.join('\n'), /Hard stays the same\./)
 assert.equal(CHANGELOG[1].version, '1.4.550', '1.4.550 follows the 1.4.551 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.550'), '1.4.550 changelog row')
 assert.doesNotMatch(
@@ -6190,8 +6198,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     mazePlaySrc,
     /1\.4\.350: HELPED! closes the maze grid; teach clear runs after the stamp \(#514\)/,
   )
-  assert.match(mazePlaySrc, /useEffect\(\(\) => \{\s*setMazePreset\(attempt\)/)
-  assert.doesNotMatch(mazePlaySrc, /\n  setMazePreset\(attempt\)\n/)
+  assert.doesNotMatch(mazePlaySrc, /useEffect\(\(\) => \{\s*setMazePreset\(attempt\)/)
+  assert.match(mazePlaySrc, /\n  setMazePreset\(attempt\)\n/)
   assert.match(mazePlaySrc, /stampTimer/)
   assert.match(
     mazePlaySrc,
