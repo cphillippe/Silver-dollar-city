@@ -16356,7 +16356,7 @@ console.log('check-city: ok')
   assert.match(playTap, /scrollWinIntoView/)
   assert.match(playTap, /gem-find-pop gem-score-pop/)
   assert.match(playTap, /submit\(line, true\)/)
-  assert.match(gemTapCss, /\.gem-hint-slot \{[\s\S]*?min-height: 5\.85rem/)
+  assert.match(gemTapCss, /\.gem-hint-slot \{[\s\S]*?min-height: 7\.35rem/)
   assert.doesNotMatch(
     gemTapCss,
     /:has\(\.gem-combo\.is-loud\) \{\s*min-height: 5\.85rem/,
