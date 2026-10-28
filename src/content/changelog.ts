@@ -15,6 +15,20 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.551',
+    title: 'Night Run: the Just Right Gate',
+    when: '2026-10-28',
+    items: [
+      'Night Run has a new Star Tower gate with three cranks.',
+      'Find six crank parts in the other districts. A gold path and the Parts pill show the way.',
+      'Turn each crank to just right. The pond, the star and the sprout wake up.',
+      'Try one, then find all three at once. Then let luck try.',
+      'No hearts are lost at the gate.',
+      'The Journal adds Just Right with its sources.',
+      'Refs #793.',
+    ],
+  },
+  {
     version: '1.4.550',
     title: 'Easy Match: bonus words that start a story word score on release',
     when: '2026-10-28',
