@@ -12,8 +12,8 @@ interface QuickReviewScreenProps {
   onNavigate: (view: View) => void
 }
 
-function readDebugFormat(fromHome: boolean): QuickReviewProps['debugFormat'] {
-  if (fromHome || typeof window === 'undefined') return undefined
+function readDebugFormat(_fromHome: boolean): QuickReviewProps['debugFormat'] {
+  if (typeof window === 'undefined') return undefined
   const raw = new URLSearchParams(window.location.search).get('reviewFormat')
   if (raw === 'A' || raw === 'B' || raw === 'C') return raw
   return undefined

@@ -1,3 +1,18 @@
+/* One gold cue per screen — top chrome stays neutral on QuickReview. */
+html[data-easy='on'] .app.is-play:has(.quick-review) header.topbar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+html[data-easy='on'] .app.is-play:has(.quick-review) .topbar .brand-mark {
+  background: rgba(255, 246, 232, 0.55);
+  box-shadow: none;
+}
+
+html[data-easy='on'] .app.is-play:has(.quick-review) .topbar nav button.is-active {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.1);
+}
+
 html[data-easy='on'] .journal.is-rehearse:has(.quick-review) {
   display: flex;
   flex-direction: column;
@@ -234,6 +249,8 @@ html[data-easy='on'] .quick-review-lines {
 html[data-easy='on'] .quick-review-lines .match-card.recall-card {
   font-size: 0.8125rem;
   min-height: 44px;
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: none;
 }
 
 html[data-easy='on'] .quick-review-lines .match-card.recall-card.is-flash {
