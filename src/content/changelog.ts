@@ -15,13 +15,25 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.550',
+    version: '1.4.551',
     title: 'Behind the scenes: Easy Home Read can open saved review cards',
     when: '2026-10-28',
     items: [
       'Nothing changes for players yet.',
       'Behind the scenes: when ideas are due, Read can walk a short review queue before the daily story.',
       'Refs: Bill 2026-10-25 7:50 AM CT, review mix (Memory Coach).',
+    ],
+  },
+  {
+    version: '1.4.550',
+    title: 'Easy Match: bonus words that start a story word score on release',
+    when: '2026-10-28',
+    items: [
+      'Releasing a drag on SEE, SHE, TUNE, THIN, or other real bonus words that start a story word scores BONUS +50 instead of Miss −25.',
+      'After that bonus, dragging the full story word still awards Story word! +100.',
+      'A short release that only prefixes a chip word still clears with no penalty.',
+      'Hard stays the same.',
+      'Refs #870.',
     ],
   },
   {
