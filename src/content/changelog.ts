@@ -15,6 +15,17 @@ export function playerVisibleChangeItems(items: string[]): string[] {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.549',
+    title: 'Easy Story Creek: road maze drags follow your finger around corners',
+    when: '2026-10-28',
+    items: [
+      'On Easy, dragging on the blue pawn walks the open road toward your finger — through turns and along straight corridors.',
+      'A long straight drag moves one tile per step for the full distance; dragging past a dead end stops on the last road tile.',
+      'Tapping the next road tile still moves one step, the same as before.',
+      'Refs #861.',
+    ],
+  },
+  {
     version: '1.4.548',
     title: 'Behind the scenes: groundwork for quick review cards on saved ideas',
     when: '2026-10-28',
