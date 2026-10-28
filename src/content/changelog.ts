@@ -25,6 +25,15 @@ export const CHANGELOG: ChangeNote[] = [
     ],
   },
   {
+    version: '1.4.548',
+    title: 'Behind the scenes: groundwork for quick review cards on saved ideas',
+    when: '2026-10-28',
+    items: [
+      'Nothing changes for players yet.',
+      'Refs: Bill 2026-10-25 7:50 AM CT, review mix (Memory Coach).',
+    ],
+  },
+  {
     version: '1.4.547',
     title: 'Easy Lock In: empty tab stays on Lock In',
     when: '2026-10-27',

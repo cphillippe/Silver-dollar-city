@@ -477,4 +477,57 @@ const foreignCopies = corruptCopies()
 assert.equal(foreignCopies.length, 1)
 assert.equal(saveStore.get(foreignCopies[0]), '{"nope":1}')
 
+const lastFormatSave = {
+  kind: SAVE_KIND,
+  schemaVersion: SAVE_SCHEMA_VERSION,
+  appVersion: APP_VERSION,
+  savedAt: '2026-10-27T12:00:00.000Z',
+  progress: {
+    started: true,
+    easyMode: true,
+    memory: {
+      'ph-road': {
+        id: 'ph-road',
+        pillar: 'parable-hollow',
+        intervalIndex: 1,
+        nextReviewAt: '2026-10-28',
+        reviews: 2,
+        cleanRecalls: 1,
+        elaborated: false,
+        lastFormat: 'B',
+      },
+    },
+  },
+}
+const parsedLastFormat = parseIncomingSave(JSON.stringify(lastFormatSave))
+assert.equal(parsedLastFormat.ok, true)
+if (!parsedLastFormat.ok) throw new Error('lastFormat parse')
+assert.equal(parsedLastFormat.progress.memory['ph-road']?.lastFormat, 'B')
+const junkZ = parseIncomingSave(
+  JSON.stringify({
+    ...lastFormatSave,
+    progress: {
+      ...lastFormatSave.progress,
+      memory: {
+        'ph-road': { ...lastFormatSave.progress.memory['ph-road'], lastFormat: 'Z' },
+      },
+    },
+  }),
+)
+assert.equal(junkZ.ok, true)
+if (!junkZ.ok) throw new Error('junk lastFormat')
+assert.equal(junkZ.progress.memory['ph-road']?.lastFormat, undefined)
+const junkNum = parseIncomingSave(
+  JSON.stringify({
+    ...lastFormatSave,
+    progress: {
+      ...lastFormatSave.progress,
+      memory: { 'ph-road': { ...lastFormatSave.progress.memory['ph-road'], lastFormat: 5 } },
+    },
+  }),
+)
+assert.equal(junkNum.ok, true)
+if (!junkNum.ok) throw new Error('numeric lastFormat')
+assert.equal(junkNum.progress.memory['ph-road']?.lastFormat, undefined)
+
 console.log('check-save: ok')
