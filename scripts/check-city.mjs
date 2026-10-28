@@ -1971,7 +1971,7 @@ assert.doesNotMatch(
   '1.4.546 changelog drops box paths',
 )
 assert.match(latestChange('1.4.546').items.join('\n'), /Refs #753/, '1.4.546 changelog refs #753')
-assert.equal(CHANGELOG[4].version, '1.4.545', '1.4.545 stays under 1.4.546')
+assert.equal(CHANGELOG[5].version, '1.4.545', '1.4.545 stays under 1.4.546')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.545'), '1.4.545 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.545').items.join('\n'),
