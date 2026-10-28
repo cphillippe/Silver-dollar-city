@@ -3,6 +3,9 @@
  * The map sheet, the clear-bar buttons, and a walker beside a lamp.
  */
 import assert from 'node:assert/strict'
+import { mkdirSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createServer } from 'vite'
 import { chromium } from '@playwright/test'
@@ -58,7 +61,8 @@ async function noScroll(page, label) {
   assert.ok(overflow <= 1, `${label} horizontal scroll ${overflow}`)
 }
 
-const SHOTS = '/opt/cursor/artifacts/screenshots'
+const SHOTS = join(tmpdir(), 'cursor-phone-fixes-shots')
+mkdirSync(SHOTS, { recursive: true })
 
 async function assertHeavenClear(page, label, shot = '') {
   const read = () =>

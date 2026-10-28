@@ -6059,14 +6059,15 @@ button.defend-new-lamp[aria-pressed='true'] {
   color: transparent;
 }
 
-/* 792b NWUI-2: the pace chip rides the top-left, off the center road and clear of the skill tray and walk-in tap discs. On Easy the fast chip is violet so the strip stays the only gold mid-wave. */
+/* 792b NWUI-2: pace sits under the Sparks badge on the left rail, outside the road (walker taps stay above at z 11). */
 @media (max-width: 480px) {
   .defend-page.is-easy-watch .nw-pace {
-    top: 56px;
+    top: calc(10px + 32px + 8px);
     bottom: auto;
-    left: 8px;
+    left: max(18px, calc(env(safe-area-inset-left, 0px) + 14px));
     right: auto;
     transform: none;
+    z-index: 5;
   }
 }
 
