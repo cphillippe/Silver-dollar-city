@@ -459,6 +459,25 @@ try {
   await pointerClick(words, tuning)
   await words.locator('.gem-board').waitFor()
   await assertMainEasyTypeBaselines(words, 'L3 word search 375×667')
+
+  const words390 = await browser.newPage({ viewport: { width: 390, height: 844 } })
+  await words390.goto(`${origin}/?playtest=1`)
+  await words390.locator('.welcome').waitFor()
+  await pointerClick(words390, words390.getByRole('button', { name: 'Start Easy' }))
+  await words390.getByRole('main', { name: 'Home' }).waitFor()
+  const wordSettings390 = words390.getByRole('button', { name: 'Settings', exact: true })
+  await wordSettings390.scrollIntoViewIfNeeded()
+  await pointerClick(words390, wordSettings390)
+  const wordSummary390 = words390.locator('details.settings-debug summary')
+  await wordSummary390.scrollIntoViewIfNeeded()
+  await pointerClick(words390, wordSummary390)
+  const tuning390 = words390.getByRole('button', { name: /^ob-tuning ·/ })
+  await tuning390.scrollIntoViewIfNeeded()
+  await pointerClick(words390, tuning390)
+  await words390.locator('.gem-board').waitFor()
+  await assertMainEasyTypeBaselines(words390, 'L3 word search 390×844')
+  await words390.close()
+
   await assertEasyTypeFloor(
     words,
     'L3 word search 375',

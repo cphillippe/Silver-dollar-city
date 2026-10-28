@@ -669,7 +669,7 @@ html[data-easy='on'] .play.is-gem-search .gem-cell.is-start-gold {
 html[data-easy='on'] .play.is-gem-search .gem-hint-slot {
   position: relative;
   flex: 0 0 auto;
-  min-height: 7.35rem;
+  min-height: 6.54rem;
   margin: 0 0 4px;
   display: grid;
   place-items: center;
@@ -1033,7 +1033,6 @@ html[data-easy='on'] .play.is-gem-search .gem-cell:active:not(.is-sel):not(.is-b
 html[data-easy='on'] .play.is-gem-search :is(
   .gem-word-kind,
   .gem-word-label,
-  .gem-letter,
   .match-teach-kind,
   .match-teach-label,
   .match-score,

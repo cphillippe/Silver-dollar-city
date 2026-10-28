@@ -12,6 +12,12 @@ export const MAIN_EASY_TYPE_BASELINES = {
   /** Main at 375×667 uses gem.css @430px sort-how 0.95rem (~15.2px), not the 1.02rem desktop rule. */
   gemSortHow: { selector: '.play.is-gem-search .sort-how', px: 15.2, tolerance: 0.6 },
   gemTeachSay: { selector: '.play.is-gem-search .match-teach-say', px: 14, tolerance: 0.05 },
+  /** Main inherits .gem-cell clamp(0.92rem, 4.4vw, …) — must not get the 13px :is() floor. */
+  gemLetter: {
+    selector: '.play.is-gem-search .gem-letter',
+    byViewport: { 375: 16.5, 390: 17.16 },
+    tolerance: 0.25,
+  },
 }
 
 export function assertTypeFloorCss() {
@@ -39,6 +45,11 @@ export function assertTypeFloorCss() {
     gem,
     /#871:[\s\S]*:is\([\s\S]*\.match-teach-say,/,
     '#871 gem teach say uses 14px rule outside the 13px :is() block',
+  )
+  assert.doesNotMatch(
+    gem,
+    /#871:[\s\S]*:is\([\s\S]*\.gem-letter,/,
+    '#871 gem :is() floor must not shrink grid letters',
   )
   assert.match(
     gem,
@@ -77,6 +88,14 @@ export async function assertMainEasyTypeBaselines(page, label) {
       assert.ok(
         Math.abs(px - spec.px) <= tol,
         `#871 ${label} ${key} stays ${spec.px}px teach floor (got ${px}px)`,
+      )
+    } else if (key === 'gemLetter') {
+      const w = page.viewportSize()?.width ?? 0
+      const minPx = spec.byViewport?.[w]
+      if (!minPx) continue
+      assert.ok(
+        px >= minPx - tol,
+        `#871 ${label} ${key} must not shrink below main ~${minPx}px at ${w}w (got ${px}px)`,
       )
     }
   }
