@@ -554,7 +554,7 @@ html[data-easy='on'] .play.is-father-run .run-miss.is-arming .btn {
   }
 }
 
-/* #871: Father run caption and speech stay at least 13px on Easy phones. */
-html[data-easy='on'] .play.is-father-run :is(.story-caption, .run-speech-line, .run-speech-kicker, .run-speech-count, .match-score) {
-  font-size: max(13px, 0.8125rem);
+/* #871: Only raise Father-run chrome that was below 13px on main — never shrink caption/speech line. */
+html[data-easy='on'] .play.is-father-run :is(.run-speech-kicker, .run-speech-count, .match-score) {
+  font-size: 0.8125rem;
 }

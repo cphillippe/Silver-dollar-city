@@ -2025,6 +2025,7 @@ for (const script of [
   const live871 = readFileSync(new URL(`./${script}`, import.meta.url), 'utf8')
   assert.match(live871, /dev-ui-playtest\.mjs/, `#871 ${script} opens developer UI via playtest helper`)
 }
+await import('./check-type-floor-baseline.mjs').then((mod) => mod.assertTypeFloorCss())
 assert.equal(CHANGELOG[5].version, '1.4.547', '1.4.547 follows QuickReview row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.547'), '1.4.547 changelog row')
 assert.doesNotMatch(
