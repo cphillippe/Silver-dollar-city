@@ -508,6 +508,7 @@ export function RoadMazePlay({
     if (
       document.documentElement.dataset.easy === 'on' &&
       !foundRef.current &&
+      dragQueue.current.length === 0 &&
       isNextToHurt(atRef.current)
     ) {
       markFound(MAZE_HURT)
@@ -683,10 +684,14 @@ export function RoadMazePlay({
         </div>
       ) : (
         <>
-      {document.documentElement.dataset.easy === 'on' && !won && (helped || !stepped) ? (
-        <p className="maze-how" data-maze-how>
-          {helped ? EASY.mazeInnCue : EASY.mazeHow}
-        </p>
+      {document.documentElement.dataset.easy === 'on' && !won ? (
+        <div className="maze-how-slot">
+          {helped || !stepped ? (
+            <p className="maze-how" data-maze-how>
+              {helped ? EASY.mazeInnCue : EASY.mazeHow}
+            </p>
+          ) : null}
+        </div>
       ) : null}
       {toast ? (
         <p className={`match-toast gem-toast is-yes`} role="status">
