@@ -31,13 +31,35 @@ const DEV_MARKERS = [
 ]
 
 async function assertNoDevCopy(page, label) {
+  const hay = await page.evaluate(
+    () =>
+      `${document.body.textContent || ''} ${[...document.querySelectorAll('*')]
+        .flatMap((el) => [...el.attributes].map((a) => a.value))
+        .join(' ')}`,
+  )
+  const a2 = [
+    [/Developer · mini-game jumps/, 'Developer · mini-game jumps'],
+    [/\bDebug\b/, 'Debug'],
+    [/Night Watch · debug freeze/, 'Night Watch · debug freeze'],
+    [/debug freeze/i, 'debug freeze'],
+    [/Jump · Night Watch/, 'Jump · Night Watch'],
+    [/Playtest only/, 'Playtest only'],
+    [/this-device hide for playtest/, 'playtest-hide copy'],
+    [/Behind the scenes/, 'Behind the scenes'],
+    [/\bRefs\b/, 'Refs'],
+  ]
+  for (const [re, name] of a2) {
+    assert.ok(!re.test(hay), `#871 ${label} hay lacks ${name}`)
+  }
   const html = await page.evaluate(() => document.body.innerHTML)
-  const text = await page.evaluate(() => document.body.textContent || '')
   for (const marker of DEV_MARKERS) {
     assert.ok(!html.includes(marker), `#871 ${label} innerHTML lacks ${marker}`)
-    assert.ok(!text.includes(marker), `#871 ${label} text lacks ${marker}`)
   }
   assert.equal(await page.locator('details.settings-debug').count(), 0, `#871 ${label} no debug details`)
+  const whatsNew = await page.evaluate(
+    () => document.querySelector('.settings-card.whats-new')?.textContent ?? '',
+  )
+  assert.doesNotMatch(whatsNew, /\bRefs\b/, `#871 ${label} What's new has no Refs lines`)
 }
 
 async function visibleTinyType(page, scope = 'body') {
