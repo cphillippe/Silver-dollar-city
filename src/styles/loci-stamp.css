@@ -117,6 +117,10 @@ html[data-easy='on'] button.loci-stamp:active {
   font-size: 0.8rem;
 }
 
+html[data-easy='on'] .loci-stamp.is-dock .loci-stamp-pin {
+  font-size: 0.8125rem;
+}
+
 .loci-stamp-juice {
   position: absolute;
   right: 0.4rem;
