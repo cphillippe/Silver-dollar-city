@@ -34,7 +34,7 @@ export const CHANGELOG: ChangeNote[] = [
     items: [
       'The first walker on each wave can be tapped as soon as it steps onto the map — no silent wait while it is already visible.',
       'On a wide tablet with the camera off, dragging across the board no longer plants lamps or fires stray shots; quick taps still work.',
-      'The pace chip sits in the top HUD bar so walker taps stay clear when the map camera is on, including under the HUD band.',
+      'The pace chip sits in the top HUD bar; the HUD pass-through keeps the map, Sparks balloon, and lamp rail visible when the camera is on.',
       'Easy only.',
       'Refs #756.',
       'Refs #768.',

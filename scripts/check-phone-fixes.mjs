@@ -216,51 +216,6 @@ async function tapWalker(page, spot, label) {
   )
 }
 
-/** Tap until walk-in unlock or a hit/miss registers (CI runners can lag the readout). */
-async function tapWalkerUntilStat(page, spot, label, timeoutMs = 20_000) {
-  const deadline = Date.now() + timeoutMs
-  const start = await tapTotals(page)
-  while (Date.now() < deadline) {
-    const okPoint = await page.evaluate(({ x, y }) => {
-      const stack = document.elementsFromPoint(x, y)
-      let ok = false
-      for (const node of stack) {
-        if (node.closest?.('.defend-walker-tap')) {
-          ok = true
-          break
-        }
-        if (getComputedStyle(node).pointerEvents !== 'none') break
-      }
-      return ok
-    }, { x: spot.x, y: spot.y })
-    if (okPoint) {
-      await page.mouse.click(spot.x, spot.y)
-      try {
-        await page.waitForFunction(
-          (b) => {
-            const node = document.querySelector('[data-tap-hits]')
-            const hits = Number(node?.getAttribute('data-tap-hits') ?? '0')
-            const misses = Number(node?.getAttribute('data-tap-misses') ?? '0')
-            return hits + misses > b.hits + b.misses
-          },
-          start,
-          { timeout: 2500 },
-        )
-        return
-      } catch {
-        const now = await tapTotals(page)
-        if (now.hits + now.misses > start.hits + start.misses) return
-      }
-    }
-    await page.waitForTimeout(200)
-  }
-  const after = await tapTotals(page)
-  assert.ok(
-    after.hits + after.misses > start.hits + start.misses,
-    `${label} tap under HUD registers on the walker (${start.hits}+${start.misses} -> ${after.hits}+${after.misses})`,
-  )
-}
-
 async function buttonRects(page) {
   return page.locator('.defend-clear-row button').evaluateAll((nodes) =>
     nodes.map((node) => {
@@ -666,97 +621,230 @@ async function check768WalkerTapProbe(browser, port, errors) {
   }
 }
 
-/** #868 map04 390×844 cam on: a walker panned under the HUD band must stay tappable (not eaten by the strip/chip). */
+/** Read stage / HUD / chrome layout for #868 cam-on regression checks. */
+async function measure868CamOnLayout(page) {
+  return page.evaluate(() => {
+    const box = (node) => {
+      if (!node) return null
+      const st = getComputedStyle(node)
+      if (st.display === 'none' || st.visibility === 'hidden') return null
+      const b = node.getBoundingClientRect()
+      if (b.width < 1 || b.height < 1) return null
+      return { top: b.top, bottom: b.bottom, left: b.left, right: b.right }
+    }
+    const overlaps = (a, b) =>
+      Boolean(a && b && a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top)
+    const hud = box(document.querySelector('.nw-hud'))
+    const stage = box(document.querySelector('.nw-stage'))
+    const balloon =
+      box(document.querySelector('.nw-balloon-slot')) || box(document.querySelector('.nw-balloon'))
+    const railNode =
+      document.querySelector('.nw-rail .defend-abilities button') ||
+      document.querySelector('.nw-rail .defend-abilities [data-type]')
+    const rail = box(railNode)
+    const pace = box(document.querySelector('.nw-hud > .nw-pace'))
+    const wave = box(document.querySelector('.nw-wave-overlay .defend-wave'))
+    const walkers = [...document.querySelectorAll('.defend-walker-tap')]
+      .map((btn) => {
+        const b = btn.getBoundingClientRect()
+        if (b.width < 8 || b.height < 8) return null
+        return { cx: (b.left + b.right) / 2, cy: (b.top + b.bottom) / 2 }
+      })
+      .filter(Boolean)
+    return { hud, stage, balloon, rail, pace, wave, walkers, viewportH: window.innerHeight }
+  })
+}
+
+function rectsOverlap(a, b) {
+  return Boolean(a && b && a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top)
+}
+
+function assert868CamOnLayout(
+  read,
+  label,
+  { hudBottomLimit = 89.5, requirePace = true, requireWave = true, requireWalkers = true } = {},
+) {
+  assert.ok(read.hud && read.stage, `#868 ${label} HUD and stage render`)
+  assert.ok(
+    read.stage.top >= read.hud.bottom - 0.5,
+    `#868 ${label} stage top ${read.stage.top} sits at or below HUD bottom ${read.hud.bottom}`,
+  )
+  assert.ok(
+    read.hud.bottom <= hudBottomLimit + 0.5,
+    `#868 ${label} HUD bottom ${read.hud.bottom} <= ${hudBottomLimit}`,
+  )
+  if (read.balloon) {
+    assert.ok(read.balloon.top >= -0.5, `#868 ${label} Sparks balloon top on screen (${read.balloon.top})`)
+    assert.ok(
+      read.balloon.bottom <= read.viewportH + 0.5,
+      `#868 ${label} Sparks balloon bottom on screen (${read.balloon.bottom})`,
+    )
+    assert.ok(!rectsOverlap(read.balloon, read.hud), `#868 ${label} Sparks balloon clear of HUD`)
+    if (read.pace) {
+      assert.ok(!rectsOverlap(read.balloon, read.pace), `#868 ${label} Sparks balloon clear of pace chip`)
+    }
+  }
+  assert.ok(read.rail, `#868 ${label} first rail card renders`)
+  assert.ok(!rectsOverlap(read.rail, read.hud), `#868 ${label} first rail card clear of HUD`)
+  if (read.pace) {
+    assert.ok(!rectsOverlap(read.rail, read.pace), `#868 ${label} first rail card clear of pace chip`)
+  } else if (requirePace) {
+    assert.fail(`#868 ${label} pace chip renders in the HUD`)
+  }
+  if (read.wave) {
+    assert.ok(
+      !rectsOverlap(read.wave, read.hud),
+      `#868 ${label} wave pill clear of HUD (${JSON.stringify(read.wave)} / hud ${read.hud.bottom})`,
+    )
+  } else if (requireWave) {
+    assert.fail(`#868 ${label} wave pill renders`)
+  }
+  if (requireWalkers) {
+    const underHud = read.walkers.filter((w) => w.cy < read.hud.bottom - 0.5)
+    assert.deepEqual(
+      underHud,
+      [],
+      `#868 ${label} no walker tap centre above HUD bottom ${read.hud.bottom} (${JSON.stringify(underHud)})`,
+    )
+  }
+}
+
+/** #868 cam on at 375/390: stage stays put at Begin; chrome stays visible under the pass-through HUD. */
 async function check868Map04HudWalkerTap(browser, port, errors) {
-  const width = 390
-  const height = 844
-  const label = `map04 ${width}x${height} cam=on`
-  const { context, page } = await openMap(browser, port, width, height, 'map04', {
+  const stageTopLog = []
+  for (const [width, height] of [
+    [375, 667],
+    [390, 844],
+  ]) {
+    const label = `a2 ${width}x${height} cam=on`
+    const { context, page } = await openMap(browser, port, width, height, 'a2', {
+      motion: true,
+      search: '?playtest=1&nwSeed=2&nwRound=3&nwCam=1',
+    })
+    page.on('pageerror', (error) => errors.push(`${label} ${error}`))
+    if (await page.locator('#defend-plant-first').count()) {
+      await page.locator('[data-type="love"]').click()
+      const seat = await firstLiveSeat(page)
+      assert.ok(seat, `#868 ${label} has a live seat for the first plant`)
+      await page.mouse.click(seat.x, seat.y)
+      await page.locator('[data-tower-type]').first().waitFor({ timeout: 30_000 })
+    }
+    await page.waitForTimeout(400)
+    const before = await measure868CamOnLayout(page)
+    assert868CamOnLayout(before, `${label} pre-Begin`, { requirePace: false, requireWave: false, requireWalkers: false })
+
+    await page.locator('.defend-go').click({ force: true, timeout: 120_000 })
+    await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
+    await page.locator('.nw-pace').waitFor({ timeout: 60_000 })
+    await waitForFirstWalkerVisible(page)
+    await page.locator('.defend-walker-tap').first().waitFor({ timeout: 60_000 })
+    await page.waitForTimeout(400)
+    const after = await measure868CamOnLayout(page)
+    assert868CamOnLayout(after, `${label} mid-wave`)
+
+    assert.ok(
+      Math.abs(before.stage.top - after.stage.top) <= 1,
+      `#868 ${label} stage top stable pre-Begin ${before.stage.top} -> mid-wave ${after.stage.top}`,
+    )
+    stageTopLog.push({
+      size: `${width}x${height}`,
+      preBegin: before.stage.top,
+      midWave: after.stage.top,
+      hudBottom: after.hud.bottom,
+    })
+    await page.screenshot({ path: `${SHOTS}/nw-hud-crowd-${width}x${height}-cam-on.png` })
+    await context.close()
+  }
+  console.log('#868 cam-on stage tops (pre-Begin -> mid-wave, HUD bottom):')
+  for (const row of stageTopLog) {
+    console.log(`  ${row.size} stage ${row.preBegin} -> ${row.midWave} hudBottom=${row.hudBottom}`)
+  }
+}
+
+/** #768 Easy cam-off: board drags must not tap or plant; jittery slow taps still hit walkers. */
+async function check768CamOffEasyDragGuard(browser, port, errors) {
+  const width = 768
+  const height = 1024
+  const label = `a2 ${width}x${height} cam=off`
+  const { context, page } = await openMap(browser, port, width, height, 'a2', {
     motion: true,
-    search: '?playtest=1&nwSeed=2&nwRound=5&nwLamps=0&nwCam=1',
+    search: '?playtest=1&nwSeed=2&nwRound=3&nwCam=0',
   })
   page.on('pageerror', (error) => errors.push(`${label} ${error}`))
   if (await page.locator('#defend-plant-first').count()) {
     await page.locator('[data-type="love"]').click()
     const seat = await firstLiveSeat(page)
+    assert.ok(seat, `#768 ${label} has a live seat for the first plant`)
     await page.mouse.click(seat.x, seat.y)
     await page.locator('[data-tower-type]').first().waitFor({ timeout: 30_000 })
   }
-  await page.locator('.defend-go').click()
+  await page.locator('.defend-go').waitFor({ state: 'visible', timeout: 60_000 })
+  await page.waitForTimeout(400)
+  await page.locator('.defend-go').click({ force: true, timeout: 120_000 })
   await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
   await waitForFirstWalkerVisible(page)
-  await page.locator('.defend-walker-tap').first().waitFor({ timeout: 60_000 })
-  if (await page.locator('.nw-cam-recenter').count()) {
-    const rc = await page.locator('.nw-cam-recenter').boundingBox()
-    if (rc) await page.mouse.click(rc.x + rc.width / 2, rc.y + rc.height / 2)
-    await page.waitForTimeout(150)
+
+  const stats = async () => {
+    const taps = await tapTotals(page)
+    const lamps = await page.locator('[data-tower-type]').count()
+    return { ...taps, lamps }
   }
 
-  const probeX = 332
-  const probeY = 73
-  let target = null
-  const panPattern = [
+  const start = await stats()
+  const frame = await page.locator('.defend-frame').boundingBox()
+  assert.ok(frame, `#768 ${label} defend-frame drag surface renders`)
+  const dragPaths = [
+    [120, 0],
+    [-140, 40],
     [0, 160],
-    [0, 140],
-    [0, 120],
-    [-80, 120],
-    [80, 120],
-    [0, 200],
-    [0, -80],
+    [90, -120],
+    [-100, -80],
   ]
-  for (let attempt = 0; attempt < 96 && !target; attempt += 1) {
-    target = await page.evaluate(({ x, y, yMin, yMax }) => {
-      const clickTargetsWalker = (px, py) => {
-        const stack = document.elementsFromPoint(px, py)
-        for (const node of stack) {
-          if (node.closest?.('.defend-walker-tap')) return true
-          if (getComputedStyle(node).pointerEvents !== 'none') return false
-        }
-        return false
-      }
-      if (clickTargetsWalker(x, y)) {
-        return { x, y, onWalker: true, via: 'probe' }
-      }
-      for (const btn of document.querySelectorAll('.defend-walker-tap')) {
-        const b = btn.getBoundingClientRect()
-        if (b.width < 8 || b.height < 8) continue
-        const cx = (b.left + b.right) / 2
-        const cy = (b.top + b.bottom) / 2
-        if (cy < yMin || cy > yMax) continue
-        if (clickTargetsWalker(cx, cy)) return { x: cx, y: cy, onWalker: true, via: 'band' }
-      }
-      return null
-    }, { x: probeX, y: probeY, yMin: 53, yMax: 89 })
-    if (target?.onWalker) break
-    target = null
-    const [dx, dy] = panPattern[attempt % panPattern.length]
-    await panBoard(page, dx, dy)
-    await page.waitForTimeout(150)
+  for (const [dx, dy] of dragPaths) {
+    const x0 = frame.x + frame.width * 0.52
+    const y0 = frame.y + frame.height * 0.42
+    await page.mouse.move(x0, y0)
+    await page.mouse.down()
+    await page.mouse.move(x0 + dx, y0 + dy, { steps: 14 })
+    await page.mouse.up()
+    await page.waitForTimeout(120)
   }
-  if (!target?.onWalker) {
-    target = await page.evaluate(({ yMin, yMax }) => {
-      const clickTargetsWalker = (px, py) => {
-        const stack = document.elementsFromPoint(px, py)
-        for (const node of stack) {
-          if (node.closest?.('.defend-walker-tap')) return true
-          if (getComputedStyle(node).pointerEvents !== 'none') return false
-        }
-        return false
-      }
-      for (const btn of document.querySelectorAll('.defend-walker-tap')) {
-        const b = btn.getBoundingClientRect()
-        if (b.width < 8 || b.height < 8) continue
-        const cx = (b.left + b.right) / 2
-        const cy = (b.top + b.bottom) / 2
-        if (cy < yMin || cy > yMax) continue
-        if (clickTargetsWalker(cx, cy)) return { x: cx, y: cy, onWalker: true, via: 'final-band' }
-      }
-      return null
-    }, { yMin: 53, yMax: 89 })
-  }
-  assert.ok(target?.onWalker, `#868 ${label} walker under HUD (y 53–89 / probe ${probeX},${probeY}) stays tappable ${JSON.stringify(target)}`)
+  const afterDrags = await stats()
+  assert.equal(afterDrags.hits, start.hits, `#768 ${label} drags keep hits at ${start.hits}`)
+  assert.equal(afterDrags.misses, start.misses, `#768 ${label} drags keep misses at ${start.misses}`)
+  assert.equal(afterDrags.lamps, start.lamps, `#768 ${label} drags keep lamp count at ${start.lamps}`)
 
-  await tapWalkerUntilStat(page, target, `#868 ${label} cam=on tap under HUD`)
+  let spot = null
+  const huntStart = Date.now()
+  while (Date.now() - huntStart < 45_000 && !spot) {
+    spot = await page.evaluate(() => {
+      for (const btn of document.querySelectorAll('.defend-walker-tap')) {
+        const b = btn.getBoundingClientRect()
+        if (b.width < 8 || b.height < 8) continue
+        const x = (b.left + b.right) / 2
+        const y = (b.top + b.bottom) / 2
+        const stack = document.elementsFromPoint(x, y)
+        if (stack.some((node) => node.closest?.('.defend-walker-tap'))) return { x, y }
+      }
+      return null
+    })
+    if (!spot) await page.waitForTimeout(200)
+  }
+  assert.ok(spot, `#768 ${label} finds a walker for the jitter tap`)
+  await page.waitForTimeout(450)
+  const beforeTap = await stats()
+  await page.mouse.move(spot.x, spot.y)
+  await page.mouse.click(spot.x + 3, spot.y + 2, { delay: 250 })
+  await page.waitForFunction(
+    (b) => {
+      const node = document.querySelector('[data-tap-hits]')
+      const hits = Number(node?.getAttribute('data-tap-hits') ?? '0')
+      const misses = Number(node?.getAttribute('data-tap-misses') ?? '0')
+      return hits + misses > b.hits + b.misses
+    },
+    beforeTap,
+    { timeout: 5000 },
+  )
   await context.close()
 }
 
@@ -1184,6 +1272,7 @@ export async function checkPhoneFixes() {
     }
     await check792bPlant(browser, port, errors)
     await check792bPlantCard(browser, port, errors)
+    await check768CamOffEasyDragGuard(browser, port, errors)
     await check768WalkerTapProbe(browser, port, errors)
     await check868Map04HudWalkerTap(browser, port, errors)
     await check868HudStrip(browser, port, errors)

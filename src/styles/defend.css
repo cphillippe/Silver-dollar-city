@@ -4499,7 +4499,6 @@ button.defend-new-lamp[aria-pressed='true'] {
   box-shadow: 0 0 12px rgba(255, 204, 51, 0.55);
 }
 
-
 /* 1.4.383: Begin stays readable until the first plant.
    The disabled banner used to fade while the count was still 0.
    It fades only after a plant lands. Wave start alone does not fade it.
@@ -5273,13 +5272,6 @@ button.defend-new-lamp[aria-pressed='true'] {
   max-height: 36px;
   padding: 0 50px 0 12px;
   align-items: center;
-}
-
-/* Cam-on mid-wave only: walkers can sit under the HUD band; pull the playfield up for hit-testing. */
-.defend-page.is-easy-watch:has(.nw-cam[data-nw-cam='on']).is-easy-tap .nw-stage {
-  position: relative;
-  z-index: 1;
-  margin-top: -40px;
 }
 
 .defend-page.is-easy-watch .nw-hud > .defend-hud {
