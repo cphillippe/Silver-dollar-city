@@ -166,7 +166,7 @@ function seedSave(intervalIndex = 1, lastFormat) {
   return {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.553',
+    appVersion: '1.4.554',
     savedAt: new Date().toISOString(),
     progress: {
       started: true,
