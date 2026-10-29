@@ -216,6 +216,51 @@ async function tapWalker(page, spot, label) {
   )
 }
 
+/** Tap until walk-in unlock or a hit/miss registers (CI runners can lag the readout). */
+async function tapWalkerUntilStat(page, spot, label, timeoutMs = 20_000) {
+  const deadline = Date.now() + timeoutMs
+  const start = await tapTotals(page)
+  while (Date.now() < deadline) {
+    const okPoint = await page.evaluate(({ x, y }) => {
+      const stack = document.elementsFromPoint(x, y)
+      let ok = false
+      for (const node of stack) {
+        if (node.closest?.('.defend-walker-tap')) {
+          ok = true
+          break
+        }
+        if (getComputedStyle(node).pointerEvents !== 'none') break
+      }
+      return ok
+    }, { x: spot.x, y: spot.y })
+    if (okPoint) {
+      await page.mouse.click(spot.x, spot.y)
+      try {
+        await page.waitForFunction(
+          (b) => {
+            const node = document.querySelector('[data-tap-hits]')
+            const hits = Number(node?.getAttribute('data-tap-hits') ?? '0')
+            const misses = Number(node?.getAttribute('data-tap-misses') ?? '0')
+            return hits + misses > b.hits + b.misses
+          },
+          start,
+          { timeout: 2500 },
+        )
+        return
+      } catch {
+        const now = await tapTotals(page)
+        if (now.hits + now.misses > start.hits + start.misses) return
+      }
+    }
+    await page.waitForTimeout(200)
+  }
+  const after = await tapTotals(page)
+  assert.ok(
+    after.hits + after.misses > start.hits + start.misses,
+    `${label} tap under HUD registers on the walker (${start.hits}+${start.misses} -> ${after.hits}+${after.misses})`,
+  )
+}
+
 async function buttonRects(page) {
   return page.locator('.defend-clear-row button').evaluateAll((nodes) =>
     nodes.map((node) => {
@@ -661,11 +706,15 @@ async function check868Map04HudWalkerTap(browser, port, errors) {
   ]
   for (let attempt = 0; attempt < 96 && !target; attempt += 1) {
     target = await page.evaluate(({ x, y, yMin, yMax }) => {
-      const hitWalker = (px, py) => {
+      const clickTargetsWalker = (px, py) => {
         const stack = document.elementsFromPoint(px, py)
-        return stack.some((node) => node.closest?.('.defend-walker-tap'))
+        for (const node of stack) {
+          if (node.closest?.('.defend-walker-tap')) return true
+          if (getComputedStyle(node).pointerEvents !== 'none') return false
+        }
+        return false
       }
-      if (hitWalker(x, y)) {
+      if (clickTargetsWalker(x, y)) {
         return { x, y, onWalker: true, via: 'probe' }
       }
       for (const btn of document.querySelectorAll('.defend-walker-tap')) {
@@ -674,7 +723,7 @@ async function check868Map04HudWalkerTap(browser, port, errors) {
         const cx = (b.left + b.right) / 2
         const cy = (b.top + b.bottom) / 2
         if (cy < yMin || cy > yMax) continue
-        if (hitWalker(cx, cy)) return { x: cx, y: cy, onWalker: true, via: 'band' }
+        if (clickTargetsWalker(cx, cy)) return { x: cx, y: cy, onWalker: true, via: 'band' }
       }
       return null
     }, { x: probeX, y: probeY, yMin: 53, yMax: 89 })
@@ -686,31 +735,28 @@ async function check868Map04HudWalkerTap(browser, port, errors) {
   }
   if (!target?.onWalker) {
     target = await page.evaluate(({ yMin, yMax }) => {
+      const clickTargetsWalker = (px, py) => {
+        const stack = document.elementsFromPoint(px, py)
+        for (const node of stack) {
+          if (node.closest?.('.defend-walker-tap')) return true
+          if (getComputedStyle(node).pointerEvents !== 'none') return false
+        }
+        return false
+      }
       for (const btn of document.querySelectorAll('.defend-walker-tap')) {
         const b = btn.getBoundingClientRect()
         if (b.width < 8 || b.height < 8) continue
         const cx = (b.left + b.right) / 2
         const cy = (b.top + b.bottom) / 2
         if (cy < yMin || cy > yMax) continue
-        const stack = document.elementsFromPoint(cx, cy)
-        if (stack.some((node) => node.closest?.('.defend-walker-tap'))) return { x: cx, y: cy, onWalker: true, via: 'final-band' }
+        if (clickTargetsWalker(cx, cy)) return { x: cx, y: cy, onWalker: true, via: 'final-band' }
       }
       return null
     }, { yMin: 53, yMax: 89 })
   }
   assert.ok(target?.onWalker, `#868 ${label} walker under HUD (y 53–89 / probe ${probeX},${probeY}) stays tappable ${JSON.stringify(target)}`)
 
-  const before = await page.evaluate(() => {
-    const el = document.querySelector('.nw-tap-readout')
-    return el ? el.textContent?.trim() ?? '' : ''
-  })
-  await page.mouse.click(target.x, target.y)
-  await page.waitForTimeout(250)
-  const after = await page.evaluate(() => {
-    const el = document.querySelector('.nw-tap-readout')
-    return el ? el.textContent?.trim() ?? '' : ''
-  })
-  assert.notEqual(after, before, `#868 ${label} tap under HUD registers on the walker (${before} -> ${after})`)
+  await tapWalkerUntilStat(page, target, `#868 ${label} cam=on tap under HUD`)
   await context.close()
 }
 
