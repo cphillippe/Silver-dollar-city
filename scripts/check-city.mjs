@@ -1921,7 +1921,7 @@ assert.doesNotMatch(
 )
 assert.doesNotMatch(latestChange('1.4.560').items.join('\n'), /\/box\//, '1.4.560 changelog avoids box paths')
 assert.doesNotMatch(latestChange('1.4.560').items.join('\n'), /\bHard\b|\bMedium\b/, '1.4.560 changelog is Easy only')
-assert.match(latestChange('1.4.560').items.join('\n'), /gold ring sits on the ground/)
+assert.doesNotMatch(latestChange('1.4.560').items.join('\n'), /gold ring/)
 assert.match(latestChange('1.4.560').items.join('\n'), /East porch fits on the phone/)
 assert.match(latestChange('1.4.560').items.join('\n'), /at least 13 pixels/)
 assert.match(latestChange('1.4.560').items.join('\n'), /map stays on that place/)
@@ -1931,7 +1931,6 @@ assert.match(latestChange('1.4.560').items.join('\n'), /Refs #885/)
 assert.deepEqual(
   playerVisibleChangeItems(latestChange('1.4.560').items),
   [
-    'The gold ring sits on the ground in front of a house, so you can see which place is next.',
     'East porch fits on the phone.',
     'Home words are at least 13 pixels tall.',
     'Build this only raises a look you can see, and the map stays on that place.',
@@ -1941,7 +1940,7 @@ assert.deepEqual(
 )
 assert.equal(
   playerVisibleChangeTitle(latestChange('1.4.560').title),
-  'Easy Home: the gold ring shows on a house',
+  'Easy Home: the porch fits, and Build this shows a house',
 )
 assert.equal(CHANGELOG[1].version, '1.4.554', '1.4.554 follows the Home map row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.554'), '1.4.554 changelog row')
@@ -6884,18 +6883,10 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const css560 = readFileSync(new URL('../src/styles/city.css', import.meta.url), 'utf8')
   const index560 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
   assert.match(art560, /export \{ EASY_HIDE_ART \}/)
-  assert.match(map560, /is-easy-ground/)
-  assert.match(map560, /EASY_GROUND_HALO_DY = 34/)
   assert.match(map560, /else if \(easy && selectedPlot\) bringInView\(selectedPlot\)/)
   assert.match(map560, /pan=\{Boolean\(panFrame\)\}/)
-  const haloAt = map560.indexOf('is-easy-ground')
-  const tagsAt = map560.indexOf('city-easy-tags')
-  const plotsAt = map560.indexOf('id="porch"')
-  assert.ok(plotsAt > 0 && haloAt > plotsAt && tagsAt > haloAt, '1.4.560 the ground ring is after the plots and before the tags')
-  assert.match(css560, /\.city-next-halo\.is-easy-ground \{[^}]*stroke-width:\s*3/)
   assert.match(css560, /\.is-easy-pan \.city-plot-tag \{\s*font-size:\s*14px/)
   assert.match(css560, /\.easy-home-dock \.eyebrow/)
-  assert.doesNotMatch(index560, /is-easy-ground/)
   assert.doesNotMatch(index560, /EASY_ANCHOR_PAN/)
 }
 
@@ -19766,7 +19757,7 @@ assert.match(snapHoldScan, /replay is locked on the win/, '1.4.481 a second tap 
 await import('./check-story-snap.mjs').then((mod) => mod.checkSnapHold())
 await import('./check-live-prove.mjs').then((mod) => mod.checkLiveProve())
 await import('./check-hide-hard-labels.mjs')
-await import('./check-home-halo.mjs').then((mod) => mod.checkHomeHalo())
+await import('./check-home-porch.mjs').then((mod) => mod.checkHomePorch())
 await import('./check-golden-live.mjs').then((mod) => mod.checkGoldenLive())
 await import('./check-gem-tap-live.mjs').then((mod) => mod.checkGemTapLive())
 await import('./check-gem-pop-live.mjs').then((mod) => mod.checkGemPopLive())

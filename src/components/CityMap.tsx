@@ -127,9 +127,6 @@ function panAnchor(id: CityPlotId) {
   return EASY_ANCHOR_PAN[id] ?? ANCHOR[id]
 }
 
-/** Ground ring below the house anchor, on the footprint, so art does not hide it. */
-const EASY_GROUND_HALO_DY = 34
-
 function viewBoxOf(cam: { x: number; y: number; w: number; h: number }) {
   return `${cam.x} ${cam.y} ${cam.w} ${cam.h}`
 }
@@ -644,7 +641,6 @@ export function CityMap({
 
   const nextStage = stageOf(nextId)
   const nextAt = ANCHOR[cueId]
-  const panAt = panAnchor(cueId)
   const kicker = canUpgrade(nextId, progress)
     ? 'Build this'
     : nextKicker(nextStage, nextId, doneToday)
@@ -970,7 +966,7 @@ export function CityMap({
         </g>
       ) : null}
 
-      {mode === 'live' && !celebrating && !(easy && panFrame) && !(easy && selectedPlot === cueId) ? (
+      {mode === 'live' && !celebrating && !(easy && selectedPlot === cueId) ? (
         <g className="city-next-mark" transform={`translate(${nextAt.x} ${nextAt.y})`}>
           <circle
             r={easy ? 22 : 34}
@@ -1095,20 +1091,6 @@ export function CityMap({
         onOpen={open}
         onFocusPlot={easy ? bringInView : undefined}
       />
-
-      {mode === 'live' && easy && panFrame && !celebrating && selectedPlot !== cueId ? (
-        <g
-          className="city-next-mark"
-          pointerEvents="none"
-          transform={`translate(${panAt.x} ${panAt.y + EASY_GROUND_HALO_DY})`}
-        >
-          <ellipse
-            className="city-next-halo is-easy-ground"
-            rx={58}
-            ry={20}
-          />
-        </g>
-      ) : null}
 
       {mode === 'live'
         ? CITY_PLOTS.map((plot) => (

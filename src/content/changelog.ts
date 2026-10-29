@@ -29,10 +29,9 @@ export function playerVisibleChangeTitle(title: string): string | null {
 export const CHANGELOG: ChangeNote[] = [
   {
     version: '1.4.560',
-    title: 'Easy Home: the gold ring shows on a house',
+    title: 'Easy Home: the porch fits, and Build this shows a house',
     when: '2026-10-29',
     items: [
-      'The gold ring sits on the ground in front of a house, so you can see which place is next.',
       'East porch fits on the phone.',
       'Home words are at least 13 pixels tall.',
       'Build this only raises a look you can see, and the map stays on that place.',
