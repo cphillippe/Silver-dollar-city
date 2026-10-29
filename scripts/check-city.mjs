@@ -1974,7 +1974,7 @@ assert.match(quickReviewGateApp, /function quickReviewBoot\(\)/, 'QuickReview bo
 assert.match(quickReviewGateApp, /if \(isPlayBuild\(\)\) return null/, 'QuickReview boot stays off Play builds')
 assert.match(
   quickReviewGateApp,
-  /nightWatchJumpAllowed\(search, readNightWatchDebug\(\)\)/,
+  /playtestUrlAllowed\(search\)/,
   'QuickReview boot uses the playtest gate',
 )
 assert.equal(CHANGELOG[5].version, '1.4.547', '1.4.547 follows QuickReview row')
