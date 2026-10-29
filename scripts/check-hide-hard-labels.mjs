@@ -4,7 +4,11 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { playerVisibleChangeItems } from '../src/content/changelog.ts'
+import {
+  CHANGELOG,
+  playerVisibleChangeItems,
+  playerVisibleChangeTitle,
+} from '../src/content/changelog.ts'
 
 const root = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 const src = join(root, 'src')
@@ -37,8 +41,25 @@ assert.deepEqual(
   `player-visible .tsx must not name Hard/Medium tiers: ${hits.join(', ') || '(none)'}`,
 )
 
-const filtered = playerVisibleChangeItems(['Hard stays the same.', 'A plain note.'])
-assert.deepEqual(filtered, ['A plain note.'], 'changelog render filter drops tier lines')
+assert.deepEqual(
+  playerVisibleChangeItems(['A note.', 'Refs #870.', 'Refs: Bill 2026-10-25']),
+  ['A note.'],
+  'A4 filter drops Refs issue lines and Bill refs',
+)
+const filtered = playerVisibleChangeItems(['Hard stays the same.', 'A plain note.', 'Refs #871.'])
+assert.deepEqual(filtered, ['A plain note.'], 'changelog render filter drops tier and Refs lines')
+for (const note of CHANGELOG) {
+  const visible = playerVisibleChangeItems(note.items).join('\n')
+  assert.doesNotMatch(visible, /\bRefs\b/, `A4 filtered ${note.version} items have no Refs`)
+}
+const drop550 = CHANGELOG.find((note) => note.version === '1.4.550')
+assert.ok(drop550, '1.4.550 changelog row')
+assert.doesNotMatch(playerVisibleChangeItems(drop550.items).join('\n'), /\bRefs\b/, '1.4.550 player list hides Refs #870')
+assert.equal(
+  playerVisibleChangeTitle('Behind the scenes: groundwork for quick review cards on saved ideas'),
+  null,
+  'Behind the scenes changelog titles stay out of What’s new',
+)
 assert.doesNotMatch(
   playerVisibleChangeItems(latest538Items()).join('\n'),
   /\bHard\b|\bMedium\b/,

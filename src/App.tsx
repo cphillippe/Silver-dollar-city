@@ -41,7 +41,7 @@ function sequenceBoot(): View | null {
   return { name: 'challenge', areaId: found.areaId, challengeId: id }
 }
 
-/** Playwright / check entry — `?playtest=1` on this URL only. */
+/** Playwright / check entry — `?playtest=1` only. */
 function quickReviewBoot(): View | null {
   if (typeof window === 'undefined') return null
   if (isPlayBuild()) return null

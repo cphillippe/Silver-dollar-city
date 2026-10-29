@@ -6,22 +6,46 @@ export interface ChangeNote {
   items: string[]
 }
 
-const PLAYER_HIDDEN_TIER_LABEL = /\bHard\b|\bMedium\b/
+const PLAYER_HIDDEN_TIER = /\bHard\b|\bMedium\b/
+const PLAYER_HIDDEN_REFS = /^\s*Refs\b/i
+const PLAYER_HIDDEN_DEV_ONLY = /Nothing changes for players yet\./i
 
-/** Drop changelog lines that name difficulty tiers — history stays in CHANGELOG. */
+/** Drop dev-only and tier lines — full history stays in CHANGELOG. */
 export function playerVisibleChangeItems(items: string[]): string[] {
-  return items.filter((item) => !PLAYER_HIDDEN_TIER_LABEL.test(item))
+  return items.filter(
+    (item) =>
+      !PLAYER_HIDDEN_TIER.test(item) &&
+      !PLAYER_HIDDEN_REFS.test(item) &&
+      !PLAYER_HIDDEN_DEV_ONLY.test(item),
+  )
+}
+
+/** Player-facing What's new titles — dev-only rows stay in CHANGELOG only. */
+export function playerVisibleChangeTitle(title: string): string | null {
+  if (/^Behind the scenes:/i.test(title)) return null
+  return title
 }
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.552',
-    title: 'Behind the scenes: Easy Home Read can open saved review cards',
-    when: '2026-10-28',
+    version: '1.4.553',
+    title: 'Behind the scenes: Easy Home Read quick review queue',
+    when: '2026-10-29',
     items: [
       'Nothing changes for players yet.',
-      'Behind the scenes: when ideas are due, Read can walk a short review queue before the daily story.',
-      'Refs: Bill 2026-10-25 7:50 AM CT, review mix (Memory Coach).',
+      'Behind the scenes: a playtest link can open a short Memory Coach review queue from Home Read.',
+      'Refs #842.',
+    ],
+  },
+  {
+    version: '1.4.552',
+    title: 'Easy: cleaner settings and easier-to-read type',
+    when: '2026-10-28',
+    items: [
+      'Settings and What’s new stay free of developer notes on a normal link.',
+      'Easy text on Home, Settings, Lock In, Match, and early lessons is at least 13 pixels tall.',
+      'Match bonus messages stay above the letter grid on small phones without overlapping cells.',
+      'Refs #871.',
     ],
   },
   {
