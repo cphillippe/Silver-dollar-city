@@ -6,8 +6,11 @@
  * The Love lamp's box does not cover Candle or Spend.
  */
 import assert from 'node:assert/strict'
+import { devUiAppPath } from './dev-ui-playtest.mjs'
 import { createHash } from 'node:crypto'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { inflateSync } from 'node:zlib'
 import { build } from 'esbuild'
@@ -29,6 +32,8 @@ import { EASY_LINE_ORDER } from '../src/lib/easy.ts'
 import { shareCardText } from '../src/lib/shareCard.ts'
 import { EASY_FACE_HIT_R, PATH_WALKER_FACE_DY } from '../src/lib/defend.ts'
 import { EASY } from '../src/lib/easy.ts'
+
+const SC_LIVE_PROVE_ROOT = join(tmpdir(), 'sc-live-prove')
 
 const SAVE = {
   kind: SAVE_KIND,
@@ -105,7 +110,7 @@ async function readLevelPips(page) {
 }
 
 async function openJump(page, search) {
-  await page.goto(`/${search}&nwCam=0`)
+  await page.goto(devUiAppPath(search, 'nwCam=0'))
   await page.getByRole('button', { name: 'Settings' }).click()
   await page.locator('summary', { hasText: 'Developer' }).click()
   await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
@@ -1413,7 +1418,7 @@ async function checkWaveCues(browser, port, errors) {
   for (const tap of [...SEAT_TAPS, ...GROUND_TAPS]) {
     assert.ok(seatDoc.includes(tap.doc), `1.4.496 the seat doc lists ${tap.doc}`)
   }
-  mkdirSync('/opt/cursor/artifacts', { recursive: true })
+  mkdirSync(SC_LIVE_PROVE_ROOT, { recursive: true })
   const context = await browser.newContext({
     baseURL: `http://127.0.0.1:${port}/`,
     viewport: { width: 375, height: 667 },
@@ -1517,7 +1522,7 @@ async function checkWaveCues(browser, port, errors) {
     assert.equal(ring.opacity, '0', '1.4.496 Easy at 375 hides the idle yellow range line')
     assert.equal(ring.display, 'none', '1.4.496 Easy at 375 the idle range line has no box')
   }
-  await page.screenshot({ path: '/opt/cursor/artifacts/nw-496-countdown.png' })
+  await page.screenshot({ path: join(SC_LIVE_PROVE_ROOT, 'nw-496-countdown.png') })
   const before = await tapTotals(page)
   await page.mouse.click(count.cx, count.cy)
   await page.waitForTimeout(40)
@@ -1675,7 +1680,7 @@ async function checkWaveCues(browser, port, errors) {
   assert.equal(kept?.top, 'continue', '1.4.496 Continue still takes the click')
   assert.equal(kept?.overlap, false, '1.4.496 the burst does not cover Continue')
   await openNamedUpgrades(page, 'at round clear')
-  await page.screenshot({ path: '/opt/cursor/artifacts/nw-496-survived.png' })
+  await page.screenshot({ path: join(SC_LIVE_PROVE_ROOT, 'nw-496-survived.png') })
   await context.close()
 
   for (const tap of GROUND_TAPS) {
@@ -1827,7 +1832,7 @@ function rgbParts(fill) {
 
 /** Easy 375. A dead seat is refused with the toast. A live seat plants. */
 async function checkDeadSeat(browser, port, errors) {
-  mkdirSync('/opt/cursor/artifacts', { recursive: true })
+  mkdirSync(SC_LIVE_PROVE_ROOT, { recursive: true })
   const context = await browser.newContext({
     baseURL: `http://127.0.0.1:${port}/`,
     viewport: { width: 375, height: 667 },
@@ -1866,7 +1871,7 @@ async function checkDeadSeat(browser, port, errors) {
     Math.abs(deadRgb.r - deadRgb.g) < 30 && Math.abs(deadRgb.g - deadRgb.b) < 30 && deadRgb.r < 140,
     `1.4.503 dead seats are grey (${tint.deadFill})`,
   )
-  await page.screenshot({ path: '/opt/cursor/artifacts/nw-503-armed.png' })
+  await page.screenshot({ path: join(SC_LIVE_PROVE_ROOT, 'nw-503-armed.png') })
   const deadPlate = { x: 56, y: 88 }
   const deadFinger = await plateFinger(page, deadPlate)
   await page.mouse.move(deadFinger.x, deadFinger.y)
@@ -1884,7 +1889,7 @@ async function checkDeadSeat(browser, port, errors) {
   await page.mouse.click(deadFinger.x, deadFinger.y)
   await page.getByText('Too far from the road. Plant closer to the path.').waitFor()
   assert.equal(await page.locator('.defend-pad.is-planted').count(), 0, '1.4.503 the dead seat does not plant')
-  await page.screenshot({ path: '/opt/cursor/artifacts/nw-503-dead-toast.png' })
+  await page.screenshot({ path: join(SC_LIVE_PROVE_ROOT, 'nw-503-dead-toast.png') })
   const blockedFinger = await page.evaluate(() => {
     const svg = document.querySelector('.defend-board')
     if (!(svg instanceof SVGSVGElement)) return null
@@ -1938,7 +1943,7 @@ async function checkDeadSeat(browser, port, errors) {
   assert.match(planted[0].label || '', /Upgrade lamp at open ground/, '1.4.503 the planted lamp keeps its name')
   await page.locator('[data-place-toast]').waitFor({ state: 'detached', timeout: 1000 })
   assert.equal(await page.locator('[data-place-toast]').count(), 0, '1.4.503 a live plant clears the refusal')
-  await page.screenshot({ path: '/opt/cursor/artifacts/nw-503-live-plant.png' })
+  await page.screenshot({ path: join(SC_LIVE_PROVE_ROOT, 'nw-503-live-plant.png') })
   await context.close()
 }
 
@@ -2089,7 +2094,7 @@ async function checkGreyMaps(browser, port, errors) {
       await page.mouse.click(finger.x, finger.y)
       await page.getByText('Too far from the road. Plant closer to the path.').waitFor()
       assert.equal(await page.locator('.defend-pad.is-planted').count(), before, '1.4.503 (192, 632) does not plant')
-      await page.screenshot({ path: '/opt/cursor/artifacts/nw-504-grey-192.png' })
+      await page.screenshot({ path: join(SC_LIVE_PROVE_ROOT, 'nw-504-grey-192.png') })
     }
     await context.close()
   }
@@ -2126,7 +2131,7 @@ export async function checkShareCard(browser, port, errors) {
       ],
     },
   }
-  mkdirSync('/opt/cursor/artifacts/screenshots', { recursive: true })
+  mkdirSync(join(SC_LIVE_PROVE_ROOT, 'screenshots'), { recursive: true })
   for (const [width, height] of [
     [375, 667],
     [412, 915],
@@ -2219,7 +2224,7 @@ export async function checkShareCard(browser, port, errors) {
     assert.equal(filled.length, 1, `${width} one filled gold ${JSON.stringify(layout.golds)}`)
     assert.equal(filled[0].text, 'Home', `${width} the filled gold is Home`)
     if (width === 375) {
-      await page.screenshot({ path: '/opt/cursor/artifacts/screenshots/share-card-375.png' })
+      await page.screenshot({ path: join(SC_LIVE_PROVE_ROOT, 'screenshots/share-card-375.png') })
     }
     await page.getByRole('button', { name: 'Share this line', exact: true }).click()
     await page.locator('.share-card-actions [role="status"]').filter({ hasText: 'Shared.' }).waitFor()
@@ -2279,7 +2284,7 @@ export async function checkShareBusyTap(browser, port, errors) {
       ],
     },
   }
-  mkdirSync('/opt/cursor/artifacts/screenshots', { recursive: true })
+  mkdirSync(join(SC_LIVE_PROVE_ROOT, 'screenshots'), { recursive: true })
   for (const [width, height] of [
     [375, 667],
     [412, 915],
@@ -2404,7 +2409,7 @@ export async function checkShareBusyTap(browser, port, errors) {
     assert.ok(layout.homeTop != null && layout.homeBottom <= layout.vh + 1, `${width} Home stays on screen ${JSON.stringify(layout)}`)
     assert.ok(layout.backTop != null && layout.backTop >= 0, `${width} ← Home stays on screen ${JSON.stringify(layout)}`)
     if (width === 375) {
-      await page.screenshot({ path: '/opt/cursor/artifacts/screenshots/share-busy-toast-375.png' })
+      await page.screenshot({ path: join(SC_LIVE_PROVE_ROOT, 'screenshots/share-busy-toast-375.png') })
     }
     const appeared = Date.now()
     await toast.waitFor({ state: 'hidden', timeout: 2500 })
@@ -2474,8 +2479,8 @@ export async function checkOssuaryLesson(browser, port, errors) {
   assert.match(body, /Galatians 1:19/)
   assert.doesNotMatch(body, /A Jerusalem bone box names James/)
   await page.locator('.teach-reason').scrollIntoViewIfNeeded()
-  mkdirSync('/opt/cursor/artifacts/screenshots', { recursive: true })
-  await page.screenshot({ path: '/opt/cursor/artifacts/screenshots/ossuary-lesson-375.png' })
+  mkdirSync(join(SC_LIVE_PROVE_ROOT, 'screenshots'), { recursive: true })
+  await page.screenshot({ path: join(SC_LIVE_PROVE_ROOT, 'screenshots/ossuary-lesson-375.png') })
   await context.close()
 }
 
@@ -2703,7 +2708,7 @@ async function assertGreyDrag(page, type, x, y, label) {
 
 /** Real pointer events. Love and Logic, every map, on the seat center. */
 export async function checkPointerSeats(browser, port, errors) {
-  mkdirSync('/opt/cursor/artifacts', { recursive: true })
+  mkdirSync(SC_LIVE_PROVE_ROOT, { recursive: true })
   for (const type of ['love', 'logic']) {
     for (const id of POINTER_MAPS) {
       const { context, page } = await freshWatch(browser, port, errors, id, `pointer ${id} ${type}`)
@@ -2732,7 +2737,7 @@ export async function checkPointerSeats(browser, port, errors) {
           await assertGreyTap(page, x, y, `${id} ${type}`)
         }
         if (type === 'love' && (id === 'map03' || id === 'map04' || id === 'map05')) {
-          await page.screenshot({ path: `/opt/cursor/artifacts/nw-508-${id}-grey.png` })
+          await page.screenshot({ path: `${SC_LIVE_PROVE_ROOT}/nw-508-${id}-grey.png` })
         }
       } else {
         const dead = (await openSeatClients(page)).find((seat) => seat.seat === 'dead')
@@ -2743,7 +2748,7 @@ export async function checkPointerSeats(browser, port, errors) {
       if (listedGreen) {
         for (const [x, y] of listedGreen) await assertGreenTap(page, x, y, `${id} ${type}`)
         if (type === 'love' && (id === 'map03' || id === 'map04' || id === 'map05')) {
-          await page.screenshot({ path: `/opt/cursor/artifacts/nw-508-${id}-green.png` })
+          await page.screenshot({ path: `${SC_LIVE_PROVE_ROOT}/nw-508-${id}-green.png` })
         }
       }
       await context.close()
@@ -2753,7 +2758,7 @@ export async function checkPointerSeats(browser, port, errors) {
         await armCard(drag.page, type)
         await assertGreenDrag(drag.page, type, x, y, `${id} ${type}`)
         if (type === 'love' && x === 152) {
-          await drag.page.screenshot({ path: `/opt/cursor/artifacts/nw-508-${id}-green.png` })
+          await drag.page.screenshot({ path: `${SC_LIVE_PROVE_ROOT}/nw-508-${id}-green.png` })
         }
         await drag.context.close()
       }
@@ -2764,7 +2769,7 @@ export async function checkPointerSeats(browser, port, errors) {
         assert.ok(live, `${id} ${type} has a green seat to tap`)
         await assertGreenTap(planted.page, live.cx, live.cy, `${id} ${type}`)
         if (type === 'love' && (id === 'map03' || id === 'map04' || id === 'map05')) {
-          await planted.page.screenshot({ path: `/opt/cursor/artifacts/nw-508-${id}-green.png` })
+          await planted.page.screenshot({ path: `${SC_LIVE_PROVE_ROOT}/nw-508-${id}-green.png` })
         }
         await planted.context.close()
       }
@@ -2971,7 +2976,7 @@ export async function checkCrownHold(browser, port, errors) {
     2,
     '1.4.512 the crown hold resets on round start and restart',
   )
-  mkdirSync('/opt/cursor/artifacts', { recursive: true })
+  mkdirSync(SC_LIVE_PROVE_ROOT, { recursive: true })
   const shield = await openEasyWave(browser, port, errors, '?playtest=1&nwRound=2', 'crown shield')
   await shield.page.locator('[data-skill="mend"][data-state="ready"]').waitFor()
   await pointerBox(shield.page, '[data-skill="mend"]')
@@ -2994,7 +2999,7 @@ export async function checkCrownHold(browser, port, errors) {
   )
   assert.equal(await shield.page.locator('[data-crown-hold="armed"]').count(), 1, '1.4.512 the crown hold outlasts the 4s shield')
   await assertCrownGlowFits(shield.page)
-  await shield.page.screenshot({ path: '/opt/cursor/artifacts/crown-hold-armed-375.png' })
+  await shield.page.screenshot({ path: join(SC_LIVE_PROVE_ROOT, 'crown-hold-armed-375.png') })
   await waitFrom(11_000)
   assert.equal(await shield.page.locator('[data-crown-hold="armed"]').count(), 1, '1.4.512 the crown hold is still armed at 11s')
   await waitFrom(13_200)
@@ -3062,7 +3067,7 @@ export async function checkCrownHold(browser, port, errors) {
   assert.notEqual(hit.end.through, 'Held!')
   assert.equal(await hit.page.locator('[data-crown-live="Held!"]').count(), 0, '1.4.512 the hold does not duplicate Held!')
   assert.notEqual(hit.end.hearts, '0', '1.4.512 the hold keeps a heart')
-  await hit.page.screenshot({ path: '/opt/cursor/artifacts/crown-hold-hit-375.png' })
+  await hit.page.screenshot({ path: join(SC_LIVE_PROVE_ROOT, 'crown-hold-hit-375.png') })
   await hit.context.close()
 
   const miss = await showdown(20, 'miss')
@@ -3070,7 +3075,7 @@ export async function checkCrownHold(browser, port, errors) {
   assert.ok(miss.pressed.fromGo >= 19.7 && miss.pressed.fromGo <= 20.6, `1.4.512 the miss press was ${miss.pressed.fromGo}s after Go`)
   assert.ok(miss.elapsed > 12 && miss.elapsed < 15, `1.4.512 the 13s press arrived in ${miss.elapsed}s`)
   assert.ok(miss.end.through.includes('got through') || miss.end.lost, '1.4.512 the late Mend lets the crown through')
-  await miss.page.screenshot({ path: '/opt/cursor/artifacts/crown-hold-miss-375.png' })
+  await miss.page.screenshot({ path: join(SC_LIVE_PROVE_ROOT, 'crown-hold-miss-375.png') })
   await miss.context.close()
 
   const rearm = await openEasyWave(browser, port, errors, '?playtest=1&nwRound=20', 'crown rearm')
@@ -3140,7 +3145,7 @@ async function pointerClick(page, locator) {
 }
 
 async function pointerOpenJump(page, search) {
-  await page.goto(`/${search}&nwCam=0`)
+  await page.goto(devUiAppPath(search, 'nwCam=0'))
   await pointerClick(page, page.getByRole('button', { name: 'Settings' }))
   await pointerClick(page, page.locator('summary', { hasText: 'Developer' }))
   await pointerClick(page, page.getByRole('button', { name: 'Jump · Night Watch' }))
@@ -3583,14 +3588,14 @@ async function checkReadoutCueClear(browser, port, errors) {
     report.push({ width, height, toastMs, ...sample })
     await context.close()
   }
-  mkdirSync('/opt/cursor/artifacts', { recursive: true })
-  writeFileSync('/opt/cursor/artifacts/nw-cue-clear.json', JSON.stringify(report, null, 2))
+  mkdirSync(SC_LIVE_PROVE_ROOT, { recursive: true })
+  writeFileSync(join(SC_LIVE_PROVE_ROOT, 'nw-cue-clear.json'), JSON.stringify(report, null, 2))
   console.log(`cue-clear ${JSON.stringify(report)}`)
 }
 
 /** Easy misses: stray is not counted. Dark, fog, and a near board tap are. */
 async function checkTrustedMisses(browser, port, errors) {
-  mkdirSync('/opt/cursor/artifacts', { recursive: true })
+  mkdirSync(SC_LIVE_PROVE_ROOT, { recursive: true })
   const rows = []
   async function openMap(id, width, height, reduced) {
     const context = await browser.newContext({
@@ -3715,7 +3720,7 @@ async function checkTrustedMisses(browser, port, errors) {
     } else if (width === 375 && id === 'a2') {
       const motion = await ring.evaluate((node) => getComputedStyle(node).animationName)
       assert.equal(motion, 'walker-cue-nudge', `${label} the lead ring scales`)
-      await page.screenshot({ path: '/opt/cursor/artifacts/nw-miss-a2-nudge-375.png' })
+      await page.screenshot({ path: join(SC_LIVE_PROVE_ROOT, 'nw-miss-a2-nudge-375.png') })
     }
     const darkToast = await waitForToast(page, EASY.nightMiss, 900)
     assert.equal(darkToast, EASY.nightMiss, `${label} dark toast (${darkToast})`)
@@ -3748,8 +3753,8 @@ async function checkTrustedMisses(browser, port, errors) {
 
     if (!pace) {
       await assertClearOf(page, label)
-      if (width === 412) await page.screenshot({ path: '/opt/cursor/artifacts/nw-miss-412.png' })
-      if (width === 768) await page.screenshot({ path: '/opt/cursor/artifacts/nw-miss-768.png' })
+      if (width === 412) await page.screenshot({ path: join(SC_LIVE_PROVE_ROOT, 'nw-miss-412.png') })
+      if (width === 768) await page.screenshot({ path: join(SC_LIVE_PROVE_ROOT, 'nw-miss-768.png') })
       await run.context.close()
       return
     }
@@ -3778,7 +3783,7 @@ async function checkTrustedMisses(browser, port, errors) {
     assert.equal(scored.misses, missSum(scored), `${label} misses equal the reason split`)
     assert.equal(scored.late, 0, `${label} late is 0`)
     await assertClearOf(page, label)
-    await page.screenshot({ path: `/opt/cursor/artifacts/nw-miss-${id}-readout-375.png` })
+    await page.screenshot({ path: `${SC_LIVE_PROVE_ROOT}/nw-miss-${id}-readout-375.png` })
 
     let fogShot = false
     if (id === 'map05') {
@@ -3800,7 +3805,7 @@ async function checkTrustedMisses(browser, port, errors) {
         if (afterFog.fog === beforeFog.fog + 1) {
           assert.equal(afterFog.misses, beforeFog.misses + 1, 'map05 fog counts')
           assert.equal(await toastText(page), EASY.nightFog, 'map05 fog toast')
-          await page.screenshot({ path: '/opt/cursor/artifacts/nw-miss-map05-fog-375.png' })
+          await page.screenshot({ path: join(SC_LIVE_PROVE_ROOT, 'nw-miss-map05-fog-375.png') })
           fogShot = true
           caught = true
           break
@@ -3879,7 +3884,7 @@ async function checkTrustedMisses(browser, port, errors) {
   }
   const missErrors = errors.filter((line) => line.startsWith('miss '))
   if (missErrors.length) console.log(`miss-console ${missErrors.join(' | ')}`)
-  writeFileSync('/opt/cursor/artifacts/nw-miss-report.json', JSON.stringify(rows, null, 2))
+  writeFileSync(join(SC_LIVE_PROVE_ROOT, 'nw-miss-report.json'), JSON.stringify(rows, null, 2))
   console.log(`miss-report ${JSON.stringify(rows)}`)
 }
 
@@ -4022,7 +4027,7 @@ async function openSpawnMap(browser, port, errors, id, width, height, extra = ''
 
 /** Easy arches at 375, 412, and 768. Real pointer events. Hard is a check-city gate. */
 async function checkSpawnMarkers(browser, port, errors) {
-  mkdirSync('/opt/cursor/artifacts/hop-756', { recursive: true })
+  mkdirSync(join(SC_LIVE_PROVE_ROOT, 'hop-756'), { recursive: true })
   const rows = []
   const shots = []
   const widths = process.env.NW_SPAWN_LAYOUT === '0'
@@ -4059,7 +4064,7 @@ async function checkSpawnMarkers(browser, port, errors) {
           await run.page.mouse.up()
           await run.page.locator('[data-type="love"][aria-pressed="true"]').waitFor()
         }
-        const shot = `/opt/cursor/artifacts/hop-756/${id}-${width}.png`
+        const shot = join(SC_LIVE_PROVE_ROOT, "hop-756", `${id}-${width}.png`)
         await run.page.screenshot({ path: shot })
         shots.push(shot)
       }
@@ -4219,13 +4224,13 @@ async function checkSpawnMarkers(browser, port, errors) {
     } else {
       assert.equal(taps(after), taps(before), `1.4.525 ${id} wave tap on the dock stays with the dock (${before.text})`)
     }
-    if (id === 'map06') await run.page.screenshot({ path: '/opt/cursor/artifacts/hop-756/map06-r5.png' })
+    if (id === 'map06') await run.page.screenshot({ path: join(SC_LIVE_PROVE_ROOT, 'hop-756/map06-r5.png') })
     await run.context.close()
   }
   } finally {
     if (waveBrowser !== browser) await waveBrowser.close()
   }
-  writeFileSync('/opt/cursor/artifacts/hop-756/final-box.json', JSON.stringify({ rows, shots }, null, 2))
+  writeFileSync(join(SC_LIVE_PROVE_ROOT, 'hop-756/final-box.json'), JSON.stringify({ rows, shots }, null, 2))
   console.log('spawn-final-box')
   for (const row of rows) console.log(`${row.map}\t${row.width}\t${row.marker}\t${row.fit}\t${row.scale}\t${row.rect}`)
 }
@@ -4988,7 +4993,7 @@ async function checkWalkInTaps(browser, port, errors) {
 
 /** Easy walkers walk in from past the edge at 375, 412, and 768 on every map, on rounds 1 and 5. Real pointer events. */
 async function checkWalkIn(browser, port, errors) {
-  mkdirSync('/opt/cursor/artifacts/hop-756-walkin', { recursive: true })
+  mkdirSync(join(SC_LIVE_PROVE_ROOT, 'hop-756-walkin'), { recursive: true })
   const rows = []
   const widths = (process.env.NW_WALKIN_WIDTHS ?? '375x667,412x915,768x1024').split(',').filter(Boolean).map((pair) => pair.split('x').map(Number))
   const rounds = (process.env.NW_WALKIN_ROUNDS ?? '1,5').split(',').filter(Boolean).map(Number)
@@ -5036,7 +5041,7 @@ async function checkWalkIn(browser, port, errors) {
           })
           console.log(`walk-in ${id} ${width} r${round} ${spawn.road.id} ${spawn.entry.side} start ${walkStartKey(spawn.entry.start)} t ${spawn.t} run ${spawn.runMs} first ${result.first ? `${result.first.frame}@${Math.round(result.first.ms)}ms gap ${result.first.gap.toFixed(2)}` : 'off-screen'} frames ${result.frames} under-chrome ${result.chromePx}`)
           if (ghosts) {
-            await run.page.screenshot({ path: `/opt/cursor/artifacts/hop-756-walkin/${id}-${width}${round === 5 ? '' : `-r${round}`}.png` })
+            await run.page.screenshot({ path: `${SC_LIVE_PROVE_ROOT}/hop-756-walkin/${id}-${width}${round === 5 ? '' : `-r${round}`}.png` })
             await run.page.evaluate(() => document.querySelectorAll('[data-walk-ghost]').forEach((node) => node.remove()))
             ghosts = false
           }
@@ -5048,7 +5053,7 @@ async function checkWalkIn(browser, port, errors) {
     }
   }
   const taps = process.env.NW_WALKIN_TAPS === '0' ? [] : await checkWalkInTaps(browser, port, errors)
-  writeFileSync('/opt/cursor/artifacts/hop-756-walkin/walk-in.json', JSON.stringify({ rows, taps }, null, 2))
+  writeFileSync(join(SC_LIVE_PROVE_ROOT, 'hop-756-walkin/walk-in.json'), JSON.stringify({ rows, taps }, null, 2))
   console.log('walk-in-table')
   for (const row of rows) console.log(`${row.map}\t${row.width}\tr${row.round}\t${row.road}\t${row.side}\t${row.start}\t${row.t}\t${row.runMs}\t${row.firstFrame}\t${row.edgeGap}`)
   for (const row of taps) console.log(`walk-in-tap ${JSON.stringify(row)}`)

@@ -6,6 +6,7 @@ import assert from 'node:assert/strict'
 import { fileURLToPath } from 'node:url'
 import { createServer } from 'vite'
 import { chromium } from '@playwright/test'
+import { withPlaytest1 } from './dev-ui-playtest.mjs'
 import { SAVE_KIND } from '../src/lib/save.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 
@@ -66,7 +67,7 @@ export async function checkNightJump() {
       (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
       { key: STORAGE_KEY, save: SAVE },
     )
-    await page.goto(`http://127.0.0.1:${port}/`)
+    await page.goto(withPlaytest1(`http://127.0.0.1:${port}/`))
     await page.getByRole('button', { name: 'Settings' }).click()
     await page.locator('summary', { hasText: 'Developer' }).click()
     await page.getByRole('button', { name: 'Jump · Night Watch' }).click()

@@ -1625,7 +1625,7 @@ html[data-easy='on'] .city-easy-tags {
 .hub.is-easy-home .easy-step-later {
   display: block;
   margin-top: 1px;
-  font-size: 0.62rem;
+  font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: lowercase;
@@ -1737,4 +1737,21 @@ html[data-easy='on'] .hub.is-easy-home .city-folk .city-lamp {
 .hub.is-easy-home .easy-map-recenter:focus-visible {
   outline: 3px solid #fff6e8;
   outline-offset: 2px;
+}
+
+/* #871: Easy Home labels stay at least 13px (index.css peels unchanged). */
+.hub.is-easy-home .easy-build-it .eyebrow {
+  font-size: 0.8125rem;
+}
+
+.hub.is-easy-home .easy-learn-aside {
+  font-size: 0.8125rem;
+}
+
+.hub.is-easy-home .easy-home-steps .easy-coach-step {
+  font-size: 0.8125rem;
+}
+
+html[data-easy='on'] .settings .eyebrow {
+  font-size: 0.8125rem;
 }
