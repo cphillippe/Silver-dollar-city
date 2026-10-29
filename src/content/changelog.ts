@@ -28,6 +28,15 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.558',
+    title: 'Easy Night Watch: the next map opens after round 8',
+    when: '2026-10-29',
+    items: [
+      'Easy: the next Night Watch map now opens after round 8.',
+      'Refs #749.',
+    ],
+  },
+  {
     version: '1.4.557',
     title: 'Behind the scenes: Quick Review grades the beat that ran',
     when: '2026-10-29',
