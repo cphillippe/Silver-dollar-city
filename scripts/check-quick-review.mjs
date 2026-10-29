@@ -22,6 +22,7 @@ import {
 } from '../src/easyTrail/review/reviewFormat.ts'
 import { STORAGE_KEY } from '../src/config/app.ts'
 import { SAVE_KIND, SAVE_SCHEMA_VERSION } from '../src/lib/save.ts'
+import { NW_DEBUG_SESSION } from '../src/lib/nightWatchDebug.ts'
 
 const quickSrc = readFileSync(
   new URL('../src/easyTrail/review/QuickReview.tsx', import.meta.url),
@@ -33,11 +34,11 @@ const appSrc = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
 assert.match(appSrc, /if \(isPlayBuild\(\)\) return null/, 'quickReviewBoot blocks Play builds')
 assert.match(
   appSrc,
-  /nightWatchJumpAllowed\(search, readNightWatchDebug\(\)\)/,
-  'quickReviewBoot uses playtest gate',
+  /playtestUrlAllowed\(search\)/,
+  'quickReviewBoot uses playtest URL only',
 )
 const settingsSrc = readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8')
-assert.match(settingsSrc, /nightWatchJumpAllowed\(/, 'Settings Quick review uses playtest gate')
+assert.match(settingsSrc, /playtestUrlAllowed\(urlSearch\)/, 'Settings dev UI uses playtest URL gate')
 
 const allowed = new Set([
   "What's the main idea?",
@@ -130,7 +131,7 @@ async function launchBrowser() {
   return chromium.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] })
 }
 
-async function withPage(url, fn, { seed } = {}) {
+async function withPage(url, fn, { seed, sessionNwDebug = false } = {}) {
   const root = fileURLToPath(new URL('..', import.meta.url))
   const server = await createServer({
     root,
@@ -144,12 +145,13 @@ async function withPage(url, fn, { seed } = {}) {
   const browser = await launchBrowser()
   const page = await browser.newPage()
   try {
-    if (seed) {
+    if (seed || sessionNwDebug) {
       await page.addInitScript(
-        ({ key, save }) => {
-          localStorage.setItem(key, JSON.stringify(save))
+        ({ key, save, nwKey, nwOn }) => {
+          if (save) localStorage.setItem(key, JSON.stringify(save))
+          if (nwOn) sessionStorage.setItem(nwKey, 'on')
         },
-        { key: STORAGE_KEY, save: seed },
+        { key: STORAGE_KEY, save: seed ?? null, nwKey: NW_DEBUG_SESSION, nwOn: sessionNwDebug },
       )
     }
     await page.goto(`http://127.0.0.1:${port}${url}`, { waitUntil: 'networkidle' })
@@ -164,7 +166,7 @@ function seedSave(intervalIndex = 1, lastFormat) {
   return {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.549',
+    appVersion: '1.4.552',
     savedAt: new Date().toISOString(),
     progress: {
       started: true,
@@ -198,7 +200,7 @@ await withPage(
     const settings = page.locator('header').getByRole('button', { name: 'Settings', exact: true })
     await settings.scrollIntoViewIfNeeded()
     await settings.click()
-    await page.locator('details.settings-debug summary').click()
+    assert.equal(await page.locator('details.settings-debug').count(), 0)
     assert.equal(await page.locator('section[aria-label="Quick review"]').count(), 0)
   },
   { seed: hubSeed },
@@ -214,8 +216,21 @@ await withPage(
 )
 
 await withPage(
+  '/?quickReview=ph-road',
+  async (page) => {
+    await page.getByRole('main', { name: 'Home' }).waitFor()
+    assert.equal(await page.locator('.quick-review-prompt').count(), 0)
+  },
+  {
+    seed: hubSeed,
+    sessionNwDebug: true,
+  },
+)
+
+await withPage(
   `/?quickReview=ph-road&reviewFormat=C&${PLAYTEST}`,
   async (page) => {
+  await page.locator('.quick-review-plot-hit.is-now').first().waitFor({ timeout: 8000 })
   const promptGold = await page.locator('.quick-review-plot-hit.is-now').count()
   assert.equal(promptGold, 1)
   await page.locator('.quick-review-plot-hit.is-now').click()
@@ -231,6 +246,7 @@ await withPage(
   async (page) => {
     await page.getByText('Think first…').waitFor()
     await page.waitForTimeout(3200)
+    await page.locator('.quick-review-drain-bar.is-now').first().waitFor({ timeout: 8000 })
     const drainGold = await page.locator('.quick-review-drain-bar.is-now').count()
     assert.equal(drainGold, 1)
     await page.locator('.match-card.recall-card').first().click()
@@ -244,6 +260,7 @@ await withPage(
 await withPage(
   `/?quickReview=ph-road&reviewFormat=A&${PLAYTEST}`,
   async (page) => {
+  await page.locator('.quick-review-flip.is-now').first().waitFor({ timeout: 8000 })
   const faceGold = await page.locator('.quick-review-flip.is-now').count()
   assert.equal(faceGold, 1)
   await page.getByRole('button', { name: 'Show me' }).click()

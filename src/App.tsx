@@ -23,7 +23,7 @@ import { adsAreVisible, quietPauseAllowed, scenePauseMountsOn } from './config/a
 import { liveInterstitialReady, showBetweenSceneInterstitial } from './lib/adAdapter'
 import { offerStoresComingNotice } from './lib/supportToast'
 import { isPlayBuild } from './config/playBuild'
-import { nightWatchJumpAllowed, readNightWatchDebug } from './lib/nightWatchDebug'
+import { playtestUrlAllowed } from './lib/nightWatchDebug'
 import { readNightReturn } from './nightWatch/nightReturn'
 import { useProgress } from './store/progress'
 import type { View } from './types'
@@ -41,12 +41,12 @@ function sequenceBoot(): View | null {
   return { name: 'challenge', areaId: found.areaId, challengeId: id }
 }
 
-/** Playwright / check entry — playtest URL or Night Watch debug switch only. */
+/** Playwright / check entry — `?playtest=1` only. */
 function quickReviewBoot(): View | null {
   if (typeof window === 'undefined') return null
   if (isPlayBuild()) return null
   const search = window.location.search
-  if (!nightWatchJumpAllowed(search, readNightWatchDebug())) return null
+  if (!playtestUrlAllowed(search)) return null
   const lineId = new URLSearchParams(search).get('quickReview')
   if (!lineId) return null
   return { name: 'quick-review', lineId, skipWrite: true }

@@ -181,7 +181,7 @@ function readRoadCaps() {
 }
 
 async function openRegion(page, region, id) {
-  await page.goto('/', { waitUntil: 'domcontentloaded' })
+  await page.goto('/?playtest=1', { waitUntil: 'domcontentloaded' })
   await page.getByRole('button', { name: 'Settings', exact: true }).click()
   await page.getByText('Developer · mini-game jumps').click()
   await page.getByRole('region', { name: region }).getByRole('button', { name: new RegExp(`^${id} ·`) }).click()
