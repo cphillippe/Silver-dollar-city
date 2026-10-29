@@ -480,8 +480,8 @@ Jesus’ stories assume a God who speaks, seeks, grows a kingdom, and will ask w
       <easy points="10" easyOrder="3">
         <learn>
           <shortStory>Jesus tells about a king who wipes an unpayable bill. That same servant then chokes a neighbor over a tiny sum. Forgiven much, you cannot choke a neighbor over a little debt — the story will not let you keep both.</shortStory>
-          <mainIdea>Forgiven much, you cannot choke a neighbor over a little debt.</mainIdea>
-          <gloss>Forgiven much, you cannot choke a neighbor over a little debt.</gloss>
+          <mainIdea>God forgives us a huge debt. So we forgive others.</mainIdea>
+          <gloss>God forgives us a huge debt. So we forgive others.</gloss>
           <loci>This idea lives at Story Creek, with Mercy.</loci>
           <word>
             <term>Debt</term>
@@ -490,7 +490,7 @@ Jesus’ stories assume a God who speaks, seeks, grows a kingdom, and will ask w
           <hint>Keep the mercy. Toss the choke. Example: a huge bill wiped, then a tiny one demanded.</hint>
         </learn>
         <match>
-          <sentenceCorrect>Forgiven much, you cannot choke a neighbor over a little debt.</sentenceCorrect>
+          <sentenceCorrect>God forgives us a huge debt. So we forgive others.</sentenceCorrect>
           <sentenceMisses>
             <miss>Forgiveness is a limited coupon on God’s spreadsheet.</miss>
             <miss>Jesus is only reforming first-century banking.</miss>
@@ -498,11 +498,11 @@ Jesus’ stories assume a God who speaks, seeks, grows a kingdom, and will ask w
           <placePrompt>The forgiven-debt story lives at Story Creek.</placePrompt>
           <personPrompt>Mercy Wren keeps the two servants.</personPrompt>
           <ideaPrompt>Mercy’s Jesus story — forgiven much, then show mercy.</ideaPrompt>
-          <ideaLabel>Forgiven much, you cannot choke a neighbor over a little debt.</ideaLabel>
+          <ideaLabel>God forgives us a huge debt. So we forgive others.</ideaLabel>
           <whyEasy>Mercy tells the forgiven-debt story at the creek. Received mercy must give mercy.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>Forgiven much, you cannot choke a neighbor over a little debt.</claim>
+          <claim>God forgives us a huge debt. So we forgive others.</claim>
           <reason>He was forgiven much, then choked a neighbor.</reason>
           <source>Matthew 18:21–35</source>
           <whyCorrect>He was forgiven much, then choked a neighbor.</whyCorrect>
@@ -512,7 +512,7 @@ Jesus’ stories assume a God who speaks, seeks, grows a kingdom, and will ask w
             <miss>Jail him over a tiny debt.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Forgiven much, you cannot choke a neighbor over a little debt.</choice>
+            <choice>God forgives us a huge debt. So we forgive others.</choice>
             <choice>Forgiveness is a limited coupon on God’s spreadsheet.</choice>
             <choice>Jesus is only reforming first-century banking.</choice>
           </claimChoices>
