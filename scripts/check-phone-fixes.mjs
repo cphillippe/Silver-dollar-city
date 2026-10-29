@@ -663,7 +663,7 @@ export async function checkPhoneFixes() {
       for (let index = 0; index < 5; index += 1) {
         const reason = locked.nth(index).locator('[data-map-reason]')
         const text = (await reason.innerText()).replace(/\s+/g, ' ').trim()
-        assert.match(text, /^Beat round 10 on .+ to unlock$/, `1.4.478 ${width} lock line ${text}`)
+        assert.equal(text.startsWith('Beat round 8 on ') && text.endsWith(' to unlock'), true, `1.4.478 ${width} lock line ${text}`)
         reasons.push(text)
         const seen = await reason.evaluate((node) => {
           const rect = node.getBoundingClientRect()

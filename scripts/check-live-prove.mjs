@@ -58,11 +58,11 @@ const WIDTHS = [
 ]
 
 const LOCKS = {
-  'far-hills': 'Beat round 10 on Silver City to unlock',
-  map03: 'Beat round 10 on The Far Hills to unlock',
-  map04: 'Beat round 10 on Peppermint Pass to unlock',
-  map05: 'Beat round 10 on Caramel Canyon to unlock',
-  map06: 'Beat round 10 on Licorice Woods to unlock',
+  'far-hills': 'Beat round 8 on Silver City to unlock',
+  map03: 'Beat round 8 on The Far Hills to unlock',
+  map04: 'Beat round 8 on Peppermint Pass to unlock',
+  map05: 'Beat round 8 on Caramel Canyon to unlock',
+  map06: 'Beat round 8 on Licorice Woods to unlock',
 }
 
 /** Near (160, 380), close enough to the road that the cloud covers walkers. */

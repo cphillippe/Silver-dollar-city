@@ -28,6 +28,15 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.558',
+    title: 'Easy Night Watch: the next map opens after round 8',
+    when: '2026-10-29',
+    items: [
+      'Easy: the next Night Watch map now opens after round 8.',
+      'Refs #749.',
+    ],
+  },
+  {
     version: '1.4.554',
     title: 'Behind the scenes: Easy Home Read quick review queue',
     when: '2026-10-29',
@@ -1165,7 +1174,7 @@ export const CHANGELOG: ChangeNote[] = [
     items: [
       'From round 3, Easy nights can plant a cheap candle stand. It is a short light, and a row of them covers more of the road. Six is the most.',
       'The candle has no power of its own. It helps people pray and remember God. The hit on the road is only a game effect.',
-      'Each maze stays locked until the round 10 boss on the map before it falls. The new-map note sits clear of the speed button, and the map names fit.',
+      'Each maze stays locked until round 8 on the map before it is cleared. The new-map note sits clear of the speed button, and the map names fit.',
       'Licorice fog is smaller and stays off the first bend. A pop there pays one spark.',
       'Blueberry berries wait until round 5 to split. The little ones pay no sparks.',
     ],
@@ -1194,7 +1203,7 @@ export const CHANGELOG: ChangeNote[] = [
     items: [
       'The mazes send more walkers, up to five on the road at once. A pop pays half a spark, so the extra walkers do not buy the lamps twice as fast.',
       'Far Hills has a hilltop that sees farther. Peppermint has candy-cane dashes. Caramel has sticky pools. Licorice hides faces in fog, and lamps still hit them. Blueberry berries pop into two little ones.',
-      'Peppermint and Caramel keep the early walker count. A pop there pays a little more than half a spark, so an ordinary good spot can reach round 8 and a careful spot still lasts about as long. Beat round 10 and a note names the map that just opened.',
+      'Peppermint and Caramel keep the early walker count. A pop there pays a little more than half a spark, so an ordinary good spot can reach round 8 and a careful spot still lasts about as long. Beat round 8 and a note names the map that just opened.',
     ],
   },
   {
@@ -1203,7 +1212,7 @@ export const CHANGELOG: ChangeNote[] = [
     when: '2026-10-10',
     items: [
       'Easy nights go A2, Far Hills, Peppermint Pass, Caramel Canyon, Licorice Woods, then Blueberry Bog.',
-      'Beat round 10 on a map and the next one opens. Holding all 25 rounds on A2 still shows the Far Hills play screen.',
+      'Beat round 8 on a map and the next one opens. Holding all 25 rounds on A2 still shows the Far Hills play screen.',
       'The new Far Hills replaces the first one. Walkers take every road. A night with no upgrades stops around round 7, and a spender lasts a shorter night as the mazes get harder.',
     ],
   },
