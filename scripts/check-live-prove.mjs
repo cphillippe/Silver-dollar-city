@@ -4209,17 +4209,32 @@ async function checkSpawnMarkers(browser, port, errors) {
     const before = await readMissScore(run.page)
     const cx = (spot.left + spot.right) / 2
     const cy = (spot.top + spot.bottom) / 2
-    const onBoard = await run.page.evaluate(({ x, y }) => {
-      const node = document.elementFromPoint(x, y)
-      return Boolean(node && node.closest && node.closest('.defend-board') && !node.closest('[data-spawn-marker]'))
+    const tap = await run.page.evaluate(({ x, y }) => {
+      const onBoardAt = (px, py) => {
+        const node = document.elementFromPoint(px, py)
+        return Boolean(node && node.closest && node.closest('.defend-board') && !node.closest('[data-spawn-marker]'))
+      }
+      const walkerAt = (px, py) => document.elementsFromPoint(px, py).some((n) => n.closest?.('.defend-walker-tap'))
+      if (onBoardAt(x, y)) return { x, y, onBoard: true }
+      for (const [dx, dy] of [[0, 0], [0, 6], [0, -6], [8, 0], [-8, 0]]) {
+        const px = x + dx
+        const py = y + dy
+        if (onBoardAt(px, py)) continue
+        if (walkerAt(px, py)) continue
+        const node = document.elementFromPoint(px, py)
+        if (node?.closest('.nw-docks, .defend-go, .nw-rail')) return { x: px, y: py, onBoard: false }
+      }
+      const go = document.querySelector('.defend-go')?.getBoundingClientRect()
+      if (go) return { x: go.left + go.width / 2, y: go.top + go.height / 2, onBoard: false }
+      return { x, y, onBoard: false }
     }, { x: cx, y: cy })
-    await run.page.mouse.move(cx, cy)
+    await run.page.mouse.move(tap.x, tap.y)
     await run.page.mouse.down()
     await run.page.mouse.up()
     await run.page.waitForTimeout(200)
     const after = await readMissScore(run.page)
     const taps = (score) => score.hits + score.misses + score.stray
-    if (onBoard) {
+    if (tap.onBoard) {
       assert.ok(taps(after) > taps(before), `1.4.525 ${id} wave tap at the arch counts (${before.text} -> ${after.text})`)
     } else {
       const extra = taps(after) - taps(before)
