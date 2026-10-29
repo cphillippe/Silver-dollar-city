@@ -221,7 +221,7 @@ async function captureGemWinLockInReference(browser, origin, shotsDir) {
   const freshSave = {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.552',
+    appVersion: '1.4.555',
     savedAt: '2026-10-27T00:00:00.000Z',
     progress: { started: true, easyMode: true, theme: 'candy', completed: [] },
   }
@@ -256,7 +256,7 @@ async function proveLockInEmptyTab(browser, origin) {
     const freshSave = {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.552',
+      appVersion: '1.4.555',
       savedAt: '2026-10-27T00:00:00.000Z',
       progress: { started: true, easyMode: true, theme: 'candy', completed: [] },
     }
@@ -289,7 +289,7 @@ async function proveLockInEmptyTab(browser, origin) {
     const readSave = {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.552',
+      appVersion: '1.4.555',
       savedAt: '2026-10-27T00:00:00.000Z',
       progress: {
         started: true,
@@ -332,7 +332,7 @@ async function proveLockInEmptyTab(browser, origin) {
     const holdSave = {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.552',
+      appVersion: '1.4.555',
       savedAt: '2026-10-27T00:00:00.000Z',
       progress: {
         started: true,
@@ -3414,6 +3414,9 @@ async function proveNwWaveReach(browser, origin, size, slug, errorsOut) {
     const rail = await nwRect(page, '.nw-rail')
     assert.ok(tray && hud && rail, `${where} chrome is up`)
     assert.ok(hud.bottom <= 89.5, `nwPan insets: ${where} hud bottom ${hud.bottom}`)
+    if (size[0] === 375 && size[1] === 667) {
+      await page.screenshot({ path: `${SHOTS}/nw-easy-hud-wave-375x667.png` })
+    }
     assert.ok(tray.top >= (size[0] === 390 ? 736 : 736 - (844 - size[1])) - 0.5, `${where} tray top ${tray.top}`)
     assert.ok(rail.left >= (size[0] === 375 ? 310 : 325) - 0.5, `${where} rail left ${rail.left}`)
     const markers = await page.evaluate(() =>

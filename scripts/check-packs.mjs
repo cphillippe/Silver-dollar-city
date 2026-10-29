@@ -17,10 +17,12 @@ import {
   needsTierHold,
 } from '../src/lib/tiers.ts'
 import { STREET_FACT_IDS } from '../src/content/links.ts'
+import { plainFor } from '../src/content/plain.ts'
 import { evidenceFor, evidenceForTier } from '../src/content/evidence.ts'
 import { EASY_CHROME, easyKidVerses } from '../src/lib/easyChrome.ts'
 import { matchChipsFor } from '../src/lib/gemSearch.ts'
-import { matchClearBeat } from '../src/lib/successBeat.ts'
+import { lociStampFor } from '../src/lib/lociStamp.ts'
+import { lineTakeaway, matchClearBeat } from '../src/lib/successBeat.ts'
 import { APP_VERSION } from '../src/config/app.ts'
 import { PACK_XML } from '../src/content/packEmbedded.ts'
 
@@ -492,6 +494,90 @@ assert.doesNotMatch(debtLine.claim, /contradiction/)
 assert.doesNotMatch(debtLine.easy.hold.why, /throttl|contradiction/i)
 assert.doesNotMatch(debtLine.easy.learn, /contradiction/)
 assert.doesNotMatch(debtLine.easy.gloss ?? '', /^If /)
+
+const DEBT_EASY = 'God forgives us a huge debt. So we forgive others.'
+const ORDER_EASY = 'Christ made all things, and he holds them together.'
+const DEBT_MH = 'Forgiven much, you cannot choke a neighbor over a little debt.'
+const ORDER_MH = 'You already trust that the world holds together in Christ.'
+const DEBT_STAMP = 'Forgiven much, you cannot choke a neighbor over'
+const ORDER_STAMP = 'World holds in Christ'
+
+function easySurfaces(id) {
+  const lesson = packLesson(id)
+  const tier = currentLessonTier(emptyProgress(), id)
+  const journalEasy = evidenceForTier(id, tier)
+  const lockIn = evidenceForTier(id, 'easy')
+  const take = lineTakeaway(id)
+  return {
+    trail: plainFor(id)?.gloss ?? '',
+    say: matchChipsFor(id)?.say ?? '',
+    journalEasy: journalEasy?.claim ?? '',
+    lockIn: lockIn?.claim ?? '',
+    hold: lesson?.easy.hold.claim ?? '',
+    match: lesson?.easy.match.sentence ?? '',
+    gloss: lesson?.easy.gloss ?? '',
+    takeaway: take.claim,
+    win: matchClearBeat(id).title,
+    choices: lockIn?.claimChoices ?? [],
+  }
+}
+
+const debtCard = easyWhoWhere('ph-debt')
+const debtSay = `${debtCard.whoName} marks the line at ${debtCard.place}: ${DEBT_EASY}`
+const debtEasy = easySurfaces('ph-debt')
+const orderEasy = easySurfaces('fg-order')
+
+assert.equal(debtLine.easy.hold.claim, DEBT_EASY)
+assert.equal(debtLine.easy.match.sentence, DEBT_EASY)
+assert.equal(debtLine.easy.gloss, DEBT_EASY)
+assert.equal(evidenceForTier('ph-debt', 'easy')?.claim, DEBT_EASY)
+assert.equal(debtEasy.say, debtSay)
+assert.equal(debtEasy.trail, DEBT_EASY)
+assert.equal(debtEasy.journalEasy, DEBT_EASY)
+assert.equal(debtEasy.lockIn, DEBT_EASY)
+assert.equal(currentLessonTier(emptyProgress(), 'ph-debt'), 'easy')
+
+const orderLine = packLesson('fg-order')
+assert.ok(orderLine)
+assert.equal(orderLine.easy.hold.claim, ORDER_EASY)
+assert.equal(orderLine.easy.match.sentence, ORDER_EASY)
+assert.equal(orderLine.easy.gloss, ORDER_EASY)
+assert.equal(evidenceForTier('fg-order', 'easy')?.claim, ORDER_EASY)
+assert.equal(orderEasy.trail, ORDER_EASY)
+assert.equal(orderEasy.journalEasy, ORDER_EASY)
+assert.equal(orderEasy.lockIn, ORDER_EASY)
+
+for (const [id, easyClaim, oldClaim, surfaces] of [
+  ['ph-debt', DEBT_EASY, DEBT_MH, debtEasy],
+  ['fg-order', ORDER_EASY, ORDER_MH, orderEasy],
+]) {
+  const lesson = packLesson(id)
+  for (const tier of ['medium', 'hard']) {
+    assert.equal(lesson[tier].hold.claim, oldClaim, `${id} ${tier} claim stays`)
+    assert.equal(lesson[tier].match.sentence, oldClaim, `${id} ${tier} match stays`)
+    assert.equal(evidenceForTier(id, tier)?.claim, oldClaim, `${id} ${tier} brief stays`)
+    const misses = [
+      ...lesson[tier].hold.claimMisses,
+      ...(evidenceForTier(id, tier)?.claimChoices ?? []),
+    ]
+    assert.equal(misses.includes(easyClaim), false, `${id} ${tier} has no Easy claim card`)
+  }
+  const easyMisses = [
+    ...lesson.easy.hold.claimMisses,
+    ...surfaces.choices.filter((line) => line !== easyClaim),
+  ]
+  assert.equal(easyMisses.includes(oldClaim), false, `${id} Easy has no Medium/Hard claim card`)
+  assert.equal(easyMisses.includes(easyClaim), false, `${id} Easy claim is not a wrong card`)
+  for (const [name, text] of Object.entries(surfaces)) {
+    if (name === 'choices') continue
+    assert.equal(String(text).includes(oldClaim), false, `${id} ${name} still has the old Easy claim`)
+  }
+}
+
+assert.equal(lociStampFor('ph-debt').ideaShort, DEBT_STAMP)
+assert.equal(lociStampFor('fg-order').ideaShort, ORDER_STAMP)
+assert.equal(debtEasy.say.includes(DEBT_EASY), true)
+assert.equal(orderEasy.say.includes(ORDER_MH), false)
 
 const moral = packLesson('hl-moral')
 assert.ok(moral)

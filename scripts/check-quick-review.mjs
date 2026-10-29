@@ -452,7 +452,7 @@ function homeQueueSeed() {
   return {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.554',
+    appVersion: '1.4.555',
     savedAt: new Date().toISOString(),
     progress: {
       started: true,
@@ -589,7 +589,7 @@ await withPage(
     seed: {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.554',
+      appVersion: '1.4.555',
       savedAt: new Date().toISOString(),
       progress: {
         started: true,
@@ -642,7 +642,7 @@ await withPage(
     seed: {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.554',
+      appVersion: '1.4.555',
       savedAt: new Date().toISOString(),
       progress: {
         started: true,
@@ -679,7 +679,7 @@ await withPage(
     seed: {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.554',
+      appVersion: '1.4.555',
       savedAt: new Date().toISOString(),
       progress: {
         started: true,
