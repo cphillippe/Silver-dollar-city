@@ -28,6 +28,20 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.560',
+    title: 'Easy Home: the gold ring shows on a house',
+    when: '2026-10-29',
+    items: [
+      'The gold ring sits on the ground in front of a house, so you can see which place is next.',
+      'East porch fits on the phone.',
+      'Home words are at least 13 pixels tall.',
+      'Build this only raises a look you can see, and the map stays on that place.',
+      'Star lamps wait until four stars, then light up in one tap.',
+      'Refs #817.',
+      'Refs #885.',
+    ],
+  },
+  {
     version: '1.4.554',
     title: 'Behind the scenes: Easy Home Read quick review queue',
     when: '2026-10-29',

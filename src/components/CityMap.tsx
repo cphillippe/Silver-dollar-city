@@ -53,6 +53,7 @@ import { RESIDENT_WALKER } from './city/residents'
 import {
   anyUpgradeReady,
   canUpgrade,
+  EASY_ANCHOR_PAN,
   EASY_NAMED_PLOTS,
   lampsBuildGift,
   readyUpgradeId,
@@ -120,6 +121,14 @@ function camAround(id: CityPlotId) {
   const at = ANCHOR[id]
   return { x: at.x - 150, y: at.y - 120, w: 300, h: 230 }
 }
+
+/** Easy phone pan anchor. Hard and wide frames keep ANCHOR. */
+function panAnchor(id: CityPlotId) {
+  return EASY_ANCHOR_PAN[id] ?? ANCHOR[id]
+}
+
+/** Ground ring below the house anchor, on the footprint, so art does not hide it. */
+const EASY_GROUND_HALO_DY = 34
 
 function viewBoxOf(cam: { x: number; y: number; w: number; h: number }) {
   return `${cam.x} ${cam.y} ${cam.w} ${cam.h}`
@@ -318,7 +327,7 @@ export function CityMap({
     panRef.current = next
     if (now) paintPan()
     else if (!panPaint.current) panPaint.current = requestAnimationFrame(paintPan)
-    const away = Math.abs(next - panToward(ANCHOR[cueRef.current].x, f)) * f.scale > HOME_SLOP_PX
+    const away = Math.abs(next - panToward(panAnchor(cueRef.current).x, f)) * f.scale > HOME_SLOP_PX
     setOffHome((prev) => (prev === away ? prev : away))
   }
 
@@ -355,13 +364,13 @@ export function CityMap({
 
   function homePan() {
     const f = panFrameRef.current
-    return f ? panToward(ANCHOR[cueRef.current].x, f) : 0
+    return f ? panToward(panAnchor(cueRef.current).x, f) : 0
   }
 
   function bringInView(id: CityPlotId) {
     const f = panFrameRef.current
     if (!f) return
-    const x = ANCHOR[id].x
+    const x = panAnchor(id).x
     const left = panGoal.current ?? panRef.current
     if (x - left < EDGE_MARGIN || left + f.viewW - x < EDGE_MARGIN) glidePan(panToward(x, f))
   }
@@ -376,22 +385,23 @@ export function CityMap({
       panStarted.current = true
       panDragged.current = false
       stopGlide()
-      panRef.current = panToward(ANCHOR[cueRef.current].x, panFrame)
+      panRef.current = panToward(panAnchor(cueRef.current).x, panFrame)
       paintPan()
       setOffHome(false)
       return
     }
     if (!panDragged.current) {
       stopGlide()
-      panRef.current = homePan()
-      paintPan()
-      setOffHome(false)
+      // A dock reflow must not leave the house that was just raised.
+      const focus = easy && selectedPlot ? selectedPlot : cueRef.current
+      setPan(panToward(panAnchor(focus).x, panFrame), true)
     } else setPan(panRef.current, true)
   }, [panKey])
 
   useEffect(() => {
     if (!panFrameRef.current || !panStarted.current) return
     if (panDragged.current) setPan(panRef.current)
+    else if (easy && selectedPlot) bringInView(selectedPlot)
     else glidePan(homePan())
   }, [cueId])
 
@@ -634,6 +644,7 @@ export function CityMap({
 
   const nextStage = stageOf(nextId)
   const nextAt = ANCHOR[cueId]
+  const panAt = panAnchor(cueId)
   const kicker = canUpgrade(nextId, progress)
     ? 'Build this'
     : nextKicker(nextStage, nextId, doneToday)
@@ -959,7 +970,7 @@ export function CityMap({
         </g>
       ) : null}
 
-      {mode === 'live' && !celebrating && !(easy && selectedPlot === cueId) ? (
+      {mode === 'live' && !celebrating && !(easy && panFrame) && !(easy && selectedPlot === cueId) ? (
         <g className="city-next-mark" transform={`translate(${nextAt.x} ${nextAt.y})`}>
           <circle
             r={easy ? 22 : 34}
@@ -982,6 +993,7 @@ export function CityMap({
         tapped={tapped === 'lookout'}
         ready={canUpgrade('lookout', progress)}
         selected={easy && selectedPlot === 'lookout'}
+        pan={Boolean(panFrame)}
         onOpen={open}
         onFocusPlot={easy ? bringInView : undefined}
       />
@@ -995,6 +1007,7 @@ export function CityMap({
         tapped={tapped === 'observatory'}
         ready={canUpgrade('observatory', progress)}
         selected={easy && selectedPlot === 'observatory'}
+        pan={Boolean(panFrame)}
         onOpen={open}
         onFocusPlot={easy ? bringInView : undefined}
       />
@@ -1008,6 +1021,7 @@ export function CityMap({
         tapped={tapped === 'hollow'}
         ready={canUpgrade('hollow', progress)}
         selected={easy && selectedPlot === 'hollow'}
+        pan={Boolean(panFrame)}
         onOpen={open}
         onFocusPlot={easy ? bringInView : undefined}
       />
@@ -1021,6 +1035,7 @@ export function CityMap({
         tapped={tapped === 'journal'}
         ready={canUpgrade('journal', progress)}
         selected={easy && selectedPlot === 'journal'}
+        pan={Boolean(panFrame)}
         onOpen={open}
         onFocusPlot={easy ? bringInView : undefined}
       />
@@ -1034,6 +1049,7 @@ export function CityMap({
         tapped={tapped === 'bench'}
         ready={canUpgrade('bench', progress)}
         selected={easy && selectedPlot === 'bench'}
+        pan={Boolean(panFrame)}
         onOpen={open}
         onFocusPlot={easy ? bringInView : undefined}
       />
@@ -1047,6 +1063,7 @@ export function CityMap({
         tapped={tapped === 'lamps'}
         ready={canUpgrade('lamps', progress)}
         selected={easy && selectedPlot === 'lamps'}
+        pan={Boolean(panFrame)}
         onOpen={open}
         onFocusPlot={easy ? bringInView : undefined}
       />
@@ -1060,6 +1077,7 @@ export function CityMap({
         tapped={tapped === 'gate'}
         ready={canUpgrade('gate', progress)}
         selected={easy && selectedPlot === 'gate'}
+        pan={Boolean(panFrame)}
         onOpen={open}
         onFocusPlot={easy ? bringInView : undefined}
       />
@@ -1073,9 +1091,24 @@ export function CityMap({
         tapped={tapped === 'porch'}
         ready={canUpgrade('porch', progress)}
         selected={easy && selectedPlot === 'porch'}
+        pan={Boolean(panFrame)}
         onOpen={open}
         onFocusPlot={easy ? bringInView : undefined}
       />
+
+      {mode === 'live' && easy && panFrame && !celebrating && selectedPlot !== cueId ? (
+        <g
+          className="city-next-mark"
+          pointerEvents="none"
+          transform={`translate(${panAt.x} ${panAt.y + EASY_GROUND_HALO_DY})`}
+        >
+          <ellipse
+            className="city-next-halo is-easy-ground"
+            rx={58}
+            ry={20}
+          />
+        </g>
+      ) : null}
 
       {mode === 'live'
         ? CITY_PLOTS.map((plot) => (
