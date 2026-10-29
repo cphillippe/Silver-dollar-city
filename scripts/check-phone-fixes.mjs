@@ -242,10 +242,84 @@ const NW_SIZES = [
 /** Dead seat paint on 1.4.510 main. B6 only changes when it shows. */
 const DEAD_FILL = 'rgba(72, 76, 86, 0.5)'
 const DEAD_STROKE = 'rgba(154, 158, 168, 0.78)'
-/** Measured on 1.4.528 main: Begin tap to the first walker, and clear to an enabled Continue. */
-/** Begin → first `data-walker-id` on a2 round 2 with motion (#756 geometry unlock). Five runs each at 375×667 and 390×844 on 2026-10-28: 2383–2407 ms (mean 2390); main’s full run-in lock was ~2900 ms. */
+/** Measured on 1.4.528 main: clear to an enabled Continue. */
+/** Begin → first walker on a2 round 2 with motion (#756): mean ~2390 ms on 2026-10-28 main (NWUI-8 regression band only). */
 const MAIN_FIRST_WALKER_MS = 2390
 const MAIN_CONTINUE_MS = 0
+const FIRST_WALKER_VISIBLE_CEILING_MS = 35_000
+/** Measured .nw-hud strip height on live 1.4.551 Easy at 375×667 (border box). */
+const EASY_HUD_STRIP_HEIGHT_MAIN_375 = 48
+
+/** Hearts, wave pill, TAP line, and pace chip stay on one row without overlapping. */
+async function assertHudCrowding(page, label) {
+  const read = await page.evaluate(() => {
+    const pick = (sel) => {
+      const node = document.querySelector(sel)
+      if (!node) return null
+      const st = getComputedStyle(node)
+      if (st.display === 'none' || st.visibility === 'hidden') return null
+      const b = node.getBoundingClientRect()
+      if (b.width < 2 || b.height < 2) return null
+      return { sel, left: b.left, top: b.top, right: b.right, bottom: b.bottom }
+    }
+    const parts = [
+      pick('.defend-hearts'),
+      pick('.nw-wave-overlay .defend-wave'),
+      pick('.defend-count'),
+      pick('.nw-hud > .nw-pace'),
+    ].filter(Boolean)
+    const clashes = []
+    for (let i = 0; i < parts.length; i += 1) {
+      for (let j = i + 1; j < parts.length; j += 1) {
+        const a = parts[i]
+        const b = parts[j]
+        const ox = Math.min(a.right, b.right) - Math.max(a.left, b.left)
+        const oy = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top)
+        if (ox > 0.5 && oy > 0.5) clashes.push([a.sel, b.sel, ox, oy])
+      }
+    }
+    const hud = document.querySelector('.nw-hud')?.getBoundingClientRect()
+    return {
+      parts: parts.map((p) => p.sel),
+      clashes,
+      hudHeight: hud ? hud.height : null,
+      hudBottom: hud ? hud.bottom : null,
+    }
+  })
+  assert.deepEqual(read.clashes, [], `#868 ${label} HUD row has no overlaps ${JSON.stringify(read)}`)
+  assert.ok(read.parts.length >= 3, `#868 ${label} HUD row parts render ${JSON.stringify(read.parts)}`)
+  return read
+}
+
+async function panBoard(page, dx, dy) {
+  const pan = page.locator('.nw-pan').first()
+  const box = (await pan.count()) ? await pan.boundingBox() : await page.locator('.defend-frame').boundingBox()
+  assert.ok(box, 'nw-pan for camera drag')
+  const x0 = box.x + box.width * 0.5
+  const y0 = box.y + box.height * 0.35
+  await page.mouse.move(x0, y0)
+  await page.mouse.down()
+  await page.mouse.move(x0 + dx, y0 + dy, { steps: 12 })
+  await page.mouse.up()
+  await page.waitForTimeout(120)
+}
+
+/** After Begin, wait until a walker has a visible box (not a fixed run-in delay). */
+async function waitForFirstWalkerVisible(page, ceilingMs = FIRST_WALKER_VISIBLE_CEILING_MS) {
+  const t0 = Date.now()
+  while (Date.now() - t0 < ceilingMs) {
+    const seen = await page.evaluate(() => {
+      for (const node of document.querySelectorAll('.easy-walker, [data-walker-id], [data-walker-tap]')) {
+        const b = node.getBoundingClientRect()
+        if (b.width > 1 && b.height > 1) return true
+      }
+      return false
+    })
+    if (seen) return Date.now() - t0
+    await page.waitForTimeout(50)
+  }
+  assert.fail(`first walker visible within ${ceilingMs}ms`)
+}
 
 async function openMap(browser, port, width, height, map, { motion = false, search = '?playtest=1&nwSeed=2' } = {}) {
   const context = await browser.newContext({
@@ -495,7 +569,7 @@ async function check768WalkerTapProbe(browser, port, errors) {
         }
         await page.locator('.defend-go').click()
         await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
-        await page.waitForTimeout(MAIN_FIRST_WALKER_MS)
+        await waitForFirstWalkerVisible(page)
         await page.locator('.defend-walker-tap').first().waitFor({ timeout: 60_000 })
         let samples = 0
         let covers = 0
@@ -519,7 +593,7 @@ async function check768WalkerTapProbe(browser, port, errors) {
               const y = (visTop + visBottom) / 2
               const top = document.elementFromPoint(x, y)
               samples += 1
-              if (top?.closest('.nw-pace')) covers += 1
+              if (top?.closest('.nw-pace') || top?.closest('.nw-hud')) covers += 1
             }
             return { samples, covers }
           })
@@ -531,7 +605,7 @@ async function check768WalkerTapProbe(browser, port, errors) {
         rows.push({ map, width, height, cam: camOn ? 'on' : 'off', samples, covers })
         if (camOn && map === 'a2') {
           await page.screenshot({
-            path: join(SHOTS, `nw-pace-dock-${width}x${height}.png`),
+            path: join(SHOTS, `nw-pace-hud-${width}x${height}-cam-on.png`),
             fullPage: false,
           })
         }
@@ -547,6 +621,138 @@ async function check768WalkerTapProbe(browser, port, errors) {
   }
 }
 
+/** #868 map04 390×844 cam on: a walker panned under the HUD band must stay tappable (not eaten by the strip/chip). */
+async function check868Map04HudWalkerTap(browser, port, errors) {
+  const width = 390
+  const height = 844
+  const label = `map04 ${width}x${height} cam=on`
+  const { context, page } = await openMap(browser, port, width, height, 'map04', {
+    motion: true,
+    search: '?playtest=1&nwSeed=2&nwRound=5&nwLamps=0&nwCam=1',
+  })
+  page.on('pageerror', (error) => errors.push(`${label} ${error}`))
+  if (await page.locator('#defend-plant-first').count()) {
+    await page.locator('[data-type="love"]').click()
+    const seat = await firstLiveSeat(page)
+    await page.mouse.click(seat.x, seat.y)
+    await page.locator('[data-tower-type]').first().waitFor({ timeout: 30_000 })
+  }
+  await page.locator('.defend-go').click()
+  await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
+  await waitForFirstWalkerVisible(page)
+  await page.locator('.defend-walker-tap').first().waitFor({ timeout: 60_000 })
+  if (await page.locator('.nw-cam-recenter').count()) {
+    const rc = await page.locator('.nw-cam-recenter').boundingBox()
+    if (rc) await page.mouse.click(rc.x + rc.width / 2, rc.y + rc.height / 2)
+    await page.waitForTimeout(150)
+  }
+
+  const probeX = 332
+  const probeY = 73
+  let target = null
+  const panPattern = [
+    [0, 160],
+    [0, 140],
+    [0, 120],
+    [-80, 120],
+    [80, 120],
+    [0, 200],
+    [0, -80],
+  ]
+  for (let attempt = 0; attempt < 96 && !target; attempt += 1) {
+    target = await page.evaluate(({ x, y, yMin, yMax }) => {
+      const hitWalker = (px, py) => {
+        const stack = document.elementsFromPoint(px, py)
+        return stack.some((node) => node.closest?.('.defend-walker-tap'))
+      }
+      if (hitWalker(x, y)) {
+        return { x, y, onWalker: true, via: 'probe' }
+      }
+      for (const btn of document.querySelectorAll('.defend-walker-tap')) {
+        const b = btn.getBoundingClientRect()
+        if (b.width < 8 || b.height < 8) continue
+        const cx = (b.left + b.right) / 2
+        const cy = (b.top + b.bottom) / 2
+        if (cy < yMin || cy > yMax) continue
+        if (hitWalker(cx, cy)) return { x: cx, y: cy, onWalker: true, via: 'band' }
+      }
+      return null
+    }, { x: probeX, y: probeY, yMin: 53, yMax: 89 })
+    if (target?.onWalker) break
+    target = null
+    const [dx, dy] = panPattern[attempt % panPattern.length]
+    await panBoard(page, dx, dy)
+    await page.waitForTimeout(150)
+  }
+  if (!target?.onWalker) {
+    target = await page.evaluate(({ yMin, yMax }) => {
+      for (const btn of document.querySelectorAll('.defend-walker-tap')) {
+        const b = btn.getBoundingClientRect()
+        if (b.width < 8 || b.height < 8) continue
+        const cx = (b.left + b.right) / 2
+        const cy = (b.top + b.bottom) / 2
+        if (cy < yMin || cy > yMax) continue
+        const stack = document.elementsFromPoint(cx, cy)
+        if (stack.some((node) => node.closest?.('.defend-walker-tap'))) return { x: cx, y: cy, onWalker: true, via: 'final-band' }
+      }
+      return null
+    }, { yMin: 53, yMax: 89 })
+  }
+  assert.ok(target?.onWalker, `#868 ${label} walker under HUD (y 53–89 / probe ${probeX},${probeY}) stays tappable ${JSON.stringify(target)}`)
+
+  const before = await page.evaluate(() => {
+    const el = document.querySelector('.nw-tap-readout')
+    return el ? el.textContent?.trim() ?? '' : ''
+  })
+  await page.mouse.click(target.x, target.y)
+  await page.waitForTimeout(250)
+  const after = await page.evaluate(() => {
+    const el = document.querySelector('.nw-tap-readout')
+    return el ? el.textContent?.trim() ?? '' : ''
+  })
+  assert.notEqual(after, before, `#868 ${label} tap under HUD registers on the walker (${before} -> ${after})`)
+  await context.close()
+}
+
+/** #868 HUD strip height + crowding shots at 375/390, cam on/off. */
+async function check868HudStrip(browser, port, errors) {
+  for (const [width, height] of [
+    [375, 667],
+    [390, 844],
+  ]) {
+    for (const camOn of [true, false]) {
+      const label = `a2 ${width}x${height} cam=${camOn ? 'on' : 'off'}`
+      const { context, page } = await openMap(browser, port, width, height, 'a2', {
+        motion: true,
+        search: `?playtest=1&nwRound=3&nwCam=${camOn ? '1' : '0'}`,
+      })
+      page.on('pageerror', (error) => errors.push(`${label} ${error}`))
+      await page.locator('.defend-go').click()
+      await page.locator('.defend-page.is-easy-tap').waitFor()
+      await page.locator('.nw-pace').waitFor()
+      await page.waitForTimeout(400)
+      const hud = await page.evaluate(() => {
+        const box = document.querySelector('.nw-hud')?.getBoundingClientRect()
+        return box ? { height: box.height, bottom: box.bottom, top: box.top } : null
+      })
+      assert.ok(hud, `#868 ${label} HUD strip renders`)
+      if (width === 375 && height === 667) {
+        assert.ok(
+          hud.height <= EASY_HUD_STRIP_HEIGHT_MAIN_375 + 0.5,
+          `#868 ${label} HUD strip height ${hud.height} <= main ${EASY_HUD_STRIP_HEIGHT_MAIN_375}`,
+        )
+        assert.ok(hud.bottom <= 89.5, `#868 ${label} HUD bottom ${hud.bottom} <= 89.5`)
+      }
+      await assertHudCrowding(page, label)
+      await page.screenshot({
+        path: join(SHOTS, `nw-hud-crowd-${width}x${height}-cam-${camOn ? 'on' : 'off'}.png`),
+        fullPage: false,
+      })
+      await context.close()
+    }
+  }
+}
+
 /** Mid-wave at round 3: pace chip (NWUI-2), strip buttons (NWUI-6), spawn arch (B8). */
 async function check792bWave(browser, port, errors) {
   for (const [width, height] of [[375, 667], [390, 844]]) {
@@ -556,6 +762,26 @@ async function check792bWave(browser, port, errors) {
     await page.locator('.defend-go').click()
     await page.locator('.defend-page.is-easy-tap').waitFor()
     await page.locator('.nw-pace').waitFor()
+    const pacePlacement = await page.evaluate(() => {
+      const pace = document.querySelector('.nw-pace')
+      const parent = pace?.parentElement
+      return {
+        inHud: Boolean(parent?.classList.contains('nw-hud')),
+        directChild: Boolean(pace?.matches('.nw-hud > .nw-pace')),
+      }
+    })
+    assert.equal(pacePlacement.directChild, true, `#792b NWUI-2 ${label} pace is .nw-hud > .nw-pace (${JSON.stringify(pacePlacement)})`)
+    const openPaceGold = await page.evaluate(() => {
+      const pace = document.querySelector('.nw-pace.is-open, .nw-pace[data-state="open"]')
+      if (!pace) return null
+      const st = getComputedStyle(pace)
+      const border = st.borderTopColor
+      const goldish = (c) => /rgb\(\s*255,\s*20[04],\s*5/.test(c) || /rgb\(\s*255,\s*204,\s*51/.test(c)
+      return { border, gold: goldish(border) }
+    })
+    if (openPaceGold) {
+      assert.equal(openPaceGold.gold, false, `#792b NWUI-2 ${label} open pace border is not gold (${JSON.stringify(openPaceGold)})`)
+    }
     await assertArchInside(page, `${label} wave`)
     await page.waitForTimeout(800)
     let ownHits = 0
@@ -564,7 +790,14 @@ async function check792bWave(browser, port, errors) {
         const pace = document.querySelector('.nw-pace').getBoundingClientRect()
         const hit = (b) => pace.left < b.right && pace.right > b.left && pace.top < b.bottom && pace.bottom > b.top
         const clash = []
-        for (const sel of ['.nw-skill-tray', '.defend-tower-card', '.nw-cam-recenter']) {
+        for (const sel of [
+          '.nw-skill-tray',
+          '.defend-tower-card',
+          '.nw-cam-recenter',
+          '.easy-walker',
+          '[data-walker-tap]',
+          '.nw-rail',
+        ]) {
           for (const node of document.querySelectorAll(sel)) {
             const b = node.getBoundingClientRect()
             if (b.width > 1 && b.height > 1 && hit(b)) clash.push(sel)
@@ -604,7 +837,7 @@ async function check792bWave(browser, port, errors) {
       if (read.own) ownHits += 1
       await page.waitForTimeout(250)
     }
-    assert.ok(ownHits >= 8, `#792b NWUI-2 ${label} a tap at the chip centre reaches the chip (${ownHits}/10 frames)`)
+    assert.equal(ownHits, 10, `#792b NWUI-2 ${label} a tap at the chip centre reaches the chip (${ownHits}/10 frames)`)
     await page.locator('.defend-clear-lamp').first().click()
     await page.locator('.defend-tower-card').waitFor()
     const strip = await page.evaluate(() => {
@@ -906,6 +1139,8 @@ export async function checkPhoneFixes() {
     await check792bPlant(browser, port, errors)
     await check792bPlantCard(browser, port, errors)
     await check768WalkerTapProbe(browser, port, errors)
+    await check868Map04HudWalkerTap(browser, port, errors)
+    await check868HudStrip(browser, port, errors)
     await check792bWave(browser, port, errors)
     await check792bSurvived(browser, port, errors, 375, 667)
     await check792bSurvived(browser, port, errors, 390, 844)

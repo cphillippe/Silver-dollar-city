@@ -2166,8 +2166,23 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
   )
   assert.match(
     defendCss834,
-    /\.defend-page\.is-easy-watch \.nw-hud \.nw-pace \{[\s\S]*?margin-left:\s*auto;/,
+    /\.defend-page\.is-easy-watch \.nw-hud > \.nw-pace \{[\s\S]*?position:\s*absolute;[\s\S]*?right:\s*6px;[\s\S]*?translateY\(-50%\)/,
     '#768 NWUI-2 pace chip lives in the HUD strip outside the board frame',
+  )
+  assert.match(
+    defendCss834,
+    /\.defend-page\.is-easy-watch \.nw-pace\.is-open,[\s\S]*?border-color:\s*rgba\(186,\s*150,\s*255/,
+    '#768 Easy open pace chip is not gold (one gold cue per wave)',
+  )
+  assert.match(
+    defendCss834,
+    /\.defend-page\.is-easy-watch \.nw-hud \{[\s\S]*?pointer-events:\s*none;/,
+    '#868 Easy HUD strip passes taps through to walkers under the band',
+  )
+  assert.match(
+    defendCss834,
+    /\.defend-page\.is-easy-watch:has\(\.nw-cam\[data-nw-cam='on'\]\) \.nw-stage \{[\s\S]*?margin-top:\s*-40px;/,
+    '#868 Easy stage extends hit targets under the HUD band when cam pans walkers up',
   )
   assert.doesNotMatch(
     defendCss834,

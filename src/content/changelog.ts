@@ -34,7 +34,7 @@ export const CHANGELOG: ChangeNote[] = [
       'After you help him, dragging to the inn shows One more road right away — no extra tap on the win card.',
       'Drag or tap the road — the hint says both.',
       'Hard stays the same.',
-      'Refs #877.',
+      'Refs #877',
     ],
   },
   {

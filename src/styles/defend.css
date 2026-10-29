@@ -4484,6 +4484,13 @@ button.defend-new-lamp[aria-pressed='true'] {
   color: #ffe7a3;
 }
 
+.defend-page.is-easy-watch .nw-pace.is-open,
+.defend-page.is-easy-watch .nw-pace[data-state='open'] {
+  border-color: rgba(186, 150, 255, 0.55);
+  color: #fff6df;
+  box-shadow: none;
+}
+
 .nw-pace.is-fast,
 .nw-pace[data-state='fast'] {
   background: #ffcc33;
@@ -5257,7 +5264,27 @@ button.defend-new-lamp[aria-pressed='true'] {
 /* No text pills on Easy. The words stay in the DOM for scans and screen readers.
    The count slot's height stays so the phone map camera does not jump. */
 .defend-page.is-easy-watch .nw-hud {
+  position: relative;
+  z-index: 3;
+  pointer-events: none;
+  box-sizing: border-box;
+  height: 36px;
   min-height: 36px;
+  max-height: 36px;
+  padding: 0 50px 0 12px;
+  align-items: center;
+}
+
+/* Cam-on walkers can pan into the HUD band; pull the playfield up under the HUD row for hit-testing. */
+.defend-page.is-easy-watch:has(.nw-cam[data-nw-cam='on']) .nw-stage {
+  position: relative;
+  z-index: 1;
+  margin-top: -40px;
+}
+
+.defend-page.is-easy-watch .nw-hud > .defend-hud {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .defend-page.is-easy-watch .defend-count,
@@ -5287,22 +5314,24 @@ button.defend-new-lamp[aria-pressed='true'] {
   border: 0;
 }
 
-.defend-page.is-easy-watch .nw-hud .nw-pace {
-  position: relative;
-  top: auto;
+/* Pace chip: direct child of .nw-hud beside .defend-hud (not inside the <p>). */
+.defend-page.is-easy-watch .nw-hud > .nw-pace {
+  position: absolute;
+  top: 50%;
+  right: 6px;
   left: auto;
-  right: auto;
   bottom: auto;
   flex: 0 0 auto;
-  margin-left: auto;
-  transform: none;
+  margin: 0;
+  transform: translateY(-50%);
   width: 44px;
   height: 44px;
   min-width: 44px;
   min-height: 44px;
   padding: 0;
   gap: 0;
-  z-index: auto;
+  z-index: 2;
+  pointer-events: auto;
 }
 
 .defend-page.is-easy-watch .nw-pace::before {

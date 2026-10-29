@@ -4218,8 +4218,9 @@ async function checkSpawnMarkers(browser, port, errors) {
       assert.ok(taps(after) > taps(before), `1.4.525 ${id} wave tap at the arch counts (${before.text} -> ${after.text})`)
     } else {
       const extra = taps(after) - taps(before)
-      assert.ok(
-        extra === 0 || extra === 1,
+      assert.equal(
+        extra,
+        0,
         `1.4.525 ${id} wave tap on the dock stays with the dock (${before.text} -> ${after.text})`,
       )
     }
