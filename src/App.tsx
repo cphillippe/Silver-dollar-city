@@ -195,6 +195,7 @@ export default function App() {
       {view.name === 'learn' ? <LearnScreen onNavigate={go} /> : null}
       {view.name === 'quick-review' ? (
         <QuickReviewScreen
+          key={view.queue?.join(',') ?? view.lineId}
           lineId={view.lineId}
           skipWrite={view.skipWrite}
           queue={view.queue}

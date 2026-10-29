@@ -29,8 +29,13 @@ const quickSrc = readFileSync(
   'utf8',
 )
 assert.doesNotMatch(quickSrc, /recordHeld|recordLessonHold/)
+assert.match(quickSrc, /function beginSourceBeat\(reasonClean: boolean\)/)
+assert.match(quickSrc, /beginSourceBeat\(false\)/)
+assert.match(quickSrc, /beginSourceBeat\(format === 'C' \? mapTapClean : true\)/)
+assert.match(quickSrc, /holdInterval/)
 
 const appSrc = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
+assert.match(appSrc, /key=\{view\.queue\?\.join\(','\) \?\? view\.lineId\}/)
 assert.match(appSrc, /if \(isPlayBuild\(\)\) return null/, 'quickReviewBoot blocks Play builds')
 assert.match(appSrc, /playtestUrlAllowed\(search\)/, 'quickReviewBoot uses URL playtest gate')
 const settingsSrc = readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8')
@@ -520,6 +525,15 @@ await withPage(
     await assertRevealClaimReasonStable(page, 'ph-father')
     await page.getByRole('button', { name: 'I had it' }).click()
 
+    const fatherTrace = await page.evaluate((key) => {
+      const raw = localStorage.getItem(key)
+      if (!raw) return null
+      return JSON.parse(raw).progress?.memory?.['ph-father'] ?? null
+    }, STORAGE_KEY)
+    assert.ok(fatherTrace, 'ph-father memory written')
+    assert.equal(fatherTrace.cleanRecalls, 2, 'Not yet on why beat keeps cleanRecalls at 2')
+    assert.notEqual(fatherTrace.intervalIndex, 3, 'two-beat miss does not promote intervalIndex to 3')
+
     await page.locator('.quick-review-prompt-title').filter({ hasText: "What's the main idea?" }).waitFor()
     await tapCorrectPlot(page, 'ob-tuning')
     await assertRevealClaimReasonStable(page, 'ob-tuning')
@@ -529,6 +543,102 @@ await withPage(
   },
   {
     seed: homeQueueSeed(),
+    openDay: '2026-01-01',
+  },
+)
+
+await withPage(
+  `/?playtest=1&from=home&quickReview=ph-father&reviewFormat=C`,
+  async (page) => {
+    await tapCorrectPlot(page, 'ph-father')
+    await page.getByRole('button', { name: 'I had it' }).click()
+    await page.getByText("Where's it from?").waitFor()
+    await tapCorrectPlot(page, 'ph-father')
+    await page.getByRole('button', { name: 'I had it' }).click()
+    const trace = await page.evaluate((key) => {
+      const raw = localStorage.getItem(key)
+      return raw ? JSON.parse(raw).progress?.memory?.['ph-father'] : null
+    }, STORAGE_KEY)
+    assert.ok(trace)
+    assert.equal(trace.cleanRecalls, 3, 'clean two-beat card promotes cleanRecalls to 3')
+    assert.equal(trace.intervalIndex, 3)
+  },
+  {
+    seed: {
+      kind: SAVE_KIND,
+      schemaVersion: SAVE_SCHEMA_VERSION,
+      appVersion: '1.4.553',
+      savedAt: new Date().toISOString(),
+      progress: {
+        started: true,
+        easyMode: true,
+        theme: 'candy',
+        completed: ['ph-road', 'ph-father'],
+        memory: {
+          'ph-father': {
+            id: 'ph-father',
+            pillar: 'parable-hollow',
+            intervalIndex: 2,
+            nextReviewAt: today,
+            reviews: 2,
+            cleanRecalls: 2,
+            elaborated: false,
+          },
+        },
+      },
+    },
+    openDay: '2026-01-01',
+  },
+)
+
+await withPage(
+  `/?playtest=1&from=home&quickReview=ph-father&reviewFormat=C`,
+  async (page) => {
+    const wrongPlot = await page.evaluate((correct) => {
+      const hit = [...document.querySelectorAll('[data-plot-id]')].find(
+        (el) => el.getAttribute('data-plot-id') !== correct,
+      )
+      return hit?.getAttribute('data-plot-id') ?? null
+    }, lociStampFor('ph-father').plotId)
+    assert.ok(wrongPlot)
+    await page.locator(`[data-plot-id="${wrongPlot}"]`).click()
+    await tapCorrectPlot(page, 'ph-father')
+    await page.getByRole('button', { name: 'I had it' }).click()
+    await page.getByText("Where's it from?").waitFor()
+    await tapCorrectPlot(page, 'ph-father')
+    await page.getByRole('button', { name: 'I had it' }).click()
+    const trace = await page.evaluate((key) => {
+      const raw = localStorage.getItem(key)
+      return raw ? JSON.parse(raw).progress?.memory?.['ph-father'] : null
+    }, STORAGE_KEY)
+    assert.ok(trace)
+    assert.equal(trace.cleanRecalls, 2, 'wrong plot on beat 1 blocks a clean promotion')
+    assert.notEqual(trace.intervalIndex, 3)
+  },
+  {
+    seed: {
+      kind: SAVE_KIND,
+      schemaVersion: SAVE_SCHEMA_VERSION,
+      appVersion: '1.4.553',
+      savedAt: new Date().toISOString(),
+      progress: {
+        started: true,
+        easyMode: true,
+        theme: 'candy',
+        completed: ['ph-road', 'ph-father'],
+        memory: {
+          'ph-father': {
+            id: 'ph-father',
+            pillar: 'parable-hollow',
+            intervalIndex: 2,
+            nextReviewAt: today,
+            reviews: 2,
+            cleanRecalls: 2,
+            elaborated: false,
+          },
+        },
+      },
+    },
     openDay: '2026-01-01',
   },
 )

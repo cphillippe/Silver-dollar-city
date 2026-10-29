@@ -84,25 +84,27 @@ export function QuickReview({
   const { progress, recordReview } = useProgress()
   const brief = evidenceFor(lineId)
   const trace = progress.memory[lineId]
-  const intervalIndex = trace?.intervalIndex ?? 0
+  const liveIntervalIndex = trace?.intervalIndex ?? 0
+  const holdInterval = useRef<number | null>(null)
   const lastFormat = trace?.lastFormat
   const [format] = useState<Exclude<ReviewFormatId, 'F'>>(() => {
     if (debugFormat && debugFormat !== 'F') return debugFormat
-    return pickFormat(lineId, today, lastFormat, sitting, intervalIndex, {
+    return pickFormat(lineId, today, lastFormat, sitting, liveIntervalIndex, {
       acOnly: formatsACOnly,
     })
   })
 
   const [sourceBeatActive, setSourceBeatActive] = useState(false)
   const [reasonBeatClean, setReasonBeatClean] = useState(false)
-  const beatIndex = intervalIndex === 2 && sourceBeatActive ? 3 : intervalIndex
-
   const [phase, setPhase] = useState<Phase>(() => (format === 'B' ? 'think' : 'prompt'))
   const [revealed, setRevealed] = useState(false)
   const [thinkPct, setThinkPct] = useState(0)
   const [drainPct, setDrainPct] = useState(100)
   const [flashLine, setFlashLine] = useState<string | null>(null)
   const [winBurst, setWinBurst] = useState(false)
+  const intervalIndex =
+    winBurst && holdInterval.current != null ? holdInterval.current : liveIntervalIndex
+  const beatIndex = intervalIndex === 2 && sourceBeatActive ? 3 : intervalIndex
   const [pendingClean, setPendingClean] = useState<boolean | null>(null)
   const [wrongMapTaps, setWrongMapTaps] = useState(0)
   const [mapMiss, setMapMiss] = useState(false)
@@ -117,6 +119,7 @@ export function QuickReview({
   const storyPanel = storyPanelsFor(lineId)[0]
 
   useEffect(() => {
+    holdInterval.current = null
     setSourceBeatActive(false)
     setReasonBeatClean(false)
     setRevealed(false)
@@ -177,6 +180,7 @@ export function QuickReview({
       }
       const finish = () => onDone()
       if (cardClean && nextStreak === 3) {
+        holdInterval.current = liveIntervalIndex
         setWinBurst(true)
         window.setTimeout(() => {
           setWinBurst(false)
@@ -190,6 +194,7 @@ export function QuickReview({
       brief,
       format,
       intervalIndex,
+      liveIntervalIndex,
       lineId,
       onDone,
       onSittingUpdate,
@@ -286,9 +291,9 @@ export function QuickReview({
     setPhase('reveal')
   }
 
-  function beginSourceBeat() {
+  function beginSourceBeat(reasonClean: boolean) {
     graded.current = false
-    setReasonBeatClean(true)
+    setReasonBeatClean(reasonClean)
     setSourceBeatActive(true)
     setRevealed(false)
     setPendingClean(null)
@@ -302,7 +307,7 @@ export function QuickReview({
   function onHadIt() {
     if (!revealed || phase === 'honesty') return
     if (intervalIndex === 2 && !sourceBeatActive) {
-      beginSourceBeat()
+      beginSourceBeat(format === 'C' ? mapTapClean : true)
       return
     }
     if (
@@ -319,7 +324,7 @@ export function QuickReview({
 
   function onNotYet() {
     if (intervalIndex === 2 && !sourceBeatActive && revealed) {
-      beginSourceBeat()
+      beginSourceBeat(false)
       return
     }
     finishGrade(false)
