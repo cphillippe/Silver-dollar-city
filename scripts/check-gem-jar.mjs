@@ -10,6 +10,7 @@ import { readFileSync } from 'node:fs'
 import { chromium } from 'playwright'
 import { createServer } from 'vite'
 import { STORAGE_KEY } from '../src/config/app.ts'
+import { withPlaytest1 } from './dev-ui-playtest.mjs'
 import { buildGemPuzzle, findStraightSpelling, isBonusSpelling, LESSON_BONUS, MATCH_CHIPS } from '../src/lib/gemSearch.ts'
 import {
   JAR_RUNGS,
@@ -244,7 +245,7 @@ async function newPage(browser, origin, [width, height], save, { reduced = false
 }
 
 async function openBoard(page, line, seed) {
-  await page.goto(`/?gemSeed=${seed}`)
+  await page.goto(withPlaytest1(`/?gemSeed=${seed}`))
   await page.getByRole('main', { name: 'Home' }).waitFor()
   await pointerClick(page, page.getByRole('button', { name: 'Settings', exact: true }))
   await pointerClick(page, page.locator('details.settings-debug summary'))
