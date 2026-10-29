@@ -28,6 +28,15 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.559',
+    title: 'Behind the scenes: Quick Review grades the beat that ran',
+    when: '2026-10-29',
+    items: [
+      'Nothing changes for players yet.',
+      'Refs #841.',
+    ],
+  },
+  {
     version: '1.4.554',
     title: 'Behind the scenes: Easy Home Read quick review queue',
     when: '2026-10-29',
