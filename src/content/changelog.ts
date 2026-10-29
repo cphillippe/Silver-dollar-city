@@ -41,6 +41,15 @@ export const CHANGELOG: ChangeNote[] = [
     ],
   },
   {
+    version: '1.4.557',
+    title: 'Behind the scenes: Quick Review grades the beat that ran',
+    when: '2026-10-29',
+    items: [
+      'Nothing changes for players yet.',
+      'Refs #841.',
+    ],
+  },
+  {
     version: '1.4.556',
     title: 'Easy lines: forgiven debt, and Christ holds all things',
     when: '2026-10-29',
