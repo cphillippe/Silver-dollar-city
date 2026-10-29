@@ -5275,8 +5275,8 @@ button.defend-new-lamp[aria-pressed='true'] {
   align-items: center;
 }
 
-/* Cam-on walkers can pan into the HUD band; pull the playfield up under the HUD row for hit-testing. */
-.defend-page.is-easy-watch:has(.nw-cam[data-nw-cam='on']) .nw-stage {
+/* Cam-on mid-wave only: walkers can sit under the HUD band; pull the playfield up for hit-testing. */
+.defend-page.is-easy-watch:has(.nw-cam[data-nw-cam='on']).is-easy-tap .nw-stage {
   position: relative;
   z-index: 1;
   margin-top: -40px;

@@ -2229,7 +2229,7 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
   )
   assert.match(
     defendCss834,
-    /\.defend-page\.is-easy-watch:has\(\.nw-cam\[data-nw-cam='on'\]\) \.nw-stage \{[\s\S]*?margin-top:\s*-40px;/,
+    /\.defend-page\.is-easy-watch:has\(\.nw-cam\[data-nw-cam='on'\]\)\.is-easy-tap \.nw-stage \{[\s\S]*?margin-top:\s*-40px;/,
     '#868 Easy stage extends hit targets under the HUD band when cam pans walkers up',
   )
   assert.doesNotMatch(
