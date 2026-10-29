@@ -6,23 +6,49 @@ export interface ChangeNote {
   items: string[]
 }
 
-const PLAYER_HIDDEN_TIER_LABEL = /\bHard\b|\bMedium\b/
+const PLAYER_HIDDEN_TIER = /\bHard\b|\bMedium\b/
+const PLAYER_HIDDEN_REFS = /^\s*Refs\b/i
+const PLAYER_HIDDEN_DEV_ONLY = /Nothing changes for players yet\./i
 
-/** Drop changelog lines that name difficulty tiers — history stays in CHANGELOG. */
+/** Drop dev-only and tier lines — full history stays in CHANGELOG. */
 export function playerVisibleChangeItems(items: string[]): string[] {
-  return items.filter((item) => !PLAYER_HIDDEN_TIER_LABEL.test(item))
+  return items.filter(
+    (item) =>
+      !PLAYER_HIDDEN_TIER.test(item) &&
+      !PLAYER_HIDDEN_REFS.test(item) &&
+      !PLAYER_HIDDEN_DEV_ONLY.test(item),
+  )
+}
+
+/** Player-facing What's new titles — dev-only rows stay in CHANGELOG only. */
+export function playerVisibleChangeTitle(title: string): string | null {
+  if (/^Behind the scenes:/i.test(title)) return null
+  return title
 }
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.552',
+    version: '1.4.553',
     title: 'Easy Night Watch: walk-in taps, tablet drags, pace chip in HUD',
-    when: '2026-10-28',
+    when: '2026-10-29',
     items: [
       'The first walker on each wave can be tapped as soon as it steps onto the map — no silent wait while it is already visible.',
       'On a wide tablet with the camera off, dragging across the board no longer plants lamps or fires stray shots; quick taps still work.',
-      'The pace chip sits in the top HUD bar so it never covers walker taps when the map camera is on.',
-      'Easy only. Refs #756, Refs #768.',
+      'The pace chip sits in the top HUD bar so walker taps stay clear when the map camera is on, including under the HUD band.',
+      'Easy only.',
+      'Refs #756.',
+      'Refs #768.',
+    ],
+  },
+  {
+    version: '1.4.552',
+    title: 'Easy: cleaner settings and easier-to-read type',
+    when: '2026-10-28',
+    items: [
+      'Settings and What’s new stay free of developer notes on a normal link.',
+      'Easy text on Home, Settings, Lock In, Match, and early lessons is at least 13 pixels tall.',
+      'Match bonus messages stay above the letter grid on small phones without overlapping cells.',
+      'Refs #871.',
     ],
   },
   {

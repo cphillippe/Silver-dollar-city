@@ -1,6 +1,11 @@
 import { useRef, useState } from 'react'
 import { APP_ID, APP_VERSION, SAVE_SCHEMA_VERSION } from '../config/app'
-import { CHANGELOG, latestChange, playerVisibleChangeItems } from '../content/changelog'
+import {
+  CHANGELOG,
+  latestChange,
+  playerVisibleChangeItems,
+  playerVisibleChangeTitle,
+} from '../content/changelog'
 import {
   adsEnabledDefault,
   softAdsVisible,
@@ -31,7 +36,7 @@ import {
   storyStripLines,
 } from '../lib/debugPlays'
 import {
-  nightWatchJumpAllowed,
+  playtestUrlAllowed,
   readNightWatchDebug,
   writeNightWatchDebug,
 } from '../lib/nightWatchDebug'
@@ -48,6 +53,8 @@ interface SettingsProps {
 }
 
 export function Settings({ onNavigate }: SettingsProps) {
+  const urlSearch = typeof window !== 'undefined' ? window.location.search : ''
+  const playtestOn = playtestUrlAllowed(urlSearch)
   const { progress, saveMeta, importSaveText, reset, setTheme, setEasyMode, setLampStyle } =
     useProgress()
   const easy = isEasy(progress)
@@ -61,6 +68,7 @@ export function Settings({ onNavigate }: SettingsProps) {
   const held = progress.held.length
   const open = progress.journal.length
   const drop = latestChange(APP_VERSION)
+  const dropTitle = playerVisibleChangeTitle(drop.title)
   const savedLabel = saveMeta.savedAt
     ? `Progress saved on this device · ${formatSaved(saveMeta.savedAt)}`
     : 'Progress saved on this device as you walk'
@@ -292,7 +300,7 @@ export function Settings({ onNavigate }: SettingsProps) {
 
       <section className="settings-card whats-new" aria-label="What’s new">
         <p className="eyebrow">What’s new · {APP_VERSION}</p>
-        <h2>{drop.title}</h2>
+        {dropTitle ? <h2>{dropTitle}</h2> : null}
         <p className="quiet">{drop.when}</p>
         <ul className="whats-new-list">
           {playerVisibleChangeItems(drop.items).map((item) => (
@@ -302,10 +310,12 @@ export function Settings({ onNavigate }: SettingsProps) {
         {CHANGELOG.length > 1 && !easy ? (
           <details className="whats-new-more">
             <summary>Earlier drops</summary>
-            {CHANGELOG.filter((note) => note.version !== APP_VERSION).map((note) => (
+            {CHANGELOG.filter(
+              (note) => note.version !== APP_VERSION && playerVisibleChangeTitle(note.title),
+            ).map((note) => (
               <div key={note.version} className="whats-new-past">
                 <p className="eyebrow">
-                  {note.version} · {note.title}
+                  {note.version} · {playerVisibleChangeTitle(note.title)}
                 </p>
                 <ul className="whats-new-list">
                   {playerVisibleChangeItems(note.items).map((item) => (
@@ -411,8 +421,15 @@ export function Settings({ onNavigate }: SettingsProps) {
         <p>
           Unpaid walks may see a dismissible pause between home and a lesson.
           They never cover Match, Lock In, Journal, or arcade play. A tip is the
-          supporter path until stores return. Remove ads comes with stores; this
-          toggle is a this-device hide for playtest.
+          supporter path until stores return.
+          {playtestOn ? (
+            <>
+              {' '}
+              Remove ads comes with stores; this toggle is a this-device hide for playtest.
+            </>
+          ) : (
+            <> Remove ads comes with stores.</>
+          )}
         </p>
         {easy ? null : (
           <p className="quiet">
@@ -474,7 +491,7 @@ export function Settings({ onNavigate }: SettingsProps) {
             </a>
           </p>
         </section>
-      ) : (
+      ) : playtestOn ? (
       <details className="settings-card settings-danger settings-debug">
         <summary>Developer · mini-game jumps</summary>
         <p className="eyebrow">Debug</p>
@@ -513,15 +530,11 @@ export function Settings({ onNavigate }: SettingsProps) {
             </button>
           </div>
         </section>
-        {nightWatchJumpAllowed(
-          typeof window !== 'undefined' ? window.location.search : '',
-          nwDebug,
-        ) ? (
+        {playtestOn ? (
           <section className="settings-debug-group" aria-label="Quick review">
             <p className="eyebrow">Quick review</p>
             <p className="quiet">
-              Playtest only — add <code>?playtest=1</code> to the link, or turn on Night Watch debug
-              freeze for this visit.
+              Playtest only — this link already has <code>?playtest=1</code>.
             </p>
             <div className="settings-actions">
               {debugQuickReviewLines().map((item) => (
@@ -579,7 +592,7 @@ export function Settings({ onNavigate }: SettingsProps) {
           </section>
         ))}
       </details>
-      )}
+      ) : null}
     </main>
   )
 }

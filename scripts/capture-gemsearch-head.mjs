@@ -1,16 +1,18 @@
 #!/usr/bin/env node
 /**
  * Proof shots for Easy Match tapfix at HEAD — mid after first find + win after tap.
- * Writes to GEMSEARCH_HEAD_DIR (default /cursor/stores/self/gemsearch-fix/head).
+ * Writes to GEMSEARCH_HEAD_DIR (default: os.tmpdir()/gemsearch-fix/head).
  */
 import assert from 'node:assert/strict'
 import { mkdirSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { chromium } from '@playwright/test'
 import { createServer } from 'vite'
 import { STORAGE_KEY } from '../src/config/app.ts'
 import { buildGemPuzzle, gemWordsFor } from '../src/lib/gemSearch.ts'
 import { packLesson } from '../src/content/packCatalog.ts'
+import { withPlaytest1 } from './dev-ui-playtest.mjs'
 
 const LESSONS = ['ph-seeds', 'ob-tuning', 'hl-mind']
 const VIEWPORTS = [
@@ -18,7 +20,7 @@ const VIEWPORTS = [
   [390, 844],
   [412, 915],
 ]
-const OUT = process.env.GEMSEARCH_HEAD_DIR ?? '/cursor/stores/self/gemsearch-fix/head'
+const OUT = process.env.GEMSEARCH_HEAD_DIR ?? join(tmpdir(), 'gemsearch-fix', 'head')
 const JAR_SETTLE_MS = 1500
 
 function savePayload() {
@@ -66,7 +68,7 @@ async function pointerClick(page, locator) {
 }
 
 async function openLesson(page, origin, lineId, seed = 0) {
-  await page.goto(`${origin}?gemSeed=${seed}`)
+  await page.goto(withPlaytest1(`${origin}?gemSeed=${seed}`))
   await page.getByRole('main', { name: 'Home' }).waitFor()
   await pointerClick(page, page.getByRole('button', { name: 'Settings', exact: true }))
   await pointerClick(page, page.locator('details.settings-debug summary'))
