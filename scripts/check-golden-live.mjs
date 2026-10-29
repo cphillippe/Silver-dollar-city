@@ -2692,7 +2692,7 @@ async function proveHomeWideAndHard(browser, origin, errorsOut) {
     await wide.ctx.close()
   }
 
-  // Ready lots without a candy still: main draws the gold ring on them. The next road is a different lot.
+  // Sky Watch has no Easy still, so it is the next road and not a ready ring. A candy lot can still be ready.
   const readySeed = {
     completed: [...HOME_HOLLOW, ...HOME_BENCH],
     cityBuilt: { porch: 4, hollow: 4, bench: 1, observatory: 0, gate: 0, lookout: 0, journal: 0, lamps: 0 },
@@ -2721,11 +2721,14 @@ async function proveHomeWideAndHard(browser, origin, errorsOut) {
     await ready768.page.locator('.city-svg').waitFor()
     await ready768.page.waitForTimeout(500)
     const cue = await readyCue(ready768.page)
-    const plain = cue.rings.filter((ring) => !ring.candy)
     assert.equal(cue.pan, 0, '768 is not in pan mode')
-    assert.ok(plain.length >= 1, `768 seed has a ready lot without a candy still ${JSON.stringify(cue)}`)
-    assert.ok(Math.abs(cue.haloX - cue.nextX) < 1, `768 the halo sits on the next road, as on main ${JSON.stringify(cue)}`)
-    for (const ring of plain) assert.notEqual(ring.stroke, 'none', `768 the gold ready ring is present on ${ring.id}, as on main`)
+    assert.equal(cue.nextId, 'observatory', '768 the next road is still Sky Watch')
+    assert.ok(Math.abs(cue.haloX - cue.nextX) < 1, `768 the halo sits on the next road ${JSON.stringify(cue)}`)
+    assert.equal(
+      cue.rings.some((ring) => ring.id === 'observatory'),
+      false,
+      '768 Easy does not mark a hidden Sky Watch look ready',
+    )
   } finally {
     errorsOut.push(...ready768.errors)
     await ready768.ctx.close()
