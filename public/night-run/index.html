@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; script-src 'sha256-eA2VzRxEhXaND2rslyrMqCKyeDXrmw3UG/U+kCR+jSE='"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; script-src 'sha256-a5TLOjAb0VQvLkbZFQkA0Fi25nCKd6Q2i9xrhQ+jook='"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Night Run · Silver City</title><link rel="icon" href="assets/favicon.png"><meta name="theme-color" content="#2a0d58">
 <link rel="stylesheet" href="../fonts/fonts.css">
 <style>
@@ -71,6 +71,13 @@ html,body{margin:0;height:100%;overflow:hidden;font-family:var(--sans);color:var
 #ftRow{display:flex;gap:8px;margin-top:auto;padding-top:6px}#ftRow button{flex:1;margin:0;padding:12px 6px;font-size:16px;min-height:48px}#ftRow .cbtn:disabled{filter:grayscale(.7);opacity:.6}#ftRow .cbtn.quiet{background:#7a5aae;border-color:#9680be;color:#fff6e8;box-shadow:none}
 #ftMsg{position:absolute;inset:6px 0 0;display:none;flex-direction:column;justify-content:center;text-align:center;padding:16px 18px;border-radius:22px;border:2px solid rgba(196,170,250,.7);background:linear-gradient(180deg,rgba(90,40,150,.97),rgba(42,13,88,.98));box-shadow:0 16px 36px rgba(40,8,70,.55)}
 #ftMsg h2{font-family:var(--serif);font-weight:650;letter-spacing:-.02em;line-height:1.2;margin:6px 0 10px;font-size:24px}#ftMsg p{margin:4px 0 12px;font-size:17px;line-height:1.4}#ftMsg .cbtn{margin-top:6px}
+#ftF{display:none;margin-top:8px}#cFT.tune #ftCols{display:none}#cFT.tune #ftF{display:block}#cFT.lk #ffZ,#cFT.lk #ffP{display:none}#ftK{display:flex;gap:4px}
+.ftk{flex:1;min-width:0;position:relative;border-radius:12px;border:2px solid #5c3e8c;background:#3a1e62;color:#fff6e8;font-family:var(--sans);font-weight:700;font-size:13px;line-height:1.1;padding:4px 1px;min-height:42px;white-space:nowrap}.ftk i{display:block;font-style:normal;font-size:14px;color:#ffb0a0}.ftk.in i{color:#5ed678}.ftk.sel{border-color:#e0d2ff;background:#5c3e8c;box-shadow:0 0 10px rgba(196,170,250,.45)}.ftk.cue{border-color:#fff3c4;background:linear-gradient(180deg,#fff6b8,#ffcc33 55%,#ff9f1a);color:#2a1c08}.ftk.cue i{color:#2a1c08}
+#ftFo{margin-top:6px;border-radius:14px;background:#3a1e62;border:2px solid #5c3e8c;padding:5px 6px 7px;text-align:center}#ffN{font-weight:700;font-size:15px;color:#fff6e8}#ffR{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;font-size:14px;color:#fff6e8;margin-top:2px;white-space:nowrap}#ffW{font-size:13px;line-height:1.2;color:#d6c8f0;margin-top:2px}
+#ffS{font-size:13px;font-weight:700;line-height:1.2;min-height:32px;margin-top:3px;color:#ffd0b0;display:flex;align-items:center;justify-content:center;text-wrap:balance}#ffS.ok{color:#9dffb6}
+#ffZ{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:3px}.ffz{min-width:52px;height:40px;border-radius:12px;border:2px solid #2b1640;background:#7a5aae;color:#fff6e8;font-family:var(--sans);font-weight:700;font-size:14px;padding:0 4px;touch-action:none}.ffz:disabled{background:#5c3e8c;color:#9680be}.ffz.cue:not(:disabled){background:linear-gradient(180deg,#fff6b8,#ffcc33 55%,#ff9f1a);color:#2b1640}#ffSt{min-width:70px;font-size:13px;font-weight:700;color:#e0d2ff}
+#ffP{display:flex;justify-content:center;gap:40px;margin-top:4px}
+@media (max-height:700px){#cFT.tune #ftSc{width:min(100%,240px)}}
 </style></head><body><div id="wrap">
 <canvas id="view" width="300" height="500"></canvas>
 <div id="danger"></div>
@@ -94,7 +101,7 @@ html,body{margin:0;height:100%;overflow:hidden;font-family:var(--sans);color:var
 <div id="jr"><div class="eyebrow">Night Run</div><h2>Evidence Journal</h2><div style="font-weight:700;color:var(--gold)">📜 <span id="jcount"></span> found</div><div id="jstars" style="font-weight:700;color:var(--gold);margin-top:2px"></div><button class="cbtn2" id="allB" style="display:none;margin:6px 0 0;padding:8px">🏆 All districts</button><div id="jlist"></div><button class="xbtn" id="jx">Close ✕</button></div>
 <div id="mapBig"><div class="eyebrow">Night maze map</div><canvas id="bigC" width="324" height="324"></canvas><div class="mleg" id="mleg"></div><button class="xbtn" id="mx" style="width:min(92vw,420px)">Close ✕</button></div>
 <div id="cFT"><div class="eyebrow" id="ftE"></div><div id="ftSc"><canvas id="ftScene" width="686" height="500"></canvas><div id="ftRes"></div><div id="ftPill"></div></div>
-<div id="ftBody"><div id="ftCols"></div><div id="ftTxt"></div><div id="ftRow"><button class="cbtn2" id="ftX"></button><button class="cbtn2" id="ftH"></button><button class="cbtn" id="ftL"></button><button class="cbtn" id="ftN"></button></div>
+<div id="ftBody"><div id="ftCols"></div><div id="ftF"><div id="ftK"></div><div id="ftFo"><div id="ffN"></div><div id="ffR"></div><div id="ffW"></div><div id="ffS"></div><div id="ffZ"><button class="ffz" data-z="-10" aria-label="step 10 billion times finer">÷10¹⁰</button><button class="ffz" data-z="-1" aria-label="step 10 times finer">÷10</button><span id="ffSt"></span><button class="ffz" data-z="1" aria-label="step 10 times bigger">×10</button><button class="ffz" data-z="10" aria-label="step 10 billion times bigger">×10¹⁰</button></div><div id="ffP"><button class="ftb" data-d="-1" aria-label="less">−</button><button class="ftb" data-d="1" aria-label="more">+</button></div></div></div><div id="ftTxt"></div><div id="ftRow"><button class="cbtn2" id="ftX"></button><button class="cbtn2" id="ftH"></button><button class="cbtn" id="ftL"></button><button class="cbtn" id="ftN"></button></div>
 <div id="ftMsg"><div class="eyebrow" id="ftME"></div><h2 id="ftMT"></h2><p id="ftMP"></p><p id="ftMQ"></p><button class="cbtn" id="ftMB"></button></div></div></div>
 <div id="status">init</div>
 </div><script>
@@ -147,6 +154,29 @@ const COPY={
  DESIGN_CLAIM:'God, the Maker, planned a world where people could live.',
  DESIGN_REASON:'God wanted people, so He made the world just right.',
  JSRC:'Psalm 19:1; Romans 1:20. Fine-tuning: Collins; Barrow & Tipler; Carter.',
+ // --- v2 real-forces copy (RESEARCH.md rows in brackets; all pending BS + H&P) ---
+ FCHIP:['Gravity','Strong','Electric','Weak','Space'],
+ FN:['Gravity','Strong force','Electromagnetic force','Weak force','Space grows (dark energy)'],
+ FW:['Life needs: within 1 part in 10⁶⁰ (Collins; Davies)', // R1
+  'Life needs: within ±0.5% (Oberhummer)', // R2
+  'Life needs: within ±4% (Oberhummer)', // R3
+  'Life needs: within about ±2% (Jeltema & Sher)', // R4
+  'Life needs: under 1 part in 10¹²⁰ of its natural size, either way (Barnes)'], // R5
+ OFF:'Off from today: {v}',LNOW:'Now: {v}',STEP:'Step 10{e}',
+ FX:{grav:['Too weak! Everything flew apart too fast. No stars could form.','Too strong! Everything fell back together too fast. No life could ever start.'], // R1
+  strong:['Too weak! Stars could not make both carbon and oxygen. Life needs both.','Too strong! Stars could not make both carbon and oxygen. Life needs both.'], // R2
+  strongFar:'Far too weak! Tiny bits fall apart. Stars could not even start to burn.', // R2b
+  em:['Too weak! Stars would burn far too fast.','Too strong! Stars could not make both carbon and oxygen. Life needs both.'], // R3b, R3
+  weak:['Off! Stars could not make both carbon and oxygen. Life needs both.','Off! Stars could not make both carbon and oxygen. Life needs both.'], // R4
+  weakFar:'Far too weak! No atom centers could hold together at all.', // R4b
+  lam:['Space pulls in! Everything fell back together in a crunch. No life could ever start.','Space grows too fast! Everything flew apart before stars or galaxies could form.']}, // R5b
+ STEP5:'Now find all five! Each must be inside its real window.',
+ WIN5:'Gravity, strong, electric, weak, and space: all set just right.',
+ ODDS:'Real odds for luck to get all five at once: about 1 in 2.5 × 10¹⁸⁵.', // R-luck
+ COUNT5:'Luck tries: {n}. Times all five: {k}.',
+ SAVED5:'Luck has tried {n} times. All five just right: {k}.',
+ HIT5:'Luck got all five! That almost never, ever happens.',
+ MULTI:'Some people guess there are endless other universes, so luck could win somewhere. No one has ever seen even one. We only know this one, and God set it just right.', // pending BS + H&P (merged line)
  // H&P result labels [too low, too high] per crank
  HP:[['Too weak! Stars can\'t form.','Too strong! Stars get squished and burn out fast.'],
   ['Too slow! It all fell back together.','Too fast! Stuff flew apart before stars could form.'],
@@ -157,7 +187,7 @@ const W=27,H=27,DX=[0,1,0,-1],DY=[-1,0,1,0];
 const cv=document.getElementById('view'),g=cv.getContext('2d',{willReadFrequently:true});let RW=cv.width,RH=cv.height;const RES=[[300,500],[240,400],[180,300],[144,240]];let resL=0;
 const $=id=>document.getElementById(id);const Q=new URLSearchParams(location.search);
 // ===== Star Tower cranks: data (DESIGN.md v8, Option B; Option A fallback via ?parts=A) =====
-const CRANKS=[{key:'pull',name:'Pull',icon:'dial-pull.webp'},{key:'space',name:'Space grows',icon:'dial-space-grows.webp'},{key:'bits',name:'Tiny bits stick',icon:'dial-tiny-bits-stick.webp'}];
+const CRANKS=[{key:'pull',name:'Pull',force:'Gravity',icon:'dial-pull.webp'},{key:'space',name:'Space grows',force:'Space grows',icon:'dial-space-grows.webp'},{key:'bits',name:'Tiny bits stick',force:'Strong force',icon:'dial-tiny-bits-stick.webp'}];
 const DIN={1:'Good Samaritan',2:'the Empty Tomb',3:'the Star Tower',4:'the Scroll Cave'},DFROM={1:'Good Samaritan',2:'Empty Tomb',3:'Star Tower',4:'Scroll Cave'};
 const PARTS_B=[['pull-w',0,'w',3,9,2],['pull-h',0,'h',2,7,2],['space-w',1,'w',22,15,4],['space-h',1,'h',15,16,4],['bits-w',2,'w',10,25,1],['bits-h',2,'h',7,20,1]];
 const PARTS_A=[['pull-w',0,'w',15,1,3],['pull-h',0,'h',21,1,3],['space-w',1,'w',19,3,3],['space-h',1,'h',23,3,3],['bits-w',2,'w',19,7,3],['bits-h',2,'h',19,9,3]];
@@ -539,7 +569,7 @@ function journalParts(el){const h=document.createElement('div');h.className='jd'
  PARTS.forEach(p=>{const it=document.createElement('div');const got=havePart(p.id);it.className='ji'+(got?'':' lock');
   if(got){const im=document.createElement('img');im.src=p.k==='w'?GEARURL:HANDURL;it.appendChild(im);}else{const qq=document.createElement('span');qq.className='q';qq.textContent='?';it.appendChild(qq);}
   const bx=document.createElement('div');const b=document.createElement('b');b.textContent=got?p.name:'Not found yet';bx.appendChild(b);const pp=document.createElement('p');pp.textContent=got?COPY.PART[p.id]:DFROM[p.d];bx.appendChild(pp);it.appendChild(bx);el.appendChild(it);});
- if(PG.luckTries>0){const p=document.createElement('p');p.className='jluck';p.textContent=fill(COPY.SAVED,{n:PG.luckTries,k:PG.luckHits});el.appendChild(p);}}
+ if((PG.l5n|0)>0){const p=document.createElement('p');p.className='jluck';p.textContent=fill(COPY.SAVED5,{n:PG.l5n|0,k:PG.l5k|0});el.appendChild(p);}}
 // ===== Star Tower crank gate panel (H3-H7) =====
 const RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
 const FTIMG=CRANKS.map(c=>IMG(c.icon)),FTSCN=IMG('star-tower-scene.webp');
@@ -576,13 +606,13 @@ function ftMsg(eb,h,p1,p2,btn){$('ftME').textContent=eb;$('ftMT').textContent=h;
 function ftGo(st){FT.st=st;FT.idle=0;FT.win=0;FT.perfect=0;FT.tcDone=0;FT.sk=['','',''];$('ftMsg').style.display='none';const T=$('ftTxt');T.innerHTML='';
  if(st==='claim'){ftMsg(COPY.TITLE,COPY.CLAIM,COPY.FRAME,'',COPY.NEXT);}
  else if(st==='try'){FT.tc=FT.tc||0;FT.c.forEach(c=>{c.v=c.cen;c.green=1;c.left=0;});ftTxt(COPY.TRY,CRANKS[FT.tc].name);}
- else if(st==='all3'||st==='replay'){ftScramble();ftTxt(COPY.STEP3);}
- else if(st==='luck'||st==='rluck'){FT.rl=0;ftTxt(COPY.LUCKT,COPY.LUCKBAND+(PG.luckTries>0?' · '+fill(COPY.SAVED,{n:PG.luckTries,k:PG.luckHits}):''));}
- else if(st==='back'){FT.c.forEach((c,i)=>ftTween(i,c.cen,.7));ftTxt(COPY.BACK);setTimeout(()=>{FT.P.length<200&&[0,1,2].forEach(ftSpark);[523,659,784,1047].forEach((f,k)=>setTimeout(()=>snd(f,.25,'sine',.06),k*110));},700);}
+ else if(st==='all3'||st==='replay'){ftScramble();ffScramble();ftTxt(COPY.STEP5);}
+ else if(st==='luck'||st==='rluck'){FT.rl=0;ftTxt(COPY.LUCKT,COPY.ODDS);}
+ else if(st==='back'){FT.c.forEach((c,i)=>ftTween(i,c.cen,.7));FT.F.forEach(F=>{F.dev=0n;F.g=1;});ftTxt(COPY.BACK);setTimeout(()=>{FT.P.length<200&&[0,1,2].forEach(ftSpark);[523,659,784,1047].forEach((f,k)=>setTimeout(()=>snd(f,.25,'sine',.06),k*110));},700);}
  else if(st==='reason'){ftMsg(COPY.TITLE,COPY.REASON,'','',COPY.NEXT);}
  else if(st==='open'){ftMsg('⭐ '+COPY.STICKER,COPY.ALL3,COPY.PSALM,'',COPY.NEXT);[523,659,784,1047,1319].forEach((f,k)=>setTimeout(()=>snd(f,.3,'sine',.07),k*110));}
- ftBtns();window.SHOT='ft-'+st;}
-function ftTxt(a,b){const T=$('ftTxt');T.textContent=a;if(b){const s=document.createElement('small');s.textContent=b;T.appendChild(s);}}
+ $('cFT').classList.toggle('tune',ffMode());$('cFT').classList.toggle('lk',ffMode()&&!(st==='all3'||st==='replay'));FT.sk5='';ftBtns();window.SHOT='ft-'+st;}
+function ftTxt(a,...b){const T=$('ftTxt');T.textContent=a;b.forEach(t=>{if(!t)return;const s=document.createElement('small');s.textContent=t;T.appendChild(s);});}
 function ftBtns(){const st=FT.st,msg=['claim','reason','open'].includes(st);$('ftRow').style.visibility=msg?'hidden':'visible';
  $('ftH').style.display=(FT.idle>30&&['try','all3','replay'].includes(st)&&!FT.win&&!FT.tcDone)?'block':'none';
  $('ftL').style.display=(st==='luck'||st==='rluck')?'block':'none';$('ftL').disabled=!!FT.spin||(st==='rluck'&&FT.rl>=5);
@@ -591,11 +621,13 @@ function ftBtns(){const st=FT.st,msg=['claim','reason','open'].includes(st);$('f
 function ftSettle(i){const c=FT.c[i];if(!inB(i)){const ed=c.v<c.cen?c.cen-BAND:c.cen+BAND;if(Math.abs(c.v-ed)<=NOTCH+1e-9){ftSetV(i,c.v<c.cen?ed+1e-6:ed-1e-6,1);snd(1760,.08,'sine',.05);}}
  const st=FT.st;if(st==='try'&&i===FT.tc&&c.left&&inB(i)&&!FT.tcDone){FT.tcDone=1;ftTxt(COPY.IN,CRANKS[i].name);[880,1175].forEach((f,k)=>setTimeout(()=>snd(f,.15,'sine',.06),k*90));
   setTimeout(()=>{if(FT.st!=='try')return;FT.tc++;FT.tcDone=0;FT.idle=0;if(FT.tc>=3){FT.tc=0;ftGo('all3');}else{FT.c[FT.tc].left=0;ftTxt(COPY.TRY,CRANKS[FT.tc].name);ftBtns();}},850);}
- if((st==='all3'||st==='replay')&&!FT.win&&[0,1,2].every(k=>inB(k))){FT.win=1;const pf=FT.c.every(c=>Math.abs(c.v-c.cen)<.035);FT.perfect=pf;if(pf&&!PG.ftBest){PG.ftBest=1;pSave();}
+ if((st==='all3'||st==='replay')&&!FT.win&&!ffMode()&&[0,1,2].every(k=>inB(k))){FT.win=1;const pf=FT.c.every(c=>Math.abs(c.v-c.cen)<.035);FT.perfect=pf;if(pf&&!PG.ftBest){PG.ftBest=1;pSave();}
   ftTxt(COPY.ALL3,pf?COPY.PERFECT:'');[0,1,2].forEach(ftSpark);FT.bloom=1;[523,659,784,1047,1319].forEach((f,k)=>setTimeout(()=>snd(f,.28,'sine',.07),k*100));ftVib(40);window.SHOT='ft-win';}
  ftBtns();}
-function ftLuck(){if(FT.spin||(FT.st==='rluck'&&FT.rl>=5))return;S.taps++;const to=[0,1,2].map(()=>Math.random());FT.spin={k:0,dur:RM?.05:.85,f:FT.c.map(c=>c.v),to,extra:[0,1,2].map(()=>(2+Math.random()*2)*(Math.random()<.5?-1:1))};snd(300,.4,'sawtooth',.03);ftBtns();}
-function ftLuckEnd(){const hit=[0,1,2].every(i=>inB(i,LBAND));FT.luckN++;FT.rl++;PG.luckTries++;if(hit){FT.luckK++;PG.luckHits++;}pSave();
+function ftLuck(){if(FT.spin||(FT.st==='rluck'&&FT.rl>=5))return;S.taps++;if(ffMode()){FT.spin={ff:1,k:0,dur:RM?.05:.85,to:FF.map(()=>ffRand())};snd(300,.4,'sawtooth',.03);ftBtns();return;}const to=[0,1,2].map(()=>Math.random());FT.spin={k:0,dur:RM?.05:.85,f:FT.c.map(c=>c.v),to,extra:[0,1,2].map(()=>(2+Math.random()*2)*(Math.random()<.5?-1:1))};snd(300,.4,'sawtooth',.03);ftBtns();}
+function ftLuckEnd(){if(FT.spin&&FT.spin.ff){const hit=ffAll();FT.luckN++;FT.rl++;PG.l5n=(PG.l5n|0)+1;if(hit){FT.luckK++;PG.l5k=(PG.l5k|0)+1;}pSave();const j=FF.findIndex((f,k)=>!ffIn(k));if(j>=0)FT.fi=j;FT.sk5='';
+ if(hit){ftTxt(COPY.HIT5,fill(COPY.COUNT5,{n:FT.luckN,k:FT.luckK}),COPY.MULTI);[0,1,2].forEach(ftSpark);}else ftTxt(COPY.MISS+' '+COPY.FCHIP[j]+': '+ffFx(j).split('! ')[0]+'!',fill(COPY.COUNT5,{n:FT.luckN,k:FT.luckK}),COPY.MULTI);snd(hit?1319:200,.2,hit?'sine':'triangle',.05);FT.spin=null;ftBtns();window.SHOT='ft-luck';return;}
+ const hit=[0,1,2].every(i=>inB(i,LBAND));FT.luckN++;FT.rl++;PG.luckTries++;if(hit){FT.luckK++;PG.luckHits++;}pSave();
  if(hit){ftTxt(COPY.HIT,fill(COPY.COUNT,{n:FT.luckN,k:FT.luckK}));[0,1,2].forEach(ftSpark);}else ftTxt(COPY.MISS,fill(COPY.COUNT,{n:FT.luckN,k:FT.luckK}));snd(hit?1319:200,.2,hit?'sine':'triangle',.05);FT.spin=null;ftBtns();window.SHOT='ft-luck';}
 function openFT(){if(S.paused&&!FT.open)return;if(FT.open)return;S.paused=true;CTRL.fwd=0;CTRL.bf=0;FT.open=1;if(!PG.partsOn){PG.partsOn=1;pSave();updHUD();HK='';}
  ftPresets();FT.luckN=0;FT.luckK=0;FT.tc=0;FT.P=[];FT.bloom=0;FT.c.forEach((c,i)=>{const sd=Math.random()<.5?-1:1;c.v=Math.max(.02,Math.min(.98,c.cen+sd*.3));c.green=0;});
@@ -605,9 +637,9 @@ function closeFT(){FT.open=0;FT.spin=null;$('cFT').style.display='none';$('ftMsg
 function ftOpenGate(){PG.ftOpen=1;PG.partsOn=1;pSave();closeFT();S.pgold=new Set();S.tv++;HK='';const g=goalOf(3);if(g){const pa=pathBetween(JFRONT,g);if(pa)pa.forEach(c=>S.gold.add(c));}S.goldV++;S.visited.add(JCELL.x+','+JCELL.y);
  burst(RW/2,RH*.45,90,'255,230,120');burst(RW/2,RH*.45,50,'140,230,255');[659,880,1175,1568].forEach((f,i)=>setTimeout(()=>snd(f,.2,'sine',.07),i*80));toast('✨ '+COPY.STICKER+'!');updHUD();window.SHOT='ftopen';}
 function ftNext(){const st=FT.st;if(st==='all3')ftGo('luck');else if(st==='replay')ftGo('rluck');else if(st==='luck')ftGo('back');else if(st==='back')ftGo('reason');else if(st==='rluck'){closeFT();toast('⭐ '+COPY.STICKER);}}
-$('ftMB').onclick=()=>{const st=FT.st;snd(600,.1,'sine',.05);if(st==='claim')ftGo('try');else if(st==='reason')ftGo('open');else if(st==='open')ftOpenGate();};
+$('ftMB').onclick=()=>{const st=FT.st;snd(600,.1,'sine',.05);if(st==='claim')ftGo('all3');else if(st==='reason')ftGo('open');else if(st==='open')ftOpenGate();};
 $('ftN').onclick=ftNext;$('ftX').onclick=()=>closeFT();$('ftL').onclick=ftLuck;
-$('ftH').onclick=()=>{const act=[0,1,2].filter(i=>ftActive(i)&&!inB(i));const i=act[0];if(i===undefined)return;ftTween(i,FT.c[i].cen,.6);FT.helpI=i;FT.idle=0;ftBtns();};
+$('ftH').onclick=()=>{if(ffMode()){ffHelp();FT.idle=0;ftBtns();return;}const act=[0,1,2].filter(i=>ftActive(i)&&!inB(i));const i=act[0];if(i===undefined)return;ftTween(i,FT.c[i].cen,.6);FT.helpI=i;FT.idle=0;ftBtns();};
 // crank input: circular drag on the wheel, +/- with hold repeat
 function ftBind(i){const cv2=$('ftc'+i).querySelector('canvas');let pid=null,pa=0,moved=0,t0=0,sx=0,sy=0;
  const ctr=()=>{const r=cv2.getBoundingClientRect();return [r.left+r.width*109/218,r.top+r.height*128/220];};
@@ -622,7 +654,7 @@ function ftBind(i){const cv2=$('ftc'+i).querySelector('canvas');let pid=null,pa=
   b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();stp();ftSettle(i);}});});}
 (function(){const host=$('ftCols');CRANKS.forEach((c,i)=>{const d=document.createElement('div');d.className='ftc';d.id='ftc'+i;const pd=PARTS.find(p=>p.c===i).d;
  d.innerHTML='<div class="ftn"></div><div class="ftcap"></div><div class="ftfrom"></div><canvas width="218" height="220"></canvas><div class="ftst"></div><div class="ftpm"><button class="ftb" data-d="-1" aria-label="turn back">−</button><button class="ftb" data-d="1" aria-label="turn on">+</button></div>';
- d.querySelector('.ftn').textContent=c.name;d.querySelector('.ftcap').textContent=COPY.CAP[i];d.querySelector('.ftfrom').textContent=fill(COPY.FROM,{district:DFROM[pd]});host.appendChild(d);ftBind(i);});})();
+ d.querySelector('.ftn').textContent=c.force;d.querySelector('.ftcap').textContent=COPY.CAP[i];d.querySelector('.ftfrom').textContent=fill(COPY.FROM,{district:DFROM[pd]});host.appendChild(d);ftBind(i);});})();
 function ftDrawCrank(i,dt){const cv2=$('ftc'+i).querySelector('canvas'),x=cv2.getContext('2d'),c=FT.c[i],key=CRANKS[i].key,pw=PG.placed.includes(key+'-w'),ph=PG.placed.includes(key+'-h'),done=pw&&ph;x.clearRect(0,0,218,220);
  const mx0=18,mx1=200,my=24,MX=v=>mx0+(mx1-mx0)*v;x.lineJoin='round';
  x.fillStyle='#5c3e8c';x.strokeStyle='#2b1640';x.lineWidth=4;x.beginPath();x.roundRect(mx0,my-10,mx1-mx0,20,10);x.fill();x.stroke();
@@ -638,7 +670,7 @@ function ftDrawCrank(i,dt){const cv2=$('ftc'+i).querySelector('canvas'),x=cv2.ge
  const ha=rot-Math.PI/2,hx=cx+Math.cos(ha)*(R+3),hy=cy+Math.sin(ha)*(R+3);
  if(pw&&ph){drawHandle(x,cx+Math.cos(ha)*26,cy+Math.sin(ha)*26,hx,hy,13,WSIL);if(FT.drag===i||FT.spin){x.strokeStyle='rgba(255,246,232,.85)';x.lineWidth=5;for(const a0 of [Math.PI*.8,Math.PI*1.8]){x.beginPath();x.arc(cx,cy,R+9,a0,a0+.8);x.stroke();}}}
  else if(pw){x.strokeStyle='#9680be';x.lineWidth=7;x.setLineDash([10,9]);x.beginPath();x.moveTo(cx+Math.cos(ha)*28,cy+Math.sin(ha)*28);x.lineTo(hx,hy);x.stroke();x.lineWidth=4;x.beginPath();x.arc(hx,hy,13,0,7);x.stroke();x.setLineDash([]);}}
-function ftW(i){if(!cDone(i))return [0,0];const c=FT.c[i],e=(c.v-c.cen)/BAND,a=Math.abs(e);return [a<=1?1:Math.max(0,1-(a-1)/1.4),e<-1?-1:e>1?1:0];}
+function ftW(i){if(ffMode()){const j=FF.findIndex(f=>f.crank===i);const d=FT.F[j].dev;return ffIn(j)?[1,0]:[0,d<0n?-1:1];}if(!cDone(i))return [0,0];const c=FT.c[i],e=(c.v-c.cen)/BAND,a=Math.abs(e);return [a<=1?1:Math.max(0,1-(a-1)/1.4),e<-1?-1:e>1?1:0];}
 function ftScene(dt){const cv2=$('ftScene'),x=cv2.getContext('2d'),t=FT.t;x.clearRect(0,0,686,500);if(FTSCN.complete&&FTSCN.naturalWidth)x.drawImage(FTSCN,0,0,686,500);else{x.fillStyle='#3a1480';x.fillRect(0,0,686,500);}
  const [w0,s0]=ftW(0),[w1,s1]=ftW(1),[w2,s2]=ftW(2);
  // Space grows -> the sky / star field
@@ -664,26 +696,76 @@ function ftScene(dt){const cv2=$('ftScene'),x=cv2.getContext('2d'),t=FT.t;x.clea
   const L=24*w2;for(const sd of [-1,1]){x.fillStyle='#5ee08a';x.strokeStyle='#2b1640';x.lineWidth=3;x.beginPath();x.ellipse(bx+sw*1.5+sd*L*.6,by-h+8,L*.62,L*.3,sd*-.5,0,7);x.fill();x.stroke();}}
  else{x.strokeStyle='#6b8a4a';x.lineWidth=4;x.beginPath();x.arc(bx+6,by-6,7,Math.PI*.9,Math.PI*2.1);x.stroke();}
  // bloom when all three are just right
- const all=w0===1&&w1===1&&w2===1;if(all&&!RM&&Math.random()<.5)FT.P.push({x:Math.random()*686,y:Math.random()*300,vx:0,vy:-20,l:1,c:'255,246,200',s:1});
+ const all=ffMode()?ffAll():w0===1&&w1===1&&w2===1;if(all&&!RM&&Math.random()<.5)FT.P.push({x:Math.random()*686,y:Math.random()*300,vx:0,vy:-20,l:1,c:'255,246,200',s:1});
  if(all){x.fillStyle='rgba(255,236,160,'+(.08+.04*Math.sin(t*2))+')';x.fillRect(0,0,686,500);}
  FT.P=FT.P.filter(p=>(p.l-=dt*(p.s?1.2:1.6))>0);for(const p of FT.P){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=(p.s?0:260)*dt;x.fillStyle='rgba('+p.c+','+p.l+')';x.fillRect(p.x-3,p.y-3,p.s?4:7,p.s?4:7);}
  // result line + parts pill
- const L=FT.last,r=$('ftRes');let rt='',ok=0;if(L>=0&&cDone(L)&&FT.st!=='claim'){const [w,sd]=ftW(L);if(inB(L)){rt=CRANKS[L].name+': '+COPY.IN;ok=1;}else rt=COPY.HP[L][FT.c[L].v<FT.c[L].cen?0:1];}
+ const L=FT.last,r=$('ftRes');let rt='',ok=0;if(ffMode()){const j=FT.fi,fx=ffFx(j);rt=COPY.FCHIP[j]+': '+(fx?fx.split('! ')[0]+'!':COPY.IN);ok=!fx;}else if(L>=0&&cDone(L)&&FT.st!=='claim'){const [w,sd]=ftW(L);if(inB(L)){rt=CRANKS[L].name+': '+COPY.IN;ok=1;}else rt=COPY.HP[L][FT.c[L].v<FT.c[L].cen?0:1];}
  if(r.textContent!==rt){r.textContent=rt;}r.className=ok?'ok':'';r.style.display=rt?'block':'none';
  const pl=$('ftPill'),pt=PG.ftOpen?'':fill(COPY.PILL,{n:PG.parts.length});if(pl.textContent!==pt)pl.textContent=pt;pl.style.display=pt?'block':'none';}
 function ftFrame(dt){FT.t+=dt;if(['try','all3','replay'].includes(FT.st)&&!FT.win&&!FT.tcDone){const pi=FT.idle;FT.idle+=dt;if((pi<=30&&FT.idle>30))ftBtns();}
  FT.c.forEach((c,i)=>{if(c.tw){c.tw.k=Math.min(1,c.tw.k+dt/c.tw.dur);const e=1-Math.pow(1-c.tw.k,3);ftSetV(i,c.tw.f+(c.tw.to-c.tw.f)*e);if(c.tw.k>=1){c.tw=null;if(FT.st==='back')ftBtns();else ftSettle(i);}}});
- if(FT.spin){const sp=FT.spin;sp.k=Math.min(1,sp.k+dt/sp.dur);const e=1-Math.pow(1-sp.k,3);FT.spinX=sp.extra.map(v=>v*Math.PI*2*e);FT.c.forEach((c,i)=>{const nv=sp.f[i]+(sp.to[i]-sp.f[i])*e;const n0=Math.floor((c.v*4*Math.PI+(FT.spinPrev?FT.spinPrev[i]:0))/(Math.PI/12)),n1=Math.floor((nv*4*Math.PI+FT.spinX[i])/(Math.PI/12));c.v=nv;if(n0!==n1)ftTick(i,n1);});FT.spinPrev=FT.spinX.slice();
+ if(FT.spin&&FT.spin.ff)ffSpin(dt);else if(FT.spin){const sp=FT.spin;sp.k=Math.min(1,sp.k+dt/sp.dur);const e=1-Math.pow(1-sp.k,3);FT.spinX=sp.extra.map(v=>v*Math.PI*2*e);FT.c.forEach((c,i)=>{const nv=sp.f[i]+(sp.to[i]-sp.f[i])*e;const n0=Math.floor((c.v*4*Math.PI+(FT.spinPrev?FT.spinPrev[i]:0))/(Math.PI/12)),n1=Math.floor((nv*4*Math.PI+FT.spinX[i])/(Math.PI/12));c.v=nv;if(n0!==n1)ftTick(i,n1);});FT.spinPrev=FT.spinX.slice();
   if(sp.k>=1){FT.spinX=null;FT.spinPrev=null;FT.c.forEach((c,i)=>c.green=inB(i)?1:0);ftLuckEnd();}}
- ftScene(dt);for(let i=0;i<3;i++){ftDrawCrank(i,dt);ftStatus(i);}ftCue();}
+ ftScene(dt);for(let i=0;i<3;i++){ftDrawCrank(i,dt);ftStatus(i);}if(ffMode())ffRender();ftCue();}
 // One gold cue per state: the waiting chip (Tap to place first), else the ± that moves the active crank toward just right.
-function ftCue(){let t=null;if($('ftMsg').style.display!=='flex'&&!FT.spin&&!FT.win){const ch=[...document.querySelectorAll('#ftCols .ftchip')];t=ch.find(b=>b.dataset.k==='place')||ch[0]||null;
+function ftCue(){let t=null;if(ffMode()){t=$('ftMsg').style.display!=='flex'?ffCue():null;}else if($('ftMsg').style.display!=='flex'&&!FT.spin&&!FT.win){const ch=[...document.querySelectorAll('#ftCols .ftchip')];t=ch.find(b=>b.dataset.k==='place')||ch[0]||null;
  if(!t){const i=[0,1,2].find(k=>ftActive(k)&&(!inB(k)||(FT.st==='try'&&!FT.c[k].left&&!FT.tcDone)));if(i!=null){const c=FT.c[i],up=inB(i)?c.v<.5:c.v<c.cen;t=$('ftc'+i).querySelector('.ftb[data-d="'+(up?1:-1)+'"]');}}}
  document.querySelectorAll('#cFT .cue').forEach(e=>{if(e!==t)e.classList.remove('cue');});if(t&&!t.classList.contains('cue'))t.classList.add('cue');
  $('ftL').classList.toggle('quiet',$('ftN').style.display==='block'&&$('ftL').style.display==='block');}
+// ===== Just Right Gate v2: the real forces (RESEARCH.md R1-R5). Dev = signed change from today, in units of 10^-130.
+// Forces: dev = (strength / today) - 1. Space grows (Λ): dev = Λ / its natural (Planck) size. Life window lo..hi, no forgiving band.
+const P10=e=>10n**BigInt(e),ONE=P10(130);
+const FF=[{key:'grav',crank:0,lo:-P10(70),hi:P10(70),emin:-60},   // R1 ±1 part in 10^60 (Collins 2009; Davies 1982)
+ {key:'strong',crank:2,lo:-5n*P10(127),hi:5n*P10(127),emin:-3},     // R2 ±0.5% (Oberhummer et al. 2000)
+ {key:'em',crank:-1,lo:-4n*P10(128),hi:4n*P10(128),emin:-2},        // R3 ±4% (Oberhummer et al. 2000)
+ {key:'weak',crank:-1,lo:-197n*P10(126),hi:203n*P10(126),emin:-3},  // R4 Higgs v ±1% -> G_F -1.97%..+2.03% (Jeltema & Sher via Barnes 2012)
+ {key:'lam',crank:1,lo:-P10(10),hi:P10(10),emin:-120}];             // R5 |Λ| ≤ 1 part in 10^120 of natural size (Barnes 2012; Collins 2009)
+FT.F=FF.map(()=>({dev:0n,e:-1,g:0}));FT.fi=0;
+const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};const sup=n=>String(n).split('').map(c=>SUP[c]).join('');
+function ffMode(){return ['all3','replay','luck','rluck','back'].includes(FT.st);}
+function ffTune(){return (FT.st==='all3'||FT.st==='replay')&&!FT.win&&!FT.spin;}
+function ffIn(i){const f=FF[i],d=FT.F[i].dev;return d>=f.lo&&d<=f.hi;}
+function ffAll(){return FF.every((f,i)=>ffIn(i));}
+function ffLead(d){const a=d<0n?-d:d;return a===0n?-999:a.toString().length-1-130;}
+function ffFmt(d){if(d===0n)return '0';const neg=d<0n,s=(neg?-d:d).toString(),e=s.length-1-130;let m=s[0];const r=s.slice(1,3).replace(/0+$/,'');if(r)m+='.'+r;
+ let o=(neg?'−':'+')+m+' × 10'+sup(e);if(e>=-4&&e<0){const pc=parseFloat(s.slice(0,4)[0]+'.'+s.slice(1,4))*Math.pow(10,e+2);o+=' ('+(neg?'−':'+')+(+pc.toPrecision(2))+'%)';}return o;}
+function ffFx(i){if(ffIn(i))return '';const f=FF[i],d=FT.F[i].dev;
+ if(f.key==='strong'&&d< -9n*P10(128))return COPY.FX.strongFar; // R2b αs < 0.91 (Davies 1972 via Barnes 2012)
+ if(f.key==='weak'&&d< -626n*P10(127))return COPY.FX.weakFar;   // R4b v/mPl > 3.3e-17 (Damour & Donoghue 2008 via Barnes 2012)
+ return COPY.FX[f.key][d<0n?0:1];}
+function ri(a,b){return a+Math.floor(Math.random()*(b-a+1));}
+function ffScramble(){FT.F=FF.map(f=>{const E=f.emin,sg=Math.random()<.5?-1n:1n;let es;
+  if(E<-10){const a=Math.ceil(E/5),b=Math.ceil(2*E/3);es=[ri(a,-1),ri(b,a-1),ri(E+1,b-1)];}else es=E<=-3?[-1,ri(-3,-2)]:[-1,-2];
+  let d=0n;es.forEach((e,k)=>{d+=sg*BigInt(k?ri(1,9):ri(2,9))*P10(130+e);});return {dev:d,e:-1,g:0};});FT.fi=0;}
+function ffRand(){let s='';for(let k=0;k<130;k++)s+=Math.floor(Math.random()*10);const v=BigInt(s);return Math.random()<.5?-v:v;} // uniform over -1..+1 (none to double)
+function ffCheck(i,quiet){const g=ffIn(i)?1:0,F=FT.F[i];if(g!==F.g){F.g=g;if(!quiet){if(g){snd(1568,.12,'sine',.06);setTimeout(()=>snd(2093,.1,'sine',.05),60);ftVib(15);if(FF[i].crank>=0)ftSpark(FF[i].crank);}else snd(240,.09,'sine',.04);}}
+ if(ffTune()&&ffAll()){FT.win=1;ftTxt(COPY.ALL3,COPY.WIN5);[0,1,2].forEach(ftSpark);FT.bloom=1;[523,659,784,1047,1319].forEach((f,k)=>setTimeout(()=>snd(f,.28,'sine',.07),k*100));ftVib(40);window.SHOT='ft-win';}
+ FT.sk5='';ftBtns();}
+function ffNudge(d){if(!ffTune())return;const i=FT.fi,F=FT.F[i];let v=F.dev+BigInt(d)*P10(130+F.e);if(v>ONE)v=ONE;if(v< -ONE)v=-ONE;F.dev=v;FT.idle=0;S.taps++;
+ const n=performance.now();if(n-FT.tickT>18){FT.tickT=n;snd(d>0?2600:1900,.018,'square',.035);}ftVib(8);ffCheck(i);}
+function ffZoom(z){if(!ffTune())return;const F=FT.F[FT.fi],f=FF[FT.fi];F.e=Math.max(f.emin,Math.min(-1,F.e+z));FT.idle=0;snd(z<0?1400:900,.03,'triangle',.04);FT.sk5='';}
+function ffSel(i){FT.fi=i;FT.last=i;FT.sk5='';snd(700,.03,'triangle',.04);}
+function ffHelp(){const F=FT.F[FT.fi],f=FF[FT.fi];if(ffIn(FT.fi))return;F.e=Math.max(f.emin,Math.min(-1,ffLead(F.dev)));FT.sk5='';}
+(function(){const K=$('ftK');FF.forEach((f,i)=>{const b=document.createElement('button');b.className='ftk';b.dataset.i=i;b.innerHTML='<span></span><i></i>';b.firstChild.textContent=COPY.FCHIP[i];b.onclick=()=>ffSel(i);K.appendChild(b);});
+ const hold=(b,fn)=>{let h1=null,h2=null;const stop=()=>{if(h1===null&&h2===null)return;clearTimeout(h1);clearInterval(h2);h1=h2=null;};
+  b.addEventListener('pointerdown',e=>{e.preventDefault();try{b.setPointerCapture(e.pointerId)}catch(_){}stop();fn();h1=setTimeout(()=>{h2=setInterval(fn,110);},350);});
+  ['pointerup','pointercancel','lostpointercapture'].forEach(t=>b.addEventListener(t,stop));b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fn();}});};
+ document.querySelectorAll('#ffP .ftb').forEach(b=>hold(b,()=>ffNudge(+b.dataset.d)));document.querySelectorAll('#ffZ .ffz').forEach(b=>hold(b,()=>ffZoom(+b.dataset.z)));})();
+function ffRender(){const i=FT.fi,F=FT.F[i],f=FF[i],tu=ffTune();const k=[FT.st,i,FT.F.map(x=>x.dev+':'+x.e).join(','),tu?1:0,FT.win].join('|');if(FT.sk5===k)return;FT.sk5=k;
+ document.querySelectorAll('#ftK .ftk').forEach((b,j)=>{const ok=ffIn(j);b.classList.toggle('in',ok);b.classList.toggle('sel',j===i);b.lastChild.textContent=ok?'✓':'✗';b.setAttribute('aria-label',COPY.FN[j]+(ok?' just right':' not right'));});
+ $('ffN').textContent=COPY.FN[i];$('ffR').textContent=fill(f.key==='lam'?COPY.LNOW:COPY.OFF,{v:ffFmt(F.dev)});$('ffW').textContent=COPY.FW[i];
+ const fx=ffFx(i),s=$('ffS');s.textContent=fx||COPY.IN;s.className=fx?'':'ok';$('ffSt').textContent=fill(COPY.STEP,{e:sup(F.e)});
+ document.querySelectorAll('#ffZ .ffz').forEach(b=>{const z=+b.dataset.z;b.disabled=!tu||(z<0?F.e<=f.emin:F.e>=-1);});document.querySelectorAll('#ffP .ftb').forEach(b=>b.disabled=!tu);}
+// one gold cue: the ± that moves toward the window, else the finer-step button, else the next force that is not right yet
+function ffCue(){if(!ffTune())return null;const i=FT.fi,F=FT.F[i];
+ if(!ffIn(i)){const L=ffLead(F.dev);if(L>=F.e)return document.querySelector('#ffP .ftb[data-d="'+(F.dev>0n?-1:1)+'"]');return document.querySelector('#ffZ .ffz[data-z="'+(L<=F.e-10&&F.e-10>=FF[i].emin?-10:-1)+'"]');}
+ const j=FF.findIndex((f,k)=>!ffIn(k));return j<0?null:document.querySelector('#ftK .ftk[data-i="'+j+'"]');}
+function ffSpin(dt){const sp=FT.spin;sp.k=Math.min(1,sp.k+dt/sp.dur);sp.t=(sp.t||0)+dt;if(sp.t>.06){sp.t=0;FT.F.forEach(F=>F.dev=ffRand());snd(1900+Math.random()*700,.015,'square',.03);}
+ if(sp.k>=1){FT.F.forEach((F,i)=>{F.dev=sp.to[i];F.g=ffIn(i)?1:0;});ftLuckEnd();}}
 $('ftE').textContent=COPY.TITLE;$('ftX').textContent=COPY.NOTNOW;$('ftH').textContent=COPY.HELP;$('ftL').textContent=COPY.LUCKB;$('ftN').textContent=COPY.NEXT;
 document.querySelector('#cInn img.art').src=INNSPR.toDataURL();reset(true);$('cIntro').style.display='block';requestAnimationFrame(frame);
 window.onerror=m=>{$('status').textContent='ERR '+m;};
-window.NR={FT,ftGo,ftPlace,ftSettle,ftSetV,ftLuck,ftNext,closeFT,inB,cDone,arrive:()=>arrive(),PARTS,openFT,routeParts,missingParts,pathBetween,pLoad,get PG(){return PG},GATES,openChain,openAll,placeTile,get CH(){return CH},hasFind,openGate,ART,GOALS,targets,hintInfo,breakK,DSA,W,H,get JR(){return JR},openJ,closeJ,laneArt,showStory,COINS,get RW(){return RW},get RH(){return RH},get resL(){return resL},trapAt,CTRL,turnAround,dash,angDiff,goal:()=>S.phase===2?INN:HURT,open:(x,y)=>open(x,y),get S(){return S},move,tapAt,dashGreen,fwdTrap,MAP};
+window.NR={FF,ffCheck,ffRand,ffNudge,ffZoom,ffSel,ffIn,ffAll,ffFmt,ffLead,ffScramble,FT,ftGo,ftPlace,ftSettle,ftSetV,ftLuck,ftNext,closeFT,inB,cDone,arrive:()=>arrive(),PARTS,openFT,routeParts,missingParts,pathBetween,pLoad,get PG(){return PG},GATES,openChain,openAll,placeTile,get CH(){return CH},hasFind,openGate,ART,GOALS,targets,hintInfo,breakK,DSA,W,H,get JR(){return JR},openJ,closeJ,laneArt,showStory,COINS,get RW(){return RW},get RH(){return RH},get resL(){return resL},trapAt,CTRL,turnAround,dash,angDiff,goal:()=>S.phase===2?INN:HURT,open:(x,y)=>open(x,y),get S(){return S},move,tapAt,dashGreen,fwdTrap,MAP};
 setTimeout(()=>{if($('status').textContent==='init')$('status').textContent='OK';},50);
 </script></body></html>
