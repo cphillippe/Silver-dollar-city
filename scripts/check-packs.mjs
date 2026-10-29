@@ -133,6 +133,35 @@ const MULTIVERSE_BS =
   'Some say luck did it with lots of other worlds. No one has ever seen even one of those worlds.'
 
 assert.equal(tuning.easy.learn, EASY_STORY)
+
+// #821 BS Oct 28: Easy GATE_WRONG copies use the new kid lines; the old ones are gone.
+{
+  const OLD_GATE_WRONG = [
+    'The settings for life could be almost anything, so luck explains it.',
+    "The numbers for life aren't special at all.",
+  ]
+  const NEW_GATE_WRONG = ['Stars look tiny because they are far away.', 'The sun comes up every morning.']
+  const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+  const nr = readFileSync(join(root, 'public/night-run/index.html'), 'utf8')
+  const gw = nr.match(/GATE_WRONG:(\[[^\]]*\])/)
+  assert.ok(gw, 'Night Run COPY.GATE_WRONG missing')
+  assert.deepEqual(JSON.parse(gw[1].replace(/'/g, '"')), NEW_GATE_WRONG, 'Night Run COPY.GATE_WRONG must be the BS Oct 28 lines')
+  const cm = nr.match(/const CONTENT=(\{.*?\});\n/s)
+  assert.ok(cm, 'Night Run CONTENT missing')
+  const obt = JSON.parse(cm[1]).ART.find((a) => a.id === 'ob-tuning')
+  assert.deepEqual(obt?.gate?.wrong, NEW_GATE_WRONG, 'Night Run CONTENT ob-tuning gate.wrong must be the BS Oct 28 lines')
+  const ec = readFileSync(join(root, 'src/lib/easyChrome.ts'), 'utf8')
+  for (const old of OLD_GATE_WRONG) {
+    assert.ok(!nr.includes(old) && !nr.includes(old.replace("'", "\\'")), `old GATE_WRONG still in Night Run: ${old}`)
+    assert.ok(!ec.includes(old) && !ec.includes(old.replace("'", "\\'")), `old GATE_WRONG still in easyChrome.ts: ${old}`)
+    assert.ok(!Object.values(EASY_CHROME).includes(old), `old GATE_WRONG still an EASY_CHROME value: ${old}`)
+  }
+  assert.equal(
+    EASY_CHROME['Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.'],
+    NEW_GATE_WRONG[0],
+    'easyChrome kid swap for the wide-ranges miss must be the BS Oct 28 line',
+  )
+}
 assert.equal(tuning.easy.gloss, EASY_CLAIM)
 assert.equal(tuning.easy.match.sentence, EASY_CLAIM)
 assert.equal(tuning.easy.hold.claim, EASY_CLAIM)
