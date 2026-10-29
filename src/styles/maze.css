@@ -538,6 +538,12 @@ html[data-easy='on'] .play.is-road-maze .maze-how {
   box-shadow: 0 0 10px rgba(255, 204, 51, 0.55);
 }
 
+html[data-easy='on'] .maze-cell.is-help-cue .maze-cell-label {
+  font-size: 0.8125rem;
+  line-height: 1.15;
+  padding: 2px 6px;
+}
+
 .maze-actor.is-hurt.is-with-you {
   inset: auto 4% 28% auto;
   width: 42%;
@@ -1514,8 +1520,21 @@ html[data-easy='on'] .play.is-road-maze .maze-cell.is-road:active {
     flex: 0 0 auto;
     margin: 0;
     padding: 0 4px;
-    font-size: 0.72rem;
+    font-size: 0.8125rem;
     line-height: 1.1;
     letter-spacing: 0.04em;
   }
+}
+
+/* #871: Easy Story Creek maze HUD stays at least 13px on phones. */
+html[data-easy='on'] .play.is-road-maze :is(
+  .story-kicker,
+  .story-caption,
+  .maze-beat,
+  .maze-beat-label,
+  .maze-how,
+  .match-score,
+  .sort-how
+) {
+  font-size: 0.8125rem;
 }

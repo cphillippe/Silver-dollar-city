@@ -34,7 +34,7 @@ const appSrc = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
 assert.match(appSrc, /if \(isPlayBuild\(\)\) return null/, 'quickReviewBoot blocks Play builds')
 assert.match(appSrc, /playtestUrlAllowed\(search\)/, 'quickReviewBoot uses URL playtest gate')
 const settingsSrc = readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8')
-assert.match(settingsSrc, /nightWatchJumpAllowed\(/, 'Settings Quick review uses playtest gate')
+assert.match(settingsSrc, /playtestUrlAllowed\(urlSearch\)/, 'Settings dev UI uses playtest URL gate')
 
 const allowed = new Set([
   "What's the main idea?",
@@ -279,11 +279,8 @@ await withPage(
   '/',
   async (page) => {
     await page.getByRole('main', { name: 'Home' }).waitFor()
-    const settings = page.locator('header').getByRole('button', { name: 'Settings', exact: true })
-    await settings.scrollIntoViewIfNeeded()
-    await settings.click()
-    await page.locator('details.settings-debug summary').click()
-    assert.equal(await page.locator('section[aria-label="Quick review"]').count(), 0)
+    await page.locator('header').getByRole('button', { name: 'Settings', exact: true }).click()
+    assert.equal(await page.locator('details.settings-debug').count(), 0)
   },
   { seed: hubSeed },
 )
@@ -429,7 +426,7 @@ function homeQueueSeed() {
   return {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.552',
+    appVersion: '1.4.553',
     savedAt: new Date().toISOString(),
     progress: {
       started: true,
@@ -549,7 +546,7 @@ await withPage(
     seed: {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.552',
+      appVersion: '1.4.553',
       savedAt: new Date().toISOString(),
       progress: {
         started: true,

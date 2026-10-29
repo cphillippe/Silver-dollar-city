@@ -245,6 +245,10 @@ img.gem-heart {
   font-size: 0.82rem;
 }
 
+html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-score {
+  font-size: 0.8125rem;
+}
+
 .story-sheet-bonus.gem-words.is-bonus {
   margin: 0 0 8px;
   justify-content: flex-start;
@@ -443,6 +447,10 @@ img.gem-heart {
   font-weight: 800;
   letter-spacing: 0.04em;
   line-height: 1.1;
+}
+
+html[data-easy='on'] .play.is-gem-search .gem-word-kind {
+  font-size: 0.8125rem;
 }
 
 .gem-word-kind {
@@ -661,10 +669,11 @@ html[data-easy='on'] .play.is-gem-search .gem-cell.is-start-gold {
 html[data-easy='on'] .play.is-gem-search .gem-hint-slot {
   position: relative;
   flex: 0 0 auto;
-  min-height: 5.85rem;
+  min-height: 6.54rem;
   margin: 0 0 4px;
   display: grid;
   place-items: center;
+  overflow: hidden;
 }
 
 html[data-easy='on'] .play.is-gem-search .gem-start-hint {
@@ -774,7 +783,7 @@ html[data-easy='on'] .play.is-gem-search .gem-hint-slot:has(.gem-combo.is-loud) 
 html[data-easy='on'] .play.is-gem-search .gem-hint-slot:has(.gem-combo.is-loud) .miss-banner,
 html[data-easy='on'] .play.is-gem-search .gem-hint-slot:has(.gem-combo.is-loud) .match-toast,
 html[data-easy='on'] .play.is-gem-search .gem-hint-slot:has(.gem-combo.is-loud) .gem-score-pop {
-  top: 3.15rem;
+  top: 3.45rem;
   width: min(86%, 210px);
 }
 
@@ -1018,4 +1027,60 @@ html[data-easy='on'] .play.is-gem-search .gem-hint-slot:has(.gem-combo.is-loud) 
 html[data-easy='on'] .play.is-gem-search .gem-cell:active:not(.is-sel):not(.is-burst) {
   transform: scale(0.92) translateZ(0);
   transition: transform 0.05s ease-out;
+}
+
+/* #871: Easy word search labels and clue chips stay at least 13px. */
+html[data-easy='on'] .play.is-gem-search :is(
+  .gem-word-kind,
+  .gem-word-label,
+  .match-teach-kind,
+  .match-teach-label,
+  .match-score,
+  .story-dock-word,
+  .story-caption,
+  .story-kicker,
+  .gem-bonus-hint,
+  .toast-why
+) {
+  font-size: 0.8125rem;
+}
+
+html[data-easy='on'] .play.is-gem-search .match-teach-say {
+  font-size: 0.875rem;
+}
+
+@media (max-width: 430px) {
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .story-dock-word {
+    font-size: 0.8125rem;
+  }
+}
+
+/* #871: find pops stay inside the hint band — no translateY into the grid. */
+html[data-easy='on'] .play.is-gem-search .gem-hint-slot .gem-find-pop.gem-score-pop {
+  animation: gem-hint-score-pop 1.6s cubic-bezier(0.2, 1.45, 0.3, 1) both;
+}
+
+@keyframes gem-hint-score-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.78);
+  }
+  22% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+  78% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-easy='on'] .play.is-gem-search .gem-hint-slot .gem-find-pop.gem-score-pop {
+    animation: none;
+  }
 }
