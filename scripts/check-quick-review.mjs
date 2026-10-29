@@ -21,6 +21,7 @@ import {
   reviewTargetLine,
 } from '../src/easyTrail/review/reviewFormat.ts'
 import { STORAGE_KEY } from '../src/config/app.ts'
+import { easyWhyLine } from '../src/lib/easy.ts'
 import { lociStampFor } from '../src/lib/lociStamp.ts'
 import { SAVE_KIND, SAVE_SCHEMA_VERSION } from '../src/lib/save.ts'
 
@@ -33,11 +34,26 @@ assert.match(quickSrc, /function beginSourceBeat\(reasonClean: boolean\)/)
 assert.match(quickSrc, /beginSourceBeat\(false\)/)
 assert.match(quickSrc, /beginSourceBeat\(format === 'C' \? mapTapClean : true\)/)
 assert.match(quickSrc, /holdInterval/)
+assert.match(
+  quickSrc,
+  /const cardClean = sourceBeatActive \? clean && reasonBeatClean : clean/,
+  'interval 2 grades both beats only when the source beat ran',
+)
+assert.match(
+  quickSrc,
+  /useEffect\(\(\) => \(\) => window\.clearTimeout\(celebrateTimer\.current\), \[\]\)/,
+  'celebration timer clears on unmount',
+)
 
 const appSrc = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
 assert.match(appSrc, /key=\{view\.queue\?\.join\(','\) \?\? view\.lineId\}/)
 assert.match(appSrc, /if \(isPlayBuild\(\)\) return null/, 'quickReviewBoot blocks Play builds')
 assert.match(appSrc, /playtestUrlAllowed\(search\)/, 'quickReviewBoot uses URL playtest gate')
+assert.match(
+  appSrc,
+  /const reviewWrite = !fromHome && params\.get\('reviewWrite'\) === '1'/,
+  'reviewWrite records a forced format without the Home route',
+)
 const settingsSrc = readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8')
 assert.match(settingsSrc, /playtestUrlAllowed\(urlSearch\)/, 'Settings dev UI uses playtest URL gate')
 
@@ -223,6 +239,11 @@ assert.match(
   screenSrc,
   /key=\{`\$\{lineId\}-\$\{cardIndex\}`\}/,
   'QuickReview remounts per queue slot',
+)
+assert.match(
+  screenSrc,
+  /if \(_fromHome && raw === 'B'\) return undefined/,
+  'Home ignores a forced format B',
 )
 
 async function countGoldCues(page) {
@@ -431,7 +452,7 @@ function homeQueueSeed() {
   return {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.554',
+    appVersion: '1.4.555',
     savedAt: new Date().toISOString(),
     progress: {
       started: true,
@@ -532,7 +553,8 @@ await withPage(
     }, STORAGE_KEY)
     assert.ok(fatherTrace, 'ph-father memory written')
     assert.equal(fatherTrace.cleanRecalls, 2, 'Not yet on why beat keeps cleanRecalls at 2')
-    assert.notEqual(fatherTrace.intervalIndex, 3, 'two-beat miss does not promote intervalIndex to 3')
+    assert.equal(fatherTrace.reviews, 3, 'two-beat miss still records the review')
+    assert.equal(fatherTrace.intervalIndex, 1, 'two-beat miss drops intervalIndex to 1')
 
     await page.locator('.quick-review-prompt-title').filter({ hasText: "What's the main idea?" }).waitFor()
     await tapCorrectPlot(page, 'ob-tuning')
@@ -567,7 +589,7 @@ await withPage(
     seed: {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.554',
+      appVersion: '1.4.555',
       savedAt: new Date().toISOString(),
       progress: {
         started: true,
@@ -613,13 +635,14 @@ await withPage(
     }, STORAGE_KEY)
     assert.ok(trace)
     assert.equal(trace.cleanRecalls, 2, 'wrong plot on beat 1 blocks a clean promotion')
-    assert.notEqual(trace.intervalIndex, 3)
+    assert.equal(trace.reviews, 3, 'wrong plot still records the review')
+    assert.equal(trace.intervalIndex, 1, 'wrong plot drops intervalIndex to 1')
   },
   {
     seed: {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.554',
+      appVersion: '1.4.555',
       savedAt: new Date().toISOString(),
       progress: {
         started: true,
@@ -656,7 +679,7 @@ await withPage(
     seed: {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.554',
+      appVersion: '1.4.555',
       savedAt: new Date().toISOString(),
       progress: {
         started: true,
@@ -695,6 +718,146 @@ await withPage(
     assert.equal(pipGold, false, 'lit streak pips are not gold')
   },
   { seed: seedSave(1) },
+)
+
+function intervalSeed(lineId, intervalIndex, extra = {}) {
+  return {
+    kind: SAVE_KIND,
+    schemaVersion: SAVE_SCHEMA_VERSION,
+    savedAt: new Date().toISOString(),
+    progress: {
+      started: true,
+      easyMode: true,
+      theme: 'candy',
+      completed: [lineId],
+      memory: {
+        [lineId]: {
+          id: lineId,
+          pillar: 'parable-hollow',
+          intervalIndex,
+          nextReviewAt: today,
+          reviews: intervalIndex,
+          cleanRecalls: intervalIndex,
+          elaborated: false,
+          ...extra,
+        },
+      },
+    },
+  }
+}
+
+async function readTrace(page, lineId) {
+  return page.evaluate(
+    ({ key, id }) => {
+      const raw = localStorage.getItem(key)
+      if (!raw) return null
+      return JSON.parse(raw).progress?.memory?.[id] ?? null
+    },
+    { key: STORAGE_KEY, id: lineId },
+  )
+}
+
+async function finishFormatB(page, lineId, clean) {
+  const briefLine = evidenceFor(lineId)
+  assert.ok(briefLine, lineId)
+  const face = easyWhyLine(briefLine.reason)
+  await page.getByText('Think first…').waitFor()
+  await page.locator('.match-card.recall-card').first().waitFor({ timeout: 6000 })
+  const cards = page.locator('.match-card.recall-card')
+  const count = await cards.count()
+  assert.ok(count >= 2, 'format B offers a miss as well as the line')
+  let picked = false
+  for (let i = 0; i < count; i += 1) {
+    const text = ((await cards.nth(i).innerText()) ?? '').trim()
+    if (clean ? text === face : text !== face) {
+      await cards.nth(i).click()
+      picked = true
+      break
+    }
+  }
+  assert.equal(picked, true, clean ? 'format B clean pick' : 'format B miss pick')
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.locator('main.settings').waitFor()
+}
+
+await withPage(
+  `/?quickReview=ph-father&reviewFormat=B&reviewWrite=1&${PLAYTEST}`,
+  async (page) => {
+    await finishFormatB(page, 'ph-father', true)
+    const trace = await readTrace(page, 'ph-father')
+    assert.ok(trace)
+    assert.equal(trace.lastFormat, 'B')
+    assert.equal(trace.cleanRecalls, 3, "format B at intervalIndex 2 with 'I had it' promotes")
+    assert.equal(trace.reviews, 3, "format B at intervalIndex 2 with 'I had it' records the review")
+    assert.equal(trace.intervalIndex, 3, "format B at intervalIndex 2 with 'I had it' promotes")
+  },
+  { seed: intervalSeed('ph-father', 2) },
+)
+
+await withPage(
+  `/?quickReview=ph-father&reviewFormat=B&reviewWrite=1&${PLAYTEST}`,
+  async (page) => {
+    await finishFormatB(page, 'ph-father', false)
+    const trace = await readTrace(page, 'ph-father')
+    assert.ok(trace)
+    assert.equal(trace.lastFormat, 'B')
+    assert.equal(trace.cleanRecalls, 2, "format B at intervalIndex 2 with 'Not yet' does not promote")
+    assert.equal(trace.reviews, 3, "format B at intervalIndex 2 with 'Not yet' still records the review")
+    assert.equal(trace.intervalIndex, 1, "format B at intervalIndex 2 with 'Not yet' does not promote")
+  },
+  { seed: intervalSeed('ph-father', 2) },
+)
+
+assert.equal(
+  pickFormat('ph-road', today, 'C', undefined, 1, { acOnly: true }),
+  'A',
+  'Home with last format C stays on A when B is refused',
+)
+
+await withPage(
+  `/?playtest=1&from=home&quickReview=ph-road&reviewFormat=B`,
+  async (page) => {
+    await page.getByRole('button', { name: 'Show me' }).waitFor()
+    assert.equal(await page.getByText('Think first…').count(), 0, 'from=home ignores reviewFormat=B')
+    await page.getByRole('button', { name: 'Show me' }).click()
+    await page.getByRole('button', { name: 'I had it' }).click()
+    await page.getByRole('main', { name: 'Home' }).waitFor()
+    const trace = await readTrace(page, 'ph-road')
+    assert.ok(trace)
+    assert.equal(trace.lastFormat, 'A', 'from=home does not write format B')
+    assert.equal(trace.intervalIndex, 2, 'Home still writes the format it actually ran')
+    assert.equal(trace.reviews, 2)
+    assert.equal(trace.cleanRecalls, 2)
+  },
+  { seed: intervalSeed('ph-road', 1, { lastFormat: 'C' }) },
+)
+
+const burstLine = EASY_LINE_ORDER.find((id) => evidenceFor(id) && !honestyCheckDue(id, today, 1))
+assert.ok(burstLine, 'claim card without an honesty check')
+
+await withPage(
+  `/?quickReview=${burstLine}&reviewFormat=A&reviewStreak=2&${PLAYTEST}`,
+  async (page) => {
+    await page.evaluate(() => {
+      const real = window.setTimeout.bind(window)
+      window.setTimeout = (fn, ms, ...args) =>
+        real(() => {
+          if (ms === 1200) window.__celebrateFired = true
+          fn(...args)
+        }, ms, ...args)
+    })
+    await page.locator('.quick-review-streak').waitFor()
+    await page.getByRole('button', { name: 'Show me' }).click()
+    await page.getByRole('button', { name: 'I had it' }).click()
+    await page.locator('.win-burst').waitFor()
+    await page.locator('main button.text-link').first().click()
+    await page.locator('main.settings').waitFor()
+    await page.waitForTimeout(1500)
+    const fired = await page.evaluate(() => Boolean(window.__celebrateFired))
+    assert.equal(fired, false, 'unmount during the burst means onDone is not called')
+    await page.locator('main.settings').waitFor()
+  },
+  { seed: intervalSeed(burstLine, 1) },
 )
 
 const brief = evidenceFor('ph-road')

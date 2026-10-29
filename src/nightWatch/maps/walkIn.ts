@@ -11,6 +11,8 @@ export const WALK_IN_U_PER_S = 900
  * The fastest Easy walker covers 0.1 of its road in this time: 0.1 / (0.01 × 6.8 × 1.75) s.
  */
 export const WALK_IN_TAP_MAX_MS = 840
+/** Walker hit radius in plate units; tap unlocks once this much of the body is on the plate. */
+export const WALK_IN_WALKER_R = 24
 /** Live spawns never start past this t (`EASY_ON_SCREEN_T`). The time table is checked up to here. */
 export const WALK_IN_SPAWN_T_CAP = 0.55
 
@@ -125,14 +127,32 @@ export function walkInMs(lengthU: number): number {
   return Math.min(WALK_IN_MAX_MS, Math.max(WALK_IN_MIN_MS, Math.round(raw)))
 }
 
-export function walkInTapLockMs(runMs: number): number {
-  return Math.min(WALK_IN_TAP_MAX_MS, Math.max(0, runMs))
-}
-
 /** Slow across the edge, quick through the middle, settled on the sim point. */
 export function walkInEase(progress: number): number {
   const p = Math.min(1, Math.max(0, progress))
   return p * p * (3 - 2 * p)
+}
+
+/** Inverse of {@link walkInEase}: six bisection steps, no dependency. */
+function walkInEaseInverse(f: number): number {
+  const target = Math.min(1, Math.max(0, f))
+  let lo = 0
+  let hi = 1
+  for (let i = 0; i < 6; i += 1) {
+    const mid = (lo + hi) / 2
+    if (walkInEase(mid) < target) lo = mid
+    else hi = mid
+  }
+  return (lo + hi) / 2
+}
+
+/** Tap lock until the walker is on the plate by one radius; capped by {@link WALK_IN_TAP_MAX_MS}. */
+export function walkInTapLockMs(runMs: number, lengthU: number): number {
+  if (!(lengthU > 0) || !(runMs > 0)) return 0
+  const f = (WALK_IN_LEAD_U + WALK_IN_WALKER_R) / lengthU
+  if (f >= 1) return Math.min(WALK_IN_TAP_MAX_MS, runMs)
+  const p = walkInEaseInverse(f)
+  return Math.min(WALK_IN_TAP_MAX_MS, Math.max(0, Math.round(runMs * p)))
 }
 
 /** Point `f` of the way along the trail. `f` = 1 is the sim point. */
@@ -192,8 +212,10 @@ export function createWalkInClock(
     let row: WalkInSeen | null = null
     if (!walker.turned && !walker.mini && walker.t <= WALK_IN_SPAWN_T_CAP) {
       const points = roadOf(walker.pathId)
-      const runMs = walkInMs(walkInLength(walkInEntry(points, plate()), points, walker.t))
-      row = { at: now, runMs, lockMs: walkInTapLockMs(runMs) }
+      const entry = walkInEntry(points, plate())
+      const lengthU = walkInLength(entry, points, walker.t)
+      const runMs = walkInMs(lengthU)
+      row = { at: now, runMs, lockMs: walkInTapLockMs(runMs, lengthU) }
     }
     seen.set(walker.id, row)
     return row

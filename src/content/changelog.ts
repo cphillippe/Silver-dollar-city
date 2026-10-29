@@ -28,12 +28,36 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.558',
-    title: 'Easy Night Watch: the next map opens after round 8',
+    version: '1.4.557',
+    title: 'Behind the scenes: Quick Review grades the beat that ran',
     when: '2026-10-29',
     items: [
-      'Easy: the next Night Watch map now opens after round 8.',
-      'Refs #749.',
+      'Nothing changes for players yet.',
+      'Refs #841.',
+    ],
+  },
+  {
+    version: '1.4.556',
+    title: 'Easy lines: forgiven debt, and Christ holds all things',
+    when: '2026-10-29',
+    items: [
+      'The debt line now says: God forgives us a huge debt. So we forgive others.',
+      'The order line now says: Christ made all things, and he holds them together.',
+      'Medium and Hard claims stay as they are.',
+      'Refs #873',
+    ],
+  },
+  {
+    version: '1.4.555',
+    title: 'Easy Night Watch: walk-in taps, tablet drags, pace chip in HUD',
+    when: '2026-10-29',
+    items: [
+      'The first walker on each wave can be tapped as soon as it steps onto the map — no silent wait while it is already visible.',
+      'On a wide tablet with the camera off, dragging across the board no longer plants lamps or fires stray shots; quick taps still work.',
+      'The pace chip sits in the top HUD bar; the HUD pass-through keeps the map, Sparks balloon, and lamp rail visible when the camera is on.',
+      'Easy only.',
+      'Refs #756.',
+      'Refs #768.',
     ],
   },
   {
