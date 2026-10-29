@@ -640,7 +640,8 @@ export function CityMap({
   }
 
   const nextStage = stageOf(nextId)
-  const nextAt = ANCHOR[cueId]
+  // Phone pan moves East porch. The existing circle stays on that same point.
+  const nextAt = panFrame ? panAnchor(cueId) : ANCHOR[cueId]
   const kicker = canUpgrade(nextId, progress)
     ? 'Build this'
     : nextKicker(nextStage, nextId, doneToday)
