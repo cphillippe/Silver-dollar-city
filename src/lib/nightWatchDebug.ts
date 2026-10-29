@@ -74,7 +74,9 @@ export function nightWatchRoundJump(search: string, nightLen: number, allowed: b
   return round - 1
 }
 
-/** URL-only playtest gate — debug switches and Play builds do not count. */
+/**
+ * `?playtest=1` on this URL only. The Night Watch debug switch does not pass.
+ */
 export function playtestUrlAllowed(search: string): boolean {
   return new URLSearchParams(search).get('playtest') === '1'
 }

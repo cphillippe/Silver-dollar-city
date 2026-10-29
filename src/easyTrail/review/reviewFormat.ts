@@ -31,6 +31,11 @@ export interface ReviewSitting {
   bUsed?: boolean
 }
 
+export interface PickFormatOptions {
+  /** Home route until Scholar OKs decoys — never pick format B. */
+  acOnly?: boolean
+}
+
 /** Seeded weighted pick — F is reserved for #846. */
 export function pickFormat(
   id: string,
@@ -38,8 +43,12 @@ export function pickFormat(
   lastFormat?: ReviewFormatId,
   sitting?: ReviewSitting,
   intervalIndex = 0,
+  options?: PickFormatOptions,
 ): Exclude<ReviewFormatId, 'F'> {
   let pool: Array<'A' | 'B' | 'C'> = ['C', 'B', 'A']
+  if (options?.acOnly) {
+    pool = pool.filter((format) => format !== 'B')
+  }
   if (lastFormat && lastFormat !== 'F') {
     pool = pool.filter((format) => format !== lastFormat)
   }
