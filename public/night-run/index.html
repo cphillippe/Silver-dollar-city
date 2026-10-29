@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; script-src 'sha256-wfb2aSaJNwpZxoTeE/luhbNRSxpuUOUShKP42Je8zpc='"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; script-src 'sha256-UjCCScaO73egqirWXk7SgbRTM3KTcAe2/kXmjAyMMHo='"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Night Run · Silver City</title><link rel="icon" href="assets/favicon.png"><meta name="theme-color" content="#2a0d58">
 <link rel="stylesheet" href="../fonts/fonts.css">
 <style>
@@ -164,7 +164,7 @@ const COPY={
   'Life needs it smaller than 1 part in a number with 120 zeros of its natural size, either way.'], // R5
  SRCB:'Sources',SRC:['Sources: Collins 2009; Davies 1982','Source: Oberhummer et al. 2000','Sources: Oberhummer et al. 2000; Tegmark 2003','Sources (Higgs setting): Jeltema & Sher; Damour & Donoghue, via Barnes 2012','Sources: Barnes 2012; Collins 2009'],
  TAG:['Too weak!','Too strong!','Off!'],
- OFF:'How far off: {v}',ZEROS:'Zeros right: {n} of {m}',CLOSER:'Closer!',FARTHER:'Farther!',TAPHINT:'Tap − or + to get closer.',SETB:'Set it ✓',SETHINT:'In the window! Tap Set it ✓ to keep it.',WARN:'Farther! One more and it starts over.',RESET:'Too far off. Back to the start. Try again!',LOCKED:'Locked ✓',LUCKTRY:'Luck\'s try:',
+ OFF:'How far off: {v}',ZEROS:'Zeros found: {n} of {m}',CLOSER:'Closer!',FARTHER:'Farther!',TAPHINT:'Tap − or + to get closer.',SETB:'Found it ✓',SETHINT:'In the window! Tap Found it ✓ to keep it.',WARN:'Farther! One more and it starts over.',RESET:'Too far off. Back to the start. Try again!',LOCKED:'Locked ✓',LUCKTRY:'Luck\'s try:',
  CLOSE:{grav:['So close! Still a tiny bit too weak.','So close! Still a tiny bit too strong.'],strong:['So close! Still a tiny bit too weak.','So close! Still a tiny bit too strong.'],em:['So close! Still a tiny bit too weak.','So close! Still a tiny bit too strong.'],weak:'So close! Still a tiny bit off.',lam:['So close! Space still pulls in a tiny bit.','So close! Space still grows a tiny bit too fast.']},
  FX:{grav:['Too weak! Everything flew apart too fast. No stars could form.','Too strong! Everything fell back together too fast. No life could ever start.'], // R1
   strong:['Stars could not make enough of both carbon and oxygen. Life needs both.','Stars could not make enough of both carbon and oxygen. Life needs both.'], // R2
@@ -173,7 +173,7 @@ const COPY={
   weak:['Stars could not make enough of both carbon and oxygen. Life needs both.','Stars could not make enough of both carbon and oxygen. Life needs both.'], // R4
   weakFar:'Far too weak! No atom centers could hold together at all.', // R4b
   lam:['Space pulls in! Everything fell back together in a crunch. No life could ever start.','Space grows too fast! Everything flew apart before stars or galaxies could form.']}, // R5b
- STEP5:'Now find all five! Get each inside its real window, then tap Set it ✓.',
+ STEP5:'Now find all five! Get each inside its real window, then tap Found it ✓.',
  WIN5:'Gravity, strong, electric, weak, and space: God set them all just right.',
  ODDS:'Real odds for luck to get all five at once: about 1 in 5 × 10¹⁸⁵. That\'s a number 186 digits long!', // R-luck
  ATOMS:'That\'s far, far more than all the atoms in the universe we can see.', // ~10^80 atoms (Eddington-scale estimate)
@@ -730,15 +730,18 @@ function ffMode(){return ['all3','replay','luck','rluck','back'].includes(FT.st)
 function ffTune(){return (FT.st==='all3'||FT.st==='replay')&&!FT.win&&!FT.spin;}
 function ffInD(i,d){const f=FF[i];return d>=f.lo&&d<=f.hi;}
 function ffIn(i){return ffInD(i,FT.F[i].dev);}
-function ffAll(){return FF.every((f,i)=>!!FT.F[i].lk);} // all five Set it ✓ (locked)
+function ffAll(){return FF.every((f,i)=>!!FT.F[i].lk);} // all five Found it ✓ (locked)
 function ffLk(i){return !!FT.F[i].lk;}
 const ZF={grav:60,lam:120}; // tiny windows: progress is shown as zeros right after the point
 function ffZeros(d){const a=d<0n?-d:d;return a===0n?999:130-a.toString().length;}
+// Zeros found, counted against the window (not raw digits): the largest k with |dev| ≤ 10^-k, so k = z exactly when inside
+// (|dev| ≤ 10^-z, the edge 0.000…01 counts) and k ≤ z−1 whenever outside. Same test as ffInD, so the count and ✓ always agree.
+function ffZn(i,d){const z=ZF[FF[i].key];if(!z)return 0;if(ffInD(i,d))return z;const a=d<0n?-d:d;return Math.max(0,Math.min(z-1,130-(a-1n).toString().length));}
 function ffLead(d){const a=d<0n?-d:d;return a===0n?-999:a.toString().length-1-130;}
 function ffFmt(i,d){if(d===0n)return '0';const neg=d<0n,s=(neg?-d:d).toString(),sg=neg?'−':'+';
  if(ZF[FF[i].key]){const z=130-s.length;return sg+'0.'+(z<=6?'0'.repeat(z):'000…0')+s[0];}
  const pc=Number((neg?-d:d)/P10(122))/1e6,n=pc>=10?1:pc>=1?2:3,t=Math.floor(pc*10**n)/10**n;return sg+t.toFixed(n)+'%';}
-function ffClose(i,d){const f=FF[i];if(ffInD(i,d))return false;const z=ZF[f.key];if(z)return ffZeros(d)>=z-3;const a=d<0n?-d:d;return a<=2n*f.hi;}
+function ffClose(i,d){const f=FF[i];if(ffInD(i,d))return false;const z=ZF[f.key];if(z)return ffZn(i,d)>=z-3;const a=d<0n?-d:d;return a<=2n*f.hi;}
 function ffFx(i,d){if(d===undefined)d=FT.F[i].dev;if(ffInD(i,d))return '';const f=FF[i];
  if(f.key==='strong'&&d< -9n*P10(128))return COPY.FX.strongFar; // R2b αs < 0.91 (Davies 1972 via Barnes 2012)
  if(f.key==='weak'&&d>634n*P10(127))return COPY.FX.weakFar;   // R4b v/mPl > 3.3e-17 (v +63.4%: weak far too weak) (Damour & Donoghue 2008 via Barnes 2012)
@@ -767,7 +770,7 @@ function ffMove(i,F,dir){const sg=F.dev<0n?-1:1,tw=dir===-sg,top=F.H[F.H.length-
  return fb;}
 function ffNewF(d){return {dev:d,s0:d,H:[],best:0,fa:0,lk:0,g:0,fb:''};}
 function ffSkill(i,d){let n=0;while(!ffInD(i,d)&&n<999){d=ffStepD(i,d,d>0n?-1:1);n++;}return n;} // taps a perfect player needs
-const FTAPS={grav:[12,12],strong:[4,4],em:[4,4],weak:[4,4],lam:[12,12]}; // + one Set it ✓ each = 41 skill taps
+const FTAPS={grav:[12,12],strong:[4,4],em:[4,4],weak:[4,4],lam:[12,12]}; // + one Found it ✓ each = 41 skill taps
 function ffScr1(i){const f=FF[i],z=ZF[f.key],sg=Math.random()<.5?-1n:1n,[a,b]=FTAPS[f.key];
  if(z){const k=ri(a,b),ex=new Set([ri(1,3),ri(z-5,z)]);while(ex.size<k)ex.add(ri(4,z-6));const es=[...ex].sort((p,q)=>p-q);let d=0n,pd=0;
   es.forEach(e=>{let g;do g=ri(1,9);while(g===pd);pd=g;d+=BigInt(g)*P10(130-e);});let g;do g=ri(1,9);while(g===pd);d+=BigInt(g)*P10(130-ri(z+3,Math.min(z+12,128)));return sg*d;} // each digit differs from the one before, so every tap changes the readout
@@ -777,13 +780,13 @@ function ffScramble(){FT.F=FF.map((f,i)=>ffNewF(ffScr1(i)));FT.fi=0;FT.adv=0;cle
 function ffRand(){let s='';for(let k=0;k<130;k++)s+=Math.floor(Math.random()*10);const v=BigInt(s);return Math.random()<.5?-v:v;} // uniform over -1..+1 (none to double)
 function ffNext(i){for(let k=1;k<=FF.length;k++){const j=(i+k)%FF.length;if(!ffLk(j))return j;}return -1;}
 function ffCheck(i,quiet){const g=ffIn(i)?1:0,F=FT.F[i];if(g!==F.g){F.g=g;if(!quiet){if(g){snd(1568,.1,'sine',.05);ftVib(10);}else snd(240,.09,'sine',.04);}}FT.sk5='';ftBtns();}
-// Set it ✓: locks a force only while it is inside its window. One deliberate tap per force.
+// Found it ✓: locks a force only while it is inside its window. One deliberate tap per force.
 function ffSet(){if(!ffTune())return;const i=FT.fi,F=FT.F[i];if(F.lk||!ffIn(i))return;F.lk=1;FT.idle=0;
  snd(1568,.12,'sine',.06);setTimeout(()=>snd(2093,.1,'sine',.05),60);ftVib(15);if(FF[i].crank>=0)ftSpark(FF[i].crank);
  const j=ffNext(i);if(j>=0){FT.adv=1;clearTimeout(FT.advT);FT.advT=setTimeout(()=>{FT.adv=0;if(ffTune()&&FT.fi===i&&!ffLk(j))ffSel(j);FT.sk5='';},RM?60:700);}
  if(ffAll()){FT.win=1;ftTxt(COPY.ALL3,COPY.WIN5);[0,1,2].forEach(ftSpark);FT.bloom=1;[523,659,784,1047,1319].forEach((f,k)=>setTimeout(()=>snd(f,.28,'sine',.07),k*100));ftVib(40);window.SHOT='ft-win';}
  FT.sk5='';ftBtns();}
-function ffNudge(d){if(!ffTune())return false;const i=FT.fi,F=FT.F[i];if(F.lk)return false; // locked after Set it ✓
+function ffNudge(d){if(!ffTune())return false;const i=FT.fi,F=FT.F[i];if(F.lk)return false; // locked after Found it ✓
  F.fb=ffMove(i,F,d);FT.idle=0;S.taps++;
  const n=performance.now();if(n-FT.tickT>18){FT.tickT=n;snd(d>0?2600:1900,.018,'square',.035);}ftVib(8);ffCheck(i);return !(F.fb==='r'||ffIn(i));} // false stops a held button
 function ffSel(i){FT.fi=i;FT.last=i;FT.sk5='';snd(700,.03,'triangle',.04);}
@@ -798,12 +801,12 @@ function ffRender(){const i=FT.fi,F=FT.F[i],f=FF[i],tu=ffTune();const k=[FT.st,i
  document.querySelectorAll('#ftK .ftk').forEach((b,j)=>{const ok=ffLk(j);b.classList.toggle('in',ok);b.classList.toggle('sel',j===i);b.lastChild.textContent=ok?'✓':'✗';b.setAttribute('aria-label',COPY.FN[j]+(ok?' just right':' not right'));});
  $('ffN').textContent=COPY.FN[i];$('ffR').textContent=fill(COPY.OFF,{v:ffFmt(i,F.dev)});$('ffW').textContent=FT.src?COPY.SRC[i]:COPY.FW[i];$('ffW').classList.toggle('src',!!FT.src);$('ffSrc').setAttribute('aria-pressed',FT.src?'true':'false');
  const ok=ffIn(i),s=$('ffS');s.textContent=ffKid(i);s.className=ok?'ok':'';
- const z=ZF[f.key],bar=$('ffBar'),gt=$('ffGt'),zn=z?Math.min(z,ffZeros(F.dev)):0;bar.classList.toggle('on',!!z);if(z)bar.firstChild.style.width=(100*zn/z)+'%';
+ const z=ZF[f.key],bar=$('ffBar'),gt=$('ffGt'),zn=ffZn(i,F.dev);bar.classList.toggle('on',!!z);if(z)bar.firstChild.style.width=(100*zn/z)+'%';
  const lk=!!F.lk,fb=F.fb==='c'?COPY.CLOSER:F.fb==='f'?(F.fa>=2?COPY.WARN:COPY.FARTHER):F.fb==='r'?COPY.RESET:'';let t,c=F.fb==='r'?'f':(F.fb||'');
  if(lk){t=COPY.LOCKED;c='lk';}else if(ok){t=COPY.SETHINT;c='c';}else if(z)t=(fb?fb+' ':'')+fill(COPY.ZEROS,{n:zn,m:z});else t=fb||COPY.TAPHINT;
  gt.textContent=t;gt.className=c;document.querySelectorAll('#ffP .ftb').forEach(b=>{b.disabled=!tu||lk;b.classList.toggle('lkd',lk);});
  const sb=$('ffSet');sb.disabled=!(tu&&ok&&!lk);sb.style.visibility=tu&&ok&&!lk?'visible':'hidden';}
-// one gold cue: Set it ✓ when inside, else the ± that moves toward the window, else the next force not locked yet
+// one gold cue: Found it ✓ when inside, else the ± that moves toward the window, else the next force not locked yet
 function ffCue(){if(!ffTune()||FT.adv)return null;const i=FT.fi,F=FT.F[i];
  if(!F.lk)return ffIn(i)?$('ffSet'):document.querySelector('#ffP .ftb[data-d="'+(F.dev>0n?-1:1)+'"]');
  const j=FF.findIndex((f,k)=>!ffLk(k));return j<0?null:document.querySelector('#ftK .ftk[data-i="'+j+'"]');}
@@ -813,6 +816,6 @@ function ffSpin(dt){const sp=FT.spin;sp.k=Math.min(1,sp.k+dt/sp.dur);sp.t=(sp.t|
 $('ftE').textContent=COPY.TITLE;$('ftX').textContent=COPY.NOTNOW;$('ftH').textContent=COPY.HELP;$('ftL').textContent=COPY.LUCKB;$('ftN').textContent=COPY.NEXT;
 document.querySelector('#cInn img.art').src=INNSPR.toDataURL();reset(true);$('cIntro').style.display='block';requestAnimationFrame(frame);
 window.onerror=m=>{$('status').textContent='ERR '+m;};
-window.NR={FF,ffTag,ffCheck,ffRand,ffNudge,ffSel,ffIn,ffInD,ffAll,ffFmt,ffLead,ffZeros,ffStepD,ffSkill,ffClose,ffKid,ffScramble,ffCue,FTAPS,ffMove,ffNewF,ffSet,ffLvl,ffLk,FT,ftGo,ftPlace,ftSettle,ftSetV,ftLuck,ftNext,closeFT,inB,cDone,arrive:()=>arrive(),PARTS,openFT,routeParts,missingParts,pathBetween,pLoad,get PG(){return PG},GATES,openChain,openAll,placeTile,get CH(){return CH},hasFind,openGate,ART,GOALS,targets,hintInfo,breakK,DSA,W,H,get JR(){return JR},openJ,closeJ,laneArt,showStory,COINS,get RW(){return RW},get RH(){return RH},get resL(){return resL},trapAt,CTRL,turnAround,dash,angDiff,goal:()=>S.phase===2?INN:HURT,open:(x,y)=>open(x,y),get S(){return S},move,tapAt,dashGreen,fwdTrap,MAP};
+window.NR={FF,ffTag,ffCheck,ffRand,ffNudge,ffSel,ffIn,ffInD,ffAll,ffFmt,ffLead,ffZeros,ffZn,ffStepD,ffSkill,ffClose,ffKid,ffScramble,ffCue,FTAPS,ffMove,ffNewF,ffSet,ffLvl,ffLk,FT,ftGo,ftPlace,ftSettle,ftSetV,ftLuck,ftNext,closeFT,inB,cDone,arrive:()=>arrive(),PARTS,openFT,routeParts,missingParts,pathBetween,pLoad,get PG(){return PG},GATES,openChain,openAll,placeTile,get CH(){return CH},hasFind,openGate,ART,GOALS,targets,hintInfo,breakK,DSA,W,H,get JR(){return JR},openJ,closeJ,laneArt,showStory,COINS,get RW(){return RW},get RH(){return RH},get resL(){return resL},trapAt,CTRL,turnAround,dash,angDiff,goal:()=>S.phase===2?INN:HURT,open:(x,y)=>open(x,y),get S(){return S},move,tapAt,dashGreen,fwdTrap,MAP};
 setTimeout(()=>{if($('status').textContent==='init')$('status').textContent='OK';},50);
 </script></body></html>
