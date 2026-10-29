@@ -28,6 +28,17 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.556',
+    title: 'Easy lines: forgiven debt, and Christ holds all things',
+    when: '2026-10-29',
+    items: [
+      'The debt line now says: God forgives us a huge debt. So we forgive others.',
+      'The order line now says: Christ made all things, and he holds them together.',
+      'Medium and Hard claims stay as they are.',
+      'Refs #873',
+    ],
+  },
+  {
     version: '1.4.555',
     title: 'Easy Night Watch: walk-in taps, tablet drags, pace chip in HUD',
     when: '2026-10-29',
