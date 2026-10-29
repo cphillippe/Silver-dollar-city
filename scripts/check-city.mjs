@@ -1933,6 +1933,8 @@ assert.doesNotMatch(
   assert.match(nr561, /function hintBfs\(use\)/, '1.4.561 Night Run goal stays on one reachable target')
   assert.match(nr561, /function turnBtn\(id,sg\)/, '1.4.561 Night Run a tap on Turn turns 90 degrees')
   assert.match(nr561, /S\.dashG!==ti/, '1.4.561 Night Run dash check matches the button')
+  assert.match(nr561, /r\.strike=null;if\(r\.gone\)return;/, '1.4.561 Night Run a hit never wakes a popped robber')
+  assert.match(nr561, /if\(!r\.gone&&Math\.abs\(r\.sx-S\.x\)\+Math\.abs\(r\.sy-S\.y\)<2\)r\.gone=\.5;/, '1.4.561 Night Run a robber waits while you stand by its hideout')
 }
 assert.equal(CHANGELOG[1].version, '1.4.554', '1.4.554 follows the Night Run maze row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.554'), '1.4.554 changelog row')

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; script-src 'sha256-qQl2GiJz0owL+hO+tuO+anTWgUX3N69QnNhyMYHuWGM='"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; script-src 'sha256-kFzRIpBsbZW/NIaFdqAjuNY6f0tPVWAgr2pTfFh/Y7A='"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Night Run · Silver City</title><link rel="icon" href="assets/favicon.png"><meta name="theme-color" content="#2a0d58">
 <link rel="stylesheet" href="../fonts/fonts.css">
 <style>
@@ -251,7 +251,7 @@ function arrive(){const k=S.x+','+S.y;S.seen=S.seen||new Set();if(!S.seen.has(k)
 function hit(why){if(S.inv>0||S.paused||Q.has('god'))return;S.hearts--;S.hitsTaken++;updHUD();S.inv=2.5;S.shake=.4;
  $('flash').style.transition='none';$('flash').style.opacity=.5;requestAnimationFrame(()=>{$('flash').style.transition='opacity .45s';$('flash').style.opacity=0;});
  snd(90,.3,'sawtooth',.1);const tt=$('toast');tt.classList.add('bad');toast(why);setTimeout(()=>tt.classList.remove('bad'),1200);if(navigator.vibrate)navigator.vibrate(120);
- S.robbers.forEach(r=>{r.strike=null;if(Math.abs(r.x-S.x)+Math.abs(r.y-S.y)<3){r.x=r.sx;r.y=r.sy;r.px=r.x+.5;r.py=r.y+.5;r.gone=3;}else r.hold=Math.max(r.hold||0,2.5);});
+ S.robbers.forEach(r=>{r.strike=null;if(r.gone)return;if(Math.abs(r.x-S.x)+Math.abs(r.y-S.y)<3){r.x=r.sx;r.y=r.sy;r.px=r.x+.5;r.py=r.y+.5;r.gone=3;}else r.hold=Math.max(r.hold||0,2.5);});
  if(S.hearts<=0){S.paused=true;S.tw=null;$('cFail').style.display='block';updBtns();return;}
  if(why!=='Wait for green!')bump();}
 function checkHit(src){for(const r of S.robbers)if(!r.gone&&r.x===S.x&&r.y===S.y&&r.strike==null)r.strike=.45;}
@@ -456,7 +456,7 @@ function step(dt){S.t+=dt;if(!S.paused&&!S.tw)S.noin=(S.noin||0)+dt;const showSw
  ['bf','br','back','bl'].forEach(id=>$(id).classList.toggle('hint',!!S.hint&&S.hintBtn===id));if(S.inv>0)S.inv-=dt;if(S.shake>0)S.shake-=dt;
  if(S.tw){const w=S.tw;w.k=Math.min(1,w.k+dt/w.dur);const e=w.k<.5?2*w.k*w.k:1-((-2*w.k+2)**2)/2;S.ang=w.a0+(w.a1-w.a0)*e;S.px=w.x0+(w.x1-w.x0)*e;S.py=w.y0+(w.y1-w.y0)*e;if(w.k>=1){S.tw=null;S.dir=dirOf(S.ang);updBtns();if(w.dash||w.nob)arrive();}}
  else freeMove(dt);
- S.robbers.forEach(r=>{if(r.strike!=null){if(r.gone||r.x!==S.x||r.y!==S.y)r.strike=null;else if(!S.paused&&!S.tw&&(r.strike-=dt)<=0){r.strike=null;hit('Robber! −1 ❤️');}}if(r.hold>0&&!S.paused)r.hold-=dt;if(r.gone>0){r.gone=Math.max(0,r.gone-dt);if(!r.gone){r.x=r.sx;r.y=r.sy;r.px=r.x+.5;r.py=r.y+.5;if(Math.abs(r.x-S.x)+Math.abs(r.y-S.y)<4)r.hold=Math.max(r.hold||0,2.5);}}r.px+=(r.x+.5-r.px)*Math.min(1,dt*5);r.py+=(r.y+.5-r.py)*Math.min(1,dt*5);});
+ S.robbers.forEach(r=>{if(r.strike!=null){if(r.gone||r.x!==S.x||r.y!==S.y)r.strike=null;else if(!S.paused&&!S.tw&&(r.strike-=dt)<=0){r.strike=null;hit('Robber! −1 ❤️');}}if(r.hold>0&&!S.paused)r.hold-=dt;if(r.gone>0){r.gone=Math.max(0,r.gone-dt);if(!r.gone&&Math.abs(r.sx-S.x)+Math.abs(r.sy-S.y)<2)r.gone=.5;if(!r.gone){r.x=r.sx;r.y=r.sy;r.px=r.x+.5;r.py=r.y+.5;if(Math.abs(r.x-S.x)+Math.abs(r.y-S.y)<4)r.hold=Math.max(r.hold||0,2.5);}}r.px+=(r.x+.5-r.px)*Math.min(1,dt*5);r.py+=(r.y+.5-r.py)*Math.min(1,dt*5);});
  if(!S.paused){S.rt+=dt;if(S.rt>2.6){S.rt=0;robberTick();}
   TRAPS.forEach((tp,i)=>{const c=trapC(i,S.t),near=Math.abs(tp.x-S.x)+Math.abs(tp.y-S.y)<4;if(near&&tp.lc!==undefined){if(c<tp.lc)snd(988,.08,'sine',.07);else if(tp.lc<1.0&&c>=1.0)snd(330,.08,'sine',.05);else if(tp.lc<1.7&&c>=1.7)snd(220,.12,'square',.05);}tp.lc=c;
    const st=trapState(i,S.t);if(st==='down'&&!S.tw&&S.x===tp.x&&S.y===tp.y){hit('Crushed! −1 ❤️');}tp.last=st;});
