@@ -12,6 +12,7 @@ import { createServer } from 'vite'
 import { STORAGE_KEY } from '../src/config/app.ts'
 import { buildGemPuzzle, findStraightSpelling, isBonusSpelling, MATCH_CHIPS } from '../src/lib/gemSearch.ts'
 import { debugMiniGames } from '../src/lib/debugPlays.ts'
+import { withPlaytest1 } from './dev-ui-playtest.mjs'
 
 const VIEWPORTS = [
   [375, 667],
@@ -149,7 +150,7 @@ async function swipe(page, path) {
 }
 
 async function openLesson(page, origin, lineId, seed) {
-  await page.goto(`${origin}?gemSeed=${seed}`)
+  await page.goto(withPlaytest1(`${origin}?gemSeed=${seed}`))
   await page.getByRole('main', { name: 'Home' }).waitFor()
   await pointerClick(page, page.getByRole('button', { name: 'Settings', exact: true }))
   await pointerClick(page, page.locator('details.settings-debug summary'))

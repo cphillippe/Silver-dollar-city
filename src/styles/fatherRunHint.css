@@ -223,7 +223,8 @@ html[data-easy='on'] .play.is-father-run .run-miss.is-arming .btn {
   }
 
   html[data-easy='on'] .play.is-father-run .story-caption {
-    font: 700 15px/1.2 var(--sans);
+    display: block;
+    font: 700 15px / 1.2 var(--sans);
   }
 
   html[data-easy='on'] .play.is-father-run .story-kicker {
@@ -551,4 +552,9 @@ html[data-easy='on'] .play.is-father-run .run-miss.is-arming .btn {
       background-position: -16px -30px;
     }
   }
+}
+
+/* #871: Only raise Father-run chrome that was below 13px on main — never shrink caption/speech line. */
+html[data-easy='on'] .play.is-father-run :is(.run-speech-kicker, .run-speech-count, .match-score) {
+  font-size: 0.8125rem;
 }
