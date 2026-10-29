@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; script-src 'sha256-a5TLOjAb0VQvLkbZFQkA0Fi25nCKd6Q2i9xrhQ+jook='"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; script-src 'sha256-bIBLZgAdAclO5Y++g4cl5tiJeiewYt+UWpiVy7R33BY='"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Night Run · Silver City</title><link rel="icon" href="assets/favicon.png"><meta name="theme-color" content="#2a0d58">
 <link rel="stylesheet" href="../fonts/fonts.css">
 <style>
@@ -156,12 +156,12 @@ const COPY={
  JSRC:'Psalm 19:1; Romans 1:20. Fine-tuning: Collins; Barrow & Tipler; Carter.',
  // --- v2 real-forces copy (RESEARCH.md rows in brackets; all pending BS + H&P) ---
  FCHIP:['Gravity','Strong','Electric','Weak','Space'],
- FN:['Gravity','Strong force','Electromagnetic force','Weak force','Space grows (dark energy)'],
+ FN:['Gravity','Strong force','Electromagnetic force','Weak force (Higgs setting)','Space grows (dark energy)'],
  FW:['Life needs: within 1 part in 10⁶⁰ (Collins; Davies)', // R1
   'Life needs: within ±0.5% (Oberhummer)', // R2
   'Life needs: within ±4% (Oberhummer)', // R3
-  'Life needs: within about ±2% (Jeltema & Sher)', // R4
-  'Life needs: under 1 part in 10¹²⁰ of its natural size, either way (Barnes)'], // R5
+  'Life needs this one within about 1 part in 100.', // R4
+  'Life needs it smaller than 1 part in a number with 120 zeros of its natural size, either way.'], // R5
  OFF:'Off from today: {v}',LNOW:'Now: {v}',STEP:'Step 10{e}',
  FX:{grav:['Too weak! Everything flew apart too fast. No stars could form.','Too strong! Everything fell back together too fast. No life could ever start.'], // R1
   strong:['Too weak! Stars could not make both carbon and oxygen. Life needs both.','Too strong! Stars could not make both carbon and oxygen. Life needs both.'], // R2
@@ -172,7 +172,7 @@ const COPY={
   lam:['Space pulls in! Everything fell back together in a crunch. No life could ever start.','Space grows too fast! Everything flew apart before stars or galaxies could form.']}, // R5b
  STEP5:'Now find all five! Each must be inside its real window.',
  WIN5:'Gravity, strong, electric, weak, and space: all set just right.',
- ODDS:'Real odds for luck to get all five at once: about 1 in 2.5 × 10¹⁸⁵.', // R-luck
+ ODDS:'Real odds for luck to get all five at once: about 1 in 5 × 10¹⁸⁵.', // R-luck
  COUNT5:'Luck tries: {n}. Times all five: {k}.',
  SAVED5:'Luck has tried {n} times. All five just right: {k}.',
  HIT5:'Luck got all five! That almost never, ever happens.',
@@ -719,7 +719,7 @@ const P10=e=>10n**BigInt(e),ONE=P10(130);
 const FF=[{key:'grav',crank:0,lo:-P10(70),hi:P10(70),emin:-60},   // R1 ±1 part in 10^60 (Collins 2009; Davies 1982)
  {key:'strong',crank:2,lo:-5n*P10(127),hi:5n*P10(127),emin:-3},     // R2 ±0.5% (Oberhummer et al. 2000)
  {key:'em',crank:-1,lo:-4n*P10(128),hi:4n*P10(128),emin:-2},        // R3 ±4% (Oberhummer et al. 2000)
- {key:'weak',crank:-1,lo:-197n*P10(126),hi:203n*P10(126),emin:-3},  // R4 Higgs v ±1% -> G_F -1.97%..+2.03% (Jeltema & Sher via Barnes 2012)
+ {key:'weak',crank:-1,lo:-P10(128),hi:P10(128),emin:-3},  // R4 Higgs setting v ±1% (Jeltema & Sher via Barnes 2012); dev = v change
  {key:'lam',crank:1,lo:-P10(10),hi:P10(10),emin:-120}];             // R5 |Λ| ≤ 1 part in 10^120 of natural size (Barnes 2012; Collins 2009)
 FT.F=FF.map(()=>({dev:0n,e:-1,g:0}));FT.fi=0;
 const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};const sup=n=>String(n).split('').map(c=>SUP[c]).join('');
@@ -732,7 +732,7 @@ function ffFmt(d){if(d===0n)return '0';const neg=d<0n,s=(neg?-d:d).toString(),e=
  let o=(neg?'−':'+')+m+' × 10'+sup(e);if(e>=-4&&e<0){const pc=parseFloat(s.slice(0,4)[0]+'.'+s.slice(1,4))*Math.pow(10,e+2);o+=' ('+(neg?'−':'+')+(+pc.toPrecision(2))+'%)';}return o;}
 function ffFx(i){if(ffIn(i))return '';const f=FF[i],d=FT.F[i].dev;
  if(f.key==='strong'&&d< -9n*P10(128))return COPY.FX.strongFar; // R2b αs < 0.91 (Davies 1972 via Barnes 2012)
- if(f.key==='weak'&&d< -626n*P10(127))return COPY.FX.weakFar;   // R4b v/mPl > 3.3e-17 (Damour & Donoghue 2008 via Barnes 2012)
+ if(f.key==='weak'&&d>634n*P10(127))return COPY.FX.weakFar;   // R4b v/mPl > 3.3e-17 (v +63.4%: weak far too weak) (Damour & Donoghue 2008 via Barnes 2012)
  return COPY.FX[f.key][d<0n?0:1];}
 function ri(a,b){return a+Math.floor(Math.random()*(b-a+1));}
 function ffScramble(){FT.F=FF.map(f=>{const E=f.emin,sg=Math.random()<.5?-1n:1n;let es;
