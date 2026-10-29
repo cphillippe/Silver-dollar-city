@@ -1727,7 +1727,8 @@ assert.match(
   assert.equal(WORDS.fineTuning.term, 'Fine-tuning', '#792 WORDS.fineTuning is unchanged')
   assert.equal(
     easyWhyLine('Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.'),
-    'The settings for life could be almost anything, so luck explains it.',
+    'Stars look tiny because they are far away.',
+    '#821 BS Oct 28: Easy kid swap for the wide-ranges miss',
   )
   assert.deepEqual(whyBlastExtras('daily-cosmos'), ['Luck is enough for a livable world.'])
   const cosmos = packLesson('daily-cosmos')
