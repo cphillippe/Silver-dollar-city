@@ -1916,36 +1916,63 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.558')
-assert.equal(CHANGELOG[0].version, '1.4.558', '1.4.558 is the newest row')
-assert.ok(CHANGELOG.some((note) => note.version === '1.4.558'), '1.4.558 changelog row')
+assert.equal(APP_VERSION, '1.4.557')
+assert.equal(CHANGELOG[0].version, '1.4.557', '1.4.557 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.557'), '1.4.557 changelog row')
 assert.doesNotMatch(
-  latestChange('1.4.558').items.join('\n'),
+  latestChange('1.4.557').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
-  '1.4.558 changelog avoids GitHub close keywords',
+  '1.4.557 changelog avoids GitHub close keywords',
 )
-assert.match(latestChange('1.4.558').items.join('\n'), /Refs #749/, '1.4.558 changelog refs #749')
-assert.equal(
-  latestChange('1.4.558').items[0],
-  'Easy: the next Night Watch map now opens after round 8.',
-  '1.4.558 changelog names the Easy map gate',
+assert.match(latestChange('1.4.557').items.join('\n'), /Refs #841/, '1.4.557 changelog refs #841')
+assert.match(latestChange('1.4.557').items.join('\n'), /Nothing changes for players yet\./)
+assert.doesNotMatch(
+  latestChange('1.4.557').items.join('\n'),
+  /\?playtest=1|Night Watch debug/,
+  '1.4.557 changelog stays player-facing',
 )
 assert.deepEqual(
-  playerVisibleChangeItems(latestChange('1.4.558').items),
-  ['Easy: the next Night Watch map now opens after round 8.'],
-  '1.4.558 players see the Easy map line and not the ref',
+  playerVisibleChangeItems(latestChange('1.4.557').items),
+  [],
+  '1.4.557 player list drops Refs and dev-only lines',
 )
 assert.equal(
-  playerVisibleChangeTitle(latestChange('1.4.558').title),
-  'Easy Night Watch: the next map opens after round 8',
-  '1.4.558 the map note stays in What’s new',
+  playerVisibleChangeTitle(latestChange('1.4.557').title),
+  null,
+  '1.4.557 Behind the scenes title stays out of What’s new',
 )
+assert.equal(CHANGELOG[1].version, '1.4.556', '1.4.556 follows the grade row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.556'), '1.4.556 changelog row')
 assert.doesNotMatch(
-  playerVisibleChangeItems(latestChange('1.4.558').items).join('\n'),
-  /\bHard\b|\bMedium\b/,
-  '1.4.558 the player note does not name other tiers',
+  latestChange('1.4.556').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.556 changelog avoids GitHub close keywords',
 )
-assert.equal(CHANGELOG[1].version, '1.4.554', '1.4.554 follows the round 8 row')
+assert.match(latestChange('1.4.556').items.join('\n'), /Refs #873/, '1.4.556 changelog refs #873')
+assert.match(
+  latestChange('1.4.556').items.join('\n'),
+  /God forgives us a huge debt\. So we forgive others\./,
+)
+assert.match(
+  latestChange('1.4.556').items.join('\n'),
+  /Christ made all things, and he holds them together\./,
+)
+assert.match(latestChange('1.4.556').items.join('\n'), /Medium and Hard claims stay as they are\./)
+assert.deepEqual(playerVisibleChangeItems(latestChange('1.4.556').items), [
+  'The debt line now says: God forgives us a huge debt. So we forgive others.',
+  'The order line now says: Christ made all things, and he holds them together.',
+])
+assert.equal(CHANGELOG[2].version, '1.4.555', '1.4.555 follows the Easy claims row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.555'), '1.4.555 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.555').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.555 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.555').items.join('\n'), /Refs #756/, '1.4.555 changelog refs #756')
+assert.match(latestChange('1.4.555').items.join('\n'), /Refs #768/, '1.4.555 changelog refs #768')
+assert.match(latestChange('1.4.555').items.join('\n'), /pace chip sits in the top HUD/, '1.4.555 changelog names the HUD pace chip')
+assert.equal(CHANGELOG[3].version, '1.4.554', '1.4.554 follows the Night Watch row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.554'), '1.4.554 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.554').items.join('\n'),
@@ -1969,10 +1996,10 @@ assert.equal(
   null,
   '1.4.554 Behind the scenes title stays out of What’s new',
 )
-assert.equal(CHANGELOG[2].version, '1.4.553', '1.4.553 follows the Home Read row')
+assert.equal(CHANGELOG[4].version, '1.4.553', '1.4.553 follows the Home Read row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.553'), '1.4.553 changelog row')
 assert.match(latestChange('1.4.553').items.join('\n'), /Refs #793/)
-assert.equal(CHANGELOG[3].version, '1.4.552', '1.4.552 follows the 1.4.553 row')
+assert.equal(CHANGELOG[5].version, '1.4.552', '1.4.552 follows the 1.4.553 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.552'), '1.4.552 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.552').items.join('\n'),
@@ -1990,7 +2017,7 @@ assert.match(
   /above the letter grid/,
   '1.4.552 changelog names the Match banner layout fix',
 )
-assert.equal(CHANGELOG[4].version, '1.4.551', '1.4.551 follows the #871 row')
+assert.equal(CHANGELOG[6].version, '1.4.551', '1.4.551 follows the #871 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.551'), '1.4.551 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.551').items.join('\n'),
@@ -2006,7 +2033,7 @@ assert.match(
 assert.match(latestChange('1.4.551').items.join('\n'), /Drag or tap the road/, '1.4.551 changelog names the maze hint')
 assert.match(latestChange('1.4.551').items.join('\n'), /Refs #877/, '1.4.551 changelog refs #877')
 assert.match(latestChange('1.4.551').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[5].version, '1.4.550', '1.4.550 follows the 1.4.551 row')
+assert.equal(CHANGELOG[7].version, '1.4.550', '1.4.550 follows the 1.4.551 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.550'), '1.4.550 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.550').items.join('\n'),
@@ -2022,7 +2049,7 @@ assert.match(
 assert.match(latestChange('1.4.550').items.join('\n'), /Story word! \+100/, '1.4.550 changelog keeps the story payoff')
 assert.match(latestChange('1.4.550').items.join('\n'), /Refs #870/, '1.4.550 changelog refs #870')
 assert.match(latestChange('1.4.550').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[6].version, '1.4.549', '1.4.549 follows the 1.4.550 row')
+assert.equal(CHANGELOG[8].version, '1.4.549', '1.4.549 follows the 1.4.550 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.549'), '1.4.549 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.549').items.join('\n'),
@@ -2036,7 +2063,7 @@ assert.doesNotMatch(
   /\?playtest=1|Night Watch debug/,
   '1.4.549 changelog stays player-facing',
 )
-assert.equal(CHANGELOG[7].version, '1.4.548', '1.4.548 follows the maze drag row')
+assert.equal(CHANGELOG[9].version, '1.4.548', '1.4.548 follows the maze drag row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.548'), '1.4.548 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.548').items.join('\n'),
@@ -2090,7 +2117,7 @@ for (const script of [
   assert.match(live871, /dev-ui-playtest\.mjs/, `#871 ${script} opens developer UI via playtest helper`)
 }
 await import('./check-type-floor-baseline.mjs').then((mod) => mod.assertTypeFloorCss())
-assert.equal(CHANGELOG[8].version, '1.4.547', '1.4.547 follows QuickReview row')
+assert.equal(CHANGELOG[10].version, '1.4.547', '1.4.547 follows QuickReview row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.547'), '1.4.547 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.547').items.join('\n'),
@@ -2103,7 +2130,7 @@ assert.doesNotMatch(
   '1.4.547 changelog avoids box paths',
 )
 assert.match(latestChange('1.4.547').items.join('\n'), /Refs #858/, '1.4.547 changelog refs #858')
-assert.equal(CHANGELOG[9].version, '1.4.546', '1.4.546 stays under 1.4.547')
+assert.equal(CHANGELOG[11].version, '1.4.546', '1.4.546 stays under 1.4.547')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.546'), '1.4.546 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.546').items.join('\n'),
@@ -2116,7 +2143,7 @@ assert.doesNotMatch(
   '1.4.546 changelog drops box paths',
 )
 assert.match(latestChange('1.4.546').items.join('\n'), /Refs #753/, '1.4.546 changelog refs #753')
-assert.equal(CHANGELOG[10].version, '1.4.545', '1.4.545 stays under 1.4.546')
+assert.equal(CHANGELOG[12].version, '1.4.545', '1.4.545 stays under 1.4.546')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.545'), '1.4.545 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.545').items.join('\n'),
@@ -2125,7 +2152,7 @@ assert.doesNotMatch(
 )
 assert.match(latestChange('1.4.545').items.join('\n'), /Refs #855/, '1.4.545 changelog refs #855')
 assert.match(latestChange('1.4.545').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[11].version, '1.4.544', '1.4.544 stays under 1.4.545')
+assert.equal(CHANGELOG[13].version, '1.4.544', '1.4.544 stays under 1.4.545')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.544'), '1.4.544 changelog row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.543'), '1.4.543 changelog row')
 assert.doesNotMatch(
@@ -2242,6 +2269,7 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
   const camSrc834 = readFileSync(new URL('../src/components/nwCamera.ts', import.meta.url), 'utf8')
   const screen834 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   const actors834 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  const defendCss834 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   assert.match(camSrc834, /export const NW_TAP_SLOP = 8\b/, '#834 the tap slop stays 8')
   assert.match(camSrc834, /export function camFirstSeat/, '#834 the first seat is picked from the camera view')
   assert.match(screen834, /firstSeatAt=\{camOn \? firstSeatPick : undefined\}/, '#834 DefendScreen passes the camera pick down')
@@ -2249,6 +2277,47 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
   assert.match(actors834, /firstSeatAt !== undefined/, '#834 the page-measured pick is only for the static board')
   assert.match(screen834, /camPointerAt\.current < 500 && !target\.matches\(':focus-visible'\)/, '#834 a pointer focus never pans the camera')
   assert.match(screen834, /suppressClickUntil\.current = 0\n\s+camPanning\.current = false/, '#834 a new press clears the click swallow')
+  assert.match(screen834, /function camDown\(event: ReactPointerEvent<HTMLDivElement>\) \{\s*if \(!event\.isPrimary\) return\s*if \(!camOn && !easy\) return/, '#768 cam-off drag tracking is Easy-only in camDown')
+  assert.match(
+    screen834,
+    /if \(!camOn\) \{\s*if \(!easy\) return[\s\S]*?if \(camPanning\.current\) \{\s*suppressClickUntil\.current = performance\.now\(\) \+ 400\s*event\.stopPropagation\(\)/,
+    '#768 a cam-off drag past NW_TAP_SLOP is Easy-only',
+  )
+  assert.match(
+    screen834,
+    /function camEatClick\(event: ReactMouseEvent<HTMLDivElement>\) \{\s*if \(\(!camOn && !easy\) \|\| performance\.now\(\) >= suppressClickUntil\.current\) return/,
+    '#768 the post-drag click swallow is Easy-only when the camera is off',
+  )
+  assert.match(
+    screen834,
+    /if \(!camOn\) \{\s*if \(!easy\) return[\s\S]*?closeUpgrade\(true\)/,
+    '#768 only Easy cam-off drags may close the tower card',
+  )
+  assert.match(
+    defendCss834,
+    /\.defend-page\.is-easy-watch \.nw-hud > \.nw-pace \{[\s\S]*?position:\s*absolute;[\s\S]*?right:\s*6px;[\s\S]*?translateY\(-50%\)/,
+    '#768 NWUI-2 pace chip lives in the HUD strip outside the board frame',
+  )
+  assert.match(
+    defendCss834,
+    /\.defend-page\.is-easy-watch \.nw-pace\.is-open,[\s\S]*?border-color:\s*rgba\(186,\s*150,\s*255/,
+    '#768 Easy open pace chip is not gold (one gold cue per wave)',
+  )
+  assert.match(
+    defendCss834,
+    /\.defend-page\.is-easy-watch \.nw-hud \{[\s\S]*?pointer-events:\s*none;/,
+    '#868 Easy HUD strip passes taps through to walkers under the band',
+  )
+  assert.doesNotMatch(
+    defendCss834,
+    /\.defend-page\.is-easy-watch:has\(\.nw-cam\[data-nw-cam='on'\]\)\.is-easy-tap \.nw-stage \{[\s\S]*?margin-top:\s*-40px;/,
+    '#868 Easy cam-on wave must not pull the stage under the HUD',
+  )
+  assert.doesNotMatch(
+    defendCss834,
+    /\.defend-page\.is-easy-watch \.nw-pace \{[^}]*z-index:\s*20/,
+    '#768 NWUI-2 pace chip does not paint above walker taps',
+  )
 
   const seat = (x, y, live = true) => ({ x, y, live })
   const view = { W: 375, H: 574, s0: 0.5063, z: 1.4, tx: -200, ty: -250 }
@@ -19438,7 +19507,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(walk526.WALK_IN_MAX_MS, 1800)
   assert.equal(walk526.WALK_IN_U_PER_S, 900, '1.4.526 walkers run in at 900 map units a second')
   assert.equal(walk526.WALK_IN_TAP_MAX_MS, 840, '1.4.526 the tap lock is 0.84 s at most')
-  assert.equal(Math.round(100 / (0.01 * 6.8 * 1.75)), 840, '1.4.526 0.84 s is 0.1 of the road for the fastest Easy walker')
+  assert.equal(walk526.WALK_IN_WALKER_R, 24, '1.4.555 the tap lock ends once the walker body is on the plate')
   assert.equal(walk526.WALK_IN_SPAWN_T_CAP, defend526.EASY_ON_SCREEN_T, '1.4.526 the run-in cap is the live spawn cap')
 
   const roads526 = (id) => {
@@ -19523,11 +19592,13 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.deepEqual(seen526.find((row) => row[8] === 784).slice(0, 2), ['map06', 'c'], '1.4.526 map06 road c is the shortest')
   assert.equal(Math.max(...r1Runs526), 1705, '1.4.526 the longest round 1 run-in is 1705 ms')
   assert.deepEqual(seen526.find((row) => row[8] === 1705).slice(0, 2), ['far-hills', 'main'], '1.4.526 far-hills is the longest')
-  assert.deepEqual(
-    [...new Set(seen526.filter((row) => row[8] > walk526.WALK_IN_TAP_MAX_MS).map((row) => row[0]))],
-    ['a2', 'far-hills', 'map03', 'map04'],
-    '1.4.526 round 1 run-ins past 0.84 s take taps at the drawn spot before they land',
-  )
+  const r1Lock547 = seen526.map((row) => {
+    const road = roads526(row[0]).find((item) => item.id === row[1])
+    const entry = walk526.walkInEntry(road.points, plate526)
+    return walk526.walkInTapLockMs(row[8], walk526.walkInLength(entry, road.points, r1T526))
+  })
+  assert.equal(Math.min(...r1Lock547), 202, '1.4.555 the shortest round 1 tap lock is geometry-based')
+  assert.equal(Math.max(...r1Lock547), 280, '1.4.555 the longest round 1 tap lock stays under the 0.84 s cap')
 
   const ts526 = new Set()
   for (let wave = 0; wave < 40; wave += 1) {
@@ -19547,7 +19618,10 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
         low526 = Math.min(low526, ms)
         high526 = Math.max(high526, ms)
         assert.ok(ms >= 600 && ms <= 1800, `1.4.526 ${id}:${road.id} t ${t} runs ${ms} ms`)
-        assert.equal(walk526.walkInTapLockMs(ms), Math.min(ms, 840), `1.4.526 ${id}:${road.id} t ${t} the lock is the run-in, at most 0.84 s`)
+        const entry547 = walk526.walkInEntry(road.points, plate526)
+        const len547 = walk526.walkInLength(entry547, road.points, t)
+        const lock547 = walk526.walkInTapLockMs(ms, len547)
+        assert.ok(lock547 <= ms && lock547 <= walk526.WALK_IN_TAP_MAX_MS, `1.4.555 ${id}:${road.id} t ${t} lock ${lock547} ms`)
       }
     }
   }
@@ -19561,8 +19635,8 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(walk526.walkInMs(900), 1000, '1.4.526 900 u is one second')
   assert.equal(walk526.walkInMs(1000), 1111)
   assert.equal(walk526.walkInMs(500), 600)
-  assert.equal(walk526.walkInTapLockMs(700), 700)
-  assert.equal(walk526.walkInTapLockMs(1800), 840)
+  assert.equal(walk526.walkInTapLockMs(700, 100), 700, '1.4.555 a short trail keeps the full run-in locked')
+  assert.equal(walk526.walkInTapLockMs(1800, 4000), 183, '1.4.555 a long trail unlocks once the walker reaches the plate')
   assert.equal(walk526.walkInEase(0), 0)
   assert.equal(walk526.walkInEase(0.5), 0.5)
   assert.equal(walk526.walkInEase(1), 1)
@@ -19578,7 +19652,8 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const sim526 = point526(0.3, path526)
   const run526 = ms526(a2Entry526, path526, 0.3)
   assert.deepEqual(clock526.drawAt(walker526, sim526, 1000), a2Entry526.start, '1.4.526 first frame is the start')
-  const lock526 = walk526.walkInTapLockMs(run526)
+  const lock526 = walk526.walkInTapLockMs(run526, walk526.walkInLength(a2Entry526, path526, 0.3))
+  assert.equal(lock526, 194, '1.4.555 a2 t 0.3 unlocks when the walker reaches the plate')
   assert.equal(clock526.entering(walker526, 1000 + run526 - 1), true)
   assert.equal(clock526.tapLocked(walker526, 1000 + lock526 - 1), true)
   assert.equal(clock526.entering(walker526, 1000 + run526), false)
@@ -19588,8 +19663,8 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const hillWalker526 = { id: 3, t: r1T526 }
   const hillSim526 = point526(r1T526, hills526)
   assert.equal(long526.see(hillWalker526, 0).runMs, 1705)
-  assert.equal(long526.tapLocked(hillWalker526, 839), true)
-  assert.equal(long526.tapLocked(hillWalker526, 840), false, '1.4.526 a long run-in takes taps after 0.84 s')
+  assert.equal(long526.tapLocked(hillWalker526, 279), true)
+  assert.equal(long526.tapLocked(hillWalker526, 280), false, '1.4.555 far-hills unlocks when the walker is on the plate')
   assert.equal(long526.entering(hillWalker526, 840), true, '1.4.526 and is still walking in')
   const hillAt526 = long526.drawAt(hillWalker526, hillSim526, 840)
   assert.ok(hillAt526.x >= 0 && hillAt526.y >= 0 && hillAt526.x <= 798 && hillAt526.y <= 1134, '1.4.526 its drawn spot is on the map by then')
