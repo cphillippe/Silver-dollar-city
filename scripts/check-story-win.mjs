@@ -212,7 +212,7 @@ function assertWin(id, width, height, win, widths) {
 }
 
 async function openWin(page, id, lines) {
-  await page.goto('/', { waitUntil: 'domcontentloaded' })
+  await page.goto('/?playtest=1', { waitUntil: 'domcontentloaded' })
   await page.getByRole('button', { name: 'Settings', exact: true }).click()
   await page.getByText('Developer · mini-game jumps').click()
   await page.getByRole('region', { name: 'Story Strip' }).getByRole('button', { name: new RegExp(`^${id} ·`) }).click()

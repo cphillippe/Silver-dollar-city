@@ -7,6 +7,7 @@ import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import { mkdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { tmpdir } from 'node:os'
 import { chromium } from 'playwright'
 import { build, preview } from 'vite'
 import { DAILY_POOL } from '../src/content/daily.ts'
@@ -17,9 +18,96 @@ import {
   webRefreshSurface,
   waitForFreshWorker,
 } from '../src/lib/webRefresh.ts'
+import { assertMainEasyTypeBaselines } from './check-type-floor-baseline.mjs'
 
-const shotDir = '/opt/cursor/artifacts'
+const shotDir = join(tmpdir(), 'silver-city-871-shots')
 mkdirSync(shotDir, { recursive: true })
+
+const DEV_MARKERS = [
+  'Developer · mini-game jumps',
+  'Night Watch · debug freeze',
+  'this-device hide for playtest',
+  'Behind the scenes',
+  'Refs:',
+]
+
+async function assertNoDevCopy(page, label) {
+  const hay = await page.evaluate(
+    () =>
+      `${document.body.textContent || ''} ${[...document.querySelectorAll('*')]
+        .flatMap((el) => [...el.attributes].map((a) => a.value))
+        .join(' ')}`,
+  )
+  const a2 = [
+    [/Developer · mini-game jumps/, 'Developer · mini-game jumps'],
+    [/\bDebug\b/, 'Debug'],
+    [/Night Watch · debug freeze/, 'Night Watch · debug freeze'],
+    [/debug freeze/i, 'debug freeze'],
+    [/Jump · Night Watch/, 'Jump · Night Watch'],
+    [/Playtest only/, 'Playtest only'],
+    [/this-device hide for playtest/, 'playtest-hide copy'],
+    [/Behind the scenes/, 'Behind the scenes'],
+    [/\bRefs\b/, 'Refs'],
+  ]
+  for (const [re, name] of a2) {
+    assert.ok(!re.test(hay), `#871 ${label} hay lacks ${name}`)
+  }
+  const html = await page.evaluate(() => document.body.innerHTML)
+  for (const marker of DEV_MARKERS) {
+    assert.ok(!html.includes(marker), `#871 ${label} innerHTML lacks ${marker}`)
+  }
+  assert.equal(await page.locator('details.settings-debug').count(), 0, `#871 ${label} no debug details`)
+  const whatsNew = await page.evaluate(
+    () => document.querySelector('.settings-card.whats-new')?.textContent ?? '',
+  )
+  assert.doesNotMatch(whatsNew, /\bRefs\b/, `#871 ${label} What's new has no Refs lines`)
+}
+
+async function visibleTinyType(page, scope = 'body') {
+  return page.evaluate((scope) => {
+    const roots =
+      scope === 'body'
+        ? [document.body]
+        : scope.split(',').flatMap((part) => {
+            const sel = part.trim()
+            if (!sel) return []
+            const nodes = [...document.querySelectorAll(sel)]
+            return nodes.length ? nodes : [`missing root: ${sel}`]
+          })
+    if (roots.some((root) => typeof root === 'string')) return roots.filter((root) => typeof root === 'string')
+    const bad = []
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
+    let node
+    while ((node = walker.nextNode())) {
+      const raw = (node.textContent || '').replace(/\s+/g, ' ').trim()
+      if (!raw) continue
+      const el = node.parentElement
+      if (!el || !roots.some((root) => root.contains(el))) continue
+      if (el.closest('svg')) continue
+      if (typeof el.checkVisibility === 'function' && !el.checkVisibility()) continue
+      const style = getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+      const elBox = el.getBoundingClientRect()
+      if (elBox.width <= 0 || elBox.height <= 0) continue
+      const range = document.createRange()
+      range.selectNodeContents(node)
+      for (const rect of range.getClientRects()) {
+        if (rect.width <= 0 || rect.height <= 0) continue
+        const px = parseFloat(style.fontSize)
+        if (px + 0.05 < 13) {
+          bad.push(`${raw.slice(0, 48)} (${px}px)`)
+          break
+        }
+      }
+    }
+    return bad
+  }, scope)
+}
+
+async function assertEasyTypeFloor(page, label, scope = 'body') {
+  const bad = await visibleTinyType(page, scope)
+  assert.deepEqual(bad, [], `#871 ${label} visible type >= 13px: ${bad.join('; ')}`)
+}
 
 const gems = DAILY_POOL.find((item) => item.challenge.id === 'daily-gems')
 assert.ok(gems && gems.challenge.kind === 'match')
@@ -244,6 +332,30 @@ try {
     { width: 375, height: 667 },
     { width: 390, height: 844 },
   ]) {
+    const audit = await browser.newPage({ viewport })
+    await audit.goto(`${origin}/`)
+    await audit.locator('.welcome').waitFor()
+    await pointerClick(audit, audit.getByRole('button', { name: 'Start Easy' }))
+    await audit.getByRole('main', { name: 'Home' }).waitFor()
+    await assertEasyTypeFloor(audit, `Home ${viewport.width}`, 'main.hub.is-easy-home')
+    const settingsBtn = audit.getByRole('button', { name: 'Settings', exact: true })
+    await settingsBtn.scrollIntoViewIfNeeded()
+    await pointerClick(audit, settingsBtn)
+    await audit.locator('main.settings').waitFor()
+    await assertNoDevCopy(audit, `Settings ${viewport.width}`)
+    await assertEasyTypeFloor(audit, `Settings ${viewport.width}`, 'main.settings')
+    await audit.evaluate(() => {
+      const details = document.querySelector('details.settings-advanced')
+      if (details instanceof HTMLDetailsElement) details.open = true
+    })
+    await assertNoDevCopy(audit, `Settings More open ${viewport.width}`)
+    if (viewport.width === 375) {
+      await audit.screenshot({ path: join(shotDir, '871-settings-no-flag-375x667.png') })
+      await audit.locator('.settings-card.whats-new').scrollIntoViewIfNeeded()
+      await audit.screenshot({ path: join(shotDir, '871-whats-new-no-flag-375x667.png') })
+    }
+    await audit.close()
+
     const page = await browser.newPage({ viewport })
     await page.goto(`${origin}/`)
     await page.locator('.welcome').waitFor()
@@ -257,6 +369,7 @@ try {
     assert.match(kickerText, /Mercy · Story Creek/)
     await inView(page, kicker, `L1 kicker ${viewport.width}`)
     await inView(page, page.locator('.maze-board'), `L1 board ${viewport.width}`)
+    await assertEasyTypeFloor(page, `L1 maze ${viewport.width}`, '.play.is-road-maze')
     await walkMaze(page)
     await page.locator('[data-maze-next]').waitFor({ timeout: 8000 })
     await inView(page, kicker, `L1 kicker after win ${viewport.width}`)
@@ -264,6 +377,8 @@ try {
     if (viewport.width === 375) {
       await page.screenshot({ path: join(shotDir, 'launch-809-who-375.png') })
     }
+    await page.goto(`${origin}/?playtest=1`)
+    await page.getByRole('main', { name: 'Home' }).waitFor()
     const settings = page.getByRole('button', { name: 'Settings', exact: true })
     await settings.scrollIntoViewIfNeeded()
     await pointerClick(page, settings)
@@ -279,6 +394,14 @@ try {
     const fatherText = await fatherKicker.evaluate((node) => (node.textContent || '').replace(/\s+/g, ' ').trim())
     assert.match(fatherText, /Mercy · Story Creek/)
     await inView(page, fatherKicker, `L2 kicker ${viewport.width}`)
+    if (viewport.width === 375 && viewport.height === 667) {
+      await assertMainEasyTypeBaselines(page, 'L2 father 375×667')
+    }
+    await assertEasyTypeFloor(
+      page,
+      `L2 father ${viewport.width}`,
+      '.play.is-father-run .story-kicker, .play.is-father-run .story-caption, .play.is-father-run .run-speech, .play.is-father-run .match-score, .play.is-father-run .run-pad',
+    )
     await inView(page, page.locator('.play.is-father-run .run-scene'), `L2 scene ${viewport.width}`)
     await inView(page, page.locator('[data-run-pad="hold"]'), `L2 pad ${viewport.width}`)
     await hugFather(page)
@@ -289,11 +412,39 @@ try {
       page.locator('.play.is-father-run.is-win').getByRole('button', { name: 'Lock In next' }),
       `L2 gold ${viewport.width}`,
     )
+    await pointerClick(
+      page,
+      page.locator('.play.is-father-run.is-win').getByRole('button', { name: 'Lock In next' }),
+    )
+    await page.locator('.recall-gate.is-easy-hold').waitFor()
+    await assertEasyTypeFloor(page, `Lock In ${viewport.width}`, '.recall-gate.is-easy-hold')
     await page.close()
   }
 
+  const playtestSettings = await browser.newPage({ viewport: { width: 375, height: 667 } })
+  await playtestSettings.goto(`${origin}/?playtest=1`)
+  await playtestSettings.locator('.welcome').waitFor()
+  await pointerClick(playtestSettings, playtestSettings.getByRole('button', { name: 'Start Easy' }))
+  await playtestSettings.getByRole('main', { name: 'Home' }).waitFor()
+  await pointerClick(playtestSettings, playtestSettings.getByRole('button', { name: 'Settings', exact: true }))
+  await playtestSettings.locator('details.settings-debug summary').waitFor()
+  assert.ok(
+    (await playtestSettings.locator('details.settings-debug').count()) >= 1,
+    '#871 playtest=1 keeps the dev section in the DOM',
+  )
+  await playtestSettings.screenshot({ path: join(shotDir, '871-settings-playtest-375x667.png') })
+  await playtestSettings.close()
+
+  const homeShot = await browser.newPage({ viewport: { width: 375, height: 667 } })
+  await homeShot.goto(`${origin}/`)
+  await homeShot.locator('.welcome').waitFor()
+  await pointerClick(homeShot, homeShot.getByRole('button', { name: 'Start Easy' }))
+  await homeShot.getByRole('main', { name: 'Home' }).waitFor()
+  await homeShot.screenshot({ path: join(shotDir, '871-home-375x667.png') })
+  await homeShot.close()
+
   const words = await browser.newPage({ viewport: { width: 375, height: 667 } })
-  await words.goto(`${origin}/`)
+  await words.goto(`${origin}/?playtest=1`)
   await words.locator('.welcome').waitFor()
   await pointerClick(words, words.getByRole('button', { name: 'Start Easy' }))
   await words.getByRole('main', { name: 'Home' }).waitFor()
@@ -307,6 +458,32 @@ try {
   await tuning.scrollIntoViewIfNeeded()
   await pointerClick(words, tuning)
   await words.locator('.gem-board').waitFor()
+  await assertMainEasyTypeBaselines(words, 'L3 word search 375×667')
+
+  const words390 = await browser.newPage({ viewport: { width: 390, height: 844 } })
+  await words390.goto(`${origin}/?playtest=1`)
+  await words390.locator('.welcome').waitFor()
+  await pointerClick(words390, words390.getByRole('button', { name: 'Start Easy' }))
+  await words390.getByRole('main', { name: 'Home' }).waitFor()
+  const wordSettings390 = words390.getByRole('button', { name: 'Settings', exact: true })
+  await wordSettings390.scrollIntoViewIfNeeded()
+  await pointerClick(words390, wordSettings390)
+  const wordSummary390 = words390.locator('details.settings-debug summary')
+  await wordSummary390.scrollIntoViewIfNeeded()
+  await pointerClick(words390, wordSummary390)
+  const tuning390 = words390.getByRole('button', { name: /^ob-tuning ·/ })
+  await tuning390.scrollIntoViewIfNeeded()
+  await pointerClick(words390, tuning390)
+  await words390.locator('.gem-board').waitFor()
+  await assertMainEasyTypeBaselines(words390, 'L3 word search 390×844')
+  await words390.close()
+
+  await assertEasyTypeFloor(
+    words,
+    'L3 word search 375',
+    '.play.is-gem-search .match-teach-dock, .play.is-gem-search .match-score, .play.is-gem-search .sort-how, .play.is-gem-search .loci-stamp.is-dock, .play.is-gem-search .gem-hint-slot',
+  )
+  await words.screenshot({ path: join(shotDir, '871-l3-word-search-375x667.png') })
   const grid = await readGrid(words)
   const path = findWord(grid, 'LARK')
   assert.ok(path, 'LARK is not on the board')
@@ -446,6 +623,26 @@ async function walkMaze(page) {
   const inn = await readCell(page.locator('[data-maze-cell].is-inn'))
   await walkUntil(page, hurt)
   await page.locator('.play.is-road-maze.is-found').waitFor()
+  await page.evaluate(() => {
+    const hurt = document.querySelector('[data-maze-cell].is-hurt')
+    if (!hurt) return
+    hurt.classList.add('is-help-cue')
+    if (!hurt.querySelector('.maze-cell-label')) {
+      const span = document.createElement('span')
+      span.className = 'maze-cell-label'
+      span.textContent = 'Help'
+      hurt.appendChild(span)
+    }
+  })
+  await assertEasyTypeFloor(page, 'L1 maze help cue', '.play.is-road-maze .maze-cell.is-help-cue')
+  const artRoot = process.env.SILVER_CITY_ARTIFACTS
+  if (artRoot) {
+    mkdirSync(artRoot, { recursive: true })
+    const w = page.viewportSize()?.width ?? 0
+    if (w === 375 || w === 390) {
+      await page.screenshot({ path: join(artRoot, `871-maze-help-${w}.png`) })
+    }
+  }
   await pointerClick(page, page.locator('[data-maze-cell].is-hurt'))
   await page.locator('.play.is-road-maze.is-helped').waitFor()
   await walkUntil(page, inn, true)
