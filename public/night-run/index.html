@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; script-src 'sha256-v9/vpHrLFg1wTCjDaGdHO2Znk+vqjDrT3jvgky/vv3s='"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; script-src 'sha256-lfKPerYGkUYalgRh79pO/A1X1fBQG+iiZfL6oRAZx9Q='"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Night Run · Silver City</title><link rel="icon" href="assets/favicon.png"><meta name="theme-color" content="#2a0d58">
 <link rel="stylesheet" href="../fonts/fonts.css">
 <style>
@@ -162,7 +162,7 @@ const COPY={
  DESIGN_REASON:'God wanted people, so He made the world just right.',
  JSRC:'Psalm 19:1; Romans 1:20. Fine-tuning: Collins; Barrow & Tipler; Carter.',
  // --- v2 real-forces copy (RESEARCH.md rows in brackets; all pending BS + H&P) ---
- FCHIP:['Gravity','Strong','Electric','Weak','Space'],
+ FCHIP:['Gravity','Strong','Electric','Higgs','Space'],
  FN:['Gravity','Strong force','Electric force','Weight setting (Higgs)','Space stretch'],
  FW:['Gravity must match the Big Bang\'s push almost perfectly.\nWithin 1 part in a number with 60 zeros!\nToo much, and everything crashes back.\nToo little, and nothing clumps into stars.', // R1 (r6: one line each)
   'Life needs it within 1 part in 200.', // R2
@@ -171,7 +171,7 @@ const COPY={
   'Life needs it smaller than 1 part in a number with 120 zeros of its natural size, either way.'], // R5
  SRCB:'Sources',SRC:['Sources: Collins 2009; Davies 1982','Source: Oberhummer et al. 2000','Sources: Oberhummer et al. 2000; Tegmark 2003','Sources (Higgs setting): Jeltema & Sher; Damour & Donoghue, via Barnes 2012','Sources: Barnes 2012; Collins 2009'],
  TAG:['Too weak!','Too strong!','Off!'],
- OFF:'How far off: {v}',ZEROS:'Zeros found: {n} of {m}',CLOSER:'Closer!',GETTING:{grav:['Getting closer! Still too weak.','Getting closer! Still too strong.'],lam:['Getting closer! Space still pulls in.','Getting closer! Space still grows too fast.']},DIALHINT:'Turn the dial. Go slow to land it!',ZOOMB:'Zoom in 🔍',ZOOMHINT:'This part is right! Tap Zoom in 🔍 to look closer.',RIGHT:'This part is right!',PAST:'You went past it! Turn back a little.',TUNE3:'Now find Just right!',FLOW:'All five are just right!',GATEOPEN:'The gate is open! God set all five just right.',FARTHER:'Farther!',TAPHINT:'Tap − or + to get closer.',SETB:'Found it ✓',SETHINT:'In the window! Tap Found it ✓ to keep it.',WARN:'Farther! One more and it starts over.',RESET:'Too far off. Back to the start. Try again!',LOCKED:'Locked ✓',LUCKTRY:'Luck\'s try:',LUCKN:['Gravity','Strong','Electric','Higgs','Space'],
+ OFF:'How far off: {v}',ZEROS:'Zeros found: {n} of {m}',CLOSER:'Closer!',GETTING:{grav:['Getting closer! Still too weak.','Getting closer! Still too strong.'],lam:['Getting closer! Space still pulls in.','Getting closer! Space still grows too fast.']},DIALHINT:'Turn the dial. Go slow to land it!',ZOOMB:'Zoom in 🔍',ZOOMHINT:'This part is right! Tap Zoom in 🔍 to look closer.',RIGHT:'This part is right!',PAST:'You went past it! Turn back a little.',TUNE3:'Now find Just right!',GATEOPEN:'The gate is open! God set all five just right.',FARTHER:'Farther!',TAPHINT:'Tap − or + to get closer.',SETB:'Found it ✓',SETHINT:'In the window! Tap Found it ✓ to keep it.',WARN:'Farther! One more and it starts over.',RESET:'Too far off. Back to the start. Try again!',LOCKED:'Locked ✓',LUCKTRY:'Luck\'s try:',LUCKN:['Gravity','Strong','Electric','Higgs','Space'],
  CLOSE:{grav:['So close! Still a tiny bit too weak.','So close! Still a tiny bit too strong.'],strong:['So close! Still a tiny bit too weak.','So close! Still a tiny bit too strong.'],em:['So close! Still a tiny bit too weak.','So close! Still a tiny bit too strong.'],weak:'So close! Still a tiny bit off.',lam:['So close! Space still pulls in a tiny bit.','So close! Space still grows a tiny bit too fast.']},
  FX:{grav:['Too weak! Everything flew apart too fast. No stars could form.','Too strong! Everything fell back together too fast. No life could ever start.'], // R1
   strong:['Stars could not make the oxygen we breathe or the carbon in our bodies.','Stars could not make the oxygen we breathe or the carbon in our bodies.'], // R2
@@ -619,7 +619,7 @@ function ftMsg(eb,h,p1,p2,btn){$('ftME').textContent=eb;$('ftMT').textContent=h;
 function ftGo(st){FT.st=st;FT.idle=0;FT.pc=0;FT.win=0;FT.perfect=0;FT.tcDone=0;FT.sk=['','',''];$('ftMsg').style.display='none';const T=$('ftTxt');T.innerHTML='';
  if(st==='claim'){ftMsg(COPY.TITLE,COPY.CLAIM,COPY.FRAME,'',COPY.NEXT);}
  else if(st==='try'){FT.tc=FT.tc||0;FT.c.forEach(c=>{c.v=c.cen;c.green=1;c.left=0;});ftTxt(COPY.TRY,CRANKS[FT.tc].name);}
- else if(st==='all3'||st==='replay'){ftScramble();ffScramble();if(st==='all3')ftTxt(COPY.FLOW,COPY.STEP5);else ftTxt(COPY.STEP5);}
+ else if(st==='all3'||st==='replay'){ftScramble();ffScramble();/* r6 fix: crank-done/scramble never says all five are right */ftTxt(COPY.STEP5);}
  else if(st==='luck'||st==='rluck'){FT.rl=0;FT.lr=null;ftLuckTxt();}
  else if(st==='back'){FT.c.forEach((c,i)=>ftTween(i,c.cen,.7));FT.F.forEach(F=>{F.dev=0n;F.g=1;F.fb='';F.lk=1;F.H=[];F.fa=0;});ftTxt(COPY.BACK);setTimeout(()=>{FT.P.length<200&&[0,1,2].forEach(ftSpark);[523,659,784,1047].forEach((f,k)=>setTimeout(()=>snd(f,.25,'sine',.06),k*110));},700);}
  else if(st==='reason'){ftMsg('⭐ '+COPY.STICKER,COPY.REASON,COPY.PSALM,'',COPY.NEXT);[523,659,784,1047,1319].forEach((f,k)=>setTimeout(()=>snd(f,.3,'sine',.07),k*110));}
