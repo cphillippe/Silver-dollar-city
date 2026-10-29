@@ -1,9 +1,115 @@
+/* One gold cue per screen — top chrome stays neutral on QuickReview. */
+html[data-easy='on'] .app.is-play:has(.quick-review) header.topbar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+html[data-easy='on'] .app.is-play:has(.quick-review) .topbar .brand-mark {
+  background: rgba(255, 246, 232, 0.55);
+  box-shadow: none;
+}
+
+html[data-easy='on'] .app.is-play:has(.quick-review) .topbar nav button.is-active {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+html[data-easy='on'] .journal.is-rehearse:has(.quick-review) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+html[data-easy='on'] .journal.is-rehearse:has(.quick-review) > .text-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
 html[data-easy='on'] .quick-review {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   padding: 0 0 1.25rem;
   max-width: 100%;
+  flex: 1 1 auto;
+  justify-content: center;
+}
+
+html[data-easy='on'] .quick-review-stage {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.85rem;
+  flex: 1 1 auto;
+  min-height: min(52vh, 28rem);
+  padding: 0.25rem 0 0.5rem;
+}
+
+html[data-easy='on'] .quick-review-prompt-panel {
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+html[data-easy='on'] .quick-review-prompt-panel--flat {
+  padding: 0.35rem 0.5rem 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+html[data-easy='on'] .quick-review-reveal-panel {
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-width: 20rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+html[data-easy='on'] .quick-review-reveal-cue {
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+html[data-easy='on'] .quick-review-guide-name {
+  font-weight: 600;
+}
+
+html[data-easy='on'] .quick-review-reveal-claim {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight: 650;
+}
+
+html[data-easy='on'] .quick-review-reveal-reason {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+html[data-easy='on'] .quick-review-reveal-source {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+html[data-easy='on'] .quick-review-map-miss {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.35;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.88);
 }
 
 html[data-easy='on'] .quick-review .quick-review-cue {
@@ -20,6 +126,13 @@ html[data-easy='on'] .quick-review .quick-review-prompt {
   margin: 0;
 }
 
+html[data-easy='on'] .quick-review .quick-review-prompt-title {
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight: 650;
+  text-align: center;
+}
+
 html[data-easy='on'] .quick-review .quick-review-prompt.is-now {
   font-weight: 600;
 }
@@ -29,9 +142,16 @@ html[data-easy='on'] .quick-review-map {
   width: 100%;
   max-width: 20rem;
   margin: 0 auto;
+  overflow: visible;
+  padding-top: 0.35rem;
+}
+
+html[data-easy='on'] .quick-review-map-frame {
+  position: relative;
+  width: 100%;
   aspect-ratio: 640 / 420;
   border-radius: 0.75rem;
-  overflow: hidden;
+  overflow: visible;
   background: #a8d070;
 }
 
@@ -42,11 +162,38 @@ html[data-easy='on'] .quick-review-map-bg {
   height: 100%;
   object-fit: cover;
   pointer-events: none;
+  border-radius: 0.75rem;
 }
 
 html[data-easy='on'] .quick-review-map-plate {
   position: absolute;
   inset: 0;
+  padding-top: 1.75rem;
+  box-sizing: border-box;
+}
+
+html[data-easy='on'] .quick-review-map-tap {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.35;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+html[data-easy='on'] .quick-review-map-tap.is-now {
+  color: #f6c255;
+  font-weight: 600;
+  animation: quick-review-map-tap-pulse 1.25s ease-in-out infinite;
+}
+
+@keyframes quick-review-map-tap-pulse {
+  0%,
+  100% {
+    text-shadow: 0 0 6px rgba(246, 194, 85, 0.35);
+  }
+  50% {
+    text-shadow: 0 0 12px rgba(246, 194, 85, 0.65);
+  }
 }
 
 html[data-easy='on'] .quick-review-plot-hit {
@@ -69,12 +216,23 @@ html[data-easy='on'] .quick-review-plot-hit img {
 }
 
 html[data-easy='on'] .quick-review-plot-hit.is-now {
-  filter: drop-shadow(0 0 0.45rem rgba(255, 210, 80, 0.95));
+  filter: none;
+  border-radius: 999px;
+  animation: quick-review-gold-pulse 1.25s ease-in-out infinite;
 }
 
-html[data-easy='on'] .quick-review-plot-hit .quick-review-avatar {
-  position: absolute;
-  bottom: 3.1rem;
+@keyframes quick-review-gold-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px rgba(246, 194, 85, 0.95),
+      0 0 10px rgba(246, 194, 85, 0.45);
+  }
+  50% {
+    box-shadow:
+      0 0 0 4px rgba(246, 194, 85, 1),
+      0 0 18px rgba(246, 194, 85, 0.7);
+  }
 }
 
 html[data-easy='on'] .quick-review-think-bar,
@@ -110,6 +268,8 @@ html[data-easy='on'] .quick-review-lines {
 html[data-easy='on'] .quick-review-lines .match-card.recall-card {
   font-size: 0.8125rem;
   min-height: 44px;
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: none;
 }
 
 html[data-easy='on'] .quick-review-lines .match-card.recall-card.is-flash {
@@ -123,6 +283,9 @@ html[data-easy='on'] .quick-review-flip {
   padding: 0.75rem;
   background: rgba(255, 255, 255, 0.08);
   box-shadow: 0 0 0 2px rgba(255, 210, 80, 0.85);
+  width: 100%;
+  max-width: 20rem;
+  margin: 0 auto;
 }
 
 html[data-easy='on'] .quick-review-flip img {
@@ -133,7 +296,7 @@ html[data-easy='on'] .quick-review-flip img {
 }
 
 html[data-easy='on'] .quick-review-reveal-line {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.4;
   margin: 0;
 }
@@ -153,7 +316,8 @@ html[data-easy='on'] .quick-review-streak-pip {
 }
 
 html[data-easy='on'] .quick-review-streak-pip.is-lit {
-  background: #f6c255;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: none;
 }
 
 html[data-easy='on'] .quick-review-actions {
@@ -161,11 +325,31 @@ html[data-easy='on'] .quick-review-actions {
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
+  justify-content: center;
 }
 
 html[data-easy='on'] .quick-review-actions .text-link {
   min-height: 44px;
+  min-width: 44px;
   display: inline-flex;
   align-items: center;
-  font-size: 13px;
+  justify-content: center;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0 0.5rem;
+}
+
+html[data-easy='on'] .quick-review .quick-review-prompt.is-now {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-easy='on'] .quick-review-plot-hit.is-now,
+  html[data-easy='on'] .quick-review-prompt-panel.is-now {
+    animation: none;
+    box-shadow: 0 0 0 3px rgba(246, 194, 85, 0.95);
+  }
 }
