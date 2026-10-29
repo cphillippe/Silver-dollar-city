@@ -33,7 +33,6 @@ export const CHANGELOG: ChangeNote[] = [
     when: '2026-10-29',
     items: [
       'Nothing changes for players yet.',
-      'Behind the scenes: a playtest link can open a short Memory Coach review queue from Home Read.',
       'Refs #842.',
     ],
   },
