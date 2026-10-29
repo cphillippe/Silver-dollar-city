@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; script-src 'sha256-bIBLZgAdAclO5Y++g4cl5tiJeiewYt+UWpiVy7R33BY='"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; script-src 'sha256-5RZUTO/CpoAz19MKPdu1w7Fu9aM3VZUqLoKK+jNQjfQ='"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Night Run · Silver City</title><link rel="icon" href="assets/favicon.png"><meta name="theme-color" content="#2a0d58">
 <link rel="stylesheet" href="../fonts/fonts.css">
 <style>
@@ -73,7 +73,7 @@ html,body{margin:0;height:100%;overflow:hidden;font-family:var(--sans);color:var
 #ftMsg h2{font-family:var(--serif);font-weight:650;letter-spacing:-.02em;line-height:1.2;margin:6px 0 10px;font-size:24px}#ftMsg p{margin:4px 0 12px;font-size:17px;line-height:1.4}#ftMsg .cbtn{margin-top:6px}
 #ftF{display:none;margin-top:8px}#cFT.tune #ftCols{display:none}#cFT.tune #ftF{display:block}#cFT.lk #ffZ,#cFT.lk #ffP{display:none}#ftK{display:flex;gap:4px}
 .ftk{flex:1;min-width:0;position:relative;border-radius:12px;border:2px solid #5c3e8c;background:#3a1e62;color:#fff6e8;font-family:var(--sans);font-weight:700;font-size:13px;line-height:1.1;padding:4px 1px;min-height:42px;white-space:nowrap}.ftk i{display:block;font-style:normal;font-size:14px;color:#ffb0a0}.ftk.in i{color:#5ed678}.ftk.sel{border-color:#e0d2ff;background:#5c3e8c;box-shadow:0 0 10px rgba(196,170,250,.45)}.ftk.cue{border-color:#fff3c4;background:linear-gradient(180deg,#fff6b8,#ffcc33 55%,#ff9f1a);color:#2a1c08}.ftk.cue i{color:#2a1c08}
-#ftFo{margin-top:6px;border-radius:14px;background:#3a1e62;border:2px solid #5c3e8c;padding:5px 6px 7px;text-align:center}#ffN{font-weight:700;font-size:15px;color:#fff6e8}#ffR{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;font-size:14px;color:#fff6e8;margin-top:2px;white-space:nowrap}#ffW{font-size:13px;line-height:1.2;color:#d6c8f0;margin-top:2px}
+#ftFo{margin-top:6px;border-radius:14px;background:#3a1e62;border:2px solid #5c3e8c;padding:5px 6px 7px;text-align:center}#ffN{font-weight:700;font-size:15px;color:#fff6e8;padding:0 66px;line-height:26px}#ffR{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;font-size:14px;color:#fff6e8;margin-top:2px;white-space:nowrap}#ffW{font-size:13px;line-height:1.2;color:#d6c8f0;margin-top:2px}#ffW.src{color:#fff6e8;font-style:italic}#ftFo{position:relative}#ffSrc{position:absolute;top:5px;right:4px;font-family:var(--sans);font-size:13px;font-weight:700;line-height:1.1;color:#e8dcff;background:#4a2d78;border:1.5px solid #8a72b8;border-radius:999px;padding:4px 8px;cursor:pointer}#ffSrc[aria-pressed=true]{background:#6a4ea0;color:#fff6e8}
 #ffS{font-size:13px;font-weight:700;line-height:1.2;min-height:32px;margin-top:3px;color:#ffd0b0;display:flex;align-items:center;justify-content:center;text-wrap:balance}#ffS.ok{color:#9dffb6}
 #ffZ{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:3px}.ffz{min-width:52px;height:40px;border-radius:12px;border:2px solid #2b1640;background:#7a5aae;color:#fff6e8;font-family:var(--sans);font-weight:700;font-size:14px;padding:0 4px;touch-action:none}.ffz:disabled{background:#5c3e8c;color:#9680be}.ffz.cue:not(:disabled){background:linear-gradient(180deg,#fff6b8,#ffcc33 55%,#ff9f1a);color:#2b1640}#ffSt{min-width:70px;font-size:13px;font-weight:700;color:#e0d2ff}
 #ffP{display:flex;justify-content:center;gap:40px;margin-top:4px}
@@ -101,7 +101,7 @@ html,body{margin:0;height:100%;overflow:hidden;font-family:var(--sans);color:var
 <div id="jr"><div class="eyebrow">Night Run</div><h2>Evidence Journal</h2><div style="font-weight:700;color:var(--gold)">📜 <span id="jcount"></span> found</div><div id="jstars" style="font-weight:700;color:var(--gold);margin-top:2px"></div><button class="cbtn2" id="allB" style="display:none;margin:6px 0 0;padding:8px">🏆 All districts</button><div id="jlist"></div><button class="xbtn" id="jx">Close ✕</button></div>
 <div id="mapBig"><div class="eyebrow">Night maze map</div><canvas id="bigC" width="324" height="324"></canvas><div class="mleg" id="mleg"></div><button class="xbtn" id="mx" style="width:min(92vw,420px)">Close ✕</button></div>
 <div id="cFT"><div class="eyebrow" id="ftE"></div><div id="ftSc"><canvas id="ftScene" width="686" height="500"></canvas><div id="ftRes"></div><div id="ftPill"></div></div>
-<div id="ftBody"><div id="ftCols"></div><div id="ftF"><div id="ftK"></div><div id="ftFo"><div id="ffN"></div><div id="ffR"></div><div id="ffW"></div><div id="ffS"></div><div id="ffZ"><button class="ffz" data-z="-10" aria-label="step 10 billion times finer">÷10¹⁰</button><button class="ffz" data-z="-1" aria-label="step 10 times finer">÷10</button><span id="ffSt"></span><button class="ffz" data-z="1" aria-label="step 10 times bigger">×10</button><button class="ffz" data-z="10" aria-label="step 10 billion times bigger">×10¹⁰</button></div><div id="ffP"><button class="ftb" data-d="-1" aria-label="less">−</button><button class="ftb" data-d="1" aria-label="more">+</button></div></div></div><div id="ftTxt"></div><div id="ftRow"><button class="cbtn2" id="ftX"></button><button class="cbtn2" id="ftH"></button><button class="cbtn" id="ftL"></button><button class="cbtn" id="ftN"></button></div>
+<div id="ftBody"><div id="ftCols"></div><div id="ftF"><div id="ftK"></div><div id="ftFo"><div id="ffN"></div><div id="ffR"></div><div id="ffW"></div><button id="ffSrc" type="button" aria-pressed="false"></button><div id="ffS"></div><div id="ffZ"><button class="ffz" data-z="-10" aria-label="step 10 billion times finer">÷10¹⁰</button><button class="ffz" data-z="-1" aria-label="step 10 times finer">÷10</button><span id="ffSt"></span><button class="ffz" data-z="1" aria-label="step 10 times bigger">×10</button><button class="ffz" data-z="10" aria-label="step 10 billion times bigger">×10¹⁰</button></div><div id="ffP"><button class="ftb" data-d="-1" aria-label="less">−</button><button class="ftb" data-d="1" aria-label="more">+</button></div></div></div><div id="ftTxt"></div><div id="ftRow"><button class="cbtn2" id="ftX"></button><button class="cbtn2" id="ftH"></button><button class="cbtn" id="ftL"></button><button class="cbtn" id="ftN"></button></div>
 <div id="ftMsg"><div class="eyebrow" id="ftME"></div><h2 id="ftMT"></h2><p id="ftMP"></p><p id="ftMQ"></p><button class="cbtn" id="ftMB"></button></div></div></div>
 <div id="status">init</div>
 </div><script>
@@ -157,25 +157,26 @@ const COPY={
  // --- v2 real-forces copy (RESEARCH.md rows in brackets; all pending BS + H&P) ---
  FCHIP:['Gravity','Strong','Electric','Weak','Space'],
  FN:['Gravity','Strong force','Electromagnetic force','Weak force (Higgs setting)','Space grows (dark energy)'],
- FW:['Life needs: within 1 part in 10⁶⁰ (Collins; Davies)', // R1
-  'Life needs: within ±0.5% (Oberhummer)', // R2
-  'Life needs: within ±4% (Oberhummer)', // R3
+ FW:['Life needs it within 1 part in a number with 60 zeros, balanced with the Big Bang\'s push.', // R1
+  'Life needs it within 1 part in 200.', // R2
+  'Life needs it within 1 part in 25.', // R3
   'Life needs this one within about 1 part in 100.', // R4
   'Life needs it smaller than 1 part in a number with 120 zeros of its natural size, either way.'], // R5
+ SRCB:'Sources',SRC:['Sources: Collins 2009; Davies 1982','Source: Oberhummer et al. 2000','Sources: Oberhummer et al. 2000; Tegmark 2003','Sources (Higgs setting): Jeltema & Sher; Damour & Donoghue, via Barnes 2012','Sources: Barnes 2012; Collins 2009'],
+ TAG:['Too weak!','Too strong!','Off!'],
  OFF:'Off from today: {v}',LNOW:'Now: {v}',STEP:'Step 10{e}',
  FX:{grav:['Too weak! Everything flew apart too fast. No stars could form.','Too strong! Everything fell back together too fast. No life could ever start.'], // R1
-  strong:['Too weak! Stars could not make both carbon and oxygen. Life needs both.','Too strong! Stars could not make both carbon and oxygen. Life needs both.'], // R2
-  strongFar:'Far too weak! Tiny bits fall apart. Stars could not even start to burn.', // R2b
-  em:['Too weak! Stars would burn far too fast.','Too strong! Stars could not make both carbon and oxygen. Life needs both.'], // R3b, R3
-  weak:['Off! Stars could not make both carbon and oxygen. Life needs both.','Off! Stars could not make both carbon and oxygen. Life needs both.'], // R4
+  strong:['Stars could not make enough of both carbon and oxygen. Life needs both.','Stars could not make enough of both carbon and oxygen. Life needs both.'], // R2
+  strongFar:'Far too weak! The first tiny bits can\'t stick. Stars could not burn like our sun.', // R2b
+  em:['Too weak! Stars would burn far too fast.','Stars could not make enough of both carbon and oxygen. Life needs both.'], // R3b, R3
+  weak:['Stars could not make enough of both carbon and oxygen. Life needs both.','Stars could not make enough of both carbon and oxygen. Life needs both.'], // R4
   weakFar:'Far too weak! No atom centers could hold together at all.', // R4b
   lam:['Space pulls in! Everything fell back together in a crunch. No life could ever start.','Space grows too fast! Everything flew apart before stars or galaxies could form.']}, // R5b
  STEP5:'Now find all five! Each must be inside its real window.',
- WIN5:'Gravity, strong, electric, weak, and space: all set just right.',
- ODDS:'Real odds for luck to get all five at once: about 1 in 5 × 10¹⁸⁵.', // R-luck
+ WIN5:'Gravity, strong, electric, weak, and space: God set them all just right.',
+ ODDS:'Real odds for luck to get all five at once: about 1 in 5 × 10¹⁸⁵. That\'s a number 186 digits long!', // R-luck
  COUNT5:'Luck tries: {n}. Times all five: {k}.',
  SAVED5:'Luck has tried {n} times. All five just right: {k}.',
- HIT5:'Luck got all five! That almost never, ever happens.',
  MULTI:'Some people guess there are endless other universes, so luck could win somewhere. No one has ever seen even one. We only know this one, and God set it just right.', // pending BS + H&P (merged line)
  // H&P result labels [too low, too high] per crank
  HP:[['Too weak! Stars can\'t form.','Too strong! Stars get squished and burn out fast.'],
@@ -626,7 +627,7 @@ function ftSettle(i){const c=FT.c[i];if(!inB(i)){const ed=c.v<c.cen?c.cen-BAND:c
  ftBtns();}
 function ftLuck(){if(FT.spin||(FT.st==='rluck'&&FT.rl>=5))return;S.taps++;if(ffMode()){FT.spin={ff:1,k:0,dur:RM?.05:.85,to:FF.map(()=>ffRand())};snd(300,.4,'sawtooth',.03);ftBtns();return;}const to=[0,1,2].map(()=>Math.random());FT.spin={k:0,dur:RM?.05:.85,f:FT.c.map(c=>c.v),to,extra:[0,1,2].map(()=>(2+Math.random()*2)*(Math.random()<.5?-1:1))};snd(300,.4,'sawtooth',.03);ftBtns();}
 function ftLuckEnd(){if(FT.spin&&FT.spin.ff){const hit=ffAll();FT.luckN++;FT.rl++;PG.l5n=(PG.l5n|0)+1;if(hit){FT.luckK++;PG.l5k=(PG.l5k|0)+1;}pSave();const j=FF.findIndex((f,k)=>!ffIn(k));if(j>=0)FT.fi=j;FT.sk5='';
- if(hit){ftTxt(COPY.HIT5,fill(COPY.COUNT5,{n:FT.luckN,k:FT.luckK}),COPY.MULTI);[0,1,2].forEach(ftSpark);}else ftTxt(COPY.MISS+' '+COPY.FCHIP[j]+': '+ffFx(j).split('! ')[0]+'!',fill(COPY.COUNT5,{n:FT.luckN,k:FT.luckK}),COPY.MULTI);snd(hit?1319:200,.2,hit?'sine':'triangle',.05);FT.spin=null;ftBtns();window.SHOT='ft-luck';return;}
+ if(hit){ftTxt(COPY.ALL3,COPY.WIN5,fill(COPY.COUNT5,{n:FT.luckN,k:FT.luckK}));[0,1,2].forEach(ftSpark);}else ftTxt(COPY.MISS+' '+COPY.FCHIP[j]+': '+ffTag(j),fill(COPY.COUNT5,{n:FT.luckN,k:FT.luckK}),COPY.MULTI);snd(hit?1319:200,.2,hit?'sine':'triangle',.05);FT.spin=null;ftBtns();window.SHOT='ft-luck';return;}
  const hit=[0,1,2].every(i=>inB(i,LBAND));FT.luckN++;FT.rl++;PG.luckTries++;if(hit){FT.luckK++;PG.luckHits++;}pSave();
  if(hit){ftTxt(COPY.HIT,fill(COPY.COUNT,{n:FT.luckN,k:FT.luckK}));[0,1,2].forEach(ftSpark);}else ftTxt(COPY.MISS,fill(COPY.COUNT,{n:FT.luckN,k:FT.luckK}));snd(hit?1319:200,.2,hit?'sine':'triangle',.05);FT.spin=null;ftBtns();window.SHOT='ft-luck';}
 function openFT(){if(S.paused&&!FT.open)return;if(FT.open)return;S.paused=true;CTRL.fwd=0;CTRL.bf=0;FT.open=1;if(!PG.partsOn){PG.partsOn=1;pSave();updHUD();HK='';}
@@ -700,7 +701,7 @@ function ftScene(dt){const cv2=$('ftScene'),x=cv2.getContext('2d'),t=FT.t;x.clea
  if(all){x.fillStyle='rgba(255,236,160,'+(.08+.04*Math.sin(t*2))+')';x.fillRect(0,0,686,500);}
  FT.P=FT.P.filter(p=>(p.l-=dt*(p.s?1.2:1.6))>0);for(const p of FT.P){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=(p.s?0:260)*dt;x.fillStyle='rgba('+p.c+','+p.l+')';x.fillRect(p.x-3,p.y-3,p.s?4:7,p.s?4:7);}
  // result line + parts pill
- const L=FT.last,r=$('ftRes');let rt='',ok=0;if(ffMode()){const j=FT.fi,fx=ffFx(j);rt=COPY.FCHIP[j]+': '+(fx?fx.split('! ')[0]+'!':COPY.IN);ok=!fx;}else if(L>=0&&cDone(L)&&FT.st!=='claim'){const [w,sd]=ftW(L);if(inB(L)){rt=CRANKS[L].name+': '+COPY.IN;ok=1;}else rt=COPY.HP[L][FT.c[L].v<FT.c[L].cen?0:1];}
+ const L=FT.last,r=$('ftRes');let rt='',ok=0;if(ffMode()){const j=FT.fi,fx=ffFx(j);rt=COPY.FCHIP[j]+': '+(fx?ffTag(j):COPY.IN);ok=!fx;}else if(L>=0&&cDone(L)&&FT.st!=='claim'){const [w,sd]=ftW(L);if(inB(L)){rt=CRANKS[L].name+': '+COPY.IN;ok=1;}else rt=COPY.HP[L][FT.c[L].v<FT.c[L].cen?0:1];}
  if(r.textContent!==rt){r.textContent=rt;}r.className=ok?'ok':'';r.style.display=rt?'block':'none';
  const pl=$('ftPill'),pt=PG.ftOpen?'':fill(COPY.PILL,{n:PG.parts.length});if(pl.textContent!==pt)pl.textContent=pt;pl.style.display=pt?'block':'none';}
 function ftFrame(dt){FT.t+=dt;if(['try','all3','replay'].includes(FT.st)&&!FT.win&&!FT.tcDone){const pi=FT.idle;FT.idle+=dt;if((pi<=30&&FT.idle>30))ftBtns();}
@@ -734,6 +735,7 @@ function ffFx(i){if(ffIn(i))return '';const f=FF[i],d=FT.F[i].dev;
  if(f.key==='strong'&&d< -9n*P10(128))return COPY.FX.strongFar; // R2b αs < 0.91 (Davies 1972 via Barnes 2012)
  if(f.key==='weak'&&d>634n*P10(127))return COPY.FX.weakFar;   // R4b v/mPl > 3.3e-17 (v +63.4%: weak far too weak) (Damour & Donoghue 2008 via Barnes 2012)
  return COPY.FX[f.key][d<0n?0:1];}
+function ffTag(i){const fx=ffFx(i);if(!fx)return '';const k=fx.indexOf('! ');if(k>0)return fx.slice(0,k+1);return FF[i].key==='weak'?COPY.TAG[2]:COPY.TAG[FT.F[i].dev<0n?0:1];}
 function ri(a,b){return a+Math.floor(Math.random()*(b-a+1));}
 function ffScramble(){FT.F=FF.map(f=>{const E=f.emin,sg=Math.random()<.5?-1n:1n;let es;
   if(E<-10){const a=Math.ceil(E/5),b=Math.ceil(2*E/3);es=[ri(a,-1),ri(b,a-1),ri(E+1,b-1)];}else es=E<=-3?[-1,ri(-3,-2)]:[-1,-2];
@@ -747,14 +749,14 @@ function ffNudge(d){if(!ffTune())return;const i=FT.fi,F=FT.F[i];let v=F.dev+BigI
 function ffZoom(z){if(!ffTune())return;const F=FT.F[FT.fi],f=FF[FT.fi];F.e=Math.max(f.emin,Math.min(-1,F.e+z));FT.idle=0;snd(z<0?1400:900,.03,'triangle',.04);FT.sk5='';}
 function ffSel(i){FT.fi=i;FT.last=i;FT.sk5='';snd(700,.03,'triangle',.04);}
 function ffHelp(){const F=FT.F[FT.fi],f=FF[FT.fi];if(ffIn(FT.fi))return;F.e=Math.max(f.emin,Math.min(-1,ffLead(F.dev)));FT.sk5='';}
-(function(){const K=$('ftK');FF.forEach((f,i)=>{const b=document.createElement('button');b.className='ftk';b.dataset.i=i;b.innerHTML='<span></span><i></i>';b.firstChild.textContent=COPY.FCHIP[i];b.onclick=()=>ffSel(i);K.appendChild(b);});
+(function(){const sb=$('ffSrc');sb.textContent=COPY.SRCB;sb.onclick=()=>{FT.src=!FT.src;FT.sk5='';snd(800,.03,'triangle',.04);};const K=$('ftK');FF.forEach((f,i)=>{const b=document.createElement('button');b.className='ftk';b.dataset.i=i;b.innerHTML='<span></span><i></i>';b.firstChild.textContent=COPY.FCHIP[i];b.onclick=()=>ffSel(i);K.appendChild(b);});
  const hold=(b,fn)=>{let h1=null,h2=null;const stop=()=>{if(h1===null&&h2===null)return;clearTimeout(h1);clearInterval(h2);h1=h2=null;};
   b.addEventListener('pointerdown',e=>{e.preventDefault();try{b.setPointerCapture(e.pointerId)}catch(_){}stop();fn();h1=setTimeout(()=>{h2=setInterval(fn,110);},350);});
   ['pointerup','pointercancel','lostpointercapture'].forEach(t=>b.addEventListener(t,stop));b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fn();}});};
  document.querySelectorAll('#ffP .ftb').forEach(b=>hold(b,()=>ffNudge(+b.dataset.d)));document.querySelectorAll('#ffZ .ffz').forEach(b=>hold(b,()=>ffZoom(+b.dataset.z)));})();
-function ffRender(){const i=FT.fi,F=FT.F[i],f=FF[i],tu=ffTune();const k=[FT.st,i,FT.F.map(x=>x.dev+':'+x.e).join(','),tu?1:0,FT.win].join('|');if(FT.sk5===k)return;FT.sk5=k;
+function ffRender(){const i=FT.fi,F=FT.F[i],f=FF[i],tu=ffTune();const k=[FT.st,i,FT.src?1:0,FT.F.map(x=>x.dev+':'+x.e).join(','),tu?1:0,FT.win].join('|');if(FT.sk5===k)return;FT.sk5=k;
  document.querySelectorAll('#ftK .ftk').forEach((b,j)=>{const ok=ffIn(j);b.classList.toggle('in',ok);b.classList.toggle('sel',j===i);b.lastChild.textContent=ok?'✓':'✗';b.setAttribute('aria-label',COPY.FN[j]+(ok?' just right':' not right'));});
- $('ffN').textContent=COPY.FN[i];$('ffR').textContent=fill(f.key==='lam'?COPY.LNOW:COPY.OFF,{v:ffFmt(F.dev)});$('ffW').textContent=COPY.FW[i];
+ $('ffN').textContent=COPY.FN[i];$('ffR').textContent=fill(f.key==='lam'?COPY.LNOW:COPY.OFF,{v:ffFmt(F.dev)});$('ffW').textContent=FT.src?COPY.SRC[i]:COPY.FW[i];$('ffW').classList.toggle('src',!!FT.src);$('ffSrc').setAttribute('aria-pressed',FT.src?'true':'false');
  const fx=ffFx(i),s=$('ffS');s.textContent=fx||COPY.IN;s.className=fx?'':'ok';$('ffSt').textContent=fill(COPY.STEP,{e:sup(F.e)});
  document.querySelectorAll('#ffZ .ffz').forEach(b=>{const z=+b.dataset.z;b.disabled=!tu||(z<0?F.e<=f.emin:F.e>=-1);});document.querySelectorAll('#ffP .ftb').forEach(b=>b.disabled=!tu);}
 // one gold cue: the ± that moves toward the window, else the finer-step button, else the next force that is not right yet
@@ -766,6 +768,6 @@ function ffSpin(dt){const sp=FT.spin;sp.k=Math.min(1,sp.k+dt/sp.dur);sp.t=(sp.t|
 $('ftE').textContent=COPY.TITLE;$('ftX').textContent=COPY.NOTNOW;$('ftH').textContent=COPY.HELP;$('ftL').textContent=COPY.LUCKB;$('ftN').textContent=COPY.NEXT;
 document.querySelector('#cInn img.art').src=INNSPR.toDataURL();reset(true);$('cIntro').style.display='block';requestAnimationFrame(frame);
 window.onerror=m=>{$('status').textContent='ERR '+m;};
-window.NR={FF,ffCheck,ffRand,ffNudge,ffZoom,ffSel,ffIn,ffAll,ffFmt,ffLead,ffScramble,FT,ftGo,ftPlace,ftSettle,ftSetV,ftLuck,ftNext,closeFT,inB,cDone,arrive:()=>arrive(),PARTS,openFT,routeParts,missingParts,pathBetween,pLoad,get PG(){return PG},GATES,openChain,openAll,placeTile,get CH(){return CH},hasFind,openGate,ART,GOALS,targets,hintInfo,breakK,DSA,W,H,get JR(){return JR},openJ,closeJ,laneArt,showStory,COINS,get RW(){return RW},get RH(){return RH},get resL(){return resL},trapAt,CTRL,turnAround,dash,angDiff,goal:()=>S.phase===2?INN:HURT,open:(x,y)=>open(x,y),get S(){return S},move,tapAt,dashGreen,fwdTrap,MAP};
+window.NR={FF,ffTag,ffCheck,ffRand,ffNudge,ffZoom,ffSel,ffIn,ffAll,ffFmt,ffLead,ffScramble,FT,ftGo,ftPlace,ftSettle,ftSetV,ftLuck,ftNext,closeFT,inB,cDone,arrive:()=>arrive(),PARTS,openFT,routeParts,missingParts,pathBetween,pLoad,get PG(){return PG},GATES,openChain,openAll,placeTile,get CH(){return CH},hasFind,openGate,ART,GOALS,targets,hintInfo,breakK,DSA,W,H,get JR(){return JR},openJ,closeJ,laneArt,showStory,COINS,get RW(){return RW},get RH(){return RH},get resL(){return resL},trapAt,CTRL,turnAround,dash,angDiff,goal:()=>S.phase===2?INN:HURT,open:(x,y)=>open(x,y),get S(){return S},move,tapAt,dashGreen,fwdTrap,MAP};
 setTimeout(()=>{if($('status').textContent==='init')$('status').textContent='OK';},50);
 </script></body></html>
