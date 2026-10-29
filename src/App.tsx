@@ -51,6 +51,7 @@ function quickReviewBoot(): View | null {
   const lineId = params.get('quickReview')
   if (!lineId) return null
   const fromHome = params.get('from') === 'home'
+  const reviewWrite = !fromHome && params.get('reviewWrite') === '1'
   const queueRaw = params.get('reviewQueue')
   const queue = queueRaw
     ? queueRaw
@@ -63,7 +64,7 @@ function quickReviewBoot(): View | null {
     lineId: queue?.[0] ?? lineId,
     queue,
     from: fromHome ? 'home' : undefined,
-    skipWrite: fromHome ? false : true,
+    skipWrite: fromHome || reviewWrite ? false : true,
   }
 }
 
