@@ -21,22 +21,23 @@ import {
   reviewTargetLine,
 } from '../src/easyTrail/review/reviewFormat.ts'
 import { STORAGE_KEY } from '../src/config/app.ts'
+import { lociStampFor } from '../src/lib/lociStamp.ts'
 import { SAVE_KIND, SAVE_SCHEMA_VERSION } from '../src/lib/save.ts'
-import { NW_DEBUG_SESSION } from '../src/lib/nightWatchDebug.ts'
 
 const quickSrc = readFileSync(
   new URL('../src/easyTrail/review/QuickReview.tsx', import.meta.url),
   'utf8',
 )
 assert.doesNotMatch(quickSrc, /recordHeld|recordLessonHold/)
+assert.match(quickSrc, /function beginSourceBeat\(reasonClean: boolean\)/)
+assert.match(quickSrc, /beginSourceBeat\(false\)/)
+assert.match(quickSrc, /beginSourceBeat\(format === 'C' \? mapTapClean : true\)/)
+assert.match(quickSrc, /holdInterval/)
 
 const appSrc = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
+assert.match(appSrc, /key=\{view\.queue\?\.join\(','\) \?\? view\.lineId\}/)
 assert.match(appSrc, /if \(isPlayBuild\(\)\) return null/, 'quickReviewBoot blocks Play builds')
-assert.match(
-  appSrc,
-  /playtestUrlAllowed\(search\)/,
-  'quickReviewBoot uses playtest URL only',
-)
+assert.match(appSrc, /playtestUrlAllowed\(search\)/, 'quickReviewBoot uses URL playtest gate')
 const settingsSrc = readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8')
 assert.match(settingsSrc, /playtestUrlAllowed\(urlSearch\)/, 'Settings dev UI uses playtest URL gate')
 
@@ -54,6 +55,8 @@ const allowed = new Set([
   'Home',
   'No review brief for this line.',
   'Settings',
+  'Tap where you learned it',
+  'Not here. Try another spot.',
 ])
 
 for (const id of EASY_LINE_ORDER.slice(0, 12)) {
@@ -91,6 +94,15 @@ assert.ok(bCount <= 1, 'B at most once per 3-card sitting')
 
 for (const id of EASY_LINE_ORDER.slice(0, 8)) {
   assert.notEqual(pickFormat(id, '2026-10-27', undefined, undefined, 4), 'B', `${id} source never B`)
+}
+
+for (let i = 0; i < 300; i += 1) {
+  const id = EASY_LINE_ORDER[i % EASY_LINE_ORDER.length]
+  assert.notEqual(
+    pickFormat(id, '2026-10-28', i % 2 ? 'C' : 'A', { bUsed: i % 5 === 0 }, 0, { acOnly: true }),
+    'B',
+    'Home route never picks B',
+  )
 }
 
 const weightCounts = { C: 0, B: 0, A: 0 }
@@ -131,7 +143,7 @@ async function launchBrowser() {
   return chromium.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] })
 }
 
-async function withPage(url, fn, { seed, sessionNwDebug = false } = {}) {
+async function withPage(url, fn, { seed, openDay, nwDebugSession } = {}) {
   const root = fileURLToPath(new URL('..', import.meta.url))
   const server = await createServer({
     root,
@@ -145,13 +157,21 @@ async function withPage(url, fn, { seed, sessionNwDebug = false } = {}) {
   const browser = await launchBrowser()
   const page = await browser.newPage()
   try {
-    if (seed || sessionNwDebug) {
+    if (seed) {
       await page.addInitScript(
-        ({ key, save, nwKey, nwOn }) => {
-          if (save) localStorage.setItem(key, JSON.stringify(save))
-          if (nwOn) sessionStorage.setItem(nwKey, 'on')
+        ({ key, save, openDayKey, openDayValue, nwSessionKey, nwSessionOn }) => {
+          localStorage.setItem(key, JSON.stringify(save))
+          if (openDayValue) localStorage.setItem(openDayKey, openDayValue)
+          if (nwSessionOn) sessionStorage.setItem(nwSessionKey, 'on')
         },
-        { key: STORAGE_KEY, save: seed ?? null, nwKey: NW_DEBUG_SESSION, nwOn: sessionNwDebug },
+        {
+          key: STORAGE_KEY,
+          save: seed,
+          openDayKey: 'silver-city-easy-open-v1',
+          openDayValue: openDay ?? '',
+          nwSessionKey: 'silver-city-nw-debug-session',
+          nwSessionOn: Boolean(nwDebugSession),
+        },
       )
     }
     await page.goto(`http://127.0.0.1:${port}${url}`, { waitUntil: 'networkidle' })
@@ -162,11 +182,10 @@ async function withPage(url, fn, { seed, sessionNwDebug = false } = {}) {
   }
 }
 
-function seedSave(intervalIndex = 1, lastFormat) {
+function seedSave(intervalIndex = 1, lastFormat = undefined) {
   return {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.554',
     savedAt: new Date().toISOString(),
     progress: {
       started: true,
@@ -191,17 +210,82 @@ function seedSave(intervalIndex = 1, lastFormat) {
 
 const PLAYTEST = 'playtest=1'
 
+const hubSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
+assert.match(hubSrc, /playtestUrlAllowed\(/, 'Hub Read review uses URL playtest gate')
+assert.match(hubSrc, /from: 'home'/, 'Hub Read navigates home quick-review')
+assert.doesNotMatch(hubSrc, /readNightWatchDebug\(\)/, 'Hub Read ignores NW debug switch')
+
+const screenSrc = readFileSync(
+  new URL('../src/easyTrail/review/QuickReviewScreen.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(
+  screenSrc,
+  /key=\{`\$\{lineId\}-\$\{cardIndex\}`\}/,
+  'QuickReview remounts per queue slot',
+)
+
+async function countGoldCues(page) {
+  return page.evaluate(() => {
+    const goldish = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = Number(match[1])
+        const g = Number(match[2])
+        const b = Number(match[3])
+        if (r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const visible = (el) => {
+      const st = getComputedStyle(el)
+      const box = el.getBoundingClientRect()
+      return st.display !== 'none' && st.visibility !== 'hidden' && box.width > 2 && box.height > 2
+    }
+    const paintsGold = (st) => {
+      for (const key of [
+        'color',
+        'backgroundColor',
+        'borderTopColor',
+        'borderRightColor',
+        'borderBottomColor',
+        'borderLeftColor',
+        'outlineColor',
+        'boxShadow',
+      ]) {
+        if (goldish(st[key])) return true
+      }
+      return false
+    }
+    const hits = []
+    for (const el of document.querySelectorAll('*')) {
+      if (!visible(el)) continue
+      const st = getComputedStyle(el)
+      const classHit =
+        (el.classList.contains('btn') && el.classList.contains('gold')) || el.classList.contains('is-now')
+      if (classHit || paintsGold(st)) hits.push(el)
+    }
+    const top = hits.filter(
+      (el) => !hits.some((other) => other !== el && other.contains(el)),
+    )
+    return top.length
+  })
+}
+
+async function assertOneGold(page, label) {
+  const gold = await countGoldCues(page)
+  assert.equal(gold, 1, `${label} has one gold cue (got ${gold})`)
+}
+
 const hubSeed = seedSave(1)
 
 await withPage(
   '/',
   async (page) => {
     await page.getByRole('main', { name: 'Home' }).waitFor()
-    const settings = page.locator('header').getByRole('button', { name: 'Settings', exact: true })
-    await settings.scrollIntoViewIfNeeded()
-    await settings.click()
+    await page.locator('header').getByRole('button', { name: 'Settings', exact: true }).click()
     assert.equal(await page.locator('details.settings-debug').count(), 0)
-    assert.equal(await page.locator('section[aria-label="Quick review"]').count(), 0)
   },
   { seed: hubSeed },
 )
@@ -215,57 +299,400 @@ await withPage(
   { seed: hubSeed },
 )
 
-await withPage(
-  '/?quickReview=ph-road',
-  async (page) => {
-    await page.getByRole('main', { name: 'Home' }).waitFor()
-    assert.equal(await page.locator('.quick-review-prompt').count(), 0)
-  },
-  {
-    seed: hubSeed,
-    sessionNwDebug: true,
-  },
-)
+async function assertPlotsUniform(page) {
+  const opacities = await page.evaluate(() => {
+    const hits = [...document.querySelectorAll('.quick-review-plot-hit')]
+    return hits.map((el) => getComputedStyle(el).opacity)
+  })
+  assert.ok(opacities.length > 1, 'map plots render')
+  const first = opacities[0]
+  assert.ok(opacities.every((o) => o === first), `plots share opacity (got ${opacities.join(',')})`)
+}
 
-await withPage(
-  `/?quickReview=ph-road&reviewFormat=C&${PLAYTEST}`,
-  async (page) => {
-  await page.locator('.quick-review-plot-hit.is-now').first().waitFor({ timeout: 8000 })
-  const promptGold = await page.locator('.quick-review-plot-hit.is-now').count()
-  assert.equal(promptGold, 1)
-  await page.locator('.quick-review-plot-hit.is-now').click()
-  await page.getByRole('button', { name: 'I had it' }).waitFor()
-  const revealGold = await page.locator('.btn.gold, .is-now').count()
-  assert.equal(revealGold, 1)
-  },
-  { seed: seedSave(1) },
-)
+async function assertFormatCBeforeTap(page, lineId) {
+  assert.equal(await page.locator('.quick-review-plot-hit.is-now').count(), 0, 'no plot ring before tap')
+  assert.equal(
+    await page.locator('.quick-review-map-plate .quick-review-avatar').count(),
+    0,
+    'no guide portrait on map before tap',
+  )
+  await assertPlotsUniform(page)
+  await assertOneGold(page, `${lineId} format C prompt`)
+}
+
+async function assertFormatAPrompt(page, lineId) {
+  assert.equal(await page.locator('.quick-review-reveal-cue').count(), 0, 'no guide cue before A reveal')
+  await assertOneGold(page, `${lineId} format A prompt`)
+}
+
+async function assertFormatAReveal(page, lineId) {
+  await assertFormatCReveal(page, lineId)
+}
+
+async function assertFormatCReveal(page, lineId) {
+  const briefLine = evidenceFor(lineId)
+  assert.ok(briefLine, lineId)
+  const claimEl = page.locator('.quick-review-reveal-claim')
+  await claimEl.waitFor()
+  assert.match((await claimEl.textContent()) ?? '', new RegExp(briefLine.claim.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+  const claimPx = await claimEl.evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
+  assert.ok(claimPx >= 18, `claim font ${claimPx}px`)
+  const reasonEl = page.locator('.quick-review-reveal-reason')
+  await reasonEl.waitFor()
+  assert.match(
+    (await reasonEl.textContent()) ?? '',
+    new RegExp(briefLine.reason.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+  )
+  const reasonPx = await reasonEl.evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
+  assert.ok(reasonPx >= 15, `reason font ${reasonPx}px`)
+  const sourceEl = page.locator('.quick-review-reveal-source')
+  if (await sourceEl.count()) {
+    assert.match((await sourceEl.textContent()) ?? '', new RegExp(briefLine.source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+  }
+  await assertOneGold(page, `${lineId} format C reveal`)
+}
+
+async function assertRevealClaimReasonStable(page, lineId) {
+  await assertFormatCReveal(page, lineId)
+  await page.waitForTimeout(450)
+  await assertFormatCReveal(page, lineId)
+}
+
+async function tapCorrectPlot(page, lineId) {
+  const plotId = lociStampFor(lineId).plotId
+  await page.locator(`[data-plot-id="${plotId}"]`).click()
+}
+
+for (const viewport of [
+  { width: 375, height: 667 },
+  { width: 390, height: 844 },
+]) {
+  await withPage(
+    `/?quickReview=ph-road&reviewFormat=C&${PLAYTEST}`,
+    async (page) => {
+      await page.setViewportSize(viewport)
+      await assertFormatCBeforeTap(page, 'ph-road')
+      await tapCorrectPlot(page, 'ph-road')
+      await page.getByRole('button', { name: 'I had it' }).waitFor()
+      await assertFormatCReveal(page, 'ph-road')
+    },
+    { seed: seedSave(1, 'A') },
+  )
+
+  await withPage(
+    `/?quickReview=ph-road&reviewFormat=A&${PLAYTEST}`,
+    async (page) => {
+      await page.setViewportSize(viewport)
+      await assertFormatAPrompt(page, 'ph-road')
+      await page.getByRole('button', { name: 'Show me' }).click()
+      await page.getByRole('button', { name: 'I had it' }).waitFor()
+      await assertFormatAReveal(page, 'ph-road')
+    },
+    { seed: seedSave(1, 'A') },
+  )
+
+  await withPage(
+    `/?quickReview=ph-road&reviewFormat=C&${PLAYTEST}`,
+    async (page) => {
+      await page.setViewportSize(viewport)
+      await assertFormatCBeforeTap(page, 'ph-road')
+      const wrongPlot = await page.evaluate((correct) => {
+        const hit = [...document.querySelectorAll('[data-plot-id]')].find(
+          (el) => el.getAttribute('data-plot-id') !== correct,
+        )
+        return hit?.getAttribute('data-plot-id') ?? null
+      }, lociStampFor('ph-road').plotId)
+      assert.ok(wrongPlot)
+      await page.locator(`[data-plot-id="${wrongPlot}"]`).click()
+      await page.getByText('Not here. Try another spot.').waitFor()
+      await page.locator(`[data-plot-id="${wrongPlot}"]`).click()
+      await page.locator('.quick-review-plot-hit.is-now').waitFor()
+      assert.equal(await page.locator('.quick-review-prompt-panel.is-now').count(), 0)
+      await assertOneGold(page, 'format C after hint')
+    },
+    { seed: seedSave(1, 'A') },
+  )
+}
 
 await withPage(
   `/?quickReview=ph-road&reviewFormat=B&${PLAYTEST}`,
   async (page) => {
     await page.getByText('Think first…').waitFor()
     await page.waitForTimeout(3200)
-    await page.locator('.quick-review-drain-bar.is-now').first().waitFor({ timeout: 8000 })
-    const drainGold = await page.locator('.quick-review-drain-bar.is-now').count()
-    assert.equal(drainGold, 1)
+    await assertOneGold(page, 'format B drain')
     await page.locator('.match-card.recall-card').first().click()
     await page.getByRole('button', { name: 'Next' }).waitFor()
-    const revealGold = await page.locator('.btn.gold').count()
-    assert.equal(revealGold, 1)
+    await assertOneGold(page, 'format B reveal')
   },
   { seed: seedSave(2) },
 )
 
+function homeQueueSeed() {
+  return {
+    kind: SAVE_KIND,
+    schemaVersion: SAVE_SCHEMA_VERSION,
+    appVersion: '1.4.555',
+    savedAt: new Date().toISOString(),
+    progress: {
+      started: true,
+      easyMode: true,
+      theme: 'candy',
+      completed: ['ph-road', 'ph-father', 'ob-tuning'],
+      easyHeld: ['ph-road'],
+      lastDailyDate: '2026-01-01',
+      memory: {
+        'ph-road': {
+          id: 'ph-road',
+          pillar: 'parable-hollow',
+          intervalIndex: 1,
+          nextReviewAt: today,
+          reviews: 1,
+          cleanRecalls: 1,
+          elaborated: false,
+          lastFormat: 'A',
+        },
+        'ph-father': {
+          id: 'ph-father',
+          pillar: 'parable-hollow',
+          intervalIndex: 2,
+          nextReviewAt: today,
+          reviews: 2,
+          cleanRecalls: 2,
+          elaborated: false,
+          lastFormat: 'C',
+        },
+        'ob-tuning': {
+          id: 'ob-tuning',
+          pillar: 'observatory',
+          intervalIndex: 1,
+          nextReviewAt: today,
+          reviews: 1,
+          cleanRecalls: 1,
+          elaborated: false,
+          lastFormat: 'C',
+        },
+      },
+    },
+  }
+}
+
 await withPage(
-  `/?quickReview=ph-road&reviewFormat=A&${PLAYTEST}`,
+  `/?${PLAYTEST}`,
   async (page) => {
-  await page.locator('.quick-review-flip.is-now').first().waitFor({ timeout: 8000 })
-  const faceGold = await page.locator('.quick-review-flip.is-now').count()
-  assert.equal(faceGold, 1)
-  await page.getByRole('button', { name: 'Show me' }).click()
-  await page.getByRole('button', { name: 'I had it' }).waitFor()
-  assert.equal(await page.locator('.btn.gold').count(), 1)
+    await page.getByRole('main', { name: 'Home' }).waitFor()
+    await page.getByRole('button', { name: /Read/i }).click()
+    await page.locator('.quick-review').waitFor()
+    await assertOneGold(page, 'Home Read queue card 1')
+  },
+  {
+    seed: homeQueueSeed(),
+    openDay: '2026-01-01',
+  },
+)
+
+await withPage(
+  '/',
+  async (page) => {
+    await page.getByRole('main', { name: 'Home' }).waitFor()
+    await page.getByRole('button', { name: /Read/i }).click()
+    assert.equal(await page.locator('.quick-review').count(), 0, 'NW debug alone does not open QuickReview')
+    await page.locator('.daily-page').waitFor()
+  },
+  {
+    seed: homeQueueSeed(),
+    openDay: '2026-01-01',
+    nwDebugSession: true,
+  },
+)
+
+const queueUrl = `/?playtest=1&from=home&reviewQueue=ph-road,ph-father,ob-tuning&quickReview=ph-road&reviewFormat=C`
+
+await withPage(
+  queueUrl,
+  async (page) => {
+    await page.locator('.quick-review-prompt-title').filter({ hasText: "What's the main idea?" }).waitFor()
+    await tapCorrectPlot(page, 'ph-road')
+    await assertRevealClaimReasonStable(page, 'ph-road')
+    await page.getByRole('button', { name: 'I had it' }).click()
+
+    await page.locator('.quick-review-prompt-title').filter({ hasText: 'Why is it true?' }).waitFor()
+    await tapCorrectPlot(page, 'ph-father')
+    await assertRevealClaimReasonStable(page, 'ph-father')
+    await page.getByRole('button', { name: 'Not yet' }).click()
+
+    await page.locator('.quick-review-prompt-title').filter({ hasText: "Where's it from?" }).waitFor()
+    await tapCorrectPlot(page, 'ph-father')
+    await assertRevealClaimReasonStable(page, 'ph-father')
+    await page.getByRole('button', { name: 'I had it' }).click()
+
+    const fatherTrace = await page.evaluate((key) => {
+      const raw = localStorage.getItem(key)
+      if (!raw) return null
+      return JSON.parse(raw).progress?.memory?.['ph-father'] ?? null
+    }, STORAGE_KEY)
+    assert.ok(fatherTrace, 'ph-father memory written')
+    assert.equal(fatherTrace.cleanRecalls, 2, 'Not yet on why beat keeps cleanRecalls at 2')
+    assert.notEqual(fatherTrace.intervalIndex, 3, 'two-beat miss does not promote intervalIndex to 3')
+
+    await page.locator('.quick-review-prompt-title').filter({ hasText: "What's the main idea?" }).waitFor()
+    await tapCorrectPlot(page, 'ob-tuning')
+    await assertRevealClaimReasonStable(page, 'ob-tuning')
+    await page.getByRole('button', { name: 'I had it' }).click()
+
+    await page.getByRole('main', { name: 'Home' }).waitFor()
+  },
+  {
+    seed: homeQueueSeed(),
+    openDay: '2026-01-01',
+  },
+)
+
+await withPage(
+  `/?playtest=1&from=home&quickReview=ph-father&reviewFormat=C`,
+  async (page) => {
+    await tapCorrectPlot(page, 'ph-father')
+    await page.getByRole('button', { name: 'I had it' }).click()
+    await page.getByText("Where's it from?").waitFor()
+    await tapCorrectPlot(page, 'ph-father')
+    await page.getByRole('button', { name: 'I had it' }).click()
+    const trace = await page.evaluate((key) => {
+      const raw = localStorage.getItem(key)
+      return raw ? JSON.parse(raw).progress?.memory?.['ph-father'] : null
+    }, STORAGE_KEY)
+    assert.ok(trace)
+    assert.equal(trace.cleanRecalls, 3, 'clean two-beat card promotes cleanRecalls to 3')
+    assert.equal(trace.intervalIndex, 3)
+  },
+  {
+    seed: {
+      kind: SAVE_KIND,
+      schemaVersion: SAVE_SCHEMA_VERSION,
+      appVersion: '1.4.555',
+      savedAt: new Date().toISOString(),
+      progress: {
+        started: true,
+        easyMode: true,
+        theme: 'candy',
+        completed: ['ph-road', 'ph-father'],
+        memory: {
+          'ph-father': {
+            id: 'ph-father',
+            pillar: 'parable-hollow',
+            intervalIndex: 2,
+            nextReviewAt: today,
+            reviews: 2,
+            cleanRecalls: 2,
+            elaborated: false,
+          },
+        },
+      },
+    },
+    openDay: '2026-01-01',
+  },
+)
+
+await withPage(
+  `/?playtest=1&from=home&quickReview=ph-father&reviewFormat=C`,
+  async (page) => {
+    const wrongPlot = await page.evaluate((correct) => {
+      const hit = [...document.querySelectorAll('[data-plot-id]')].find(
+        (el) => el.getAttribute('data-plot-id') !== correct,
+      )
+      return hit?.getAttribute('data-plot-id') ?? null
+    }, lociStampFor('ph-father').plotId)
+    assert.ok(wrongPlot)
+    await page.locator(`[data-plot-id="${wrongPlot}"]`).click()
+    await tapCorrectPlot(page, 'ph-father')
+    await page.getByRole('button', { name: 'I had it' }).click()
+    await page.getByText("Where's it from?").waitFor()
+    await tapCorrectPlot(page, 'ph-father')
+    await page.getByRole('button', { name: 'I had it' }).click()
+    const trace = await page.evaluate((key) => {
+      const raw = localStorage.getItem(key)
+      return raw ? JSON.parse(raw).progress?.memory?.['ph-father'] : null
+    }, STORAGE_KEY)
+    assert.ok(trace)
+    assert.equal(trace.cleanRecalls, 2, 'wrong plot on beat 1 blocks a clean promotion')
+    assert.notEqual(trace.intervalIndex, 3)
+  },
+  {
+    seed: {
+      kind: SAVE_KIND,
+      schemaVersion: SAVE_SCHEMA_VERSION,
+      appVersion: '1.4.555',
+      savedAt: new Date().toISOString(),
+      progress: {
+        started: true,
+        easyMode: true,
+        theme: 'candy',
+        completed: ['ph-road', 'ph-father'],
+        memory: {
+          'ph-father': {
+            id: 'ph-father',
+            pillar: 'parable-hollow',
+            intervalIndex: 2,
+            nextReviewAt: today,
+            reviews: 2,
+            cleanRecalls: 2,
+            elaborated: false,
+          },
+        },
+      },
+    },
+    openDay: '2026-01-01',
+  },
+)
+
+await withPage(
+  `/?quickReview=ph-father&reviewFormat=C&${PLAYTEST}`,
+  async (page) => {
+    await tapCorrectPlot(page, 'ph-father')
+    await page.getByRole('button', { name: 'Not yet' }).click()
+    await page.getByText("Where's it from?").waitFor()
+    assert.equal(await page.locator('.quick-review-reveal-source').count(), 0)
+    await assertFormatCBeforeTap(page, 'ph-father')
+  },
+  {
+    seed: {
+      kind: SAVE_KIND,
+      schemaVersion: SAVE_SCHEMA_VERSION,
+      appVersion: '1.4.555',
+      savedAt: new Date().toISOString(),
+      progress: {
+        started: true,
+        easyMode: true,
+        theme: 'candy',
+        completed: ['ph-road', 'ph-father'],
+        memory: {
+          'ph-father': {
+            id: 'ph-father',
+            pillar: 'parable-hollow',
+            intervalIndex: 2,
+            nextReviewAt: today,
+            reviews: 2,
+            cleanRecalls: 2,
+            elaborated: false,
+          },
+        },
+      },
+    },
+  },
+)
+
+await withPage(
+  `/?quickReview=ph-father&reviewFormat=C&reviewStreak=2&${PLAYTEST}`,
+  async (page) => {
+    await page.locator('.quick-review-streak').waitFor()
+    await tapCorrectPlot(page, 'ph-father')
+    await page.getByRole('button', { name: 'I had it' }).waitFor()
+    await assertFormatCReveal(page, 'ph-father')
+    const pipGold = await page.evaluate(() => {
+      const pip = document.querySelector('.quick-review-streak-pip.is-lit')
+      if (!pip) return true
+      const bg = getComputedStyle(pip).backgroundColor
+      return /246,\s*194,\s*85|f6c255/i.test(bg)
+    })
+    assert.equal(pipGold, false, 'lit streak pips are not gold')
   },
   { seed: seedSave(1) },
 )

@@ -4,6 +4,7 @@ import { Avatar } from '../../components/Avatar'
 import { StoryPanelArt } from '../../components/StoryPanelArt'
 import { WinBurst } from '../../components/challenges/WinBurst'
 import { pillarFor } from '../../content'
+import { CAST } from '../../content/story'
 import { evidenceFor } from '../../content/evidence'
 import { ANCHOR, PLOT_IMG } from '../../components/city/CityPlotArt'
 import { EASY, easyFacingLine, easyWhyLine, uniqueHoldChoices } from '../../lib/easy'
@@ -36,6 +37,10 @@ export interface QuickReviewProps {
   onSittingUpdate?: (next: { bUsed?: boolean; streak?: number }) => void
   onDone: () => void
   debugFormat?: ReviewFormatId
+  /** Home route — formats A and C only until Scholar OKs decoys. */
+  formatsACOnly?: boolean
+  /** Home route — no post-reveal honesty check until decoys are approved. */
+  skipHonesty?: boolean
 }
 
 function faceForRung(lineId: string, intervalIndex: number, line: string): string {
@@ -73,36 +78,64 @@ export function QuickReview({
   onSittingUpdate,
   onDone,
   debugFormat,
+  formatsACOnly = false,
+  skipHonesty = false,
 }: QuickReviewProps) {
   const { progress, recordReview } = useProgress()
   const brief = evidenceFor(lineId)
   const trace = progress.memory[lineId]
-  const intervalIndex = trace?.intervalIndex ?? 0
+  const liveIntervalIndex = trace?.intervalIndex ?? 0
+  const holdInterval = useRef<number | null>(null)
   const lastFormat = trace?.lastFormat
-  const format =
-    debugFormat && debugFormat !== 'F'
-      ? debugFormat
-      : pickFormat(lineId, today, lastFormat, sitting, intervalIndex)
+  const [format] = useState<Exclude<ReviewFormatId, 'F'>>(() => {
+    if (debugFormat && debugFormat !== 'F') return debugFormat
+    return pickFormat(lineId, today, lastFormat, sitting, liveIntervalIndex, {
+      acOnly: formatsACOnly,
+    })
+  })
 
+  const [sourceBeatActive, setSourceBeatActive] = useState(false)
+  const [reasonBeatClean, setReasonBeatClean] = useState(false)
   const [phase, setPhase] = useState<Phase>(() => (format === 'B' ? 'think' : 'prompt'))
   const [revealed, setRevealed] = useState(false)
   const [thinkPct, setThinkPct] = useState(0)
   const [drainPct, setDrainPct] = useState(100)
   const [flashLine, setFlashLine] = useState<string | null>(null)
   const [winBurst, setWinBurst] = useState(false)
+  const intervalIndex =
+    winBurst && holdInterval.current != null ? holdInterval.current : liveIntervalIndex
+  const beatIndex = intervalIndex === 2 && sourceBeatActive ? 3 : intervalIndex
   const [pendingClean, setPendingClean] = useState<boolean | null>(null)
+  const [wrongMapTaps, setWrongMapTaps] = useState(0)
+  const [mapMiss, setMapMiss] = useState(false)
+  /** Format C: wrong plot or post-hint correct tap — never a clean recall. */
+  const [mapTapClean, setMapTapClean] = useState(true)
   const drainHalf = useRef(false)
   const graded = useRef(false)
 
   const stamp = lociStampFor(lineId)
-  const targetLine = brief ? reviewTargetLine(brief, intervalIndex) : ''
-  const prompt = reviewPrompt(intervalIndex)
+  const targetLine = brief ? reviewTargetLine(brief, beatIndex) : ''
+  const prompt = reviewPrompt(beatIndex)
   const storyPanel = storyPanelsFor(lineId)[0]
+
+  useEffect(() => {
+    holdInterval.current = null
+    setSourceBeatActive(false)
+    setReasonBeatClean(false)
+    setRevealed(false)
+    setPhase(format === 'B' ? 'think' : 'prompt')
+    setPendingClean(null)
+    setFlashLine(null)
+    setWrongMapTaps(0)
+    setMapMiss(false)
+    setMapTapClean(true)
+    graded.current = false
+  }, [lineId])
 
   const choiceLines = useMemo(() => {
     if (!brief) return []
-    return threeChoices(lineId, intervalIndex, targetLine, brief)
-  }, [brief, intervalIndex, lineId, targetLine])
+    return threeChoices(lineId, beatIndex, targetLine, brief)
+  }, [beatIndex, brief, lineId, targetLine])
 
   const shuffledDrain = useMemo(() => {
     if (!brief) return []
@@ -125,8 +158,10 @@ export function QuickReview({
     (clean: boolean) => {
       if (graded.current) return
       graded.current = true
+      const cardClean =
+        intervalIndex === 2 ? clean && reasonBeatClean : clean
       const streak = sitting?.streak ?? 0
-      const nextStreak = clean ? Math.min(3, streak + 1) : 0
+      const nextStreak = cardClean ? Math.min(3, streak + 1) : 0
       onSittingUpdate?.({
         bUsed: sitting?.bUsed || format === 'B',
         streak: nextStreak,
@@ -137,14 +172,15 @@ export function QuickReview({
           pillar: pillarFor(lineId),
           kind: 'recall',
           today,
-          clean,
-          peeked: !clean,
+          clean: cardClean,
+          peeked: !cardClean,
           elaborated: false,
           format,
         })
       }
       const finish = () => onDone()
-      if (clean && nextStreak === 3) {
+      if (cardClean && nextStreak === 3) {
+        holdInterval.current = liveIntervalIndex
         setWinBurst(true)
         window.setTimeout(() => {
           setWinBurst(false)
@@ -157,10 +193,13 @@ export function QuickReview({
     [
       brief,
       format,
+      intervalIndex,
+      liveIntervalIndex,
       lineId,
       onDone,
       onSittingUpdate,
       practice,
+      reasonBeatClean,
       recordReview,
       sitting?.bUsed,
       sitting?.streak,
@@ -219,17 +258,27 @@ export function QuickReview({
   }
 
   const showHonesty =
+    !skipHonesty &&
     (format === 'A' || format === 'C') &&
     phase === 'honesty' &&
-    honestyCheckDue(lineId, today, intervalIndex)
+    honestyCheckDue(lineId, today, beatIndex)
 
   function plotStage(plotId: CityPlotId): 'built' | 'lit' {
     if (format === 'C' && revealed && plotId === stamp.plotId) return 'lit'
     return 'built'
   }
 
-  function onMapTap() {
+  function onPlotTap(plotId: CityPlotId) {
     if (format !== 'C' || phase !== 'prompt' || revealed) return
+    if (plotId !== stamp.plotId) {
+      setWrongMapTaps((count) => count + 1)
+      setMapMiss(true)
+      setMapTapClean(false)
+      return
+    }
+    setMapMiss(false)
+    const hintShowing = wrongMapTaps >= 2
+    if (hintShowing) setMapTapClean(false)
     setRevealed(true)
     playGemPop('win')
     setPhase('reveal')
@@ -242,19 +291,42 @@ export function QuickReview({
     setPhase('reveal')
   }
 
+  function beginSourceBeat(reasonClean: boolean) {
+    graded.current = false
+    setReasonBeatClean(reasonClean)
+    setSourceBeatActive(true)
+    setRevealed(false)
+    setPendingClean(null)
+    setFlashLine(null)
+    setWrongMapTaps(0)
+    setMapMiss(false)
+    setMapTapClean(true)
+    setPhase('prompt')
+  }
+
   function onHadIt() {
     if (!revealed || phase === 'honesty') return
+    if (intervalIndex === 2 && !sourceBeatActive) {
+      beginSourceBeat(format === 'C' ? mapTapClean : true)
+      return
+    }
     if (
+      !skipHonesty &&
       (format === 'A' || format === 'C') &&
-      honestyCheckDue(lineId, today, intervalIndex)
+      honestyCheckDue(lineId, today, beatIndex)
     ) {
       setPhase('honesty')
       return
     }
-    finishGrade(true)
+    const selfGradeClean = format === 'C' ? mapTapClean : true
+    finishGrade(selfGradeClean)
   }
 
   function onNotYet() {
+    if (intervalIndex === 2 && !sourceBeatActive && revealed) {
+      beginSourceBeat(false)
+      return
+    }
     finishGrade(false)
   }
 
@@ -286,6 +358,41 @@ export function QuickReview({
 
   const streak = sitting?.streak ?? 0
   const streakLabel = streak >= 2 ? (streak >= 3 ? '3 in a row' : '2 in a row') : null
+  const mapPlotHint = wrongMapTaps >= 2
+  const mapTapGold = format === 'C' && phase === 'prompt' && !revealed && !mapPlotHint
+  const rung = reviewRung(beatIndex)
+  const guideName = CAST[stamp.whoId]?.name ?? stamp.whoId
+
+  function acRevealBody() {
+    if (!brief) return null
+    const showReason = Boolean(brief.reason)
+    const showSource = rung === 'source' || (intervalIndex === 2 && sourceBeatActive)
+    return (
+      <>
+        <div className="quick-review-cue quick-review-reveal-cue">
+          <Avatar who={stamp.whoId} size="sm" />
+          <span>{stamp.placeLabel}</span>
+          <span className="quick-review-guide-name">{guideName}</span>
+        </div>
+        <p className="quick-review-reveal-claim">{brief.claim}</p>
+        {showReason ? <p className="quick-review-reveal-reason">{brief.reason}</p> : null}
+        {showSource ? <p className="quick-review-reveal-source">{brief.source}</p> : null}
+      </>
+    )
+  }
+
+  function acRevealActions() {
+    return (
+      <div className="quick-review-actions">
+        <button type="button" className="btn gold xl" onClick={onHadIt}>
+          I had it
+        </button>
+        <button type="button" className="text-link" onClick={onNotYet}>
+          Not yet
+        </button>
+      </div>
+    )
+  }
 
   return (
     <section className="quick-review" aria-label={EASY.saved}>
@@ -334,7 +441,7 @@ export function QuickReview({
                 className="match-card recall-card"
                 onClick={() => onDrainPick(line)}
               >
-                {faceForRung(lineId, intervalIndex, line)}
+                {faceForRung(lineId, beatIndex, line)}
               </button>
             ))}
           </div>
@@ -343,77 +450,64 @@ export function QuickReview({
 
       {format === 'C' && (phase === 'prompt' || (phase === 'reveal' && !showHonesty)) ? (
         <>
-          <div className="quick-review-map" aria-hidden={phase !== 'prompt'}>
-            <img className="quick-review-map-bg" src={cityMapBg} alt="" draggable={false} />
-            <div className="quick-review-map-plate">
-              {(Object.keys(PLOT_IMG) as CityPlotId[]).map((plotId) => {
-                const anchor = ANCHOR[plotId]
-                const left = (anchor.x / 640) * 100
-                const top = (anchor.y / 420) * 100
-                const stage = plotStage(plotId)
-                const img = PLOT_IMG[plotId as keyof typeof PLOT_IMG]?.[stage]
-                const glow = plotId === stamp.plotId && phase === 'prompt' && !revealed
-                if (!img) return null
-                if (plotId === stamp.plotId) {
-                  return (
-                    <button
-                      key={plotId}
-                      type="button"
-                      className={`quick-review-plot-hit ${glow ? 'is-now' : ''}`}
-                      style={{ left: `${left}%`, top: `${top}%` }}
-                      onClick={onMapTap}
-                      aria-label={glow ? prompt : undefined}
-                    >
-                      <span className="quick-review-avatar">
-                        <Avatar who={stamp.whoId} size="sm" />
-                      </span>
-                      <img src={img} alt="" draggable={false} />
-                    </button>
-                  )
-                }
-                return (
-                  <div
-                    key={plotId}
-                    className="quick-review-plot-hit"
-                    style={{ left: `${left}%`, top: `${top}%`, opacity: 0.55 }}
-                    aria-hidden
-                  >
-                    <img src={img} alt="" draggable={false} />
-                  </div>
-                )
-              })}
-            </div>
-          </div>
           {phase === 'prompt' && !revealed ? (
-            <p className="quick-review-prompt">{prompt}</p>
+            <div className="quick-review-stage">
+              <div className="quick-review-prompt-panel quick-review-prompt-panel--flat">
+                <p className="quick-review-prompt quick-review-prompt-title">{prompt}</p>
+              </div>
+              <div className="quick-review-map" aria-hidden={false}>
+                <div className="quick-review-map-frame">
+                  <img className="quick-review-map-bg" src={cityMapBg} alt="" draggable={false} />
+                  <div className="quick-review-map-plate">
+                    {(Object.keys(PLOT_IMG) as CityPlotId[]).map((plotId) => {
+                      const anchor = ANCHOR[plotId]
+                      const left = (anchor.x / 640) * 100
+                      const top = (anchor.y / 420) * 100
+                      const stage = plotStage(plotId)
+                      const img = PLOT_IMG[plotId as keyof typeof PLOT_IMG]?.[stage]
+                      const hint = mapPlotHint && plotId === stamp.plotId
+                      if (!img) return null
+                      return (
+                        <button
+                          key={plotId}
+                          type="button"
+                          data-plot-id={plotId}
+                          className={`quick-review-plot-hit ${hint ? 'is-now' : ''}`}
+                          style={{ left: `${left}%`, top: `${top}%` }}
+                          onClick={() => onPlotTap(plotId)}
+                          aria-label={`${prompt}. ${EASY.reviewMapTap}`}
+                        >
+                          <img src={img} alt="" draggable={false} />
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+              <p className={`quick-review-map-tap ${mapTapGold ? 'is-now' : ''}`}>{EASY.reviewMapTap}</p>
+              {mapMiss ? (
+                <p className="quick-review-map-miss" role="status">
+                  {EASY.reviewMapMiss}
+                </p>
+              ) : null}
+            </div>
           ) : null}
           {revealed ? (
-            <>
-              <p className="quick-review-reveal-line">
-                {faceForRung(lineId, intervalIndex, targetLine)}
-              </p>
-              <div className="quick-review-actions">
-                <button type="button" className="btn gold xl" onClick={onHadIt}>
-                  I had it
-                </button>
-                <button type="button" className="text-link" onClick={onNotYet}>
-                  Not yet
-                </button>
-              </div>
-            </>
+            <div className="quick-review-stage">
+              <div className="quick-review-reveal-panel">{acRevealBody()}</div>
+              {acRevealActions()}
+            </div>
           ) : null}
         </>
       ) : null}
 
       {format === 'A' && (phase === 'prompt' || phase === 'reveal') && !showHonesty ? (
         <>
-          <div className="quick-review-cue">
-            <Avatar who={stamp.whoId} size="sm" />
-            <span>{stamp.placeLabel}</span>
-          </div>
           {!revealed ? (
-            <>
-              <p className="quick-review-prompt">{prompt}</p>
+            <div className="quick-review-stage">
+              <div className="quick-review-prompt-panel">
+                <p className="quick-review-prompt quick-review-prompt-title">{prompt}</p>
+              </div>
               <button
                 type="button"
                 className="quick-review-flip is-now"
@@ -429,21 +523,12 @@ export function QuickReview({
                   />
                 ) : null}
               </button>
-            </>
+            </div>
           ) : (
-            <>
-              <p className="quick-review-reveal-line">
-                {faceForRung(lineId, intervalIndex, targetLine)}
-              </p>
-              <div className="quick-review-actions">
-                <button type="button" className="btn gold xl" onClick={onHadIt}>
-                  I had it
-                </button>
-                <button type="button" className="text-link" onClick={onNotYet}>
-                  Not yet
-                </button>
-              </div>
-            </>
+            <div className="quick-review-stage">
+              <div className="quick-review-reveal-panel">{acRevealBody()}</div>
+              {acRevealActions()}
+            </div>
           )}
         </>
       ) : null}
@@ -451,7 +536,7 @@ export function QuickReview({
       {format === 'B' && phase === 'reveal' ? (
         <>
           <p className="quick-review-reveal-line">
-            {faceForRung(lineId, intervalIndex, targetLine)}
+            {faceForRung(lineId, beatIndex, targetLine)}
           </p>
           <div className="quick-review-actions">
             <button type="button" className="btn gold xl" onClick={onBNext}>
@@ -472,7 +557,7 @@ export function QuickReview({
                 className={`match-card recall-card ${flashLine === line ? 'is-flash' : ''}`}
                 onClick={() => onHonestyPick(line)}
               >
-                {faceForRung(lineId, intervalIndex, line)}
+                {faceForRung(lineId, beatIndex, line)}
               </button>
             ))}
           </div>

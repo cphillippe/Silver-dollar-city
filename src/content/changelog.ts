@@ -28,7 +28,7 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.554',
+    version: '1.4.555',
     title: 'Easy Night Watch: walk-in taps, tablet drags, pace chip in HUD',
     when: '2026-10-29',
     items: [
@@ -38,6 +38,15 @@ export const CHANGELOG: ChangeNote[] = [
       'Easy only.',
       'Refs #756.',
       'Refs #768.',
+    ],
+  },
+  {
+    version: '1.4.554',
+    title: 'Behind the scenes: Easy Home Read quick review queue',
+    when: '2026-10-29',
+    items: [
+      'Nothing changes for players yet.',
+      'Refs #842.',
     ],
   },
   {
