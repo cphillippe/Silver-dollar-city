@@ -2255,10 +2255,10 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
     /\.defend-page\.is-easy-watch \.nw-hud \{[\s\S]*?pointer-events:\s*none;/,
     '#868 Easy HUD strip passes taps through to walkers under the band',
   )
-  assert.match(
+  assert.doesNotMatch(
     defendCss834,
     /\.defend-page\.is-easy-watch:has\(\.nw-cam\[data-nw-cam='on'\]\)\.is-easy-tap \.nw-stage \{[\s\S]*?margin-top:\s*-40px;/,
-    '#868 Easy stage extends hit targets under the HUD band when cam pans walkers up',
+    '#868 Easy cam-on wave must not pull the stage under the HUD',
   )
   assert.doesNotMatch(
     defendCss834,
