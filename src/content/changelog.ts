@@ -28,6 +28,18 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.556',
+    title: 'Night Run: five real forces at the Just Right Gate',
+    when: '2026-10-29',
+    items: [
+      'After the three cranks, the Star Tower gate now shows five real forces: gravity, strong, electric, weak and space.',
+      'Each one has to be inside its real window for life. The screen shows how far off you are and how small the window is.',
+      'A Sources tap shows where each window comes from.',
+      'Then let luck try. The real odds for luck are about 1 in 5 × 10¹⁸⁵.',
+      'Refs #793.',
+    ],
+  },
+  {
     version: '1.4.554',
     title: 'Behind the scenes: Easy Home Read quick review queue',
     when: '2026-10-29',
