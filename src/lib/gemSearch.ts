@@ -232,7 +232,7 @@ export const MATCH_CHIPS: Record<string, MatchChipSet> = {
     words: ['BOAZ', 'HALL', 'DEBT', 'FORGIVE'],
     kinds: ['person', 'place', 'idea', 'idea'],
     roles: ['who', 'where', 'idea', 'keep'],
-    say: 'Boaz Archive marks the line at Record Hall: forgiven debt means we must forgive too.',
+    say: 'Mercy Wren marks the line at Story Creek: God forgives us a huge debt. So we forgive others.',
   },
   'fg-order': {
     words: ['LARK', 'GATE', 'ORDER', 'CHRIST'],

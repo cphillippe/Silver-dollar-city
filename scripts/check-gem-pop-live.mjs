@@ -40,7 +40,7 @@ function savePayload({ lifetime = 5000, seen = 2 } = {}) {
   return {
     kind: 'silver-city-save',
     schemaVersion: 1,
-    appVersion: '1.4.556',
+    appVersion: '1.4.555',
     savedAt: now.toISOString(),
     progress: {
       started: true,

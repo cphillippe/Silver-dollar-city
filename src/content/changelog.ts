@@ -29,14 +29,26 @@ export function playerVisibleChangeTitle(title: string): string | null {
 export const CHANGELOG: ChangeNote[] = [
   {
     version: '1.4.556',
-    title: 'Night Run: five real forces at the Just Right Gate',
+    title: 'Easy lines: forgiven debt, and Christ holds all things',
     when: '2026-10-29',
     items: [
-      'After the three cranks, the Star Tower gate now shows five real forces: gravity, strong, electric, weak and space.',
-      'Each one has to be inside its real window for life. The screen shows how far off you are and how small the window is.',
-      'A Sources tap shows where each window comes from.',
-      'Then let luck try. The real odds for luck are about 1 in 5 × 10¹⁸⁵.',
-      'Refs #793.',
+      'The debt line now says: God forgives us a huge debt. So we forgive others.',
+      'The order line now says: Christ made all things, and he holds them together.',
+      'Medium and Hard claims stay as they are.',
+      'Refs #873',
+    ],
+  },
+  {
+    version: '1.4.555',
+    title: 'Easy Night Watch: walk-in taps, tablet drags, pace chip in HUD',
+    when: '2026-10-29',
+    items: [
+      'The first walker on each wave can be tapped as soon as it steps onto the map — no silent wait while it is already visible.',
+      'On a wide tablet with the camera off, dragging across the board no longer plants lamps or fires stray shots; quick taps still work.',
+      'The pace chip sits in the top HUD bar; the HUD pass-through keeps the map, Sparks balloon, and lamp rail visible when the camera is on.',
+      'Easy only.',
+      'Refs #756.',
+      'Refs #768.',
     ],
   },
   {
