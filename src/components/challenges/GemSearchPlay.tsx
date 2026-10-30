@@ -612,6 +612,22 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     applyCell(cell, 'drag')
   }
 
+  function easyFingerIsTap() {
+    if (document.documentElement.dataset.easy === 'on') {
+      return maxTravel.current <= GEM_TAP_MAX_TRAVEL_PX && performance.now() - downAt.current < GEM_TAP_MAX_MS
+    }
+    return true
+  }
+
+  function restoreEasyPath() {
+    const keep = pathBefore.current.slice()
+    downCell.current = null
+    endDrag()
+    writePath(keep)
+    rawRef.current = keep.slice()
+    if (keep.length > 0) setTapNext(true)
+  }
+
   function onBoardUp(event?: ReactPointerEvent<HTMLDivElement>) {
     if (!drag.current) return
     if (event && event.pointerId !== dragPointerId.current) return
@@ -625,43 +641,16 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     // A tap (no finger travel) extends the path; pointerdown must not submit (drag stays live).
     if (!moved.current) {
       const cell = downCell.current ?? rawRef.current[rawRef.current.length - 1]
-      if (document.documentElement.dataset.easy === 'on') {
-        const travel = maxTravel.current
-        const elapsed = performance.now() - downAt.current
-        const isTap = travel <= GEM_TAP_MAX_TRAVEL_PX && elapsed < GEM_TAP_MAX_MS
-        if (!isTap) {
-          const keep = pathBefore.current.slice()
-          downCell.current = null
-          endDrag()
-          writePath(keep)
-          rawRef.current = keep.slice()
-          if (keep.length > 0) setTapNext(true)
-          return
-        }
-      }
-      const openedTap =
-        document.documentElement.dataset.easy === 'on' && pathBefore.current.length === 0
+      if (!easyFingerIsTap()) return restoreEasyPath()
       downCell.current = null
       if (cell) applyCell(cell, 'tap')
-      if (openedTap && pathRef.current.length === 1) setTapNext(true)
+      if (document.documentElement.dataset.easy === 'on' && pathBefore.current.length === 0 && pathRef.current.length === 1) {
+        setTapNext(true)
+      }
       return endDrag(true)
     }
-    if (
-      document.documentElement.dataset.easy === 'on' &&
-      rawRef.current.length <= 1
-    ) {
-      const travel = maxTravel.current
-      const elapsed = performance.now() - downAt.current
-      const isTap = travel <= GEM_TAP_MAX_TRAVEL_PX && elapsed < GEM_TAP_MAX_MS
-      if (!isTap) {
-        const keep = pathBefore.current.slice()
-        downCell.current = null
-        endDrag()
-        writePath(keep)
-        rawRef.current = keep.slice()
-        if (keep.length > 0) setTapNext(true)
-        return
-      }
+    if (document.documentElement.dataset.easy === 'on' && rawRef.current.length <= 1 && !easyFingerIsTap()) {
+      return restoreEasyPath()
     }
     downCell.current = null
     const nextPath = rawRef.current.length ? rawRef.current.slice() : pathRef.current.slice()

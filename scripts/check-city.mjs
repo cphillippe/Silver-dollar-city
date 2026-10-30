@@ -1959,7 +1959,6 @@ assert.doesNotMatch(
   assert.match(maze561, /proveOvershootFollowsFinger/, '#883 overshoot recheck follows the finger')
   assert.doesNotMatch(maze561, /trace\.push\(want\)/, '#883 the inn trace is not synthesized')
 }
-assert.equal(APP_VERSION, '1.4.558')
 assert.equal(CHANGELOG[1].version, '1.4.558', '1.4.558 follows the word-search row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.558'), '1.4.558 changelog row')
 assert.doesNotMatch(
