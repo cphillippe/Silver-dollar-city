@@ -1643,6 +1643,36 @@ html[data-easy='on'] .hub.is-easy-home .city-folk .city-lamp {
   animation: none;
 }
 
+/* Easy phone pan: ground ring at the house base. Opacity pulse only — a CSS
+   transform on the ring paints it above the resident. The hit is invisible. */
+.hub.is-easy-home .city-overworld.is-easy-pan .city-next-halo-hit {
+  fill: transparent;
+  stroke: none;
+}
+
+.hub.is-easy-home .city-overworld.is-easy-pan .city-next-halo.is-easy-ground {
+  stroke-width: 3;
+  opacity: 0.9;
+  transform: none;
+  animation: city-ground-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes city-ground-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hub.is-easy-home .city-overworld.is-easy-pan .city-next-halo.is-easy-ground {
+    animation: none;
+  }
+}
+
 /* Easy Home pan (portrait phones): the plate fills the strip above the dock and slides sideways.
    Movement is transform only. No filter on the moving layer. */
 .hub.is-easy-home .easy-home-map .city-pan-viewport {
@@ -1739,7 +1769,12 @@ html[data-easy='on'] .hub.is-easy-home .city-folk .city-lamp {
   outline-offset: 2px;
 }
 
+.hub.is-easy-home .city-overworld.is-easy-pan .city-plot-tag {
+  font-size: 14px;
+}
+
 /* #871: Easy Home labels stay at least 13px (index.css peels unchanged). */
+.hub.is-easy-home .easy-home-dock .eyebrow,
 .hub.is-easy-home .easy-build-it .eyebrow {
   font-size: 0.8125rem;
 }
