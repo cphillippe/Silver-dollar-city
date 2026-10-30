@@ -85,6 +85,11 @@ export interface GemPuzzle {
   bonusPaths: Record<string, GemCoord[]>
 }
 
+/** Easy tap: finger travel at or under this stays a tap. A longer slip does not pick. */
+export const GEM_TAP_MAX_TRAVEL_PX = 6
+/** Easy tap: a press shorter than this can pick a letter. A longer hold does not. */
+export const GEM_TAP_MAX_MS = 350
+
 const MIN_LEN = 3
 const MAX_LEN = 8
 const MAX_WORDS = 4
