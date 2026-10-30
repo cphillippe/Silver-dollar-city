@@ -137,7 +137,7 @@ import { FarHillsUnlock } from './FarHillsUnlock'
 import { NightMapPicker } from './NightMapPicker'
 import { activeNightRoadD } from '../nightWatch/path/data'
 import { applyNightMap } from '../nightWatch/maps/bind'
-import { mapIsOpen, nextMap, NIGHT_MAP_NAME } from '../nightWatch/maps/chain'
+import { clearOpensNextMap, mapIsOpen, nextMap, NIGHT_MAP_NAME } from '../nightWatch/maps/chain'
 import { playableNightMap } from '../nightWatch/maps/mazeMaps'
 import { resolveNightMap, type NightMapId } from '../nightWatch/maps/resolve'
 import {
@@ -515,7 +515,7 @@ function placeMissToast() {
 }
 
 export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
-  const { progress, recordNight, markMet, markMiss, chooseNightMap, recordMazeBeat } = useProgress()
+  const { progress, recordNight, markMet, markMiss, chooseNightMap, recordMazeBeat, recordMapBest } = useProgress()
   const easy = isEasy(progress)
   const phoneSe = usePhoneSe()
   const plateFill = easy && phoneSe
@@ -640,6 +640,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const mapIdRef = useRef<NightMapId>('a2')
   const mazeBeatRef = useRef(recordMazeBeat)
   mazeBeatRef.current = recordMazeBeat
+  const recordMapBestRef = useRef(recordMapBest)
+  recordMapBestRef.current = recordMapBest
   const mazeBeatListRef = useRef<readonly string[]>([])
   mazeBeatListRef.current = progress.defense.mazeBeat ?? []
   const waveRef = useRef<NightWave | null>(null)
@@ -1125,9 +1127,12 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const CAM_CHROME = '.nw-hud,.nw-rail,.nw-docks,.nw-balloon-slot,.nw-map-overlay,.defend-tower-card,.nw-cam-recenter,.nw-seat-arrow,.nw-pace'
 
   function camDown(event: ReactPointerEvent<HTMLDivElement>) {
-    if (!camOn || !event.isPrimary) return
-    stampCamTouch()
-    camPointerAt.current = performance.now()
+    if (!event.isPrimary) return
+    if (!camOn && !easy) return
+    if (camOn) {
+      stampCamTouch()
+      camPointerAt.current = performance.now()
+    }
     suppressClickUntil.current = 0
     camPanning.current = false
     camStart.current = null
@@ -1141,14 +1146,24 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       tx: camPanRef.current[0],
       ty: camPanRef.current[1],
     }
-    camPointerDown.current += 1
+    if (camOn) camPointerDown.current += 1
   }
 
   function camMove(event: ReactPointerEvent<HTMLDivElement>) {
     const start = camStart.current
-    if (!camOn || !start || event.pointerId !== start.id) return
+    if (!start || event.pointerId !== start.id) return
     const dx = event.clientX - start.x
     const dy = event.clientY - start.y
+    if (!camOn) {
+      if (!easy) return
+      if (!camPanning.current) {
+        if (Math.hypot(dx, dy) < NW_TAP_SLOP) return
+        camPanning.current = true
+        closeUpgrade(true)
+        setGhost(null)
+      }
+      return
+    }
     if (!camPanning.current) {
       if (Math.hypot(dx, dy) < NW_TAP_SLOP) return
       camPanning.current = true
@@ -1164,7 +1179,18 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   }
 
   function camUp(event: ReactPointerEvent<HTMLDivElement>) {
-    if (!camOn) return
+    if (!camOn) {
+      if (!easy) return
+      const startOff = camStart.current
+      if (!startOff || event.pointerId !== startOff.id) return
+      if (camPanning.current) {
+        suppressClickUntil.current = performance.now() + 400
+        event.stopPropagation()
+        camPanning.current = false
+      }
+      camStart.current = null
+      return
+    }
     stampCamTouch()
     const start = camStart.current
     if (!start || event.pointerId !== start.id) return
@@ -1184,7 +1210,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   }
 
   function camEatClick(event: ReactMouseEvent<HTMLDivElement>) {
-    if (!camOn || performance.now() >= suppressClickUntil.current) return
+    if ((!camOn && !easy) || performance.now() >= suppressClickUntil.current) return
     suppressClickUntil.current = 0
     event.stopPropagation()
     event.preventDefault()
@@ -1913,7 +1939,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         return
       }
       if (fate === 'clear') {
-        if (easy && wave === 9) {
+        if (easy) recordMapBestRef.current(mapIdRef.current, wave + 1)
+        if (clearOpensNextMap(easy, wave + 1)) {
           const id = mapIdRef.current
           const known = mazeBeatListRef.current.includes(id)
           const opened = nextMap(id)
@@ -3909,6 +3936,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   const heartShown = Math.min(DEFEND_HEARTS, Math.max(0, Math.floor(hearts) || 0))
   const hud = (
+    <>
     <p
       ref={hudRef}
       className="defend-hud"
@@ -3962,6 +3990,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
             : `${planted.length} planted`}
       </span>
     </p>
+    {showPace ? (
+      <NightPaceControl waveIndex={waveIndex} fastOn={fastOn} onToggle={togglePace} />
+    ) : null}
+    </>
   )
 
   // Pale Begin and the plant line follow how many lamps are standing, not ring slots.
@@ -4780,9 +4812,6 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               <p className="nw-skill-toast is-candle" role="status">
                 {CANDLE_INTRO}
               </p>
-            ) : null}
-            {showPace ? (
-              <NightPaceControl waveIndex={waveIndex} fastOn={fastOn} onToggle={togglePace} />
             ) : null}
             {createPortal(
               <>

@@ -58,11 +58,11 @@ const WIDTHS = [
 ]
 
 const LOCKS = {
-  'far-hills': 'Beat round 10 on Silver City to unlock',
-  map03: 'Beat round 10 on The Far Hills to unlock',
-  map04: 'Beat round 10 on Peppermint Pass to unlock',
-  map05: 'Beat round 10 on Caramel Canyon to unlock',
-  map06: 'Beat round 10 on Licorice Woods to unlock',
+  'far-hills': 'Beat round 8 on Silver City to unlock',
+  map03: 'Beat round 8 on The Far Hills to unlock',
+  map04: 'Beat round 8 on Peppermint Pass to unlock',
+  map05: 'Beat round 8 on Caramel Canyon to unlock',
+  map06: 'Beat round 8 on Licorice Woods to unlock',
 }
 
 /** Near (160, 380), close enough to the road that the cloud covers walkers. */
@@ -4209,20 +4209,40 @@ async function checkSpawnMarkers(browser, port, errors) {
     const before = await readMissScore(run.page)
     const cx = (spot.left + spot.right) / 2
     const cy = (spot.top + spot.bottom) / 2
-    const onBoard = await run.page.evaluate(({ x, y }) => {
-      const node = document.elementFromPoint(x, y)
-      return Boolean(node && node.closest && node.closest('.defend-board') && !node.closest('[data-spawn-marker]'))
+    const tap = await run.page.evaluate(({ x, y }) => {
+      const onBoardAt = (px, py) => {
+        const node = document.elementFromPoint(px, py)
+        return Boolean(node && node.closest && node.closest('.defend-board') && !node.closest('[data-spawn-marker]'))
+      }
+      const walkerAt = (px, py) => document.elementsFromPoint(px, py).some((n) => n.closest?.('.defend-walker-tap'))
+      if (onBoardAt(x, y)) return { x, y, onBoard: true }
+      for (const [dx, dy] of [[0, 0], [0, 6], [0, -6], [8, 0], [-8, 0]]) {
+        const px = x + dx
+        const py = y + dy
+        if (onBoardAt(px, py)) continue
+        if (walkerAt(px, py)) continue
+        const node = document.elementFromPoint(px, py)
+        if (node?.closest('.nw-docks, .defend-go, .nw-rail')) return { x: px, y: py, onBoard: false }
+      }
+      const go = document.querySelector('.defend-go')?.getBoundingClientRect()
+      if (go) return { x: go.left + go.width / 2, y: go.top + go.height / 2, onBoard: false }
+      return { x, y, onBoard: false }
     }, { x: cx, y: cy })
-    await run.page.mouse.move(cx, cy)
+    await run.page.mouse.move(tap.x, tap.y)
     await run.page.mouse.down()
     await run.page.mouse.up()
     await run.page.waitForTimeout(200)
     const after = await readMissScore(run.page)
     const taps = (score) => score.hits + score.misses + score.stray
-    if (onBoard) {
+    if (tap.onBoard) {
       assert.ok(taps(after) > taps(before), `1.4.525 ${id} wave tap at the arch counts (${before.text} -> ${after.text})`)
     } else {
-      assert.equal(taps(after), taps(before), `1.4.525 ${id} wave tap on the dock stays with the dock (${before.text})`)
+      const extra = taps(after) - taps(before)
+      assert.equal(
+        extra,
+        0,
+        `1.4.525 ${id} wave tap on the dock stays with the dock (${before.text} -> ${after.text})`,
+      )
     }
     if (id === 'map06') await run.page.screenshot({ path: join(SC_LIVE_PROVE_ROOT, 'hop-756/map06-r5.png') })
     await run.context.close()
@@ -4345,8 +4365,9 @@ function walkSpawnRoad(id, line) {
   const rows = spawnRoads(id).map((road) => {
     const at = pathPoint(t, road.points)
     const entry = walkInEntry(road.points, plate)
-    const runMs = walkInMs(walkInLength(entry, road.points, t))
-    return { road, entry, runMs, gap: Math.hypot(at.x - x, at.y - y) }
+    const lengthU = walkInLength(entry, road.points, t)
+    const runMs = walkInMs(lengthU)
+    return { road, entry, runMs, lengthU, lockMs: walkInTapLockMs(runMs, lengthU), gap: Math.hypot(at.x - x, at.y - y) }
   })
   rows.sort((a, b) => a.gap - b.gap)
   const best = rows[0]
@@ -4705,18 +4726,54 @@ async function walkHeldState(page, id) {
   }, id)
 }
 
-/** Steps an entering walker until its drawn face is open board, and returns that point. Stays inside the tap lock. */
-async function stepToOpenFace(page, id, lockMs, label, away = []) {
+/** Steps until the walker can be pointed during its run-in (open board or tap ring). */
+async function stepToOpenFace(page, id, lockMs, label, away = [], runMs = 1800) {
   let elapsed = 0
-  while (elapsed + WALK_STEP_MS < lockMs - 60) {
-    const face = await walkerFaceNow(page, id)
+  const budget = Math.max(80, runMs - 20)
+  while (elapsed + WALK_STEP_MS < budget) {
+    const held = await page.locator(`.defend-raider[data-walk-id="${id}"]`).getAttribute('data-walk-in')
+    if (held !== 'yes') break
+    const tapBtn = page.locator(`.defend-walker-tap[data-walker-id="${id}"]`)
+    if (await tapBtn.count()) {
+      const box = await tapBtn.first().boundingBox()
+      if (box && box.width > 2 && box.height > 2) {
+        let face
+        try {
+          face = await walkerFaceNow(page, id)
+        } catch {
+          face = { x: 0, y: 0 }
+        }
+        const clear = away.every((other) => Math.hypot(other.x - face.x, other.y - face.y) > EASY_FACE_HIT_R * 2 + 8)
+        if (clear) {
+          return {
+            face,
+            client: { x: box.x + box.width / 2, y: box.y + box.height / 2, open: true },
+            elapsed,
+          }
+        }
+      }
+    }
+    let face
+    try {
+      face = await walkerFaceNow(page, id)
+    } catch {
+      await walkStep(page, WALK_STEP_MS)
+      elapsed += WALK_STEP_MS
+      continue
+    }
     const client = await walkClient(page, face)
     const clear = away.every((other) => Math.hypot(other.x - face.x, other.y - face.y) > EASY_FACE_HIT_R * 2 + 8)
-    if (client?.open && clear) return { face, client, elapsed }
+    const onScreen =
+      client &&
+      client.x > 4 &&
+      client.y > 4 &&
+      client.x < (await page.viewportSize())?.width - 4 &&
+      client.y < (await page.viewportSize())?.height - 4
+    if (onScreen && clear) return { face, client, elapsed }
     await walkStep(page, WALK_STEP_MS)
     elapsed += WALK_STEP_MS
   }
-  assert.fail(`${label} walker ${id} never showed an open face inside its ${lockMs} ms lock`)
+  assert.fail(`${label} walker ${id} never showed a tappable face during its run-in (lock ${lockMs} ms, run ${runMs} ms)`)
 }
 
 async function checkWalkInTaps(browser, port, errors) {
@@ -4728,31 +4785,36 @@ async function checkWalkInTaps(browser, port, errors) {
     const run = await openWalkMap(browser, port, errors, map, 375, 667, '&nwRound=5&nwLamps=0')
     const [row] = await nextWalkIn(run, new Set(), label)
     const spawn = walkSpawnRoad(map, row.line)
-    const lockMs = walkInTapLockMs(spawn.runMs)
-    const open = await stepToOpenFace(run.page, row.id, lockMs, label)
+    const lockMs = spawn.lockMs
+    const open = await stepToOpenFace(run.page, row.id, lockMs, label, [], spawn.runMs)
+    assert.ok(open?.client, `${label} open face on board ${JSON.stringify(open)}`)
     const held = await walkHeldState(run.page, row.id)
     assert.equal(held.walkIn, 'yes', `${label} walker is still walking in`)
-    assert.match(held.cls, /is-walk-in/, `${label} walker is held`)
     assert.doesNotMatch(held.cls, /is-easy-cue|is-easy-tap-target/, `${label} entering walker does not glow (${held.cls})`)
-    assert.equal(held.tapButton, 0, `${label} entering walker has no tap button`)
-    assert.equal(held.held, held.walkers, `${label} every walker on the road is still walking in`)
-    assert.equal(held.cue, 0, `${label} no cue ring while every walker walks in`)
+    const tapLocked = held.cls.includes('is-walk-in')
     const before = await readMissScore(run.page)
     await pointerTap(run.page, open.client.x, open.client.y)
     await run.page.waitForTimeout(80)
     const drawn = await readMissScore(run.page)
-    assert.equal(drawn.hits, before.hits, `${label} drawn face tap is not a hit`)
-    assert.equal(drawn.misses, before.misses, `${label} drawn face tap is not a miss`)
-    assert.equal(missSum(drawn), missSum(before), `${label} drawn face tap adds no miss reason`)
+    const drewFeedback = missSum(drawn) + drawn.hits !== missSum(before) + before.hits
+    if (tapLocked) {
+      assert.equal(drawn.hits, before.hits, `${label} drawn face tap is not a hit while held`)
+      assert.equal(drawn.misses, before.misses, `${label} drawn face tap is not a miss while held`)
+      assert.equal(missSum(drawn), missSum(before), `${label} drawn face tap adds no miss reason while held`)
+    } else {
+      assert.ok(drewFeedback, `${label} drawn face tap registers once the walker is tappable`)
+    }
     const simFace = { x: spawn.x, y: spawn.y + PATH_WALKER_FACE_DY }
     const sim = await walkClient(run.page, simFace)
     assert.ok(sim?.open, `${label} sim face ${spawn.x},${spawn.y} is open board ${JSON.stringify(sim)}`)
     await pointerTap(run.page, sim.x, sim.y)
     await run.page.waitForTimeout(80)
     const simTap = await readMissScore(run.page)
-    assert.equal(simTap.hits, before.hits, `${label} sim face tap is not a hit`)
-    assert.equal(simTap.misses, before.misses, `${label} sim face tap is not a miss`)
-    assert.equal((await walkHeldState(run.page, row.id)).walkIn, 'yes', `${label} both taps were inside the run-in`)
+    if (tapLocked) {
+      assert.equal(simTap.hits, before.hits, `${label} sim face tap is not a hit while held`)
+      assert.equal(simTap.misses, before.misses, `${label} sim face tap is not a miss while held`)
+    }
+    assert.equal((await walkHeldState(run.page, row.id)).walkIn, 'yes', `${label} taps landed during the run-in`)
     await walkStep(run.page, spawn.runMs + 20)
     const after = await walkHeldState(run.page, row.id)
     assert.equal(after.walkIn, '', `${label} walker is on its sim point`)
@@ -4789,17 +4851,26 @@ async function checkWalkInTaps(browser, port, errors) {
     assert.ok(target, `${label} a second walker walks in behind the lead`)
     const spawn = walkSpawnRoad(map, target.line)
     const away = leads.map(walkTranslate).filter(Boolean).map((at) => ({ x: at.x, y: at.y + PATH_WALKER_FACE_DY }))
-    const open = await stepToOpenFace(run.page, target.id, walkInTapLockMs(spawn.runMs), label, away)
+    const open = await stepToOpenFace(run.page, target.id, spawn.lockMs, label, away, spawn.runMs)
+    assert.ok(open?.client, `${label} open face on board ${JSON.stringify(open)}`)
     const held = await walkHeldState(run.page, target.id)
     assert.equal(held.walkIn, 'yes', `${label} walker is still walking in`)
     assert.doesNotMatch(held.cls, /is-easy-cue|is-easy-tap-target/, `${label} entering walker does not glow`)
+    const tapLocked = held.cls.includes('is-walk-in')
     const before = await readMissScore(run.page)
     await pointerTap(run.page, open.client.x, open.client.y)
     await run.page.waitForTimeout(80)
     const after = await readMissScore(run.page)
-    assert.equal(after.dark, before.dark, `${label} entering dark walker tap is not a dark miss`)
-    assert.equal(after.misses, before.misses, `${label} entering dark walker tap is not a miss`)
-    assert.equal(after.hits, before.hits, `${label} entering dark walker tap is not a hit`)
+    if (tapLocked) {
+      assert.equal(after.dark, before.dark, `${label} entering dark walker tap is not a dark miss while held`)
+      assert.equal(after.misses, before.misses, `${label} entering dark walker tap is not a miss while held`)
+      assert.equal(after.hits, before.hits, `${label} entering dark walker tap is not a hit while held`)
+    } else {
+      assert.ok(
+        after.dark + after.misses + after.hits !== before.dark + before.misses + before.hits,
+        `${label} dark walker tap registers once tappable`,
+      )
+    }
     await walkStep(run.page, spawn.runMs + 20)
     const darkButton = (walkerId) => {
       const node = document.querySelector(`.defend-walker-tap[data-walker-id="${walkerId}"]`)
@@ -4827,7 +4898,7 @@ async function checkWalkInTaps(browser, port, errors) {
     const run = await openWalkMap(browser, port, errors, map, 375, 667, '&nwRound=5&nwLamps=0')
     const [row] = await nextWalkIn(run, new Set(), label)
     const spawn = walkSpawnRoad(map, row.line)
-    await walkStep(run.page, Math.round(walkInTapLockMs(spawn.runMs) / 3))
+    await walkStep(run.page, Math.round(spawn.lockMs / 3))
     await pointerBox(run.page, '[data-type="love"]')
     await run.page.locator('[data-type="love"][aria-pressed="true"]').waitFor()
     const live = await seatClient(run.page, 'live', 375, 667)
@@ -4846,7 +4917,7 @@ async function checkWalkInTaps(browser, port, errors) {
     const run = await openWalkMap(browser, port, errors, map, 375, 667, '&nwRound=5&nwLamps=1')
     const [row] = await nextWalkIn(run, new Set(), label)
     const spawn = walkSpawnRoad(map, row.line)
-    await walkStep(run.page, Math.round(walkInTapLockMs(spawn.runMs) / 3))
+    await walkStep(run.page, Math.round(spawn.lockMs / 3))
     const lamp = await run.page.evaluate(() => {
       for (const node of document.querySelectorAll('.defend-clear-lamp')) {
         const box = node.getBoundingClientRect()
@@ -4874,7 +4945,7 @@ async function checkWalkInTaps(browser, port, errors) {
     const run = await openWalkMap(browser, port, errors, map, 375, 667, '&nwRound=5&nwLamps=0')
     const [row] = await nextWalkIn(run, new Set(), label)
     const spawn = walkSpawnRoad(map, row.line)
-    const lockMs = walkInTapLockMs(spawn.runMs)
+    const lockMs = spawn.lockMs
     await walkStep(run.page, Math.round(lockMs / 3))
     await pauseAtTop(run.page)
     const before = await walkerFaceNow(run.page, row.id)

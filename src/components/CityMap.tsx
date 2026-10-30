@@ -100,6 +100,11 @@ const STAGE_MEADOW = '#a8d070'
 
 const PACK_A_CANDY: CityPlotId[] = ['porch', 'gate', 'journal', 'hollow']
 
+/** Easy phone pan: ground-ring center, viewBox units below the lot anchor.
+ *  ry 16 at +50 sits on the footprint, under the porch chin, and above the name chip.
+ *  ry 20 at +40 crosses that face and the chip. */
+const EASY_PAN_HALO_DY = 50
+
 /** A touch or mouse that moves this many CSS px is a drag, never a tap. */
 const TAP_SLOP = 8
 /** A chosen or focused house this close (plate units) to a view edge slides into the middle. */
@@ -967,7 +972,7 @@ export function CityMap({
         </g>
       ) : null}
 
-      {mode === 'live' && !celebrating && !(easy && selectedPlot === cueId) ? (
+      {mode === 'live' && !celebrating && !(easy && selectedPlot === cueId) && !(easy && panFrame) ? (
         <g className="city-next-mark" transform={`translate(${nextAt.x} ${nextAt.y})`}>
           <circle
             r={easy ? 22 : 34}
@@ -1092,6 +1097,28 @@ export function CityMap({
         onOpen={open}
         onFocusPlot={easy ? bringInView : undefined}
       />
+
+      {mode === 'live' && !celebrating && easy && panFrame && selectedPlot !== cueId ? (
+        <g className="city-next-mark" transform={`translate(${nextAt.x} ${nextAt.y})`} pointerEvents="none">
+          <ellipse
+            className="city-next-halo-hit"
+            cy={EASY_PAN_HALO_DY}
+            rx={62}
+            ry={18}
+            fill="transparent"
+            stroke="none"
+            pointerEvents="fill"
+            onClick={() => open(cueId)}
+          />
+          <ellipse
+            className="city-next-halo is-easy-ground"
+            cy={EASY_PAN_HALO_DY}
+            rx={58}
+            ry={16}
+            pointerEvents="none"
+          />
+        </g>
+      ) : null}
 
       {mode === 'live'
         ? CITY_PLOTS.map((plot) => (
