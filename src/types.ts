@@ -215,8 +215,13 @@ export interface DefenseState {
   met?: string[]
   /** Easy round 25 opened the Far Hills. */
   farHills?: boolean
-  /** Map ids whose round 10 boss has been beaten. The next map in the chain opens. */
+  /** Map ids whose Easy unlock round has been cleared. The next map in the chain opens. */
   mazeBeat?: string[]
+  /**
+   * Best Easy round cleared on each map (1-based). Optional on old saves.
+   * A best at the unlock round opens the next map on load. Schema stays 1.
+   */
+  mapBest?: Partial<Record<'a2' | 'far-hills' | 'map03' | 'map04' | 'map05' | 'map06', number>>
   /** Easy map the next night starts on. Missing means A2. Hard ignores this. */
   nightMap?: 'a2' | 'far-hills' | 'map03' | 'map04' | 'map05' | 'map06'
 }
