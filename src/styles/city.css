@@ -1769,7 +1769,12 @@ html[data-easy='on'] .hub.is-easy-home .city-folk .city-lamp {
   outline-offset: 2px;
 }
 
+.hub.is-easy-home .city-overworld.is-easy-pan .city-plot-tag {
+  font-size: 14px;
+}
+
 /* #871: Easy Home labels stay at least 13px (index.css peels unchanged). */
+.hub.is-easy-home .easy-home-dock .eyebrow,
 .hub.is-easy-home .easy-build-it .eyebrow {
   font-size: 0.8125rem;
 }

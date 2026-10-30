@@ -38,6 +38,29 @@ export const CHANGELOG: ChangeNote[] = [
     ],
   },
   {
+    version: '1.4.561',
+    title: 'Easy word search: a tiny wiggle no longer picks a letter',
+    when: '2026-10-30',
+    items: [
+      'A small slip of your finger no longer picks a letter. A real tap does, and a line tells you what to do next.',
+      'Hard stays the same.',
+      'Refs #881',
+    ],
+  },
+  {
+    version: '1.4.560',
+    title: 'Easy Home: the porch fits, and Build this shows a house',
+    when: '2026-10-30',
+    items: [
+      'East porch fits on the phone.',
+      'Home words are at least 13 pixels tall.',
+      'Build this only raises a look you can see, and the map stays on that place.',
+      'Star lamps wait until four stars, then light up in one tap.',
+      'Refs #817.',
+      'Refs #885.',
+    ],
+  },
+  {
     version: '1.4.559',
     title: 'Easy Home: the gold ring sits on the ground by the house',
     when: '2026-10-29',

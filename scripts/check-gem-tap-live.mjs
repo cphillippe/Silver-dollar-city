@@ -4,13 +4,14 @@
  * Real pointer / touch only. Boards pinned with ?gemSeed=0.
  */
 import assert from 'node:assert/strict'
-import { mkdirSync } from 'node:fs'
+import { mkdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { chromium } from '@playwright/test'
 import { createServer } from 'vite'
-import { STORAGE_KEY } from '../src/config/app.ts'
-import { buildGemPuzzle, gemWordsFor } from '../src/lib/gemSearch.ts'
+import { APP_VERSION, STORAGE_KEY } from '../src/config/app.ts'
+import { EASY } from '../src/lib/easyUi.ts'
+import { buildGemPuzzle, GEM_TAP_MAX_MS, GEM_TAP_MAX_TRAVEL_PX, gemWordsFor } from '../src/lib/gemSearch.ts'
 import { packLesson } from '../src/content/packCatalog.ts'
 import { withPlaytest1 } from './dev-ui-playtest.mjs'
 
@@ -490,7 +491,201 @@ async function assertHlMindThinThink(page, origin, w, h) {
   await assertStoryBonusRelease(page, tag, bonusPath(board, 'THIN'), plantedPath(board, 'THINK'), 'THIN', 'THINK')
 }
 
+async function statusLine(page) {
+  return page.evaluate(() => {
+    const nodes = [...document.querySelectorAll('.play.is-gem-search [role="status"]')]
+    const visible = nodes.filter((node) => {
+      const style = getComputedStyle(node)
+      const box = node.getBoundingClientRect()
+      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0 && box.width > 0 && box.height > 0
+    })
+    const pick = visible[0] || nodes[0]
+    return {
+      text: (pick?.textContent || '').replace(/\s+/g, ' ').trim(),
+      font: pick ? parseFloat(getComputedStyle(pick).fontSize) : 0,
+    }
+  })
+}
+
+async function selCount(page) {
+  return page.locator('.gem-board .gem-cell.is-sel').count()
+}
+
+async function selAt(page) {
+  const node = page.locator('.gem-board .gem-cell.is-sel')
+  if ((await node.count()) !== 1) return null
+  return { r: await node.getAttribute('data-r'), c: await node.getAttribute('data-c') }
+}
+
+async function startCell(page) {
+  const node = page.locator('[data-gem-start-cell]')
+  return { r: Number(await node.getAttribute('data-r')), c: Number(await node.getAttribute('data-c')) }
+}
+
+function farFrom(cell) {
+  for (let r = 0; r < 8; r += 1) {
+    for (let c = 0; c < 8; c += 1) {
+      if (Math.max(Math.abs(r - cell.r), Math.abs(c - cell.c)) > 1) return { r, c }
+    }
+  }
+  return { r: 0, c: 0 }
+}
+
+async function touchTravel(page, from, dx, dy, ms) {
+  const session = await page.context().newCDPSession(page)
+  const travel = Math.hypot(dx, dy)
+  try {
+    await session.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ x: from.x, y: from.y, id: 1 }],
+    })
+    if (dx !== 0 || dy !== 0) {
+      const half = Math.floor(ms / 2)
+      if (half > 0) await page.waitForTimeout(half)
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchMove',
+        touchPoints: [{ x: from.x + dx, y: from.y + dy, id: 1 }],
+      })
+      const rest = ms - half
+      if (rest > 0) await page.waitForTimeout(rest)
+    } else if (ms > 0) {
+      await page.waitForTimeout(ms)
+    }
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  } finally {
+    await session.detach()
+  }
+  await page.waitForTimeout(50)
+  return travel
+}
+
+async function goldCueOffenders(page) {
+  return page.evaluate(() => {
+    const gold = /rgba?\(255, 204, 51(?:, [\d.]+)?\)|rgba?\(255, 159, 26(?:, [\d.]+)?\)/
+    const props = [
+      'color', 'backgroundColor', 'backgroundImage', 'borderTopColor', 'borderRightColor', 'borderBottomColor',
+      'borderLeftColor', 'outlineColor', 'boxShadow', 'textShadow', 'filter', 'fill', 'stroke',
+    ]
+    const root = document.querySelector('.play.is-gem-search')
+    if (!root) return ['no play root']
+    const hits = []
+    for (const node of [root, ...root.querySelectorAll('*')]) {
+      const lockIn = node.closest('button')
+      if (lockIn && /Lock In next/.test(lockIn.textContent || '')) continue
+      const box = node.getBoundingClientRect()
+      const own = getComputedStyle(node)
+      if (own.display === 'none' || own.visibility === 'hidden' || Number(own.opacity) === 0) continue
+      if (box.width === 0 && box.height === 0) continue
+      for (const pseudo of [null, '::before', '::after']) {
+        const style = pseudo ? getComputedStyle(node, pseudo) : own
+        if (pseudo && style.content === 'none') continue
+        for (const prop of props) {
+          if (!gold.test(style[prop])) continue
+          if (prop === 'backgroundColor' && node.classList.contains('gem-cell') && !pseudo) continue
+          hits.push(`${node.tagName.toLowerCase()}.${String(node.className).trim().split(/\s+/).join('.')}${pseudo ?? ''}:${prop}`)
+        }
+      }
+    }
+    return hits
+  })
+}
+
+async function assertOneGoldCue(page, tag) {
+  const hits = await goldCueOffenders(page)
+  const extra = hits.filter(
+    (item) => !/is-start-gold|gem-cell\.[^:]*is-bonus-burst|bonus-banner|gem-combo|gem-find-pop|bonus-plus|match-toast/.test(item),
+  )
+  assert.equal(await page.locator('.gem-cell.is-start-gold').count(), 1, `${tag} one gold start cell`)
+  assert.deepEqual(extra, [], `${tag} one gold cue (${extra.join(' | ')})`)
+}
+
+function assertTapSource() {
+  assert.equal(APP_VERSION, '1.4.561')
+  assert.equal(GEM_TAP_MAX_TRAVEL_PX, 6)
+  assert.equal(GEM_TAP_MAX_MS, 350)
+  const src = readFileSync(new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url), 'utf8')
+  assert.match(
+    src,
+    /dataset\.easy === 'on'[\s\S]{0,500}GEM_TAP_MAX_TRAVEL_PX/,
+    'T10 GemSearchPlay gates the tap threshold on dataset.easy === on',
+  )
+  assert.match(src, /GEM_TAP_MAX_MS/, 'T10 duration threshold is named')
+}
+
+/** #881 Easy tap threshold at one viewport. Real CDP touches. */
+async function proveTapThreshold(page, origin, tag, errors) {
+  const errorAt = errors.length
+  mkdirSync(SHOT_ROOT, { recursive: true })
+  const shot = tag.replace(/\s+/g, '')
+
+  await openLesson(page, origin, 'ph-seeds', 0)
+  const t1Cell = await startCell(page)
+  const t1 = await touchTravel(page, await cellCentre(page, t1Cell), 4, 3, 80)
+  // 5px is inside the inclusive 6px tap, so the letter stays picked and the line appears.
+  assert.equal(await selCount(page), 1, `${tag} T1 wiggle travel=${t1}px 80ms is-sel 1`)
+  assert.equal((await statusLine(page)).text, EASY.gemTapNext, `${tag} T1 wiggle travel=${t1}px 80ms status`)
+  await assertOneGoldCue(page, `${tag} T1`)
+  await page.screenshot({ path: join(SHOT_ROOT, `881-T1-${shot}.png`) })
+
+  await openLesson(page, origin, 'ph-seeds', 0)
+  const t2 = await touchTravel(page, await cellCentre(page, farFrom(await startCell(page))), 5, 4, 100)
+  assert.equal(await selCount(page), 0, `${tag} T2 over-travel travel=${t2}px 100ms is-sel 0`)
+
+  await openLesson(page, origin, 'ph-seeds', 0)
+  const t3 = await touchTravel(page, await cellCentre(page, await startCell(page)), 6, 0, 120)
+  assert.equal(await selCount(page), 1, `${tag} T3 boundary travel=${t3}px 120ms is-sel 1`)
+
+  await openLesson(page, origin, 'ph-seeds', 0)
+  const t4 = await touchTravel(page, await cellCentre(page, farFrom(await startCell(page))), 0, 0, 400)
+  assert.equal(await selCount(page), 0, `${tag} T4 long press travel=${t4}px 400ms is-sel 0`)
+  await assertOneGoldCue(page, `${tag} T4`)
+
+  await openLesson(page, origin, 'ph-seeds', 0)
+  const start = await startCell(page)
+  const t5 = await touchTravel(page, await cellCentre(page, start), 0, 0, 60)
+  assert.equal(await selCount(page), 1, `${tag} T5 clean tap travel=${t5}px 60ms is-sel 1`)
+  const afterTap = await statusLine(page)
+  assert.equal(afterTap.text, EASY.gemTapNext, `${tag} T5 clean tap travel=${t5}px 60ms status`)
+  assert.ok(afterTap.font >= 13, `${tag} T5 clean tap travel=${t5}px 60ms font ${afterTap.font}px`)
+  await assertOneGoldCue(page, `${tag} T5`)
+  await page.screenshot({ path: join(SHOT_ROOT, `881-T5-${shot}.png`) })
+
+  const held = await selAt(page)
+  const scoreBefore = await page.locator('.match-score').innerText()
+  // A slip past 6px on another letter must not retarget the live path.
+  const t6 = await touchTravel(page, await cellCentre(page, farFrom(start)), 5, 4, 80)
+  assert.equal(await selCount(page), 1, `${tag} T6 live wiggle travel=${t6}px 80ms is-sel 1`)
+  assert.deepEqual(await selAt(page), held, `${tag} T6 live wiggle travel=${t6}px 80ms same cell`)
+  assert.equal((await statusLine(page)).text, afterTap.text, `${tag} T6 live wiggle travel=${t6}px 80ms status unchanged`)
+  assert.equal(await page.locator('.miss-banner').count(), 0, `${tag} T6 live wiggle travel=${t6}px 80ms no miss`)
+  assert.equal(await page.locator('.match-score').innerText(), scoreBefore, `${tag} T6 live wiggle travel=${t6}px 80ms score unchanged`)
+  await page.screenshot({ path: join(SHOT_ROOT, `881-T6-${shot}.png`) })
+
+  await openLesson(page, origin, 'ph-seeds', 0)
+  const board = buildGemPuzzle('ph-seeds', 0)
+  const first = board.words[0]
+  const second = board.words[1]
+  await tapPath(page, board.paths[first.id], true)
+  await page.waitForTimeout(900)
+  assert.equal(await foundCount(page), 1, `${tag} T7 tap-through finds ${first.text}`)
+  const cleared = await statusLine(page)
+  assert.equal(cleared.text.includes(EASY.gemTapNext), false, `${tag} T7 status cleared after the find (${cleared.text})`)
+  await assertOneGoldCue(page, `${tag} T7`)
+
+  await dragPath(page, board.paths[second.id])
+  await page.waitForTimeout(1100)
+  let found = await foundCount(page)
+  if (found < 2) {
+    await dragPath(page, board.paths[second.id])
+    await page.waitForTimeout(1100)
+    found = await foundCount(page)
+  }
+  assert.equal(found, 2, `${tag} T8 drag finds ${second.text}`)
+  assert.equal(errors.length, errorAt, `${tag} page errors === 0 (${errors.slice(errorAt).join(' | ')})`)
+}
+
 export async function checkGemTapLive() {
+  assertTapSource()
   mkdirSync(SHOT_ROOT, { recursive: true })
   const server = await createServer({
     server: { host: '127.0.0.1', port: 0 },
@@ -505,6 +700,20 @@ export async function checkGemTapLive() {
   const browser = await launchBrowser()
   const errors = []
   try {
+    for (const [w, h] of VIEWPORTS) {
+      const context = await browser.newContext({
+        viewport: { width: w, height: h },
+        hasTouch: true,
+        isMobile: true,
+      })
+      await context.addInitScript(({ key, payload }) => {
+        window.localStorage.setItem(key, JSON.stringify(payload))
+      }, { key: STORAGE_KEY, payload: savePayload() })
+      const page = await context.newPage()
+      page.on('pageerror', (err) => errors.push(String(err)))
+      await proveTapThreshold(page, origin, `${w}x${h}`, errors)
+      await context.close()
+    }
     for (const [w, h] of VIEWPORTS) {
       for (const lineId of LESSONS) {
         for (const mode of ['tap', 'drag']) {
