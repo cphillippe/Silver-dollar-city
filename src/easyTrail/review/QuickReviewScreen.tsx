@@ -15,6 +15,7 @@ interface QuickReviewScreenProps {
 function readDebugFormat(_fromHome: boolean): QuickReviewProps['debugFormat'] {
   if (typeof window === 'undefined') return undefined
   const raw = new URLSearchParams(window.location.search).get('reviewFormat')
+  if (_fromHome && raw === 'B') return undefined
   if (raw === 'A' || raw === 'B' || raw === 'C') return raw
   return undefined
 }
