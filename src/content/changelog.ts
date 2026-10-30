@@ -28,7 +28,7 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.557',
+    version: '1.4.559',
     title: 'Easy Home: the gold ring sits on the ground by the house',
     when: '2026-10-29',
     items: [

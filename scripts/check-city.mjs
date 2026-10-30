@@ -1916,29 +1916,29 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.558')
-assert.equal(CHANGELOG[0].version, '1.4.557', '1.4.557 is the newest row')
-assert.ok(CHANGELOG.some((note) => note.version === '1.4.557'), '1.4.557 changelog row')
+assert.equal(APP_VERSION, '1.4.559')
+assert.equal(CHANGELOG[0].version, '1.4.559', '1.4.559 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.559'), '1.4.559 changelog row')
 assert.doesNotMatch(
-  latestChange('1.4.557').items.join('\n'),
+  latestChange('1.4.559').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
-  '1.4.557 changelog avoids GitHub close keywords',
+  '1.4.559 changelog avoids GitHub close keywords',
 )
-assert.match(latestChange('1.4.557').items.join('\n'), /Refs #817/, '1.4.557 changelog refs #817')
-assert.match(latestChange('1.4.557').items.join('\n'), /gold ring/, '1.4.557 changelog names the ground ring')
-assert.match(latestChange('1.4.557').items.join('\n'), /Hard stays the same\./)
+assert.match(latestChange('1.4.559').items.join('\n'), /Refs #817/, '1.4.559 changelog refs #817')
+assert.match(latestChange('1.4.559').items.join('\n'), /gold ring/, '1.4.559 changelog names the ground ring')
+assert.match(latestChange('1.4.559').items.join('\n'), /Hard stays the same\./)
 assert.match(mapSrc, /ellipse[\s\S]*city-next-halo is-easy-ground/, 'easy pan halo is a ground ellipse')
 assert.match(mapSrc, /pointerEvents="none"/, 'the ground ring does not take taps')
 assert.match(cssSrc, /\.city-next-halo\.is-easy-ground/, 'ground ring rules live in city.css')
 assert.doesNotMatch(
   readFileSync(new URL('../src/index.css', import.meta.url), 'utf8'),
   /is-easy-ground/,
-  '1.4.557 ground ring rules stay out of index.css',
+  '1.4.559 ground ring rules stay out of index.css',
 )
 assert.match(
   cssSrc,
   /\.city-next-halo\.is-easy-ground \{[^}]*animation:\s*none/,
-  '1.4.557 the ground ring does not pulse under reduced motion',
+  '1.4.559 the ground ring does not pulse under reduced motion',
 )
 assert.equal(CHANGELOG[1].version, '1.4.558', '1.4.558 follows the ground ring row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.558'), '1.4.558 changelog row')
