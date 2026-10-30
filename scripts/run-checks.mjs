@@ -38,6 +38,7 @@ const SCOPES = {
       'check-debug-plays.mjs',
       'check-panel-blast.mjs',
       'check-android-shell.mjs',
+      'check-home-porch.mjs',
       'check-city-scans.mjs',
       'check-phone-fixes.mjs',
       'check-incense-lamps.mjs',
