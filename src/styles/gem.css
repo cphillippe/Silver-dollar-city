@@ -691,6 +691,22 @@ html[data-easy='on'] .play.is-gem-search .gem-start-hint {
   border-radius: 12px;
 }
 
+/* #881: the tap-next line is teach text, 14px, and not a second gold cue.
+   The dock sentence also carries the line, but short phones already show it
+   in the hint slot — keep a single visible copy. */
+html[data-easy='on'] .play.is-gem-search .gem-start-hint.is-tap-next {
+  font-size: 0.875rem;
+  color: #2a2118;
+  background: #fff6e8;
+  border: 0;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-say.is-tap-next {
+  display: none;
+}
+
 html[data-easy='on'] .play.is-gem-search .gem-start-hint.is-reserved {
   visibility: hidden;
 }

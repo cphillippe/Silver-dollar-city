@@ -17,6 +17,8 @@ import {
   shouldMissAfterSwipe,
   snapFingerPath,
   tryAddToPath,
+  GEM_TAP_MAX_MS,
+  GEM_TAP_MAX_TRAVEL_PX,
   type GemCoord,
   type GemPuzzle,
 } from '../../lib/gemSearch'
@@ -136,6 +138,11 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const dockJuiced = useRef(false)
   const boardPointer = useRef<HTMLElement | null>(null)
   const downCell = useRef<GemCoord | null>(null)
+  const downXY = useRef<{ x: number; y: number } | null>(null)
+  const downAt = useRef(0)
+  const maxTravel = useRef(0)
+  const pathBefore = useRef<GemCoord[]>([])
+  const [tapNext, setTapNext] = useState(false)
   const gemScrollRef = useRef<HTMLDivElement>(null)
   const stripRef = useRef(stripMode)
   const findUntil = useRef(0)
@@ -194,6 +201,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     setStripMode('dock')
     setDockJuice(null)
     dockJuiced.current = false
+    setTapNext(false)
   }
 
   useEffect(() => {
@@ -289,6 +297,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     if (keepPath) return
     rawRef.current = []
     writePath([])
+    if (document.documentElement.dataset.easy === 'on') setTapNext(false)
   }
 
   function closeSheet() {
@@ -434,6 +443,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       scoredThisGesture.current = true
       writePath([])
       rawRef.current = []
+      if (document.documentElement.dataset.easy === 'on') setTapNext(false)
       setHint([])
       setMisses(0)
       comboRef.current += 1
@@ -451,6 +461,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       if (nextPath.length < 4) {
         writePath([])
         rawRef.current = []
+        if (document.documentElement.dataset.easy === 'on') setTapNext(false)
         return true
       }
     }
@@ -462,6 +473,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       scoredThisGesture.current = true
       writePath([])
       rawRef.current = []
+      if (document.documentElement.dataset.easy === 'on') setTapNext(false)
       setMisses(0)
       comboRef.current += 1
       if (comboRef.current >= 2) {
@@ -483,6 +495,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   }
 
   function missIfSwipe(nextPath: GemCoord[]) {
+    if (document.documentElement.dataset.easy === 'on') setTapNext(false)
     if (scoredThisGesture.current) {
       writePath([])
       rawRef.current = []
@@ -573,18 +586,46 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     scoredThisGesture.current = false
     setShake(false)
     downCell.current = cell
+    if (document.documentElement.dataset.easy === 'on') {
+      downXY.current = { x: event.clientX, y: event.clientY }
+      downAt.current = performance.now()
+      maxTravel.current = 0
+      pathBefore.current = pathRef.current.slice()
+    }
     rawRef.current = [cell]
     if (!pathRef.current.length) writePath([cell])
   }
 
   function onBoardMove(event: ReactPointerEvent<HTMLDivElement>) {
     if (!drag.current || status === 'ok' || event.pointerId !== dragPointerId.current) return
+    if (document.documentElement.dataset.easy === 'on' && downXY.current) {
+      const dx = event.clientX - downXY.current.x
+      const dy = event.clientY - downXY.current.y
+      const travel = Math.hypot(dx, dy)
+      if (travel > maxTravel.current) maxTravel.current = travel
+    }
     const cell = cellFromPoint(event.clientX, event.clientY)
     if (!cell) return
     const last = pathRef.current[pathRef.current.length - 1]
     if (last && sameCell(last, cell)) return
     moved.current = true
     applyCell(cell, 'drag')
+  }
+
+  function easyFingerIsTap() {
+    if (document.documentElement.dataset.easy === 'on') {
+      return maxTravel.current <= GEM_TAP_MAX_TRAVEL_PX && performance.now() - downAt.current < GEM_TAP_MAX_MS
+    }
+    return true
+  }
+
+  function restoreEasyPath() {
+    const keep = pathBefore.current.slice()
+    downCell.current = null
+    endDrag()
+    writePath(keep)
+    rawRef.current = keep.slice()
+    if (keep.length > 0) setTapNext(true)
   }
 
   function onBoardUp(event?: ReactPointerEvent<HTMLDivElement>) {
@@ -600,9 +641,16 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     // A tap (no finger travel) extends the path; pointerdown must not submit (drag stays live).
     if (!moved.current) {
       const cell = downCell.current ?? rawRef.current[rawRef.current.length - 1]
+      if (!easyFingerIsTap()) return restoreEasyPath()
       downCell.current = null
       if (cell) applyCell(cell, 'tap')
+      if (document.documentElement.dataset.easy === 'on' && pathBefore.current.length === 0 && pathRef.current.length === 1) {
+        setTapNext(true)
+      }
       return endDrag(true)
+    }
+    if (document.documentElement.dataset.easy === 'on' && rawRef.current.length <= 1 && !easyFingerIsTap()) {
+      return restoreEasyPath()
     }
     downCell.current = null
     const nextPath = rawRef.current.length ? rawRef.current.slice() : pathRef.current.slice()
@@ -676,11 +724,13 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
               ))}
             </ul>
             <p
-              className={`match-teach-say ${found.length === puzzle.words.length ? 'is-lit' : ''}`}
+              className={`match-teach-say ${found.length === puzzle.words.length ? 'is-lit' : ''} ${easy && tapNext ? 'is-tap-next' : ''}`}
               role="status"
               aria-live="polite"
             >
-              {sayLine.split(/(\s+)/).map((part: string, index: number) => {
+              {easy && tapNext
+                ? EASY.gemTapNext
+                : sayLine.split(/(\s+)/).map((part: string, index: number) => {
                 const plain = part.replace(/[^A-Za-z]/g, '').toUpperCase()
                 const hit = puzzle.words.find((word) => word.text === plain)
                 const on = hit ? found.includes(hit.id) : false
@@ -773,11 +823,16 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         <div className="gem-hint-slot">
           {puzzle.words[0] ? (
             <p
-              className={`gem-start-hint${hideStartHint ? ' is-suppressed' : ''}${found.length && !popOverlayActive ? ' is-reserved' : ''}`}
+              className={`gem-start-hint${easy && tapNext ? ' is-tap-next' : ''}${hideStartHint ? ' is-suppressed' : ''}${found.length && !popOverlayActive && !tapNext ? ' is-reserved' : ''}`}
               data-gem-start
               aria-hidden={hideStartHint}
+              {...(easy && tapNext ? { role: 'status' as const, 'aria-live': 'polite' as const } : {})}
             >
-              {found.length === 0 && !popOverlayActive ? EASY.bonusMissStraight : '\u00a0'}
+              {easy && tapNext
+                ? EASY.gemTapNext
+                : found.length === 0 && !popOverlayActive
+                  ? EASY.bonusMissStraight
+                  : '\u00a0'}
             </p>
           ) : null}
           {plusFlash ? (
