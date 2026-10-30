@@ -1916,8 +1916,39 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.558')
-assert.equal(CHANGELOG[0].version, '1.4.558', '1.4.558 is the newest row')
+assert.equal(APP_VERSION, '1.4.562')
+assert.equal(CHANGELOG[0].version, '1.4.562', '1.4.562 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.562'), '1.4.562 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.562').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.562 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.562').items.join('\n'), /Refs #749/, '1.4.562 changelog refs #749')
+assert.equal(
+  latestChange('1.4.562').items[0],
+  'Easy: after round 8, the new-map note stays on screen.',
+  '1.4.562 changelog names the visible map note',
+)
+assert.deepEqual(
+  playerVisibleChangeItems(latestChange('1.4.562').items),
+  [
+    'Easy: after round 8, the new-map note stays on screen.',
+    'Home shows Far Hills once that map is open.',
+  ],
+  '1.4.562 players see the map note and the Home badge line',
+)
+assert.equal(
+  playerVisibleChangeTitle(latestChange('1.4.562').title),
+  'Easy Night Watch: the new-map note stays on screen',
+  '1.4.562 the map note stays in What’s new',
+)
+assert.doesNotMatch(
+  playerVisibleChangeItems(latestChange('1.4.562').items).join('\n'),
+  /\bHard\b|\bMedium\b/,
+  '1.4.562 the player note does not name other tiers',
+)
+assert.equal(CHANGELOG[1].version, '1.4.558', '1.4.558 follows the map-note row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.558'), '1.4.558 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.558').items.join('\n'),
@@ -1945,7 +1976,7 @@ assert.doesNotMatch(
   /\bHard\b|\bMedium\b/,
   '1.4.558 the player note does not name other tiers',
 )
-assert.equal(CHANGELOG[1].version, '1.4.557', '1.4.557 follows the round 8 row')
+assert.equal(CHANGELOG[2].version, '1.4.557', '1.4.557 follows the round 8 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.557'), '1.4.557 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.557').items.join('\n'),
@@ -1969,7 +2000,7 @@ assert.equal(
   null,
   '1.4.557 Behind the scenes title stays out of What’s new',
 )
-assert.equal(CHANGELOG[2].version, '1.4.556', '1.4.556 follows the grade row')
+assert.equal(CHANGELOG[3].version, '1.4.556', '1.4.556 follows the grade row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.556'), '1.4.556 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.556').items.join('\n'),
@@ -1990,7 +2021,7 @@ assert.deepEqual(playerVisibleChangeItems(latestChange('1.4.556').items), [
   'The debt line now says: God forgives us a huge debt. So we forgive others.',
   'The order line now says: Christ made all things, and he holds them together.',
 ])
-assert.equal(CHANGELOG[3].version, '1.4.555', '1.4.555 follows the Easy claims row')
+assert.equal(CHANGELOG[4].version, '1.4.555', '1.4.555 follows the Easy claims row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.555'), '1.4.555 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.555').items.join('\n'),
@@ -2000,7 +2031,7 @@ assert.doesNotMatch(
 assert.match(latestChange('1.4.555').items.join('\n'), /Refs #756/, '1.4.555 changelog refs #756')
 assert.match(latestChange('1.4.555').items.join('\n'), /Refs #768/, '1.4.555 changelog refs #768')
 assert.match(latestChange('1.4.555').items.join('\n'), /pace chip sits in the top HUD/, '1.4.555 changelog names the HUD pace chip')
-assert.equal(CHANGELOG[4].version, '1.4.554', '1.4.554 follows the Night Watch row')
+assert.equal(CHANGELOG[5].version, '1.4.554', '1.4.554 follows the Night Watch row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.554'), '1.4.554 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.554').items.join('\n'),
@@ -2024,10 +2055,10 @@ assert.equal(
   null,
   '1.4.554 Behind the scenes title stays out of What’s new',
 )
-assert.equal(CHANGELOG[5].version, '1.4.553', '1.4.553 follows the Home Read row')
+assert.equal(CHANGELOG[6].version, '1.4.553', '1.4.553 follows the Home Read row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.553'), '1.4.553 changelog row')
 assert.match(latestChange('1.4.553').items.join('\n'), /Refs #793/)
-assert.equal(CHANGELOG[6].version, '1.4.552', '1.4.552 follows the 1.4.553 row')
+assert.equal(CHANGELOG[7].version, '1.4.552', '1.4.552 follows the 1.4.553 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.552'), '1.4.552 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.552').items.join('\n'),
@@ -2045,7 +2076,7 @@ assert.match(
   /above the letter grid/,
   '1.4.552 changelog names the Match banner layout fix',
 )
-assert.equal(CHANGELOG[7].version, '1.4.551', '1.4.551 follows the #871 row')
+assert.equal(CHANGELOG[8].version, '1.4.551', '1.4.551 follows the #871 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.551'), '1.4.551 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.551').items.join('\n'),
@@ -2061,7 +2092,7 @@ assert.match(
 assert.match(latestChange('1.4.551').items.join('\n'), /Drag or tap the road/, '1.4.551 changelog names the maze hint')
 assert.match(latestChange('1.4.551').items.join('\n'), /Refs #877/, '1.4.551 changelog refs #877')
 assert.match(latestChange('1.4.551').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[8].version, '1.4.550', '1.4.550 follows the 1.4.551 row')
+assert.equal(CHANGELOG[9].version, '1.4.550', '1.4.550 follows the 1.4.551 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.550'), '1.4.550 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.550').items.join('\n'),
@@ -2077,7 +2108,7 @@ assert.match(
 assert.match(latestChange('1.4.550').items.join('\n'), /Story word! \+100/, '1.4.550 changelog keeps the story payoff')
 assert.match(latestChange('1.4.550').items.join('\n'), /Refs #870/, '1.4.550 changelog refs #870')
 assert.match(latestChange('1.4.550').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[9].version, '1.4.549', '1.4.549 follows the 1.4.550 row')
+assert.equal(CHANGELOG[10].version, '1.4.549', '1.4.549 follows the 1.4.550 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.549'), '1.4.549 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.549').items.join('\n'),
@@ -2091,7 +2122,7 @@ assert.doesNotMatch(
   /\?playtest=1|Night Watch debug/,
   '1.4.549 changelog stays player-facing',
 )
-assert.equal(CHANGELOG[10].version, '1.4.548', '1.4.548 follows the maze drag row')
+assert.equal(CHANGELOG[11].version, '1.4.548', '1.4.548 follows the maze drag row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.548'), '1.4.548 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.548').items.join('\n'),
@@ -2145,7 +2176,7 @@ for (const script of [
   assert.match(live871, /dev-ui-playtest\.mjs/, `#871 ${script} opens developer UI via playtest helper`)
 }
 await import('./check-type-floor-baseline.mjs').then((mod) => mod.assertTypeFloorCss())
-assert.equal(CHANGELOG[11].version, '1.4.547', '1.4.547 follows QuickReview row')
+assert.equal(CHANGELOG[12].version, '1.4.547', '1.4.547 follows QuickReview row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.547'), '1.4.547 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.547').items.join('\n'),
@@ -2158,7 +2189,7 @@ assert.doesNotMatch(
   '1.4.547 changelog avoids box paths',
 )
 assert.match(latestChange('1.4.547').items.join('\n'), /Refs #858/, '1.4.547 changelog refs #858')
-assert.equal(CHANGELOG[12].version, '1.4.546', '1.4.546 stays under 1.4.547')
+assert.equal(CHANGELOG[13].version, '1.4.546', '1.4.546 stays under 1.4.547')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.546'), '1.4.546 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.546').items.join('\n'),
@@ -2171,7 +2202,7 @@ assert.doesNotMatch(
   '1.4.546 changelog drops box paths',
 )
 assert.match(latestChange('1.4.546').items.join('\n'), /Refs #753/, '1.4.546 changelog refs #753')
-assert.equal(CHANGELOG[13].version, '1.4.545', '1.4.545 stays under 1.4.546')
+assert.equal(CHANGELOG[14].version, '1.4.545', '1.4.545 stays under 1.4.546')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.545'), '1.4.545 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.545').items.join('\n'),
@@ -2180,7 +2211,7 @@ assert.doesNotMatch(
 )
 assert.match(latestChange('1.4.545').items.join('\n'), /Refs #855/, '1.4.545 changelog refs #855')
 assert.match(latestChange('1.4.545').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[14].version, '1.4.544', '1.4.544 stays under 1.4.545')
+assert.equal(CHANGELOG[15].version, '1.4.544', '1.4.544 stays under 1.4.545')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.544'), '1.4.544 changelog row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.543'), '1.4.543 changelog row')
 assert.doesNotMatch(
@@ -10227,6 +10258,41 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(mapIsOpen('far-hills', short558.defense), false, '1.4.558 a saved best of round 7 stays locked')
   assert.equal(short558.defense.mazeBeat, undefined)
   assert.equal(short558.defense.cleared, 1)
+  assert.equal(mapIsOpen('far-hills', { farHills: true }), true, '1.4.562 the old Far Hills flag still opens the badge')
+  assert.equal(mapIsOpen('far-hills', { mazeBeat: ['a2'] }), true, '1.4.562 a round-8 unlock opens the badge without the old flag')
+  assert.equal(mapIsOpen('far-hills', { mapBest: { a2: 8 } }), true, '1.4.562 a saved best of round 8 opens the badge')
+  assert.equal(mapIsOpen('far-hills', { mapBest: { a2: 7 } }), false, '1.4.562 round 7 does not open the badge')
+  assert.equal(mapIsOpen('far-hills', {}), false, '1.4.562 a fresh night does not open the badge')
+  const hub562 = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
+  const home562 = hub562.slice(hub562.indexOf('easy-night-watch'), hub562.indexOf('easy-night-watch') + 500)
+  assert.match(home562, /mapIsOpen\('far-hills', progress\.defense\)/, '1.4.562 Home Far Hills badge uses mapIsOpen')
+  assert.doesNotMatch(home562, /progress\.defense\.farHills \?/, '1.4.562 Home no longer reads only the old flag')
+  const css562 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(
+    css562,
+    /\.defend-page\.is-easy-watch \.nw-skill-toast:not\(\.nw-map-toast\),/,
+    '1.4.562 Easy skill notes stay in the reader box',
+  )
+  assert.doesNotMatch(
+    css562,
+    /\.defend-page\.is-easy-watch \.nw-skill-toast,/,
+    '1.4.562 the reader box does not clip the map note',
+  )
+  const mapToast562 = css562.match(/\.defend-page\.is-easy-watch \.nw-map-toast \{[^}]*\}/)?.[0] ?? ''
+  assert.match(mapToast562, /top:\s*108px/, '1.4.562 the map note sits at 108px')
+  assert.match(mapToast562, /left:\s*50%/, '1.4.562 the map note is centered')
+  assert.match(mapToast562, /translateX\(-50%\)/, '1.4.562 the map note centers on itself')
+  assert.match(mapToast562, /font-size:\s*14px/, '1.4.562 the map note text is at least 14px')
+  assert.match(mapToast562, /pointer-events:\s*none/, '1.4.562 the map note does not take taps')
+  assert.doesNotMatch(
+    mapToast562,
+    /255,\s*204,\s*51|255,\s*159,\s*26|#ffcc33|#ff9f1a|#ffe7a3/i,
+    '1.4.562 the map note is not gold',
+  )
+  const screen562 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(screen562, /className="nw-skill-toast nw-map-toast"/, '1.4.562 the unlock line is the map note')
+  assert.match(screen562, /New map unlocked:/, '1.4.562 the unlock line names the new map')
+  assert.match(screen562, /, 4200\)/, '1.4.562 the map note holds for about 4.2s')
   const picker477 = readFileSync(new URL('../src/components/NightMapPicker.tsx', import.meta.url), 'utf8')
   const screen477 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   const board477 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
