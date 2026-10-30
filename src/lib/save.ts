@@ -4,6 +4,7 @@ import { emptyCityBuilt, snapshotCityBuilt } from './cityBuild.ts'
 import { MATCH_BONUS_MAX, MATCH_EXTRA_MAX, MATCH_LIFETIME_MAX } from './matchBonus.ts'
 import { JAR_LADDER_STEPS, jarState } from './gemJar.ts'
 import { emptyDefense, normalizeMet } from './defend.ts'
+import { mapsUnlockedByBest, NIGHT_MAP_IDS, type NightMapId } from '../nightWatch/maps/chain.ts'
 import { emptyTrace } from './memory.ts'
 import type {
   AppTheme,
@@ -406,19 +407,36 @@ function asDefense(value: unknown): DefenseState {
   ) {
     defense.nightMap = value.nightMap
   }
+  const mapBest = asMapBest(value.mapBest)
+  if (mapBest) defense.mapBest = mapBest
+  const beat: NightMapId[] = []
   if (Array.isArray(value.mazeBeat)) {
-    const beat = value.mazeBeat.filter(
-      (id): id is NonNullable<DefenseState['nightMap']> =>
-        id === 'a2' ||
-        id === 'far-hills' ||
-        id === 'map03' ||
-        id === 'map04' ||
-        id === 'map05' ||
-        id === 'map06',
-    )
-    if (beat.length > 0) defense.mazeBeat = [...new Set(beat)]
+    for (const id of value.mazeBeat) {
+      if (isNightMapBeatId(id) && !beat.includes(id)) beat.push(id)
+    }
   }
+  // Unlock is a stored flag. A best of 8 or 9 from before this gate
+  // still opens the next map, and an older flag is never dropped.
+  for (const id of mapsUnlockedByBest(mapBest)) {
+    if (!beat.includes(id)) beat.push(id)
+  }
+  if (beat.length > 0) defense.mazeBeat = beat
   return defense
+}
+
+function isNightMapBeatId(id: unknown): id is NightMapId {
+  return typeof id === 'string' && (NIGHT_MAP_IDS as readonly string[]).includes(id)
+}
+
+function asMapBest(value: unknown): DefenseState['mapBest'] | undefined {
+  if (!isPlainObject(value)) return undefined
+  const next: NonNullable<DefenseState['mapBest']> = {}
+  for (const id of NIGHT_MAP_IDS) {
+    if (!Object.prototype.hasOwnProperty.call(value, id)) continue
+    const round = finiteInt(value[id], 0, 25, -1)
+    if (round >= 0) next[id] = round
+  }
+  return Object.keys(next).length > 0 ? next : undefined
 }
 
 function asLearningArray(value: unknown): Learning[] {
