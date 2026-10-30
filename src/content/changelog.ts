@@ -30,7 +30,7 @@ export const CHANGELOG: ChangeNote[] = [
   {
     version: '1.4.560',
     title: 'Easy Home: the porch fits, and Build this shows a house',
-    when: '2026-10-29',
+    when: '2026-10-30',
     items: [
       'East porch fits on the phone.',
       'Home words are at least 13 pixels tall.',

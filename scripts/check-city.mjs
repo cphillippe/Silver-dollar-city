@@ -1919,7 +1919,7 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.559')
+assert.equal(APP_VERSION, '1.4.560')
 assert.equal(CHANGELOG[0].version, '1.4.560', '1.4.560 is the newest row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.560'), '1.4.560 changelog row')
 assert.doesNotMatch(
