@@ -12,6 +12,7 @@ import { applyHoldFail, applyHoldSuccess } from '../lib/tiers'
 import { appendStreetLinks, STREET_TRIPLES } from '../content/links'
 import { learningFromReview, upsertLearning } from '../lib/learning'
 import { isNightCastId } from '../lib/defend.ts'
+import { applyNightMapClear, type NightMapId } from '../nightWatch/maps/chain.ts'
 import { isToolHowTo } from '../lib/watchTools'
 import {
   applyMiss,
@@ -266,6 +267,18 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     })
   }, [write])
 
+  const recordMapBest = useCallback((map: NightMapId, round: number) => {
+    setProgress((current) => {
+      const next = applyNightMapClear(current.defense, true, map, round)
+      const prev = current.defense.mapBest?.[map] ?? 0
+      if ((next.mapBest?.[map] ?? 0) === prev) return current
+      return write({
+        ...current,
+        defense: { ...current.defense, mapBest: next.mapBest },
+      })
+    })
+  }, [write])
+
   const recordNight = useCallback((dateKey: string, farHills = false) => {
     setProgress((current) => {
       const seen = current.defense.nights.includes(dateKey)
@@ -470,6 +483,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       markMiss,
       recordNight,
       recordMazeBeat,
+      recordMapBest,
       chooseNightMap,
       markMet,
       setTheme,
@@ -493,6 +507,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordHeld,
       recordNight,
       recordMazeBeat,
+      recordMapBest,
       chooseNightMap,
       recordReview,
       recordLessonHold,

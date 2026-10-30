@@ -6,8 +6,10 @@ export interface NightMapChoice {
   easy: boolean
   /** Easy round 25 has already been held. That still opens Far Hills. */
   unlocked: boolean
-  /** Map ids whose round 10 boss has been beaten. */
+  /** Map ids whose Easy unlock round has been cleared. */
   mazeBeat?: readonly string[]
+  /** Best Easy round cleared on each map. A best at the unlock round opens the next map. */
+  mapBest?: Partial<Record<NightMapId, number>>
   saved?: string
   /** playtest=1 or the debug freeze. */
   playtest: boolean
@@ -18,12 +20,12 @@ export interface NightMapChoice {
 }
 
 function open(id: NightMapId, choice: NightMapChoice): boolean {
-  return mapIsOpen(id, { farHills: choice.unlocked, mazeBeat: choice.mazeBeat })
+  return mapIsOpen(id, { farHills: choice.unlocked, mazeBeat: choice.mazeBeat, mapBest: choice.mapBest })
 }
 
 /**
- * A2 is the night everyone starts on. Later maps open after round 10 on the
- * one before them. A playtest jump can open any map. Hard never leaves A2.
+ * A2 is the night everyone starts on. Later maps open after the Easy unlock
+ * round on the one before them. A playtest jump can open any map. Hard never leaves A2.
  */
 export function resolveNightMap(choice: NightMapChoice): NightMapId {
   if (!choice.easy) return 'a2'
