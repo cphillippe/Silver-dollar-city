@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.561',
+    title: 'Easy word search: a tiny wiggle no longer picks a letter',
+    when: '2026-10-30',
+    items: [
+      'A small slip of your finger no longer picks a letter. A real tap does, and a line tells you what to do next.',
+      'Hard stays the same.',
+      'Refs #881',
+    ],
+  },
+  {
     version: '1.4.558',
     title: 'Easy Night Watch: the next map opens after round 8',
     when: '2026-10-29',

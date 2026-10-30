@@ -1916,8 +1916,51 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
+assert.equal(APP_VERSION, '1.4.561')
+assert.equal(CHANGELOG[0].version, '1.4.561', '1.4.561 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.561'), '1.4.561 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.561').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.561 changelog avoids GitHub close keywords',
+)
+assert.doesNotMatch(latestChange('1.4.561').items.join('\n'), /\/box\//, '1.4.561 changelog avoids box paths')
+assert.match(
+  latestChange('1.4.561').items.join('\n'),
+  /A small slip of your finger no longer picks a letter/,
+  '1.4.561 changelog names the Easy word-search tap fix',
+)
+assert.match(latestChange('1.4.561').items.join('\n'), /Refs #881/, '1.4.561 changelog refs #881')
+assert.match(latestChange('1.4.561').items.join('\n'), /Hard stays the same\./, '1.4.561 changelog says Hard stays the same')
+assert.equal(
+  latestChange('1.4.561').items[0],
+  'A small slip of your finger no longer picks a letter. A real tap does, and a line tells you what to do next.',
+  '1.4.561 changelog names the tap line',
+)
+assert.deepEqual(
+  playerVisibleChangeItems(latestChange('1.4.561').items),
+  ['A small slip of your finger no longer picks a letter. A real tap does, and a line tells you what to do next.'],
+  '1.4.561 players see the tap line and not the ref',
+)
+assert.equal(
+  playerVisibleChangeTitle(latestChange('1.4.561').title),
+  'Easy word search: a tiny wiggle no longer picks a letter',
+  '1.4.561 the wiggle note stays in What’s new',
+)
+assert.doesNotMatch(
+  playerVisibleChangeItems(latestChange('1.4.561').items).join('\n'),
+  /\bHard\b|\bMedium\b/,
+  '1.4.561 the player note does not name other tiers',
+)
+{
+  const gem561 = readFileSync(new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url), 'utf8')
+  const maze561 = readFileSync(new URL('./check-maze-drag-live.mjs', import.meta.url), 'utf8')
+  assert.match(gem561, /dataset\.easy === 'on'[\s\S]{0,500}GEM_TAP_MAX_TRAVEL_PX/, '#881 Easy tap threshold stays off Hard')
+  assert.match(maze561, /proveOvershootFollowsFinger/, '#883 overshoot recheck follows the finger')
+  assert.doesNotMatch(maze561, /trace\.push\(want\)/, '#883 the inn trace is not synthesized')
+}
 assert.equal(APP_VERSION, '1.4.558')
-assert.equal(CHANGELOG[0].version, '1.4.558', '1.4.558 is the newest row')
+assert.equal(CHANGELOG[1].version, '1.4.558', '1.4.558 follows the word-search row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.558'), '1.4.558 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.558').items.join('\n'),
@@ -1945,7 +1988,7 @@ assert.doesNotMatch(
   /\bHard\b|\bMedium\b/,
   '1.4.558 the player note does not name other tiers',
 )
-assert.equal(CHANGELOG[1].version, '1.4.557', '1.4.557 follows the round 8 row')
+assert.equal(CHANGELOG[2].version, '1.4.557', '1.4.557 follows the round 8 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.557'), '1.4.557 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.557').items.join('\n'),
@@ -1969,7 +2012,7 @@ assert.equal(
   null,
   '1.4.557 Behind the scenes title stays out of What’s new',
 )
-assert.equal(CHANGELOG[2].version, '1.4.556', '1.4.556 follows the grade row')
+assert.equal(CHANGELOG[3].version, '1.4.556', '1.4.556 follows the grade row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.556'), '1.4.556 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.556').items.join('\n'),
@@ -1990,7 +2033,7 @@ assert.deepEqual(playerVisibleChangeItems(latestChange('1.4.556').items), [
   'The debt line now says: God forgives us a huge debt. So we forgive others.',
   'The order line now says: Christ made all things, and he holds them together.',
 ])
-assert.equal(CHANGELOG[3].version, '1.4.555', '1.4.555 follows the Easy claims row')
+assert.equal(CHANGELOG[4].version, '1.4.555', '1.4.555 follows the Easy claims row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.555'), '1.4.555 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.555').items.join('\n'),
@@ -2000,7 +2043,7 @@ assert.doesNotMatch(
 assert.match(latestChange('1.4.555').items.join('\n'), /Refs #756/, '1.4.555 changelog refs #756')
 assert.match(latestChange('1.4.555').items.join('\n'), /Refs #768/, '1.4.555 changelog refs #768')
 assert.match(latestChange('1.4.555').items.join('\n'), /pace chip sits in the top HUD/, '1.4.555 changelog names the HUD pace chip')
-assert.equal(CHANGELOG[4].version, '1.4.554', '1.4.554 follows the Night Watch row')
+assert.equal(CHANGELOG[5].version, '1.4.554', '1.4.554 follows the Night Watch row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.554'), '1.4.554 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.554').items.join('\n'),
@@ -2024,10 +2067,10 @@ assert.equal(
   null,
   '1.4.554 Behind the scenes title stays out of What’s new',
 )
-assert.equal(CHANGELOG[5].version, '1.4.553', '1.4.553 follows the Home Read row')
+assert.equal(CHANGELOG[6].version, '1.4.553', '1.4.553 follows the Home Read row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.553'), '1.4.553 changelog row')
 assert.match(latestChange('1.4.553').items.join('\n'), /Refs #793/)
-assert.equal(CHANGELOG[6].version, '1.4.552', '1.4.552 follows the 1.4.553 row')
+assert.equal(CHANGELOG[7].version, '1.4.552', '1.4.552 follows the 1.4.553 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.552'), '1.4.552 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.552').items.join('\n'),
@@ -2045,7 +2088,7 @@ assert.match(
   /above the letter grid/,
   '1.4.552 changelog names the Match banner layout fix',
 )
-assert.equal(CHANGELOG[7].version, '1.4.551', '1.4.551 follows the #871 row')
+assert.equal(CHANGELOG[8].version, '1.4.551', '1.4.551 follows the #871 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.551'), '1.4.551 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.551').items.join('\n'),
@@ -2061,7 +2104,7 @@ assert.match(
 assert.match(latestChange('1.4.551').items.join('\n'), /Drag or tap the road/, '1.4.551 changelog names the maze hint')
 assert.match(latestChange('1.4.551').items.join('\n'), /Refs #877/, '1.4.551 changelog refs #877')
 assert.match(latestChange('1.4.551').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[8].version, '1.4.550', '1.4.550 follows the 1.4.551 row')
+assert.equal(CHANGELOG[9].version, '1.4.550', '1.4.550 follows the 1.4.551 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.550'), '1.4.550 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.550').items.join('\n'),
@@ -2077,7 +2120,7 @@ assert.match(
 assert.match(latestChange('1.4.550').items.join('\n'), /Story word! \+100/, '1.4.550 changelog keeps the story payoff')
 assert.match(latestChange('1.4.550').items.join('\n'), /Refs #870/, '1.4.550 changelog refs #870')
 assert.match(latestChange('1.4.550').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[9].version, '1.4.549', '1.4.549 follows the 1.4.550 row')
+assert.equal(CHANGELOG[10].version, '1.4.549', '1.4.549 follows the 1.4.550 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.549'), '1.4.549 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.549').items.join('\n'),
@@ -2091,7 +2134,7 @@ assert.doesNotMatch(
   /\?playtest=1|Night Watch debug/,
   '1.4.549 changelog stays player-facing',
 )
-assert.equal(CHANGELOG[10].version, '1.4.548', '1.4.548 follows the maze drag row')
+assert.equal(CHANGELOG[11].version, '1.4.548', '1.4.548 follows the maze drag row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.548'), '1.4.548 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.548').items.join('\n'),
@@ -2145,7 +2188,7 @@ for (const script of [
   assert.match(live871, /dev-ui-playtest\.mjs/, `#871 ${script} opens developer UI via playtest helper`)
 }
 await import('./check-type-floor-baseline.mjs').then((mod) => mod.assertTypeFloorCss())
-assert.equal(CHANGELOG[11].version, '1.4.547', '1.4.547 follows QuickReview row')
+assert.equal(CHANGELOG[12].version, '1.4.547', '1.4.547 follows QuickReview row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.547'), '1.4.547 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.547').items.join('\n'),
@@ -2158,7 +2201,7 @@ assert.doesNotMatch(
   '1.4.547 changelog avoids box paths',
 )
 assert.match(latestChange('1.4.547').items.join('\n'), /Refs #858/, '1.4.547 changelog refs #858')
-assert.equal(CHANGELOG[12].version, '1.4.546', '1.4.546 stays under 1.4.547')
+assert.equal(CHANGELOG[13].version, '1.4.546', '1.4.546 stays under 1.4.547')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.546'), '1.4.546 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.546').items.join('\n'),
@@ -2171,7 +2214,7 @@ assert.doesNotMatch(
   '1.4.546 changelog drops box paths',
 )
 assert.match(latestChange('1.4.546').items.join('\n'), /Refs #753/, '1.4.546 changelog refs #753')
-assert.equal(CHANGELOG[13].version, '1.4.545', '1.4.545 stays under 1.4.546')
+assert.equal(CHANGELOG[14].version, '1.4.545', '1.4.545 stays under 1.4.546')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.545'), '1.4.545 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.545').items.join('\n'),
@@ -2180,7 +2223,7 @@ assert.doesNotMatch(
 )
 assert.match(latestChange('1.4.545').items.join('\n'), /Refs #855/, '1.4.545 changelog refs #855')
 assert.match(latestChange('1.4.545').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[14].version, '1.4.544', '1.4.544 stays under 1.4.545')
+assert.equal(CHANGELOG[15].version, '1.4.544', '1.4.544 stays under 1.4.545')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.544'), '1.4.544 changelog row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.543'), '1.4.543 changelog row')
 assert.doesNotMatch(
