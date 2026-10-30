@@ -71,6 +71,47 @@ function lampsSave(stars) {
   })
 }
 
+/** Porch is the cue. Why Gate is a different lot that can be built. */
+function gateBesidePorch() {
+  return opened({
+    completed: ['ob-tuning', 'ob-design', 'ob-leibniz', 'ob-life', 'fg-mover'],
+    cityBuilt: { ...emptyCityBuilt(), porch: 1, hollow: 1, gate: 0 },
+  })
+}
+
+function countGoldRings() {
+  const vp = document.querySelector('.city-pan-viewport')?.getBoundingClientRect()
+  const dockTop = document.querySelector('.easy-home-dock')?.getBoundingClientRect().top ?? innerHeight
+  const probe = document.createElement('i')
+  document.body.append(probe)
+  const rgb = (value) => {
+    probe.style.color = ''
+    probe.style.color = value
+    const m = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/.exec(getComputedStyle(probe).color)
+    return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null
+  }
+  const gold = (value) => {
+    const c = value && value !== 'none' ? rgb(value) : null
+    return Boolean(c && c[0] > 190 && c[1] > 140 && c[2] < 120 && c[0] > c[2] + 60)
+  }
+  const inView = (r) =>
+    Boolean(vp) && r.width > 0 && r.height > 0 && r.right > vp.left && r.left < vp.right && r.bottom > vp.top && r.top < dockTop
+  const shown = (el) => {
+    const st = getComputedStyle(el)
+    return st.display !== 'none' && st.visibility !== 'hidden' && Number(st.opacity) > 0
+  }
+  const cues = []
+  for (const el of document.querySelectorAll('.city-next-halo, .city-plot-select, .city-plot.is-ready .city-plot-hit')) {
+    if (!shown(el)) continue
+    const st = getComputedStyle(el)
+    if (st.stroke === 'none' || !(parseFloat(st.strokeWidth) > 0) || !gold(st.stroke)) continue
+    if (!inView(el.getBoundingClientRect())) continue
+    cues.push((el.getAttribute('class') || '').slice(0, 80))
+  }
+  probe.remove()
+  return cues
+}
+
 async function launchBrowser() {
   try {
     return await chromium.launch({ headless: true })
@@ -271,6 +312,34 @@ export async function checkHomePorch() {
         assert.deepEqual(ready.errors, [], `${tag} build page errors`)
       } finally {
         await ready.context.close()
+      }
+
+      const beside = await openSeed(browser, origin, gateBesidePorch(), size)
+      try {
+        await beside.page.locator('.city-pan-viewport').waitFor()
+        await beside.page.locator('.city-next-halo.is-easy-ground').waitFor()
+        await beside.page.waitForTimeout(250)
+        const openRings = await beside.page.evaluate(countGoldRings)
+        assert.deepEqual(openRings, ['city-next-halo is-easy-ground'], `${tag} no selection shows the ground halo ${JSON.stringify(openRings)}`)
+        await beside.page.screenshot({ path: join(SHOTS, `halo-${tag}.png`) })
+        await beside.page.locator('g.city-plot[data-plot="gate"]').click()
+        await beside.page.getByRole('button', { name: /Build this/ }).click()
+        await beside.page.waitForFunction(
+          (key) => {
+            const raw = localStorage.getItem(key)
+            return raw ? JSON.parse(raw).progress?.cityBuilt?.gate === 2 : false
+          },
+          STORAGE_KEY,
+        )
+        await beside.page.waitForFunction(() => !document.querySelector('.city-overworld.is-revealing'))
+        await beside.page.locator('g.city-plot.is-selected[data-plot="gate"]').waitFor()
+        const builtRings = await beside.page.evaluate(countGoldRings)
+        assert.equal(builtRings.length, 1, `${tag} one gold ring after Build this ${JSON.stringify(builtRings)}`)
+        assert.equal(builtRings.some((name) => name.includes('is-easy-ground')), false, `${tag} the halo hides while a lot stays selected`)
+        await beside.page.screenshot({ path: join(SHOTS, `one-ring-${tag}.png`) })
+        assert.deepEqual(beside.errors, [], `${tag} beside page errors`)
+      } finally {
+        await beside.context.close()
       }
     }
 

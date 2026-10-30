@@ -1098,7 +1098,7 @@ export function CityMap({
         onFocusPlot={easy ? bringInView : undefined}
       />
 
-      {mode === 'live' && !celebrating && easy && panFrame && selectedPlot !== cueId ? (
+      {mode === 'live' && !celebrating && easy && panFrame && !selectedPlot ? (
         <g className="city-next-mark" transform={`translate(${nextAt.x} ${nextAt.y})`} pointerEvents="none">
           <ellipse
             className="city-next-halo-hit"

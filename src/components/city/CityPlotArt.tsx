@@ -47,10 +47,10 @@ import {
   HEAVEN_TAG,
   plotTag,
 } from '../../lib/cityBuild'
-
-export { EASY_HIDE_ART }
 import { isEasy } from '../../lib/easy'
 import { useProgress } from '../../store/progress'
+
+export { EASY_HIDE_ART }
 
 export const ANCHOR: Record<CityPlotId, { x: number; y: number }> = {
   lookout: { x: 532, y: 62 },
