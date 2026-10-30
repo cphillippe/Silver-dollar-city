@@ -38,6 +38,16 @@ export const CHANGELOG: ChangeNote[] = [
     ],
   },
   {
+    version: '1.4.559',
+    title: 'Easy Home: the gold ring sits on the ground by the house',
+    when: '2026-10-29',
+    items: [
+      'On the phone map, the gold ring around the next house sits on the ground so you can see it.',
+      'Hard stays the same.',
+      'Refs #817.',
+    ],
+  },
+  {
     version: '1.4.558',
     title: 'Easy Night Watch: the next map opens after round 8',
     when: '2026-10-29',
