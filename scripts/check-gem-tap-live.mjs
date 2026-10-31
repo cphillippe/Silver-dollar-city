@@ -600,7 +600,7 @@ async function assertOneGoldCue(page, tag) {
 }
 
 function assertTapSource() {
-  assert.equal(APP_VERSION, '1.4.561')
+  assert.equal(APP_VERSION, '1.4.562')
   assert.equal(GEM_TAP_MAX_TRAVEL_PX, 6)
   assert.equal(GEM_TAP_MAX_MS, 350)
   const src = readFileSync(new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url), 'utf8')

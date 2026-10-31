@@ -1108,6 +1108,310 @@ export async function check792bSurvived(browser, port, errors, width, height) {
   await early.context.close()
 }
 
+const MAP_NOTE_WIDTHS = [
+  [375, 667],
+  [390, 844],
+  [412, 915],
+  [768, 1024],
+]
+const MAP_NOTE_SHOTS = join(tmpdir(), 'nw-map-note-562')
+
+function mapNoteWidths() {
+  const raw = process.env.NW_MAP_WIDTHS
+  if (!raw) return MAP_NOTE_WIDTHS
+  return raw.split(',').map((pair) => pair.split('x').map((part) => Number(part)))
+}
+
+function mapNoteRounds() {
+  const raw = process.env.NW_MAP_ROUNDS
+  if (!raw) return [1, 2, 3, 4, 5, 6, 7, 8]
+  return raw.split(',').map((part) => Number(part))
+}
+
+async function mapGoldCues(page) {
+  return page.evaluate(() => {
+    const root = document.querySelector('.defend-page')
+    if (!root) return []
+    const gold = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = Number(match[1])
+        const g = Number(match[2])
+        const b = Number(match[3])
+        const a = match[4] === undefined ? 1 : Number(match[4])
+        if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const chrome = 'button, .defend-abilities, .defend-boost, .defend-tower-card, .defend-path-pip, .nw-balloon-orb, .defend-wave, .defend-ability-stock'
+    return [...root.querySelectorAll(chrome)]
+      .filter((node) => !node.closest('.defend-nw-debug'))
+      .filter((node) => {
+        const box = node.getBoundingClientRect()
+        const style = getComputedStyle(node)
+        return box.width > 1 && box.height > 1 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0
+      })
+      .filter((node) => {
+        const style = getComputedStyle(node)
+        const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+        const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+        return gold(style.backgroundImage) || gold(style.backgroundColor) || border || gold(style.boxShadow) || (text && gold(style.color))
+      })
+      .map((node) => `${node.tagName}.${node.getAttribute('class') || ''}`.slice(0, 80))
+  })
+}
+
+async function visibleHardText(page) {
+  return page.evaluate(() => {
+    const hits = []
+    const walk = (node) => {
+      if (node.nodeType === 3) {
+        const text = node.textContent || ''
+        if (!/\bHard\b/.test(text)) return
+        const parent = node.parentElement
+        if (!parent || parent.closest('.defend-nw-debug')) return
+        const style = getComputedStyle(parent)
+        const box = parent.getBoundingClientRect()
+        const clip = style.clipPath || ''
+        const clipped = clip !== 'none' && clip.includes('inset')
+        const seen =
+          style.display !== 'none' &&
+          style.visibility !== 'hidden' &&
+          Number(style.opacity) > 0 &&
+          box.width > 2 &&
+          box.height > 2 &&
+          !clipped
+        if (seen) hits.push(text.replace(/\s+/g, ' ').trim().slice(0, 80))
+        return
+      }
+      if (node.nodeType === 1) {
+        for (const child of node.childNodes) walk(child)
+      }
+    }
+    walk(document.body)
+    return hits
+  })
+}
+
+async function openMapRound(browser, port, width, height, round, errors) {
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width, height },
+    deviceScaleFactor: 1,
+    reducedMotion: 'reduce',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: SAVE },
+  )
+  const page = await context.newPage()
+  const label = `${width}x${height} r${round}`
+  page.on('pageerror', (error) => errors.push(`${label} ${error}`))
+  page.on('console', (msg) => {
+    if (msg.type() !== 'error') return
+    const text = msg.text()
+    if (text.includes('Encountered two children with the same key')) return
+    errors.push(`${label} ${text}`)
+  })
+  await page.goto(`/?playtest=1&nwCam=0&nwRound=${round}`)
+  await page.getByRole('button', { name: 'Settings' }).click()
+  await page.locator('summary', { hasText: 'Developer' }).click()
+  await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
+  await page.locator('.defend-board').waitFor()
+  if (await page.locator('[data-map-overlay]').count()) {
+    await page.locator('[data-map="a2"]').click()
+    await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+  }
+  return { context, page, label }
+}
+
+async function cuePoint(page) {
+  return page.evaluate(() => {
+    const face = document.querySelector('.defend-raider.is-easy-cue')
+    if (!face) return null
+    const id = face.getAttribute('data-walker-id')
+    const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+    if (!tap) return null
+    const box = tap.getBoundingClientRect()
+    const x = box.x + box.width / 2
+    const y = box.y + box.height / 2
+    const node = document.elementFromPoint(x, y)
+    if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+    return { x, y }
+  })
+}
+
+async function clearToBoost(page, label) {
+  const go = page.locator('.defend-go')
+  if (await go.count()) await go.click()
+  const started = Date.now()
+  while (Date.now() - started < 120_000) {
+    if (await page.locator('.defend-page.is-boost').count()) return
+    if (await page.locator('.defend-page.is-lost').count()) assert.fail(`${label} the round was lost`)
+    const cue = await cuePoint(page)
+    if (cue) await page.mouse.click(cue.x, cue.y)
+    await page.waitForTimeout(60)
+  }
+  assert.fail(`${label} the round did not clear`)
+}
+
+async function readMapNote(page) {
+  return page.evaluate(() => {
+    const node = document.querySelector('.nw-map-toast')
+    if (!node) return null
+    const style = getComputedStyle(node)
+    const box = node.getBoundingClientRect()
+    const chip = document.querySelector('.nw-pace')
+    const chipBox = chip ? chip.getBoundingClientRect() : null
+    return {
+      text: (node.textContent || '').replace(/\s+/g, ' ').trim(),
+      w: box.width,
+      h: box.height,
+      x: box.x,
+      y: box.y,
+      right: box.right,
+      bottom: box.bottom,
+      font: parseFloat(style.fontSize),
+      top: style.top,
+      opacity: Number(style.opacity),
+      display: style.display,
+      visibility: style.visibility,
+      events: style.pointerEvents,
+      chip: chipBox
+        ? { x: chipBox.x, y: chipBox.y, w: chipBox.width, h: chipBox.height, right: chipBox.right, bottom: chipBox.bottom }
+        : null,
+    }
+  })
+}
+
+function boxesOverlap(a, b) {
+  return a.x < b.right && a.right > b.x && a.y < b.bottom && a.bottom > b.y
+}
+
+async function checkHomeBadge(browser, port, errors) {
+  const cases = [
+    { name: 'round 8', defense: { cleared: 1, nights: ['2026-10-14'], mazeBeat: ['a2'], mapBest: { a2: 8 } }, badge: true },
+    { name: 'old flag', defense: { cleared: 1, nights: ['2026-10-14'], farHills: true }, badge: true },
+    { name: 'round 7', defense: { cleared: 1, nights: ['2026-10-14'], mapBest: { a2: 7 } }, badge: false },
+  ]
+  for (const item of cases) {
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 375, height: 667 },
+      deviceScaleFactor: 1,
+    })
+    await context.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      {
+        key: STORAGE_KEY,
+        save: {
+          ...SAVE,
+          progress: { ...SAVE.progress, easyHeld: ['ph-road'], defense: item.defense },
+        },
+      },
+    )
+    const page = await context.newPage()
+    page.on('pageerror', (error) => errors.push(`home ${item.name} ${error}`))
+    await page.goto('/?playtest=1', { waitUntil: 'domcontentloaded' })
+    const badge = page.locator('.easy-night-watch .nw-area-badge')
+    if (item.badge) {
+      await badge.waitFor({ timeout: 60_000 })
+      assert.equal((await badge.textContent()).trim(), 'Far Hills', `1.4.562 Home shows Far Hills for ${item.name}`)
+      const box = await badge.boundingBox()
+      assert.ok(box && box.width > 10 && box.height > 8, `1.4.562 the Far Hills badge is visible for ${item.name}`)
+    } else {
+      await page.locator('.easy-night-watch').waitFor()
+      assert.equal(await badge.count(), 0, `1.4.562 Home hides Far Hills for ${item.name}`)
+    }
+    await context.close()
+  }
+}
+
+/** 1.4.562: the Easy round-8 map note is visible, and earlier clears do not show it. */
+async function checkMapNote(browser, port, errors) {
+  mkdirSync(MAP_NOTE_SHOTS, { recursive: true })
+  await checkHomeBadge(browser, port, errors)
+  const rounds = mapNoteRounds()
+  for (const [width, height] of mapNoteWidths()) {
+    for (const round of rounds) {
+      const { context, page, label } = await openMapRound(browser, port, width, height, round, errors)
+      if (round === 1) {
+        const skill = await page.locator('.nw-skill-toast:not(.nw-map-toast)').first().evaluate((node) => {
+          const box = node.getBoundingClientRect()
+          return { w: box.width, h: box.height, text: (node.textContent || '').trim() }
+        })
+        assert.ok(skill.w <= 2 && skill.h <= 2, `${label} skill notes stay hidden (${skill.w}x${skill.h} ${skill.text})`)
+      }
+      assert.equal(await page.locator('.nw-map-toast').count(), 0, `${label} the map note is absent before the clear`)
+      const hardBefore = await visibleHardText(page)
+      assert.deepEqual(hardBefore, [], `${label} no Hard text before the clear ${hardBefore}`)
+      await clearToBoost(page, label)
+      if (round < 8) {
+        assert.equal(await page.locator('.nw-map-toast').count(), 0, `${label} no map note after round ${round}`)
+        await page.waitForTimeout(400)
+        assert.equal(await page.locator('.nw-map-toast').count(), 0, `${label} the map note stays absent after round ${round}`)
+        await context.close()
+        continue
+      }
+      const seenAt = Date.now()
+      await page.locator('.nw-map-toast').waitFor()
+      const first = await readMapNote(page)
+      assert.ok(first, `${label} the map note is mounted`)
+      assert.equal(first.text, 'New map unlocked: The Far Hills!', `${label} the note names The Far Hills`)
+      assert.ok(first.w >= 100, `${label} the note is at least 100px wide (${first.w})`)
+      assert.ok(first.h > 8, `${label} the note has a visible height (${first.h})`)
+      assert.ok(first.font >= 14, `${label} the note text is at least 14px (${first.font})`)
+      assert.equal(first.top, '108px', `${label} the note sits at 108px`)
+      assert.equal(first.events, 'none', `${label} the note does not take taps`)
+      assert.ok(first.opacity > 0.9 && first.visibility !== 'hidden' && first.display !== 'none', `${label} the note is visible`)
+      const center = width / 2
+      assert.ok(Math.abs(first.x + first.w / 2 - center) <= 12, `${label} the note is centered ${JSON.stringify(first)}`)
+      assert.ok(first.chip, `${label} the pace chip is on screen`)
+      if (width === 375) {
+        assert.ok(Math.abs(first.chip.w - 44) <= 4 && Math.abs(first.chip.h - 44) <= 4, `${label} pace chip is ~44px ${JSON.stringify(first.chip)}`)
+        assert.ok(Math.abs(first.chip.right - width) <= 16, `${label} pace chip sits at the right edge ${JSON.stringify(first.chip)}`)
+        assert.ok(Math.abs(first.chip.y - 49) <= 16, `${label} pace chip y ~49 (${first.chip.y})`)
+      }
+      assert.equal(boxesOverlap(first, first.chip), false, `${label} the note does not cover the pace chip ${JSON.stringify({ note: first, chip: first.chip })}`)
+      const gold = await mapGoldCues(page)
+      assert.equal(gold.length, 1, `${label} exactly one gold cue ${JSON.stringify(gold)}`)
+      const hit = await page.evaluate(() => {
+        const chip = document.querySelector('.nw-pace')
+        const box = chip.getBoundingClientRect()
+        const x = box.x + box.width / 2
+        const y = box.y + box.height / 2
+        const node = document.elementFromPoint(x, y)
+        return Boolean(node?.closest?.('.nw-pace'))
+      })
+      assert.equal(hit, true, `${label} a tap at the pace chip center hits the chip`)
+      const paceBefore = await page.locator('.nw-pace').getAttribute('data-state')
+      const chipBox = await page.locator('.nw-pace').boundingBox()
+      await page.mouse.click(chipBox.x + chipBox.width / 2, chipBox.y + chipBox.height / 2)
+      const paceAfter = await page.locator('.nw-pace').getAttribute('data-state')
+      assert.notEqual(paceAfter, paceBefore, `${label} the pace chip takes the tap (${paceBefore} -> ${paceAfter})`)
+      const hard = await visibleHardText(page)
+      assert.deepEqual(hard, [], `${label} no Hard text a player can see ${hard}`)
+      if (width === 375 || width === 390) {
+        await page.screenshot({ path: join(MAP_NOTE_SHOTS, `note-${width}x${height}.png`) })
+      }
+      let lastWide = Date.now()
+      while (Date.now() - seenAt < 7000) {
+        const note = await readMapNote(page)
+        if (!note || note.w < 100) break
+        assert.equal(boxesOverlap(note, note.chip), false, `${label} the note stays off the pace chip`)
+        lastWide = Date.now()
+        await page.waitForTimeout(150)
+      }
+      const held = lastWide - seenAt
+      assert.ok(held >= 3600 && held <= 5200, `${label} the note stays wide for about 4.2s (${held}ms)`)
+      assert.equal(await page.locator('.nw-map-toast').count(), 0, `${label} the note leaves after the hold`)
+      console.log(`${label} map note ${Math.round(first.w)}x${Math.round(first.h)} at ${Math.round(first.x)},${Math.round(first.y)} held ${held}ms chip ${JSON.stringify(first.chip)}`)
+      await context.close()
+    }
+  }
+}
+
 export async function checkPhoneFixes() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -1117,6 +1421,7 @@ export async function checkPhoneFixes() {
   const browser = await launchBrowser()
   const errors = []
   try {
+    if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
         baseURL: `http://127.0.0.1:${port}/`,
@@ -1279,6 +1584,8 @@ export async function checkPhoneFixes() {
     await check792bWave(browser, port, errors)
     await check792bSurvived(browser, port, errors, 375, 667)
     await check792bSurvived(browser, port, errors, 390, 844)
+    }
+    await checkMapNote(browser, port, errors)
     assert.equal(errors.join('\n'), '', '1.4.478 phone nights stay free of console errors')
   } finally {
     await browser.close()
