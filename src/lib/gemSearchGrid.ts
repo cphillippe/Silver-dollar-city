@@ -412,3 +412,48 @@ export function tryAddToPath(path: GemCoord[], next: GemCoord, size = GRID_SIZE,
   if (chebyshev(last, next) > 2) return path
   return snapFingerPath([...path, next], size, maxLen)
 }
+
+/** Cells from `a` through `b` when they share a row, column, or 8-way diagonal. */
+function straightRun(a: GemCoord, b: GemCoord, size: number): GemCoord[] | null {
+  const dr = b.r - a.r
+  const dc = b.c - a.c
+  const steps = Math.max(Math.abs(dr), Math.abs(dc))
+  if (steps < 1) return [{ r: a.r, c: a.c }]
+  if (dr !== 0 && Math.abs(dr) !== steps) return null
+  if (dc !== 0 && Math.abs(dc) !== steps) return null
+  const sr = dr / steps
+  const sc = dc / steps
+  if (!Number.isInteger(sr) || !Number.isInteger(sc)) return null
+  const line: GemCoord[] = []
+  for (let i = 0; i <= steps; i += 1) {
+    const r = a.r + sr * i
+    const c = a.c + sc * i
+    if (r < 0 || c < 0 || r >= size || c >= size) return null
+    line.push({ r, c })
+  }
+  return line
+}
+
+/**
+ * Easy tap: extend a straight line, including a jump from the start letter to the end.
+ * Returns null when the tap leaves the line so the caller can start over on that letter.
+ */
+export function extendStraightTap(path: GemCoord[], next: GemCoord, size = GRID_SIZE, maxLen = 8): GemCoord[] | null {
+  if (path.some((cell) => sameCell(cell, next))) {
+    if (path.length >= 2 && sameCell(path[path.length - 2]!, next)) return path.slice(0, -1)
+    if (path.length > 0 && sameCell(path[path.length - 1]!, next)) return path
+    return null
+  }
+  if (!path.length) return [next]
+  const origin = path[0]
+  if (!origin) return [next]
+  const line = straightRun(origin, next, size)
+  if (!line || line.length < 2 || line.length > maxLen) return null
+  if (path.length > line.length) return null
+  for (let i = 0; i < path.length; i += 1) {
+    const have = path[i]
+    const want = line[i]
+    if (!have || !want || !sameCell(have, want)) return null
+  }
+  return line
+}

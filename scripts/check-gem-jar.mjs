@@ -454,12 +454,9 @@ async function run() {
       // A: play state, one gold cue
       await page.waitForTimeout(300)
       const playGold = await goldElements(page, '.play.is-gem-search', '.cta-dock')
-      assert.equal(await page.locator('.gem-cell.is-start-gold').count(), 1, `${tag} one start cell`)
-      assert.deepEqual(
-        playGold.filter((item) => !/is-start-gold/.test(item)),
-        [],
-        `${tag} the only gold in play is the start cell (${playGold.join(' | ')})`,
-      )
+      assert.equal(await page.locator('.gem-cell.is-start-gold').count(), 0, `${tag} no preselected gold cell`)
+      assert.equal(await page.locator('.gem-cell.is-sel').count(), 0, `${tag} nothing selected at the start`)
+      assert.deepEqual(playGold, [], `${tag} no gold before the first action (${playGold.join(' | ')})`)
       assert.equal(await page.locator('.gem-cell.is-sight').count(), 0, `${tag} a fresh save has no Bonus Sight`)
 
       // B: a story word, then a generic extra, then the chips
@@ -577,7 +574,7 @@ async function run() {
         planted.some((cells) => sightCells.every((key) => cells.includes(key))),
         `${tag} sight lights cells of one planted word (${sightCells.join(',')})`,
       )
-      assert.equal(await page.locator('.gem-cell.is-start-gold').count(), 1, `${tag} still one gold start cell during sight`)
+      assert.equal(await page.locator('.gem-cell.is-start-gold').count(), 0, `${tag} sight does not add a gold cell`)
       const sightGold = await goldElements(page, '.play.is-gem-search', '.cta-dock')
       assert.deepEqual(
         sightGold.filter((item) => !/is-start-gold/.test(item)),

@@ -13,6 +13,7 @@ import {
   isStraightPath,
   matchBonusWord,
   matchGemWord,
+  extendStraightTap,
   sameCell,
   shouldMissAfterSwipe,
   snapFingerPath,
@@ -75,7 +76,7 @@ function cellFromPoint(x: number, y: number): GemCoord | null {
   const nodes = document.elementsFromPoint(x, y)
   const node = nodes.find((candidate) => candidate instanceof HTMLElement && candidate.matches('[data-gem-cell]'))
   if (!(node instanceof HTMLElement)) return null
-  if (node.classList.contains('is-clear')) return null
+  if (node.classList.contains('is-clear') || node.classList.contains('is-word-lit')) return null
   const r = Number(node.dataset.r)
   const c = Number(node.dataset.c)
   if (!Number.isFinite(r) || !Number.isFinite(c)) return null
@@ -591,6 +592,12 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       downAt.current = performance.now()
       maxTravel.current = 0
       pathBefore.current = pathRef.current.slice()
+      if (toastMiss) {
+        setToast('')
+        setToastWhy('')
+        setToastBonus(false)
+        setToastMiss(false)
+      }
     }
     rawRef.current = [cell]
     if (!pathRef.current.length) writePath([cell])
@@ -603,6 +610,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       const dy = event.clientY - downXY.current.y
       const travel = Math.hypot(dx, dy)
       if (travel > maxTravel.current) maxTravel.current = travel
+      // A finger that has barely moved is still a tap, even if a move event lands on the next letter.
+      if (maxTravel.current <= GEM_TAP_MAX_TRAVEL_PX) return
     }
     const cell = cellFromPoint(event.clientX, event.clientY)
     if (!cell) return
@@ -628,9 +637,50 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     if (keep.length > 0) setTapNext(true)
   }
 
+  function applyEasyTap(cell: GemCoord) {
+    if (status === 'ok') return
+    const extended = extendStraightTap(pathRef.current, cell, puzzle.size)
+    const next = extended ?? [cell]
+    rawRef.current = next
+    const line = snapFingerPath(next, puzzle.size)
+    writePath(line)
+    const scored = submit(line)
+    if (!scored) setTapNext(true)
+  }
+
+  function finishEasyGesture(event?: ReactPointerEvent<HTMLDivElement>) {
+    if (scoredThisGesture.current) return endDrag()
+    const travel = maxTravel.current
+    const elapsed = performance.now() - downAt.current
+    const down = downCell.current
+    const up = event ? cellFromPoint(event.clientX, event.clientY) : null
+    // Little movement, held up to about 800ms: this is a tap, not a cancelled drag.
+    if (travel <= GEM_TAP_MAX_TRAVEL_PX && elapsed < GEM_TAP_MAX_MS) {
+      const cell = down ?? rawRef.current[rawRef.current.length - 1]
+      downCell.current = null
+      endDrag(true)
+      if (cell) applyEasyTap(cell)
+      return
+    }
+    let nextPath = rawRef.current.length ? rawRef.current.slice() : []
+    if (down && up && !sameCell(down, up)) {
+      const jumped = extendStraightTap([down], up, puzzle.size)
+      if (jumped && jumped.length > nextPath.length) nextPath = jumped
+    }
+    // A slip that never reaches a second letter puts the previous selection back.
+    if (nextPath.length < 2) return restoreEasyPath()
+    downCell.current = null
+    endDrag()
+    if (nextPath.length >= 3) missIfSwipe(nextPath)
+  }
+
   function onBoardUp(event?: ReactPointerEvent<HTMLDivElement>) {
     if (!drag.current) return
     if (event && event.pointerId !== dragPointerId.current) return
+    if (document.documentElement.dataset.easy === 'on') {
+      finishEasyGesture(event)
+      return
+    }
     if (!moved.current && event) {
       const last = rawRef.current[rawRef.current.length - 1]
       const at = cellFromPoint(event.clientX, event.clientY)
@@ -831,7 +881,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
               {easy && tapNext
                 ? EASY.gemTapNext
                 : found.length === 0 && !popOverlayActive
-                  ? EASY.bonusMissStraight
+                  ? EASY.gemHow
                   : '\u00a0'}
             </p>
           ) : null}
@@ -932,16 +982,10 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
             const sharedFound = kept && found.some((wordId) =>
               (puzzle.paths[wordId] ?? []).some((cell) => cell.r === r && cell.c === c),
             )
-            const cellClear = status !== 'ok' && (targetClear || bonusClear)
+            const easyWordLit = easy && status !== 'ok' && targetClear
+            const cellClear = status !== 'ok' && !easyWordLit && (targetClear || bonusClear)
             const cellFound = status === 'ok' && (targetClear || sharedFound)
             const cellCracked = !bonusClear && (bonusGhost || sharedFound)
-            const startCell = nextWord ? puzzle.paths[nextWord.id]?.[0] : undefined
-            const startGold =
-              easy &&
-              status !== 'ok' &&
-              startCell != null &&
-              startCell.r === r &&
-              startCell.c === c
             return (
               <div
                 key={key}
@@ -949,9 +993,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
                 data-gem-cell
                 data-r={r}
                 data-c={c}
-                {...(startGold ? { 'data-gem-start-cell': '' } : {})}
                 onPointerDown={(event) => onCellDown(event, { r, c })}
-                className={`gem-cell hue-${gemHue(letter, r, c)} ${selected.has(key) ? 'is-sel' : ''} ${popping ? 'is-burst' : ''} ${cellClear ? 'is-clear' : ''} ${cellFound ? 'is-found' : ''} ${cellCracked ? 'is-cracked' : ''} ${hint.includes(key) ? 'is-hint' : ''} ${startGold ? 'is-start-gold' : ''} ${sightKeys.includes(key) && !bonusClear ? 'is-sight' : ''} ${popping && (bonusClear || bonusGhost) ? 'is-bonus-burst' : ''}`}
+                className={`gem-cell hue-${gemHue(letter, r, c)} ${selected.has(key) ? 'is-sel' : ''} ${popping ? 'is-burst' : ''} ${easyWordLit ? 'is-word-lit' : ''} ${cellClear ? 'is-clear' : ''} ${cellFound ? 'is-found' : ''} ${cellCracked ? 'is-cracked' : ''} ${hint.includes(key) ? 'is-hint' : ''} ${sightKeys.includes(key) && !bonusClear ? 'is-sight' : ''} ${popping && (bonusClear || bonusGhost) ? 'is-bonus-burst' : ''}`}
               >
                 <span className="gem-letter">{letter}</span>
                 {popping
