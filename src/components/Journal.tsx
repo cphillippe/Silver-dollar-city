@@ -83,6 +83,9 @@ export function Journal({ focusId, autoQuiz, lockInEmpty, onNavigate }: JournalP
     ? evidenceForJournal(focusedEntry.unlockAfter, focusedEntry.id)
     : undefined
   const holdId = focusedBrief?.id ?? focusId
+  /* A stored line stays on the Journal. An empty lock, even after a held id with no card, stays empty. */
+  if (progress.learnings.length > 0) lockInEmpty = false
+
   const quizBrief = holdId
     ? evidenceForTier(holdId, currentLessonTier(progress, holdId)) ?? evidenceFor(holdId)
     : undefined
@@ -112,7 +115,7 @@ export function Journal({ focusId, autoQuiz, lockInEmpty, onNavigate }: JournalP
   }
 
   return (
-    <main className={`journal ${dueItems.length ? 'has-due' : ''} ${easy ? 'is-easy-hold' : ''}`}>
+    <main className={`journal ${!easy && dueItems.length ? 'has-due' : ''} ${easy ? 'is-easy-hold' : ''}`}>
       {easy ? <EasyBack onNavigate={onNavigate} /> : null}
       {easy ? null : dueItems.length > 0 ? (
         <section className="journal-chapter due-chapter">
