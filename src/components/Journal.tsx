@@ -83,6 +83,9 @@ export function Journal({ focusId, autoQuiz, lockInEmpty, onNavigate }: JournalP
     ? evidenceForJournal(focusedEntry.unlockAfter, focusedEntry.id)
     : undefined
   const holdId = focusedBrief?.id ?? focusId
+  /* A kept line stays on the Journal. The empty Lock In is only when nothing is kept. */
+  if (progress.held.length > 0 || progress.learnings.length > 0) lockInEmpty = false
+
   const quizBrief = holdId
     ? evidenceForTier(holdId, currentLessonTier(progress, holdId)) ?? evidenceFor(holdId)
     : undefined
@@ -94,9 +97,6 @@ export function Journal({ focusId, autoQuiz, lockInEmpty, onNavigate }: JournalP
     !easyLineTaught(progress, openLine)
   const holdPractice =
     Boolean(autoQuiz && quizBrief && !quizReplacesMatch && (easy || !focusedEntry || focusedOpen))
-
-  /* A kept line stays on the Journal. The empty Lock In is only when nothing is kept. */
-  if (progress.held.length > 0 || progress.learnings.length > 0) lockInEmpty = false
 
   if (easy && lockInEmpty) {
     return <LockInEmpty onNavigate={onNavigate} />
