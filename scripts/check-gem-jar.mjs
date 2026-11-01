@@ -197,7 +197,7 @@ async function swipe(page, path) {
   await page.mouse.up()
 }
 
-function saveFor({ lifetime = 0, seen = 0, easy = true } = {}) {
+function saveFor({ lifetime = 0, seen = 0, easy = true, kept = false } = {}) {
   const now = new Date()
   const today = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-')
   return {
@@ -211,12 +211,21 @@ function saveFor({ lifetime = 0, seen = 0, easy = true } = {}) {
       lastDailyDate: today,
       dailyDates: [today],
       completed: [],
-      held: [],
-      easyTaught: [],
-      easyHeld: [],
+      held: kept ? ['ph-road'] : [],
+      easyTaught: kept ? ['ph-road'] : [],
+      easyHeld: kept ? ['ph-road'] : [],
       taught: [],
       journal: [],
-      learnings: [],
+      learnings: kept
+        ? [{
+            id: 'ph-road',
+            claim: 'Mercy crosses the road',
+            reason: 'The hurt man needed help',
+            source: 'A story',
+            anchor: 'Juniper · the road',
+            acquiredAt: '2026-10-01',
+          }]
+        : [],
       memory: {},
       matchLifetime: lifetime,
       matchSkillSeen: seen,
@@ -715,15 +724,16 @@ async function run() {
       await context.close()
     }
 
-    // H: held evidence never depends on the jar
+    // H: a kept line stays on Lock In, and it does not depend on the jar
     const journals = []
     for (const lifetime of [0, 20000]) {
-      const { page, context, errors: pageErrors } = await newPage(browser, origin, [375, 667], saveFor({ lifetime, seen: 3 }))
+      const { page, context, errors: pageErrors } = await newPage(browser, origin, [375, 667], saveFor({ lifetime, seen: 3, kept: true }))
       errors.push(...pageErrors)
       await page.goto('/')
       await page.getByRole('main', { name: 'Home' }).waitFor()
       await pointerClick(page, page.getByRole('button', { name: 'Lock In', exact: true }).first())
       await page.locator('.journal-head').waitFor()
+      assert.equal(await page.locator('.journal.is-lock-in-empty').count(), 0, 'a kept line is not the empty Lock In')
       const head = (await page.locator('.journal-head').innerText()).replace(/\s+/g, ' ')
       const entries = await page.locator('.journal article, .journal .dossier').count()
       journals.push({ head: head.replace(/ · Gem Jar [\d,]+/, '').replace(/ (Bonus Sight|Combo Spark|Big Word)/g, ''), entries, jar: /Gem Jar/.test(head) })
@@ -731,6 +741,7 @@ async function run() {
     }
     assert.equal(journals[0].jar, false, 'no jar line while the jar is empty')
     assert.equal(journals[1].jar, true)
+    assert.ok(journals[0].entries > 0, 'a kept line stays on Lock In')
     assert.equal(journals[0].head, journals[1].head, 'Journal evidence count is the same with or without the jar')
     assert.equal(journals[0].entries, journals[1].entries, 'Journal entries do not depend on the jar')
 
