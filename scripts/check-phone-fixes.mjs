@@ -1412,6 +1412,181 @@ async function checkMapNote(browser, port, errors) {
   }
 }
 
+function overlapArea(a, b) {
+  if (!a || !b) return 0
+  const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.x, b.x))
+  const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y))
+  return w * h
+}
+
+/** 1.4.565: sample the leak banner against the map note on every frame. */
+async function checkLeakBanner(browser, port, errors) {
+  const shots = join(tmpdir(), 'nw-leak-banner-565')
+  mkdirSync(shots, { recursive: true })
+  const sizes = [
+    [375, 667],
+    [375, 812],
+    [390, 844],
+  ]
+  for (const [width, height] of sizes) {
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+    })
+    await context.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: SAVE },
+    )
+    const page = await context.newPage()
+    const label = `${width}x${height}`
+    page.on('pageerror', (error) => errors.push(`${label} leak ${error}`))
+    await page.goto(`/?playtest=1&nwCam=0&nwRound=8`)
+    await page.getByRole('button', { name: 'Settings' }).click()
+    await page.locator('summary', { hasText: 'Developer' }).click()
+    await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
+    await page.locator('.defend-board').waitFor()
+    if (await page.locator('[data-map-overlay]').count()) {
+      await page.locator('[data-map="a2"]').click()
+      await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+    }
+    await page.evaluate(() => {
+      const box = (node) => {
+        if (!node) return null
+        const r = node.getBoundingClientRect()
+        if (r.width < 2 || r.height < 2) return null
+        return { x: r.x, y: r.y, right: r.right, bottom: r.bottom, w: r.width, h: r.height }
+      }
+      window.__leakFrames = []
+      const tick = () => {
+        const banner = document.querySelector('.nw-power-banner.is-still')
+        if (banner) {
+          const style = getComputedStyle(banner)
+          const bannerBox = box(banner)
+          if (bannerBox) {
+            window.__leakFrames.push({
+              t: performance.now(),
+              banner: bannerBox,
+              note: box(document.querySelector('.nw-map-toast')),
+              round: box(document.querySelector('.nw-wave-survived-round')),
+              title: box(document.querySelector('.nw-wave-survived-title')),
+              chip: box(document.querySelector('.nw-pace')),
+              hearts: box(document.querySelector('.defend-hearts')),
+              cont: box(document.querySelector('.defend-continue')),
+              font: parseFloat(style.fontSize),
+              space: style.whiteSpace,
+              opacity: Number(style.opacity),
+            })
+          }
+        }
+        requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    })
+    const go = page.locator('.defend-go')
+    if (await go.count()) await go.click()
+    const started = Date.now()
+    let shot = false
+    let tapped = false
+    while (Date.now() - started < 90_000) {
+      const frame = await page.evaluate(() => {
+        const lost = Boolean(document.querySelector('.defend-page.is-lost'))
+        const count = (document.querySelector('.defend-count')?.textContent || '').replace(/\s+/g, ' ').trim()
+        const face = document.querySelector('.defend-raider.is-easy-cue')
+        let cue = null
+        if (face) {
+          const id = face.getAttribute('data-walker-id')
+          const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+          if (tap) {
+            const box = tap.getBoundingClientRect()
+            const x = box.x + box.width / 2
+            const y = box.y + box.height / 2
+            const node = document.elementFromPoint(x, y)
+            if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') === id) cue = { x, y }
+          }
+        }
+        const both = Boolean(document.querySelector('.nw-map-toast') && document.querySelector('.nw-power-banner.is-still'))
+        return { lost, count, cue, both }
+      })
+      if (frame.lost) assert.fail(`${label} the round was lost before the leak banner`)
+      if (frame.both && !tapped) {
+        const before = await page.locator('.nw-pace').getAttribute('data-state')
+        const chip = await page.locator('.nw-pace').boundingBox()
+        assert.ok(chip, `${label} the pace chip is on screen with the note`)
+        await page.mouse.click(chip.x + chip.width / 2, chip.y + chip.height / 2)
+        const after = await page.locator('.nw-pace').getAttribute('data-state')
+        assert.notEqual(after, before, `${label} the pace chip takes the tap during the note`)
+        tapped = true
+      }
+      if (!shot) {
+        const opaque = await page.evaluate(() => (window.__leakFrames || []).some((frame) => frame.opacity > 0.9 && frame.note))
+        if (opaque) {
+          await page.screenshot({ path: join(shots, `leak-${width}x${height}.png`) })
+          shot = true
+        }
+      }
+      const left = Number((frame.count.match(/\b(\d+) left\b/) || [])[1] || 99)
+      if (left > 2 && frame.cue) await page.mouse.click(frame.cue.x, frame.cue.y)
+      const done = await page.evaluate(() => {
+        const frames = window.__leakFrames || []
+        if (!frames.length) return false
+        const last = frames[frames.length - 1]
+        return performance.now() - last.t > 400 && !document.querySelector('.nw-power-banner.is-still')
+      })
+      if (done && shot) break
+      await page.waitForTimeout(16)
+    }
+    const frames = await page.evaluate(() => window.__leakFrames || [])
+    assert.ok(frames.length >= 15, `${label} sampled the banner (${frames.length} frames)`)
+    const span = frames[frames.length - 1].t - frames[0].t
+    assert.ok(span >= 1000, `${label} the sample covers the banner lifetime (${Math.round(span)}ms)`)
+    let maxNote = 0
+    let maxRound = 0
+    let maxTitle = 0
+    let maxChip = 0
+    let maxHearts = 0
+    let maxCont = 0
+    let minY = Infinity
+    for (const [index, frame] of frames.entries()) {
+      assert.ok(frame.note, `${label} frame ${index} the note is up with the banner`)
+      const note = overlapArea(frame.banner, frame.note)
+      const round = overlapArea(frame.banner, frame.round)
+      const title = overlapArea(frame.banner, frame.title)
+      const chip = overlapArea(frame.banner, frame.chip)
+      const hearts = overlapArea(frame.banner, frame.hearts)
+      const cont = overlapArea(frame.banner, frame.cont)
+      maxNote = Math.max(maxNote, note)
+      maxRound = Math.max(maxRound, round)
+      maxTitle = Math.max(maxTitle, title)
+      maxChip = Math.max(maxChip, chip)
+      maxHearts = Math.max(maxHearts, hearts)
+      maxCont = Math.max(maxCont, cont)
+      minY = Math.min(minY, frame.banner.y)
+      assert.equal(note, 0, `${label} frame ${index} banner/note overlap ${note}`)
+      assert.equal(round, 0, `${label} frame ${index} banner/round overlap ${round}`)
+      assert.equal(title, 0, `${label} frame ${index} banner/title overlap ${title}`)
+      assert.equal(chip, 0, `${label} frame ${index} banner/chip overlap ${chip}`)
+      assert.equal(hearts, 0, `${label} frame ${index} banner/hearts overlap ${hearts}`)
+      assert.equal(cont, 0, `${label} frame ${index} banner/continue overlap ${cont}`)
+      assert.ok(frame.banner.y >= 268, `${label} frame ${index} banner top ${frame.banner.y} is under 268`)
+      assert.ok(frame.font >= 13, `${label} frame ${index} banner font ${frame.font}`)
+      assert.equal(frame.space, 'nowrap', `${label} frame ${index} banner stays one line`)
+      assert.ok(frame.banner.h <= 52, `${label} frame ${index} banner is one line tall (${frame.banner.h})`)
+    }
+    assert.equal(tapped, true, `${label} the pace chip was tapped`)
+    const rows = frames.map((frame, index) => ({
+      i: index,
+      y: Math.round(frame.banner.y * 10) / 10,
+      h: Math.round(frame.banner.h * 10) / 10,
+      note: overlapArea(frame.banner, frame.note),
+      op: Math.round(frame.opacity * 100) / 100,
+    }))
+    console.log(`${label} leak frames ${frames.length} span ${Math.round(span)}ms minY ${minY.toFixed(1)} maxNote ${maxNote} maxRound ${maxRound} maxTitle ${maxTitle} maxChip ${maxChip} maxHearts ${maxHearts} maxCont ${maxCont}`)
+    console.log(`${label} leak per-frame ${JSON.stringify(rows)}`)
+    await context.close()
+  }
+}
+
 export async function checkPhoneFixes() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -1421,6 +1596,11 @@ export async function checkPhoneFixes() {
   const browser = await launchBrowser()
   const errors = []
   try {
+    if (process.env.NW_LEAK_ONLY === '1') {
+      await checkLeakBanner(browser, port, errors)
+      assert.equal(errors.join('\n'), '', '1.4.565 leak banner nights stay free of console errors')
+      return
+    }
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -1586,6 +1766,7 @@ export async function checkPhoneFixes() {
     await check792bSurvived(browser, port, errors, 390, 844)
     }
     await checkMapNote(browser, port, errors)
+    await checkLeakBanner(browser, port, errors)
     assert.equal(errors.join('\n'), '', '1.4.478 phone nights stay free of console errors')
   } finally {
     await browser.close()
