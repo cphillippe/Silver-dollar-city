@@ -4305,6 +4305,13 @@ button.defend-new-lamp[aria-pressed='true'] {
   text-shadow: 0 0 12px rgba(180, 220, 255, 0.9);
 }
 
+/* 1.4.563: the leak line sits under the new-map note. The note's frame
+   cannot paint above this fixed banner, so the banner moves below it. */
+body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
+  top: 268px;
+  transform: translate(-50%, 0);
+}
+
 .nw-power-banner.is-mend {
   color: #fff6df;
   background: rgba(140, 32, 78, 0.9);
@@ -5306,15 +5313,16 @@ button.defend-new-lamp[aria-pressed='true'] {
   border: 0;
 }
 
-/* 1.4.562 Easy: the new-map note stays on screen under the pace chip. Skill notes stay in the reader box. */
+/* 1.4.562 Easy: the new-map note stays on screen under the pace chip. Skill notes stay in the reader box.
+   1.4.563: the note drops below Round 8. The leak banner moves under the note. */
 .defend-page.is-easy-watch .nw-map-toast {
   position: absolute;
   display: block;
   top: 108px;
   left: 50%;
   right: auto;
-  transform: translateX(-50%);
-  z-index: 8;
+  transform: translateX(-50%) translateY(16px);
+  z-index: 48;
   width: max-content;
   max-width: min(340px, 92%);
   height: auto;

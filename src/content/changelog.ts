@@ -37,6 +37,19 @@ export const CHANGELOG: ChangeNote[] = [
     ],
   },
   {
+    version: '1.4.563',
+    title: 'Night Watch: the new-map note stays on top',
+    when: '2026-11-01',
+    items: [
+      'Night Watch: the new-map note now stays on top.',
+      'Word search: the hint sits above the letters.',
+      'Lock In still shows a saved line.',
+      'Refs #910.',
+      'Refs #899.',
+      'Refs #900.',
+    ],
+  },
+  {
     version: '1.4.562',
     title: 'Easy Night Watch: the new-map note stays on screen',
     when: '2026-10-30',
