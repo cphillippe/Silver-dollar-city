@@ -28,6 +28,15 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.565',
+    title: 'Night Watch: the leak line stays under the note',
+    when: '2026-11-01',
+    items: [
+      'Night Watch: the leak line stays under the new-map note.',
+      'Refs #910.',
+    ],
+  },
+  {
     version: '1.4.563',
     title: 'Night Watch: the new-map note stays on top',
     when: '2026-11-01',
