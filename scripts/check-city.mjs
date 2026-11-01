@@ -1919,8 +1919,25 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.562')
-assert.equal(CHANGELOG[0].version, '1.4.562', '1.4.562 is the newest row')
+assert.equal(APP_VERSION, '1.4.563')
+assert.equal(CHANGELOG[0].version, '1.4.563', '1.4.563 is the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.563'), '1.4.563 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.563').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.563 changelog avoids GitHub close keywords',
+)
+assert.equal(
+  latestChange('1.4.563').items[0],
+  'Night Watch: the new-map note now stays on top.',
+  '1.4.563 changelog names the note',
+)
+assert.doesNotMatch(
+  playerVisibleChangeItems(latestChange('1.4.563').items).join('\n'),
+  /\bHard\b|\bMedium\b/,
+  '1.4.563 the player note does not name other tiers',
+)
+assert.equal(CHANGELOG[1].version, '1.4.562', '1.4.562 follows the newest row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.562'), '1.4.562 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.562').items.join('\n'),
@@ -1951,7 +1968,7 @@ assert.doesNotMatch(
   /\bHard\b|\bMedium\b/,
   '1.4.562 the player note does not name other tiers',
 )
-assert.equal(CHANGELOG[1].version, '1.4.561', '1.4.561 follows the map-note row')
+assert.equal(CHANGELOG[2].version, '1.4.561', '1.4.561 follows the map-note row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.561'), '1.4.561 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.561').items.join('\n'),
