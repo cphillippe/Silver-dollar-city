@@ -1357,28 +1357,15 @@ async function assertGemWinFold(page, label) {
 async function assertGemStart(page, lineId, { shot = false } = {}) {
   await page.locator('[data-gem-start]').waitFor()
   const hint = ((await page.locator('[data-gem-start]').innerText()) || '').replace(/\s+/g, ' ').trim()
-  assert.equal(hint, EASY.bonusMissStraight, `${lineId} start hint`)
-  assert.equal(await page.locator('[data-gem-start-cell].is-start-gold').count(), 1, `${lineId} one start pulse`)
+  assert.equal(hint, EASY.gemHow, `${lineId} start hint`)
+  assert.doesNotMatch(hint, /Try a full straight word/, `${lineId} no error before the first action`)
+  assert.equal(await page.locator('.gem-cell.is-start-gold').count(), 0, `${lineId} no preselected gold cell`)
+  assert.equal(await page.locator('.gem-cell.is-sel').count(), 0, `${lineId} nothing selected at the start`)
   assert.equal((await filledGolds(page)).length, 0, `${lineId} word search has no filled gold`)
   if (shot) {
     await page.locator('[data-gem-start]').scrollIntoViewIfNeeded()
     await page.screenshot({ path: `${SHOTS}/word-search-start-375.png` })
   }
-}
-
-function spellsForward(letters, word, start) {
-  const dirs = [
-    { r: 0, c: 1 },
-    { r: 1, c: 0 },
-    { r: 1, c: 1 },
-  ]
-  return dirs.some((dir) => {
-    for (let i = 0; i < word.length; i += 1) {
-      const row = letters[start.r + dir.r * i]
-      if (!row || row[start.c + dir.c * i] !== word[i]) return false
-    }
-    return word.length > 0
-  })
 }
 
 async function playGem(page, lineId = 'ob-tuning', { watchLast = false, checkStart = false } = {}) {
@@ -1465,35 +1452,17 @@ async function playGem(page, lineId = 'ob-tuning', { watchLast = false, checkSta
         timeout: 4000,
       })
       const won = (await page.locator('.play.is-gem-search.is-win').count()) > 0
-      const pulses = page.locator('[data-gem-start-cell].is-start-gold')
-      if (won) {
-        assert.equal(await pulses.count(), 0, `${lineId} no start pulse after MATCHED`)
-      } else {
-        await page.waitForFunction(
-          () => document.querySelectorAll('[data-gem-start-cell].is-start-gold').length === 1,
-          undefined,
-          { timeout: 4000 },
+      assert.equal(await page.locator('.gem-cell.is-start-gold').count(), 0, `${lineId} no gold cell after a find`)
+      if (!won) {
+        const foundNow = await page.locator('.match-teach-chip.is-found').count()
+        const score = ((await page.locator('.match-score').innerText()) || '').replace(/\s+/g, ' ')
+        assert.match(score, new RegExp(`${foundNow}\\s*/`), `${lineId} counter updates after a find (${score})`)
+        const lit = await page.locator('.gem-cell.is-word-lit').count()
+        assert.ok(lit >= 1, `${lineId} found word stays highlighted (${lit})`)
+        const goldLit = await page.locator('.gem-cell.is-word-lit').evaluateAll((nodes) =>
+          nodes.some((node) => /255,\s*204,\s*51|255,\s*159,\s*26/i.test(getComputedStyle(node).boxShadow)),
         )
-        const cells = await pulses.evaluateAll((els) =>
-          els.map((el) => ({
-            r: Number(el.getAttribute('data-r')),
-            c: Number(el.getAttribute('data-c')),
-            shadow: getComputedStyle(el).boxShadow,
-          })),
-        )
-        assert.equal(cells.length, 1, `${lineId} one pulse after a find`)
-        assert.equal(isGoldPaint(cells[0].shadow), true, `${lineId} pulse glow is gold`)
-        assert.match(cells[0].shadow, /rgb\(42, 33, 24\)/, `${lineId} pulse has an ink ring`)
-        const nextLabel = (
-          (await page.locator('.match-teach-dock .match-teach-chip:not(.is-found) .match-teach-label').first().innerText()) || ''
-        )
-          .replace(/[^A-Za-z]/g, '')
-          .toUpperCase()
-        const lettersNow = await readGrid(page)
-        assert.ok(
-          spellsForward(lettersNow, nextLabel, cells[0]),
-          `${lineId} pulse ${cells[0].r},${cells[0].c} is the first letter of ${nextLabel}`,
-        )
+        assert.equal(goldLit, false, `${lineId} found highlight is not gold`)
       }
     }
     if (expectJuice) {
