@@ -11,7 +11,7 @@ import { chromium } from '@playwright/test'
 import { createServer } from 'vite'
 import { APP_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 import { EASY } from '../src/lib/easyUi.ts'
-import { buildGemPuzzle, GEM_TAP_MAX_MS, GEM_TAP_MAX_TRAVEL_PX, gemWordsFor } from '../src/lib/gemSearch.ts'
+import { buildGemPuzzle, extendStraightTap, GEM_TAP_MAX_MS, GEM_TAP_MAX_TRAVEL_PX, gemWordsFor } from '../src/lib/gemSearch.ts'
 import { packLesson } from '../src/content/packCatalog.ts'
 import { withPlaytest1 } from './dev-ui-playtest.mjs'
 
@@ -517,9 +517,12 @@ async function selAt(page) {
   return { r: await node.getAttribute('data-r'), c: await node.getAttribute('data-c') }
 }
 
-async function startCell(page) {
-  const node = page.locator('[data-gem-start-cell]')
-  return { r: Number(await node.getAttribute('data-r')), c: Number(await node.getAttribute('data-c')) }
+function anchorCell(board) {
+  const word = board.words[0]
+  assert.ok(word, 'board has a word')
+  const path = board.paths[word.id]
+  assert.ok(path?.length, 'word has a path')
+  return path[0]
 }
 
 function farFrom(cell) {
@@ -593,16 +596,28 @@ async function goldCueOffenders(page) {
 async function assertOneGoldCue(page, tag) {
   const hits = await goldCueOffenders(page)
   const extra = hits.filter(
-    (item) => !/is-start-gold|gem-cell\.[^:]*is-bonus-burst|bonus-banner|gem-combo|gem-find-pop|bonus-plus|match-toast/.test(item),
+    (item) => !/is-sel|is-word-lit|gem-cell\.[^:]*is-bonus-burst|bonus-banner|gem-combo|gem-find-pop|bonus-plus|match-toast/.test(item),
   )
-  assert.equal(await page.locator('.gem-cell.is-start-gold').count(), 1, `${tag} one gold start cell`)
-  assert.deepEqual(extra, [], `${tag} one gold cue (${extra.join(' | ')})`)
+  assert.equal(await page.locator('.gem-cell.is-start-gold').count(), 0, `${tag} no preselected gold cell`)
+  assert.deepEqual(extra, [], `${tag} no gold besides the live selection (${extra.join(' | ')})`)
 }
 
 function assertTapSource() {
-  assert.equal(APP_VERSION, '1.4.563')
+  assert.equal(APP_VERSION, '1.4.564')
   assert.equal(GEM_TAP_MAX_TRAVEL_PX, 6)
-  assert.equal(GEM_TAP_MAX_MS, 350)
+  assert.equal(GEM_TAP_MAX_MS, 800)
+  const kept = extendStraightTap([{ r: 2, c: 1 }], { r: 2, c: 4 }, 8)
+  assert.deepEqual(
+    kept,
+    [
+      { r: 2, c: 1 },
+      { r: 2, c: 2 },
+      { r: 2, c: 3 },
+      { r: 2, c: 4 },
+    ],
+    'a tap from the start letter to the end fills the straight line',
+  )
+  assert.equal(extendStraightTap([{ r: 2, c: 1 }, { r: 2, c: 2 }], { r: 3, c: 2 }, 8), null, 'a tap off the line does not extend')
   const src = readFileSync(new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url), 'utf8')
   assert.match(
     src,
@@ -618,8 +633,8 @@ async function proveTapThreshold(page, origin, tag, errors) {
   mkdirSync(SHOT_ROOT, { recursive: true })
   const shot = tag.replace(/\s+/g, '')
 
-  await openLesson(page, origin, 'ph-seeds', 0)
-  const t1Cell = await startCell(page)
+  const t1Board = await openLesson(page, origin, 'ph-seeds', 0)
+  const t1Cell = anchorCell(t1Board)
   const t1 = await touchTravel(page, await cellCentre(page, t1Cell), 4, 3, 80)
   // 5px is inside the inclusive 6px tap, so the letter stays picked and the line appears.
   assert.equal(await selCount(page), 1, `${tag} T1 wiggle travel=${t1}px 80ms is-sel 1`)
@@ -627,21 +642,21 @@ async function proveTapThreshold(page, origin, tag, errors) {
   await assertOneGoldCue(page, `${tag} T1`)
   await page.screenshot({ path: join(SHOT_ROOT, `881-T1-${shot}.png`) })
 
-  await openLesson(page, origin, 'ph-seeds', 0)
-  const t2 = await touchTravel(page, await cellCentre(page, farFrom(await startCell(page))), 5, 4, 100)
+  const t2Board = await openLesson(page, origin, 'ph-seeds', 0)
+  const t2 = await touchTravel(page, await cellCentre(page, farFrom(anchorCell(t2Board))), 5, 4, 100)
   assert.equal(await selCount(page), 0, `${tag} T2 over-travel travel=${t2}px 100ms is-sel 0`)
 
-  await openLesson(page, origin, 'ph-seeds', 0)
-  const t3 = await touchTravel(page, await cellCentre(page, await startCell(page)), 6, 0, 120)
+  const t3Board = await openLesson(page, origin, 'ph-seeds', 0)
+  const t3 = await touchTravel(page, await cellCentre(page, anchorCell(t3Board)), 6, 0, 120)
   assert.equal(await selCount(page), 1, `${tag} T3 boundary travel=${t3}px 120ms is-sel 1`)
 
-  await openLesson(page, origin, 'ph-seeds', 0)
-  const t4 = await touchTravel(page, await cellCentre(page, farFrom(await startCell(page))), 0, 0, 400)
-  assert.equal(await selCount(page), 0, `${tag} T4 long press travel=${t4}px 400ms is-sel 0`)
+  const t4Board = await openLesson(page, origin, 'ph-seeds', 0)
+  const t4 = await touchTravel(page, await cellCentre(page, farFrom(anchorCell(t4Board))), 0, 0, 900)
+  assert.equal(await selCount(page), 0, `${tag} T4 long press travel=${t4}px 900ms is-sel 0`)
   await assertOneGoldCue(page, `${tag} T4`)
 
-  await openLesson(page, origin, 'ph-seeds', 0)
-  const start = await startCell(page)
+  const t5Board = await openLesson(page, origin, 'ph-seeds', 0)
+  const start = anchorCell(t5Board)
   const t5 = await touchTravel(page, await cellCentre(page, start), 0, 0, 60)
   assert.equal(await selCount(page), 1, `${tag} T5 clean tap travel=${t5}px 60ms is-sel 1`)
   const afterTap = await statusLine(page)
@@ -684,6 +699,155 @@ async function proveTapThreshold(page, origin, tag, errors) {
   assert.equal(errors.length, errorAt, `${tag} page errors === 0 (${errors.slice(errorAt).join(' | ')})`)
 }
 
+async function hintText(page) {
+  const hint = page.locator('[data-gem-start]')
+  return ((await hint.innerText()) || '').replace(/\s+/g, ' ').trim()
+}
+
+async function assertCleanBoard(page, tag) {
+  const hint = await hintText(page)
+  assert.equal(hint, EASY.gemHow, `${tag} how-to before the first action`)
+  assert.doesNotMatch(hint, /Try a full straight word/, `${tag} no error before the first action`)
+  assert.equal(await page.locator('.miss-banner').count(), 0, `${tag} no miss banner`)
+  assert.equal(await page.locator('.gem-cell.is-sel').count(), 0, `${tag} no selected cell`)
+  assert.equal(await page.locator('.gem-cell.is-start-gold').count(), 0, `${tag} no gold outline`)
+  assert.equal(await page.locator('.gem-cell.is-hint').count(), 0, `${tag} no hint outline`)
+  const font = await page.locator('[data-gem-start]').evaluate((node) => parseFloat(getComputedStyle(node).fontSize))
+  assert.ok(font >= 13, `${tag} how-to is ${font}px`)
+}
+
+async function holdTap(page, cell, ms) {
+  const at = await cellCentre(page, cell)
+  const session = await page.context().newCDPSession(page)
+  try {
+    await session.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ x: Math.round(at.x), y: Math.round(at.y), id: 1 }],
+    })
+    if (ms > 0) await page.waitForTimeout(ms)
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  } finally {
+    await session.detach()
+  }
+  await page.waitForTimeout(40)
+}
+
+async function touchSlide(page, path) {
+  const session = await page.context().newCDPSession(page)
+  const points = []
+  for (const cell of path) points.push(await cellCentre(page, cell))
+  try {
+    await session.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ x: Math.round(points[0].x), y: Math.round(points[0].y), id: 1 }],
+    })
+    for (const point of points.slice(1)) {
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchMove',
+        touchPoints: [{ x: Math.round(point.x), y: Math.round(point.y), id: 1 }],
+      })
+      await page.waitForTimeout(30)
+    }
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  } finally {
+    await session.detach()
+  }
+  await page.waitForTimeout(40)
+}
+
+async function assertWordFound(page, tag, word) {
+  await page.waitForTimeout(900)
+  const chip = page.locator('.match-teach-chip.is-found', { hasText: word.label })
+  assert.equal(await chip.count(), 1, `${tag} ${word.text} chip stays found`)
+  const score = ((await page.locator('.match-score').innerText()) || '').replace(/\s+/g, ' ')
+  assert.match(score, /1\s*\/\s*\d+\s+found/i, `${tag} counter updated (${score})`)
+  const lit = await page.locator('.gem-cell.is-word-lit').count()
+  assert.ok(lit >= 1, `${tag} found word stays highlighted (${lit})`)
+  const goldLit = await page.locator('.gem-cell.is-word-lit').evaluateAll((nodes) =>
+    nodes.some((node) => /255,\s*204,\s*51|255,\s*159,\s*26|#ffcc33|#ff9f1a/i.test(getComputedStyle(node).boxShadow)),
+  )
+  assert.equal(goldLit, false, `${tag} found highlight is not gold`)
+  assert.equal(await page.locator('.miss-banner').count(), 0, `${tag} a found word shows no error`)
+}
+
+/** #912 Easy word search: tap, slide, and a slow tap on a phone-size board. */
+async function proveEasyWordInputs(page, origin, w, h) {
+  const tag = `${w}x${h}`
+  mkdirSync(SHOT_ROOT, { recursive: true })
+  const board = await openLesson(page, origin, 'ob-tuning', 0)
+  const word = board.words[0]
+  const path = board.paths[word.id]
+  assert.ok(path.length >= 3, `${tag} ${word.text} is a straight word`)
+  await assertCleanBoard(page, tag)
+  await page.screenshot({ path: join(SHOT_ROOT, `912-start-${w}.png`) })
+
+  for (let i = 0; i < path.length; i += 1) {
+    await holdTap(page, path[i], 70)
+    await page.waitForTimeout(220)
+    if (i === 1) {
+      assert.equal(await selCount(page), 2, `${tag} tap-by-tap keeps both letters`)
+      assert.equal(await page.locator('.miss-banner').count(), 0, `${tag} mid-word tap shows no error`)
+      await page.screenshot({ path: join(SHOT_ROOT, `912-mid-tap-${w}.png`) })
+    }
+  }
+  await assertWordFound(page, `${tag} tap-by-tap`, word)
+
+  const endBoard = await openLesson(page, origin, 'ob-tuning', 0)
+  const endWord = endBoard.words[0]
+  const endPath = endBoard.paths[endWord.id]
+  await assertCleanBoard(page, `${tag} start-end`)
+  await holdTap(page, endPath[0], 80)
+  await page.waitForTimeout(200)
+  await holdTap(page, endPath[endPath.length - 1], 80)
+  await assertWordFound(page, `${tag} tap start then end`, endWord)
+  if (w === 375) await page.screenshot({ path: join(SHOT_ROOT, '912-found-375.png') })
+
+  const slideBoard = await openLesson(page, origin, 'ob-tuning', 0)
+  const slideWord = slideBoard.words[0]
+  await assertCleanBoard(page, `${tag} touch slide`)
+  await touchSlide(page, slideBoard.paths[slideWord.id])
+  await assertWordFound(page, `${tag} touch slide`, slideWord)
+
+  const mouseBoard = await openLesson(page, origin, 'ob-tuning', 0)
+  const mouseWord = mouseBoard.words[0]
+  await assertCleanBoard(page, `${tag} mouse slide`)
+  await dragPath(page, mouseBoard.paths[mouseWord.id])
+  await assertWordFound(page, `${tag} mouse slide`, mouseWord)
+
+  const slowBoard = await openLesson(page, origin, 'ob-tuning', 0)
+  const slowWord = slowBoard.words[0]
+  const slowPath = slowBoard.paths[slowWord.id]
+  await assertCleanBoard(page, `${tag} slow tap`)
+  for (const cell of slowPath) {
+    await holdTap(page, cell, 600)
+    await page.waitForTimeout(180)
+  }
+  await assertWordFound(page, `${tag} slow 600ms tap`, slowWord)
+
+  const missBoard = await openLesson(page, origin, 'ob-tuning', 0)
+  await assertCleanBoard(page, `${tag} before miss`)
+  const corner = [
+    { r: 0, c: 0 },
+    { r: 0, c: 1 },
+    { r: 1, c: 0 },
+  ]
+  const spelled = corner.map((cell) => missBoard.letters[cell.r][cell.c]).join('')
+  const straightWord = missBoard.words.some((item) => item.text === spelled || item.text === [...spelled].reverse().join(''))
+  if (!straightWord) {
+    await dragPath(page, corner)
+    await page.waitForTimeout(400)
+    const miss = page.locator('.miss-banner')
+    assert.equal(await miss.count(), 1, `${tag} a failed swipe shows the miss`)
+    const why = miss.locator('span')
+    assert.match((await why.innerText()) || '', /Try a full straight word/)
+    const whyFont = await why.evaluate((node) => parseFloat(getComputedStyle(node).fontSize))
+    assert.ok(whyFont >= 13, `${tag} miss line is ${whyFont}px`)
+    await holdTap(page, { r: 7, c: 7 }, 80)
+    await page.waitForTimeout(80)
+    assert.equal(await page.locator('.miss-banner').count(), 0, `${tag} the next tap clears the miss`)
+  }
+}
+
 export async function checkGemTapLive() {
   assertTapSource()
   mkdirSync(SHOT_ROOT, { recursive: true })
@@ -712,6 +876,23 @@ export async function checkGemTapLive() {
       const page = await context.newPage()
       page.on('pageerror', (err) => errors.push(String(err)))
       await proveTapThreshold(page, origin, `${w}x${h}`, errors)
+      await context.close()
+    }
+    for (const [w, h] of [
+      [375, 812],
+      [390, 844],
+    ]) {
+      const context = await browser.newContext({
+        viewport: { width: w, height: h },
+        hasTouch: true,
+        isMobile: true,
+      })
+      await context.addInitScript(({ key, payload }) => {
+        window.localStorage.setItem(key, JSON.stringify(payload))
+      }, { key: STORAGE_KEY, payload: savePayload() })
+      const page = await context.newPage()
+      page.on('pageerror', (err) => errors.push(String(err)))
+      await proveEasyWordInputs(page, origin, w, h)
       await context.close()
     }
     for (const [w, h] of VIEWPORTS) {

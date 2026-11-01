@@ -28,6 +28,15 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.564',
+    title: 'Easy word search: tap letters one by one, or slide',
+    when: '2026-11-01',
+    items: [
+      'Word search: tap letters one by one, or slide.',
+      'Refs #912',
+    ],
+  },
+  {
     version: '1.4.563',
     title: 'Night Watch: the new-map note stays on top',
     when: '2026-11-01',

@@ -653,6 +653,53 @@ html[data-easy='on'] .play.is-gem-search .gem-cell.is-start-gold {
   animation: gem-start-pulse 1.15s ease-in-out infinite;
 }
 
+/* Easy miss copy stays at least 13px, including the "why" line under Miss −25. */
+html[data-easy='on'] .play.is-gem-search .gem-hint-slot .miss-banner span,
+html[data-easy='on'] .play.is-gem-search .gem-stage .miss-banner span {
+  font-size: 13px;
+}
+
+/* A found word stays on the board. The ring is pine, so it is not a second gold cue. */
+html[data-easy='on'] .play.is-gem-search .gem-cell.is-word-lit {
+  z-index: 1;
+  color: inherit;
+  border-color: #1f7a4d;
+  box-shadow:
+    0 0 0 2px #2a2118,
+    0 0 0 5px #1f7a4d;
+  pointer-events: none;
+}
+
+html[data-easy='on'] .play.is-gem-search .gem-cell.is-word-lit .gem-letter {
+  opacity: 1;
+  color: inherit;
+}
+
+/* An intentional hint after a miss is ink, not gold. */
+html[data-easy='on'] .play.is-gem-search .gem-cell.is-hint {
+  border-color: #2a2118;
+  box-shadow: 0 0 0 3px #2a2118;
+  animation: gem-hint-ink 1.15s ease-in-out infinite;
+}
+
+@keyframes gem-hint-ink {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px #2a2118;
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(42, 33, 24, 0.45);
+    transform: scale(1.02);
+  }
+}
+
+html[data-easy='on'] .play.is-gem-search .match-teach-chip.is-found {
+  background: #e5f6ec;
+  border-color: #1f7a4d;
+  box-shadow: inset 0 0 0 2px #1f7a4d;
+}
+
 /* need-pulse swaps box-shadow every frame, so the ink ring needs its own keyframes. */
 @keyframes gem-start-pulse {
   0%,
