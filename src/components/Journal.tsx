@@ -83,8 +83,8 @@ export function Journal({ focusId, autoQuiz, lockInEmpty, onNavigate }: JournalP
     ? evidenceForJournal(focusedEntry.unlockAfter, focusedEntry.id)
     : undefined
   const holdId = focusedBrief?.id ?? focusId
-  /* A kept line stays on the Journal. The empty Lock In is only when nothing is kept. */
-  if (progress.held.length > 0 || progress.learnings.length > 0) lockInEmpty = false
+  /* A stored line stays on the Journal. An empty lock, even after a held id with no card, stays empty. */
+  if (progress.learnings.length > 0) lockInEmpty = false
 
   const quizBrief = holdId
     ? evidenceForTier(holdId, currentLessonTier(progress, holdId)) ?? evidenceFor(holdId)
