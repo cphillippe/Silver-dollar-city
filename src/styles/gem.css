@@ -676,6 +676,14 @@ html[data-easy='on'] .play.is-gem-search .gem-hint-slot {
   overflow: hidden;
 }
 
+/* #899: on a short phone the square board is centered about 8.5px into this slot.
+   Move the slot up without changing the board, dock, or score. */
+@media (max-height: 720px) {
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .gem-hint-slot {
+    transform: translateY(-9px);
+  }
+}
+
 html[data-easy='on'] .play.is-gem-search .gem-start-hint {
   grid-area: 1 / 1;
   margin: 0;
