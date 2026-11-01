@@ -4306,10 +4306,35 @@ button.defend-new-lamp[aria-pressed='true'] {
 }
 
 /* 1.4.563: the leak line sits under the new-map note. The note's frame
-   cannot paint above this fixed banner, so the banner moves below it. */
+   cannot paint above this fixed banner, so the banner moves below it.
+   1.4.565: nw-power-pop's translate(-50%, -50%) was overriding top and
+   pulling the banner up by half its height. This pop grows downward only. */
 body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   top: 268px;
-  transform: translate(-50%, 0);
+  transform: translateX(-50%);
+  transform-origin: center top;
+  white-space: nowrap;
+  font-size: 13px;
+  animation: nw-power-pop-under 1.6s ease forwards;
+}
+
+@keyframes nw-power-pop-under {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.86);
+  }
+  12% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.06);
+  }
+  78% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scale(1);
+  }
 }
 
 .nw-power-banner.is-mend {
@@ -4435,7 +4460,8 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   .nw-skill.is-fresh,
   .defend-hearts.is-mend-pop span.is-on,
   .nw-power-banner,
-  .nw-mend-shield {
+  .nw-mend-shield,
+  body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
     animation: none;
   }
 }
