@@ -31,6 +31,7 @@ import {
   phoneFit,
   probeInitSource,
   screenText,
+  keptGoldCues,
   startFrameSampler,
   markFrameSampler,
   stopFrameSampler,
@@ -756,15 +757,18 @@ async function keptCase(nextReviewAt, due, viewport = VIEWPORTS[0]) {
     const stamp = lociStampFor('ph-road')
     const format = (await page.locator('.quick-review-plot-hit').count()) > 0 ? 'C' : (await page.locator('.quick-review-flip').count()) > 0 ? 'A' : 'B'
     assert.equal(format, 'C', `after format A the kept review is C (never A, never B), got ${format}`)
-    const named = await page.evaluate(goldCues)
-    const now = await page.locator('.is-now').count()
-    assert.ok(named.length + (named.length ? 0 : now) >= 1, 'kept card shows its one gold cue')
+    const keptGold = await page.evaluate(keptGoldCues)
+    assert.equal(keptGold.length, 1, `kept card (${due ? 'due' : 'not due'}): exactly one gold cue, got [${keptGold.join(' | ')}]`)
+    assert.match(keptGold[0], /quick-review-map-tap/, `kept card (${due ? 'due' : 'not due'}): the gold cue is the map tap line`)
+    assert.ok(await page.locator('.quick-review-map-tap.is-now').isVisible(), `kept card (${due ? 'due' : 'not due'}): the gold cue is on screen`)
     assert.equal(await page.evaluate(fontViolations).then((list) => list.length), 0, 'kept card font floors')
     await page.locator(`.quick-review-plot-hit[data-plot-id="${stamp.plotId}"]`).click()
     await page.getByRole('button', { name: 'I had it' }).waitFor()
     assert.deepEqual(await page.evaluate(fontViolations), [], 'kept card reveal font floors')
     const revealGold = await page.evaluate(goldCues)
     assert.equal(revealGold.length, 1, `kept card reveal: one gold cue, got [${revealGold.join(' | ')}]`)
+    assert.match(revealGold[0], /btn/, 'kept card reveal: the gold cue is the I had it button')
+    assert.ok(await page.getByRole('button', { name: 'I had it' }).isVisible(), 'kept card reveal: the gold button is on screen')
     await page.evaluate(() => {
       window.__scrolls = 0
     })

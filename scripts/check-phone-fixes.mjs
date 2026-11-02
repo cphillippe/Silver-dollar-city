@@ -2027,4 +2027,10 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY'].some((name) => process.env[name] === '1')
+  if (!scoped) {
+    // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
+    await import('./check-lockin-843.mjs')
+    console.log('check-lockin-843 ok')
+  }
 }

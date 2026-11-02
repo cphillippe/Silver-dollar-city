@@ -44,6 +44,24 @@ export function goldCues() {
   return top.map((el) => `${el.tagName.toLowerCase()}.${[...el.classList].join('.')}`)
 }
 
+/**
+ * Gold cues on a QuickReview screen. QuickReview marks its one cue with `.is-now`
+ * (gold text or a gold rim), so that class counts next to the painted cues from goldCues.
+ */
+export function keptGoldCues() {
+  const painted = window.__probe.goldCues()
+  const visible = (el) => {
+    const st = getComputedStyle(el)
+    const box = el.getBoundingClientRect()
+    return st.display !== 'none' && st.visibility !== 'hidden' && box.width > 2 && box.height > 2
+  }
+  const label = (el) => `${el.tagName.toLowerCase()}.${[...el.classList].join('.')}`
+  const now = [...document.querySelectorAll('.app-body .is-now')].filter(visible)
+  const topNow = now.filter((el) => !now.some((other) => other !== el && other.contains(el)))
+  const named = new Set(painted)
+  return [...painted, ...topNow.map(label).filter((entry) => !named.has(entry))]
+}
+
 /** Text and tap-target font sizes under the H2 floors. Teach text 14px, everything else 13px. */
 export function fontViolations() {
   const teach = '.why-miss-hint, .why-miss-answer, .lockin-recall-claim, .why-keep-card .match-yes span, .why-keep-card .held-from'
