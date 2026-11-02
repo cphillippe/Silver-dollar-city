@@ -101,10 +101,12 @@ function listenCrown(page, errors, label) {
 
 async function readLevelPips(page) {
   return page.evaluate(() =>
-    [...document.querySelectorAll('text.defend-level-pip')].map((node) => {
+    [...document.querySelectorAll('.defend-level-pip')].map((node) => {
       const style = getComputedStyle(node)
       const rect = node.getBoundingClientRect()
-      return { display: style.display, w: rect.width, text: (node.textContent || '').trim() }
+      const stage = node.getAttribute('data-glyph-stage')
+      const text = (node.textContent || '').trim() || (stage != null ? `stage ${stage}` : '')
+      return { display: style.display, w: rect.width, text }
     }),
   )
 }
