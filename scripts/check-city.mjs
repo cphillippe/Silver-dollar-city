@@ -1944,6 +1944,7 @@ assert.equal(
   'A planted lamp shows a small mark that grows as you upgrade it.',
   '1.4.566 changelog names the lamp mark',
 )
+assert.match(latestChange('1.4.566').items.join('\n'), /Refs #923/, '1.4.566 changelog refs #923')
 assert.doesNotMatch(
   playerVisibleChangeItems(latestChange('1.4.566').items).join('\n'),
   /\bHard\b|\bMedium\b/,

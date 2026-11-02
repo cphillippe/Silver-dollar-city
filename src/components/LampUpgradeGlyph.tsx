@@ -16,6 +16,8 @@ const MAP_GAP_PX = 6
 const DRAW_MS = 200
 
 const LAMP_TOP = -(TOWER_LAMP_SPRITE.h - TOWER_LAMP_SPRITE.footY)
+/** Type mark sits above the lamp art. The glyph clears that box. */
+const TYPE_MARK_TOP = -78
 
 export interface LampUpgradeGlyphProps {
   paths: LampPaths
@@ -64,7 +66,7 @@ export function LampUpgradeGlyph({ paths, variant, stage: stageOverride }: LampU
     const px = Math.hypot(ctm.a, ctm.b)
     if (!(px > 0.05)) return
     const units = MAP_GLYPH_PX / px
-    const y = LAMP_TOP - MAP_GAP_PX / px - units
+    const y = Math.min(LAMP_TOP, TYPE_MARK_TOP) - MAP_GAP_PX / px - units
     setBox((prev) => (Math.abs(prev.units - units) < 0.15 && Math.abs(prev.y - y) < 0.15 ? prev : { units, y }))
   })
 

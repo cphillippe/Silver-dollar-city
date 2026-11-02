@@ -6152,6 +6152,11 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   color: var(--parchment);
 }
 
+/* Easy open-lamp ring is not a second gold cue. Begin keeps the gold. */
+.defend-page.is-easy-watch .defend-upgrade-ring {
+  stroke: var(--parchment);
+}
+
 .lamp-upgrade-glyph .is-stroke {
   fill: none;
   stroke-width: 2.25;

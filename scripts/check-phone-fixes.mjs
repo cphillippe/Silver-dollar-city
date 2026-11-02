@@ -1587,6 +1587,250 @@ async function checkLeakBanner(browser, port, errors) {
   }
 }
 
+const GLYPH_SIZES = [
+  [375, 667],
+  [375, 812],
+  [390, 844],
+]
+
+function pathsForGlyphStage(stage) {
+  const strong = Math.min(5, stage)
+  const far = Math.min(2, Math.max(0, stage - strong))
+  const bright = stage - strong - far > 0 ? 1 : 0
+  return { far, strong, bright }
+}
+
+async function checkLampGlyph(browser, port, errors) {
+  const summary = []
+  for (const [width, height] of GLYPH_SIZES) {
+    const label = `${width}x${height}`
+    const { context, page } = await openMap(browser, port, width, height, 'a2', {
+      motion: true,
+      search: '?playtest=1&nwSeed=2',
+    })
+    page.on('pageerror', (error) => errors.push(`glyph ${label} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(`glyph ${label} ${msg.text()}`)
+    })
+    const seat = await firstLiveSeat(page)
+    assert.ok(seat, `${label} a live seat is present`)
+    await page.mouse.click(seat.x, seat.y)
+    await page.locator('.lamp-upgrade-glyph[data-glyph-variant="map"]').waitFor()
+    const tool = await page.locator('.defend-pad.is-planted').first().getAttribute('data-tower-type')
+    assert.ok(tool, `${label} the planted lamp names its type`)
+
+    const read = () => page.evaluate(() => {
+      const box = (el) => {
+        if (!el) return null
+        const style = getComputedStyle(el)
+        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return null
+        const rect = el.getBoundingClientRect()
+        if (rect.width < 1 || rect.height < 1) return null
+        return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, w: rect.width, h: rect.height }
+      }
+      const many = (sel) => [...document.querySelectorAll(sel)].map(box).filter(Boolean)
+      const glyph = document.querySelector('.lamp-upgrade-glyph[data-glyph-variant="map"]')
+      const rail = document.querySelector('.defend-ability-tier.is-glyph .lamp-upgrade-glyph')
+      const goldish = (value) => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+        let match
+        while ((match = re.exec(value || ''))) {
+          const r = +match[1]
+          const g = +match[2]
+          const b = +match[3]
+          const a = match[4] === undefined ? 1 : +match[4]
+          if (a > 0.05 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
+      const pieceGold = []
+      if (glyph) {
+        for (const el of glyph.querySelectorAll('.is-stroke, .is-gap, .is-dot')) {
+          const style = getComputedStyle(el)
+          if (goldish(style.stroke) || goldish(style.fill)) pieceGold.push(el.getAttribute('class'))
+        }
+      }
+      const gold = []
+      for (const el of document.querySelectorAll('.defend-page *')) {
+        if (el.closest('path.defend-road, path.defend-heaven-wall, [hidden]')) continue
+        const style = getComputedStyle(el)
+        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+        const rect = el.getBoundingClientRect()
+        if (rect.width <= 0 || rect.height <= 0 || rect.right <= 0 || rect.bottom <= 0 || rect.left >= innerWidth || rect.top >= innerHeight) continue
+        const why = []
+        if (el instanceof SVGElement) {
+          if (style.stroke !== 'none' && parseFloat(style.strokeWidth) > 0 && goldish(style.stroke)) why.push('stroke')
+          if (style.fill !== 'none' && goldish(style.fill)) why.push('fill')
+        } else if (goldish(style.backgroundImage) || goldish(style.backgroundColor)) why.push('fill')
+        else if (['Top', 'Right', 'Bottom', 'Left'].some((side) => parseFloat(style[`border${side}Width`]) > 0 && style[`border${side}Style`] !== 'none' && goldish(style[`border${side}Color`]))) why.push('border')
+        else if (goldish(style.boxShadow)) why.push('shadow')
+        if (why.length) gold.push(`${el.tagName.toLowerCase()}.${String(el.getAttribute('class') ?? '').split(/\s+/).slice(0, 2).join('.')}`)
+      }
+      return {
+        glyph: box(glyph),
+        stage: glyph?.getAttribute('data-glyph-stage') ?? null,
+        pieces: glyph ? glyph.querySelectorAll('.is-stroke, .is-gap').length : null,
+        rail: box(rail),
+        lamp: many('.defend-tower-lamp, .defend-type-mark'),
+        buttons: many('.nw-rail .defend-ability'),
+        notes: many('.defend-clear-note, #defend-plant-first, .nw-miss-toast, .defend-plant-first'),
+        banners: many('.nw-power-banner, .defend-boost-status, .nw-wave-count'),
+        hearts: many('.defend-hearts'),
+        pace: many('.nw-pace'),
+        begin: many('.defend-go'),
+        cont: many('.defend-continue'),
+        others: many('.lamp-upgrade-glyph[data-glyph-variant="map"]').slice(1),
+        pieceGold,
+        gold,
+      }
+    })
+
+    const assertStage = async (stage) => {
+      const view = await read()
+      assert.ok(view.glyph, `${label} stage ${stage} map glyph is present`)
+      assert.ok(view.glyph.w >= 18 && view.glyph.h >= 18, `${label} stage ${stage} map glyph is ${view.glyph.w}x${view.glyph.h}`)
+      assert.equal(view.stage, String(stage), `${label} stage attr`)
+      assert.equal(view.pieces, stage, `${label} stage ${stage} drawn pieces`)
+      assert.ok(view.rail, `${label} stage ${stage} rail glyph is present`)
+      assert.ok(Math.abs(view.rail.w - 28) <= 1 && Math.abs(view.rail.h - 28) <= 1, `${label} rail glyph is ${view.rail.w}x${view.rail.h}`)
+      assert.deepEqual(view.pieceGold, [], `${label} stage ${stage} glyph paint is gold ${view.pieceGold}`)
+      summary.push(`${label} stage ${stage} pieces ${view.pieces} map ${Math.round(view.glyph.w)} rail ${Math.round(view.rail.w)}`)
+      return view
+    }
+
+    await assertStage(0)
+    const plantedGold = await read()
+    assert.equal(plantedGold.gold.length, 1, `${label} plant has one gold cue ${JSON.stringify(plantedGold.gold)}`)
+    assert.ok(await page.locator('.nw-rail .defend-ability.is-on').count(), `${label} a lamp card is selected`)
+    const selectedGold = await read()
+    assert.equal(selectedGold.gold.length, 1, `${label} selected lamp has one gold cue ${JSON.stringify(selectedGold.gold)}`)
+    await page.locator('.defend-pad.is-planted').first().click({ force: true })
+    await page.locator('.defend-tower-card').waitFor()
+    const openGold = await read()
+    assert.equal(openGold.gold.length, 1, `${label} open upgrade panel has one gold cue ${JSON.stringify(openGold.gold)}`)
+    await page.waitForTimeout(450)
+    await page.locator('.defend-pad.is-planted').first().click({ force: true })
+    await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+
+    for (let stage = 1; stage <= 8; stage += 1) {
+      const frames = await page.evaluate(async ({ tool, paths }) => {
+        const root = document.querySelector('.defend-page')
+        const key = Object.keys(root).find((name) => name.startsWith('__reactFiber$'))
+        let fiber = root[key]
+        let dispatched = false
+        while (fiber && !dispatched) {
+          let hook = fiber.memoizedState
+          while (hook) {
+            const state = hook.memoizedState
+            if (state && state.love && state.logic && state.love.far != null && hook.queue && typeof hook.queue.dispatch === 'function') {
+              hook.queue.dispatch({ ...state, [tool]: { far: paths.far, strong: paths.strong, bright: paths.bright } })
+              dispatched = true
+              break
+            }
+            hook = hook.next
+          }
+          fiber = fiber.return
+        }
+        if (!dispatched) return { miss: true, frames: [] }
+        const box = (el) => {
+          if (!el) return null
+          const style = getComputedStyle(el)
+          if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return null
+          const rect = el.getBoundingClientRect()
+          if (rect.width < 1 || rect.height < 1) return null
+          return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, w: rect.width, h: rect.height }
+        }
+        const many = (sel) => [...document.querySelectorAll(sel)].map(box).filter(Boolean)
+        const sample = () => {
+          const glyph = document.querySelector('.lamp-upgrade-glyph[data-glyph-variant="map"]')
+          return {
+            glyph: box(glyph),
+            pieces: glyph ? glyph.querySelectorAll('.is-stroke, .is-gap').length : null,
+            lamp: many('.defend-tower-lamp, .defend-type-mark'),
+            buttons: many('.nw-rail .defend-ability'),
+            notes: many('.defend-clear-note, #defend-plant-first, .nw-miss-toast'),
+            banners: many('.nw-power-banner, .defend-boost-status, .nw-wave-count'),
+            hearts: many('.defend-hearts'),
+            pace: many('.nw-pace'),
+            begin: many('.defend-go'),
+            cont: many('.defend-continue'),
+            others: [...document.querySelectorAll('.lamp-upgrade-glyph[data-glyph-variant="map"]')].slice(1).map(box).filter(Boolean),
+          }
+        }
+        const frames = []
+        const start = performance.now()
+        await new Promise((resolve) => {
+          const tick = (now) => {
+            frames.push(sample())
+            const elapsed = now - start
+            if (elapsed < 520 || (frames.length < 10 && elapsed < 1500)) requestAnimationFrame(tick)
+            else resolve()
+          }
+          requestAnimationFrame(tick)
+        })
+        return { miss: false, frames }
+      }, { tool, paths: pathsForGlyphStage(stage) })
+      assert.equal(frames.miss, false, `${label} stage ${stage} path state was found`)
+      assert.ok(frames.frames.length >= 10, `${label} stage ${stage} sampled ${frames.frames.length} frames`)
+      let worst = ''
+      for (const frame of frames.frames) {
+        assert.ok(frame.glyph, `${label} stage ${stage} glyph missing on a frame`)
+        assert.notEqual(frame.pieces, null, `${label} stage ${stage} piece count missing`)
+        assert.ok(frame.lamp.length > 0, `${label} stage ${stage} lamp missing on a frame`)
+        assert.ok(frame.buttons.length > 0, `${label} stage ${stage} ability buttons missing on a frame`)
+        assert.ok(frame.hearts.length > 0, `${label} stage ${stage} hearts missing on a frame`)
+        assert.ok(frame.begin.length > 0, `${label} stage ${stage} Begin missing on a frame`)
+        const neighbors = [
+          ...frame.lamp.map((rect) => ['lamp', rect]),
+          ...frame.buttons.map((rect) => ['ability', rect]),
+          ...frame.notes.map((rect) => ['note', rect]),
+          ...frame.banners.map((rect) => ['banner', rect]),
+          ...frame.hearts.map((rect) => ['hearts', rect]),
+          ...frame.pace.map((rect) => ['chip', rect]),
+          ...frame.begin.map((rect) => ['begin', rect]),
+          ...frame.cont.map((rect) => ['continue', rect]),
+          ...frame.others.map((rect) => ['glyph', rect]),
+        ]
+        for (const [name, rect] of neighbors) {
+          if (rectsOverlap(frame.glyph, rect)) worst = name
+        }
+      }
+      assert.equal(worst, '', `${label} stage ${stage} glyph overlaps ${worst}`)
+      await page.waitForFunction(
+        (want) => document.querySelector('.lamp-upgrade-glyph[data-glyph-variant="map"]')?.getAttribute('data-glyph-stage') === want,
+        String(stage),
+      )
+      await assertStage(stage)
+    }
+    await context.close()
+  }
+
+  const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }
+  const hard = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width: 375, height: 667 },
+    deviceScaleFactor: 1,
+  })
+  await hard.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: hardSave },
+  )
+  const hardPage = await hard.newPage()
+  hardPage.on('pageerror', (error) => errors.push(`glyph hard ${error}`))
+  await hardPage.goto('/?playtest=1')
+  await hardPage.getByRole('button', { name: 'Hold the night' }).click()
+  await hardPage.locator('.defend-board').waitFor()
+  const hardMarks = await hardPage.evaluate(() => ({
+    glyphs: document.querySelectorAll('.lamp-upgrade-glyph').length,
+    romans: [...document.querySelectorAll('text.defend-level-pip')].map((node) => (node.textContent || '').trim()),
+  }))
+  assert.equal(hardMarks.glyphs, 0, `Hard renders ${hardMarks.glyphs} glyph elements`)
+  assert.ok(hardMarks.romans.length > 0, 'Hard still renders the roman level pip')
+  summary.push(`hard glyphs ${hardMarks.glyphs} romans ${hardMarks.romans.join(',')}`)
+  await hard.close()
+  console.log(summary.join('\n'))
+}
+
 export async function checkPhoneFixes() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -1601,6 +1845,12 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', '1.4.565 leak banner nights stay free of console errors')
       return
     }
+    if (process.env.NW_GLYPH_ONLY === '1') {
+      await checkLampGlyph(browser, port, errors)
+      assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
+      return
+    }
+    await checkLampGlyph(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({

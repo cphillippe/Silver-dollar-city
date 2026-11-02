@@ -33,6 +33,7 @@ export const CHANGELOG: ChangeNote[] = [
     when: '2026-11-02',
     items: [
       'A planted lamp shows a small mark that grows as you upgrade it.',
+      'Refs #923',
     ],
   },
   {
