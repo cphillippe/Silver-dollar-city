@@ -3,6 +3,7 @@ import { shuffle } from '../lib/shuffle'
 import { takeawayLines, type EvidenceBrief } from '../content/evidence'
 import { STORY } from '../content/story'
 import { EASY, easyFacingLine, easyReasonHint, easyWhyLine, isEasy, uniqueHoldChoices } from '../lib/easy'
+import { LockInRecall } from '../easyTrail/lockIn/LockInRecall'
 import { WhyBlastPlay } from './challenges/WhyBlastPlay'
 import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
@@ -53,17 +54,13 @@ export function RecallGate({
   /** Sort “keep” tiles can carry sub-lines; Easy Lock In rehearses the story hold, not those tiles. */
   const sortKeepsEncode = encode && lines.length > 1
   const own = sortKeepsEncode && !easy
-  const easySortClaimPick = easy && sortKeepsEncode
   const [chosen, setChosen] = useState<(typeof lines)[0] | null>(
-    own || easySortClaimPick ? null : lines[0] ?? null,
+    own ? null : lines[0] ?? null,
   )
   const claimFace = (line: string) => (easy ? easyFacingLine(brief.id, line) : line)
   const reasonFace = (line: string) => (easy ? easyWhyLine(line) : line)
   const claimOptions = useMemo(() => {
     if (encode) {
-      if (easySortClaimPick) {
-        return uniqueHoldChoices([...brief.claimChoices], claimFace, brief.claim)
-      }
       const raw = sortKeepsEncode ? lines.map((item) => item.claim) : [brief.claim]
       return uniqueHoldChoices(raw, claimFace, raw[0] ?? brief.claim)
     }
@@ -76,7 +73,7 @@ export function RecallGate({
         )
       : pool
     return uniqueHoldChoices(raw, claimFace, brief.claim)
-  }, [brief.id, brief.claim, brief.claimChoices, encode, sortKeepsEncode, easySortClaimPick, lines, easy])
+  }, [brief.id, brief.claim, brief.claimChoices, encode, sortKeepsEncode, lines, easy])
   const reasonOptions = useMemo(() => {
     const correct = chosen?.reason ?? brief.reason
     if (encode && !easy) return uniqueHoldChoices([correct], reasonFace, correct)
@@ -101,7 +98,7 @@ export function RecallGate({
   const showDeeperBeat = deeper && (sealed || reasonLocked || phase === 'teach')
 
   const easyEncode = easy && encode
-  const easyLineReady = !(own || easySortClaimPick) || Boolean(chosen)
+  const [recalled, setRecalled] = useState(false)
   const nextTap =
     phase === 'teach'
       ? easy
@@ -165,15 +162,6 @@ export function RecallGate({
   }
 
   function pickClaim(line: string) {
-    if (easySortClaimPick) {
-      if (line === brief.claim) {
-        setChosen({ claim: brief.claim, reason: brief.reason })
-        setHeldNote(true)
-        return
-      }
-      pick(line, brief.claim, 'reason')
-      return
-    }
     if (encode && own) {
       const hit = lines.find((item) => item.claim === line)
       if (hit) {
@@ -214,38 +202,21 @@ export function RecallGate({
   if (easyEncode) {
     return (
       <section
-        className={`recall-gate is-encode is-easy-hold is-why-blast ${shake ? 'is-shake' : ''} ${own || easySortClaimPick ? 'is-own' : ''}`}
+        className={`recall-gate is-encode is-easy-hold is-why-blast ${recalled ? '' : 'is-lockin-recall'}`}
         aria-label={STORY.takeaway}
       >
         <p className="eyebrow">{EASY.saved}</p>
-        {!easyLineReady ? (
-          <>
-            {/* Easy Clear 1.4.142: one next-tap action cue — Main idea already taught on Learn (140) + labeled on Lock In live/miss (141/139). */}
-            <p className="next-tap">{EASY.rememberSentence}</p>
-            <div className="recall-choices">
-              {claimOptions.map((line) => (
-                <button
-                  key={line}
-                  type="button"
-                  className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
-                  onClick={() => pickClaim(line)}
-                >
-                  {easyFacingLine(brief.id, line)}
-                </button>
-              ))}
-            </div>
-          </>
+        {recalled ? (
+          <WhyBlastPlay
+            id={brief.id}
+            claim={brief.claim}
+            reason={brief.reason}
+            source={brief.source}
+            packMisses={brief.reasonChoices}
+            onDone={(result) => settle(result.clean)}
+          />
         ) : (
-          <>
-            <WhyBlastPlay
-              id={brief.id}
-              claim={heldClaim}
-              reason={heldReason}
-              source={brief.source}
-              packMisses={brief.reasonChoices}
-              onDone={(result) => settle(result.clean)}
-            />
-          </>
+          <LockInRecall id={brief.id} claim={brief.claim} onDone={() => setRecalled(true)} />
         )}
       </section>
     )

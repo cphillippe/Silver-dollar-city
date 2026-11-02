@@ -101,9 +101,9 @@ export function debugPlayGroups(): DebugPlayGroup[] {
 
 export function debugJumpView(item: DebugMiniGame):
   | { name: 'link'; debugLine: string }
-  | { name: 'journal'; focusId: string; autoQuiz: true } {
+  | { name: 'journal'; focusId: string; autoQuiz: true; debugLockIn: true } {
   if (item.play === 'why-blast') {
-    return { name: 'journal', focusId: item.lineId, autoQuiz: true }
+    return { name: 'journal', focusId: item.lineId, autoQuiz: true, debugLockIn: true }
   }
   return { name: 'link', debugLine: item.lineId }
 }

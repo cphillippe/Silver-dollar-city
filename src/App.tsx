@@ -176,6 +176,7 @@ export default function App() {
           focusId={view.focusId}
           autoQuiz={view.autoQuiz}
           lockInEmpty={view.lockInEmpty}
+          debugLockIn={view.debugLockIn}
           onNavigate={go}
         />
       ) : null}
