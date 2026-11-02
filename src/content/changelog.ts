@@ -28,6 +28,15 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.566',
+    title: 'Night Watch: a lamp mark grows with each upgrade',
+    when: '2026-11-02',
+    items: [
+      'A planted lamp shows a small mark that grows as you upgrade it.',
+      'Refs #923',
+    ],
+  },
+  {
     version: '1.4.565',
     title: 'Night Watch: the leak line stays under the note',
     when: '2026-11-01',
