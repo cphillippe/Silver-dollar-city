@@ -41,6 +41,8 @@ import {
   writeNightWatchDebug,
 } from '../lib/nightWatchDebug'
 import { EASY, isEasy } from '../lib/easy'
+import { LAMP_GLYPH_TABLE_TOP } from '../nightWatch/lampGlyph'
+import { LampUpgradeGlyph } from './LampUpgradeGlyph'
 import { activeLampStyle, foundersLamp } from '../lib/foundersLamp'
 import { EASY_HOME } from '../lib/easyNav'
 import { EasyBack } from './EasyBack'
@@ -528,6 +530,14 @@ export function Settings({ onNavigate }: SettingsProps) {
             >
               Jump · Night Watch
             </button>
+          </div>
+          <div className="lamp-glyph-preview" data-lamp-glyph-preview="yes" aria-label="Lamp mark preview">
+            {Array.from({ length: LAMP_GLYPH_TABLE_TOP + 1 }, (_, stage) => (
+              <figure key={stage} data-preview-stage={stage}>
+                <LampUpgradeGlyph paths={{ far: 0, strong: 0 }} variant="rail" stage={stage} />
+                <figcaption>{stage}</figcaption>
+              </figure>
+            ))}
           </div>
         </section>
         {playtestOn ? (

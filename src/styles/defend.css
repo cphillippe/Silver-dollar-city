@@ -6095,6 +6095,109 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   display: none;
 }
 
+/* 1.4.566 Easy lamp mark. A stroke glyph replaces the F/S letters. Hard keeps the roman pip. */
+.lamp-upgrade-glyph {
+  fill: none;
+  stroke: none;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.defend-level-pip.lamp-upgrade-glyph {
+  fill: none;
+  stroke: none;
+}
+
+.lamp-upgrade-glyph .is-pad {
+  fill: rgba(255, 246, 232, 0.02);
+  stroke: none;
+}
+
+.lamp-upgrade-glyph .is-dot {
+  fill: rgba(255, 246, 232, 0.55);
+  stroke: none;
+}
+
+.lamp-upgrade-glyph .is-gap {
+  fill: none;
+  stroke-width: 2.3;
+  stroke-linecap: round;
+}
+
+.lamp-upgrade-glyph.is-far .is-gap {
+  stroke: #5eb6ff;
+}
+
+.lamp-upgrade-glyph.is-strong .is-gap {
+  stroke: #c46a28;
+}
+
+.lamp-upgrade-glyph.is-rest .is-gap {
+  stroke: rgba(255, 246, 232, 0.55);
+}
+
+.lamp-glyph-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lamp-glyph-preview figure {
+  margin: 0;
+  width: 36px;
+  text-align: center;
+}
+
+.lamp-glyph-preview figcaption {
+  color: var(--parchment);
+}
+
+.lamp-upgrade-glyph .is-stroke {
+  fill: none;
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lamp-upgrade-glyph.is-far .is-stroke {
+  stroke: #5eb6ff;
+}
+
+.lamp-upgrade-glyph.is-strong .is-stroke {
+  stroke: #c46a28;
+}
+
+.lamp-upgrade-glyph .is-draw {
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: lamp-glyph-draw 200ms ease-out forwards;
+}
+
+@keyframes lamp-glyph-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lamp-upgrade-glyph .is-draw {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+.defend-ability-tier.is-glyph {
+  background: transparent;
+  padding: 0;
+  line-height: 0;
+}
+
+.defend-ability-tier.is-glyph .lamp-upgrade-glyph {
+  display: block;
+  width: 28px;
+  height: 28px;
+}
+
 /* 792b B6: Easy plant step. Grey seat rings wait until the kid picks a lamp (data-lamp-picked). Draw only. */
 .defend-page.is-easy-watch:not([data-lamp-picked='yes']) .defend-plant-ground circle.is-dead {
   display: none;
