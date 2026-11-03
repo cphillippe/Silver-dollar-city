@@ -11,6 +11,7 @@ import { createServer } from 'vite'
 import { chromium } from '@playwright/test'
 import { SAVE_KIND } from '../src/lib/save.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
+import { LAMP_GLYPH_COLOR } from '../src/nightWatch/lampGlyph.ts'
 
 const SAVE = {
   kind: SAVE_KIND,
@@ -1591,219 +1592,453 @@ const GLYPH_SIZES = [
   [375, 667],
   [375, 812],
   [390, 844],
+  [412, 915],
+  [768, 1024],
 ]
 
-function pathsForGlyphStage(stage) {
-  const strong = Math.min(5, stage)
-  const far = Math.min(2, Math.max(0, stage - strong))
-  const bright = stage - strong - far > 0 ? 1 : 0
-  return { far, strong, bright }
+/** Round 24 on the playtest jump: enough sparks for two full ladders, the late steps open, no lamps yet. */
+const GLYPH_SEARCH = '?playtest=1&nwSeed=2&nwRound=24&nwLamps=0'
+const GLYPH_TOOLS = ['love', 'logic', 'reason', 'science']
+const GLYPH_NAME = { love: 'Love', logic: 'Logic', reason: 'Reason', science: 'Science' }
+
+/**
+ * Eight real buys on one lamp, one click each on the open card.
+ * Stage n is the count of buys, so the mark must read 1 through 8 in this order.
+ */
+const GLYPH_LADDER = [
+  { path: 'strong' },
+  { path: 'strong' },
+  { path: 'strong' },
+  { path: 'far' },
+  { bright: true },
+  { path: 'strong' },
+  { path: 'strong' },
+  { path: 'far' },
+]
+
+function glyphArea(a, b) {
+  if (!a || !b) return 0
+  const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left))
+  const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+  return w * h
+}
+
+function glyphInside(box, frame, slack = 0.5) {
+  return box.left >= frame.left - slack && box.right <= frame.right + slack && box.top >= frame.top - slack && box.bottom <= frame.bottom + slack
+}
+
+function hexToRgb(hex) {
+  const n = Number.parseInt(hex.slice(1), 16)
+  return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`
+}
+
+/**
+ * One new piece, sampled on every frame. It has to draw: the drawn share starts low,
+ * is not done in the first two frames, only goes up, and takes at least 150ms.
+ */
+function assertDrawOn(frames, piece, label) {
+  const seen = frames
+    .map((frame) => ({ t: frame.t, item: frame.draw.find((item) => item.stage === piece) }))
+    .filter((row) => row.item)
+  assert.ok(seen.length >= 3, `${label} the new piece shows ${seen.length} drawing frames`)
+  for (const row of seen) {
+    assert.equal(row.item.dash, 1, `${label} piece dash is ${row.item.dash}`)
+    assert.equal(row.item.len, '1', `${label} piece pathLength is ${row.item.len}`)
+  }
+  const shares = seen.map((row) => row.item.share)
+  assert.ok(shares[0] < 0.97 && shares[1] < 0.97, `${label} the piece is not complete in the first 2 frames (${shares.slice(0, 2).map((v) => v.toFixed(2))})`)
+  for (let i = 1; i < shares.length; i += 1) {
+    assert.ok(shares[i] >= shares[i - 1] - 0.001, `${label} drawn share only goes up (${shares.map((v) => v.toFixed(2))})`)
+  }
+  assert.ok(new Set(shares.map((v) => v.toFixed(2))).size >= 3, `${label} the share takes several values (${shares.map((v) => v.toFixed(2))})`)
+  const start = seen[0].t
+  const done = frames.find((frame) => frame.t > start && (!frame.draw.some((item) => item.stage === piece) || frame.draw.find((item) => item.stage === piece).share >= 0.99))
+  assert.ok(done, `${label} the piece finishes drawing`)
+  const span = done.t - start
+  assert.ok(span >= 150, `${label} the piece draws over ${Math.round(span)}ms, not a pop`)
+  return { span, first: Math.max(shares[0], shares[1]), count: seen.length }
+}
+
+async function glyphSetup(page) {
+  await page.evaluate(() => {
+    const box = (el) => {
+      if (!el) return null
+      const style = getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return null
+      const rect = el.getBoundingClientRect()
+      if (rect.width < 1 || rect.height < 1) return null
+      return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, w: rect.width, h: rect.height }
+    }
+    const many = (sel, root = document) => [...root.querySelectorAll(sel)].map(box).filter(Boolean)
+    window.__glyphSample = (tool) => {
+      const pad = document.querySelector(`.defend-pad[data-tower-type="${tool}"]`)
+      const glyph = pad?.querySelector('.lamp-upgrade-glyph[data-glyph-variant="map"]') ?? null
+      const draw = glyph
+        ? [...glyph.querySelectorAll('[data-glyph-draw="yes"]')].map((el) => {
+            const style = getComputedStyle(el)
+            const offset = parseFloat(style.strokeDashoffset)
+            return {
+              stage: Number(el.getAttribute('data-glyph-piece')),
+              dash: parseFloat(style.strokeDasharray),
+              len: el.getAttribute('pathLength'),
+              share: 1 - Math.min(1, Math.max(0, offset)),
+            }
+          })
+        : []
+      return {
+        t: performance.now(),
+        glyph: box(glyph),
+        stage: glyph?.getAttribute('data-glyph-stage') ?? null,
+        draw,
+        card: box(document.querySelector('.defend-tower-card')),
+        board: box(document.querySelector('.defend-board')),
+        frame: box(document.querySelector('.defend-frame')),
+        hearts: many('.defend-hearts'),
+        lamp: pad ? many('.defend-tower-lamp, .defend-type-mark', pad) : [],
+        buttons: many('.nw-rail .defend-ability'),
+        notes: many('.defend-clear-note, #defend-plant-first, .nw-miss-toast, .defend-plant-first'),
+        banners: many('.nw-power-banner, .defend-boost-status, .nw-wave-count'),
+        pace: many('.nw-pace'),
+        begin: many('.defend-go'),
+        cont: many('.defend-continue'),
+        others: [...document.querySelectorAll('.defend-pad .lamp-upgrade-glyph[data-glyph-variant="map"]')]
+          .filter((node) => node !== glyph)
+          .map(box)
+          .filter(Boolean),
+      }
+    }
+    window.__glyphRun = null
+    window.__glyphStart = (tool) => {
+      const run = { frames: [], stop: false }
+      window.__glyphRun = run
+      const tick = () => {
+        run.frames.push(window.__glyphSample(tool))
+        if (!run.stop) requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    }
+    window.__glyphEnd = () => {
+      const run = window.__glyphRun
+      run.stop = true
+      return run.frames
+    }
+  })
+}
+
+/** Gold painted anywhere on the board page, and on the one mark under test. Same rule as before 1.4.568. */
+function readGold(page, tool) {
+  return page.evaluate((toolId) => {
+    const goldish = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = +match[1]
+        const g = +match[2]
+        const b = +match[3]
+        const a = match[4] === undefined ? 1 : +match[4]
+        if (a > 0.05 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const pieceGold = []
+    const glyph = toolId ? document.querySelector(`.defend-pad[data-tower-type="${toolId}"] .lamp-upgrade-glyph`) : null
+    if (glyph) {
+      for (const el of glyph.querySelectorAll('.is-stroke, .is-gap, .is-dot')) {
+        const style = getComputedStyle(el)
+        if (goldish(style.stroke) || goldish(style.fill)) pieceGold.push(el.getAttribute('class'))
+      }
+    }
+    const gold = []
+    for (const el of document.querySelectorAll('.defend-page *')) {
+      if (el.closest('path.defend-road, path.defend-heaven-wall, [hidden]')) continue
+      const style = getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+      const rect = el.getBoundingClientRect()
+      if (rect.width <= 0 || rect.height <= 0 || rect.right <= 0 || rect.bottom <= 0 || rect.left >= innerWidth || rect.top >= innerHeight) continue
+      let why = false
+      if (el instanceof SVGElement) {
+        if (style.stroke !== 'none' && parseFloat(style.strokeWidth) > 0 && goldish(style.stroke)) why = true
+        if (style.fill !== 'none' && goldish(style.fill)) why = true
+      } else if (goldish(style.backgroundImage) || goldish(style.backgroundColor)) why = true
+      else if (['Top', 'Right', 'Bottom', 'Left'].some((side) => parseFloat(style[`border${side}Width`]) > 0 && style[`border${side}Style`] !== 'none' && goldish(style[`border${side}Color`]))) why = true
+      else if (goldish(style.boxShadow)) why = true
+      if (why) gold.push(`${el.tagName.toLowerCase()}.${String(el.getAttribute('class') ?? '').split(/\s+/).slice(0, 2).join('.')}`)
+    }
+    return { gold, pieceGold }
+  }, tool ?? '')
+}
+
+/** What one lamp shows right now: its mark, the card, and how they sit. */
+function readGlyphStage(page, tool) {
+  return page.evaluate((toolId) => {
+    const frame = window.__glyphSample(toolId)
+    const glyph = document.querySelector(`.defend-pad[data-tower-type="${toolId}"] .lamp-upgrade-glyph[data-glyph-variant="map"]`)
+    const strokes = glyph ? [...glyph.querySelectorAll('.is-stroke, .is-gap')] : []
+    return {
+      ...frame,
+      pieces: strokes.length,
+      tone: glyph?.getAttribute('data-glyph-tone') ?? null,
+      colors: [...new Set(strokes.map((el) => getComputedStyle(el).stroke))],
+      rails: [...document.querySelectorAll('.defend-ability-tier.is-glyph .lamp-upgrade-glyph')].map((node) => {
+        const rect = node.getBoundingClientRect()
+        return { stage: node.getAttribute('data-glyph-stage'), w: rect.width, h: rect.height }
+      }),
+    }
+  }, tool)
+}
+
+async function checkRingArcDraw(browser, port, errors) {
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width: 375, height: 667 },
+    deviceScaleFactor: 1,
+    reducedMotion: 'no-preference',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: SAVE },
+  )
+  const page = await context.newPage()
+  page.on('pageerror', (error) => errors.push(`glyph arcs ${error}`))
+  await page.goto('/?playtest=1')
+  await page.getByRole('button', { name: 'Settings' }).click()
+  await page.locator('summary', { hasText: 'Developer' }).click()
+  const top = await page.locator('.lamp-glyph-preview figure').count()
+  const arcs = page.locator(`.lamp-glyph-preview figure[data-preview-stage="${top - 1}"] path.is-stroke[d*="A"]`)
+  assert.equal(await arcs.count(), 4, 'ring arcs: the top stage has four arc pieces')
+  const lengths = await arcs.evaluateAll((nodes) => nodes.map((node) => node.getAttribute('pathLength')))
+  assert.deepEqual(lengths, ['1', '1', '1', '1'], 'ring arcs: every arc has pathLength 1')
+  const frames = await page.evaluate(async () => {
+    const arc = document.querySelector('.lamp-glyph-preview figure:last-child path.is-stroke[d*="A"]')
+    const rows = []
+    arc.setAttribute('data-glyph-piece', '10')
+    arc.setAttribute('data-glyph-draw', 'yes')
+    arc.classList.add('is-draw')
+    await new Promise((resolve) => {
+      const start = performance.now()
+      const tick = (now) => {
+        const style = getComputedStyle(arc)
+        rows.push({
+          t: now,
+          draw: [
+            {
+              stage: 10,
+              dash: parseFloat(style.strokeDasharray),
+              len: arc.getAttribute('pathLength'),
+              share: 1 - Math.min(1, Math.max(0, parseFloat(style.strokeDashoffset))),
+            },
+          ],
+        })
+        if (now - start < 500) requestAnimationFrame(tick)
+        else resolve()
+      }
+      requestAnimationFrame(tick)
+    })
+    return rows
+  })
+  const arc = assertDrawOn(frames, 10, 'ring arc')
+  console.log(`checkLampGlyph ok ring arcs pathLength 1 on 4/4 arcs draw-on ${Math.round(arc.span)}ms over ${arc.count} frames first share ${arc.first.toFixed(2)}`)
+  await context.close()
+}
+
+/**
+ * One gold cue per screen. A bank of sparks lights the New lamp buttons (#924, out of scope),
+ * so this runs on the plain night with no sparks: pick a lamp, plant it, open its card.
+ * Zero gold and two or more gold both fail. The selected-lamp state is a second lamp picked while one is planted.
+ */
+async function checkGlyphOneGold(browser, port, errors, width, height) {
+  const label = `${width}x${height}`
+  const { context, page } = await openMap(browser, port, width, height, 'a2', { motion: true })
+  page.on('pageerror', (error) => errors.push(`glyph gold ${label} ${error}`))
+  const selected = () =>
+    page.evaluate(() => [...document.querySelectorAll('.nw-rail .defend-ability.is-on')].map((node) => (node.textContent || '').trim()))
+  const plant = async (tool) => {
+    const seat = await firstLiveSeat(page)
+    await page.mouse.click(seat.x, seat.y)
+    await page.locator(`.defend-pad[data-tower-type="${tool}"] .lamp-upgrade-glyph[data-glyph-variant="map"]`).waitFor()
+    await page.waitForTimeout(150)
+  }
+  const first = await selected()
+  assert.ok(first.length === 1 && first[0].startsWith('Love'), `${label} Love starts selected ${JSON.stringify(first)}`)
+  await plant('love')
+  const plantedGold = await readGold(page, 'love')
+  assert.deepEqual(plantedGold.pieceGold, [], `${label} planted glyph paint is gold`)
+  assert.equal(plantedGold.gold.length, 1, `${label} planted lamp has exactly one gold cue ${JSON.stringify(plantedGold.gold)}`)
+  // The selected-lamp state: a second lamp is picked on the rail, nothing planted for it yet.
+  await page.locator('.nw-rail .defend-ability').nth(1).click()
+  const picked = await selected()
+  assert.equal(picked.length, 1, `${label} one lamp is selected ${JSON.stringify(picked)}`)
+  assert.ok(picked[0].startsWith('Logic'), `${label} Logic is the selected lamp ${JSON.stringify(picked)}`)
+  const selectedGold = await readGold(page)
+  assert.equal(selectedGold.gold.length, 1, `${label} selected lamp has exactly one gold cue ${JSON.stringify(selectedGold.gold)}`)
+  await plant('logic')
+  await page.locator('.defend-pad[data-tower-type="logic"]').click({ force: true })
+  await page.locator('.defend-tower-card').waitFor()
+  const openGold = await readGold(page, 'logic')
+  assert.deepEqual(openGold.pieceGold, [], `${label} open-card glyph paint is gold`)
+  assert.equal(openGold.gold.length, 1, `${label} open upgrade card has exactly one gold cue ${JSON.stringify(openGold.gold)}`)
+  await context.close()
+  return { selected: selectedGold.gold.length, planted: plantedGold.gold.length, open: openGold.gold.length }
 }
 
 async function checkLampGlyph(browser, port, errors) {
-  const summary = []
-  for (const [width, height] of GLYPH_SIZES) {
+  const only = process.env.NW_GLYPH_SIZE
+  for (const [width, height] of GLYPH_SIZES.filter(([w, h]) => !only || only === `${w}x${h}`)) {
     const label = `${width}x${height}`
+    const gold = await checkGlyphOneGold(browser, port, errors, width, height)
     const { context, page } = await openMap(browser, port, width, height, 'a2', {
       motion: true,
-      search: '?playtest=1&nwSeed=2',
+      search: GLYPH_SEARCH,
     })
     page.on('pageerror', (error) => errors.push(`glyph ${label} ${error}`))
     page.on('console', (msg) => {
       if (msg.type() === 'error') errors.push(`glyph ${label} ${msg.text()}`)
     })
-    const seat = await firstLiveSeat(page)
-    assert.ok(seat, `${label} a live seat is present`)
-    await page.mouse.click(seat.x, seat.y)
-    await page.locator('.lamp-upgrade-glyph[data-glyph-variant="map"]').waitFor()
-    const tool = await page.locator('.defend-pad.is-planted').first().getAttribute('data-tower-type')
-    assert.ok(tool, `${label} the planted lamp names its type`)
+    await glyphSetup(page)
+    const stats = { buys: 0, frames: 0, minSpan: Infinity, maxSpan: 0, maxFirst: 0, maxCard: 0, maxHearts: 0, maxEdge: 0, bothSeen: 0 }
 
-    const read = () => page.evaluate(() => {
-      const box = (el) => {
-        if (!el) return null
-        const style = getComputedStyle(el)
-        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return null
-        const rect = el.getBoundingClientRect()
-        if (rect.width < 1 || rect.height < 1) return null
-        return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, w: rect.width, h: rect.height }
-      }
-      const many = (sel) => [...document.querySelectorAll(sel)].map(box).filter(Boolean)
-      const glyph = document.querySelector('.lamp-upgrade-glyph[data-glyph-variant="map"]')
-      const rail = document.querySelector('.defend-ability-tier.is-glyph .lamp-upgrade-glyph')
-      const goldish = (value) => {
-        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
-        let match
-        while ((match = re.exec(value || ''))) {
-          const r = +match[1]
-          const g = +match[2]
-          const b = +match[3]
-          const a = match[4] === undefined ? 1 : +match[4]
-          if (a > 0.05 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
-        }
-        return false
-      }
-      const pieceGold = []
-      if (glyph) {
-        for (const el of glyph.querySelectorAll('.is-stroke, .is-gap, .is-dot')) {
-          const style = getComputedStyle(el)
-          if (goldish(style.stroke) || goldish(style.fill)) pieceGold.push(el.getAttribute('class'))
-        }
-      }
-      const gold = []
-      for (const el of document.querySelectorAll('.defend-page *')) {
-        if (el.closest('path.defend-road, path.defend-heaven-wall, [hidden]')) continue
-        const style = getComputedStyle(el)
-        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
-        const rect = el.getBoundingClientRect()
-        if (rect.width <= 0 || rect.height <= 0 || rect.right <= 0 || rect.bottom <= 0 || rect.left >= innerWidth || rect.top >= innerHeight) continue
-        const why = []
-        if (el instanceof SVGElement) {
-          if (style.stroke !== 'none' && parseFloat(style.strokeWidth) > 0 && goldish(style.stroke)) why.push('stroke')
-          if (style.fill !== 'none' && goldish(style.fill)) why.push('fill')
-        } else if (goldish(style.backgroundImage) || goldish(style.backgroundColor)) why.push('fill')
-        else if (['Top', 'Right', 'Bottom', 'Left'].some((side) => parseFloat(style[`border${side}Width`]) > 0 && style[`border${side}Style`] !== 'none' && goldish(style[`border${side}Color`]))) why.push('border')
-        else if (goldish(style.boxShadow)) why.push('shadow')
-        if (why.length) gold.push(`${el.tagName.toLowerCase()}.${String(el.getAttribute('class') ?? '').split(/\s+/).slice(0, 2).join('.')}`)
-      }
-      return {
-        glyph: box(glyph),
-        stage: glyph?.getAttribute('data-glyph-stage') ?? null,
-        pieces: glyph ? glyph.querySelectorAll('.is-stroke, .is-gap').length : null,
-        rail: box(rail),
-        lamp: many('.defend-tower-lamp, .defend-type-mark'),
-        buttons: many('.nw-rail .defend-ability'),
-        notes: many('.defend-clear-note, #defend-plant-first, .nw-miss-toast, .defend-plant-first'),
-        banners: many('.nw-power-banner, .defend-boost-status, .nw-wave-count'),
-        hearts: many('.defend-hearts'),
-        pace: many('.nw-pace'),
-        begin: many('.defend-go'),
-        cont: many('.defend-continue'),
-        others: many('.lamp-upgrade-glyph[data-glyph-variant="map"]').slice(1),
-        pieceGold,
-        gold,
-      }
-    })
+    const selected = () =>
+      page.evaluate(() => [...document.querySelectorAll('.nw-rail .defend-ability.is-on')].map((node) => (node.textContent || '').trim()))
 
-    const assertStage = async (stage) => {
-      const view = await read()
-      assert.ok(view.glyph, `${label} stage ${stage} map glyph is present`)
-      assert.ok(view.glyph.w >= 18 && view.glyph.h >= 18, `${label} stage ${stage} map glyph is ${view.glyph.w}x${view.glyph.h}`)
-      assert.equal(view.stage, String(stage), `${label} stage attr`)
-      assert.equal(view.pieces, stage, `${label} stage ${stage} drawn pieces`)
-      assert.ok(view.rail, `${label} stage ${stage} rail glyph is present`)
-      assert.ok(Math.abs(view.rail.w - 28) <= 1 && Math.abs(view.rail.h - 28) <= 1, `${label} rail glyph is ${view.rail.w}x${view.rail.h}`)
-      assert.deepEqual(view.pieceGold, [], `${label} stage ${stage} glyph paint is gold ${view.pieceGold}`)
-      summary.push(`${label} stage ${stage} pieces ${view.pieces} map ${Math.round(view.glyph.w)} rail ${Math.round(view.rail.w)}`)
+    // Plant one lamp of each type. Every pick is a real tap on the rail, then a real tap on a seat.
+    for (const [index, tool] of GLYPH_TOOLS.entries()) {
+      let now = await selected()
+      if (!(now.length === 1 && now[0].startsWith(GLYPH_NAME[tool]))) {
+        await page.locator('.nw-rail .defend-ability').nth(index).click()
+        now = await selected()
+      }
+      assert.equal(now.length, 1, `${label} ${tool} exactly one lamp is selected ${JSON.stringify(now)}`)
+      assert.ok(now[0].startsWith(GLYPH_NAME[tool]), `${label} ${tool} is the selected lamp ${JSON.stringify(now)}`)
+      const seat = await firstLiveSeat(page)
+      await page.mouse.click(seat.x, seat.y)
+      await page.locator(`.defend-pad[data-tower-type="${tool}"] .lamp-upgrade-glyph[data-glyph-variant="map"]`).waitFor()
+      await page.waitForTimeout(150)
+    }
+    const closeCard = async () => {
+      if (await page.locator('.defend-tower-card').count()) {
+        await page.keyboard.press('Escape')
+        await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+      }
+    }
+    const openCard = async (tool) => {
+      await closeCard()
+      await page.locator(`.defend-pad[data-tower-type="${tool}"]`).click({ force: true })
+      await page.locator('.defend-tower-card').waitFor()
+      await page.waitForTimeout(450)
+    }
+    /** Mark and card are both on screen, the mark is on the board, and nothing sits on it. */
+    const assertSettled = async (tool, stage, what) => {
+      const view = await readGlyphStage(page, tool)
+      assert.ok(view.glyph, `${label} ${tool} stage ${stage} ${what}: map glyph is present`)
+      assert.ok(view.card, `${label} ${tool} stage ${stage} ${what}: upgrade card is present`)
+      assert.ok(view.glyph.w >= 18 && view.glyph.h >= 18, `${label} ${tool} stage ${stage} map glyph is ${view.glyph.w}x${view.glyph.h}`)
+      const covered = glyphArea(view.glyph, view.card)
+      assert.equal(covered, 0, `${label} ${tool} stage ${stage} ${what}: card covers the glyph by ${covered}px2 glyph ${JSON.stringify(view.glyph)} card ${JSON.stringify(view.card)} board ${JSON.stringify(view.board)}`)
+      assert.ok(glyphInside(view.glyph, view.board), `${label} ${tool} stage ${stage} ${what}: glyph ${JSON.stringify(view.glyph)} is outside the board ${JSON.stringify(view.board)}`)
+      assert.ok(glyphInside(view.glyph, view.frame), `${label} ${tool} stage ${stage} ${what}: glyph is outside the frame`)
+      for (const hearts of view.hearts) {
+        assert.equal(glyphArea(view.glyph, hearts), 0, `${label} ${tool} stage ${stage} ${what}: glyph overlaps hearts`)
+      }
+      stats.bothSeen += 1
       return view
     }
 
-    await assertStage(0)
-    const plantedGold = await read()
-    assert.equal(plantedGold.gold.length, 1, `${label} plant has one gold cue ${JSON.stringify(plantedGold.gold)}`)
-    assert.ok(await page.locator('.nw-rail .defend-ability.is-on').count(), `${label} a lamp card is selected`)
-    const selectedGold = await read()
-    assert.equal(selectedGold.gold.length, 1, `${label} selected lamp has one gold cue ${JSON.stringify(selectedGold.gold)}`)
-    await page.locator('.defend-pad.is-planted').first().click({ force: true })
-    await page.locator('.defend-tower-card').waitFor()
-    const openGold = await read()
-    assert.equal(openGold.gold.length, 1, `${label} open upgrade panel has one gold cue ${JSON.stringify(openGold.gold)}`)
-    await page.waitForTimeout(450)
-    await page.locator('.defend-pad.is-planted').first().click({ force: true })
-    await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+    const ladder = async (tool, steps) => {
+      let rail = 0
+      for (let at = 0; at < steps.length; at += 1) {
+        const stage = at + 1
+        const step = steps[at]
+        await openCard(tool)
+        const before = await assertSettled(tool, stage - 1, 'card open before the buy')
+        assert.equal(before.stage, String(stage - 1), `${label} ${tool} stage before buy ${stage}`)
+        await page.evaluate((id) => window.__glyphStart(id), tool)
+        const buy = step.bright
+          ? page.locator('.defend-tower-card .defend-bright-buy')
+          : page.locator(`.defend-tower-card button.defend-path-buy[data-path-buy="${step.path}"]`)
+        assert.equal(await buy.count(), 1, `${label} ${tool} stage ${stage} the card offers the real buy ${JSON.stringify(step)}`)
+        await buy.click()
+        await page.waitForTimeout(520)
+        const frames = await page.evaluate(() => window.__glyphEnd())
+        stats.buys += 1
+        stats.frames += frames.length
+        assert.ok(frames.length >= 10, `${label} ${tool} stage ${stage} sampled ${frames.length} frames`)
 
-    for (let stage = 1; stage <= 8; stage += 1) {
-      const frames = await page.evaluate(async ({ tool, paths }) => {
-        const root = document.querySelector('.defend-page')
-        const key = Object.keys(root).find((name) => name.startsWith('__reactFiber$'))
-        let fiber = root[key]
-        let dispatched = false
-        while (fiber && !dispatched) {
-          let hook = fiber.memoizedState
-          while (hook) {
-            const state = hook.memoizedState
-            if (state && state.love && state.logic && state.love.far != null && hook.queue && typeof hook.queue.dispatch === 'function') {
-              hook.queue.dispatch({ ...state, [tool]: { far: paths.far, strong: paths.strong, bright: paths.bright } })
-              dispatched = true
-              break
-            }
-            hook = hook.next
+        let cardFrames = 0
+        for (const [index, frame] of frames.entries()) {
+          assert.ok(frame.glyph, `${label} ${tool} stage ${stage} frame ${index}: glyph missing`)
+          assert.ok(frame.board, `${label} ${tool} stage ${stage} frame ${index}: board missing`)
+          assert.ok(glyphInside(frame.glyph, frame.board), `${label} ${tool} stage ${stage} frame ${index}: glyph ${JSON.stringify(frame.glyph)} left the board ${JSON.stringify(frame.board)}`)
+          stats.maxEdge = Math.max(stats.maxEdge, Math.max(frame.board.left - frame.glyph.left, frame.board.top - frame.glyph.top, frame.glyph.right - frame.board.right, frame.glyph.bottom - frame.board.bottom, 0))
+          if (frame.card) {
+            cardFrames += 1
+            const covered = glyphArea(frame.glyph, frame.card)
+            stats.maxCard = Math.max(stats.maxCard, covered)
+            assert.equal(covered, 0, `${label} ${tool} stage ${stage} frame ${index}: card covers the glyph by ${covered}px2`)
           }
-          fiber = fiber.return
-        }
-        if (!dispatched) return { miss: true, frames: [] }
-        const box = (el) => {
-          if (!el) return null
-          const style = getComputedStyle(el)
-          if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return null
-          const rect = el.getBoundingClientRect()
-          if (rect.width < 1 || rect.height < 1) return null
-          return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, w: rect.width, h: rect.height }
-        }
-        const many = (sel) => [...document.querySelectorAll(sel)].map(box).filter(Boolean)
-        const sample = () => {
-          const glyph = document.querySelector('.lamp-upgrade-glyph[data-glyph-variant="map"]')
-          return {
-            glyph: box(glyph),
-            pieces: glyph ? glyph.querySelectorAll('.is-stroke, .is-gap').length : null,
-            lamp: many('.defend-tower-lamp, .defend-type-mark'),
-            buttons: many('.nw-rail .defend-ability'),
-            notes: many('.defend-clear-note, #defend-plant-first, .nw-miss-toast'),
-            banners: many('.nw-power-banner, .defend-boost-status, .nw-wave-count'),
-            hearts: many('.defend-hearts'),
-            pace: many('.nw-pace'),
-            begin: many('.defend-go'),
-            cont: many('.defend-continue'),
-            others: [...document.querySelectorAll('.lamp-upgrade-glyph[data-glyph-variant="map"]')].slice(1).map(box).filter(Boolean),
+          for (const hearts of frame.hearts) {
+            const area = glyphArea(frame.glyph, hearts)
+            stats.maxHearts = Math.max(stats.maxHearts, area)
+            assert.equal(area, 0, `${label} ${tool} stage ${stage} frame ${index}: glyph overlaps hearts by ${area}px2`)
+          }
+          const neighbors = [
+            ...frame.lamp.map((rect) => ['lamp', rect]),
+            ...frame.buttons.map((rect) => ['ability', rect]),
+            ...frame.notes.map((rect) => ['note', rect]),
+            ...frame.banners.map((rect) => ['banner', rect]),
+            ...frame.pace.map((rect) => ['chip', rect]),
+            ...frame.begin.map((rect) => ['begin', rect]),
+            ...frame.cont.map((rect) => ['continue', rect]),
+            ...frame.others.map((rect) => ['glyph', rect]),
+          ]
+          for (const [name, rect] of neighbors) {
+            assert.equal(glyphArea(frame.glyph, rect), 0, `${label} ${tool} stage ${stage} frame ${index}: glyph overlaps ${name} ${JSON.stringify(frame.glyph)} vs ${JSON.stringify(rect)}`)
           }
         }
-        const frames = []
-        const start = performance.now()
-        await new Promise((resolve) => {
-          const tick = (now) => {
-            frames.push(sample())
-            const elapsed = now - start
-            if (elapsed < 520 || (frames.length < 10 && elapsed < 1500)) requestAnimationFrame(tick)
-            else resolve()
-          }
-          requestAnimationFrame(tick)
-        })
-        return { miss: false, frames }
-      }, { tool, paths: pathsForGlyphStage(stage) })
-      assert.equal(frames.miss, false, `${label} stage ${stage} path state was found`)
-      assert.ok(frames.frames.length >= 10, `${label} stage ${stage} sampled ${frames.frames.length} frames`)
-      let worst = ''
-      for (const frame of frames.frames) {
-        assert.ok(frame.glyph, `${label} stage ${stage} glyph missing on a frame`)
-        assert.notEqual(frame.pieces, null, `${label} stage ${stage} piece count missing`)
-        assert.ok(frame.lamp.length > 0, `${label} stage ${stage} lamp missing on a frame`)
-        assert.ok(frame.buttons.length > 0, `${label} stage ${stage} ability buttons missing on a frame`)
-        assert.ok(frame.hearts.length > 0, `${label} stage ${stage} hearts missing on a frame`)
-        assert.ok(frame.begin.length > 0, `${label} stage ${stage} Begin missing on a frame`)
-        const neighbors = [
-          ...frame.lamp.map((rect) => ['lamp', rect]),
-          ...frame.buttons.map((rect) => ['ability', rect]),
-          ...frame.notes.map((rect) => ['note', rect]),
-          ...frame.banners.map((rect) => ['banner', rect]),
-          ...frame.hearts.map((rect) => ['hearts', rect]),
-          ...frame.pace.map((rect) => ['chip', rect]),
-          ...frame.begin.map((rect) => ['begin', rect]),
-          ...frame.cont.map((rect) => ['continue', rect]),
-          ...frame.others.map((rect) => ['glyph', rect]),
-        ]
-        for (const [name, rect] of neighbors) {
-          if (rectsOverlap(frame.glyph, rect)) worst = name
+        assert.ok(cardFrames > 0, `${label} ${tool} stage ${stage} the card was on screen during the buy`)
+        const drew = assertDrawOn(frames, stage, `${label} ${tool} stage ${stage}`)
+        stats.minSpan = Math.min(stats.minSpan, drew.span)
+        stats.maxSpan = Math.max(stats.maxSpan, drew.span)
+        stats.maxFirst = Math.max(stats.maxFirst, drew.first)
+
+        await page.waitForFunction(
+          ([id, want]) => document.querySelector(`.defend-pad[data-tower-type="${id}"] .lamp-upgrade-glyph[data-glyph-variant="map"]`)?.getAttribute('data-glyph-stage') === want,
+          [tool, String(stage)],
+        )
+        // The card may stay open or close after a buy. Either way, open it and check both again.
+        await page.waitForTimeout(300)
+        await openCard(tool)
+        const after = await assertSettled(tool, stage, 'card open after the real buy')
+        assert.equal(after.stage, String(stage), `${label} ${tool} stage attr after buy ${stage}`)
+        assert.equal(after.pieces, stage, `${label} ${tool} stage ${stage} drawn pieces`)
+        assert.ok(after.rails.some((row) => row.stage === String(stage) && Math.abs(row.w - 28) <= 1 && Math.abs(row.h - 28) <= 1), `${label} ${tool} stage ${stage} rail glyph ${JSON.stringify(after.rails)}`)
+        const paint = await readGold(page, tool)
+        assert.deepEqual(paint.pieceGold, [], `${label} ${tool} stage ${stage} glyph paint is gold ${paint.pieceGold}`)
+        if (after.tone === 'strong') {
+          assert.deepEqual(after.colors, [hexToRgb(LAMP_GLYPH_COLOR.strong)], `${label} ${tool} stage ${stage} strong arms paint ${after.colors}`)
         }
+        rail = stage
       }
-      assert.equal(worst, '', `${label} stage ${stage} glyph overlaps ${worst}`)
-      await page.waitForFunction(
-        (want) => document.querySelector('.lamp-upgrade-glyph[data-glyph-variant="map"]')?.getAttribute('data-glyph-stage') === want,
-        String(stage),
-      )
-      await assertStage(stage)
+      await closeCard()
+      return rail
     }
+
+    assert.equal(await ladder(GLYPH_TOOLS[0], GLYPH_LADDER), 8, `${label} top lamp reached stage 8 by real buys`)
+    for (const tool of GLYPH_TOOLS.slice(1, -1)) {
+      assert.equal(await ladder(tool, GLYPH_LADDER.slice(0, 1)), 1, `${label} ${tool} reached stage 1 by a real buy`)
+    }
+    assert.equal(await ladder(GLYPH_TOOLS[GLYPH_TOOLS.length - 1], GLYPH_LADDER), 8, `${label} lowest lamp reached stage 8 by real buys`)
+
+    const line =
+      `checkLampGlyph ok ${label} real buys ${stats.buys} frames ${stats.frames} ` +
+      `draw-span ${Math.round(stats.minSpan)}-${Math.round(stats.maxSpan)}ms max first-2-frames share ${stats.maxFirst.toFixed(2)} ` +
+      `card/glyph overlap max ${stats.maxCard}px2 (card+glyph both present ${stats.bothSeen}x) ` +
+      `glyph outside board max ${stats.maxEdge.toFixed(1)}px hearts overlap max ${stats.maxHearts}px2 ` +
+      `selected-lamp gold===${gold.selected} planted gold===${gold.planted} open-card gold===${gold.open}`
+    console.log(line)
     await context.close()
   }
+
+  await checkRingArcDraw(browser, port, errors)
 
   const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }
   const hard = await browser.newContext({
@@ -1826,9 +2061,8 @@ async function checkLampGlyph(browser, port, errors) {
   }))
   assert.equal(hardMarks.glyphs, 0, `Hard renders ${hardMarks.glyphs} glyph elements`)
   assert.ok(hardMarks.romans.length > 0, 'Hard still renders the roman level pip')
-  summary.push(`hard glyphs ${hardMarks.glyphs} romans ${hardMarks.romans.join(',')}`)
+  console.log(`checkLampGlyph ok hard glyphs ${hardMarks.glyphs} romans ${hardMarks.romans.join(',')}`)
   await hard.close()
-  console.log(summary.join('\n'))
 }
 
 export async function checkPhoneFixes() {
