@@ -2100,7 +2100,7 @@ function newGlyphStats() {
   return {
     minTip: Infinity, buys: 0, frames: 0, minSpan: Infinity, maxSpan: 0, maxFirst: 0, maxCard: 0, maxHearts: 0, maxEdge: 0, bothSeen: 0,
     minGap: Infinity, headerFrames: 0, headerSettled: 0, brightGold: 0, brightBuys: 0,
-    solved: 0, spotsMin: Infinity, noSpot: new Set(), reserveFrames: 0, reserveMinSlack: Infinity,
+    solved: 0, spotsMin: Infinity, noSpot: new Set(), headerBy: new Map(), headerSpotsMax: 0, reserveFrames: 0, reserveMinSlack: Infinity,
     beginFrames: 0, beginMaxOverlap: 0, beginMinSlack: Infinity, beginHitBad: 0, railFrames: 0, railMaxOverlap: 0, clearFrames: 0, clearMaxOverlap: 0,
     nbFrames: 0, nbMaxOverlap: 0, nbHeaderOverlap: 0, nbOverFrames: 0, aboveFrames: 0, underFrames: 0,
     newLampFrames: 0, newLampMaxOverlap: 0, kitFrames: 0, kitMaxOverlap: 0, ownMaxOverlap: 0, ownHeaderOverlap: 0,
@@ -2113,6 +2113,8 @@ function mergeGlyphStats(total, part) {
   for (const key of ['maxFirst', 'maxCard', 'maxHearts', 'maxEdge', 'maxSpan', 'beginMaxOverlap', 'railMaxOverlap', 'clearMaxOverlap', 'nbMaxOverlap', 'nbHeaderOverlap', 'newLampMaxOverlap', 'kitMaxOverlap', 'ownMaxOverlap', 'ownHeaderOverlap']) total[key] = Math.max(total[key], part[key])
   for (const key of ['minSpan', 'minGap', 'minTip', 'spotsMin', 'beginMinSlack', 'reserveMinSlack', 'rowMinSlack', 'stripMinSlack', 'bodyMinH']) total[key] = Math.min(total[key], part[key])
   for (const entry of part.noSpot) total.noSpot.add(entry)
+  for (const [key, count] of part.headerBy) total.headerBy.set(key, (total.headerBy.get(key) ?? 0) + count)
+  total.headerSpotsMax = Math.max(total.headerSpotsMax, part.headerSpotsMax)
 }
 
 /**
@@ -2148,7 +2150,9 @@ function glyphCardRules(frame, where, stats, stageKey, { settled = false } = {})
     }
     if (under) stats.underFrames += 1
     if (frame.header) {
-      assert.ok(spots === 0 || under, `${where}: the header copy shows while ${spots} card spots clear the glyph+6, Begin-8, the rail, its buttons, the New lamp buttons, the neighbour lamps and their names, glyph ${JSON.stringify(frame.glyph)} card ${JSON.stringify(card)}`)
+      glyphRule('header copy while a clear spot exists', spots === 0, `${where}: the header copy shows while ${spots} card spots clear the glyph+6, Begin-8, the rail, its buttons, the New lamp buttons, the neighbour lamps and their names, glyph ${JSON.stringify(frame.glyph)} card ${JSON.stringify(card)}`)
+      stats.headerSpotsMax = Math.max(stats.headerSpotsMax, spots)
+      stats.headerBy.set(stageKey, (stats.headerBy.get(stageKey) ?? 0) + 1)
       if (settled) stats.headerSettled += 1
       else stats.headerFrames += 1
     } else {
@@ -2398,7 +2402,7 @@ function glyphStatsLine(label, what, stats, gold) {
     `checkLampGlyph ok ${label} ${what} real buys ${stats.buys} frames ${stats.frames} ` +
     `draw-span ${Math.round(stats.minSpan)}-${Math.round(stats.maxSpan)}ms max first-2-frames share ${stats.maxFirst.toFixed(2)} ` +
     `card/glyph overlap max ${stats.maxCard}px2 min gap ${stats.minGap === Infinity ? 'n/a' : `${stats.minGap.toFixed(2)}px`} pointer tip min gap ${stats.minTip === Infinity ? 'n/a' : `${stats.minTip.toFixed(2)}px`} ` +
-    `(card+glyph both present ${stats.bothSeen}x) header copy ${stats.headerFrames} frames ${stats.headerSettled} settled ` +
+    `(card+glyph both present ${stats.bothSeen}x) header copy ${stats.headerFrames} frames ${stats.headerSettled} settled, solver spots on header frames max ${stats.headerSpotsMax} (must be 0), by seat/stage [${[...stats.headerBy].map(([key, count]) => `${key}x${count}`).join(' ') || 'none'}] ` +
     `solver ${stats.solved} card frames, clear spots min ${spots}, ${noSpot.length} stages with no clear spot${noSpot.length ? ` [${noSpot.join(' ')}]` : ''} ` +
     `reserve ${stats.reserveFrames} frames min card-bottom-to-reserve ${stats.reserveMinSlack === Infinity ? 'n/a' : `${stats.reserveMinSlack.toFixed(2)}px`} (>=0) ` +
     `Begin ${stats.beginFrames} frames overlap max ${stats.beginMaxOverlap}px2 min card-bottom-to-Begin ${stats.beginMinSlack === Infinity ? 'n/a' : `${stats.beginMinSlack.toFixed(2)}px`} (>=8) centre tap miss ${stats.beginHitBad} ` +
@@ -2675,7 +2679,7 @@ async function checkGlyphClearRow(browser, port, errors, width, height) {
       `rail buttons ${stats.railFrames} frames overlap max ${stats.railMaxOverlap}px2 clear-row buttons ${stats.clearFrames} frames overlap max ${stats.clearMaxOverlap}px2 ` +
       `mid-wave strip ${strip.frames} frames min card-bottom-to-row ${strip.slack.toFixed(2)}px (>=8) New lamp ${stats.newLampFrames} frames overlap max ${stats.newLampMaxOverlap}px2 ` +
       `neighbours ${stats.nbFrames} frames overlap max ${stats.nbMaxOverlap}px2 bottom row ${stats.rowFrames} frames min slack ${stats.rowMinSlack.toFixed(2)}px empty-body frames 0 of ${stats.bodyFrames} min content ${stats.bodyMinH.toFixed(0)}px ` +
-      `Begin frames ${stats.beginFrames} overlap max ${stats.beginMaxOverlap}px2 header copy ${stats.headerFrames} frames ` +
+      `Begin frames ${stats.beginFrames} overlap max ${stats.beginMaxOverlap}px2 header copy ${stats.headerFrames} frames solver spots on header frames max ${stats.headerSpotsMax} (must be 0) by stage [${[...stats.headerBy].map(([key, count]) => `${key}x${count}`).join(' ') || 'none'}] ` +
       `clear spots min ${stats.spotsMin === Infinity ? 'n/a' : stats.spotsMin} stages with no clear spot ${stats.noSpot.size} ` +
       `card/glyph overlap max ${stats.maxCard}px2 min gap ${stats.minGap === Infinity ? 'n/a' : `${stats.minGap.toFixed(2)}px`}`,
   )
