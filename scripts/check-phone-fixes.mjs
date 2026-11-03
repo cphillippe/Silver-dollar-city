@@ -1748,6 +1748,89 @@ async function glyphSetup(page) {
           return { x, y, h, reserve: reserve || 0 }
         })(),
         cont: many('.defend-continue'),
+        kit: many('.defend-kits button'),
+        newLamp: many('.defend-new-lamp'),
+        recenter: many('.nw-cam-recenter'),
+        wave: Boolean(document.querySelector('.defend-page.is-easy-tap')),
+        open: Boolean(document.querySelector('.defend-pad.is-upgrade-open')),
+        strip: document.querySelector('.defend-tower-card')?.getAttribute('data-strip') === 'yes',
+        // What the card paints: boxes that are really on screen, not the 1px clipped words.
+        body: (() => {
+          const el = document.querySelector('.defend-tower-card')
+          if (!el) return null
+          // Ink only: a button, an image, or an element with its own words. Empty wrappers paint nothing.
+          const inks = [...el.querySelectorAll('*')].filter((node) => {
+            if (node.closest('svg') && node.tagName.toLowerCase() !== 'svg') return false
+            const style = getComputedStyle(node)
+            if (style.visibility === 'hidden' || style.display === 'none' || Number(style.opacity) === 0) return false
+            if (['BUTTON', 'IMG'].includes(node.tagName) || node.tagName.toLowerCase() === 'svg') return true
+            return [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim().length > 0)
+          })
+          // An ancestor that clips (the 1px clipped words, the card's own edge) cuts what is really painted.
+          const seen = (node) => {
+            const own = node.getBoundingClientRect()
+            let left = own.left
+            let top = own.top
+            let right = own.right
+            let bottom = own.bottom
+            for (let up = node.parentElement; up; up = up.parentElement) {
+              const style = getComputedStyle(up)
+              if (style.clipPath !== 'none' && style.clipPath.includes('inset(50%')) return null
+              if (style.overflow !== 'visible' || style.clipPath !== 'none') {
+                const box = up.getBoundingClientRect()
+                left = Math.max(left, box.left)
+                top = Math.max(top, box.top)
+                right = Math.min(right, box.right)
+                bottom = Math.min(bottom, box.bottom)
+              }
+              if (up === el) break
+            }
+            return right - left >= 8 && bottom - top >= 8 ? { left, top, right, bottom, w: right - left, h: bottom - top } : null
+          }
+          const parts = inks.map((node) => seen(node)).filter(Boolean)
+          if (parts.length === 0) return { count: 0, h: 0 }
+          return { count: parts.length, h: Math.max(...parts.map((r) => r.bottom)) - Math.min(...parts.map((r) => r.top)) }
+        })(),
+        rowTop: (() => {
+          const rows = [...many('.defend-go'), ...many('.defend-kits button'), ...many('.defend-continue')]
+          return rows.length ? Math.min(...rows.map((r) => r.top)) : null
+        })(),
+        own: [
+          ...(pad ? many('text.defend-type-label', pad) : []),
+          ...many(`.defend-type-chip.is-${tool}`),
+        ],
+        nbBodies: [...document.querySelectorAll('.defend-pad.is-planted')]
+          .filter((node) => node !== pad)
+          .map((node) => {
+            const parts = [...node.querySelectorAll('.defend-lamp-sprite, image.defend-type-mark')].map(box).filter(Boolean)
+            if (!parts.length) return null
+            return {
+              left: Math.min(...parts.map((r) => r.left)),
+              top: Math.min(...parts.map((r) => r.top)),
+              right: Math.max(...parts.map((r) => r.right)),
+              bottom: Math.max(...parts.map((r) => r.bottom)),
+            }
+          })
+          .filter(Boolean),
+        nbLabels: [
+          ...[...document.querySelectorAll('.defend-pad.is-planted')].filter((node) => node !== pad).flatMap((node) => many('text.defend-type-label', node)),
+          ...many(`.defend-type-chip:not(.is-${tool})`),
+        ],
+        nbMarks: [...document.querySelectorAll('.defend-pad.is-planted')].filter((node) => node !== pad).flatMap((node) => many('image.defend-type-mark', node)),
+        // The mark is painted above the names when a second copy of it sits in a layer over every chip.
+        above: (() => {
+          if (!glyph?.id) return false
+          const top = document.querySelector(`svg.defend-glyph-top use[href="#${CSS.escape(glyph.id)}"]`)
+          const layer = top?.ownerSVGElement
+          const at = box(top)
+          const own = box(glyph)
+          if (!top || !layer || !at || !own) return false
+          if (Math.abs(at.left - own.left) > 1 || Math.abs(at.top - own.top) > 1) return false
+          const chips = [...document.querySelectorAll('.defend-type-chip')]
+          const z = Number(getComputedStyle(layer).zIndex)
+          if (!(z > Math.max(0, ...chips.map((chip) => Number(getComputedStyle(chip).zIndex) || 0)))) return false
+          return chips.every((chip) => Boolean(chip.compareDocumentPosition(layer) & Node.DOCUMENT_POSITION_FOLLOWING))
+        })(),
         others: [...document.querySelectorAll('.defend-pad .lamp-upgrade-glyph[data-glyph-variant="map"]')]
           .filter((node) => node !== glyph)
           // A lamp panned off the top of the frame has no art on screen to sit over; only lamps in view count.
@@ -1941,24 +2024,35 @@ const SOLVER_EDGE = 2
 const SOLVER_FLOOR_MARGIN = 8
 const glyphSpotCache = new Map()
 
+/** Every measured box grows by half a pixel before the search, as the placer does, so a rounded box cannot touch a card. */
+const SOLVER_EPS = 0.5
+const growBox = (box) => ({ left: box.left - SOLVER_EPS, top: box.top - SOLVER_EPS, right: box.right + SOLVER_EPS, bottom: box.bottom + SOLVER_EPS })
+
 /**
- * Every 1px card spot on the plate that clears the glyph plus 6 (body and pointer), Begin minus 8, the whole rail
- * and every rail and clear-row button. Counts them. Other lamps' art does not count: the mark wins over it.
+ * Every 1px card spot on the plate that clears the glyph plus 6 (body and pointer), Begin minus 8, the whole rail,
+ * every rail, clear-row, skill kit and New lamp button, the open lamp's own name, every other lamp (art and type
+ * mark) and every other lamp's name, and stays 8px above the bottom row. Counts them. Other lamps' art counts since
+ * 1.4.572: a spot that covers a neighbour is not a clear spot.
  * Independent of the placer: it reads only measured boxes.
  */
 function glyphClearSpots(frame) {
   const { card, glyph, place, plate } = frame
   if (!card || !glyph || !place || !plate) return null
   const round = (box) => (box ? [box.left, box.top, box.right, box.bottom].map((n) => Math.round(n * 10) / 10) : null)
-  const key = JSON.stringify([round(plate), round(glyph), Math.round(card.h * 10) / 10, place, round(frame.begin[0]), round(frame.rail), frame.buttons.map(round), frame.clearButtons.map(round)])
+  const key = JSON.stringify([
+    round(plate), round(glyph), Math.round(card.h * 10) / 10, place, round(frame.begin[0]), round(frame.rail), frame.buttons.map(round), frame.clearButtons.map(round),
+    frame.kit.map(round), frame.newLamp.map(round), frame.recenter.map(round), frame.rowTop, frame.own.map(round), frame.nbBodies.map(round), frame.nbLabels.map(round),
+  ])
   if (glyphSpotCache.has(key)) return glyphSpotCache.get(key)
   const H = card.h
   const zone = { left: glyph.left - SOLVER_GLYPH_ZONE, right: glyph.right + SOLVER_GLYPH_ZONE, top: glyph.top - SOLVER_GLYPH_ZONE, bottom: glyph.bottom + SOLVER_GLYPH_ZONE }
   const blocks = []
   const begin = frame.begin[0]
   if (begin) blocks.push({ left: begin.left, right: begin.right, top: begin.top - SOLVER_BEGIN_GAP, bottom: begin.bottom })
-  if (frame.rail) blocks.push(frame.rail)
-  blocks.push(...frame.buttons, ...frame.clearButtons)
+  if (frame.rail) blocks.push(growBox(frame.rail))
+  blocks.push(...[...frame.buttons, ...frame.clearButtons, ...frame.kit, ...frame.newLamp, ...frame.recenter, ...frame.own].map(growBox))
+  if (frame.rowTop != null) blocks.push({ left: -1e6, right: 1e6, top: frame.rowTop - SOLVER_BEGIN_GAP, bottom: 1e6 })
+  blocks.push(...[...frame.nbBodies, ...frame.nbLabels].map(growBox))
   const pointLeft = plate.left + place.x
   const pointTop = plate.top + place.y
   const hits = (l, t, r, b, box) => l < box.right && r > box.left && t < box.bottom && b > box.top
@@ -1983,7 +2077,23 @@ function glyphClearSpots(frame) {
     }
   }
   glyphSpotCache.set(key, count)
+  if (count === 0 && process.env.NW_DEBUG_SPOTS) {
+    console.log('NO SPOT', JSON.stringify({ plate: round(plate), glyph: round(glyph), H, place, begin: round(begin), rail: round(frame.rail), buttons: frame.buttons.map(round), newLamp: frame.newLamp.map(round), kit: frame.kit.map(round), rowTop: frame.rowTop, own: frame.own.map(round), nbBodies: frame.nbBodies.map(round), nbLabels: frame.nbLabels.map(round) }))
+  }
   return count
+}
+
+/**
+ * The 1.4.572 rules. They assert, unless NW_GLYPH_COLLECT=1: then a miss is counted by rule so a run against an
+ * older build lists every rule it breaks instead of stopping at the first.
+ */
+const glyphMisses = new Map()
+function glyphRule(rule, ok, message) {
+  if (ok) return
+  if (process.env.NW_GLYPH_COLLECT !== '1') assert.fail(message)
+  const row = glyphMisses.get(rule) ?? { count: 0, first: message }
+  row.count += 1
+  glyphMisses.set(rule, row)
 }
 
 function newGlyphStats() {
@@ -1992,13 +2102,16 @@ function newGlyphStats() {
     minGap: Infinity, headerFrames: 0, headerSettled: 0, brightGold: 0, brightBuys: 0,
     solved: 0, spotsMin: Infinity, noSpot: new Set(), reserveFrames: 0, reserveMinSlack: Infinity,
     beginFrames: 0, beginMaxOverlap: 0, beginMinSlack: Infinity, beginHitBad: 0, railFrames: 0, railMaxOverlap: 0, clearFrames: 0, clearMaxOverlap: 0,
+    nbFrames: 0, nbMaxOverlap: 0, nbHeaderOverlap: 0, nbOverFrames: 0, aboveFrames: 0, underFrames: 0,
+    newLampFrames: 0, newLampMaxOverlap: 0, kitFrames: 0, kitMaxOverlap: 0, ownMaxOverlap: 0, ownHeaderOverlap: 0,
+    rowFrames: 0, rowMinSlack: Infinity, stripFrames: 0, stripMinSlack: Infinity, bodyFrames: 0, bodyMinH: Infinity, suppressed: 0,
   }
 }
 
 function mergeGlyphStats(total, part) {
-  for (const key of ['buys', 'frames', 'bothSeen', 'headerFrames', 'headerSettled', 'brightGold', 'brightBuys', 'solved', 'reserveFrames', 'beginFrames', 'beginHitBad', 'railFrames', 'clearFrames']) total[key] += part[key]
-  for (const key of ['maxFirst', 'maxCard', 'maxHearts', 'maxEdge', 'maxSpan', 'beginMaxOverlap', 'railMaxOverlap', 'clearMaxOverlap']) total[key] = Math.max(total[key], part[key])
-  for (const key of ['minSpan', 'minGap', 'minTip', 'spotsMin', 'beginMinSlack', 'reserveMinSlack']) total[key] = Math.min(total[key], part[key])
+  for (const key of ['buys', 'frames', 'bothSeen', 'headerFrames', 'headerSettled', 'brightGold', 'brightBuys', 'solved', 'reserveFrames', 'beginFrames', 'beginHitBad', 'railFrames', 'clearFrames', 'nbFrames', 'nbOverFrames', 'aboveFrames', 'underFrames', 'newLampFrames', 'kitFrames', 'rowFrames', 'stripFrames', 'bodyFrames', 'suppressed']) total[key] += part[key]
+  for (const key of ['maxFirst', 'maxCard', 'maxHearts', 'maxEdge', 'maxSpan', 'beginMaxOverlap', 'railMaxOverlap', 'clearMaxOverlap', 'nbMaxOverlap', 'nbHeaderOverlap', 'newLampMaxOverlap', 'kitMaxOverlap', 'ownMaxOverlap', 'ownHeaderOverlap']) total[key] = Math.max(total[key], part[key])
+  for (const key of ['minSpan', 'minGap', 'minTip', 'spotsMin', 'beginMinSlack', 'reserveMinSlack', 'rowMinSlack', 'stripMinSlack', 'bodyMinH']) total[key] = Math.min(total[key], part[key])
   for (const entry of part.noSpot) total.noSpot.add(entry)
 }
 
@@ -2025,11 +2138,21 @@ function glyphCardRules(frame, where, stats, stageKey, { settled = false } = {})
     stats.solved += 1
     if (spots > 0) stats.spotsMin = Math.min(stats.spotsMin, spots)
     else stats.noSpot.add(stageKey)
+    // A neighbour's name, badge or type mark that sits on the mark and is painted over it hides the mark.
+    const labelBoxes = [...frame.nbLabels, ...frame.nbMarks]
+    const overLabel = labelBoxes.filter((box) => glyphArea(frame.glyph, box) > 0).length
+    const under = overLabel > 0 && !frame.above
+    if (overLabel > 0) {
+      stats.nbOverFrames += 1
+      if (frame.above) stats.aboveFrames += 1
+    }
+    if (under) stats.underFrames += 1
     if (frame.header) {
-      assert.equal(spots, 0, `${where}: the header copy shows while ${spots} card spots clear the glyph+6, Begin-8, the rail and its buttons, glyph ${JSON.stringify(frame.glyph)} card ${JSON.stringify(card)}`)
+      assert.ok(spots === 0 || under, `${where}: the header copy shows while ${spots} card spots clear the glyph+6, Begin-8, the rail, its buttons, the New lamp buttons, the neighbour lamps and their names, glyph ${JSON.stringify(frame.glyph)} card ${JSON.stringify(card)}`)
       if (settled) stats.headerSettled += 1
       else stats.headerFrames += 1
     } else {
+      glyphRule('mark under a neighbour name', !under, `${where}: the mark sits under a neighbour name or type mark that paints over it and the card shows no header copy, glyph ${JSON.stringify(frame.glyph)} over ${JSON.stringify(labelBoxes.filter((box) => glyphArea(frame.glyph, box) > 0))}`)
       const covered = glyphArea(frame.glyph, card)
       const gap = glyphGap(frame.glyph, card)
       stats.maxCard = Math.max(stats.maxCard, covered)
@@ -2067,6 +2190,58 @@ function glyphCardRules(frame, where, stats, stageKey, { settled = false } = {})
     stats.clearMaxOverlap = Math.max(stats.clearMaxOverlap, over)
     assert.equal(over, 0, `${where}: card covers a clear-row button by ${over}px2, card ${JSON.stringify(card)} button ${JSON.stringify(button)}`)
   }
+  // 1.4.572: New lamp and skill kit buttons are tap targets, the open lamp's own name is never covered, and the card
+  // never paints an empty body.
+  if (frame.newLamp.length > 0) stats.newLampFrames += 1
+  for (const button of frame.newLamp) {
+    const over = glyphArea(card, button)
+    stats.newLampMaxOverlap = Math.max(stats.newLampMaxOverlap, over)
+    glyphRule('card over a New lamp button', over === 0, `${where}: card covers a New lamp button by ${over}px2, card ${JSON.stringify(card)} button ${JSON.stringify(button)}`)
+  }
+  if (frame.kit.length > 0) stats.kitFrames += 1
+  for (const button of frame.kit) {
+    const over = glyphArea(card, button)
+    stats.kitMaxOverlap = Math.max(stats.kitMaxOverlap, over)
+    glyphRule('card over a skill kit button', over === 0, `${where}: card covers a skill kit button by ${over}px2, card ${JSON.stringify(card)} button ${JSON.stringify(button)}`)
+  }
+  // The open lamp's own name is never covered, unless the frame has no spot that clears it and every tap target:
+  // then the card says so with the header copy (the solver counts the name as an obstacle).
+  for (const label of frame.own) {
+    const over = glyphArea(card, label)
+    if (frame.header) {
+      stats.ownHeaderOverlap = Math.max(stats.ownHeaderOverlap, over)
+      continue
+    }
+    stats.ownMaxOverlap = Math.max(stats.ownMaxOverlap, over)
+    glyphRule('card over the open lamp own name', over === 0, `${where}: card covers the open lamp's own name by ${over}px2 and shows no header copy, card ${JSON.stringify(card)} name ${JSON.stringify(label)}`)
+  }
+  if (frame.nbBodies.length + frame.nbLabels.length > 0) stats.nbFrames += 1
+  for (const [name, list] of [['lamp', frame.nbBodies], ['name', frame.nbLabels]]) {
+    for (const box of list) {
+      const over = glyphArea(card, box)
+      if (frame.header) {
+        stats.nbHeaderOverlap = Math.max(stats.nbHeaderOverlap, over)
+        continue
+      }
+      stats.nbMaxOverlap = Math.max(stats.nbMaxOverlap, over)
+      glyphRule(`card over a neighbour ${name}`, over === 0, `${where}: card covers a neighbour ${name} by ${over}px2 and shows no header copy, card ${JSON.stringify(card)} ${name} ${JSON.stringify(box)}`)
+    }
+  }
+  if (frame.rowTop != null) {
+    const slack = frame.rowTop - card.bottom
+    stats.rowFrames += 1
+    stats.rowMinSlack = Math.min(stats.rowMinSlack, slack)
+    glyphRule('card bottom above the bottom row', slack >= SOLVER_BEGIN_GAP - 0.01, `${where}: card bottom ${card.bottom.toFixed(1)} is ${slack.toFixed(2)}px above the bottom row (${frame.rowTop.toFixed(1)}: Begin, skill kit or Continue), needs ${SOLVER_BEGIN_GAP}`)
+  }
+  if (frame.strip) {
+    stats.stripFrames += 1
+    stats.stripMinSlack = Math.min(stats.stripMinSlack, frame.rowTop == null ? -Infinity : frame.rowTop - card.bottom)
+    assert.ok(frame.rowTop != null, `${where}: the mid-wave strip has a bottom row to sit above`)
+    assert.equal(frame.header, null, `${where}: the mid-wave strip shows a header copy`)
+  }
+  stats.bodyFrames += 1
+  stats.bodyMinH = Math.min(stats.bodyMinH, frame.body?.h ?? 0)
+  glyphRule('empty card body', Boolean(frame.body && frame.body.count > 0 && frame.body.h > 0), `${where}: the card paints an empty body (content ${JSON.stringify(frame.body)}, card ${JSON.stringify(card)})`)
 }
 
 /**
@@ -2228,6 +2403,10 @@ function glyphStatsLine(label, what, stats, gold) {
     `reserve ${stats.reserveFrames} frames min card-bottom-to-reserve ${stats.reserveMinSlack === Infinity ? 'n/a' : `${stats.reserveMinSlack.toFixed(2)}px`} (>=0) ` +
     `Begin ${stats.beginFrames} frames overlap max ${stats.beginMaxOverlap}px2 min card-bottom-to-Begin ${stats.beginMinSlack === Infinity ? 'n/a' : `${stats.beginMinSlack.toFixed(2)}px`} (>=8) centre tap miss ${stats.beginHitBad} ` +
     `rail buttons ${stats.railFrames} frames overlap max ${stats.railMaxOverlap}px2 clear-row buttons ${stats.clearFrames} frames overlap max ${stats.clearMaxOverlap}px2 ` +
+    `neighbours ${stats.nbFrames} frames card overlap max ${stats.nbMaxOverlap}px2 (header-copy frames max ${stats.nbHeaderOverlap}px2) ` +
+    `mark under a name ${stats.underFrames} frames, painted above the names on ${stats.aboveFrames} of ${stats.nbOverFrames} frames where a name sits on it ` +
+    `New lamp buttons ${stats.newLampFrames} frames overlap max ${stats.newLampMaxOverlap}px2 skill kit ${stats.kitFrames} frames overlap max ${stats.kitMaxOverlap}px2 own name overlap max ${stats.ownMaxOverlap}px2 (header-copy frames max ${stats.ownHeaderOverlap}px2) ` +
+    `bottom row ${stats.rowFrames} frames min card-bottom-to-row ${stats.rowMinSlack === Infinity ? 'n/a' : `${stats.rowMinSlack.toFixed(2)}px`} (>=8) empty-body frames 0 of ${stats.bodyFrames} min content ${stats.bodyMinH === Infinity ? 'n/a' : `${stats.bodyMinH.toFixed(0)}px`} ` +
     `glyph outside board max ${stats.maxEdge.toFixed(1)}px hearts overlap max ${stats.maxHearts}px2 ` +
     `bright buys ${stats.brightBuys} bright gold===${stats.brightGold}` +
     (gold ? ` selected-lamp gold===${gold.selected} planted gold===${gold.planted} open-card gold===${gold.open}` : '')
@@ -2244,8 +2423,6 @@ const SEAT_SWEEP_SIZES = ['375x667', '390x844', '412x915', '320x568', '300x540']
 /** The live state: camera on (the default on a phone), banked sparks from the jump, lamps already planted around the seat. */
 const GLYPH_LIVE_SEARCH = `${GLYPH_SEARCH}&nwCam=1`
 const GLYPH_NEIGHBOR_TYPES = ['logic', 'reason', 'science', 'candle']
-/** Plates where every seat and every stage has a clear spot (measured by the solver), so the header copy must never show. */
-const ROOMY_SIZES = ['390x844', '412x915']
 /** The seat the 1.4.569 live prove caught: 375x667, board units. Its tall stages have no spot clear of the glyph, Begin and the rail. */
 const FAILING_SEAT = { size: '375x667', cx: 464, cy: 768 }
 
@@ -2374,6 +2551,7 @@ async function checkGlyphSeatSweep(browser, port, errors, width, height) {
   const seen = []
   let neighbors = 0
   for (const ring of rings) {
+    if (process.env.NW_GLYPH_SEAT && process.env.NW_GLYPH_SEAT !== `${ring.cx},${ring.cy}`) continue
     const where = `${label} seat ${ring.cx},${ring.cy}`
     const { context, page } = await openMap(browser, port, width, height, 'a2', { motion: true, search: GLYPH_LIVE_SEARCH })
     page.on('pageerror', (error) => errors.push(`glyph seat ${where} ${error}`))
@@ -2400,10 +2578,9 @@ async function checkGlyphSeatSweep(browser, port, errors, width, height) {
     mergeGlyphStats(total, driver.stats)
     const headerHere = driver.stats.headerFrames + driver.stats.headerSettled
     seen.push(`${ring.cx},${ring.cy}${headerHere > 0 ? ' header' : ''}`)
-    if (ROOMY_SIZES.includes(label)) {
-      assert.equal(headerHere, 0, `${where} shows the header copy on ${headerHere} frames; every stage has a clear spot on this plate`)
-      assert.equal(driver.stats.noSpot.size, 0, `${where} has stages with no clear spot ${[...driver.stats.noSpot]}`)
-    }
+    // 1.4.572: with four neighbour lamps around the seat (they are soft obstacles) a plate may have no spot that clears
+    // the mark, the taps and every neighbour. Then the header copy is allowed, and only then: glyphCardRules makes the
+    // solver find 0 spots on every header frame. The counts are reported per size, not capped.
     if (label === FAILING_SEAT.size && ring.cx === FAILING_SEAT.cx && ring.cy === FAILING_SEAT.cy) {
       assert.ok(driver.stats.noSpot.size > 0 && driver.stats.headerSettled > 0, `${where} is the seat the 1.4.569 prove caught: its tall stages have no clear spot and show the header copy (${driver.stats.noSpot.size} stages, ${driver.stats.headerSettled} settled header views)`)
     }
@@ -2464,6 +2641,8 @@ async function checkGlyphClearRow(browser, port, errors, width, height) {
   await page.locator('.defend-go').click()
   await page.waitForSelector('.easy-walker, [data-walker-id]', { state: 'attached', timeout: 20_000 })
   const wave = await sample('mid-wave', 700)
+  glyphRule('mid-wave buy strip placed above the bottom row', stats.stripFrames > 0, `${where} mid-wave the card is the placed buy strip (${stats.stripFrames} strip frames)`)
+  const strip = { frames: stats.stripFrames, slack: stats.stripMinSlack }
   const railDuringWave = stats.railFrames
   assert.ok(railDuringWave > 0 && stats.clearFrames === 0, `${where} mid-wave the rail shows and the clear row does not (${railDuringWave} rail frames, ${stats.clearFrames} clear-row frames)`)
   const started = Date.now()
@@ -2494,9 +2673,71 @@ async function checkGlyphClearRow(browser, port, errors, width, height) {
     `checkLampGlyph ok ${label} clear-row session seat ${ring.cx},${ring.cy} mid-wave card frames ${wave} clear-row card frames ${clear} ` +
       `nwCam=1 reserve ${stats.reserveFrames} frames min card-bottom-to-reserve ${stats.reserveMinSlack === Infinity ? 'n/a' : `${stats.reserveMinSlack.toFixed(2)}px`} (>=0) ` +
       `rail buttons ${stats.railFrames} frames overlap max ${stats.railMaxOverlap}px2 clear-row buttons ${stats.clearFrames} frames overlap max ${stats.clearMaxOverlap}px2 ` +
+      `mid-wave strip ${strip.frames} frames min card-bottom-to-row ${strip.slack.toFixed(2)}px (>=8) New lamp ${stats.newLampFrames} frames overlap max ${stats.newLampMaxOverlap}px2 ` +
+      `neighbours ${stats.nbFrames} frames overlap max ${stats.nbMaxOverlap}px2 bottom row ${stats.rowFrames} frames min slack ${stats.rowMinSlack.toFixed(2)}px empty-body frames 0 of ${stats.bodyFrames} min content ${stats.bodyMinH.toFixed(0)}px ` +
       `Begin frames ${stats.beginFrames} overlap max ${stats.beginMaxOverlap}px2 header copy ${stats.headerFrames} frames ` +
       `clear spots min ${stats.spotsMin === Infinity ? 'n/a' : stats.spotsMin} stages with no clear spot ${stats.noSpot.size} ` +
       `card/glyph overlap max ${stats.maxCard}px2 min gap ${stats.minGap === Infinity ? 'n/a' : `${stats.minGap.toFixed(2)}px`}`,
+  )
+  await context.close()
+}
+
+/**
+ * A lamp bought to its last step, then a wave with its card tapped open. Nothing is left to buy, so no card
+ * frame is painted: every frame either has no card or a card with content. Never an empty purple box.
+ */
+const MAXWAVE_TOOL = process.env.NW_MAXWAVE_TOOL || 'science'
+
+async function checkGlyphMaxWave(browser, port, errors, width, height) {
+  const label = `${width}x${height}`
+  const where = `${label} max lamp wave`
+  const { context, page } = await openMap(browser, port, width, height, 'a2', { motion: true, search: GLYPH_LIVE_SEARCH })
+  page.on('pageerror', (error) => errors.push(`glyph ${where} ${error}`))
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') errors.push(`glyph ${where} ${msg.text()}`)
+  })
+  await glyphSetup(page)
+  await assertGlyphCamera(page, where)
+  const rings = await page.evaluate(() =>
+    [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({ cx: Number(ring.getAttribute('cx')), cy: Number(ring.getAttribute('cy')) })),
+  )
+  assert.ok(rings.length >= 3, `${where} finds ${rings.length} live seats`)
+  const ring = rings.find((entry) => entry.cx === FAILING_SEAT.cx && entry.cy === FAILING_SEAT.cy) ?? rings[rings.length - 1]
+  await glyphPlantAt(page, MAXWAVE_TOOL, ring, where)
+  const driver = glyphDriver(page, where, errors)
+  assert.equal(await driver.ladder(MAXWAVE_TOOL, GLYPH_LADDER), 8, `${where} reached stage 8 by real buys`)
+  await driver.closeCard()
+  await page.locator('.defend-go').click()
+  await page.waitForSelector('.easy-walker, [data-walker-id]', { state: 'attached', timeout: 20_000 })
+  const stats = newGlyphStats()
+  let openFrames = 0
+  let noCard = 0
+  let cardFrames = 0
+  for (let attempt = 0; attempt < 4 && openFrames < 5; attempt += 1) {
+    await page.locator('.defend-clear-lamp').first().click({ force: true })
+    await page.waitForTimeout(350)
+    await page.evaluate((id) => window.__glyphStart(id), MAXWAVE_TOOL)
+    await page.waitForTimeout(900)
+    const frames = await page.evaluate(() => window.__glyphEnd())
+    if (process.env.NW_DEBUG_CARD) console.log('CARD', await page.evaluate(() => document.querySelector('.defend-tower-card')?.outerHTML.slice(0, 3000)))
+    assert.ok(frames.length >= 10, `${where} sampled ${frames.length} frames`)
+    for (const [index, frame] of frames.entries()) {
+      if (!frame.wave || !frame.open) continue
+      openFrames += 1
+      if (!frame.card) {
+        noCard += 1
+        continue
+      }
+      cardFrames += 1
+      glyphCardRules(frame, `${where} frame ${index}`, stats, 'max-wave')
+    }
+  }
+  assert.ok(openFrames >= 5, `${where} the lamp was open for ${openFrames} wave frames`)
+  stats.suppressed = noCard
+  console.log(
+    `checkLampGlyph ok ${label} max-lamp wave seat ${ring.cx},${ring.cy} nwCam=1 lamp open ${openFrames} wave frames, card painted on ${cardFrames}, card not shown on ${noCard} (nothing left to buy) ` +
+      `empty-body frames 0 of ${stats.bodyFrames} min content ${stats.bodyMinH === Infinity ? 'n/a' : `${stats.bodyMinH.toFixed(0)}px`} ` +
+      `bottom row ${stats.rowFrames} frames min card-bottom-to-row ${stats.rowMinSlack === Infinity ? 'n/a' : `${stats.rowMinSlack.toFixed(2)}px`} (>=8) reserve ${stats.reserveFrames} frames`,
   )
   await context.close()
 }
@@ -2548,10 +2789,16 @@ async function checkLampGlyph(browser, port, errors) {
   }
   for (const size of SEAT_SWEEP_SIZES.filter((entry) => !only || only === entry)) {
     const [width, height] = size.split('x').map(Number)
-    if (process.env.NW_GLYPH_CLEARROW_ONLY !== '1') await checkGlyphSeatSweep(browser, port, errors, width, height)
-    await checkGlyphClearRow(browser, port, errors, width, height)
+    if (process.env.NW_GLYPH_CLEARROW_ONLY !== '1' && process.env.NW_GLYPH_MAXWAVE_ONLY !== '1') await checkGlyphSeatSweep(browser, port, errors, width, height)
+    if (process.env.NW_GLYPH_MAXWAVE_ONLY !== '1') await checkGlyphClearRow(browser, port, errors, width, height)
+    await checkGlyphMaxWave(browser, port, errors, width, height)
   }
 
+  if (process.env.NW_GLYPH_COLLECT === '1') {
+    console.log(`checkLampGlyph collected ${glyphMisses.size} broken 1.4.572 rules`)
+    for (const [rule, row] of glyphMisses) console.log(`  BROKEN ${rule}: ${row.count} frames, first: ${row.first.slice(0, 420)}`)
+    return
+  }
   await checkRingArcDraw(browser, port, errors)
 
   const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }

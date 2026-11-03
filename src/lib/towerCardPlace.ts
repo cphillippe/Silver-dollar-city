@@ -9,6 +9,9 @@ export const TOWER_CARD_H = 168
 export const TOWER_TREE_H = 236
 /** Same card when the Lock In cue and its button are open. */
 export const TOWER_TREE_LESSON_H = 320
+/** The mid-wave buy strip: two stacked 44px buttons. */
+export const STRIP_W = 112
+export const STRIP_H = 96
 /** Slim Easy clear bar. The lamp card stays above it when the board has room. */
 export const CLEAR_BAR_RESERVE = 92
 const RAIL = 72
@@ -23,10 +26,6 @@ const LAMP_HIT = { x: 38, up: 64, down: 12 }
 const SPEND_H = 64
 /** Top-right trash control. */
 const PULL = 40
-
-function cardLeft(pointLeft: number, boardW: number): number {
-  return Math.max(MARGIN, Math.min(pointLeft - TOWER_CARD_W / 2, boardW - TOWER_CARD_W - RAIL))
-}
 
 function clampCardTop(
   top: number,
@@ -65,6 +64,7 @@ export function upgradeControlsHitLamp(
   lamp: TowerCardPoint,
   scale: number,
   cardHeight = TOWER_CARD_H,
+  strip = false,
 ): boolean {
   const s = scale > 0 ? scale : 1
   const hit = {
@@ -72,6 +72,9 @@ export function upgradeControlsHitLamp(
     r: lamp.left + LAMP_HIT.x * s,
     t: lamp.top - LAMP_HIT.up * s,
     b: lamp.top + LAMP_HIT.down * s,
+  }
+  if (strip) {
+    return overlaps({ l: card.left, r: card.left + STRIP_W, t: card.top, b: card.top + cardHeight }, hit)
   }
   const spend = {
     l: card.left,
@@ -146,7 +149,16 @@ export interface TowerRect {
 export interface TowerTaps {
   begin: TowerRect | null
   rail: TowerRect | null
+  /** Rail lamp buttons, clear row buttons, the skill kit and the New lamp buttons. All hard. */
   buttons: readonly TowerRect[]
+  /** Top edge of the bottom row (Begin, the skill kit, the clear row). The card bottom stays BEGIN_GAP above it. */
+  row?: number | null
+  /** The open lamp's own name, chip and label. Hard: the card never covers it. */
+  own?: readonly TowerRect[]
+  /** Other planted lamps: art and type mark. Soft: the card slides off them when a spot exists. */
+  lamps?: readonly TowerRect[]
+  /** Other planted lamps' names. Soft. */
+  labels?: readonly TowerRect[]
 }
 
 /** The card bottom stays this far above Begin the watch. */
@@ -168,11 +180,34 @@ function tapBlocks(taps: TowerTaps | null): TowerRect[] {
   }
   if (taps.rail) out.push(grow(taps.rail))
   for (const button of taps.buttons) out.push(grow(button))
+  if (taps.row != null) {
+    out.push({ left: -1e6, right: 1e6, top: taps.row - BEGIN_GAP - TAP_EPS, bottom: 1e6 })
+  }
   return out
 }
 
-function hitsRect(card: { left: number; top: number }, height: number, r: TowerRect): boolean {
-  return card.left < r.right && card.left + TOWER_CARD_W > r.left && card.top < r.bottom && card.top + height > r.top
+/** The open lamp's own name. Not a tap, so a frame with no room anywhere else may still lean on it, after every tap target. */
+function ownBlocks(taps: TowerTaps | null): TowerRect[] {
+  return (taps?.own ?? []).map((r) => ({
+    left: r.left - TAP_EPS,
+    top: r.top - TAP_EPS,
+    right: r.right + TAP_EPS,
+    bottom: r.bottom + TAP_EPS,
+  }))
+}
+
+function softBlocks(taps: TowerTaps | null): TowerRect[] {
+  if (!taps) return []
+  return [...(taps.lamps ?? []), ...(taps.labels ?? [])].map((r) => ({
+    left: r.left - TAP_EPS,
+    top: r.top - TAP_EPS,
+    right: r.right + TAP_EPS,
+    bottom: r.bottom + TAP_EPS,
+  }))
+}
+
+function hitsRect(card: { left: number; top: number }, height: number, r: TowerRect, width = TOWER_CARD_W): boolean {
+  return card.left < r.right && card.left + width > r.left && card.top < r.bottom && card.top + height > r.top
 }
 
 /**
@@ -180,9 +215,11 @@ function hitsRect(card: { left: number; top: number }, height: number, r: TowerR
  * Upgrade and Pull slide off any other planted lamp so that lamp can still be opened.
  * The lamp mark wins over other lamps' art and the plate walls, never over a tap target: the card widens
  * sideways and above, and only past the measured rail when it sits below it. It never runs into Begin
- * the watch, the rail buttons or the clear row. When no spot on the frame clears the mark and every tap
- * target, the card keeps the snug spot that clears the taps and says so (`markClear` false), so it can
- * show its own copy of the mark.
+ * the watch, the rail buttons, the New lamp buttons, the skill kit, the clear row or its own lamp's name.
+ * Other lamps and their names are soft: a spot that clears them wins. When no spot on the frame clears the
+ * mark, every tap target and every other lamp, the card keeps the spot that covers the fewest lamps and says so
+ * (`markClear` false), so it can show its own copy of the mark.
+ * `strip` is the mid-wave buy strip: 112 wide, and all of it takes taps.
  */
 export function placeTowerCard(
   point: TowerCardPoint,
@@ -195,14 +232,28 @@ export function placeTowerCard(
   /** Height the card really paints, when it is taller than `cardHeight`. Only the mark and tap tests read it. */
   paintHeight = cardHeight,
   taps: TowerTaps | null = null,
+  strip = false,
 ): { left: number; top: number; side: 'above' | 'below'; markClear: boolean } {
-  const centered = cardLeft(point.left, board.w)
+  const W = strip ? STRIP_W : TOWER_CARD_W
+  const centered = Math.max(MARGIN, Math.min(point.left - W / 2, board.w - W - RAIL))
   const glyphHits = (card: { left: number; top: number }) =>
     glyph && cardHitsGlyph(card, point, cardHeight, paintHeight, glyph) ? 1 : 0
   const markH = paintHeight > 0 ? paintHeight : cardHeight
   const blocks = tapBlocks(taps)
+  const soft = softBlocks(taps)
+  const own = ownBlocks(taps)
+  const ownHits = (card: { left: number; top: number }) =>
+    own.reduce((n, block) => n + (hitsRect(card, markH, block, W) ? 1 : 0), 0)
+  const softArea = (card: { left: number; top: number }) =>
+    soft.reduce((sum, block) => {
+      const w = Math.min(card.left + W, block.right) - Math.max(card.left, block.left)
+      const h = Math.min(card.top + markH, block.bottom) - Math.max(card.top, block.top)
+      return sum + (w > 0 && h > 0 ? w * h : 0)
+    }, 0)
   const tapHits = (card: { left: number; top: number }) =>
-    blocks.reduce((n, block) => n + (hitsRect(card, markH, block) ? 1 : 0), 0)
+    blocks.reduce((n, block) => n + (hitsRect(card, markH, block, W) ? 1 : 0), 0)
+  const softHits = (card: { left: number; top: number }) =>
+    soft.reduce((n, block) => n + (hitsRect(card, markH, block, W) ? 1 : 0), 0)
   let above = point.top - cardHeight - GAP
   if (glyph && glyphHits({ left: centered, top: above })) above = Math.min(above, glyph.top - GLYPH_CLEAR - STEM_H - markH)
   const below = point.top + GAP
@@ -215,13 +266,14 @@ export function placeTowerCard(
     side: cardSide(top, point.top, cardHeight),
   }
   const lampHits = (card: { left: number; top: number }) =>
-    others.reduce((n, lamp) => n + (upgradeControlsHitLamp(card, lamp, scale, cardHeight) ? 1 : 0), 0)
-  if (lampHits(legacy) + glyphHits(legacy) + tapHits(legacy) === 0) return { ...legacy, markClear: true }
-  const maxLeft = Math.max(MARGIN, board.w - TOWER_CARD_W - RAIL)
-  const maxTop = Math.max(MARGIN, board.h - boundH - MARGIN - reserveBottom)
+    others.reduce((n, lamp) => n + (upgradeControlsHitLamp(card, lamp, scale, cardHeight, strip) ? 1 : 0), 0)
+  if (lampHits(legacy) + glyphHits(legacy) + tapHits(legacy) + ownHits(legacy) + softHits(legacy) === 0) return { ...legacy, markClear: true }
+  const maxLeft = Math.max(MARGIN, board.w - W - RAIL)
+  const rowFloor = taps?.row != null ? taps.row - BEGIN_GAP - TAP_EPS : Infinity
+  const maxTop = Math.max(MARGIN, Math.min(board.h - boundH - MARGIN - reserveBottom, rowFloor - boundH))
   // The wide search leans on the plate edge sideways, and past the fixed rail column only with the measured rail
-  // rect. It never goes down: the card stays out of the bottom reserve (Begin, the clear row).
-  const wideLeft = taps?.rail ? Math.max(maxLeft, board.w - TOWER_CARD_W - EDGE) : maxLeft
+  // rect. It never goes down: the card stays out of the bottom reserve (Begin, the clear row, the skill kit).
+  const wideLeft = taps?.rail ? Math.max(maxLeft, board.w - W - EDGE) : maxLeft
   const wideTop = maxTop
   const search = (markWeight: number, farLeft: number, farTop: number, near = MARGIN) => {
     let best = legacy
@@ -240,7 +292,7 @@ export function placeTowerCard(
     }
     if (glyph) {
       addLeft(glyph.right + GLYPH_CLEAR + 1)
-      addLeft(Math.max(near, glyph.left - GLYPH_CLEAR - 1 - TOWER_CARD_W))
+      addLeft(Math.max(near, glyph.left - GLYPH_CLEAR - 1 - W))
       for (const top of [
         glyph.bottom + GLYPH_CLEAR + STEM_H + 1,
         glyph.bottom + GLYPH_CLEAR + 1,
@@ -251,9 +303,9 @@ export function placeTowerCard(
         addTop(Math.max(near, top))
       }
     }
-    for (const block of blocks) {
+    for (const block of [...blocks, ...own, ...soft]) {
       addLeft(block.right)
-      addLeft(block.left - TOWER_CARD_W)
+      addLeft(block.left - W)
       addTop(block.bottom)
       addTop(block.top - markH)
     }
@@ -262,9 +314,16 @@ export function placeTowerCard(
         const card = { left, top }
         const railIn = Math.max(0, left - maxLeft)
         const barIn = Math.max(0, top - maxTop)
-        const dist = Math.hypot(left + TOWER_CARD_W / 2 - point.left, top + cardHeight / 2 - point.top)
+        const dist = Math.hypot(left + W / 2 - point.left, top + cardHeight / 2 - point.top)
         const key =
-          markWeight * glyphHits(card) * 1e7 + tapHits(card) * 1e6 + lampHits(card) * 2000 + (railIn + barIn) * 50 + dist
+          markWeight * glyphHits(card) * 1e7 +
+          tapHits(card) * 1e6 +
+          ownHits(card) * 5e5 +
+          softHits(card) * 1e5 +
+          softArea(card) * 0.5 +
+          lampHits(card) * 2000 +
+          (railIn + barIn) * 50 +
+          dist
         if (key < bestKey) {
           bestKey = key
           best = { left, top, side: cardSide(top, point.top, cardHeight) }
@@ -274,11 +333,10 @@ export function placeTowerCard(
     return best
   }
   const snug = search(1, maxLeft, maxTop)
-  if (glyphHits(snug) + tapHits(snug) === 0) return { ...snug, markClear: true }
+  if (glyphHits(snug) + tapHits(snug) + ownHits(snug) + softHits(snug) === 0) return { ...snug, markClear: true }
   const wide = search(1, wideLeft, wideTop, EDGE)
-  if (glyphHits(wide) + tapHits(wide) === 0) return { ...wide, markClear: true }
-  // No spot clears the mark: keep the snug spot. Only the measured rail lets it lean past the fixed rail column,
-  // and only to get off a tap target.
-  const railFree = taps?.rail ? Math.min(wideLeft, taps.rail.left - TOWER_CARD_W - TAP_EPS) : maxLeft
-  return { ...search(0, Math.max(maxLeft, railFree), maxTop), markClear: false }
+  if (glyphHits(wide) + tapHits(wide) + ownHits(wide) + softHits(wide) === 0) return { ...wide, markClear: true }
+  // No spot clears the mark, the taps and the lamps around it: the header copy carries the mark and the card
+  // keeps the spot that covers the fewest of them. Taps first, then neighbour lamps.
+  return { ...search(0, wideLeft, wideTop, EDGE), markClear: false }
 }
