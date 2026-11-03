@@ -95,11 +95,12 @@ const debtClaim = easyFacingLine('ph-debt', easyBrief('ph-debt').claim)
 assert.ok(debtClaim.length > 10, 'ph-debt Easy claim is live (D2)')
 
 // Version, changelog.
-assert.equal(APP_VERSION, '1.4.567')
+assert.equal(APP_VERSION, '1.4.568')
 assert.equal(JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version, APP_VERSION)
-assert.equal(CHANGELOG[0].version, APP_VERSION, 'the new changelog row is on top')
-assert.equal(CHANGELOG[0].title, 'Easy Lock In: remember first, then why')
-assert.deepEqual(CHANGELOG[0].items, [
+const lockInRow = CHANGELOG.find((note) => note.version === '1.4.567')
+assert.ok(lockInRow, 'the 1.4.567 Lock In row is shipped')
+assert.equal(lockInRow.title, 'Easy Lock In: remember first, then why')
+assert.deepEqual(lockInRow.items, [
   'Lock In now asks for the main idea before it shows it.',
   'A wrong card now costs a try, and you see why before the next pick.',
   'The wrong cards are true story details now.',
