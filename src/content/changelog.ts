@@ -32,7 +32,7 @@ export const CHANGELOG: ChangeNote[] = [
     title: 'Night Watch: the upgrade card never covers the lamp mark (1.4.570)',
     when: '2026-11-03',
     items: [
-      'The upgrade card now moves aside so the lamp mark stays in view, and it never covers Begin the watch, the side bar lamps or the clear buttons.',
+      'The upgrade card now moves aside so the lamp mark stays in view, and it stays above the bottom bar: it never covers Begin the watch, the side bar lamps or the clear buttons.',
       'On a tight screen with no clear spot, the card shows its own copy of the mark.',
       'The little gold pointer on the card keeps clear of the lamp mark too.',
       'The pointer hides when the card sits beside the lamp.',

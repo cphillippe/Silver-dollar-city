@@ -901,7 +901,7 @@ export function DefendTowerCard({
         className={`defend-tower-card is-tree is-${placed.side}${markOnMap && !stemShows(placed.left, point.left) ? ' is-stemless' : ''}`}
         data-upgrade-card
         data-upgrade-tree="yes"
-        data-place={`${point.left.toFixed(1)},${point.top.toFixed(1)},${cardH}`}
+        data-place={`${point.left.toFixed(1)},${point.top.toFixed(1)},${cardH},${reserveBottom}`}
         data-mid-wave={midWave ? 'yes' : undefined}
         data-upgrade-plot={plotId}
         role="dialog"

@@ -2037,6 +2037,7 @@ assert.doesNotMatch(
   ]
   const hitsBlock = (card, height, box) =>
     card.left < box.right && card.left + TOWER_CARD_W > box.left && card.top < box.bottom && card.top + height > box.top
+  const MARGIN_FLOOR = 8
   let checked = 0
   let crowded = 0
   let crowdedKeptOff = 0
@@ -2063,6 +2064,7 @@ assert.doesNotMatch(
           const point = { left: x, top: y }
           const placed = placeTowerCard(point, { w, h }, [], scale, reserve, TOWER_TREE_H, mark, paint, taps)
           const where = `lamp ${x},${y} on ${w}x${h}/${reserve} paint ${paint}`
+          assert.ok(placed.top + paint <= h - reserve + 0.01, `1.4.570 the card at ${where} stays out of the bottom reserve (bottom ${placed.top + paint} > ${h - reserve})`)
           if (placed.markClear) {
             checked += 1
             assert.equal(cardHitsGlyph(placed, point, TOWER_TREE_H, paint, mark, 4), false, `1.4.570 the card at ${where} says it clears the mark but is within 4px of it`)
@@ -2071,7 +2073,7 @@ assert.doesNotMatch(
             crowded += 1
             let spot = false
             for (let left = 2; left <= w - TOWER_CARD_W - 2 && !spot; left += 2) {
-              for (let top = 2; top <= h - paint - 2 && !spot; top += 2) {
+              for (let top = 2; top <= h - paint - MARGIN_FLOOR - reserve && !spot; top += 2) {
                 const at = { left, top }
                 spot = !cardHitsGlyph(at, point, TOWER_TREE_H, paint, mark, GLYPH_CLEAR) && !blocks.some((block) => hitsBlock(at, paint, block))
               }
@@ -2098,10 +2100,17 @@ assert.doesNotMatch(
     for (const block of tapBlocksFor(taps)) assert.equal(hitsBlock(live, 309, block), false, `1.4.570 the live seat card keeps off ${JSON.stringify(block)}`)
     const bare = placeTowerCard(point, { w: 375, h: 574 }, [], 0.7086, CLEAR_BAR_RESERVE, TOWER_TREE_H, mark, 309)
     assert.ok(bare.top + 309 <= 574 - CLEAR_BAR_RESERVE && bare.left + TOWER_CARD_W <= 375 - 72, '1.4.570 with no measured boxes the card never widens into the bottom reserve or the rail column')
-    const short = placeTowerCard(point, { w: 375, h: 574 }, [], 0.7086, CLEAR_BAR_RESERVE, TOWER_TREE_H, mark, 260, taps)
+    assert.ok(live.top + 309 <= 574 - CLEAR_BAR_RESERVE, '1.4.570 the live seat card stays out of the bottom reserve')
+    // Below the rail and above the reserve there is room for 574 - 92 - 8 - 222 = 252px, and no more: the widening
+    // never reaches down into the reserve strip.
+    const tall = placeTowerCard(point, { w: 375, h: 574 }, [], 0.7086, CLEAR_BAR_RESERVE, TOWER_TREE_H, mark, 260, taps)
+    assert.equal(tall.markClear, false, '1.4.570 a 260px card does not fit below the rail without entering the bottom reserve, so the header copy carries the mark')
+    assert.ok(tall.top + 260 <= 574 - CLEAR_BAR_RESERVE, '1.4.570 the 260px card stays out of the bottom reserve')
+    const short = placeTowerCard(point, { w: 375, h: 574 }, [], 0.7086, CLEAR_BAR_RESERVE, TOWER_TREE_H, mark, 244, taps)
     assert.equal(short.markClear, true, '1.4.570 the shorter card at the live seat finds a slot that clears the mark, Begin and the rail')
-    assert.equal(cardHitsGlyph(short, point, TOWER_TREE_H, 260, mark, 4), false, '1.4.570 the shorter card and pointer stay 4px off the mark')
-    for (const block of tapBlocksFor(taps)) assert.equal(hitsBlock(short, 260, block), false, `1.4.570 the shorter card keeps off ${JSON.stringify(block)}`)
+    assert.ok(short.top + 244 <= 574 - CLEAR_BAR_RESERVE, '1.4.570 the shorter card stays out of the bottom reserve')
+    assert.equal(cardHitsGlyph(short, point, TOWER_TREE_H, 244, mark, 4), false, '1.4.570 the shorter card and pointer stay 4px off the mark')
+    for (const block of tapBlocksFor(taps)) assert.equal(hitsBlock(short, 244, block), false, `1.4.570 the shorter card keeps off ${JSON.stringify(block)}`)
   }
   const card = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
   assert.match(card, /markOnMap && !placed\.markClear && paths/, '1.4.569 the card shows the header copy exactly when no slot clears the mark')

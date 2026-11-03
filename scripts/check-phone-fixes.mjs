@@ -1744,8 +1744,8 @@ async function glyphSetup(page) {
         place: (() => {
           const raw = document.querySelector('.defend-tower-card')?.getAttribute('data-place')
           if (!raw) return null
-          const [x, y, h] = raw.split(',').map(Number)
-          return { x, y, h }
+          const [x, y, h, reserve] = raw.split(',').map(Number)
+          return { x, y, h, reserve: reserve || 0 }
         })(),
         cont: many('.defend-continue'),
         others: [...document.querySelectorAll('.defend-pad .lamp-upgrade-glyph[data-glyph-variant="map"]')]
@@ -1898,12 +1898,13 @@ async function checkRingArcDraw(browser, port, errors) {
  */
 async function checkGlyphOneGold(browser, port, errors, width, height) {
   const label = `${width}x${height}`
-  const { context, page } = await openMap(browser, port, width, height, 'a2', { motion: true })
+  const { context, page } = await openMap(browser, port, width, height, 'a2', { motion: true, search: '?playtest=1&nwSeed=2&nwCam=1' })
   page.on('pageerror', (error) => errors.push(`glyph gold ${label} ${error}`))
+  await assertGlyphCamera(page, `${label} one gold`)
   const selected = () =>
     page.evaluate(() => [...document.querySelectorAll('.nw-rail .defend-ability.is-on')].map((node) => (node.textContent || '').trim()))
   const plant = async (tool) => {
-    const seat = await firstLiveSeat(page)
+    const seat = await glyphNextSeat(page, `${label} one gold`)
     await page.mouse.click(seat.x, seat.y)
     await page.locator(`.defend-pad[data-tower-type="${tool}"] .lamp-upgrade-glyph[data-glyph-variant="map"]`).waitFor()
     await page.waitForTimeout(150)
@@ -1922,6 +1923,7 @@ async function checkGlyphOneGold(browser, port, errors, width, height) {
   const selectedGold = await readGold(page)
   assert.equal(selectedGold.gold.length, 1, `${label} selected lamp has exactly one gold cue ${JSON.stringify(selectedGold.gold)}`)
   await plant('logic')
+  await glyphPanToPad(page, 'logic')
   await page.locator('.defend-pad[data-tower-type="logic"]').click({ force: true })
   await page.locator('.defend-tower-card').waitFor()
   const openGold = await readGold(page, 'logic')
@@ -1936,6 +1938,7 @@ const CARD_W = 176
 const SOLVER_GLYPH_ZONE = 6
 const SOLVER_BEGIN_GAP = 8
 const SOLVER_EDGE = 2
+const SOLVER_FLOOR_MARGIN = 8
 const glyphSpotCache = new Map()
 
 /**
@@ -1963,7 +1966,8 @@ function glyphClearSpots(frame) {
   const minLeft = Math.ceil(plate.left + SOLVER_EDGE)
   const maxLeft = Math.floor(plate.right - CARD_W - SOLVER_EDGE)
   const minTop = Math.ceil(plate.top + SOLVER_EDGE)
-  const maxTop = Math.floor(plate.bottom - H - SOLVER_EDGE)
+  // The card never enters the bottom reserve: its bottom stays the reserve and the 8px margin above the plate floor.
+  const maxTop = Math.floor(plate.bottom - place.reserve - SOLVER_FLOOR_MARGIN - H)
   for (let top = minTop; top <= maxTop; top += 1) {
     for (let left = minLeft; left <= maxLeft; left += 1) {
       const right = left + CARD_W
@@ -1986,15 +1990,15 @@ function newGlyphStats() {
   return {
     minTip: Infinity, buys: 0, frames: 0, minSpan: Infinity, maxSpan: 0, maxFirst: 0, maxCard: 0, maxHearts: 0, maxEdge: 0, bothSeen: 0,
     minGap: Infinity, headerFrames: 0, headerSettled: 0, brightGold: 0, brightBuys: 0,
-    solved: 0, spotsMin: Infinity, noSpot: new Set(),
+    solved: 0, spotsMin: Infinity, noSpot: new Set(), reserveFrames: 0, reserveMinSlack: Infinity,
     beginFrames: 0, beginMaxOverlap: 0, beginMinSlack: Infinity, beginHitBad: 0, railFrames: 0, railMaxOverlap: 0, clearFrames: 0, clearMaxOverlap: 0,
   }
 }
 
 function mergeGlyphStats(total, part) {
-  for (const key of ['buys', 'frames', 'bothSeen', 'headerFrames', 'headerSettled', 'brightGold', 'brightBuys', 'solved', 'beginFrames', 'beginHitBad', 'railFrames', 'clearFrames']) total[key] += part[key]
+  for (const key of ['buys', 'frames', 'bothSeen', 'headerFrames', 'headerSettled', 'brightGold', 'brightBuys', 'solved', 'reserveFrames', 'beginFrames', 'beginHitBad', 'railFrames', 'clearFrames']) total[key] += part[key]
   for (const key of ['maxFirst', 'maxCard', 'maxHearts', 'maxEdge', 'maxSpan', 'beginMaxOverlap', 'railMaxOverlap', 'clearMaxOverlap']) total[key] = Math.max(total[key], part[key])
-  for (const key of ['minSpan', 'minGap', 'minTip', 'spotsMin', 'beginMinSlack']) total[key] = Math.min(total[key], part[key])
+  for (const key of ['minSpan', 'minGap', 'minTip', 'spotsMin', 'beginMinSlack', 'reserveMinSlack']) total[key] = Math.min(total[key], part[key])
   for (const entry of part.noSpot) total.noSpot.add(entry)
 }
 
@@ -2007,6 +2011,13 @@ function mergeGlyphStats(total, part) {
 function glyphCardRules(frame, where, stats, stageKey, { settled = false } = {}) {
   const card = frame.card
   if (!card) return
+  // The card stays out of the bottom reserve: its bottom is at or above the plate floor minus the reserve.
+  if (frame.plate && frame.place) {
+    const slack = frame.plate.bottom - frame.place.reserve - card.bottom
+    stats.reserveFrames += 1
+    stats.reserveMinSlack = Math.min(stats.reserveMinSlack, slack)
+    assert.ok(slack >= -0.01, `${where}: card bottom ${card.bottom.toFixed(1)} is ${(-slack).toFixed(2)}px inside the bottom reserve (plate floor ${frame.plate.bottom.toFixed(1)} minus reserve ${frame.place.reserve})`)
+  }
   // A wave hides the map mark, so a frame without one has only the tap rules to pass.
   if (frame.glyph) {
     const spots = glyphClearSpots(frame)
@@ -2075,6 +2086,7 @@ function glyphDriver(page, label, errors) {
   }
   const openCard = async (tool) => {
     await closeCard()
+    await glyphPanToPad(page, tool)
     await page.locator(`.defend-pad[data-tower-type="${tool}"]`).click({ force: true })
     await page.locator('.defend-tower-card').waitFor()
     await page.waitForTimeout(450)
@@ -2213,12 +2225,19 @@ function glyphStatsLine(label, what, stats, gold) {
     `card/glyph overlap max ${stats.maxCard}px2 min gap ${stats.minGap === Infinity ? 'n/a' : `${stats.minGap.toFixed(2)}px`} pointer tip min gap ${stats.minTip === Infinity ? 'n/a' : `${stats.minTip.toFixed(2)}px`} ` +
     `(card+glyph both present ${stats.bothSeen}x) header copy ${stats.headerFrames} frames ${stats.headerSettled} settled ` +
     `solver ${stats.solved} card frames, clear spots min ${spots}, ${noSpot.length} stages with no clear spot${noSpot.length ? ` [${noSpot.join(' ')}]` : ''} ` +
+    `reserve ${stats.reserveFrames} frames min card-bottom-to-reserve ${stats.reserveMinSlack === Infinity ? 'n/a' : `${stats.reserveMinSlack.toFixed(2)}px`} (>=0) ` +
     `Begin ${stats.beginFrames} frames overlap max ${stats.beginMaxOverlap}px2 min card-bottom-to-Begin ${stats.beginMinSlack === Infinity ? 'n/a' : `${stats.beginMinSlack.toFixed(2)}px`} (>=8) centre tap miss ${stats.beginHitBad} ` +
     `rail buttons ${stats.railFrames} frames overlap max ${stats.railMaxOverlap}px2 clear-row buttons ${stats.clearFrames} frames overlap max ${stats.clearMaxOverlap}px2 ` +
     `glyph outside board max ${stats.maxEdge.toFixed(1)}px hearts overlap max ${stats.maxHearts}px2 ` +
     `bright buys ${stats.brightBuys} bright gold===${stats.brightGold}` +
     (gold ? ` selected-lamp gold===${gold.selected} planted gold===${gold.planted} open-card gold===${gold.open}` : '')
   )
+}
+
+/** Every glyph and card session runs with the camera on, as it is for a player. A camera-off pass proves nothing here. */
+async function assertGlyphCamera(page, where) {
+  const camera = await page.evaluate(() => /[?&]nwCam=1\b/.test(location.search) && (Boolean(document.querySelector('.nw-zoom')) || document.querySelector('.defend-board')?.getBoundingClientRect().left < 0))
+  assert.ok(camera, `${where} the camera is on (nwCam=1), as it is for a player`)
 }
 
 const SEAT_SWEEP_SIZES = ['375x667', '390x844', '412x915', '320x568', '300x540']
@@ -2273,6 +2292,43 @@ async function glyphReachSeat(page, ring, label) {
   return point
 }
 
+/** The next free seat, panned into reach with real drags. Camera on, so a seat may start off screen. */
+async function glyphNextSeat(page, label) {
+  const ring = await page.evaluate(() => {
+    const node = document.querySelector('.defend-plant-ground circle.is-live')
+    return node ? { cx: Number(node.getAttribute('cx')), cy: Number(node.getAttribute('cy')) } : null
+  })
+  assert.ok(ring, `${label} a live seat is left to plant`)
+  return glyphReachSeat(page, ring, label)
+}
+
+/** Drag the map until a planted lamp sits well inside the frame, so a real tap on it lands. */
+async function glyphPanToPad(page, tool) {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const at = await page.evaluate((id) => {
+      const pad = document.querySelector(`.defend-pad[data-tower-type="${id}"]`)
+      const frame = document.querySelector('.defend-frame')?.getBoundingClientRect()
+      if (!pad || !frame) return null
+      const box = pad.getBoundingClientRect()
+      const x = box.left + box.width / 2
+      const y = box.top + box.height / 2
+      const inside = x > frame.left + 50 && x < frame.right - 90 && y > frame.top + 60 && y < frame.bottom - 120
+      return { x, y, inside, w: innerWidth, h: innerHeight }
+    }, tool)
+    if (!at || at.inside) return
+    const cx = at.w / 2
+    const cy = at.h / 2
+    const dx = Math.max(-150, Math.min(150, cx - at.x))
+    const dy = Math.max(-250, Math.min(250, cy - at.y))
+    await page.mouse.move(cx, cy)
+    await page.mouse.down()
+    await page.mouse.move(cx + dx / 2, cy + dy / 2, { steps: 5 })
+    await page.mouse.move(cx + dx, cy + dy, { steps: 5 })
+    await page.mouse.up()
+    await page.waitForTimeout(1300)
+  }
+}
+
 async function glyphPlantAt(page, tool, ring, label) {
   if (await page.locator('.defend-tower-card').count()) {
     await page.keyboard.press('Escape')
@@ -2325,8 +2381,7 @@ async function checkGlyphSeatSweep(browser, port, errors, width, height) {
       if (msg.type() === 'error') errors.push(`glyph seat ${where} ${msg.text()}`)
     })
     await glyphSetup(page)
-    const camera = await page.evaluate(() => Boolean(document.querySelector('.nw-zoom')) || document.querySelector('.defend-board')?.getBoundingClientRect().left < 0)
-    assert.ok(camera, `${where} the camera is on, as it is for a player`)
+    await assertGlyphCamera(page, where)
     const sparks = await page.evaluate(() => Number((document.body.innerText.match(/(\d+)\s*\n?\s*Sparks/) || [])[1] || 0))
     assert.ok(sparks >= 95, `${where} starts with banked sparks (${sparks})`)
     const others = rings.filter((other) => other !== ring)
@@ -2376,6 +2431,7 @@ async function checkGlyphClearRow(browser, port, errors, width, height) {
     if (msg.type() === 'error') errors.push(`glyph ${where} ${msg.text()}`)
   })
   await glyphSetup(page)
+  await assertGlyphCamera(page, where)
   const rings = await page.evaluate(() =>
     [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({ cx: Number(ring.getAttribute('cx')), cy: Number(ring.getAttribute('cy')) })),
   )
@@ -2436,6 +2492,7 @@ async function checkGlyphClearRow(browser, port, errors, width, height) {
   assert.equal(stats.beginHitBad, 0, `${where} Begin centre tap`)
   console.log(
     `checkLampGlyph ok ${label} clear-row session seat ${ring.cx},${ring.cy} mid-wave card frames ${wave} clear-row card frames ${clear} ` +
+      `nwCam=1 reserve ${stats.reserveFrames} frames min card-bottom-to-reserve ${stats.reserveMinSlack === Infinity ? 'n/a' : `${stats.reserveMinSlack.toFixed(2)}px`} (>=0) ` +
       `rail buttons ${stats.railFrames} frames overlap max ${stats.railMaxOverlap}px2 clear-row buttons ${stats.clearFrames} frames overlap max ${stats.clearMaxOverlap}px2 ` +
       `Begin frames ${stats.beginFrames} overlap max ${stats.beginMaxOverlap}px2 header copy ${stats.headerFrames} frames ` +
       `clear spots min ${stats.spotsMin === Infinity ? 'n/a' : stats.spotsMin} stages with no clear spot ${stats.noSpot.size} ` +
@@ -2451,13 +2508,14 @@ async function checkLampGlyph(browser, port, errors) {
     const gold = await checkGlyphOneGold(browser, port, errors, width, height)
     const { context, page } = await openMap(browser, port, width, height, 'a2', {
       motion: true,
-      search: GLYPH_SEARCH,
+      search: GLYPH_LIVE_SEARCH,
     })
     page.on('pageerror', (error) => errors.push(`glyph ${label} ${error}`))
     page.on('console', (msg) => {
       if (msg.type() === 'error') errors.push(`glyph ${label} ${msg.text()}`)
     })
     await glyphSetup(page)
+    await assertGlyphCamera(page, `${label} shared night`)
     const { stats, selected, ladder } = glyphDriver(page, label, errors)
 
     // Plant one lamp of each type. Every pick is a real tap on the rail, then a real tap on a seat.
@@ -2469,10 +2527,14 @@ async function checkLampGlyph(browser, port, errors) {
       }
       assert.equal(now.length, 1, `${label} ${tool} exactly one lamp is selected ${JSON.stringify(now)}`)
       assert.ok(now[0].startsWith(GLYPH_NAME[tool]), `${label} ${tool} is the selected lamp ${JSON.stringify(now)}`)
-      const seat = await firstLiveSeat(page)
+      const seat = await glyphNextSeat(page, `${label} shared night`)
       await page.mouse.click(seat.x, seat.y)
       await page.locator(`.defend-pad[data-tower-type="${tool}"] .lamp-upgrade-glyph[data-glyph-variant="map"]`).waitFor()
-      await page.waitForTimeout(150)
+      await page.waitForTimeout(250)
+      if (await page.locator('.defend-tower-card').count()) {
+        await page.keyboard.press('Escape')
+        await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+      }
     }
 
     assert.equal(await ladder(GLYPH_TOOLS[0], GLYPH_LADDER), 8, `${label} top lamp reached stage 8 by real buys`)

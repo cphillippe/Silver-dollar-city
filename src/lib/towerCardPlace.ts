@@ -207,7 +207,8 @@ export function placeTowerCard(
   if (glyph && glyphHits({ left: centered, top: above })) above = Math.min(above, glyph.top - GLYPH_CLEAR - STEM_H - markH)
   const below = point.top + GAP
   const legacyTop = above < MARGIN ? below : above
-  const top = clampCardTop(legacyTop, board.h, cardHeight, reserveBottom)
+  const boundH = glyph || taps ? markH : cardHeight
+  const top = clampCardTop(legacyTop, board.h, boundH, reserveBottom)
   const legacy = {
     left: centered,
     top,
@@ -217,12 +218,11 @@ export function placeTowerCard(
     others.reduce((n, lamp) => n + (upgradeControlsHitLamp(card, lamp, scale, cardHeight) ? 1 : 0), 0)
   if (lampHits(legacy) + glyphHits(legacy) + tapHits(legacy) === 0) return { ...legacy, markClear: true }
   const maxLeft = Math.max(MARGIN, board.w - TOWER_CARD_W - RAIL)
-  const boundH = glyph || taps ? markH : cardHeight
   const maxTop = Math.max(MARGIN, board.h - boundH - MARGIN - reserveBottom)
-  // The wide search leans on the plate edge. Past the fixed rail column it needs the measured rail rect;
-  // past the bottom reserve it needs the measured Begin and clear row. Without them it stays snug.
+  // The wide search leans on the plate edge sideways, and past the fixed rail column only with the measured rail
+  // rect. It never goes down: the card stays out of the bottom reserve (Begin, the clear row).
   const wideLeft = taps?.rail ? Math.max(maxLeft, board.w - TOWER_CARD_W - EDGE) : maxLeft
-  const wideTop = taps ? Math.max(maxTop, board.h - markH - EDGE) : maxTop
+  const wideTop = maxTop
   const search = (markWeight: number, farLeft: number, farTop: number, near = MARGIN) => {
     let best = legacy
     let bestKey = Infinity
