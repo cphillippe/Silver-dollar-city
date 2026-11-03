@@ -9,6 +9,8 @@ import {
   HOLD_LOCKED_STAMP,
   HOLD_MISS_FACE,
   HOLD_MISS_PENALTY,
+  LOCKIN_DECOYS,
+  lockInWhyBoard,
   WHY_CHIP_COUNT,
   whyBlastChoices,
   whyBlastExtras,
@@ -92,7 +94,11 @@ assert.match(blastSrc, /miss-plus/)
 assert.match(blastSrc, /HOLD_LOCKED_STAMP/)
 assert.match(blastSrc, /applyHoldMiss/)
 assert.match(blastSrc, /why-chip/)
-assert.match(blastSrc, /is-toss/)
+// 1.4.567 (#843): a miss is one synchronous handler. No toss timer, no flying card.
+assert.doesNotMatch(blastSrc, /is-toss|tossing/)
+assert.match(blastSrc, /busyRef/)
+assert.match(blastSrc, /missesRef\.current \+= 1/)
+assert.match(blastSrc, /lockInWhyBoard\(id, reason\)/)
 assert.match(blastSrc, /MatchTakeaway/)
 assert.match(blastSrc, /holdSuccessBeat/)
 assert.match(blastSrc, /EASY\.sayFrom/)
@@ -196,5 +202,16 @@ for (const id of EASY_LINE_ORDER) {
     assert.ok(cardNorm.includes(word) || chromeNorm.includes(word), `${id} hint word ${word}`)
   }
 }
+
+// 1.4.567 (#843): the Easy board is the right card plus the three map lines, in any order.
+for (const id of Object.keys(LOCKIN_DECOYS)) {
+  const easy = evidenceForTier(id, 'easy')
+  assert.ok(easy, id)
+  for (let run = 0; run < 12; run += 1) {
+    assert.deepEqual([...lockInWhyBoard(id, easy.reason)].sort(), [easy.reason, ...LOCKIN_DECOYS[id]].sort(), `${id} board`)
+  }
+  assert.equal(lockInWhyBoard(id, `${easy.reason} (other tier)`), null, `${id} other reasons keep their own board`)
+}
+assert.equal(lockInWhyBoard('not-a-line', 'x'), null)
 
 console.log('check-why-blast: ok')

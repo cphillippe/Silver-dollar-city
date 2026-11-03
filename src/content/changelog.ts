@@ -28,6 +28,19 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.567',
+    title: 'Easy Lock In: remember first, then why',
+    when: '2026-11-02',
+    items: [
+      'Lock In now asks for the main idea before it shows it.',
+      'A wrong card now costs a try, and you see why before the next pick.',
+      'The wrong cards are true story details now.',
+      'Continue after Lock In goes straight Home.',
+      'A line you already kept gets a quick review, not the same game.',
+      'Refs #843.',
+    ],
+  },
+  {
     version: '1.4.566',
     title: 'Night Watch: a lamp mark grows with each upgrade',
     when: '2026-11-02',

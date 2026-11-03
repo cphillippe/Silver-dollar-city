@@ -1,3 +1,4 @@
+import { evidenceForTier } from '../content/evidence.ts'
 import { easyWhyLine, uniqueHoldChoices } from './easy.ts'
 import { shuffle } from './shuffle.ts'
 
@@ -62,6 +63,40 @@ export const WHY_BLAST_EXTRAS: Record<string, string[]> = {
   'ic-lucian': ['Lucian writes that he believed in the risen Christ.'],
 }
 
+/**
+ * Easy Lock In wrong cards for L1-L5 (#843). Each is a true story detail that is
+ * not the reason why. Copied verbatim from the Scholar verdict; do not retype.
+ * Easy only: the board is `[reason, ...LOCKIN_DECOYS[id]]`, shuffled. Pack
+ * `whyMisses`, `WHY_BLAST_EXTRAS` and the generic fills never join these boards.
+ */
+export const LOCKIN_DECOYS: Readonly<Record<string, readonly [string, string, string]>> = {
+  'ph-road': [
+    'The road went down to Jericho.',
+    'Robbers hurt a man on the road.',
+    'A lawyer asked Jesus a question.',
+  ],
+  'ph-father': [
+    'The son was hungry far from home.',
+    'The son had a speech ready.',
+    'The older brother was out in the field.',
+  ],
+  'ob-tuning': [
+    'There are many, many stars.',
+    'The earth goes around the sun.',
+    'Rain falls from the clouds.',
+  ],
+  'ph-debt': [
+    'The king checked who owed him money.',
+    'Peter asked Jesus a question first.',
+    'Other servants saw what he did.',
+  ],
+  'fg-order': [
+    'Colossians is a letter Paul wrote.',
+    'Trees grow from seeds.',
+    'Some things are big, and some are small.',
+  ],
+}
+
 const GENERIC_WHY_MISSES = [
   'The story is only a slogan.',
   'Nothing here asks us to change.',
@@ -107,4 +142,14 @@ export function whyBlastChoices(
   face: (line: string) => string = easyWhyLine,
 ): string[] {
   return shuffle(whyBlastPool(keep, packMisses, extras, face))
+}
+
+/**
+ * Shuffled Lock In board for an L1-L5 line, or null when the line keeps today's pool.
+ * Only the Easy reason gets the map. Any other tier keeps its own board untouched.
+ */
+export function lockInWhyBoard(id: string, keep: string): string[] | null {
+  const decoys = LOCKIN_DECOYS[id]
+  if (!decoys || evidenceForTier(id, 'easy')?.reason !== keep) return null
+  return shuffle([keep, ...decoys])
 }
