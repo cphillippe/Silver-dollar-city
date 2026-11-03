@@ -8,6 +8,7 @@ import {
   TOWER_CARD_W,
   TOWER_TREE_H,
   TOWER_TREE_LESSON_H,
+  stemShows,
   type TowerCardPoint,
 } from '../lib/towerCardPlace'
 import { mapGlyphRect } from '../nightWatch/lampGlyphPlace'
@@ -845,7 +846,7 @@ export function DefendTowerCard({
     return (
       <div
         ref={cardRef}
-        className={`defend-tower-card is-tree is-${placed.side}`}
+        className={`defend-tower-card is-tree is-${placed.side}${markOnMap && !stemShows(placed.left, point.left) ? ' is-stemless' : ''}`}
         data-upgrade-card
         data-upgrade-tree="yes"
         data-mid-wave={midWave ? 'yes' : undefined}
