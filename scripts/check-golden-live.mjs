@@ -458,7 +458,7 @@ async function signature(page) {
   const id = await screenId(page)
   const golds = await filledGolds(page)
   const detail = await page.evaluate(() => {
-    const claim = document.querySelector('.why-claim, .recall-line, .teach-reason')?.textContent || ''
+    const claim = document.querySelector('.why-claim, .recall-line, .teach-reason, .why-keep-card .match-yes strong')?.textContent || ''
     const whisper = (document.querySelector('.easy-home-whisper') || document.querySelector('.easy-build-gift'))?.textContent || ''
     return `${claim} ${whisper}`.replace(/\s+/g, ' ').trim().slice(0, 80)
   })
@@ -1483,7 +1483,21 @@ async function playGem(page, lineId = 'ob-tuning', { watchLast = false, checkSta
   return juice
 }
 
+/** 1.4.567 (#843): Easy Lock In asks for the main idea first. Self-mark "I had it" to reach the why slide. */
+async function passRecall(page) {
+  await page.locator('.lockin-recall-show').waitFor({ timeout: 8000 })
+  await pointerClick(page, page.locator('.lockin-recall-show'))
+  await pointerClick(page, page.locator('.lockin-recall-had'))
+}
+
+async function waitBlast(page) {
+  await page.locator('.lockin-recall-show, .why-blast').first().waitFor()
+  if (await page.locator('.lockin-recall-show').count()) await passRecall(page)
+  await page.locator('.why-blast').waitFor()
+}
+
 async function lockInFace(page) {
+  if (await page.locator('.lockin-recall-show').count()) await passRecall(page)
   await page.locator('.why-blast-hud .next-tap').waitFor({ timeout: 8000 })
   await page.locator('button.why-chip').first().waitFor()
   return page.evaluate(() => {
@@ -1563,7 +1577,8 @@ async function dragWhy(page, id) {
   })
   assert.ok(cueGeo, `${id} slide cue and claim have boxes`)
   assert.ok(cueGeo.dx <= 6, `${id} slide cue is centred on MAIN IDEA (${cueGeo.dx})`)
-  assert.ok(cueGeo.below >= -2 && cueGeo.below <= 8, `${id} slide cue sits on the MAIN IDEA top edge (${cueGeo.below})`)
+  // 1.4.567 (#843): the cue sits in the gap above MAIN IDEA (nudge included), never over the claim or the last card.
+  assert.ok(cueGeo.below >= -12 && cueGeo.below <= 0.5, `${id} slide cue sits just above the MAIN IDEA top edge (${cueGeo.below})`)
   if (page.viewportSize()?.width === 375) {
     assert.equal(face.descender, true, `${id} keeps the g descender (${face.lineHeight})`)
     await page.screenshot({ path: `${SHOTS}/lock-in-slide-cue-375.png` })
@@ -1702,6 +1717,10 @@ async function finishRead(page, puzzle) {
   else throw new Error(`day-2 daily kind ${kind} is not in the early pool solver`)
   for (let guard = 0; guard < 10; guard += 1) {
     if ((await page.locator('.daily-page').count()) === 0 && (await screenId(page)) === 'home') return
+    if (await page.locator('.lockin-recall-show').count()) {
+      await passRecall(page)
+      continue
+    }
     const quizOpen = await page.locator('.why-blast').count()
     const quizWon = await page.locator('.why-blast.is-yes, .why-blast.is-win').count()
     if (quizOpen && !quizWon) {
@@ -1831,6 +1850,7 @@ async function proveNotQuite(browser, origin) {
     const blast = await openSeeded(browser, origin, {}, viewport)
     try {
       await openRoadLockIn(blast.page, origin)
+      await passRecall(blast.page)
       await blast.page.locator('button.why-chip').first().waitFor()
       const startCue = await lockInGoldCues(blast.page)
       assert.equal(startCue.length, 1, `Lock In start one gold ${JSON.stringify(startCue)}`)
@@ -1881,29 +1901,10 @@ async function proveNotQuite(browser, origin) {
   })
   try {
     await openRoadLockIn(review.page, origin)
-    await review.page.locator('button.recall-card').first().waitFor()
-    assert.equal(await review.page.locator('.why-blast').count(), 0, 'Easy review uses RecallGate')
-    await tapWrongRecall(review.page, claim)
-    await review.page.locator('.why-miss-hint').waitFor()
-    const reviewHint = ((await review.page.locator('.why-miss-hint').innerText()) || '').replace(/\s+/g, ' ').trim()
-    assert.equal(reviewHint, hint, 'RecallGate first miss hints from the reason')
-    assert.equal(await review.page.locator('.why-miss-answer').count(), 0)
-    const reviewFirst = await filledGolds(review.page)
-    assert.equal(reviewFirst.length, 1, `RecallGate first miss one gold ${JSON.stringify(reviewFirst)}`)
-    assert.equal(reviewFirst[0].text, 'Try again')
-    await pointerClick(review.page, review.page.locator('.why-miss-retry'))
-    await review.page.locator('button.recall-card').first().waitFor()
-    await tapWrongRecall(review.page, claim)
-    await review.page.locator('.why-miss-answer').waitFor()
-    const reviewAnswer = ((await review.page.locator('.why-miss-answer').innerText()) || '').replace(/\s+/g, ' ').trim()
-    assert.equal(reviewAnswer, answer, 'RecallGate second miss is one line')
-    assert.equal(await review.page.locator('.why-miss-retry').count(), 0)
-    const reviewSecond = await filledGolds(review.page)
-    assert.equal(reviewSecond.length, 1, `RecallGate second miss one gold ${JSON.stringify(reviewSecond)}`)
-    assert.equal(reviewSecond[0].text, 'Continue')
-    await pointerClick(review.page, review.page.locator('.why-miss-continue'))
-    await review.page.locator('main.hub').waitFor()
-    assert.equal(review.errors.join('\n'), '', 'recall miss page errors')
+    // 1.4.567 (#843): a kept Easy line gets the quick review, never the claim pick or the why slide.
+    await review.page.locator('.quick-review').waitFor()
+    assert.equal(await review.page.locator('.why-blast, .recall-card, .lockin-recall').count(), 0, 'Easy kept line uses QuickReview')
+    assert.equal(review.errors.join('\n'), '', 'quick review page errors')
   } finally {
     await review.context.close()
   }
@@ -4580,7 +4581,7 @@ export async function checkGoldenLive() {
       assert.match(shot.golds[0].text, /Lock In/)
       await tapFilledGold(page)
 
-      await page.locator('.why-blast').waitFor()
+      await waitBlast(page)
       await stamp('quiz-road')
       await answerQuiz(page, 'ph-road')
       await page.locator('.why-blast.is-yes .btn.primary, .why-blast.is-win .btn.primary').first().waitFor()
@@ -4623,7 +4624,7 @@ export async function checkGoldenLive() {
       assert.equal(shot.id, 'run-win')
       assert.match(shot.golds[0].text, /Lock In/)
       await tapFilledGold(page)
-      await page.locator('.why-blast').waitFor()
+      await page.locator('.lockin-recall, .why-blast').first().waitFor()
       await stamp('quiz-father')
       const fatherFace = await lockInFace(page)
       assertSharedCards(fatherFace, 'ph-father')
@@ -4710,7 +4711,7 @@ export async function checkGoldenLive() {
         await page.screenshot({ path: `${SHOTS}/L3-wordsearch-matched-win-${width}.png` })
       }
       await tapFilledGold(page)
-      await page.locator('.why-blast').waitFor()
+      await waitBlast(page)
       shot = await stamp('quiz-tuning')
       assert.equal(shot.id, 'quiz', 'word-search gold opens the Lock In quiz')
       assert.equal(await page.locator('.play.is-gem-search').count(), 0, 'the gold tap did not replay the word search')
@@ -4747,7 +4748,7 @@ export async function checkGoldenLive() {
         await assertGemWinFold(page, 'ph-debt')
         assertGemWinOneGold(page, 'ph-debt')
         await tapFilledGold(page)
-        await page.locator('.why-blast').waitFor()
+        await waitBlast(page)
         await dragWhy(page, 'ph-debt')
         await assertLocked(page, 'ph-debt')
         await tapFilledGold(page)
@@ -4766,7 +4767,7 @@ export async function checkGoldenLive() {
         await assertGemWinFold(page, 'fg-order')
         assertGemWinOneGold(page, 'fg-order')
         await tapFilledGold(page)
-        await page.locator('.why-blast').waitFor()
+        await waitBlast(page)
         await dragWhy(page, 'fg-order')
         await assertLocked(page, 'fg-order')
         await tapFilledGold(page)
@@ -4916,7 +4917,7 @@ export async function checkGoldenLive() {
     await humanPage.locator('[data-maze-next]').waitFor()
     await humanStamp('maze-win')
     await tapFilledGold(humanPage)
-    await humanPage.locator('.why-blast').waitFor()
+    await waitBlast(humanPage)
     await humanStamp('quiz-road')
     await answerQuiz(humanPage, 'ph-road')
     await humanPage.locator('.why-blast.is-yes .btn.primary').waitFor()
@@ -4931,7 +4932,7 @@ export async function checkGoldenLive() {
     await hugFatherHuman(humanPage)
     await humanStamp('run-win')
     await tapFilledGold(humanPage)
-    await humanPage.locator('.why-blast').waitFor()
+    await waitBlast(humanPage)
     await humanStamp('quiz-father')
     await answerQuiz(humanPage, 'ph-father')
     await humanPage.locator('.why-got-it').waitFor()
@@ -4957,7 +4958,7 @@ export async function checkGoldenLive() {
     const humanGem = await humanStamp('gem-win')
     assert.match(humanGem.golds[0].text, /Lock In/)
     await tapFilledGold(humanPage)
-    await humanPage.locator('.why-blast').waitFor()
+    await waitBlast(humanPage)
     const humanScience = await humanStamp('quiz-tuning')
     assert.equal(humanScience.id, 'quiz', 'human-like Run still reaches ob-tuning Lock In')
     assert.equal(await humanPage.locator('.play.is-gem-search').count(), 0)

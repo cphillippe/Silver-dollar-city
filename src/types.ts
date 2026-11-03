@@ -385,6 +385,7 @@ export type View =
       autoQuiz?: boolean
       sceneRecap?: boolean
       lockInEmpty?: boolean
+      debugLockIn?: boolean
     }
   | { name: 'vista' }
   | { name: 'settings' }

@@ -38,10 +38,12 @@ interface JournalProps {
   focusId?: string
   autoQuiz?: boolean
   lockInEmpty?: boolean
+  /** Settings debug jump only. Always lands in Lock In on Easy, even on a fresh save. */
+  debugLockIn?: boolean
   onNavigate: (view: View) => void
 }
 
-export function Journal({ focusId, autoQuiz, lockInEmpty, onNavigate }: JournalProps) {
+export function Journal({ focusId, autoQuiz, lockInEmpty, debugLockIn, onNavigate }: JournalProps) {
   const { progress, snoozeReviews } = useProgress()
   const easy = isEasy(progress)
   const today = localDateKey()
@@ -96,7 +98,7 @@ export function Journal({ focusId, autoQuiz, lockInEmpty, onNavigate }: JournalP
     (holdId === openLine || focusId === openLine) &&
     !easyLineTaught(progress, openLine)
   const holdPractice =
-    Boolean(autoQuiz && quizBrief && !quizReplacesMatch && (easy || !focusedEntry || focusedOpen))
+    Boolean(autoQuiz && quizBrief && ((easy && debugLockIn) || (!quizReplacesMatch && (easy || !focusedEntry || focusedOpen))))
 
   if (easy && lockInEmpty) {
     return <LockInEmpty onNavigate={onNavigate} />
@@ -313,6 +315,7 @@ export function Journal({ focusId, autoQuiz, lockInEmpty, onNavigate }: JournalP
                 findLearning(progress, entry.unlockAfter) ?? findLearning(progress, entry.id)
               }
               today={today}
+              onNavigate={onNavigate}
             />
           ))}
         </div>
@@ -359,6 +362,7 @@ export function Journal({ focusId, autoQuiz, lockInEmpty, onNavigate }: JournalP
                   trace={progress.memory[entry.unlockAfter]}
                   learning={findLearning(progress, entry.unlockAfter)}
                   today={today}
+                  onNavigate={onNavigate}
                 />
               ))}
             </div>
@@ -397,6 +401,7 @@ function JournalCard({
   trace,
   learning,
   today,
+  onNavigate,
 }: {
   entry: JournalEntry
   open: boolean
@@ -409,6 +414,7 @@ function JournalCard({
   trace?: MemoryTrace
   learning?: Learning
   today: string
+  onNavigate: (view: View) => void
 }) {
   const { recordHeld, recordReview, recordLessonHold, snoozeReviews, progress } = useProgress()
   const easy = isEasy(progress)
@@ -519,6 +525,10 @@ function JournalCard({
                     recordLessonHold(brief.id, true)
                   } else {
                     recordLessonHold(brief.id, false)
+                  }
+                  if (easy) {
+                    onNavigate({ name: 'hub' })
+                    return
                   }
                   setFace('read')
                   setQuizAgain(false)
