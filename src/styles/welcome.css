@@ -2769,6 +2769,7 @@ html[data-easy='on'] .play.is-road-maze .maze-beat.is-now {
   html[data-easy='on'] .journal.is-easy-hold .dossier.is-stored .eyebrow,
   html[data-easy='on'] .journal.is-easy-hold .held-triad dt {
     color: #8a5a12;
+    font-size: 0.8125rem;
   }
 
   html[data-easy='on'] .journal.is-easy-hold .stored-chapter {

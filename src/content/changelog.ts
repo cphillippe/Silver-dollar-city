@@ -28,16 +28,132 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.569',
+    title: 'Night Watch: the upgrade card never covers the lamp mark',
+    when: '2026-11-03',
+    items: [
+      'The upgrade card now keeps a little space between itself and the lamp mark.',
+      'On a tight screen the card shows its own copy of the mark, so you never lose it.',
+      'The Bright button no longer glows gold.',
+      'The orange lines are a touch brighter again.',
+      'Refs #923.',
+    ],
+  },
+  {
+    version: '1.4.568',
+    title: 'Night Watch: the lamp mark draws on and stays clear',
+    when: '2026-11-03',
+    items: [
+      'A new piece of the lamp mark now draws on, line by line.',
+      'The upgrade card no longer sits on top of the lamp mark.',
+      'The mark stays on the board, even for a lamp near the top.',
+      'The orange lines are brighter and easier to see.',
+      'Refs #923.',
+    ],
+  },
+  {
+    version: '1.4.567',
+    title: 'Easy Lock In: remember first, then why',
+    when: '2026-11-02',
+    items: [
+      'Lock In now asks for the main idea before it shows it.',
+      'A wrong card now costs a try, and you see why before the next pick.',
+      'The wrong cards are true story details now.',
+      'Continue after Lock In goes straight Home.',
+      'A line you already kept gets a quick review, not the same game.',
+      'Refs #843.',
+    ],
+  },
+  {
+    version: '1.4.566',
+    title: 'Night Watch: a lamp mark grows with each upgrade',
+    when: '2026-11-02',
+    items: [
+      'A planted lamp shows a small mark that grows as you upgrade it.',
+      'Refs #923',
+    ],
+  },
+  {
+    version: '1.4.565',
+    title: 'Night Watch: the leak line stays under the note',
+    when: '2026-11-01',
+    items: [
+      'Night Watch: the leak line stays under the new-map note.',
+      'Refs #910.',
+    ],
+  },
+  {
+    version: '1.4.564',
+    title: 'Easy word search: tap letters one by one, or slide',
+    when: '2026-11-01',
+    items: [
+      'Word search: tap letters one by one, or slide.',
+      'Refs #912',
+    ],
+  },
+  {
+    version: '1.4.563',
+    title: 'Night Watch: the new-map note stays on top',
+    when: '2026-11-01',
+    items: [
+      'Night Watch: the new-map note now stays on top.',
+      'Word search: the hint sits above the letters.',
+      'Lock In still shows a saved line.',
+      'Refs #910.',
+      'Refs #899.',
+      'Refs #900.',
+    ],
+  },
+  {
+    version: '1.4.562',
+    title: 'Easy Night Watch: the new-map note stays on screen',
+    when: '2026-10-30',
+    items: [
+      'Easy: after round 8, the new-map note stays on screen.',
+      'Home shows Far Hills once that map is open.',
+      'Refs #749.',
+    ],
+  },
+  {
+    version: '1.4.561',
+    title: 'Easy word search: a tiny wiggle no longer picks a letter',
+    when: '2026-10-30',
+    items: [
+      'A small slip of your finger no longer picks a letter. A real tap does, and a line tells you what to do next.',
+      'Hard stays the same.',
+      'Refs #881',
+    ],
+  },
+  {
+    version: '1.4.560',
+    title: 'Easy Home: the porch fits, and Build this shows a house',
+    when: '2026-10-30',
+    items: [
+      'East porch fits on the phone.',
+      'Home words are at least 13 pixels tall.',
+      'Build this only raises a look you can see, and the map stays on that place.',
+      'Star lamps wait until four stars, then light up in one tap.',
+      'Refs #817.',
+      'Refs #885.',
+    ],
+  },
+  {
     version: '1.4.559',
-    title: 'Night Run: five real forces at the Just Right Gate',
+    title: 'Easy Home: the gold ring sits on the ground by the house',
     when: '2026-10-29',
     items: [
-      'After the three cranks, the Star Tower gate shows five real forces: gravity, strong, electric, weak and space.',
-      'Turn a spinner dial to tune each one. Each has to land inside its real window for life.',
-      'When a part is right, the dial zooms in by itself. Zeros found shows how close you are.',
-      'Tap Found it ✓ to keep a force. Too many wrong turns sends that force back to the start.',
-      'A Sources tap shows where each window comes from. Then let luck try: about 1 in 5 × 10¹⁸⁵.',
-      'Refs #793.',
+      'On the phone map, the gold ring around the next house sits on the ground so you can see it.',
+      'Hard stays the same.',
+      'Refs #817.',
+    ],
+  },
+  {
+    version: '1.4.558',
+    title: 'Easy Night Watch: the next map opens after round 8',
+    when: '2026-10-29',
+    items: [
+      'Easy: the next Night Watch map now opens after round 8.',
+      'Refs #749.',
     ],
   },
   {

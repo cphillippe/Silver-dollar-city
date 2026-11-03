@@ -33,7 +33,7 @@ import {
 import * as easyLib from '../src/lib/easy.ts'
 import * as trailLoopHome from '../src/easyTrail/trail/loop.ts'
 import * as trailShelf from '../src/easyTrail/trail/index.ts'
-import { normalizeProgress } from '../src/lib/save.ts'
+import { normalizeProgress, parseUnknownSave, SAVE_KIND } from '../src/lib/save.ts'
 import {
   nightWatchDebugHolds,
   nightWatchDebugPanel,
@@ -243,7 +243,15 @@ import {
   walkerZone,
 } from '../src/nightWatch/maps/features.ts'
 import { waveRound, waveWalkerHp } from '../src/nightWatch/maps/wave.ts'
-import { mapIsOpen, mapLockReason, nextMap, NIGHT_MAP_IDS, NIGHT_MAP_NAME } from '../src/nightWatch/maps/chain.ts'
+import {
+  applyNightMapClear,
+  mapIsOpen,
+  mapLockReason,
+  mapUnlockRound,
+  nextMap,
+  NIGHT_MAP_IDS,
+  NIGHT_MAP_NAME,
+} from '../src/nightWatch/maps/chain.ts'
 import {
   SPAWN_BOX_U,
   SPAWN_MARKERS,
@@ -278,6 +286,7 @@ import {
   lateStepOpen,
   wavePipVisible,
   TREE_LATE_COST,
+  TREE_LATE_CROSS,
   TREE_LATE_MAX,
   lessonWaiting,
   LESSON_LOCK,
@@ -288,6 +297,17 @@ import {
   TREE_LOCK,
   TREE_STEP_COST,
 } from '../src/nightWatch/upgradeTree.ts'
+import {
+  LAMP_GLYPH_COLOR,
+  LAMP_GLYPH_STEP_MAX,
+  LAMP_GLYPH_STAGES,
+  lampGlyphMarks,
+  lampGlyphStage,
+  lampGlyphTone,
+  lampUpgradeCount,
+  LAMP_GLYPH_TABLE_TOP,
+  clampGlyphStage,
+} from '../src/nightWatch/lampGlyph.ts'
 import {
   applyBellSlow,
   applyBellStep,
@@ -491,8 +511,10 @@ import {
   UPGRADE_TAP_ECHO_MS,
   upgradeSpendAllowed,
 } from '../src/lib/nightPlants.ts'
+import { MAP_GLYPH_PX, mapGlyphRect } from '../src/nightWatch/lampGlyphPlace.ts'
 import {
   CLEAR_BAR_RESERVE,
+  GLYPH_CLEAR,
   placeTowerCard,
   TOWER_CARD_H,
   TOWER_TREE_H,
@@ -512,6 +534,9 @@ import {
   visualSnapshot,
   visualStage,
   lotTapWhy,
+  EASY_ANCHOR_PAN,
+  EASY_HIDE_ART,
+  EASY_TAG_SLOT_PAN,
   easyTagsFit,
   easyPlotTag,
   easyTagMetrics,
@@ -1115,7 +1140,9 @@ assert.match(recallSrc, /easyWhyLine/)
 {
   const easyHold = recallSrc.match(/if \(easyEncode\) \{\s*return \(([\s\S]*?)\n  \}/)?.[1] ?? ''
   assert.match(easyHold, /WhyBlastPlay/)
-  assert.match(easyHold, /EASY\.rememberSentence/)
+  // 1.4.567 (#843): the Easy encode branch recalls first (LockInRecall) and no longer offers a claim pick.
+  assert.match(easyHold, /LockInRecall/)
+  assert.doesNotMatch(easyHold, /EASY\.rememberSentence|recall-choices/)
   // Easy Clear 1.4.142: claim-pick is one next-tap — no stacked mainIdeaTeach chip.
   assert.doesNotMatch(easyHold, /className=\"teach-chip\"/)
   assert.doesNotMatch(easyHold, /EASY\.mainIdeaTeach/)
@@ -1908,25 +1935,393 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.559')
-assert.equal(CHANGELOG[0].version, '1.4.559', '1.4.559 is the newest row')
+assert.equal(APP_VERSION, '1.4.569')
+assert.equal(CHANGELOG[0].version, '1.4.569', '1.4.569 is the newest row')
+assert.equal(CHANGELOG[1].version, '1.4.568', '1.4.568 follows the newest row')
+assert.equal(CHANGELOG[2].version, '1.4.567', '1.4.567 follows the 1.4.568 row')
+assert.match(latestChange('1.4.569').items.join('\n'), /Refs #923\./, '1.4.569 changelog refs #923')
+assert.doesNotMatch(latestChange('1.4.569').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.569 changelog avoids GitHub close keywords')
+assert.doesNotMatch(
+  playerVisibleChangeItems(latestChange('1.4.569').items).join('\n'),
+  /\bHard\b|\bMedium\b/,
+  '1.4.569 the player note does not name other tiers',
+)
+assert.match(latestChange('1.4.568').items.join('\n'), /Refs #923\./, '1.4.568 changelog refs #923')
+assert.doesNotMatch(latestChange('1.4.568').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.568 changelog avoids GitHub close keywords')
+assert.doesNotMatch(
+  playerVisibleChangeItems(latestChange('1.4.568').items).join('\n'),
+  /\bHard\b|\bMedium\b/,
+  '1.4.568 the player note does not name other tiers',
+)
+{
+  // #923: the lamp mark draws on, the card clears it, the board holds it, the arms are readable.
+  const lampMark = readFileSync(new URL('../src/components/LampUpgradeGlyph.tsx', import.meta.url), 'utf8')
+  const defendCss = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.equal((lampMark.match(/pathLength=\{1\}/g) ?? []).length, 2, '1.4.568 every mark piece, stroke and dot, normalises to pathLength 1')
+  assert.match(
+    defendCss,
+    /\.lamp-upgrade-glyph \.is-draw \{\s*stroke-dasharray: 1;\s*stroke-dashoffset: 1;\s*animation: lamp-glyph-draw 200ms/,
+    '1.4.568 a new piece draws a unit dash from 1 to 0 over 200ms',
+  )
+  assert.match(defendCss, /@keyframes lamp-glyph-draw \{\s*from \{\s*stroke-dashoffset: 1;\s*\}\s*to \{\s*stroke-dashoffset: 0;/, '1.4.568 draw-on runs 1 to 0')
+  assert.doesNotMatch(defendCss, /stroke-dasharray: 40/, '1.4.568 the 40 unit dash is gone')
+  assert.doesNotMatch(defendCss, /#c46a28|#e98a3c/, '1.4.569 the dim ambers are gone from the mark')
+  const luminance = (hex) => {
+    const n = Number.parseInt(hex.slice(1), 16)
+    const part = [(n >> 16) & 255, (n >> 8) & 255, (n >> 0) & 255].map((v) => {
+      const c = v / 255
+      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+    })
+    return 0.2126 * part[0] + 0.7152 * part[1] + 0.0722 * part[2]
+  }
+  // The live prove measured the old #c46a28 at 2.45:1 on the board, which puts the ground at about 0.061.
+  const ground = (luminance('#c46a28') + 0.05) / 2.45 - 0.05
+  const contrast = (hex) => (luminance(hex) + 0.05) / (ground + 0.05)
+  assert.ok(contrast('#c46a28') < 2.5, '1.4.568 the old arm colour is the 2.45:1 the prove read')
+  assert.ok(contrast(LAMP_GLYPH_COLOR.strong) >= 3.5, `1.4.569 strong arms are ${contrast(LAMP_GLYPH_COLOR.strong).toFixed(2)}:1, at least 3.5:1`)
+  assert.ok(contrast(LAMP_GLYPH_COLOR.far) >= 3, '1.4.568 far arms keep 3:1')
+  {
+    // The check's gold test is r>190, g>140, b<120. The arms stay orange: clear of that green line, hue well under gold's 45.
+    const n = Number.parseInt(LAMP_GLYPH_COLOR.strong.slice(1), 16)
+    const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+    assert.ok(g <= 130, `1.4.569 strong arm green channel ${g} stays at 130 or under, clear of the gold detector's 140`)
+    const hue = (() => {
+      const hi = Math.max(r, g, b)
+      const lo = Math.min(r, g, b)
+      return (60 * (g - b)) / (hi - lo)
+    })()
+    assert.ok(hue >= 15 && hue <= 30, `1.4.569 strong arm hue ${hue.toFixed(0)} is orange, not gold (45)`)
+    assert.ok(!(r > 190 && g > 140 && b < 120), '1.4.569 strong arm is not gold by the check rule')
+    assert.match(defendCss, /\.lamp-upgrade-glyph\.is-strong \.is-stroke \{\s*stroke: #ff7d2d;/, '1.4.569 the CSS paints the strong arms with the same orange')
+    assert.equal(LAMP_GLYPH_COLOR.strong, '#ff7d2d')
+    assert.match(defendCss, /\.btn\.defend-bright-buy \{\s*border-color: rgba\(255, 246, 232, 0\.6\);/, '1.4.569 the Bright buy keeps a cream border, never gold')
+  }
+
+  // The mark stays inside the board at every edge, and never moves when there is room.
+  const board = { left: 0, top: 93, right: 375, bottom: 667 }
+  const roomy = mapGlyphRect(200, 400, 0.55, board)
+  assert.equal(roomy.top, 400 - 78 * 0.55 - 6 - MAP_GLYPH_PX, '1.4.568 a lamp with room keeps the mark above the type mark')
+  assert.equal(roomy.left, 190, '1.4.568 a lamp with room keeps the mark centred')
+  for (const [ox, oy] of [[40, 140], [200, 140], [330, 140], [200, 152], [20, 620], [360, 660], [200, 98]]) {
+    const rect = mapGlyphRect(ox, oy, 0.55, board)
+    assert.ok(rect.left >= board.left && rect.right <= board.right && rect.top >= board.top && rect.bottom <= board.bottom, `1.4.568 the mark for a lamp at ${ox},${oy} stays in the board ${JSON.stringify(rect)}`)
+    assert.equal(rect.right - rect.left, MAP_GLYPH_PX)
+  }
+  const tight = mapGlyphRect(289, 150, 0.55, board)
+  assert.ok(tight.right <= 289 - 56 * 0.55 || tight.left >= 289 + 56 * 0.55, '1.4.568 a lamp near the top gets the mark beside its art, clear of the pulse')
+
+  // The card keeps 4px off the mark wherever a clear spot exists, and says so when none does.
+  // A spot that exists but is not used fails. A position with no spot must report markClear false (the header copy shows).
+  const clearOfMark = (card, mark, gap) =>
+    card.left + 176 + gap <= mark.left || card.left >= mark.right + gap || card.top + 260 + gap <= mark.top || card.top >= mark.bottom + gap
+  let checked = 0
+  let crowded = 0
+  for (const [w, h, scale, reserve] of [
+    [375, 574, 0.55, 0],
+    [375, 719, 0.6, 0],
+    [390, 751, 0.62, 0],
+    [412, 822, 0.66, 0],
+    [628, 893, 0.9, 0],
+    [375, 574, 0.55, CLEAR_BAR_RESERVE],
+    [412, 822, 0.66, CLEAR_BAR_RESERVE],
+    [628, 893, 0.9, CLEAR_BAR_RESERVE],
+    [320, 460, 0.5, 0],
+  ]) {
+    const frame = { left: 0, top: 0, right: w, bottom: h }
+    const maxLeft = Math.max(8, w - 176 - 72)
+    const maxTop = Math.max(8, h - TOWER_TREE_H - 8 - reserve)
+    for (let y = 60; y < h - 20; y += 23) {
+      for (let x = 24; x < w - 60; x += 31) {
+        const mark = mapGlyphRect(x, y, scale, frame)
+        const placed = placeTowerCard({ left: x, top: y }, { w, h }, [], scale, reserve, TOWER_TREE_H, mark, 260)
+        let spot = false
+        for (let left = 8; left <= maxLeft + 0.1 && !spot; left += 8) {
+          for (let top = 8; top <= maxTop + 0.1 && !spot; top += 8) spot = clearOfMark({ left, top }, mark, GLYPH_CLEAR)
+        }
+        const where = `lamp ${x},${y} on ${w}x${h}/${reserve}`
+        if (placed.markClear) {
+          checked += 1
+          assert.ok(clearOfMark(placed, mark, 4), `1.4.569 the card at ${where} says it clears the mark but sits within 4px of it`)
+        } else {
+          crowded += 1
+          assert.equal(spot, false, `1.4.569 the card at ${where} gave up on the mark though a clear spot exists`)
+        }
+      }
+    }
+  }
+  assert.ok(checked > 400, `1.4.569 the card scan covered ${checked} lamps with a clear slot`)
+  assert.ok(crowded > 0, `1.4.569 the scan reaches seats with no clear slot (${crowded}), so the header copy path is covered`)
+  const card = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
+  assert.match(card, /markOnMap && !placed\.markClear && paths/, '1.4.569 the card shows the header copy exactly when no slot clears the mark')
+  assert.match(card, /data-glyph-header="yes"[\s\S]{0,160}variant="rail"/, '1.4.569 the header copy is the same mark at the same stage')
+}
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.566'), '1.4.566 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.566').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.566 changelog avoids GitHub close keywords',
+)
+assert.equal(
+  latestChange('1.4.566').items[0],
+  'A planted lamp shows a small mark that grows as you upgrade it.',
+  '1.4.566 changelog names the lamp mark',
+)
+assert.match(latestChange('1.4.566').items.join('\n'), /Refs #923/, '1.4.566 changelog refs #923')
+assert.doesNotMatch(
+  playerVisibleChangeItems(latestChange('1.4.566').items).join('\n'),
+  /\bHard\b|\bMedium\b/,
+  '1.4.566 the player note does not name other tiers',
+)
+assert.equal(LAMP_GLYPH_STEP_MAX, TREE_LATE_MAX + TREE_LATE_CROSS + 1, '1.4.566 the mark covers deep, short, and Bright')
+assert.equal(LAMP_GLYPH_TABLE_TOP, 13, '1.4.566 the table keeps rows past the current tree')
+assert.ok(LAMP_GLYPH_TABLE_TOP > LAMP_GLYPH_STEP_MAX)
+const glyphMarkCounts = [1, 1, 2, 3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16]
+for (let stage = 0; stage <= LAMP_GLYPH_TABLE_TOP; stage += 1) {
+  assert.equal(lampGlyphMarks(stage).length, glyphMarkCounts[stage], `1.4.566 stage ${stage} mark count`)
+}
+assert.deepEqual(
+  lampGlyphMarks(4).map((mark) => mark.key),
+  ['stub-up', 'stub-right', 'stub-down', 'stub-left'],
+)
+assert.deepEqual(
+  lampGlyphMarks(8).map((mark) => mark.key).slice(4),
+  ['grow-up', 'grow-right', 'grow-down', 'grow-left'],
+)
+assert.equal(lampGlyphMarks(9).filter((mark) => mark.draw === 'gap').length, 4)
+assert.equal(lampGlyphMarks(13).filter((mark) => mark.key.startsWith('arc-')).length, 4)
+assert.equal(lampGlyphMarks(99).length, glyphMarkCounts[LAMP_GLYPH_TABLE_TOP], '1.4.566 past the table stays on the last row')
+assert.equal(clampGlyphStage(99), LAMP_GLYPH_TABLE_TOP)
+assert.equal(lampUpgradeCount({ far: 0, strong: 0 }), 0)
+assert.equal(lampGlyphStage({ far: 0, strong: 0 }), 0)
+assert.equal(lampGlyphStage({ far: 0, strong: 1 }), 1)
+assert.equal(lampGlyphStage({ far: 5, strong: 2, bright: 1 }), LAMP_GLYPH_STEP_MAX)
+assert.equal(lampGlyphTone({ far: 5, strong: 2, bright: 1 }), 'far')
+assert.equal(lampGlyphTone({ far: 2, strong: 5, bright: 1 }), 'strong')
+assert.equal(lampGlyphTone({ far: 0, strong: 0 }), 'rest')
+for (const hex of [LAMP_GLYPH_COLOR.far, LAMP_GLYPH_COLOR.strong]) {
+  const n = Number.parseInt(hex.slice(1), 16)
+  const r = (n >> 16) & 255
+  const g = (n >> 8) & 255
+  const b = n & 255
+  assert.equal(r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30, false, `1.4.566 ${hex} is not a gold cue`)
+}
+assert.equal(CHANGELOG[4].version, '1.4.565', '1.4.565 follows the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.565'), '1.4.565 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.565').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.565 changelog avoids GitHub close keywords',
+)
+assert.equal(
+  latestChange('1.4.565').items[0],
+  'Night Watch: the leak line stays under the new-map note.',
+  '1.4.565 changelog names the leak line',
+)
+assert.doesNotMatch(
+  playerVisibleChangeItems(latestChange('1.4.565').items).join('\n'),
+  /\bHard\b|\bMedium\b/,
+  '1.4.565 the player note does not name other tiers',
+)
+assert.equal(CHANGELOG[5].version, '1.4.564', '1.4.564 follows the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.564'), '1.4.564 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.564').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.564 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.564').items.join('\n'), /Refs #912/, '1.4.564 changelog refs #912')
+assert.equal(
+  latestChange('1.4.564').items[0],
+  'Word search: tap letters one by one, or slide.',
+  '1.4.564 changelog names the tap and slide line',
+)
+assert.deepEqual(
+  playerVisibleChangeItems(latestChange('1.4.564').items),
+  ['Word search: tap letters one by one, or slide.'],
+  '1.4.564 players see the tap and slide line',
+)
+assert.equal(
+  playerVisibleChangeTitle(latestChange('1.4.564').title),
+  'Easy word search: tap letters one by one, or slide',
+  '1.4.564 the word search note stays in What’s new',
+)
+assert.doesNotMatch(
+  playerVisibleChangeItems(latestChange('1.4.564').items).join('\n'),
+  /\bHard\b|\bMedium\b/,
+  '1.4.564 the player note does not name other tiers',
+)
+assert.equal(CHANGELOG[6].version, '1.4.563', '1.4.563 follows the word-search row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.563'), '1.4.563 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.563').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.563 changelog avoids GitHub close keywords',
+)
+assert.equal(
+  latestChange('1.4.563').items[0],
+  'Night Watch: the new-map note now stays on top.',
+  '1.4.563 changelog names the note',
+)
+assert.doesNotMatch(
+  playerVisibleChangeItems(latestChange('1.4.563').items).join('\n'),
+  /\bHard\b|\bMedium\b/,
+  '1.4.563 the player note does not name other tiers',
+)
+assert.equal(CHANGELOG[7].version, '1.4.562', '1.4.562 follows the newest row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.562'), '1.4.562 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.562').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.562 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.562').items.join('\n'), /Refs #749/, '1.4.562 changelog refs #749')
+assert.equal(
+  latestChange('1.4.562').items[0],
+  'Easy: after round 8, the new-map note stays on screen.',
+  '1.4.562 changelog names the visible map note',
+)
+assert.deepEqual(
+  playerVisibleChangeItems(latestChange('1.4.562').items),
+  [
+    'Easy: after round 8, the new-map note stays on screen.',
+    'Home shows Far Hills once that map is open.',
+  ],
+  '1.4.562 players see the map note and the Home badge line',
+)
+assert.equal(
+  playerVisibleChangeTitle(latestChange('1.4.562').title),
+  'Easy Night Watch: the new-map note stays on screen',
+  '1.4.562 the map note stays in What’s new',
+)
+assert.doesNotMatch(
+  playerVisibleChangeItems(latestChange('1.4.562').items).join('\n'),
+  /\bHard\b|\bMedium\b/,
+  '1.4.562 the player note does not name other tiers',
+)
+assert.equal(CHANGELOG[8].version, '1.4.561', '1.4.561 follows the map-note row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.561'), '1.4.561 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.561').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.561 changelog avoids GitHub close keywords',
+)
+assert.doesNotMatch(latestChange('1.4.561').items.join('\n'), /\/box\//, '1.4.561 changelog avoids box paths')
+assert.match(
+  latestChange('1.4.561').items.join('\n'),
+  /A small slip of your finger no longer picks a letter/,
+  '1.4.561 changelog names the Easy word-search tap fix',
+)
+assert.match(latestChange('1.4.561').items.join('\n'), /Refs #881/, '1.4.561 changelog refs #881')
+assert.match(latestChange('1.4.561').items.join('\n'), /Hard stays the same\./, '1.4.561 changelog says Hard stays the same')
+assert.equal(
+  latestChange('1.4.561').items[0],
+  'A small slip of your finger no longer picks a letter. A real tap does, and a line tells you what to do next.',
+  '1.4.561 changelog names the tap line',
+)
+assert.deepEqual(
+  playerVisibleChangeItems(latestChange('1.4.561').items),
+  ['A small slip of your finger no longer picks a letter. A real tap does, and a line tells you what to do next.'],
+  '1.4.561 players see the tap line and not the ref',
+)
+assert.equal(
+  playerVisibleChangeTitle(latestChange('1.4.561').title),
+  'Easy word search: a tiny wiggle no longer picks a letter',
+  '1.4.561 the wiggle note stays in What’s new',
+)
+assert.doesNotMatch(
+  playerVisibleChangeItems(latestChange('1.4.561').items).join('\n'),
+  /\bHard\b|\bMedium\b/,
+  '1.4.561 the player note does not name other tiers',
+)
+{
+  const gem561 = readFileSync(new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url), 'utf8')
+  const maze561 = readFileSync(new URL('./check-maze-drag-live.mjs', import.meta.url), 'utf8')
+  assert.match(gem561, /dataset\.easy === 'on'[\s\S]{0,500}GEM_TAP_MAX_TRAVEL_PX/, '#881 Easy tap threshold stays off Hard')
+  assert.match(maze561, /proveOvershootFollowsFinger/, '#883 overshoot recheck follows the finger')
+  assert.doesNotMatch(maze561, /trace\.push\(want\)/, '#883 the inn trace is not synthesized')
+}
+assert.equal(CHANGELOG[9].version, '1.4.560', '1.4.560 follows the word-search row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.560'), '1.4.560 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.560').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.560 changelog avoids GitHub close keywords',
+)
+assert.doesNotMatch(latestChange('1.4.560').items.join('\n'), /\/box\//, '1.4.560 changelog avoids box paths')
+assert.doesNotMatch(latestChange('1.4.560').items.join('\n'), /\bHard\b|\bMedium\b/, '1.4.560 changelog is Easy only')
+assert.doesNotMatch(latestChange('1.4.560').items.join('\n'), /gold ring/)
+assert.match(latestChange('1.4.560').items.join('\n'), /East porch fits on the phone/)
+assert.match(latestChange('1.4.560').items.join('\n'), /at least 13 pixels/)
+assert.match(latestChange('1.4.560').items.join('\n'), /map stays on that place/)
+assert.match(latestChange('1.4.560').items.join('\n'), /four stars/)
+assert.match(latestChange('1.4.560').items.join('\n'), /Refs #817/)
+assert.match(latestChange('1.4.560').items.join('\n'), /Refs #885/)
+assert.deepEqual(
+  playerVisibleChangeItems(latestChange('1.4.560').items),
+  [
+    'East porch fits on the phone.',
+    'Home words are at least 13 pixels tall.',
+    'Build this only raises a look you can see, and the map stays on that place.',
+    'Star lamps wait until four stars, then light up in one tap.',
+  ],
+  '1.4.560 player list drops Refs',
+)
+assert.equal(
+  playerVisibleChangeTitle(latestChange('1.4.560').title),
+  'Easy Home: the porch fits, and Build this shows a house',
+)
+assert.equal(CHANGELOG[10].version, '1.4.559', '1.4.559 follows the porch row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.559'), '1.4.559 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.559').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
   '1.4.559 changelog avoids GitHub close keywords',
 )
-assert.match(latestChange('1.4.559').items.join('\n'), /Refs #793/, '1.4.559 changelog refs #793')
+assert.match(latestChange('1.4.559').items.join('\n'), /Refs #817/, '1.4.559 changelog refs #817')
+assert.match(latestChange('1.4.559').items.join('\n'), /gold ring/, '1.4.559 changelog names the ground ring')
+assert.match(latestChange('1.4.559').items.join('\n'), /Hard stays the same\./)
+assert.match(mapSrc, /ellipse[\s\S]*city-next-halo is-easy-ground/, 'easy pan halo is a ground ellipse')
+assert.match(mapSrc, /pointerEvents="none"/, 'the ground ring does not take taps')
+assert.match(cssSrc, /\.city-next-halo\.is-easy-ground/, 'ground ring rules live in city.css')
 assert.doesNotMatch(
-  [latestChange('1.4.559').title, ...latestChange('1.4.559').items].join('\n'),
-  /\bHard\b|\bMedium\b|\?playtest=1/,
-  '1.4.559 changelog stays Easy-only and player-facing',
+  readFileSync(new URL('../src/index.css', import.meta.url), 'utf8'),
+  /is-easy-ground/,
+  '1.4.559 ground ring rules stay out of index.css',
+)
+assert.match(
+  cssSrc,
+  /\.city-next-halo\.is-easy-ground \{[^}]*animation:\s*none/,
+  '1.4.559 the ground ring does not pulse under reduced motion',
+)
+assert.equal(CHANGELOG[11].version, '1.4.558', '1.4.558 follows the ground ring row')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.558'), '1.4.558 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.558').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.558 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.558').items.join('\n'), /Refs #749/, '1.4.558 changelog refs #749')
+assert.equal(
+  latestChange('1.4.558').items[0],
+  'Easy: the next Night Watch map now opens after round 8.',
+  '1.4.558 changelog names the Easy map gate',
+)
+assert.deepEqual(
+  playerVisibleChangeItems(latestChange('1.4.558').items),
+  ['Easy: the next Night Watch map now opens after round 8.'],
+  '1.4.558 players see the Easy map line and not the ref',
 )
 assert.equal(
-  playerVisibleChangeItems(latestChange('1.4.559').items).length,
-  5,
-  '1.4.559 player list drops only the Refs line',
+  playerVisibleChangeTitle(latestChange('1.4.558').title),
+  'Easy Night Watch: the next map opens after round 8',
+  '1.4.558 the map note stays in What’s new',
 )
-assert.equal(CHANGELOG[1].version, '1.4.557', '1.4.557 follows the five-force row')
+assert.doesNotMatch(
+  playerVisibleChangeItems(latestChange('1.4.558').items).join('\n'),
+  /\bHard\b|\bMedium\b/,
+  '1.4.558 the player note does not name other tiers',
+)
+assert.equal(CHANGELOG[12].version, '1.4.557', '1.4.557 follows the round 8 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.557'), '1.4.557 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.557').items.join('\n'),
@@ -1950,7 +2345,7 @@ assert.equal(
   null,
   '1.4.557 Behind the scenes title stays out of What’s new',
 )
-assert.equal(CHANGELOG[2].version, '1.4.556', '1.4.556 follows the grade row')
+assert.equal(CHANGELOG[13].version, '1.4.556', '1.4.556 follows the grade row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.556'), '1.4.556 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.556').items.join('\n'),
@@ -1971,7 +2366,7 @@ assert.deepEqual(playerVisibleChangeItems(latestChange('1.4.556').items), [
   'The debt line now says: God forgives us a huge debt. So we forgive others.',
   'The order line now says: Christ made all things, and he holds them together.',
 ])
-assert.equal(CHANGELOG[3].version, '1.4.555', '1.4.555 follows the Easy claims row')
+assert.equal(CHANGELOG[14].version, '1.4.555', '1.4.555 follows the Easy claims row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.555'), '1.4.555 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.555').items.join('\n'),
@@ -1981,7 +2376,7 @@ assert.doesNotMatch(
 assert.match(latestChange('1.4.555').items.join('\n'), /Refs #756/, '1.4.555 changelog refs #756')
 assert.match(latestChange('1.4.555').items.join('\n'), /Refs #768/, '1.4.555 changelog refs #768')
 assert.match(latestChange('1.4.555').items.join('\n'), /pace chip sits in the top HUD/, '1.4.555 changelog names the HUD pace chip')
-assert.equal(CHANGELOG[4].version, '1.4.554', '1.4.554 follows the Night Watch row')
+assert.equal(CHANGELOG[15].version, '1.4.554', '1.4.554 follows the Night Watch row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.554'), '1.4.554 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.554').items.join('\n'),
@@ -2005,10 +2400,10 @@ assert.equal(
   null,
   '1.4.554 Behind the scenes title stays out of What’s new',
 )
-assert.equal(CHANGELOG[5].version, '1.4.553', '1.4.553 follows the Home Read row')
+assert.equal(CHANGELOG[16].version, '1.4.553', '1.4.553 follows the Home Read row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.553'), '1.4.553 changelog row')
 assert.match(latestChange('1.4.553').items.join('\n'), /Refs #793/)
-assert.equal(CHANGELOG[6].version, '1.4.552', '1.4.552 follows the 1.4.553 row')
+assert.equal(CHANGELOG[17].version, '1.4.552', '1.4.552 follows the 1.4.553 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.552'), '1.4.552 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.552').items.join('\n'),
@@ -2026,7 +2421,7 @@ assert.match(
   /above the letter grid/,
   '1.4.552 changelog names the Match banner layout fix',
 )
-assert.equal(CHANGELOG[7].version, '1.4.551', '1.4.551 follows the #871 row')
+assert.equal(CHANGELOG[18].version, '1.4.551', '1.4.551 follows the #871 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.551'), '1.4.551 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.551').items.join('\n'),
@@ -2042,7 +2437,7 @@ assert.match(
 assert.match(latestChange('1.4.551').items.join('\n'), /Drag or tap the road/, '1.4.551 changelog names the maze hint')
 assert.match(latestChange('1.4.551').items.join('\n'), /Refs #877/, '1.4.551 changelog refs #877')
 assert.match(latestChange('1.4.551').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[8].version, '1.4.550', '1.4.550 follows the 1.4.551 row')
+assert.equal(CHANGELOG[19].version, '1.4.550', '1.4.550 follows the 1.4.551 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.550'), '1.4.550 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.550').items.join('\n'),
@@ -2058,7 +2453,7 @@ assert.match(
 assert.match(latestChange('1.4.550').items.join('\n'), /Story word! \+100/, '1.4.550 changelog keeps the story payoff')
 assert.match(latestChange('1.4.550').items.join('\n'), /Refs #870/, '1.4.550 changelog refs #870')
 assert.match(latestChange('1.4.550').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[9].version, '1.4.549', '1.4.549 follows the 1.4.550 row')
+assert.equal(CHANGELOG[20].version, '1.4.549', '1.4.549 follows the 1.4.550 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.549'), '1.4.549 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.549').items.join('\n'),
@@ -2072,7 +2467,7 @@ assert.doesNotMatch(
   /\?playtest=1|Night Watch debug/,
   '1.4.549 changelog stays player-facing',
 )
-assert.equal(CHANGELOG[10].version, '1.4.548', '1.4.548 follows the maze drag row')
+assert.equal(CHANGELOG[21].version, '1.4.548', '1.4.548 follows the maze drag row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.548'), '1.4.548 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.548').items.join('\n'),
@@ -2126,7 +2521,7 @@ for (const script of [
   assert.match(live871, /dev-ui-playtest\.mjs/, `#871 ${script} opens developer UI via playtest helper`)
 }
 await import('./check-type-floor-baseline.mjs').then((mod) => mod.assertTypeFloorCss())
-assert.equal(CHANGELOG[11].version, '1.4.547', '1.4.547 follows QuickReview row')
+assert.equal(CHANGELOG[22].version, '1.4.547', '1.4.547 follows QuickReview row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.547'), '1.4.547 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.547').items.join('\n'),
@@ -2139,7 +2534,7 @@ assert.doesNotMatch(
   '1.4.547 changelog avoids box paths',
 )
 assert.match(latestChange('1.4.547').items.join('\n'), /Refs #858/, '1.4.547 changelog refs #858')
-assert.equal(CHANGELOG[12].version, '1.4.546', '1.4.546 stays under 1.4.547')
+assert.equal(CHANGELOG[23].version, '1.4.546', '1.4.546 stays under 1.4.547')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.546'), '1.4.546 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.546').items.join('\n'),
@@ -2152,7 +2547,7 @@ assert.doesNotMatch(
   '1.4.546 changelog drops box paths',
 )
 assert.match(latestChange('1.4.546').items.join('\n'), /Refs #753/, '1.4.546 changelog refs #753')
-assert.equal(CHANGELOG[13].version, '1.4.545', '1.4.545 stays under 1.4.546')
+assert.equal(CHANGELOG[24].version, '1.4.545', '1.4.545 stays under 1.4.546')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.545'), '1.4.545 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.545').items.join('\n'),
@@ -2161,7 +2556,7 @@ assert.doesNotMatch(
 )
 assert.match(latestChange('1.4.545').items.join('\n'), /Refs #855/, '1.4.545 changelog refs #855')
 assert.match(latestChange('1.4.545').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[14].version, '1.4.544', '1.4.544 stays under 1.4.545')
+assert.equal(CHANGELOG[25].version, '1.4.544', '1.4.544 stays under 1.4.545')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.544'), '1.4.544 changelog row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.543'), '1.4.543 changelog row')
 assert.doesNotMatch(
@@ -2561,7 +2956,11 @@ assert.match(latestChange('1.4.527').items.join('\n'), /Hard/)
   assert.equal(panToward(582, spec), spec.maxX, 'porch opens at the right end')
   assert.equal(panToward(92, spec), 0, 'hollow opens at the left end')
   assert.equal(easyPanFrame(1024, 700, 600), null, 'desktop keeps the fit-to-width map')
-  assert.match(plotArtSrc, /observatory: \['scaffold', 'built', 'lit'\]/)
+  assert.match(
+    readFileSync(new URL('../src/lib/cityBuild.ts', import.meta.url), 'utf8'),
+    /observatory: \['scaffold', 'built', 'lit'\]/,
+    'Easy hide table lives in cityBuild',
+  )
   assert.match(plotArtSrc, /lamps: \{ built: 'lit' \}/)
   assert.match(cssSrc, /\.city-overworld\.is-easy-pan \.city-plot\.is-ready \.city-plot-hit/, 'ready ring is off in pan mode only')
   assert.doesNotMatch(cssSrc, /\.is-style-founders\) \.city-folk \.city-lamp/, 'folk lamps are hidden under every style')
@@ -6416,9 +6815,9 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     new URL('../src/components/RecallGate.tsx', import.meta.url),
     'utf8',
   )
-  assert.match(recall351, /easySortClaimPick/)
-  assert.match(recall351, /easySortClaimPick[\s\S]*brief\.claimChoices/)
-  assert.match(recall351, /setChosen\(\{ claim: brief\.claim, reason: brief\.reason \}\)/)
+  // 1.4.567 (#843): the claim pick is gone; the Easy encode branch always holds the pack claim and reason.
+  assert.doesNotMatch(recall351, /easySortClaimPick/)
+  assert.match(recall351, /claim=\{brief\.claim\}[\s\S]*?reason=\{brief\.reason\}/)
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.351'), '1.4.351 changelog row')
   assert.match(latestChange('1.4.351').title, /Lock In|story hold/i)
   assert.doesNotMatch(
@@ -6873,7 +7272,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
       lamps: 0,
     },
   }
-  assert.equal(readyUpgradeId(first, 'porch'), 'lamps')
+  assert.equal(canUpgrade('lamps', first), false, '1.4.560 Easy does not offer the hidden lamp scaffold')
+  assert.equal(readyUpgradeId(first, 'porch'), null, '1.4.560 a hidden lamp look is not the ready cue')
   assert.equal(visualSnapshot(first).lamps, 'empty')
   assert.equal(lampsBuildGift(first, false, 'lamps'), null)
   const scaffold = applyUpgrade(first, 'lamps')
@@ -6896,6 +7296,75 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     /Fixes #|Closes #|Resolves #/i,
     '1.4.365 changelog avoids GitHub close keywords',
   )
+}
+
+// Easy Home 1.4.560: skip looks Easy does not draw. Hard still raises the lamp scaffold at one star.
+{
+  const one = {
+    ...emptyProgress(),
+    easyMode: true,
+    stars: { a: 1 },
+    cityBuilt: { ...emptyCityBuilt(), lamps: 0 },
+  }
+  assert.equal(canUpgrade('lamps', one), false, '1.4.560 Easy lamps at 1 star are not ready')
+  const four = {
+    ...emptyProgress(),
+    easyMode: true,
+    stars: { a: 4 },
+    cityBuilt: { ...emptyCityBuilt(), lamps: 0 },
+  }
+  assert.equal(earnedTier('lamps', four), 2, '1.4.560 four stars earn the built lamp look')
+  assert.equal(canUpgrade('lamps', four), true, '1.4.560 Easy lamps are ready at 4 stars')
+  const raised = applyUpgrade(four, 'lamps')
+  assert.equal(appliedTier('lamps', raised), 2, '1.4.560 one Build this goes 0 to 2')
+  assert.equal(visualStage('lamps', appliedTier('lamps', raised)), 'built')
+  assert.doesNotMatch(nextUpgradeNeed('lamps', raised, true).line, /Earn four stars/)
+  const hardOne = { ...one, easyMode: false }
+  assert.equal(canUpgrade('lamps', hardOne), true, '1.4.560 Hard lamps are ready at 1 star')
+  const hardRaised = applyUpgrade(hardOne, 'lamps')
+  assert.equal(appliedTier('lamps', hardRaised), 1, '1.4.560 Hard still builds the lamp scaffold')
+  assert.equal(visualSnapshot(hardRaised).lamps, 'scaffold')
+  const gateOpen = {
+    ...emptyProgress(),
+    easyMode: true,
+    completed: ['ob-tuning', 'ob-design', 'ob-leibniz', 'ob-life'],
+    cityBuilt: { ...emptyCityBuilt(), gate: 0 },
+  }
+  assert.equal(plotStage('gate', gateOpen), 'scaffold')
+  assert.equal(canUpgrade('gate', gateOpen), false, '1.4.560 Easy does not offer the hidden gate scaffold')
+  const gateBuilt = {
+    ...gateOpen,
+    completed: [...gateOpen.completed, 'fg-mover'],
+  }
+  assert.equal(canUpgrade('gate', gateBuilt), true)
+  assert.equal(appliedTier('gate', applyUpgrade(gateBuilt, 'gate')), 2, '1.4.560 Easy gate skips the hidden scaffold')
+  const sky = {
+    ...emptyProgress(),
+    easyMode: true,
+    completed: ['wb-creed', 'wb-early', 'wb-method', 'wb-women', 'ob-tuning'],
+    cityBuilt: emptyCityBuilt(),
+  }
+  assert.equal(canUpgrade('observatory', sky), false, '1.4.560 Easy never offers Sky Watch a hidden look')
+  assert.equal(canUpgrade('observatory', { ...sky, easyMode: false }), true, '1.4.560 Hard can still raise Sky Watch')
+  assert.deepEqual(EASY_HIDE_ART.lamps, ['scaffold'])
+  assert.deepEqual(EASY_ANCHOR_PAN.porch, { x: 548, y: 306 })
+  assert.deepEqual(EASY_TAG_SLOT_PAN.porch, { x: 502, y: 388 })
+  const porchPan = easyTagMetrics('porch', true)
+  assert.equal(porchPan.h, 34, '1.4.560 pan chips use a 14px line step')
+  assert.equal(easyTagMetrics('porch', false).h, 32, '1.4.560 wide chips keep the 13px line step')
+  const panFit = easyTagsFit(undefined, true)
+  assert.equal(panFit.ok, true, panFit.reason)
+  const map560 = readFileSync(new URL('../src/components/CityMap.tsx', import.meta.url), 'utf8')
+  const art560 = readFileSync(new URL('../src/components/city/CityPlotArt.tsx', import.meta.url), 'utf8')
+  const css560 = readFileSync(new URL('../src/styles/city.css', import.meta.url), 'utf8')
+  const index560 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  assert.match(art560, /export \{ EASY_HIDE_ART \}/)
+  assert.match(map560, /else if \(easy && selectedPlot\) bringInView\(selectedPlot\)/)
+  assert.match(map560, /easy && panFrame && !selectedPlot \? \(/)
+  assert.match(map560, /pan=\{Boolean\(panFrame\)\}/)
+  assert.match(css560, /\.is-easy-pan \.city-plot-tag \{\s*font-size:\s*14px/)
+  assert.match(css560, /\.easy-home-dock \.eyebrow/)
+  assert.doesNotMatch(index560, /EASY_ANCHOR_PAN/)
 }
 
 // Easy story 1.4.368: short-story body wraps on a phone (#517). Leave the issue open.
@@ -8987,7 +9456,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(picker, /mapLockReason/)
   assert.match(
     readFileSync(new URL('../src/nightWatch/maps/chain.ts', import.meta.url), 'utf8'),
-    /Beat round 10 on \$\{NIGHT_MAP_NAME\[prev\]\} to unlock/,
+    /Beat round \$\{EASY_MAP_UNLOCK_ROUND\} on \$\{NIGHT_MAP_NAME\[prev\]\} to unlock/,
   )
   for (const id of ['a2', 'far-hills', 'map03', 'map04', 'map05', 'map06']) {
     assert.match(picker, new RegExp(`data-map=\\{id\\}|NIGHT_MAP_IDS`))
@@ -10124,11 +10593,125 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
 // Night Watch 1.4.478: map sheet, a still clear bar, and a lamp icon that lets a walker through.
 {
   assert.equal(mapLockReason('a2'), null, '1.4.478 Silver City has no lock line')
-  assert.equal(mapLockReason('far-hills'), 'Beat round 10 on Silver City to unlock')
-  assert.equal(mapLockReason('map03'), 'Beat round 10 on The Far Hills to unlock')
-  assert.equal(mapLockReason('map04'), 'Beat round 10 on Peppermint Pass to unlock')
-  assert.equal(mapLockReason('map05'), 'Beat round 10 on Caramel Canyon to unlock')
-  assert.equal(mapLockReason('map06'), 'Beat round 10 on Licorice Woods to unlock')
+  assert.equal(mapLockReason('far-hills'), 'Beat round 8 on Silver City to unlock')
+  assert.equal(mapLockReason('map03'), 'Beat round 8 on The Far Hills to unlock')
+  assert.equal(mapLockReason('map04'), 'Beat round 8 on Peppermint Pass to unlock')
+  assert.equal(mapLockReason('map05'), 'Beat round 8 on Caramel Canyon to unlock')
+  assert.equal(mapLockReason('map06'), 'Beat round 8 on Licorice Woods to unlock')
+  const opened558 = applyNightMapClear({}, true, 'a2', 8)
+  assert.equal(mapIsOpen('far-hills', opened558), true, '1.4.558 On Easy, beating R8 unlocks the next map')
+  assert.equal(opened558.opened, true, '1.4.558 beating R8 records a new unlock')
+  assert.deepEqual(opened558.mazeBeat, ['a2'])
+  assert.equal(opened558.mapBest?.a2, 8)
+  const nine558 = applyNightMapClear({}, true, 'a2', 9)
+  assert.equal(mapIsOpen('far-hills', nine558), true, '1.4.558 beating R9 unlocks the next map')
+  const held558 = applyNightMapClear({}, true, 'a2', 7)
+  assert.equal(mapIsOpen('far-hills', held558), false, '1.4.558 R7 does not unlock the next map')
+  assert.equal(held558.opened, false)
+  assert.equal(held558.mazeBeat, undefined)
+  assert.equal(held558.mapBest?.a2, 7)
+  const again558 = applyNightMapClear(opened558, true, 'a2', 9)
+  assert.equal(again558.opened, false, '1.4.558 a later clear does not unlock the same map twice')
+  assert.equal(mapIsOpen('map03', again558), false, '1.4.558 Silver City does not skip to Peppermint')
+  const hills558 = applyNightMapClear(again558, true, 'far-hills', 8)
+  assert.equal(mapIsOpen('map03', hills558), true, '1.4.558 beating R8 on Far Hills unlocks Peppermint')
+  assert.equal(mapIsOpen('map04', hills558), false)
+  const kept558 = applyNightMapClear({ mazeBeat: ['a2', 'far-hills'], mapBest: { a2: 10 } }, true, 'a2', 8)
+  assert.deepEqual(kept558.mazeBeat, ['a2', 'far-hills'], '1.4.558 an older unlock flag is not reset')
+  assert.equal(mapUnlockRound(false), 10, '1.4.558 the Hard threshold is unchanged')
+  assert.equal(mapUnlockRound(true), 8, '1.4.558 Easy unlocks at round 8')
+  const hard8 = applyNightMapClear({}, false, 'a2', 8)
+  const hard10 = applyNightMapClear({}, false, 'a2', 10)
+  assert.equal(mapIsOpen('far-hills', hard8), false, '1.4.558 Hard round 8 does not open a map')
+  assert.equal(mapIsOpen('far-hills', hard10), false, '1.4.558 Hard round 10 still does not open the Easy chain')
+  assert.equal(hard8.opened, false)
+  assert.equal(hard10.opened, false)
+  assert.equal(hard10.mapBest, undefined, '1.4.558 Hard does not write an Easy best')
+  assert.equal(
+    resolveNightMap({ easy: false, unlocked: true, mazeBeat: ['a2'], mapBest: { a2: 9 }, saved: 'far-hills', playtest: false, query: null, session: null }),
+    'a2',
+    '1.4.558 Hard stays on A2',
+  )
+  const prior558 = parseUnknownSave({
+    kind: SAVE_KIND,
+    schemaVersion: 1,
+    appVersion: '1.4.554',
+    savedAt: '2026-10-28T18:00:00.000Z',
+    progress: {
+      started: true,
+      completed: ['ph-road'],
+      stars: { 'ph-road': 3 },
+      streak: 2,
+      bestStreak: 5,
+      defense: {
+        cleared: 4,
+        nights: ['2026-10-27'],
+        mapBest: { a2: 9 },
+      },
+    },
+  })
+  assert.equal(prior558.ok, true, '1.4.558 the old save still loads')
+  if (prior558.ok) {
+    assert.equal(mapIsOpen('far-hills', prior558.progress.defense), true, '1.4.558 an existing save with best round 9 shows the next map unlocked')
+    assert.equal(mapIsOpen('map03', prior558.progress.defense), false, '1.4.558 best round 9 on Silver City does not skip a map')
+    assert.deepEqual(prior558.progress.defense.mazeBeat, ['a2'], '1.4.558 load turns best round 9 into the unlock flag')
+    const flagged558 = normalizeProgress({
+      defense: { cleared: 3, nights: ['2026-10-02'], mazeBeat: ['a2', 'far-hills'], mapBest: { a2: 9 } },
+    })
+    assert.deepEqual(flagged558.defense.mazeBeat, ['a2', 'far-hills'], '1.4.558 an older unlock flag stays')
+    assert.equal(flagged558.defense.cleared, 3)
+    assert.equal(mapIsOpen('map03', flagged558.defense), true)
+    assert.equal(prior558.progress.defense.mapBest?.a2, 9)
+    assert.equal(prior558.progress.defense.cleared, 4, '1.4.558 the night count is not reset')
+    assert.deepEqual(prior558.progress.defense.nights, ['2026-10-27'])
+    assert.equal(prior558.progress.defense.farHills, undefined, '1.4.558 load does not invent a round 25 unlock')
+    assert.equal(prior558.progress.completed[0], 'ph-road')
+    assert.equal(prior558.progress.stars['ph-road'], 3)
+    assert.equal(prior558.progress.streak, 2)
+    assert.equal(prior558.progress.bestStreak, 5)
+  }
+  const eightSaved = normalizeProgress({ defense: { cleared: 1, nights: ['2026-10-01'], mapBest: { a2: 8 } } })
+  assert.equal(mapIsOpen('far-hills', eightSaved.defense), true, '1.4.558 a saved best of round 8 unlocks on load')
+  assert.deepEqual(eightSaved.defense.mazeBeat, ['a2'])
+  const short558 = normalizeProgress({ defense: { cleared: 1, nights: ['2026-10-01'], mapBest: { a2: 7 } } })
+  assert.equal(mapIsOpen('far-hills', short558.defense), false, '1.4.558 a saved best of round 7 stays locked')
+  assert.equal(short558.defense.mazeBeat, undefined)
+  assert.equal(short558.defense.cleared, 1)
+  assert.equal(mapIsOpen('far-hills', { farHills: true }), true, '1.4.562 the old Far Hills flag still opens the badge')
+  assert.equal(mapIsOpen('far-hills', { mazeBeat: ['a2'] }), true, '1.4.562 a round-8 unlock opens the badge without the old flag')
+  assert.equal(mapIsOpen('far-hills', { mapBest: { a2: 8 } }), true, '1.4.562 a saved best of round 8 opens the badge')
+  assert.equal(mapIsOpen('far-hills', { mapBest: { a2: 7 } }), false, '1.4.562 round 7 does not open the badge')
+  assert.equal(mapIsOpen('far-hills', {}), false, '1.4.562 a fresh night does not open the badge')
+  const hub562 = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
+  const home562 = hub562.slice(hub562.indexOf('easy-night-watch'), hub562.indexOf('easy-night-watch') + 500)
+  assert.match(home562, /mapIsOpen\('far-hills', progress\.defense\)/, '1.4.562 Home Far Hills badge uses mapIsOpen')
+  assert.doesNotMatch(home562, /progress\.defense\.farHills \?/, '1.4.562 Home no longer reads only the old flag')
+  const css562 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(
+    css562,
+    /\.defend-page\.is-easy-watch \.nw-skill-toast:not\(\.nw-map-toast\),/,
+    '1.4.562 Easy skill notes stay in the reader box',
+  )
+  assert.doesNotMatch(
+    css562,
+    /\.defend-page\.is-easy-watch \.nw-skill-toast,/,
+    '1.4.562 the reader box does not clip the map note',
+  )
+  const mapToast562 = css562.match(/\.defend-page\.is-easy-watch \.nw-map-toast \{[^}]*\}/)?.[0] ?? ''
+  assert.match(mapToast562, /top:\s*108px/, '1.4.562 the map note sits at 108px')
+  assert.match(mapToast562, /left:\s*50%/, '1.4.562 the map note is centered')
+  assert.match(mapToast562, /translateX\(-50%\)/, '1.4.562 the map note centers on itself')
+  assert.match(mapToast562, /font-size:\s*14px/, '1.4.562 the map note text is at least 14px')
+  assert.match(mapToast562, /pointer-events:\s*none/, '1.4.562 the map note does not take taps')
+  assert.doesNotMatch(
+    mapToast562,
+    /255,\s*204,\s*51|255,\s*159,\s*26|#ffcc33|#ff9f1a|#ffe7a3/i,
+    '1.4.562 the map note is not gold',
+  )
+  const screen562 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(screen562, /className="nw-skill-toast nw-map-toast"/, '1.4.562 the unlock line is the map note')
+  assert.match(screen562, /New map unlocked:/, '1.4.562 the unlock line names the new map')
+  assert.match(screen562, /, 4200\)/, '1.4.562 the map note holds for about 4.2s')
   const picker477 = readFileSync(new URL('../src/components/NightMapPicker.tsx', import.meta.url), 'utf8')
   const screen477 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   const board477 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
@@ -17101,7 +17684,11 @@ console.log('check-city: ok')
     '../src/components/RecallGate.tsx',
   ]) {
     const src = readFileSync(new URL(rel, import.meta.url), 'utf8')
-    assert.doesNotMatch(src, /easyTrail/, `${rel} keeps its current imports`)
+    // 1.4.567 (#843): RecallGate mounts the Lock In recall step, its one easyTrail import.
+    const own = rel.endsWith('RecallGate.tsx')
+      ? src.replace("import { LockInRecall } from '../easyTrail/lockIn/LockInRecall'\n", '')
+      : src
+    assert.doesNotMatch(own, /easyTrail/, `${rel} keeps its current imports`)
   }
   assert.match(
     et('match/registry.tsx'),
@@ -17412,8 +17999,8 @@ console.log('check-city: ok')
 
   assert.deepEqual(
     readdirSync(new URL('easyTrail/lockIn/', srcRoot335)).sort(),
-    ['HoldPractice.tsx', 'LockInEmpty.tsx', 'index.ts'],
-    '1.4.335 Lock In home is HoldPractice + shelf only (no new stylesheet)',
+    ['HoldPractice.tsx', 'LockInEmpty.tsx', 'LockInRecall.tsx', 'index.ts'],
+    '1.4.335 Lock In home is HoldPractice + shelf only (no new stylesheet); 1.4.567 adds the recall step',
   )
   assert.match(
     home335,
@@ -17441,11 +18028,13 @@ console.log('check-city: ok')
       'content/evidence',
       'content/story',
       'lib/easy',
+      'lib/memory',
       'lib/recall',
       'lib/tiers',
       'components/EasyBack',
       'components/RecallGate',
       'store/progress',
+      'easyTrail/review/QuickReview',
       'types',
     ],
     '1.4.503 HoldPractice reads the same modules, and the tip box is not one of them',
@@ -17465,7 +18054,7 @@ console.log('check-city: ok')
         '    (holdId === openLine || focusId === openLine) &&',
         '    !easyLineTaught(progress, openLine)',
         '  const holdPractice =',
-        '    Boolean(autoQuiz && quizBrief && !quizReplacesMatch && (easy || !focusedEntry || focusedOpen))',
+        '    Boolean(autoQuiz && quizBrief && ((easy && debugLockIn) || (!quizReplacesMatch && (easy || !focusedEntry || focusedOpen))))',
         '',
         '  if (easy && lockInEmpty) {',
         '    return <LockInEmpty onNavigate={onNavigate} />',
@@ -17509,7 +18098,7 @@ console.log('check-city: ok')
   )
   assert.match(
     home335,
-    /if \(easy && advancing\) \{\n\s*recordHeld\(quizBrief\.id\)\n\s*recordReview\(\{\n\s*id: quizBrief\.id,\n\s*pillar,\n\s*kind: 'encode',\n\s*today,\n\s*clean: result\.clean,\n\s*peeked: false,\n\s*elaborated: false,\n\s*\}\)\n\s*recordLessonHold\(quizBrief\.id, result\.clean\)\n\s*onNavigate\(\{ name: 'hub' \}\)\n\s*return\n\s*\}/,
+    /if \(easy && advancing\) \{\n\s*recordHeld\(quizBrief\.id\)\n\s*recordReview\(\{\n\s*id: quizBrief\.id,\n\s*pillar,\n\s*kind: 'encode',\n\s*today,\n\s*clean: result\.clean,\n\s*peeked: false,\n\s*elaborated: false,\n\s*format: 'A',\n\s*\}\)\n\s*recordLessonHold\(quizBrief\.id, result\.clean\)\n\s*onNavigate\(\{ name: 'hub' \}\)\n\s*return\n\s*\}/,
     '1.4.503 Easy encode records held / review / lesson hold, then Home. The tip box stays off.',
   )
   assert.doesNotMatch(home335, /offerSupportToast/, '1.4.503 HoldPractice does not offer the tip box')
@@ -17529,7 +18118,7 @@ console.log('check-city: ok')
     '1.4.335 HoldPractice keeps the same practice classes',
   )
   assert.doesNotMatch(home335, /style=|\.css'/, '1.4.335 no inline style or stylesheet on the moved practice')
-  assert.match(home335, /<section className="rehearse-anchor">\n\s*<p className="eyebrow">\{easy \? EASY\.saved : 'Takeaway'\}<\/p>\n\s*\{easy \? null : <h1>\{focusedEntry\?\.title \?\? STORY\.tapTakeaway\}<\/h1>\}\n\s*<RecallGate\n/)
+  assert.match(home335, /<section className="rehearse-anchor">\n\s*<p className="eyebrow">\{easy \? EASY\.saved : 'Takeaway'\}<\/p>\n\s*\{easy \? null : <h1>\{focusedEntry\?\.title \?\? STORY\.tapTakeaway\}<\/h1>\}\n\s*\{keptReview \? \(\n\s*<QuickReview\n/)
 
   // Journal no longer inlines the rehearse / RecallGate encode tree.
   assert.doesNotMatch(
@@ -17575,7 +18164,7 @@ console.log('check-city: ok')
   assert.doesNotMatch(src335('App.tsx'), /HoldPractice|easyTrail/, '1.4.335 App has no Lock In route')
   assert.match(
     src335('App.tsx'),
-    /\{view\.name === 'journal' \? \(\n\s*<Journal\n\s*focusId=\{view\.focusId\}\n\s*autoQuiz=\{view\.autoQuiz\}\n\s*lockInEmpty=\{view\.lockInEmpty\}\n\s*onNavigate=\{go\}\n\s*\/>\n\s*\) : null\}/,
+    /\{view\.name === 'journal' \? \(\n\s*<Journal\n\s*focusId=\{view\.focusId\}\n\s*autoQuiz=\{view\.autoQuiz\}\n\s*lockInEmpty=\{view\.lockInEmpty\}\n\s*debugLockIn=\{view\.debugLockIn\}\n\s*onNavigate=\{go\}\n\s*\/>\n\s*\) : null\}/,
     '1.4.335 App still mounts Journal the same way',
   )
   assert.match(
@@ -19771,6 +20360,7 @@ assert.match(snapHoldScan, /replay is locked on the win/, '1.4.481 a second tap 
 await import('./check-story-snap.mjs').then((mod) => mod.checkSnapHold())
 await import('./check-live-prove.mjs').then((mod) => mod.checkLiveProve())
 await import('./check-hide-hard-labels.mjs')
+await import('./check-home-porch.mjs').then((mod) => mod.checkHomePorch())
 await import('./check-golden-live.mjs').then((mod) => mod.checkGoldenLive())
 await import('./check-gem-tap-live.mjs').then((mod) => mod.checkGemTapLive())
 await import('./check-gem-pop-live.mjs').then((mod) => mod.checkGemPopLive())

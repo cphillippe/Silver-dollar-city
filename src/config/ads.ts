@@ -91,11 +91,13 @@ export interface QuietPauseRoute {
   autoQuiz?: boolean
   focusId?: string
   /**
-   * Set only by the Lock In same-proof recap. Home from that screen is the
-   * clean landing after LOCKED! and Say this tomorrow. Opening a stored
-   * line from the map does not set this.
+   * Retired route flag. No Lock In screen sets it any more: Continue after
+   * LOCKED! goes straight Home with no pause. Opening a stored line from the
+   * map does not set it.
    */
   sceneRecap?: boolean
+  /** Settings debug jump into Lock In. Still Lock In, so still no pause. */
+  debugLockIn?: boolean
   /**
    * Set only by a finished daily or challenge Town return. A back button
    * during the scene leaves this off, so the pause does not fire mid-play.
@@ -107,14 +109,15 @@ export interface QuietPauseRoute {
  * BLOCK — never during, and never on the way out (including Home).
  * `link` is Match plus every arcade and source-dig mechanic.
  * Dig deeper has no route; it sits on these screens.
- * `learn` is teach. `journal` is Lock In, Journal, and the recap
- * (the recap’s Home landing is the one exception in `quietPauseAllowed`).
+ * `learn` is teach. `journal` is Lock In and Journal. `quick-review` is the
+ * Lock In review of a kept line.
  * `defend` is Night Watch. `welcome` is first run.
  */
 export const QUIET_PAUSE_BLOCKED_VIEWS = [
   'link',
   'learn',
   'journal',
+  'quick-review',
   'defend',
   'settings',
   'welcome',
@@ -148,7 +151,7 @@ const SCENE_RETURNS = new Set<string>(QUIET_PAUSE_SCENE_RETURNS)
 
 /**
  * Easy Lock In quiz is not a between-scene break.
- * A correct why must show LOCKED!, then the same-proof recap.
+ * LOCKED! and Continue go straight Home with no pause.
  * The quiet pause does not run on the way out of that quiz.
  */
 export function lockInQuizBlocksPause(viewName: ViewName, autoQuiz = false): boolean {
@@ -160,15 +163,15 @@ export function lockInQuizBlocksPause(viewName: ViewName, autoQuiz = false): boo
  * Cooldown, ads pref, and remove-ads stay in `App.go()` — this is only the allow-list.
  *
  * Allow:
- * - Lock In same-proof recap → Home (`sceneRecap`). The recap closes and Home
- *   is what mounts; the pause is not on the quiz or on Say this tomorrow.
+ * - Lock In → Home has no pause. The `sceneRecap` branch below is unreachable
+ *   from Lock In now and stays only as a retired route.
  * - Finished daily or challenge → Home (`afterScene`). Not the back button.
  *
  * Block:
  * - Home → lesson (no enter pause).
  * - Match / arcade / source-dig (`link`), teach (`learn`), Night Watch (`defend`).
- * - Lock In quiz (`journal` + autoQuiz), Journal list, and a stored line that
- *   is not the Lock In recap.
+ * - Lock In quiz (`journal` + autoQuiz), kept-card review (`quick-review`),
+ *   Journal list, and a stored line.
  * - Settings, first run, shop, profile, vista, area, pack street.
  * - Dig: no view of its own; source-dig is `link`, and Dig deeper is on blocked screens.
  */
