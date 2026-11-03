@@ -28,6 +28,18 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.568',
+    title: 'Night Watch: the lamp mark draws on and stays clear',
+    when: '2026-11-03',
+    items: [
+      'A new piece of the lamp mark now draws on, line by line.',
+      'The upgrade card no longer sits on top of the lamp mark.',
+      'The mark stays on the board, even for a lamp near the top.',
+      'The orange lines are brighter and easier to see.',
+      'Refs #923.',
+    ],
+  },
+  {
     version: '1.4.567',
     title: 'Easy Lock In: remember first, then why',
     when: '2026-11-02',
