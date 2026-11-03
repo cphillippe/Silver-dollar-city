@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { isFreeSpot } from '../lib/lampPlace'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
@@ -10,6 +10,9 @@ import {
   TOWER_TREE_LESSON_H,
   type TowerCardPoint,
 } from '../lib/towerCardPlace'
+import { mapGlyphRect } from '../nightWatch/lampGlyphPlace'
+import { lampGlyphStage } from '../nightWatch/lampGlyph'
+import { LampUpgradeGlyph } from './LampUpgradeGlyph'
 import { boostCost, combatTier, TIER_MARK, TOOL_TIER_MAX } from '../lib/watchTools'
 import {
   BRIGHT_COST,
@@ -194,11 +197,23 @@ export function DefendTowerCard({
       TREE_PATHS.some((path) => canTake(paths, path, gate).gate === 'lesson'),
   )
   const cardH = easy && paths ? (lessonCue ? TOWER_TREE_LESSON_H : TOWER_TREE_H) : TOWER_CARD_H
-  const placed = placeTowerCard(point, board, clearOf, cameraScale, reserveBottom, cardH)
+  const markOnMap = Boolean(
+    easy && paths && onUpgradePath && !isIncense(ability) && !isCross(ability) && !isBell(ability) && !isCandle(ability),
+  )
+  const glyph = markOnMap
+    ? mapGlyphRect(point.left, point.top, cameraScale, { left: 0, top: 0, right: board.w, bottom: board.h })
+    : null
+  const [paintH, setPaintH] = useState(0)
+  const placed = placeTowerCard(point, board, clearOf, cameraScale, reserveBottom, cardH, glyph, paintH)
   const levelLine = maxed ? TIER_MARK[tier] : `${TIER_MARK[next]} · ${cost}✦`
   const bursting = Boolean(levelBurst && levelBurst.to > levelBurst.from)
   const fromMark = bursting ? TIER_MARK[levelBurst!.from] : ''
   const toMark = bursting ? TIER_MARK[levelBurst!.to] : ''
+
+  useLayoutEffect(() => {
+    const painted = cardRef.current?.getBoundingClientRect().height ?? 0
+    setPaintH((prev) => (Math.abs(prev - painted) < 0.5 ? prev : painted))
+  })
 
   useEffect(() => {
     setPullAsk(false)
@@ -892,6 +907,11 @@ export function DefendTowerCard({
           </div>
         ) : null}
         <p className="defend-tower-tool">{label}</p>
+        {markOnMap && !placed.markClear && paths ? (
+          <div className="defend-tower-mark" data-glyph-header="yes" data-glyph-stage={lampGlyphStage(paths)}>
+            <LampUpgradeGlyph paths={paths} variant="rail" />
+          </div>
+        ) : null}
         {TREE_PATHS.map((path) => {
           const rank = paths[path]
           const buy = canTake(paths, path, gate)

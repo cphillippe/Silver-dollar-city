@@ -79,6 +79,19 @@ export function visualStage(id: CityPlotId, tier: number): CityStage {
   return stageFromTier(tier)
 }
 
+/**
+ * Looks Easy does not draw. Hard still draws every stage.
+ * Star lamps and the gate skip a bare scaffold. Sky Watch stays a lot.
+ */
+export const EASY_HIDE_ART: Partial<Record<CityPlotId, CityStage[]>> = {
+  observatory: ['scaffold', 'built', 'lit'],
+  gate: ['scaffold'],
+  lamps: ['scaffold'],
+}
+
+const easyHides = (id: CityPlotId, tier: number) =>
+  Boolean(EASY_HIDE_ART[id]?.includes(visualStage(id, tier)))
+
 /** Next saved tier. Star lamps skip a step that would draw the same picture. */
 export function nextBuildTier(id: CityPlotId, applied: number, earned: number): number {
   if (earned <= applied) return applied
@@ -135,16 +148,21 @@ export function appliedTier(id: CityPlotId, progress: ProgressState): number {
 }
 
 export function canUpgrade(id: CityPlotId, progress: ProgressState): boolean {
-  return earnedTier(id, progress) > appliedTier(id, progress)
+  const earned = earnedTier(id, progress)
+  if (earned <= appliedTier(id, progress)) return false
+  // Easy is not ready for a look the map will not draw. Hard keeps every tier.
+  return !(progress.easyMode && easyHides(id, earned))
 }
 
 export function applyUpgrade(progress: ProgressState, id: CityPlotId): ProgressState {
   const earned = earnedTier(id, progress)
   const applied = appliedTier(id, progress)
   const nextTier = nextBuildTier(id, applied, earned)
-  if (nextTier <= applied) return progress
+  let t = nextTier
+  while (progress.easyMode && t < earned && easyHides(id, t)) t += 1
+  if (t <= applied) return progress
   const cityBuilt = { ...(progress.cityBuilt ?? snapshotCityBuilt(progress)) }
-  cityBuilt[id] = nextTier
+  cityBuilt[id] = t
   return { ...progress, cityBuilt }
 }
 
@@ -404,9 +422,18 @@ export function easyTagLines(tag: string): string[] {
   return tag.includes(' ') ? tag.split(' ') : [tag]
 }
 
+/**
+ * Easy phone pan only. East porch moves in from the plate edge so the house
+ * fits on a 375 and 390 screen. Hard and wide frames keep ANCHOR.
+ */
+export const EASY_ANCHOR_PAN: Partial<Record<CityPlotId, { x: number; y: number }>> = {
+  porch: { x: 548, y: 306 },
+}
+
 /** Pan-mode chip slots (portrait phone Easy). Wider Easy frames keep EASY_TAG_SLOT. */
 export const EASY_TAG_SLOT_PAN: Partial<Record<CityPlotId, { x: number; y: number }>> = {
   journal: { x: 292, y: 388 },
+  porch: { x: 502, y: 388 },
 }
 
 export const easyTagSlot = (id: CityPlotId, pan: boolean) =>
@@ -417,8 +444,10 @@ export function easyTagMetrics(id: CityPlotId, pan = false) {
   const lines = easyTagLines(tag)
   const slot = easyTagSlot(id, pan)
   const longest = Math.max(...lines.map((line) => line.length))
-  const w = Math.max(70, longest * 8.4 + 16)
-  const h = lines.length * 13 + 6
+  const step = pan ? 14 : 13
+  const charW = pan ? 9.0 : 8.4
+  const w = Math.max(70, longest * charW + 16)
+  const h = lines.length * step + 6
   const x0 = slot.x - w / 2
   const x1 = slot.x + w / 2
   const y0 = slot.y - 14
@@ -426,8 +455,8 @@ export function easyTagMetrics(id: CityPlotId, pan = false) {
   return { id, tag, lines, x0, x1, y0, y1, w, h }
 }
 
-export function easyTagsFit(ids: CityPlotId[] = EASY_NAMED_PLOTS) {
-  const boxes = ids.map((id) => easyTagMetrics(id))
+export function easyTagsFit(ids: CityPlotId[] = EASY_NAMED_PLOTS, pan = false) {
+  const boxes = ids.map((id) => easyTagMetrics(id, pan))
   const { x0: sx0, y0: sy0, x1: sx1, y1: sy1 } = EASY_MAP_SAFE
   const gap = 8
   for (const box of boxes) {

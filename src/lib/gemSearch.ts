@@ -23,6 +23,7 @@ import {
   sameCell,
   shuffleSeed,
   scanBonusOnBoard,
+  extendStraightTap,
   snapFingerPath,
   tryAddToPath,
   tryPlaceWord,
@@ -43,6 +44,7 @@ export {
   pathLetters,
   pathSpellings,
   plantCandidates,
+  extendStraightTap,
   sameCell,
   snapFingerPath,
   tryAddToPath,
@@ -84,6 +86,11 @@ export interface GemPuzzle {
   planted: GemWord[]
   bonusPaths: Record<string, GemCoord[]>
 }
+
+/** Easy tap: finger travel at or under this stays a tap. A longer slip does not pick. */
+export const GEM_TAP_MAX_TRAVEL_PX = 6
+/** Easy tap: a press held up to about this long, with little movement, still picks a letter. */
+export const GEM_TAP_MAX_MS = 800
 
 const MIN_LEN = 3
 const MAX_LEN = 8

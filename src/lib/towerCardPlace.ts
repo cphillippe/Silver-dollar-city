@@ -36,6 +36,17 @@ function clampCardTop(
   return Math.max(MARGIN, Math.min(top, floor - cardHeight - MARGIN))
 }
 
+/** The card keeps this many pixels off the lamp mark. The drawn mark can land half a pixel off its predicted box, so this sits above the 4px the spec needs. */
+export const GLYPH_CLEAR = 6
+
+/** Screen box of the lamp mark, in the same pixels as the card. */
+export interface TowerGlyphBox {
+  left: number
+  top: number
+  right: number
+  bottom: number
+}
+
 function overlaps(
   a: { l: number; r: number; t: number; b: number },
   b: { l: number; r: number; t: number; b: number },
@@ -94,9 +105,27 @@ export function placeTowerCard(
   scale = 0.55,
   reserveBottom = 0,
   cardHeight = TOWER_CARD_H,
-): { left: number; top: number; side: 'above' | 'below' } {
+  glyph: TowerGlyphBox | null = null,
+  /** Height the card really paints, when it is taller than `cardHeight`. Only the mark test reads it. */
+  paintHeight = cardHeight,
+): { left: number; top: number; side: 'above' | 'below'; markClear: boolean } {
   const centered = cardLeft(point.left, board.w)
-  const above = point.top - cardHeight - GAP
+  const glyphZone = glyph
+    ? {
+        l: glyph.left - GLYPH_CLEAR,
+        r: glyph.right + GLYPH_CLEAR,
+        t: glyph.top - GLYPH_CLEAR,
+        b: glyph.bottom + GLYPH_CLEAR,
+      }
+    : null
+  const markH = Math.max(cardHeight, paintHeight)
+  const glyphHits = (card: { left: number; top: number }) =>
+    glyphZone &&
+    overlaps({ l: card.left, r: card.left + TOWER_CARD_W, t: card.top, b: card.top + markH }, glyphZone)
+      ? 1
+      : 0
+  let above = point.top - cardHeight - GAP
+  if (glyphZone && glyphHits({ left: centered, top: above })) above = Math.min(above, glyphZone.t - markH)
   const below = point.top + GAP
   const legacyTop = above < MARGIN ? below : above
   const top = clampCardTop(legacyTop, board.h, cardHeight, reserveBottom)
@@ -105,24 +134,30 @@ export function placeTowerCard(
     top,
     side: cardSide(top, point.top, cardHeight),
   }
-  const hits = (card: { left: number; top: number }) =>
+  const lampHits = (card: { left: number; top: number }) =>
     others.reduce((n, lamp) => n + (upgradeControlsHitLamp(card, lamp, scale, cardHeight) ? 1 : 0), 0)
-  if (hits(legacy) === 0) return legacy
+  if (lampHits(legacy) + glyphHits(legacy) === 0) return { ...legacy, markClear: true }
   const maxLeft = Math.max(MARGIN, board.w - TOWER_CARD_W - RAIL)
   const maxTop = Math.max(MARGIN, board.h - cardHeight - MARGIN - reserveBottom)
-  let best = legacy
-  let bestKey = hits(legacy) * 10000 + 1e6
-  for (let left = MARGIN; left <= maxLeft + 0.1; left += 8) {
-    for (let top = MARGIN; top <= maxTop + 0.1; top += 8) {
-      const card = { left, top }
-      const covered = hits(card)
-      const dist = Math.hypot(left + TOWER_CARD_W / 2 - point.left, top + cardHeight / 2 - point.top)
-      const key = covered * 10000 + dist
-      if (key < bestKey) {
-        bestKey = key
-        best = { left, top, side: cardSide(top, point.top, cardHeight) }
+  const search = (markWeight: number) => {
+    let best = legacy
+    let bestKey = (lampHits(legacy) + markWeight * glyphHits(legacy)) * 10000 + 1e6
+    for (let left = MARGIN; left <= maxLeft + 0.1; left += 8) {
+      for (let top = MARGIN; top <= maxTop + 0.1; top += 8) {
+        const card = { left, top }
+        const covered = lampHits(card) + markWeight * glyphHits(card)
+        const dist = Math.hypot(left + TOWER_CARD_W / 2 - point.left, top + cardHeight / 2 - point.top)
+        const key = covered * 10000 + dist
+        if (key < bestKey) {
+          bestKey = key
+          best = { left, top, side: cardSide(top, point.top, cardHeight) }
+        }
       }
     }
+    return best
   }
-  return best
+  const clear = search(1)
+  if (glyphHits(clear) === 0) return { ...clear, markClear: true }
+  // No slot keeps the card off the mark. Place it for the other lamps only; the card shows its own copy of the mark.
+  return { ...search(0), markClear: false }
 }

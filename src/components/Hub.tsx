@@ -22,6 +22,7 @@ import { ShareInvite } from './ShareInvite'
 import { CityMap } from './CityMap'
 import { AbilityMark } from './GemMark'
 import { unlockedWatchAbilities } from '../lib/defend'
+import { mapIsOpen } from '../nightWatch/maps/chain'
 import { TIER_MARK, toolTier, WATCH_TOOLS } from '../lib/watchTools'
 import {
   areaGateCopy,
@@ -288,7 +289,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           <section className="night-watch easy-night-watch" aria-label="Night Watch">
             <p className="eyebrow">
               Night Watch
-              {progress.defense.farHills ? <span className="nw-area-badge">Far Hills</span> : null}
+              {mapIsOpen('far-hills', progress.defense) ? <span className="nw-area-badge">Far Hills</span> : null}
             </p>
             <p className="quiet">{EASY.nightLead}</p>
             <button

@@ -137,7 +137,7 @@ import { FarHillsUnlock } from './FarHillsUnlock'
 import { NightMapPicker } from './NightMapPicker'
 import { activeNightRoadD } from '../nightWatch/path/data'
 import { applyNightMap } from '../nightWatch/maps/bind'
-import { mapIsOpen, nextMap, NIGHT_MAP_NAME } from '../nightWatch/maps/chain'
+import { clearOpensNextMap, mapIsOpen, nextMap, NIGHT_MAP_NAME } from '../nightWatch/maps/chain'
 import { playableNightMap } from '../nightWatch/maps/mazeMaps'
 import { resolveNightMap, type NightMapId } from '../nightWatch/maps/resolve'
 import {
@@ -515,7 +515,7 @@ function placeMissToast() {
 }
 
 export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
-  const { progress, recordNight, markMet, markMiss, chooseNightMap, recordMazeBeat } = useProgress()
+  const { progress, recordNight, markMet, markMiss, chooseNightMap, recordMazeBeat, recordMapBest } = useProgress()
   const easy = isEasy(progress)
   const phoneSe = usePhoneSe()
   const plateFill = easy && phoneSe
@@ -640,6 +640,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const mapIdRef = useRef<NightMapId>('a2')
   const mazeBeatRef = useRef(recordMazeBeat)
   mazeBeatRef.current = recordMazeBeat
+  const recordMapBestRef = useRef(recordMapBest)
+  recordMapBestRef.current = recordMapBest
   const mazeBeatListRef = useRef<readonly string[]>([])
   mazeBeatListRef.current = progress.defense.mazeBeat ?? []
   const waveRef = useRef<NightWave | null>(null)
@@ -1937,7 +1939,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         return
       }
       if (fate === 'clear') {
-        if (easy && wave === 9) {
+        if (easy) recordMapBestRef.current(mapIdRef.current, wave + 1)
+        if (clearOpensNextMap(easy, wave + 1)) {
           const id = mapIdRef.current
           const known = mazeBeatListRef.current.includes(id)
           const opened = nextMap(id)
