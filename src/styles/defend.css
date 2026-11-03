@@ -6379,7 +6379,7 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
 }
 
 /* 1.4.569: when no slot keeps the card off the map mark, the card carries its own copy in the header. */
-.defend-tower-card .defend-tower-mark {
+.defend-page.is-easy-watch .defend-tower-card .defend-tower-mark {
   position: absolute;
   top: 8px;
   right: 52px;
@@ -6389,7 +6389,7 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   pointer-events: none;
 }
 
-.defend-tower-card .defend-tower-mark .lamp-upgrade-glyph {
+.defend-page.is-easy-watch .defend-tower-card .defend-tower-mark .lamp-upgrade-glyph {
   display: block;
   width: 28px;
   height: 28px;
