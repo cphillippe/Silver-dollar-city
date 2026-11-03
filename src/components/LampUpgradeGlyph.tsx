@@ -1,6 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import type { LampPaths } from '../nightWatch/upgradeTree'
-import { TOWER_LAMP_SPRITE } from '../nightWatch/towers'
 import {
   LAMP_GLYPH_VIEW,
   clampGlyphStage,
@@ -9,15 +8,9 @@ import {
   lampGlyphTone,
   type LampGlyphMark,
 } from '../nightWatch/lampGlyph'
+import { MAP_GLYPH_PX, mapGlyphRect } from '../nightWatch/lampGlyphPlace'
 
-/** Map mark, in CSS pixels, on a phone. The rail mark is larger in CSS. */
-const MAP_GLYPH_PX = 20
-const MAP_GAP_PX = 6
 const DRAW_MS = 200
-
-const LAMP_TOP = -(TOWER_LAMP_SPRITE.h - TOWER_LAMP_SPRITE.footY)
-/** Type mark sits above the lamp art. The glyph clears that box. */
-const TYPE_MARK_TOP = -78
 
 export interface LampUpgradeGlyphProps {
   paths: LampPaths
@@ -38,7 +31,7 @@ export function LampUpgradeGlyph({ paths, variant, stage: stageOverride }: LampU
   const svgRef = useRef<SVGSVGElement | SVGGElement>(null)
   const prevStage = useRef<number | null>(null)
   const [drawFrom, setDrawFrom] = useState<number | null>(null)
-  const [box, setBox] = useState({ units: 26, y: LAMP_TOP - 8 - 26 })
+  const [box, setBox] = useState({ units: 26, x: -13, y: -64 - 8 - 26 })
 
   useLayoutEffect(() => {
     if (prevStage.current == null) {
@@ -61,13 +54,31 @@ export function LampUpgradeGlyph({ paths, variant, stage: stageOverride }: LampU
     if (variant !== 'map') return
     const node = svgRef.current
     const board = node?.ownerSVGElement
+    const lamp = node?.parentNode as SVGGraphicsElement | null | undefined
     const ctm = board?.getScreenCTM()
-    if (!ctm) return
+    const feet = lamp?.getScreenCTM?.()
+    if (!ctm || !feet) return
     const px = Math.hypot(ctm.a, ctm.b)
     if (!(px > 0.05)) return
+    const frame = board?.closest('.defend-frame')?.getBoundingClientRect()
+    const edge = board?.getBoundingClientRect()
+    const clip = edge
+      ? {
+          left: Math.max(edge.left, frame?.left ?? edge.left),
+          top: Math.max(edge.top, frame?.top ?? edge.top),
+          right: Math.min(edge.right, frame?.right ?? edge.right),
+          bottom: Math.min(edge.bottom, frame?.bottom ?? edge.bottom),
+        }
+      : null
+    const rect = mapGlyphRect(feet.e, feet.f, px, clip)
     const units = MAP_GLYPH_PX / px
-    const y = Math.min(LAMP_TOP, TYPE_MARK_TOP) - MAP_GAP_PX / px - units
-    setBox((prev) => (Math.abs(prev.units - units) < 0.15 && Math.abs(prev.y - y) < 0.15 ? prev : { units, y }))
+    const x = (rect.left - feet.e) / px
+    const y = (rect.top - feet.f) / px
+    setBox((prev) =>
+      Math.abs(prev.units - units) < 0.15 && Math.abs(prev.x - x) < 0.15 && Math.abs(prev.y - y) < 0.15
+        ? prev
+        : { units, x, y },
+    )
   })
 
   const drawing = (piece: LampGlyphMark) => drawFrom != null && piece.stage > drawFrom && piece.stage <= stage
@@ -82,6 +93,7 @@ export function LampUpgradeGlyph({ paths, variant, stage: stageOverride }: LampU
           cx={piece.cx}
           cy={piece.cy}
           r={piece.r}
+          pathLength={1}
           data-glyph-piece={piece.stage}
           data-glyph-draw={fresh ? 'yes' : 'no'}
         />
@@ -92,6 +104,7 @@ export function LampUpgradeGlyph({ paths, variant, stage: stageOverride }: LampU
         key={piece.key}
         className={`is-stroke${fresh ? ' is-draw' : ''}`}
         d={piece.d}
+        pathLength={1}
         data-glyph-piece={piece.stage}
         data-glyph-draw={fresh ? 'yes' : 'no'}
       />
@@ -112,7 +125,7 @@ export function LampUpgradeGlyph({ paths, variant, stage: stageOverride }: LampU
       <g
         ref={svgRef}
         {...marks}
-        transform={`translate(${-box.units / 2} ${box.y}) scale(${scale})`}
+        transform={`translate(${box.x} ${box.y}) scale(${scale})`}
       >
         <rect className="is-pad" x={0} y={0} width={LAMP_GLYPH_VIEW} height={LAMP_GLYPH_VIEW} />
         {body}

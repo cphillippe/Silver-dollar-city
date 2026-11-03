@@ -6129,7 +6129,7 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
 }
 
 .lamp-upgrade-glyph.is-strong .is-gap {
-  stroke: #c46a28;
+  stroke: #e98a3c;
 }
 
 .lamp-upgrade-glyph.is-rest .is-gap {
@@ -6169,16 +6169,20 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
 }
 
 .lamp-upgrade-glyph.is-strong .is-stroke {
-  stroke: #c46a28;
+  stroke: #e98a3c;
 }
 
 .lamp-upgrade-glyph .is-draw {
-  stroke-dasharray: 40;
-  stroke-dashoffset: 40;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
   animation: lamp-glyph-draw 200ms ease-out forwards;
 }
 
 @keyframes lamp-glyph-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+
   to {
     stroke-dashoffset: 0;
   }

@@ -55,10 +55,10 @@ if (bought.length < LAMP_GLYPH_STEP_MAX) {
   throw new Error(`lamp glyph table is missing a row for one of the ${LAMP_GLYPH_STEP_MAX} buys`)
 }
 
-/** Sky blue, warm amber, and the quiet resting dot. None of these is the gold cue. */
+/** Sky blue, bright amber, and the quiet resting dot. None of these is the gold cue. */
 export const LAMP_GLYPH_COLOR = {
   far: '#5eb6ff',
-  strong: '#c46a28',
+  strong: '#e98a3c',
   rest: 'rgba(255, 246, 232, 0.55)',
 } as const
 
