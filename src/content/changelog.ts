@@ -28,6 +28,21 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.571',
+    title: 'Night Run: fair robbers, a safe lamp and easy turns',
+    when: '2026-11-03',
+    items: [
+      'Night Run: a tap on a robber always pops it. That tap never costs a heart.',
+      'One hit costs one heart and moves you back one square. Then you get a short safe moment.',
+      'After Try again at a lamp, robbers wait before they chase you.',
+      'The Find goal and the small map stay on one goal you can reach until you get there.',
+      'A quick tap on Turn turns you. Hold Turn to turn slowly.',
+      'Wait for green goes away as soon as the button says GO!',
+      'Hard stays the same.',
+      'Refs #793.',
+    ],
+  },
+  {
     version: '1.4.569',
     title: 'Night Watch: the upgrade card never covers the lamp mark',
     when: '2026-11-03',
