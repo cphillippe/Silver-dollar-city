@@ -28,6 +28,18 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.569',
+    title: 'Night Watch: the upgrade card never covers the lamp mark',
+    when: '2026-11-03',
+    items: [
+      'The upgrade card now keeps a little space between itself and the lamp mark.',
+      'On a tight screen the card shows its own copy of the mark, so you never lose it.',
+      'The Bright button no longer glows gold.',
+      'The orange lines are a touch brighter again.',
+      'Refs #923.',
+    ],
+  },
+  {
     version: '1.4.568',
     title: 'Night Watch: the lamp mark draws on and stays clear',
     when: '2026-11-03',

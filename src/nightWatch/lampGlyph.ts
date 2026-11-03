@@ -58,7 +58,7 @@ if (bought.length < LAMP_GLYPH_STEP_MAX) {
 /** Sky blue, bright amber, and the quiet resting dot. None of these is the gold cue. */
 export const LAMP_GLYPH_COLOR = {
   far: '#5eb6ff',
-  strong: '#e98a3c',
+  strong: '#ff7d2d',
   rest: 'rgba(255, 246, 232, 0.55)',
 } as const
 

@@ -1623,6 +1623,16 @@ function glyphArea(a, b) {
   return w * h
 }
 
+/** Clear space between two boxes along the nearer axis. 0 when they touch or overlap. */
+function glyphGap(a, b) {
+  if (!a || !b) return Infinity
+  const dx = Math.max(0, Math.max(a.left, b.left) - Math.min(a.right, b.right))
+  const dy = Math.max(0, Math.max(a.top, b.top) - Math.min(a.bottom, b.bottom))
+  return Math.max(dx, dy)
+}
+
+const GLYPH_MIN_GAP = 4
+
 function glyphInside(box, frame, slack = 0.5) {
   return box.left >= frame.left - slack && box.right <= frame.right + slack && box.top >= frame.top - slack && box.bottom <= frame.bottom + slack
 }
@@ -1691,6 +1701,16 @@ async function glyphSetup(page) {
         stage: glyph?.getAttribute('data-glyph-stage') ?? null,
         draw,
         card: box(document.querySelector('.defend-tower-card')),
+        header: (() => {
+          const mark = document.querySelector('.defend-tower-card [data-glyph-header="yes"]')
+          const svg = mark?.querySelector('.lamp-upgrade-glyph')
+          if (!mark || !svg) return null
+          return {
+            stage: svg.getAttribute('data-glyph-stage'),
+            pieces: svg.querySelectorAll('.is-stroke, .is-gap').length,
+            box: box(svg),
+          }
+        })(),
         board: box(document.querySelector('.defend-board')),
         frame: box(document.querySelector('.defend-frame')),
         hearts: many('.defend-hearts'),
@@ -1726,8 +1746,8 @@ async function glyphSetup(page) {
 }
 
 /** Gold painted anywhere on the board page, and on the one mark under test. Same rule as before 1.4.568. */
-function readGold(page, tool) {
-  return page.evaluate((toolId) => {
+function readGold(page) {
+  return page.evaluate(() => {
     const goldish = (value) => {
       const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
       let match
@@ -1741,12 +1761,9 @@ function readGold(page, tool) {
       return false
     }
     const pieceGold = []
-    const glyph = toolId ? document.querySelector(`.defend-pad[data-tower-type="${toolId}"] .lamp-upgrade-glyph`) : null
-    if (glyph) {
-      for (const el of glyph.querySelectorAll('.is-stroke, .is-gap, .is-dot')) {
-        const style = getComputedStyle(el)
-        if (goldish(style.stroke) || goldish(style.fill)) pieceGold.push(el.getAttribute('class'))
-      }
+    for (const el of document.querySelectorAll('.lamp-upgrade-glyph .is-stroke, .lamp-upgrade-glyph .is-gap, .lamp-upgrade-glyph .is-dot')) {
+      const style = getComputedStyle(el)
+      if (goldish(style.stroke) || goldish(style.fill)) pieceGold.push(el.getAttribute('class'))
     }
     const gold = []
     for (const el of document.querySelectorAll('.defend-page *')) {
@@ -1765,7 +1782,7 @@ function readGold(page, tool) {
       if (why) gold.push(`${el.tagName.toLowerCase()}.${String(el.getAttribute('class') ?? '').split(/\s+/).slice(0, 2).join('.')}`)
     }
     return { gold, pieceGold }
-  }, tool ?? '')
+  })
 }
 
 /** What one lamp shows right now: its mark, the card, and how they sit. */
@@ -1881,6 +1898,249 @@ async function checkGlyphOneGold(browser, port, errors, width, height) {
   return { selected: selectedGold.gold.length, planted: plantedGold.gold.length, open: openGold.gold.length }
 }
 
+/**
+ * Plants and upgrades through real taps and keeps score. One driver per page so the same
+ * per-frame rules run on the shared night and on every single seat.
+ */
+function glyphDriver(page, label, errors) {
+  const stats = { buys: 0, frames: 0, minSpan: Infinity, maxSpan: 0, maxFirst: 0, maxCard: 0, maxHearts: 0, maxEdge: 0, bothSeen: 0, minGap: Infinity, headerFrames: 0, headerSettled: 0, brightGold: 0, brightBuys: 0 }
+
+  const selected = () =>
+    page.evaluate(() => [...document.querySelectorAll('.nw-rail .defend-ability.is-on')].map((node) => (node.textContent || '').trim()))
+  const closeCard = async () => {
+    if (await page.locator('.defend-tower-card').count()) {
+      await page.keyboard.press('Escape')
+      await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+    }
+  }
+  const openCard = async (tool) => {
+    await closeCard()
+    await page.locator(`.defend-pad[data-tower-type="${tool}"]`).click({ force: true })
+    await page.locator('.defend-tower-card').waitFor()
+    await page.waitForTimeout(450)
+  }
+
+  /**
+   * The card may sit on the map mark only when it shows its own copy of the mark in the header:
+   * same stage, same pieces, a full 28px, inside the card, no gold. Otherwise the card keeps 4px clear.
+   */
+  const assertHeaderCopy = (view, tool, stage, what) => {
+    const header = view.header
+    const where = `${label} ${tool} stage ${stage} ${what}`
+    assert.ok(header, `${where}: no card slot clears the glyph and no header copy is shown`)
+    assert.equal(header.stage, String(stage), `${where}: header copy shows stage ${header.stage}`)
+    assert.equal(header.pieces, view.pieces, `${where}: header copy has ${header.pieces} pieces, the map mark has ${view.pieces}`)
+    assert.ok(header.box && Math.abs(header.box.w - 28) <= 1 && Math.abs(header.box.h - 28) <= 1, `${where}: header copy is ${JSON.stringify(header.box)}`)
+    assert.ok(glyphInside(header.box, view.card), `${where}: header copy ${JSON.stringify(header.box)} is outside the card ${JSON.stringify(view.card)}`)
+  }
+
+  /** Mark and card are both on screen, the mark is on the board, and nothing sits on it. */
+  const assertSettled = async (tool, stage, what) => {
+    const view = await readGlyphStage(page, tool)
+    const where = `${label} ${tool} stage ${stage} ${what}`
+    assert.ok(view.glyph, `${where}: map glyph is present`)
+    assert.ok(view.card, `${where}: upgrade card is present`)
+    assert.ok(view.glyph.w >= 18 && view.glyph.h >= 18, `${where}: map glyph is ${view.glyph.w}x${view.glyph.h}`)
+    const covered = glyphArea(view.glyph, view.card)
+    const gap = glyphGap(view.glyph, view.card)
+    if (view.header) {
+      assertHeaderCopy(view, tool, stage, what)
+      stats.headerSettled += 1
+    } else {
+      assert.equal(covered, 0, `${where}: card covers the glyph by ${covered}px2 and shows no header copy, glyph ${JSON.stringify(view.glyph)} card ${JSON.stringify(view.card)} board ${JSON.stringify(view.board)}`)
+      assert.ok(gap >= GLYPH_MIN_GAP, `${where}: card is ${gap.toFixed(2)}px from the glyph and shows no header copy`)
+      stats.minGap = Math.min(stats.minGap, gap)
+    }
+    assert.ok(glyphInside(view.glyph, view.board), `${where}: glyph ${JSON.stringify(view.glyph)} is outside the board ${JSON.stringify(view.board)}`)
+    assert.ok(glyphInside(view.glyph, view.frame), `${where}: glyph is outside the frame`)
+    for (const hearts of view.hearts) {
+      assert.equal(glyphArea(view.glyph, hearts), 0, `${where}: glyph overlaps hearts`)
+    }
+    stats.bothSeen += 1
+    return view
+  }
+
+  const ladder = async (tool, steps) => {
+    let rail = 0
+    for (let at = 0; at < steps.length; at += 1) {
+      const stage = at + 1
+      const step = steps[at]
+      await openCard(tool)
+      const before = await assertSettled(tool, stage - 1, 'card open before the buy')
+      assert.equal(before.stage, String(stage - 1), `${label} ${tool} stage before buy ${stage}`)
+      const openPaint = await readGold(page)
+      assert.deepEqual(openPaint.pieceGold, [], `${label} ${tool} stage ${stage} card open: glyph paint is gold`)
+      const brightGold = openPaint.gold.filter((entry) => entry.includes('defend-bright-buy'))
+      stats.brightGold += brightGold.length
+      assert.deepEqual(brightGold, [], `${label} ${tool} stage ${stage} card open: the Bright buy is gold`)
+      await page.evaluate((id) => window.__glyphStart(id), tool)
+      const buy = step.bright
+        ? page.locator('.defend-tower-card .defend-bright-buy')
+        : page.locator(`.defend-tower-card button.defend-path-buy[data-path-buy="${step.path}"]`)
+      assert.equal(await buy.count(), 1, `${label} ${tool} stage ${stage} the card offers the real buy ${JSON.stringify(step)}`)
+      if (step.bright) stats.brightBuys += 1
+      await buy.click()
+      await page.waitForTimeout(520)
+      const frames = await page.evaluate(() => window.__glyphEnd())
+      stats.buys += 1
+      stats.frames += frames.length
+      assert.ok(frames.length >= 10, `${label} ${tool} stage ${stage} sampled ${frames.length} frames`)
+
+      let cardFrames = 0
+      for (const [index, frame] of frames.entries()) {
+        const where = `${label} ${tool} stage ${stage} frame ${index}`
+        assert.ok(frame.glyph, `${where}: glyph missing`)
+        assert.ok(frame.board, `${where}: board missing`)
+        assert.ok(glyphInside(frame.glyph, frame.board), `${where}: glyph ${JSON.stringify(frame.glyph)} left the board ${JSON.stringify(frame.board)}`)
+        stats.maxEdge = Math.max(stats.maxEdge, Math.max(frame.board.left - frame.glyph.left, frame.board.top - frame.glyph.top, frame.glyph.right - frame.board.right, frame.glyph.bottom - frame.board.bottom, 0))
+        if (frame.card) {
+          cardFrames += 1
+          const covered = glyphArea(frame.glyph, frame.card)
+          const gap = glyphGap(frame.glyph, frame.card)
+          if (frame.header) {
+            stats.headerFrames += 1
+            const shown = Number(frame.header.stage)
+            assert.ok(shown === stage || shown === stage - 1, `${where}: header copy shows stage ${frame.header.stage}`)
+          } else {
+            stats.maxCard = Math.max(stats.maxCard, covered)
+            assert.equal(covered, 0, `${where}: card covers the glyph by ${covered}px2 and shows no header copy`)
+            assert.ok(gap >= GLYPH_MIN_GAP, `${where}: card is ${gap.toFixed(2)}px from the glyph and shows no header copy, glyph ${JSON.stringify(frame.glyph)} card ${JSON.stringify(frame.card)}`)
+            stats.minGap = Math.min(stats.minGap, gap)
+          }
+        }
+        for (const hearts of frame.hearts) {
+          const area = glyphArea(frame.glyph, hearts)
+          stats.maxHearts = Math.max(stats.maxHearts, area)
+          assert.equal(area, 0, `${where}: glyph overlaps hearts by ${area}px2`)
+        }
+        const neighbors = [
+          ...frame.lamp.map((rect) => ['lamp', rect]),
+          ...frame.buttons.map((rect) => ['ability', rect]),
+          ...frame.notes.map((rect) => ['note', rect]),
+          ...frame.banners.map((rect) => ['banner', rect]),
+          ...frame.pace.map((rect) => ['chip', rect]),
+          ...frame.begin.map((rect) => ['begin', rect]),
+          ...frame.cont.map((rect) => ['continue', rect]),
+          ...frame.others.map((rect) => ['glyph', rect]),
+        ]
+        for (const [name, rect] of neighbors) {
+          assert.equal(glyphArea(frame.glyph, rect), 0, `${where}: glyph overlaps ${name} ${JSON.stringify(frame.glyph)} vs ${JSON.stringify(rect)}`)
+        }
+      }
+      assert.ok(cardFrames > 0, `${label} ${tool} stage ${stage} the card was on screen during the buy`)
+      const drew = assertDrawOn(frames, stage, `${label} ${tool} stage ${stage}`)
+      stats.minSpan = Math.min(stats.minSpan, drew.span)
+      stats.maxSpan = Math.max(stats.maxSpan, drew.span)
+      stats.maxFirst = Math.max(stats.maxFirst, drew.first)
+
+      await page.waitForFunction(
+        ([id, want]) => document.querySelector(`.defend-pad[data-tower-type="${id}"] .lamp-upgrade-glyph[data-glyph-variant="map"]`)?.getAttribute('data-glyph-stage') === want,
+        [tool, String(stage)],
+      )
+      // The card may stay open or close after a buy. Either way, open it and check both again.
+      await page.waitForTimeout(300)
+      await openCard(tool)
+      const after = await assertSettled(tool, stage, 'card open after the real buy')
+      assert.equal(after.stage, String(stage), `${label} ${tool} stage attr after buy ${stage}`)
+      assert.equal(after.pieces, stage, `${label} ${tool} stage ${stage} drawn pieces`)
+      assert.ok(after.rails.some((row) => row.stage === String(stage) && Math.abs(row.w - 28) <= 1 && Math.abs(row.h - 28) <= 1), `${label} ${tool} stage ${stage} rail glyph ${JSON.stringify(after.rails)}`)
+      const paint = await readGold(page)
+      assert.deepEqual(paint.pieceGold, [], `${label} ${tool} stage ${stage} glyph paint is gold ${paint.pieceGold}`)
+      assert.deepEqual(paint.gold.filter((entry) => entry.includes('defend-bright-buy')), [], `${label} ${tool} stage ${stage} the Bright buy is gold`)
+      if (after.tone === 'strong') {
+        assert.deepEqual(after.colors, [hexToRgb(LAMP_GLYPH_COLOR.strong)], `${label} ${tool} stage ${stage} strong arms paint ${after.colors}`)
+      }
+      rail = stage
+    }
+    await closeCard()
+    return rail
+  }
+
+  return { stats, selected, closeCard, openCard, ladder }
+}
+
+function glyphStatsLine(label, what, stats, gold) {
+  return (
+    `checkLampGlyph ok ${label} ${what} real buys ${stats.buys} frames ${stats.frames} ` +
+    `draw-span ${Math.round(stats.minSpan)}-${Math.round(stats.maxSpan)}ms max first-2-frames share ${stats.maxFirst.toFixed(2)} ` +
+    `card/glyph overlap max ${stats.maxCard}px2 min gap ${stats.minGap === Infinity ? 'n/a' : `${stats.minGap.toFixed(2)}px`} ` +
+    `(card+glyph both present ${stats.bothSeen}x) header copy ${stats.headerFrames} frames ${stats.headerSettled} settled ` +
+    `glyph outside board max ${stats.maxEdge.toFixed(1)}px hearts overlap max ${stats.maxHearts}px2 ` +
+    `bright buys ${stats.brightBuys} bright gold===${stats.brightGold}` +
+    (gold ? ` selected-lamp gold===${gold.selected} planted gold===${gold.planted} open-card gold===${gold.open}` : '')
+  )
+}
+
+const SEAT_SWEEP_SIZES = ['375x667', '390x844', '412x915', '320x568']
+/** A narrow phone where seat 464,768 has no clear card slot, so the header copy has to carry the mark. */
+const HEADER_FALLBACK = { size: '320x568', cx: 464, cy: 768 }
+/** The seat the 1.4.568 live re-prove caught: 375x667, board units. */
+const FAILING_SEAT = { size: '375x667', cx: 464, cy: 768 }
+
+/**
+ * Every live seat, one lamp each, the full eight real buys on it. A seat with no clear card slot
+ * must show the header copy; the glyph/card checks fail for it otherwise.
+ */
+async function checkGlyphSeatSweep(browser, port, errors, width, height) {
+  const label = `${width}x${height}`
+  const probe = await openMap(browser, port, width, height, 'a2', { motion: true, search: GLYPH_SEARCH })
+  const rings = await probe.page.evaluate(() =>
+    [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({ cx: Number(ring.getAttribute('cx')), cy: Number(ring.getAttribute('cy')) })),
+  )
+  await probe.context.close()
+  assert.ok(rings.length >= 3, `${label} seat sweep finds ${rings.length} live seats`)
+  if (`${width}x${height}` === FAILING_SEAT.size) {
+    assert.ok(rings.some((ring) => ring.cx === FAILING_SEAT.cx && ring.cy === FAILING_SEAT.cy), `${label} the 1.4.568 failing seat ${FAILING_SEAT.cx},${FAILING_SEAT.cy} is a live seat ${JSON.stringify(rings)}`)
+  }
+  const total = { buys: 0, frames: 0, minSpan: Infinity, maxSpan: 0, maxFirst: 0, maxCard: 0, maxHearts: 0, maxEdge: 0, bothSeen: 0, minGap: Infinity, headerFrames: 0, headerSettled: 0, brightGold: 0, brightBuys: 0 }
+  const seen = []
+  let sawFallback = false
+  for (const ring of rings) {
+    const { context, page } = await openMap(browser, port, width, height, 'a2', { motion: true, search: GLYPH_SEARCH })
+    page.on('pageerror', (error) => errors.push(`glyph seat ${label} ${ring.cx},${ring.cy} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(`glyph seat ${label} ${ring.cx},${ring.cy} ${msg.text()}`)
+    })
+    await glyphSetup(page)
+    const point = await page.evaluate((seat) => {
+      const svg = document.querySelector('.defend-board')
+      const ctm = svg?.getScreenCTM()
+      if (!svg || !ctm) return null
+      const p = svg.createSVGPoint()
+      p.x = seat.cx
+      p.y = seat.cy - 26
+      const q = p.matrixTransform(ctm)
+      const hit = document.elementFromPoint(q.x, q.y)
+      if (!hit || !hit.closest('.defend-board') || hit.closest('button, .nw-rail, .nw-docks')) return null
+      return { x: q.x, y: q.y }
+    }, ring)
+    assert.ok(point, `${label} seat ${ring.cx},${ring.cy} takes a real tap`)
+    const driver = glyphDriver(page, `${label} seat ${ring.cx},${ring.cy}`, errors)
+    const now = await driver.selected()
+    assert.ok(now.length === 1 && now[0].startsWith('Love'), `${label} seat ${ring.cx},${ring.cy} Love is selected ${JSON.stringify(now)}`)
+    await page.mouse.click(point.x, point.y)
+    await page.locator('.defend-pad[data-tower-type="love"] .lamp-upgrade-glyph[data-glyph-variant="map"]').waitFor()
+    await page.waitForTimeout(150)
+    const left = await page.evaluate((seat) => [...document.querySelectorAll('.defend-plant-ground circle.is-live')].some((ring) => Number(ring.getAttribute('cx')) === seat.cx && Number(ring.getAttribute('cy')) === seat.cy), ring)
+    assert.equal(left, false, `${label} the lamp took seat ${ring.cx},${ring.cy}`)
+    assert.equal(await driver.ladder('love', GLYPH_LADDER), 8, `${label} seat ${ring.cx},${ring.cy} reached stage 8 by real buys`)
+    for (const key of ['buys', 'frames', 'bothSeen', 'headerFrames', 'headerSettled', 'brightGold', 'brightBuys']) total[key] += driver.stats[key]
+    for (const key of ['maxFirst', 'maxCard', 'maxHearts', 'maxEdge', 'maxSpan']) total[key] = Math.max(total[key], driver.stats[key])
+    total.minSpan = Math.min(total.minSpan, driver.stats.minSpan)
+    total.minGap = Math.min(total.minGap, driver.stats.minGap)
+    seen.push(`${ring.cx},${ring.cy}${driver.stats.headerSettled > 0 ? ' header' : ''}`)
+    if (label === HEADER_FALLBACK.size && ring.cx === HEADER_FALLBACK.cx && ring.cy === HEADER_FALLBACK.cy) {
+      assert.ok(driver.stats.headerSettled > 0 && driver.stats.headerFrames > 0, `${label} seat ${ring.cx},${ring.cy} has no clear card slot, so the header copy must show (${driver.stats.headerSettled} settled, ${driver.stats.headerFrames} frames)`)
+      sawFallback = true
+    }
+    await context.close()
+  }
+  if (label === HEADER_FALLBACK.size) assert.ok(sawFallback, `${label} the header copy seat was swept`)
+  assert.ok(Number.isFinite(total.minGap) || total.headerSettled > 0, `${label} seat sweep measured a card gap`)
+  if (Number.isFinite(total.minGap)) assert.ok(total.minGap >= GLYPH_MIN_GAP, `${label} seat sweep min gap ${total.minGap.toFixed(2)}px`)
+  console.log(glyphStatsLine(label, `seat sweep ${rings.length} seats [${seen.join(' | ')}]`, total))
+}
+
 async function checkLampGlyph(browser, port, errors) {
   const only = process.env.NW_GLYPH_SIZE
   for (const [width, height] of GLYPH_SIZES.filter(([w, h]) => !only || only === `${w}x${h}`)) {
@@ -1895,10 +2155,7 @@ async function checkLampGlyph(browser, port, errors) {
       if (msg.type() === 'error') errors.push(`glyph ${label} ${msg.text()}`)
     })
     await glyphSetup(page)
-    const stats = { buys: 0, frames: 0, minSpan: Infinity, maxSpan: 0, maxFirst: 0, maxCard: 0, maxHearts: 0, maxEdge: 0, bothSeen: 0 }
-
-    const selected = () =>
-      page.evaluate(() => [...document.querySelectorAll('.nw-rail .defend-ability.is-on')].map((node) => (node.textContent || '').trim()))
+    const { stats, selected, ladder } = glyphDriver(page, label, errors)
 
     // Plant one lamp of each type. Every pick is a real tap on the rail, then a real tap on a seat.
     for (const [index, tool] of GLYPH_TOOLS.entries()) {
@@ -1914,113 +2171,6 @@ async function checkLampGlyph(browser, port, errors) {
       await page.locator(`.defend-pad[data-tower-type="${tool}"] .lamp-upgrade-glyph[data-glyph-variant="map"]`).waitFor()
       await page.waitForTimeout(150)
     }
-    const closeCard = async () => {
-      if (await page.locator('.defend-tower-card').count()) {
-        await page.keyboard.press('Escape')
-        await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
-      }
-    }
-    const openCard = async (tool) => {
-      await closeCard()
-      await page.locator(`.defend-pad[data-tower-type="${tool}"]`).click({ force: true })
-      await page.locator('.defend-tower-card').waitFor()
-      await page.waitForTimeout(450)
-    }
-    /** Mark and card are both on screen, the mark is on the board, and nothing sits on it. */
-    const assertSettled = async (tool, stage, what) => {
-      const view = await readGlyphStage(page, tool)
-      assert.ok(view.glyph, `${label} ${tool} stage ${stage} ${what}: map glyph is present`)
-      assert.ok(view.card, `${label} ${tool} stage ${stage} ${what}: upgrade card is present`)
-      assert.ok(view.glyph.w >= 18 && view.glyph.h >= 18, `${label} ${tool} stage ${stage} map glyph is ${view.glyph.w}x${view.glyph.h}`)
-      const covered = glyphArea(view.glyph, view.card)
-      assert.equal(covered, 0, `${label} ${tool} stage ${stage} ${what}: card covers the glyph by ${covered}px2 glyph ${JSON.stringify(view.glyph)} card ${JSON.stringify(view.card)} board ${JSON.stringify(view.board)}`)
-      assert.ok(glyphInside(view.glyph, view.board), `${label} ${tool} stage ${stage} ${what}: glyph ${JSON.stringify(view.glyph)} is outside the board ${JSON.stringify(view.board)}`)
-      assert.ok(glyphInside(view.glyph, view.frame), `${label} ${tool} stage ${stage} ${what}: glyph is outside the frame`)
-      for (const hearts of view.hearts) {
-        assert.equal(glyphArea(view.glyph, hearts), 0, `${label} ${tool} stage ${stage} ${what}: glyph overlaps hearts`)
-      }
-      stats.bothSeen += 1
-      return view
-    }
-
-    const ladder = async (tool, steps) => {
-      let rail = 0
-      for (let at = 0; at < steps.length; at += 1) {
-        const stage = at + 1
-        const step = steps[at]
-        await openCard(tool)
-        const before = await assertSettled(tool, stage - 1, 'card open before the buy')
-        assert.equal(before.stage, String(stage - 1), `${label} ${tool} stage before buy ${stage}`)
-        await page.evaluate((id) => window.__glyphStart(id), tool)
-        const buy = step.bright
-          ? page.locator('.defend-tower-card .defend-bright-buy')
-          : page.locator(`.defend-tower-card button.defend-path-buy[data-path-buy="${step.path}"]`)
-        assert.equal(await buy.count(), 1, `${label} ${tool} stage ${stage} the card offers the real buy ${JSON.stringify(step)}`)
-        await buy.click()
-        await page.waitForTimeout(520)
-        const frames = await page.evaluate(() => window.__glyphEnd())
-        stats.buys += 1
-        stats.frames += frames.length
-        assert.ok(frames.length >= 10, `${label} ${tool} stage ${stage} sampled ${frames.length} frames`)
-
-        let cardFrames = 0
-        for (const [index, frame] of frames.entries()) {
-          assert.ok(frame.glyph, `${label} ${tool} stage ${stage} frame ${index}: glyph missing`)
-          assert.ok(frame.board, `${label} ${tool} stage ${stage} frame ${index}: board missing`)
-          assert.ok(glyphInside(frame.glyph, frame.board), `${label} ${tool} stage ${stage} frame ${index}: glyph ${JSON.stringify(frame.glyph)} left the board ${JSON.stringify(frame.board)}`)
-          stats.maxEdge = Math.max(stats.maxEdge, Math.max(frame.board.left - frame.glyph.left, frame.board.top - frame.glyph.top, frame.glyph.right - frame.board.right, frame.glyph.bottom - frame.board.bottom, 0))
-          if (frame.card) {
-            cardFrames += 1
-            const covered = glyphArea(frame.glyph, frame.card)
-            stats.maxCard = Math.max(stats.maxCard, covered)
-            assert.equal(covered, 0, `${label} ${tool} stage ${stage} frame ${index}: card covers the glyph by ${covered}px2`)
-          }
-          for (const hearts of frame.hearts) {
-            const area = glyphArea(frame.glyph, hearts)
-            stats.maxHearts = Math.max(stats.maxHearts, area)
-            assert.equal(area, 0, `${label} ${tool} stage ${stage} frame ${index}: glyph overlaps hearts by ${area}px2`)
-          }
-          const neighbors = [
-            ...frame.lamp.map((rect) => ['lamp', rect]),
-            ...frame.buttons.map((rect) => ['ability', rect]),
-            ...frame.notes.map((rect) => ['note', rect]),
-            ...frame.banners.map((rect) => ['banner', rect]),
-            ...frame.pace.map((rect) => ['chip', rect]),
-            ...frame.begin.map((rect) => ['begin', rect]),
-            ...frame.cont.map((rect) => ['continue', rect]),
-            ...frame.others.map((rect) => ['glyph', rect]),
-          ]
-          for (const [name, rect] of neighbors) {
-            assert.equal(glyphArea(frame.glyph, rect), 0, `${label} ${tool} stage ${stage} frame ${index}: glyph overlaps ${name} ${JSON.stringify(frame.glyph)} vs ${JSON.stringify(rect)}`)
-          }
-        }
-        assert.ok(cardFrames > 0, `${label} ${tool} stage ${stage} the card was on screen during the buy`)
-        const drew = assertDrawOn(frames, stage, `${label} ${tool} stage ${stage}`)
-        stats.minSpan = Math.min(stats.minSpan, drew.span)
-        stats.maxSpan = Math.max(stats.maxSpan, drew.span)
-        stats.maxFirst = Math.max(stats.maxFirst, drew.first)
-
-        await page.waitForFunction(
-          ([id, want]) => document.querySelector(`.defend-pad[data-tower-type="${id}"] .lamp-upgrade-glyph[data-glyph-variant="map"]`)?.getAttribute('data-glyph-stage') === want,
-          [tool, String(stage)],
-        )
-        // The card may stay open or close after a buy. Either way, open it and check both again.
-        await page.waitForTimeout(300)
-        await openCard(tool)
-        const after = await assertSettled(tool, stage, 'card open after the real buy')
-        assert.equal(after.stage, String(stage), `${label} ${tool} stage attr after buy ${stage}`)
-        assert.equal(after.pieces, stage, `${label} ${tool} stage ${stage} drawn pieces`)
-        assert.ok(after.rails.some((row) => row.stage === String(stage) && Math.abs(row.w - 28) <= 1 && Math.abs(row.h - 28) <= 1), `${label} ${tool} stage ${stage} rail glyph ${JSON.stringify(after.rails)}`)
-        const paint = await readGold(page, tool)
-        assert.deepEqual(paint.pieceGold, [], `${label} ${tool} stage ${stage} glyph paint is gold ${paint.pieceGold}`)
-        if (after.tone === 'strong') {
-          assert.deepEqual(after.colors, [hexToRgb(LAMP_GLYPH_COLOR.strong)], `${label} ${tool} stage ${stage} strong arms paint ${after.colors}`)
-        }
-        rail = stage
-      }
-      await closeCard()
-      return rail
-    }
 
     assert.equal(await ladder(GLYPH_TOOLS[0], GLYPH_LADDER), 8, `${label} top lamp reached stage 8 by real buys`)
     for (const tool of GLYPH_TOOLS.slice(1, -1)) {
@@ -2028,14 +2178,12 @@ async function checkLampGlyph(browser, port, errors) {
     }
     assert.equal(await ladder(GLYPH_TOOLS[GLYPH_TOOLS.length - 1], GLYPH_LADDER), 8, `${label} lowest lamp reached stage 8 by real buys`)
 
-    const line =
-      `checkLampGlyph ok ${label} real buys ${stats.buys} frames ${stats.frames} ` +
-      `draw-span ${Math.round(stats.minSpan)}-${Math.round(stats.maxSpan)}ms max first-2-frames share ${stats.maxFirst.toFixed(2)} ` +
-      `card/glyph overlap max ${stats.maxCard}px2 (card+glyph both present ${stats.bothSeen}x) ` +
-      `glyph outside board max ${stats.maxEdge.toFixed(1)}px hearts overlap max ${stats.maxHearts}px2 ` +
-      `selected-lamp gold===${gold.selected} planted gold===${gold.planted} open-card gold===${gold.open}`
-    console.log(line)
+    console.log(glyphStatsLine(label, 'shared night', stats, gold))
     await context.close()
+  }
+  for (const size of SEAT_SWEEP_SIZES.filter((entry) => !only || only === entry)) {
+    const [width, height] = size.split('x').map(Number)
+    await checkGlyphSeatSweep(browser, port, errors, width, height)
   }
 
   await checkRingArcDraw(browser, port, errors)
