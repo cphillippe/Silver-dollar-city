@@ -1524,6 +1524,10 @@ button.defend-cross-lamp {
   margin-top: 6px;
 }
 
+.btn.defend-bright-buy {
+  border-color: rgba(255, 246, 232, 0.6);
+}
+
 .defend-bright-line,
 .defend-bright-on {
   font-size: 0.72rem;
@@ -6129,7 +6133,7 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
 }
 
 .lamp-upgrade-glyph.is-strong .is-gap {
-  stroke: #e98a3c;
+  stroke: #ff7d2d;
 }
 
 .lamp-upgrade-glyph.is-rest .is-gap {
@@ -6169,7 +6173,7 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
 }
 
 .lamp-upgrade-glyph.is-strong .is-stroke {
-  stroke: #e98a3c;
+  stroke: #ff7d2d;
 }
 
 .lamp-upgrade-glyph .is-draw {
@@ -6372,4 +6376,21 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
 .defend-page.is-easy-watch.is-boost .defend-clear-row .defend-clear-spend,
 .defend-page.is-easy-watch.is-boost .defend-clear-row .defend-clear-help {
   border-color: var(--berry);
+}
+
+/* 1.4.569: when no slot keeps the card off the map mark, the card carries its own copy in the header. */
+.defend-page.is-easy-watch .defend-tower-card .defend-tower-mark {
+  position: absolute;
+  top: 8px;
+  right: 52px;
+  width: 28px;
+  height: 28px;
+  line-height: 0;
+  pointer-events: none;
+}
+
+.defend-page.is-easy-watch .defend-tower-card .defend-tower-mark .lamp-upgrade-glyph {
+  display: block;
+  width: 28px;
+  height: 28px;
 }

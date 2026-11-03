@@ -11,6 +11,8 @@ import {
   type TowerCardPoint,
 } from '../lib/towerCardPlace'
 import { mapGlyphRect } from '../nightWatch/lampGlyphPlace'
+import { lampGlyphStage } from '../nightWatch/lampGlyph'
+import { LampUpgradeGlyph } from './LampUpgradeGlyph'
 import { boostCost, combatTier, TIER_MARK, TOOL_TIER_MAX } from '../lib/watchTools'
 import {
   BRIGHT_COST,
@@ -209,7 +211,7 @@ export function DefendTowerCard({
   const toMark = bursting ? TIER_MARK[levelBurst!.to] : ''
 
   useLayoutEffect(() => {
-    const painted = cardRef.current?.offsetHeight ?? 0
+    const painted = cardRef.current?.getBoundingClientRect().height ?? 0
     setPaintH((prev) => (Math.abs(prev - painted) < 0.5 ? prev : painted))
   })
 
@@ -905,6 +907,11 @@ export function DefendTowerCard({
           </div>
         ) : null}
         <p className="defend-tower-tool">{label}</p>
+        {markOnMap && !placed.markClear && paths ? (
+          <div className="defend-tower-mark" data-glyph-header="yes" data-glyph-stage={lampGlyphStage(paths)}>
+            <LampUpgradeGlyph paths={paths} variant="rail" />
+          </div>
+        ) : null}
         {TREE_PATHS.map((path) => {
           const rank = paths[path]
           const buy = canTake(paths, path, gate)
