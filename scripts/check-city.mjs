@@ -515,6 +515,7 @@ import { MAP_GAP_PX, MAP_GLYPH_PX, mapGlyphRect } from '../src/nightWatch/lampGl
 import {
   CLEAR_BAR_RESERVE,
   cardHitsGlyph,
+  BEGIN_GAP,
   GLYPH_CLEAR,
   placeTowerCard,
   TOWER_CARD_W,
@@ -2021,11 +2022,24 @@ assert.doesNotMatch(
   const tight = mapGlyphRect(289, 150, 0.55, board)
   assert.ok(tight.right <= 289 - 56 * 0.55 || tight.left >= 289 + 56 * 0.55, '1.4.568 a lamp near the top gets the mark beside its art, clear of the pulse')
 
-  // 1.4.570: the mark wins over the rail, the clear bar and other lamps. On a 375 plate or wider the card (body and
-  // pointer) is always 4px clear of it. Only a plate too narrow for any slot reports markClear false.
+  // 1.4.570: the mark wins over other lamps and the plate walls, never over Begin, the rail or its buttons. With every
+  // measured box given, the card is 4px clear of the mark whenever the frame has a spot that also clears the taps.
+  // Only a frame with no such spot reports markClear false, and then the card still keeps off the taps when it can.
+  const tapsFor = (w, h) => ({
+    begin: { left: w * 0.18, top: h - 64, right: w * 0.82, bottom: h - 8 },
+    rail: { left: w - 65, top: 5, right: w - 5, bottom: 221 },
+    buttons: [0, 1, 2, 3].map((i) => ({ left: w - 59, top: 11 + i * 52, right: w - 11, bottom: 11 + i * 52 + 46 })),
+  })
+  const tapBlocksFor = (taps) => [
+    { ...taps.begin, top: taps.begin.top - BEGIN_GAP },
+    taps.rail,
+    ...taps.buttons,
+  ]
+  const hitsBlock = (card, height, box) =>
+    card.left < box.right && card.left + TOWER_CARD_W > box.left && card.top < box.bottom && card.top + height > box.top
   let checked = 0
   let crowded = 0
-  let wideCrowded = 0
+  let crowdedKeptOff = 0
   for (const [w, h, scale, reserve] of [
     [375, 574, 0.55, 0],
     [375, 719, 0.6, 0],
@@ -2040,44 +2054,60 @@ assert.doesNotMatch(
     [320, 475, 0.5, CLEAR_BAR_RESERVE],
   ]) {
     const frame = { left: 0, top: 0, right: w, bottom: h }
-    for (const paint of [260, 309]) {
+    const taps = tapsFor(w, h)
+    const blocks = tapBlocksFor(taps)
+    for (const paint of [217, 260, 291, 309]) {
       for (let y = 60; y < h - 20; y += 23) {
         for (let x = 24; x < w - 60; x += 31) {
           const mark = mapGlyphRect(x, y, scale, frame)
           const point = { left: x, top: y }
-          const placed = placeTowerCard(point, { w, h }, [], scale, reserve, TOWER_TREE_H, mark, paint)
+          const placed = placeTowerCard(point, { w, h }, [], scale, reserve, TOWER_TREE_H, mark, paint, taps)
           const where = `lamp ${x},${y} on ${w}x${h}/${reserve} paint ${paint}`
           if (placed.markClear) {
             checked += 1
             assert.equal(cardHitsGlyph(placed, point, TOWER_TREE_H, paint, mark, 4), false, `1.4.570 the card at ${where} says it clears the mark but is within 4px of it`)
+            for (const block of blocks) assert.equal(hitsBlock(placed, paint, block), false, `1.4.570 the card at ${where} says it is clear but covers a tap target ${JSON.stringify(block)}`)
           } else {
             crowded += 1
-            if (w >= 375) wideCrowded += 1
             let spot = false
             for (let left = 2; left <= w - TOWER_CARD_W - 2 && !spot; left += 2) {
-              for (let top = 2; top <= h - paint - 2 && !spot; top += 2) spot = !cardHitsGlyph({ left, top }, point, TOWER_TREE_H, paint, mark, GLYPH_CLEAR)
+              for (let top = 2; top <= h - paint - 2 && !spot; top += 2) {
+                const at = { left, top }
+                spot = !cardHitsGlyph(at, point, TOWER_TREE_H, paint, mark, GLYPH_CLEAR) && !blocks.some((block) => hitsBlock(at, paint, block))
+              }
             }
             assert.equal(spot, false, `1.4.570 the card at ${where} gave up on the mark though the frame has a clear spot`)
+            if (!blocks.some((block) => hitsBlock(placed, paint, block))) crowdedKeptOff += 1
           }
         }
       }
     }
   }
   assert.ok(checked > 800, `1.4.570 the card scan covered ${checked} lamps with a clear slot`)
-  assert.equal(wideCrowded, 0, `1.4.570 on a 375 plate or wider every seat has a clear slot (${wideCrowded} had none)`)
   assert.ok(crowded > 0, `1.4.570 the scan reaches seats with no clear slot (${crowded}), so the header copy path is covered`)
-  // The 1.4.569 live seat: a lamp at 138,315 on the 375x574 plate with the clear bar up and the 309px card.
+  assert.ok(crowdedKeptOff > crowded * 0.9, `1.4.570 when no slot clears the mark the card still keeps off the taps (${crowdedKeptOff} of ${crowded})`)
+  // The 1.4.569 live seat: a lamp at 138,315 on the 375x574 plate with the clear bar up and the 309px card. Begin and the
+  // rail leave no spot clear of the mark, so the card keeps off both and the header copy carries the mark. With no
+  // measured boxes the old fixed reserve still lets a slot beside the mark through.
   {
     const point = { left: 138.3, top: 314.6 }
     const mark = mapGlyphRect(point.left, point.top, 0.7086, { left: 0, top: 0, right: 375, bottom: 574 })
-    const live = placeTowerCard(point, { w: 375, h: 574 }, [], 0.7086, CLEAR_BAR_RESERVE, TOWER_TREE_H, mark, 309)
-    assert.equal(live.markClear, true, '1.4.570 the live seat finds a slot that clears the mark')
-    assert.equal(cardHitsGlyph(live, point, TOWER_TREE_H, 309, mark, 4), false, '1.4.570 the live seat card and pointer stay 4px off the mark')
-    assert.ok(live.left >= mark.right + 4 || live.left + TOWER_CARD_W <= mark.left - 4, '1.4.570 the live seat card sits beside the mark')
+    const taps = tapsFor(375, 574)
+    const live = placeTowerCard(point, { w: 375, h: 574 }, [], 0.7086, CLEAR_BAR_RESERVE, TOWER_TREE_H, mark, 309, taps)
+    assert.equal(live.markClear, false, '1.4.570 the live seat has no slot that clears the mark, Begin and the rail')
+    for (const block of tapBlocksFor(taps)) assert.equal(hitsBlock(live, 309, block), false, `1.4.570 the live seat card keeps off ${JSON.stringify(block)}`)
+    const bare = placeTowerCard(point, { w: 375, h: 574 }, [], 0.7086, CLEAR_BAR_RESERVE, TOWER_TREE_H, mark, 309)
+    assert.ok(bare.top + 309 <= 574 - CLEAR_BAR_RESERVE && bare.left + TOWER_CARD_W <= 375 - 72, '1.4.570 with no measured boxes the card never widens into the bottom reserve or the rail column')
+    const short = placeTowerCard(point, { w: 375, h: 574 }, [], 0.7086, CLEAR_BAR_RESERVE, TOWER_TREE_H, mark, 260, taps)
+    assert.equal(short.markClear, true, '1.4.570 the shorter card at the live seat finds a slot that clears the mark, Begin and the rail')
+    assert.equal(cardHitsGlyph(short, point, TOWER_TREE_H, 260, mark, 4), false, '1.4.570 the shorter card and pointer stay 4px off the mark')
+    for (const block of tapBlocksFor(taps)) assert.equal(hitsBlock(short, 260, block), false, `1.4.570 the shorter card keeps off ${JSON.stringify(block)}`)
   }
   const card = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
   assert.match(card, /markOnMap && !placed\.markClear && paths/, '1.4.569 the card shows the header copy exactly when no slot clears the mark')
   assert.match(card, /data-glyph-header="yes"[\s\S]{0,160}variant="rail"/, '1.4.569 the header copy is the same mark at the same stage')
+  assert.match(card, /one\('\.defend-go'\)[\s\S]{0,120}one\('\.nw-rail'\)[\s\S]{0,160}\.nw-rail \.defend-ability[\s\S]{0,80}\.defend-clear-row button/, '1.4.570 the card measures Begin, the whole rail, the rail buttons and the clear row buttons')
+  assert.match(card, /placeTowerCard\(point, board, clearOf, cameraScale, reserveBottom, cardH, glyph, paintH, markOnMap \? taps : null\)/, '1.4.570 the card hands the measured boxes to the placer')
 }
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.566'), '1.4.566 changelog row')
 assert.doesNotMatch(

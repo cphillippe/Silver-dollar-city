@@ -10,6 +10,8 @@ import {
   TOWER_TREE_LESSON_H,
   stemShows,
   type TowerCardPoint,
+  type TowerRect,
+  type TowerTaps,
 } from '../lib/towerCardPlace'
 import { mapGlyphRect } from '../nightWatch/lampGlyphPlace'
 import { lampGlyphStage } from '../nightWatch/lampGlyph'
@@ -93,6 +95,53 @@ function PathMark({ path }: { path: TreePath }) {
         fill="currentColor"
       />
     </svg>
+  )
+}
+
+/** Boxes the card must keep off, in the card's own offset parent (the frame). Null when the card is not placed yet. */
+function measureTaps(card: HTMLElement): TowerTaps | null {
+  const parent = card.offsetParent
+  if (!(parent instanceof HTMLElement)) return null
+  const origin = parent.getBoundingClientRect()
+  const ox = origin.left + parent.clientLeft
+  const oy = origin.top + parent.clientTop
+  const rect = (el: Element): TowerRect | null => {
+    const style = getComputedStyle(el)
+    if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return null
+    const box = el.getBoundingClientRect()
+    if (box.width < 1 || box.height < 1) return null
+    return { left: box.left - ox, top: box.top - oy, right: box.right - ox, bottom: box.bottom - oy }
+  }
+  const one = (sel: string) => {
+    const el = document.querySelector(sel)
+    return el ? rect(el) : null
+  }
+  const many = (sel: string) =>
+    [...document.querySelectorAll(sel)].map(rect).filter((box): box is TowerRect => box !== null)
+  return {
+    begin: one('.defend-go'),
+    rail: one('.nw-rail'),
+    buttons: [...many('.nw-rail .defend-ability'), ...many('.defend-clear-row button')],
+  }
+}
+
+function sameRect(a: TowerRect | null, b: TowerRect | null): boolean {
+  if (!a || !b) return a === b
+  return (
+    Math.abs(a.left - b.left) < 0.25 &&
+    Math.abs(a.top - b.top) < 0.25 &&
+    Math.abs(a.right - b.right) < 0.25 &&
+    Math.abs(a.bottom - b.bottom) < 0.25
+  )
+}
+
+function sameTaps(a: TowerTaps | null, b: TowerTaps | null): boolean {
+  if (!a || !b) return a === b
+  return (
+    sameRect(a.begin, b.begin) &&
+    sameRect(a.rail, b.rail) &&
+    a.buttons.length === b.buttons.length &&
+    a.buttons.every((box, index) => sameRect(box, b.buttons[index]))
   )
 }
 
@@ -205,7 +254,8 @@ export function DefendTowerCard({
     ? mapGlyphRect(point.left, point.top, cameraScale, { left: 0, top: 0, right: board.w, bottom: board.h })
     : null
   const [paintH, setPaintH] = useState(0)
-  const placed = placeTowerCard(point, board, clearOf, cameraScale, reserveBottom, cardH, glyph, paintH)
+  const [taps, setTaps] = useState<TowerTaps | null>(null)
+  const placed = placeTowerCard(point, board, clearOf, cameraScale, reserveBottom, cardH, glyph, paintH, markOnMap ? taps : null)
   const levelLine = maxed ? TIER_MARK[tier] : `${TIER_MARK[next]} · ${cost}✦`
   const bursting = Boolean(levelBurst && levelBurst.to > levelBurst.from)
   const fromMark = bursting ? TIER_MARK[levelBurst!.from] : ''
@@ -214,6 +264,8 @@ export function DefendTowerCard({
   useLayoutEffect(() => {
     const painted = cardRef.current?.getBoundingClientRect().height ?? 0
     setPaintH((prev) => (Math.abs(prev - painted) < 0.5 ? prev : painted))
+    const next = markOnMap && cardRef.current ? measureTaps(cardRef.current) : null
+    setTaps((prev) => (sameTaps(prev, next) ? prev : next))
   })
 
   useEffect(() => {
@@ -849,6 +901,7 @@ export function DefendTowerCard({
         className={`defend-tower-card is-tree is-${placed.side}${markOnMap && !stemShows(placed.left, point.left) ? ' is-stemless' : ''}`}
         data-upgrade-card
         data-upgrade-tree="yes"
+        data-place={`${point.left.toFixed(1)},${point.top.toFixed(1)},${cardH}`}
         data-mid-wave={midWave ? 'yes' : undefined}
         data-upgrade-plot={plotId}
         role="dialog"

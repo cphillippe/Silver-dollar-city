@@ -118,7 +118,7 @@ export function cardHitsGlyph(
   gap = GLYPH_CLEAR,
 ): boolean {
   const zone = { l: glyph.left - gap, r: glyph.right + gap, t: glyph.top - gap, b: glyph.bottom + gap }
-  const h = Math.max(cardHeight, height)
+  const h = height > 0 ? height : cardHeight
   if (overlaps({ l: card.left, r: card.left + TOWER_CARD_W, t: card.top, b: card.top + h }, zone)) return true
   if (!stemShows(card.left, point.left)) return false
   const above = cardSide(card.top, point.top, cardHeight) === 'above'
@@ -131,12 +131,58 @@ export function cardHitsGlyph(
   return overlaps(stem, zone)
 }
 
+/** A screen box in the same pixels as the card. */
+export interface TowerRect {
+  left: number
+  top: number
+  right: number
+  bottom: number
+}
+
+/**
+ * What the card must never cover, measured from the page: Begin the watch, the whole right rail, the rail
+ * lamp buttons and the clear row buttons. Without it the placer leans on the fixed rail and bottom reserve.
+ */
+export interface TowerTaps {
+  begin: TowerRect | null
+  rail: TowerRect | null
+  buttons: readonly TowerRect[]
+}
+
+/** The card bottom stays this far above Begin the watch. */
+export const BEGIN_GAP = 8
+/** Placement keeps half a pixel past every measured edge so a rounded box cannot touch it. */
+const TAP_EPS = 0.5
+
+function tapBlocks(taps: TowerTaps | null): TowerRect[] {
+  if (!taps) return []
+  const out: TowerRect[] = []
+  const grow = (r: TowerRect): TowerRect => ({
+    left: r.left - TAP_EPS,
+    top: r.top - TAP_EPS,
+    right: r.right + TAP_EPS,
+    bottom: r.bottom + TAP_EPS,
+  })
+  if (taps.begin) {
+    out.push({ ...taps.begin, top: taps.begin.top - BEGIN_GAP - TAP_EPS })
+  }
+  if (taps.rail) out.push(grow(taps.rail))
+  for (const button of taps.buttons) out.push(grow(button))
+  return out
+}
+
+function hitsRect(card: { left: number; top: number }, height: number, r: TowerRect): boolean {
+  return card.left < r.right && card.left + TOWER_CARD_W > r.left && card.top < r.bottom && card.top + height > r.top
+}
+
 /**
  * Keep the upgrade card on the phone plate, beside the lamp, clear of the right rail.
  * Upgrade and Pull slide off any other planted lamp so that lamp can still be opened.
- * The lamp mark wins over everything else: when no slot on the plate clears it, the card may run into
- * the rail, the clear bar or other lamps' art. Only when nothing on the whole frame clears it does the
- * card keep the mark covered and say so (`markClear` false), so it can show its own copy.
+ * The lamp mark wins over other lamps' art and the plate walls, never over a tap target: the card widens
+ * sideways and above, and only past the measured rail when it sits below it. It never runs into Begin
+ * the watch, the rail buttons or the clear row. When no spot on the frame clears the mark and every tap
+ * target, the card keeps the snug spot that clears the taps and says so (`markClear` false), so it can
+ * show its own copy of the mark.
  */
 export function placeTowerCard(
   point: TowerCardPoint,
@@ -146,13 +192,17 @@ export function placeTowerCard(
   reserveBottom = 0,
   cardHeight = TOWER_CARD_H,
   glyph: TowerGlyphBox | null = null,
-  /** Height the card really paints, when it is taller than `cardHeight`. Only the mark test reads it. */
+  /** Height the card really paints, when it is taller than `cardHeight`. Only the mark and tap tests read it. */
   paintHeight = cardHeight,
+  taps: TowerTaps | null = null,
 ): { left: number; top: number; side: 'above' | 'below'; markClear: boolean } {
   const centered = cardLeft(point.left, board.w)
   const glyphHits = (card: { left: number; top: number }) =>
     glyph && cardHitsGlyph(card, point, cardHeight, paintHeight, glyph) ? 1 : 0
-  const markH = Math.max(cardHeight, paintHeight)
+  const markH = paintHeight > 0 ? paintHeight : cardHeight
+  const blocks = tapBlocks(taps)
+  const tapHits = (card: { left: number; top: number }) =>
+    blocks.reduce((n, block) => n + (hitsRect(card, markH, block) ? 1 : 0), 0)
   let above = point.top - cardHeight - GAP
   if (glyph && glyphHits({ left: centered, top: above })) above = Math.min(above, glyph.top - GLYPH_CLEAR - STEM_H - markH)
   const below = point.top + GAP
@@ -165,12 +215,14 @@ export function placeTowerCard(
   }
   const lampHits = (card: { left: number; top: number }) =>
     others.reduce((n, lamp) => n + (upgradeControlsHitLamp(card, lamp, scale, cardHeight) ? 1 : 0), 0)
-  if (lampHits(legacy) + glyphHits(legacy) === 0) return { ...legacy, markClear: true }
+  if (lampHits(legacy) + glyphHits(legacy) + tapHits(legacy) === 0) return { ...legacy, markClear: true }
   const maxLeft = Math.max(MARGIN, board.w - TOWER_CARD_W - RAIL)
-  const maxTop = Math.max(MARGIN, board.h - cardHeight - MARGIN - reserveBottom)
-  // Walls the card may lean on only when the mark needs it: the rail, the clear bar, the plate edge.
-  const wideLeft = Math.max(maxLeft, board.w - TOWER_CARD_W - EDGE)
-  const wideTop = Math.max(maxTop, board.h - Math.max(cardHeight, paintHeight) - EDGE)
+  const boundH = glyph || taps ? markH : cardHeight
+  const maxTop = Math.max(MARGIN, board.h - boundH - MARGIN - reserveBottom)
+  // The wide search leans on the plate edge. Past the fixed rail column it needs the measured rail rect;
+  // past the bottom reserve it needs the measured Begin and clear row. Without them it stays snug.
+  const wideLeft = taps?.rail ? Math.max(maxLeft, board.w - TOWER_CARD_W - EDGE) : maxLeft
+  const wideTop = taps ? Math.max(maxTop, board.h - markH - EDGE) : maxTop
   const search = (markWeight: number, farLeft: number, farTop: number, near = MARGIN) => {
     let best = legacy
     let bestKey = Infinity
@@ -180,18 +232,30 @@ export function placeTowerCard(
     for (let top = near; top <= farTop + 0.1; top += 8) tops.push(top)
     lefts.push(farLeft)
     tops.push(farTop)
+    const addLeft = (left: number) => {
+      if (left >= near && left <= farLeft + 0.1) lefts.push(left)
+    }
+    const addTop = (top: number) => {
+      if (top >= near && top <= farTop + 0.1) tops.push(top)
+    }
     if (glyph) {
-      for (const left of [glyph.right + GLYPH_CLEAR + 1, glyph.left - GLYPH_CLEAR - 1 - TOWER_CARD_W]) {
-        if (left >= near && left <= farLeft + 0.1) lefts.push(left)
-      }
+      addLeft(glyph.right + GLYPH_CLEAR + 1)
+      addLeft(Math.max(near, glyph.left - GLYPH_CLEAR - 1 - TOWER_CARD_W))
       for (const top of [
         glyph.bottom + GLYPH_CLEAR + STEM_H + 1,
-        glyph.top - GLYPH_CLEAR - STEM_H - 1 - markH,
         glyph.bottom + GLYPH_CLEAR + 1,
+        glyph.top - GLYPH_CLEAR - STEM_H - 1 - markH,
         glyph.top - GLYPH_CLEAR - 1 - markH,
       ]) {
-        if (top >= near && top <= farTop + 0.1) tops.push(top)
+        addTop(top)
+        addTop(Math.max(near, top))
       }
+    }
+    for (const block of blocks) {
+      addLeft(block.right)
+      addLeft(block.left - TOWER_CARD_W)
+      addTop(block.bottom)
+      addTop(block.top - markH)
     }
     for (const left of lefts) {
       for (const top of tops) {
@@ -199,7 +263,8 @@ export function placeTowerCard(
         const railIn = Math.max(0, left - maxLeft)
         const barIn = Math.max(0, top - maxTop)
         const dist = Math.hypot(left + TOWER_CARD_W / 2 - point.left, top + cardHeight / 2 - point.top)
-        const key = markWeight * glyphHits(card) * 1e7 + lampHits(card) * 2000 + (railIn + barIn) * 50 + dist
+        const key =
+          markWeight * glyphHits(card) * 1e7 + tapHits(card) * 1e6 + lampHits(card) * 2000 + (railIn + barIn) * 50 + dist
         if (key < bestKey) {
           bestKey = key
           best = { left, top, side: cardSide(top, point.top, cardHeight) }
@@ -209,8 +274,11 @@ export function placeTowerCard(
     return best
   }
   const snug = search(1, maxLeft, maxTop)
-  if (glyphHits(snug) === 0) return { ...snug, markClear: true }
+  if (glyphHits(snug) + tapHits(snug) === 0) return { ...snug, markClear: true }
   const wide = search(1, wideLeft, wideTop, EDGE)
-  if (glyphHits(wide) === 0) return { ...wide, markClear: true }
-  return { ...search(0, maxLeft, maxTop), markClear: false }
+  if (glyphHits(wide) + tapHits(wide) === 0) return { ...wide, markClear: true }
+  // No spot clears the mark: keep the snug spot. Only the measured rail lets it lean past the fixed rail column,
+  // and only to get off a tap target.
+  const railFree = taps?.rail ? Math.min(wideLeft, taps.rail.left - TOWER_CARD_W - TAP_EPS) : maxLeft
+  return { ...search(0, Math.max(maxLeft, railFree), maxTop), markClear: false }
 }
