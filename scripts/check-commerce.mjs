@@ -189,6 +189,15 @@ assert.equal(
 )
 assert.equal(quietPauseAllowed({ name: 'journal', autoQuiz: true }, { name: 'hub' }), false, 'Lock In quiz → Home')
 assert.equal(quietPauseAllowed({ name: 'journal' }, { name: 'hub' }), false, 'Journal list → Home')
+// 1.4.567 (#843): Continue after Lock In goes Home with no pause, from every Lock In route.
+assert.equal(
+  quietPauseAllowed({ name: 'journal', autoQuiz: true, debugLockIn: true }, { name: 'hub' }),
+  false,
+  'debug Lock In → Home',
+)
+assert.ok(QUIET_PAUSE_BLOCKED_VIEWS.includes('quick-review'), 'kept-card review is a Lock In screen')
+assert.equal(quietPauseAllowed({ name: 'quick-review' }, { name: 'hub' }), false, 'kept-card review → Home')
+assert.equal(quietPauseAllowed({ name: 'hub' }, { name: 'quick-review' }), false, 'Home → kept-card review')
 assert.equal(
   quietPauseAllowed({ name: 'journal', focusId: 'learn-ph-road' }, { name: 'hub' }),
   false,

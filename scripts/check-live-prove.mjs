@@ -58,11 +58,11 @@ const WIDTHS = [
 ]
 
 const LOCKS = {
-  'far-hills': 'Beat round 10 on Silver City to unlock',
-  map03: 'Beat round 10 on The Far Hills to unlock',
-  map04: 'Beat round 10 on Peppermint Pass to unlock',
-  map05: 'Beat round 10 on Caramel Canyon to unlock',
-  map06: 'Beat round 10 on Licorice Woods to unlock',
+  'far-hills': 'Beat round 8 on Silver City to unlock',
+  map03: 'Beat round 8 on The Far Hills to unlock',
+  map04: 'Beat round 8 on Peppermint Pass to unlock',
+  map05: 'Beat round 8 on Caramel Canyon to unlock',
+  map06: 'Beat round 8 on Licorice Woods to unlock',
 }
 
 /** Near (160, 380), close enough to the road that the cloud covers walkers. */
@@ -101,10 +101,12 @@ function listenCrown(page, errors, label) {
 
 async function readLevelPips(page) {
   return page.evaluate(() =>
-    [...document.querySelectorAll('text.defend-level-pip')].map((node) => {
+    [...document.querySelectorAll('.defend-level-pip')].map((node) => {
       const style = getComputedStyle(node)
       const rect = node.getBoundingClientRect()
-      return { display: style.display, w: rect.width, text: (node.textContent || '').trim() }
+      const stage = node.getAttribute('data-glyph-stage')
+      const text = (node.textContent || '').trim() || (stage != null ? `stage ${stage}` : '')
+      return { display: style.display, w: rect.width, text }
     }),
   )
 }

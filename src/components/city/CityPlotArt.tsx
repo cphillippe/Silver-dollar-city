@@ -37,8 +37,10 @@ import {
   type CityUpgrade,
 } from '../../lib/city'
 import {
+  EASY_ANCHOR_PAN,
   EASY_FOLK_LIFT,
   easyFolkNudge,
+  EASY_HIDE_ART,
   EASY_TAG_SLOT,
   EASY_TAG_SLOT_PAN,
   easyTagMetrics,
@@ -47,6 +49,8 @@ import {
 } from '../../lib/cityBuild'
 import { isEasy } from '../../lib/easy'
 import { useProgress } from '../../store/progress'
+
+export { EASY_HIDE_ART }
 
 export const ANCHOR: Record<CityPlotId, { x: number; y: number }> = {
   lookout: { x: 532, y: 62 },
@@ -60,13 +64,6 @@ export const ANCHOR: Record<CityPlotId, { x: number; y: number }> = {
 }
 
 const BUILD_SCALE = 1.58
-
-/** Easy hides these stills: baked checker windows, label strips, fringe halos. Hard keeps them. */
-export const EASY_HIDE_ART: Partial<Record<CityPlotId, CityStage[]>> = {
-  observatory: ['scaffold', 'built', 'lit'],
-  gate: ['scaffold'],
-  lamps: ['scaffold'],
-}
 
 /** Easy draws a cleaner existing still in place of a rough one. */
 export const EASY_SWAP_ART: Partial<Record<CityPlotId, Partial<Record<CityStage, CityStage>>>> = {
@@ -216,7 +213,7 @@ export function EasyPlotChip({ id, pan = false }: { id: CityPlotId; pan?: boolea
       <rect className="city-plot-tag-bg" x={x0} y={y0} width={w} height={h} rx={10} />
       <text className="city-plot-tag" x={slot.x} y={slot.y} textAnchor="middle">
         {lines.map((line, i) => (
-          <tspan key={line} x={slot.x} dy={i === 0 ? 0 : 13}>
+          <tspan key={line} x={slot.x} dy={i === 0 ? 0 : pan ? 14 : 13}>
             {line}
           </tspan>
         ))}
@@ -300,6 +297,7 @@ export function PlotGroup({
   tapped,
   ready,
   selected = false,
+  pan = false,
   onOpen,
   onFocusPlot,
 }: {
@@ -311,6 +309,8 @@ export function PlotGroup({
   tapped: boolean
   ready: boolean
   selected?: boolean
+  /** Easy phone pan. Porch uses the inset anchor so the house fits. */
+  pan?: boolean
   onOpen: (id: CityPlotId) => void
   /** Keyboard focus landed on this plot. Easy Home pans it into view. */
   onFocusPlot?: (id: CityPlotId) => void
@@ -319,7 +319,7 @@ export function PlotGroup({
   const easy = isEasy(progress)
   const hiddenArt = easy && easyArtHidden(id, stage)
   const clickable = hiddenArt ? next || ready : stage !== 'empty' || next || ready
-  const at = ANCHOR[id]
+  const at = (pan && easy ? EASY_ANCHOR_PAN[id] : undefined) ?? ANCHOR[id]
   const vacant = (stage === 'empty' || hiddenArt) && !next && !ready
   const artStage = easy ? (EASY_SWAP_ART[id]?.[stage] ?? stage) : stage
   const title =
@@ -380,7 +380,7 @@ export function PlotGroup({
         ) : null
       ) : (
         <g transform={`translate(${at.x} ${at.y}) scale(${scale}) translate(${-at.x} ${-at.y})`}>
-          <PlotArt id={id} stage={artStage} fill={fill} rising={rising} />
+          <PlotArt id={id} stage={artStage} fill={fill} rising={rising} at={at} />
         </g>
       )}
       {showTag ? (
@@ -422,8 +422,7 @@ function plotImageHref(id: CityPlotId, stage: CityStage): string | undefined {
   return pack?.[stage]
 }
 
-function PlotImageArt({ id, href }: { id: CityPlotId; href: string }) {
-  const at = ANCHOR[id]
+function PlotImageArt({ href, at }: { href: string; at: { x: number; y: number } }) {
   const w = PLOT_IMG_W
   const h = w
   return (
@@ -446,14 +445,16 @@ function PlotArt({
   stage,
   fill,
   rising,
+  at,
 }: {
   id: CityPlotId
   stage: CityStage
   fill: number
   rising: boolean
+  at: { x: number; y: number }
 }) {
   const img = plotImageHref(id, stage)
-  if (img) return <PlotImageArt id={id} href={img} />
+  if (img) return <PlotImageArt href={img} at={at} />
   if (id === 'hollow') return <HollowArt stage={stage} fill={fill} rising={rising} />
   if (id === 'porch') return <PorchArt stage={stage} />
   if (id === 'bench') return <BenchArt stage={stage} fill={fill} rising={rising} />
@@ -825,10 +826,14 @@ export function TownFolk({
   if (easy && (stage === 'empty' || easyArtHidden(id, stage))) return null
   const seat = FOLK[id]
   const nudge = easy ? easyFolkNudge(id, pan) : undefined
+  const moved = pan && easy ? EASY_ANCHOR_PAN[id] : undefined
+  const shift = moved
+    ? { x: moved.x - ANCHOR[id].x, y: moved.y - ANCHOR[id].y }
+    : { x: 0, y: 0 }
   const at = easy
     ? {
-        x: seat.x + (nudge?.x ?? 0),
-        y: seat.y - EASY_FOLK_LIFT + (nudge?.y ?? 0),
+        x: seat.x + shift.x + (nudge?.x ?? 0),
+        y: seat.y + shift.y - EASY_FOLK_LIFT + (nudge?.y ?? 0),
       }
     : seat
   const voice = townVoice(id)

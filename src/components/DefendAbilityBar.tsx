@@ -13,8 +13,9 @@ import {
   WATCH_TOOLS,
 } from '../lib/watchTools'
 import { samePillarLessons } from '../nightWatch/lampPillar'
-import { cheapestOpen, lessonWaiting, pathBadge, pathsOf, type LampPaths } from '../nightWatch/upgradeTree'
+import { cheapestOpen, lessonWaiting, pathsOf, type LampPaths } from '../nightWatch/upgradeTree'
 import { AbilityMark } from './GemMark'
+import { LampUpgradeGlyph } from './LampUpgradeGlyph'
 import type { ProgressState } from '../types'
 import type { WatchAbility } from '../lib/defend'
 
@@ -280,8 +281,8 @@ export function DefendAbilityBar({
                 >
                   <AbilityMark ability={tool.id} size="md" />
                   <span className="defend-ability-label">{tool.label}</span>
-                  <span className="defend-ability-tier" aria-hidden>
-                    {tree ? pathBadge(tree) || '·' : TIER_MARK[tier]}
+                  <span className={`defend-ability-tier${tree && placed ? ' is-glyph' : ''}`} aria-hidden>
+                    {tree && placed ? <LampUpgradeGlyph paths={tree} variant="rail" /> : tree ? '·' : TIER_MARK[tier]}
                   </span>
                   {open && !placed ? (
                     <span

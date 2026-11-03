@@ -12,8 +12,8 @@
       <easy points="10" easyOrder="4">
         <learn>
           <shortStory>You already live like the world hangs together — clocks, roads, promises. That is not a mood. Colossians names Christ: all things were created through him, and in him they hold together.</shortStory>
-          <mainIdea>You already trust that the world holds together in Christ.</mainIdea>
-          <gloss>You already trust that the world holds together in Christ.</gloss>
+          <mainIdea>Christ made all things, and he holds them together.</mainIdea>
+          <gloss>Christ made all things, and he holds them together.</gloss>
           <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
           <word>
             <term>Order</term>
@@ -22,7 +22,7 @@
           <hint>Keep the lived trust. Toss the lucky pile.</hint>
         </learn>
         <match>
-          <sentenceCorrect>You already trust that the world holds together in Christ.</sentenceCorrect>
+          <sentenceCorrect>Christ made all things, and he holds them together.</sentenceCorrect>
           <sentenceMisses>
             <miss>The world is a lucky pile with no holder.</miss>
             <miss>You do not actually trust order in ordinary life.</miss>
@@ -30,11 +30,11 @@
           <placePrompt>That question lives at Why Gate Arch.</placePrompt>
           <personPrompt>Ansel keeps the swinging arch.</personPrompt>
           <ideaPrompt>Ansel’s hinge — the world holds together in Christ.</ideaPrompt>
-          <ideaLabel>The world holds together in Christ.</ideaLabel>
+          <ideaLabel>Christ made all things, and he holds them together.</ideaLabel>
           <whyEasy>Ansel keeps the swinging arch. The world holds together in Christ.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>You already trust that the world holds together in Christ.</claim>
+          <claim>Christ made all things, and he holds them together.</claim>
           <reason>All things were created through him and hold together in him.</reason>
           <source>Colossians 1:16–17</source>
           <whyCorrect>All things were created through him and hold together in him.</whyCorrect>
@@ -44,7 +44,7 @@
             <miss>Colossians never names Christ.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>You already trust that the world holds together in Christ.</choice>
+            <choice>Christ made all things, and he holds them together.</choice>
             <choice>The world is a lucky pile with no holder.</choice>
             <choice>You do not actually trust order in ordinary life.</choice>
           </claimChoices>

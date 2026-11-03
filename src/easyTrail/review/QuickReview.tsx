@@ -112,6 +112,9 @@ export function QuickReview({
   const [mapTapClean, setMapTapClean] = useState(true)
   const drainHalf = useRef(false)
   const graded = useRef(false)
+  const celebrateTimer = useRef<number | undefined>(undefined)
+
+  useEffect(() => () => window.clearTimeout(celebrateTimer.current), [])
 
   const stamp = lociStampFor(lineId)
   const targetLine = brief ? reviewTargetLine(brief, beatIndex) : ''
@@ -158,8 +161,7 @@ export function QuickReview({
     (clean: boolean) => {
       if (graded.current) return
       graded.current = true
-      const cardClean =
-        intervalIndex === 2 ? clean && reasonBeatClean : clean
+      const cardClean = sourceBeatActive ? clean && reasonBeatClean : clean
       const streak = sitting?.streak ?? 0
       const nextStreak = cardClean ? Math.min(3, streak + 1) : 0
       onSittingUpdate?.({
@@ -182,7 +184,7 @@ export function QuickReview({
       if (cardClean && nextStreak === 3) {
         holdInterval.current = liveIntervalIndex
         setWinBurst(true)
-        window.setTimeout(() => {
+        celebrateTimer.current = window.setTimeout(() => {
           setWinBurst(false)
           finish()
         }, 1200)
@@ -193,7 +195,6 @@ export function QuickReview({
     [
       brief,
       format,
-      intervalIndex,
       liveIntervalIndex,
       lineId,
       onDone,
@@ -201,6 +202,7 @@ export function QuickReview({
       practice,
       reasonBeatClean,
       recordReview,
+      sourceBeatActive,
       sitting?.bUsed,
       sitting?.streak,
       today,

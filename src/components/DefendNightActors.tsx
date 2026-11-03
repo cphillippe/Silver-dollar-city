@@ -35,6 +35,7 @@ import {
 } from '../nightWatch/candle'
 import { combatTier, TIER_MARK, WALKER_LABEL } from '../lib/watchTools'
 import { easyShotReach, pathBadge, pathsOf, type LampPaths } from '../nightWatch/upgradeTree'
+import { LampUpgradeGlyph } from './LampUpgradeGlyph'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { TOWER_TYPE_SRC } from '../lib/towerTypeArt'
 import { EASY } from '../lib/easy'
@@ -724,15 +725,31 @@ export function DefendNightActorsSvg({
                         {upgrading || justUp ? <circle className="defend-upgrade-ring" r="36" /> : null}
                         {/* Easy keeps the tag mounted so the wave stylesheet can hide it. Hard still omits it during a wave. */}
                         {phase !== 'wave' || easy ? (
-                          <text
-                            className={`defend-level-pip${justUp ? ' is-bump' : ''}`}
-                            y="-98"
-                            textAnchor="middle"
-                            data-level={incense && tree ? incenseMark(tree) : cross && tree ? crossMark(tree) : bell && tree ? bellMark(tree) : tierMark}
-                            aria-hidden="true"
-                          >
-                            {incense && tree ? incenseMark(tree) : cross && tree ? crossMark(tree) : bell && tree ? bellMark(tree) : tierMark}
-                          </text>
+                          incense && tree ? (
+                            <text className={`defend-level-pip${justUp ? ' is-bump' : ''}`} y="-98" textAnchor="middle" data-level={incenseMark(tree)} aria-hidden="true">
+                              {incenseMark(tree)}
+                            </text>
+                          ) : cross && tree ? (
+                            <text className={`defend-level-pip${justUp ? ' is-bump' : ''}`} y="-98" textAnchor="middle" data-level={crossMark(tree)} aria-hidden="true">
+                              {crossMark(tree)}
+                            </text>
+                          ) : bell && tree ? (
+                            <text className={`defend-level-pip${justUp ? ' is-bump' : ''}`} y="-98" textAnchor="middle" data-level={bellMark(tree)} aria-hidden="true">
+                              {bellMark(tree)}
+                            </text>
+                          ) : tree ? (
+                            <LampUpgradeGlyph paths={tree} variant="map" />
+                          ) : (
+                            <text
+                              className={`defend-level-pip${justUp ? ' is-bump' : ''}`}
+                              y="-98"
+                              textAnchor="middle"
+                              data-level={tierMark}
+                              aria-hidden="true"
+                            >
+                              {tierMark}
+                            </text>
+                          )
                         ) : null}
                         {justUp ? (
                           <g className="defend-level-burst" pointerEvents="none" aria-hidden="true">

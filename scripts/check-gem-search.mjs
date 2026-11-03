@@ -547,8 +547,18 @@ assert.match(
 )
 assert.match(
   playSrc,
-  /const cellClear = status !== 'ok' && \(targetClear \|\| bonusClear\)/,
+  /const easyWordLit = easy && status !== 'ok' && targetClear/,
+  'Easy keeps a found word lit while the board is still in play',
+)
+assert.match(
+  playSrc,
+  /const cellClear = status !== 'ok' && !easyWordLit && \(targetClear \|\| bonusClear\)/,
   'found letters return on the win view',
+)
+assert.match(
+  playSrc,
+  /const cellFound = status === 'ok' && \(targetClear \|\| sharedFound\)/,
+  'win view paints found letters',
 )
 assert.match(winCss, /\.play\.is-gem-search\.is-win \.cta-dock \.btn\.primary/)
 assert.match(winCss, /font-weight:\s*800/)
