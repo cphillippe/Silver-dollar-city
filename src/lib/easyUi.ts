@@ -6,6 +6,8 @@ export const EASY = {
   mindMapShort: 'Scrapbook',
   connectLink: 'Tap the sentence, then the place, then the person.',
   matchHunt: 'Find a word. A story panel opens.',
+  gemHow: 'Word search: tap letters one by one, or slide.',
+  gemTapNext: 'Tap the next letter, or slide across the word.',
   runHunt: 'Hold to run. When it says Now tap, tap.',
   runHow: 'Hold to run!',
   runLastLine: 'Last line! Run!',

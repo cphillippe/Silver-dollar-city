@@ -653,6 +653,53 @@ html[data-easy='on'] .play.is-gem-search .gem-cell.is-start-gold {
   animation: gem-start-pulse 1.15s ease-in-out infinite;
 }
 
+/* Easy miss copy stays at least 13px, including the "why" line under Miss −25. */
+html[data-easy='on'] .play.is-gem-search .gem-hint-slot .miss-banner span,
+html[data-easy='on'] .play.is-gem-search .gem-stage .miss-banner span {
+  font-size: 13px;
+}
+
+/* A found word stays on the board. The ring is pine, so it is not a second gold cue. */
+html[data-easy='on'] .play.is-gem-search .gem-cell.is-word-lit {
+  z-index: 1;
+  color: inherit;
+  border-color: #1f7a4d;
+  box-shadow:
+    0 0 0 2px #2a2118,
+    0 0 0 5px #1f7a4d;
+  pointer-events: none;
+}
+
+html[data-easy='on'] .play.is-gem-search .gem-cell.is-word-lit .gem-letter {
+  opacity: 1;
+  color: inherit;
+}
+
+/* An intentional hint after a miss is ink, not gold. */
+html[data-easy='on'] .play.is-gem-search .gem-cell.is-hint {
+  border-color: #2a2118;
+  box-shadow: 0 0 0 3px #2a2118;
+  animation: gem-hint-ink 1.15s ease-in-out infinite;
+}
+
+@keyframes gem-hint-ink {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px #2a2118;
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(42, 33, 24, 0.45);
+    transform: scale(1.02);
+  }
+}
+
+html[data-easy='on'] .play.is-gem-search .match-teach-chip.is-found {
+  background: #e5f6ec;
+  border-color: #1f7a4d;
+  box-shadow: inset 0 0 0 2px #1f7a4d;
+}
+
 /* need-pulse swaps box-shadow every frame, so the ink ring needs its own keyframes. */
 @keyframes gem-start-pulse {
   0%,
@@ -676,6 +723,14 @@ html[data-easy='on'] .play.is-gem-search .gem-hint-slot {
   overflow: hidden;
 }
 
+/* #899: on a short phone the square board is centered about 8.5px into this slot.
+   Move the slot up without changing the board, dock, or score. */
+@media (max-height: 720px) {
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .gem-hint-slot {
+    transform: translateY(-9px);
+  }
+}
+
 html[data-easy='on'] .play.is-gem-search .gem-start-hint {
   grid-area: 1 / 1;
   margin: 0;
@@ -689,6 +744,22 @@ html[data-easy='on'] .play.is-gem-search .gem-start-hint {
   color: #2a2118;
   background: #fff6e8;
   border-radius: 12px;
+}
+
+/* #881: the tap-next line is teach text, 14px, and not a second gold cue.
+   The dock sentence also carries the line, but short phones already show it
+   in the hint slot — keep a single visible copy. */
+html[data-easy='on'] .play.is-gem-search .gem-start-hint.is-tap-next {
+  font-size: 0.875rem;
+  color: #2a2118;
+  background: #fff6e8;
+  border: 0;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-say.is-tap-next {
+  display: none;
 }
 
 html[data-easy='on'] .play.is-gem-search .gem-start-hint.is-reserved {

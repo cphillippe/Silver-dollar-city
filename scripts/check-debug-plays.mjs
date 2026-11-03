@@ -85,6 +85,7 @@ assert.deepEqual(debugJumpView(hold), {
   name: 'journal',
   focusId: 'ph-road',
   autoQuiz: true,
+  debugLockIn: true,
 })
 
 assert.deepEqual(

@@ -1,13 +1,15 @@
-import type { Dispatch, SetStateAction } from 'react'
+import { useState, type Dispatch, type SetStateAction } from 'react'
 import { pillarFor } from '../../content'
 import type { EvidenceBrief } from '../../content/evidence'
 import { STORY } from '../../content/story'
 import { EASY, isEasy } from '../../lib/easy'
+import { isDue } from '../../lib/memory'
 import { markLater, type RecallLaterState } from '../../lib/recall'
 import { needsTierHold } from '../../lib/tiers'
 import { EasyBack } from '../../components/EasyBack'
 import { RecallGate } from '../../components/RecallGate'
 import { useProgress } from '../../store/progress'
+import { QuickReview } from '../review/QuickReview'
 import type { JournalEntry, View } from '../../types'
 
 interface HoldPracticeProps {
@@ -20,7 +22,7 @@ interface HoldPracticeProps {
 }
 
 /**
- * Lock In hold practice (A3). Journal owns the gate, including the #448 teach-gate.
+ * Lock In hold practice (A3). A kept Easy line gets the shipped quick review, never the why slide again (#843). Journal owns the gate, including the #448 teach-gate.
  * Render no wrapper: Lock In CSS targets `.journal.is-rehearse > .text-link` and `.rehearse-anchor` directly.
  */
 export function HoldPractice({ quizBrief, focusedEntry, today, setLater, onNavigate }: HoldPracticeProps) {
@@ -29,6 +31,9 @@ export function HoldPractice({ quizBrief, focusedEntry, today, setLater, onNavig
   const pillar = focusedEntry?.areaId ?? pillarFor(quizBrief.id)
   const firstHold = !progress.held.includes(quizBrief.id)
   const advancing = firstHold || needsTierHold(progress, quizBrief.id)
+  const [sitting, setSitting] = useState<{ bUsed?: boolean; streak?: number }>({})
+  const trace = progress.memory[quizBrief.id]
+  const keptReview = easy && !advancing
   return (
     <main className={`journal is-rehearse ${easy ? 'is-easy-hold-practice' : ''}`}>
       {easy ? (
@@ -41,59 +46,73 @@ export function HoldPractice({ quizBrief, focusedEntry, today, setLater, onNavig
       <section className="rehearse-anchor">
         <p className="eyebrow">{easy ? EASY.saved : 'Takeaway'}</p>
         {easy ? null : <h1>{focusedEntry?.title ?? STORY.tapTakeaway}</h1>}
-        <RecallGate
-          brief={quizBrief}
-          mode={easy && advancing ? 'encode' : 'review'}
-          visits={progress.memory[quizBrief.id]?.reviews ?? 0}
-          kicker={STORY.tapTakeaway}
-          onHeld={(result) => {
-            if (easy && advancing) {
-              recordHeld(quizBrief.id)
+        {keptReview ? (
+          <QuickReview
+            lineId={quizBrief.id}
+            today={today}
+            practice={!(trace && isDue(trace, today))}
+            sitting={sitting}
+            onSittingUpdate={setSitting}
+            formatsACOnly
+            skipHonesty
+            onDone={() => onNavigate({ name: 'hub' })}
+          />
+        ) : (
+          <RecallGate
+            brief={quizBrief}
+            mode={easy && advancing ? 'encode' : 'review'}
+            visits={progress.memory[quizBrief.id]?.reviews ?? 0}
+            kicker={STORY.tapTakeaway}
+            onHeld={(result) => {
+              if (easy && advancing) {
+                recordHeld(quizBrief.id)
+                recordReview({
+                  id: quizBrief.id,
+                  pillar,
+                  kind: 'encode',
+                  today,
+                  clean: result.clean,
+                  peeked: false,
+                  elaborated: false,
+                  format: 'A',
+                })
+                recordLessonHold(quizBrief.id, result.clean)
+                onNavigate({ name: 'hub' })
+                return
+              }
               recordReview({
                 id: quizBrief.id,
                 pillar,
-                kind: 'encode',
+                kind: 'recall',
                 today,
                 clean: result.clean,
                 peeked: false,
                 elaborated: false,
               })
-              recordLessonHold(quizBrief.id, result.clean)
-              onNavigate({ name: 'hub' })
-              return
-            }
-            recordReview({
-              id: quizBrief.id,
-              pillar,
-              kind: 'recall',
-              today,
-              clean: result.clean,
-              peeked: false,
-              elaborated: false,
-            })
-            if (!result.clean) recordLessonHold(quizBrief.id, false)
-            onNavigate(
+              if (!result.clean) recordLessonHold(quizBrief.id, false)
+              onNavigate(
+                easy
+                  ? { name: 'hub' }
+                  : focusedEntry
+                    ? { name: 'journal', focusId: focusedEntry.id }
+                    : { name: 'journal' },
+              )
+            }}
+            onSkip={
               easy
-                ? { name: 'hub' }
-                : focusedEntry
-                  ? { name: 'journal', focusId: focusedEntry.id }
-                  : { name: 'journal' },
-            )
-          }}
-          onSkip={
-            easy
-              ? undefined
-              : (how) => {
-                  if (how === 'not-today') snoozeReviews([quizBrief.id], today)
-                  setLater(markLater(today, [quizBrief.id], true))
-                  onNavigate(
-                    focusedEntry
-                      ? { name: 'journal', focusId: focusedEntry.id }
-                      : { name: 'journal' },
-                  )
-                }
-          }
-        />
+                ? undefined
+                : (how) => {
+                    if (how === 'not-today') snoozeReviews([quizBrief.id], today)
+                    setLater(markLater(today, [quizBrief.id], true))
+                    onNavigate(
+                      focusedEntry
+                        ? { name: 'journal', focusId: focusedEntry.id }
+                        : { name: 'journal' },
+                    )
+                  }
+            }
+          />
+        )}
       </section>
     </main>
   )

@@ -11,6 +11,7 @@ import { createServer } from 'vite'
 import { chromium } from '@playwright/test'
 import { SAVE_KIND } from '../src/lib/save.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
+import { LAMP_GLYPH_COLOR } from '../src/nightWatch/lampGlyph.ts'
 
 const SAVE = {
   kind: SAVE_KIND,
@@ -1108,6 +1109,1110 @@ export async function check792bSurvived(browser, port, errors, width, height) {
   await early.context.close()
 }
 
+const MAP_NOTE_WIDTHS = [
+  [375, 667],
+  [390, 844],
+  [412, 915],
+  [768, 1024],
+]
+const MAP_NOTE_SHOTS = join(tmpdir(), 'nw-map-note-562')
+
+function mapNoteWidths() {
+  const raw = process.env.NW_MAP_WIDTHS
+  if (!raw) return MAP_NOTE_WIDTHS
+  return raw.split(',').map((pair) => pair.split('x').map((part) => Number(part)))
+}
+
+function mapNoteRounds() {
+  const raw = process.env.NW_MAP_ROUNDS
+  if (!raw) return [1, 2, 3, 4, 5, 6, 7, 8]
+  return raw.split(',').map((part) => Number(part))
+}
+
+async function mapGoldCues(page) {
+  return page.evaluate(() => {
+    const root = document.querySelector('.defend-page')
+    if (!root) return []
+    const gold = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = Number(match[1])
+        const g = Number(match[2])
+        const b = Number(match[3])
+        const a = match[4] === undefined ? 1 : Number(match[4])
+        if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const chrome = 'button, .defend-abilities, .defend-boost, .defend-tower-card, .defend-path-pip, .nw-balloon-orb, .defend-wave, .defend-ability-stock'
+    return [...root.querySelectorAll(chrome)]
+      .filter((node) => !node.closest('.defend-nw-debug'))
+      .filter((node) => {
+        const box = node.getBoundingClientRect()
+        const style = getComputedStyle(node)
+        return box.width > 1 && box.height > 1 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0
+      })
+      .filter((node) => {
+        const style = getComputedStyle(node)
+        const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+        const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+        return gold(style.backgroundImage) || gold(style.backgroundColor) || border || gold(style.boxShadow) || (text && gold(style.color))
+      })
+      .map((node) => `${node.tagName}.${node.getAttribute('class') || ''}`.slice(0, 80))
+  })
+}
+
+async function visibleHardText(page) {
+  return page.evaluate(() => {
+    const hits = []
+    const walk = (node) => {
+      if (node.nodeType === 3) {
+        const text = node.textContent || ''
+        if (!/\bHard\b/.test(text)) return
+        const parent = node.parentElement
+        if (!parent || parent.closest('.defend-nw-debug')) return
+        const style = getComputedStyle(parent)
+        const box = parent.getBoundingClientRect()
+        const clip = style.clipPath || ''
+        const clipped = clip !== 'none' && clip.includes('inset')
+        const seen =
+          style.display !== 'none' &&
+          style.visibility !== 'hidden' &&
+          Number(style.opacity) > 0 &&
+          box.width > 2 &&
+          box.height > 2 &&
+          !clipped
+        if (seen) hits.push(text.replace(/\s+/g, ' ').trim().slice(0, 80))
+        return
+      }
+      if (node.nodeType === 1) {
+        for (const child of node.childNodes) walk(child)
+      }
+    }
+    walk(document.body)
+    return hits
+  })
+}
+
+async function openMapRound(browser, port, width, height, round, errors) {
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width, height },
+    deviceScaleFactor: 1,
+    reducedMotion: 'reduce',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: SAVE },
+  )
+  const page = await context.newPage()
+  const label = `${width}x${height} r${round}`
+  page.on('pageerror', (error) => errors.push(`${label} ${error}`))
+  page.on('console', (msg) => {
+    if (msg.type() !== 'error') return
+    const text = msg.text()
+    if (text.includes('Encountered two children with the same key')) return
+    errors.push(`${label} ${text}`)
+  })
+  await page.goto(`/?playtest=1&nwCam=0&nwRound=${round}`)
+  await page.getByRole('button', { name: 'Settings' }).click()
+  await page.locator('summary', { hasText: 'Developer' }).click()
+  await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
+  await page.locator('.defend-board').waitFor()
+  if (await page.locator('[data-map-overlay]').count()) {
+    await page.locator('[data-map="a2"]').click()
+    await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+  }
+  return { context, page, label }
+}
+
+async function cuePoint(page) {
+  return page.evaluate(() => {
+    const face = document.querySelector('.defend-raider.is-easy-cue')
+    if (!face) return null
+    const id = face.getAttribute('data-walker-id')
+    const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+    if (!tap) return null
+    const box = tap.getBoundingClientRect()
+    const x = box.x + box.width / 2
+    const y = box.y + box.height / 2
+    const node = document.elementFromPoint(x, y)
+    if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+    return { x, y }
+  })
+}
+
+async function clearToBoost(page, label) {
+  const go = page.locator('.defend-go')
+  if (await go.count()) await go.click()
+  const started = Date.now()
+  while (Date.now() - started < 120_000) {
+    if (await page.locator('.defend-page.is-boost').count()) return
+    if (await page.locator('.defend-page.is-lost').count()) assert.fail(`${label} the round was lost`)
+    const cue = await cuePoint(page)
+    if (cue) await page.mouse.click(cue.x, cue.y)
+    await page.waitForTimeout(60)
+  }
+  assert.fail(`${label} the round did not clear`)
+}
+
+async function readMapNote(page) {
+  return page.evaluate(() => {
+    const node = document.querySelector('.nw-map-toast')
+    if (!node) return null
+    const style = getComputedStyle(node)
+    const box = node.getBoundingClientRect()
+    const chip = document.querySelector('.nw-pace')
+    const chipBox = chip ? chip.getBoundingClientRect() : null
+    return {
+      text: (node.textContent || '').replace(/\s+/g, ' ').trim(),
+      w: box.width,
+      h: box.height,
+      x: box.x,
+      y: box.y,
+      right: box.right,
+      bottom: box.bottom,
+      font: parseFloat(style.fontSize),
+      top: style.top,
+      opacity: Number(style.opacity),
+      display: style.display,
+      visibility: style.visibility,
+      events: style.pointerEvents,
+      chip: chipBox
+        ? { x: chipBox.x, y: chipBox.y, w: chipBox.width, h: chipBox.height, right: chipBox.right, bottom: chipBox.bottom }
+        : null,
+    }
+  })
+}
+
+function boxesOverlap(a, b) {
+  return a.x < b.right && a.right > b.x && a.y < b.bottom && a.bottom > b.y
+}
+
+async function checkHomeBadge(browser, port, errors) {
+  const cases = [
+    { name: 'round 8', defense: { cleared: 1, nights: ['2026-10-14'], mazeBeat: ['a2'], mapBest: { a2: 8 } }, badge: true },
+    { name: 'old flag', defense: { cleared: 1, nights: ['2026-10-14'], farHills: true }, badge: true },
+    { name: 'round 7', defense: { cleared: 1, nights: ['2026-10-14'], mapBest: { a2: 7 } }, badge: false },
+  ]
+  for (const item of cases) {
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 375, height: 667 },
+      deviceScaleFactor: 1,
+    })
+    await context.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      {
+        key: STORAGE_KEY,
+        save: {
+          ...SAVE,
+          progress: { ...SAVE.progress, easyHeld: ['ph-road'], defense: item.defense },
+        },
+      },
+    )
+    const page = await context.newPage()
+    page.on('pageerror', (error) => errors.push(`home ${item.name} ${error}`))
+    await page.goto('/?playtest=1', { waitUntil: 'domcontentloaded' })
+    const badge = page.locator('.easy-night-watch .nw-area-badge')
+    if (item.badge) {
+      await badge.waitFor({ timeout: 60_000 })
+      assert.equal((await badge.textContent()).trim(), 'Far Hills', `1.4.562 Home shows Far Hills for ${item.name}`)
+      const box = await badge.boundingBox()
+      assert.ok(box && box.width > 10 && box.height > 8, `1.4.562 the Far Hills badge is visible for ${item.name}`)
+    } else {
+      await page.locator('.easy-night-watch').waitFor()
+      assert.equal(await badge.count(), 0, `1.4.562 Home hides Far Hills for ${item.name}`)
+    }
+    await context.close()
+  }
+}
+
+/** 1.4.562: the Easy round-8 map note is visible, and earlier clears do not show it. */
+async function checkMapNote(browser, port, errors) {
+  mkdirSync(MAP_NOTE_SHOTS, { recursive: true })
+  await checkHomeBadge(browser, port, errors)
+  const rounds = mapNoteRounds()
+  for (const [width, height] of mapNoteWidths()) {
+    for (const round of rounds) {
+      const { context, page, label } = await openMapRound(browser, port, width, height, round, errors)
+      if (round === 1) {
+        const skill = await page.locator('.nw-skill-toast:not(.nw-map-toast)').first().evaluate((node) => {
+          const box = node.getBoundingClientRect()
+          return { w: box.width, h: box.height, text: (node.textContent || '').trim() }
+        })
+        assert.ok(skill.w <= 2 && skill.h <= 2, `${label} skill notes stay hidden (${skill.w}x${skill.h} ${skill.text})`)
+      }
+      assert.equal(await page.locator('.nw-map-toast').count(), 0, `${label} the map note is absent before the clear`)
+      const hardBefore = await visibleHardText(page)
+      assert.deepEqual(hardBefore, [], `${label} no Hard text before the clear ${hardBefore}`)
+      await clearToBoost(page, label)
+      if (round < 8) {
+        assert.equal(await page.locator('.nw-map-toast').count(), 0, `${label} no map note after round ${round}`)
+        await page.waitForTimeout(400)
+        assert.equal(await page.locator('.nw-map-toast').count(), 0, `${label} the map note stays absent after round ${round}`)
+        await context.close()
+        continue
+      }
+      const seenAt = Date.now()
+      await page.locator('.nw-map-toast').waitFor()
+      const first = await readMapNote(page)
+      assert.ok(first, `${label} the map note is mounted`)
+      assert.equal(first.text, 'New map unlocked: The Far Hills!', `${label} the note names The Far Hills`)
+      assert.ok(first.w >= 100, `${label} the note is at least 100px wide (${first.w})`)
+      assert.ok(first.h > 8, `${label} the note has a visible height (${first.h})`)
+      assert.ok(first.font >= 14, `${label} the note text is at least 14px (${first.font})`)
+      assert.equal(first.top, '108px', `${label} the note sits at 108px`)
+      assert.equal(first.events, 'none', `${label} the note does not take taps`)
+      assert.ok(first.opacity > 0.9 && first.visibility !== 'hidden' && first.display !== 'none', `${label} the note is visible`)
+      const center = width / 2
+      assert.ok(Math.abs(first.x + first.w / 2 - center) <= 12, `${label} the note is centered ${JSON.stringify(first)}`)
+      assert.ok(first.chip, `${label} the pace chip is on screen`)
+      if (width === 375) {
+        assert.ok(Math.abs(first.chip.w - 44) <= 4 && Math.abs(first.chip.h - 44) <= 4, `${label} pace chip is ~44px ${JSON.stringify(first.chip)}`)
+        assert.ok(Math.abs(first.chip.right - width) <= 16, `${label} pace chip sits at the right edge ${JSON.stringify(first.chip)}`)
+        assert.ok(Math.abs(first.chip.y - 49) <= 16, `${label} pace chip y ~49 (${first.chip.y})`)
+      }
+      assert.equal(boxesOverlap(first, first.chip), false, `${label} the note does not cover the pace chip ${JSON.stringify({ note: first, chip: first.chip })}`)
+      const gold = await mapGoldCues(page)
+      assert.equal(gold.length, 1, `${label} exactly one gold cue ${JSON.stringify(gold)}`)
+      const hit = await page.evaluate(() => {
+        const chip = document.querySelector('.nw-pace')
+        const box = chip.getBoundingClientRect()
+        const x = box.x + box.width / 2
+        const y = box.y + box.height / 2
+        const node = document.elementFromPoint(x, y)
+        return Boolean(node?.closest?.('.nw-pace'))
+      })
+      assert.equal(hit, true, `${label} a tap at the pace chip center hits the chip`)
+      const paceBefore = await page.locator('.nw-pace').getAttribute('data-state')
+      const chipBox = await page.locator('.nw-pace').boundingBox()
+      await page.mouse.click(chipBox.x + chipBox.width / 2, chipBox.y + chipBox.height / 2)
+      const paceAfter = await page.locator('.nw-pace').getAttribute('data-state')
+      assert.notEqual(paceAfter, paceBefore, `${label} the pace chip takes the tap (${paceBefore} -> ${paceAfter})`)
+      const hard = await visibleHardText(page)
+      assert.deepEqual(hard, [], `${label} no Hard text a player can see ${hard}`)
+      if (width === 375 || width === 390) {
+        await page.screenshot({ path: join(MAP_NOTE_SHOTS, `note-${width}x${height}.png`) })
+      }
+      let lastWide = Date.now()
+      while (Date.now() - seenAt < 7000) {
+        const note = await readMapNote(page)
+        if (!note || note.w < 100) break
+        assert.equal(boxesOverlap(note, note.chip), false, `${label} the note stays off the pace chip`)
+        lastWide = Date.now()
+        await page.waitForTimeout(150)
+      }
+      const held = lastWide - seenAt
+      assert.ok(held >= 3600 && held <= 5200, `${label} the note stays wide for about 4.2s (${held}ms)`)
+      assert.equal(await page.locator('.nw-map-toast').count(), 0, `${label} the note leaves after the hold`)
+      console.log(`${label} map note ${Math.round(first.w)}x${Math.round(first.h)} at ${Math.round(first.x)},${Math.round(first.y)} held ${held}ms chip ${JSON.stringify(first.chip)}`)
+      await context.close()
+    }
+  }
+}
+
+function overlapArea(a, b) {
+  if (!a || !b) return 0
+  const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.x, b.x))
+  const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y))
+  return w * h
+}
+
+/** 1.4.565: sample the leak banner against the map note on every frame. */
+async function checkLeakBanner(browser, port, errors) {
+  const shots = join(tmpdir(), 'nw-leak-banner-565')
+  mkdirSync(shots, { recursive: true })
+  const sizes = [
+    [375, 667],
+    [375, 812],
+    [390, 844],
+  ]
+  for (const [width, height] of sizes) {
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+    })
+    await context.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: SAVE },
+    )
+    const page = await context.newPage()
+    const label = `${width}x${height}`
+    page.on('pageerror', (error) => errors.push(`${label} leak ${error}`))
+    await page.goto(`/?playtest=1&nwCam=0&nwRound=8`)
+    await page.getByRole('button', { name: 'Settings' }).click()
+    await page.locator('summary', { hasText: 'Developer' }).click()
+    await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
+    await page.locator('.defend-board').waitFor()
+    if (await page.locator('[data-map-overlay]').count()) {
+      await page.locator('[data-map="a2"]').click()
+      await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+    }
+    await page.evaluate(() => {
+      const box = (node) => {
+        if (!node) return null
+        const r = node.getBoundingClientRect()
+        if (r.width < 2 || r.height < 2) return null
+        return { x: r.x, y: r.y, right: r.right, bottom: r.bottom, w: r.width, h: r.height }
+      }
+      window.__leakFrames = []
+      const tick = () => {
+        const banner = document.querySelector('.nw-power-banner.is-still')
+        if (banner) {
+          const style = getComputedStyle(banner)
+          const bannerBox = box(banner)
+          if (bannerBox) {
+            window.__leakFrames.push({
+              t: performance.now(),
+              banner: bannerBox,
+              note: box(document.querySelector('.nw-map-toast')),
+              round: box(document.querySelector('.nw-wave-survived-round')),
+              title: box(document.querySelector('.nw-wave-survived-title')),
+              chip: box(document.querySelector('.nw-pace')),
+              hearts: box(document.querySelector('.defend-hearts')),
+              cont: box(document.querySelector('.defend-continue')),
+              font: parseFloat(style.fontSize),
+              space: style.whiteSpace,
+              opacity: Number(style.opacity),
+            })
+          }
+        }
+        requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    })
+    const go = page.locator('.defend-go')
+    if (await go.count()) await go.click()
+    const started = Date.now()
+    let shot = false
+    let tapped = false
+    while (Date.now() - started < 90_000) {
+      const frame = await page.evaluate(() => {
+        const lost = Boolean(document.querySelector('.defend-page.is-lost'))
+        const count = (document.querySelector('.defend-count')?.textContent || '').replace(/\s+/g, ' ').trim()
+        const face = document.querySelector('.defend-raider.is-easy-cue')
+        let cue = null
+        if (face) {
+          const id = face.getAttribute('data-walker-id')
+          const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+          if (tap) {
+            const box = tap.getBoundingClientRect()
+            const x = box.x + box.width / 2
+            const y = box.y + box.height / 2
+            const node = document.elementFromPoint(x, y)
+            if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') === id) cue = { x, y }
+          }
+        }
+        const both = Boolean(document.querySelector('.nw-map-toast') && document.querySelector('.nw-power-banner.is-still'))
+        return { lost, count, cue, both }
+      })
+      if (frame.lost) assert.fail(`${label} the round was lost before the leak banner`)
+      if (frame.both && !tapped) {
+        const before = await page.locator('.nw-pace').getAttribute('data-state')
+        const chip = await page.locator('.nw-pace').boundingBox()
+        assert.ok(chip, `${label} the pace chip is on screen with the note`)
+        await page.mouse.click(chip.x + chip.width / 2, chip.y + chip.height / 2)
+        const after = await page.locator('.nw-pace').getAttribute('data-state')
+        assert.notEqual(after, before, `${label} the pace chip takes the tap during the note`)
+        tapped = true
+      }
+      if (!shot) {
+        const opaque = await page.evaluate(() => (window.__leakFrames || []).some((frame) => frame.opacity > 0.9 && frame.note))
+        if (opaque) {
+          await page.screenshot({ path: join(shots, `leak-${width}x${height}.png`) })
+          shot = true
+        }
+      }
+      const left = Number((frame.count.match(/\b(\d+) left\b/) || [])[1] || 99)
+      if (left > 2 && frame.cue) await page.mouse.click(frame.cue.x, frame.cue.y)
+      const done = await page.evaluate(() => {
+        const frames = window.__leakFrames || []
+        if (!frames.length) return false
+        const last = frames[frames.length - 1]
+        return performance.now() - last.t > 400 && !document.querySelector('.nw-power-banner.is-still')
+      })
+      if (done && shot) break
+      await page.waitForTimeout(16)
+    }
+    const frames = await page.evaluate(() => window.__leakFrames || [])
+    assert.ok(frames.length >= 15, `${label} sampled the banner (${frames.length} frames)`)
+    const span = frames[frames.length - 1].t - frames[0].t
+    assert.ok(span >= 1000, `${label} the sample covers the banner lifetime (${Math.round(span)}ms)`)
+    let maxNote = 0
+    let maxRound = 0
+    let maxTitle = 0
+    let maxChip = 0
+    let maxHearts = 0
+    let maxCont = 0
+    let minY = Infinity
+    for (const [index, frame] of frames.entries()) {
+      assert.ok(frame.note, `${label} frame ${index} the note is up with the banner`)
+      const note = overlapArea(frame.banner, frame.note)
+      const round = overlapArea(frame.banner, frame.round)
+      const title = overlapArea(frame.banner, frame.title)
+      const chip = overlapArea(frame.banner, frame.chip)
+      const hearts = overlapArea(frame.banner, frame.hearts)
+      const cont = overlapArea(frame.banner, frame.cont)
+      maxNote = Math.max(maxNote, note)
+      maxRound = Math.max(maxRound, round)
+      maxTitle = Math.max(maxTitle, title)
+      maxChip = Math.max(maxChip, chip)
+      maxHearts = Math.max(maxHearts, hearts)
+      maxCont = Math.max(maxCont, cont)
+      minY = Math.min(minY, frame.banner.y)
+      assert.equal(note, 0, `${label} frame ${index} banner/note overlap ${note}`)
+      assert.equal(round, 0, `${label} frame ${index} banner/round overlap ${round}`)
+      assert.equal(title, 0, `${label} frame ${index} banner/title overlap ${title}`)
+      assert.equal(chip, 0, `${label} frame ${index} banner/chip overlap ${chip}`)
+      assert.equal(hearts, 0, `${label} frame ${index} banner/hearts overlap ${hearts}`)
+      assert.equal(cont, 0, `${label} frame ${index} banner/continue overlap ${cont}`)
+      assert.ok(frame.banner.y >= 268, `${label} frame ${index} banner top ${frame.banner.y} is under 268`)
+      assert.ok(frame.font >= 13, `${label} frame ${index} banner font ${frame.font}`)
+      assert.equal(frame.space, 'nowrap', `${label} frame ${index} banner stays one line`)
+      assert.ok(frame.banner.h <= 52, `${label} frame ${index} banner is one line tall (${frame.banner.h})`)
+    }
+    assert.equal(tapped, true, `${label} the pace chip was tapped`)
+    const rows = frames.map((frame, index) => ({
+      i: index,
+      y: Math.round(frame.banner.y * 10) / 10,
+      h: Math.round(frame.banner.h * 10) / 10,
+      note: overlapArea(frame.banner, frame.note),
+      op: Math.round(frame.opacity * 100) / 100,
+    }))
+    console.log(`${label} leak frames ${frames.length} span ${Math.round(span)}ms minY ${minY.toFixed(1)} maxNote ${maxNote} maxRound ${maxRound} maxTitle ${maxTitle} maxChip ${maxChip} maxHearts ${maxHearts} maxCont ${maxCont}`)
+    console.log(`${label} leak per-frame ${JSON.stringify(rows)}`)
+    await context.close()
+  }
+}
+
+const GLYPH_SIZES = [
+  [375, 667],
+  [375, 812],
+  [390, 844],
+  [412, 915],
+  [768, 1024],
+]
+
+/** Round 24 on the playtest jump: enough sparks for two full ladders, the late steps open, no lamps yet. */
+const GLYPH_SEARCH = '?playtest=1&nwSeed=2&nwRound=24&nwLamps=0'
+const GLYPH_TOOLS = ['love', 'logic', 'reason', 'science']
+const GLYPH_NAME = { love: 'Love', logic: 'Logic', reason: 'Reason', science: 'Science' }
+
+/**
+ * Eight real buys on one lamp, one click each on the open card.
+ * Stage n is the count of buys, so the mark must read 1 through 8 in this order.
+ */
+const GLYPH_LADDER = [
+  { path: 'strong' },
+  { path: 'strong' },
+  { path: 'strong' },
+  { path: 'far' },
+  { bright: true },
+  { path: 'strong' },
+  { path: 'strong' },
+  { path: 'far' },
+]
+
+function glyphArea(a, b) {
+  if (!a || !b) return 0
+  const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left))
+  const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+  return w * h
+}
+
+/** Clear space between two boxes along the nearer axis. 0 when they touch or overlap. */
+function glyphGap(a, b) {
+  if (!a || !b) return Infinity
+  const dx = Math.max(0, Math.max(a.left, b.left) - Math.min(a.right, b.right))
+  const dy = Math.max(0, Math.max(a.top, b.top) - Math.min(a.bottom, b.bottom))
+  return Math.max(dx, dy)
+}
+
+const GLYPH_MIN_GAP = 4
+
+function glyphInside(box, frame, slack = 0.5) {
+  return box.left >= frame.left - slack && box.right <= frame.right + slack && box.top >= frame.top - slack && box.bottom <= frame.bottom + slack
+}
+
+function hexToRgb(hex) {
+  const n = Number.parseInt(hex.slice(1), 16)
+  return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`
+}
+
+/**
+ * One new piece, sampled on every frame. It has to draw: the drawn share starts low,
+ * is not done in the first two frames, only goes up, and takes at least 150ms.
+ */
+function assertDrawOn(frames, piece, label) {
+  const seen = frames
+    .map((frame) => ({ t: frame.t, item: frame.draw.find((item) => item.stage === piece) }))
+    .filter((row) => row.item)
+  assert.ok(seen.length >= 3, `${label} the new piece shows ${seen.length} drawing frames`)
+  for (const row of seen) {
+    assert.equal(row.item.dash, 1, `${label} piece dash is ${row.item.dash}`)
+    assert.equal(row.item.len, '1', `${label} piece pathLength is ${row.item.len}`)
+  }
+  const shares = seen.map((row) => row.item.share)
+  assert.ok(shares[0] < 0.97 && shares[1] < 0.97, `${label} the piece is not complete in the first 2 frames (${shares.slice(0, 2).map((v) => v.toFixed(2))})`)
+  for (let i = 1; i < shares.length; i += 1) {
+    assert.ok(shares[i] >= shares[i - 1] - 0.001, `${label} drawn share only goes up (${shares.map((v) => v.toFixed(2))})`)
+  }
+  assert.ok(new Set(shares.map((v) => v.toFixed(2))).size >= 3, `${label} the share takes several values (${shares.map((v) => v.toFixed(2))})`)
+  const start = seen[0].t
+  const done = frames.find((frame) => frame.t > start && (!frame.draw.some((item) => item.stage === piece) || frame.draw.find((item) => item.stage === piece).share >= 0.99))
+  assert.ok(done, `${label} the piece finishes drawing`)
+  const span = done.t - start
+  assert.ok(span >= 150, `${label} the piece draws over ${Math.round(span)}ms, not a pop`)
+  return { span, first: Math.max(shares[0], shares[1]), count: seen.length }
+}
+
+async function glyphSetup(page) {
+  await page.evaluate(() => {
+    const box = (el) => {
+      if (!el) return null
+      const style = getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return null
+      const rect = el.getBoundingClientRect()
+      if (rect.width < 1 || rect.height < 1) return null
+      return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, w: rect.width, h: rect.height }
+    }
+    const many = (sel, root = document) => [...root.querySelectorAll(sel)].map(box).filter(Boolean)
+    window.__glyphSample = (tool) => {
+      const pad = document.querySelector(`.defend-pad[data-tower-type="${tool}"]`)
+      const glyph = pad?.querySelector('.lamp-upgrade-glyph[data-glyph-variant="map"]') ?? null
+      const draw = glyph
+        ? [...glyph.querySelectorAll('[data-glyph-draw="yes"]')].map((el) => {
+            const style = getComputedStyle(el)
+            const offset = parseFloat(style.strokeDashoffset)
+            return {
+              stage: Number(el.getAttribute('data-glyph-piece')),
+              dash: parseFloat(style.strokeDasharray),
+              len: el.getAttribute('pathLength'),
+              share: 1 - Math.min(1, Math.max(0, offset)),
+            }
+          })
+        : []
+      return {
+        t: performance.now(),
+        glyph: box(glyph),
+        stage: glyph?.getAttribute('data-glyph-stage') ?? null,
+        draw,
+        card: box(document.querySelector('.defend-tower-card')),
+        header: (() => {
+          const mark = document.querySelector('.defend-tower-card [data-glyph-header="yes"]')
+          const svg = mark?.querySelector('.lamp-upgrade-glyph')
+          if (!mark || !svg) return null
+          return {
+            stage: svg.getAttribute('data-glyph-stage'),
+            pieces: svg.querySelectorAll('.is-stroke, .is-gap').length,
+            box: box(svg),
+          }
+        })(),
+        board: box(document.querySelector('.defend-board')),
+        frame: box(document.querySelector('.defend-frame')),
+        hearts: many('.defend-hearts'),
+        lamp: pad ? many('.defend-tower-lamp, .defend-type-mark', pad) : [],
+        buttons: many('.nw-rail .defend-ability'),
+        notes: many('.defend-clear-note, #defend-plant-first, .nw-miss-toast, .defend-plant-first'),
+        banners: many('.nw-power-banner, .defend-boost-status, .nw-wave-count'),
+        pace: many('.nw-pace'),
+        begin: many('.defend-go'),
+        cont: many('.defend-continue'),
+        others: [...document.querySelectorAll('.defend-pad .lamp-upgrade-glyph[data-glyph-variant="map"]')]
+          .filter((node) => node !== glyph)
+          .map(box)
+          .filter(Boolean),
+      }
+    }
+    window.__glyphRun = null
+    window.__glyphStart = (tool) => {
+      const run = { frames: [], stop: false }
+      window.__glyphRun = run
+      const tick = () => {
+        run.frames.push(window.__glyphSample(tool))
+        if (!run.stop) requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    }
+    window.__glyphEnd = () => {
+      const run = window.__glyphRun
+      run.stop = true
+      return run.frames
+    }
+  })
+}
+
+/** Gold painted anywhere on the board page, and on the one mark under test. Same rule as before 1.4.568. */
+function readGold(page) {
+  return page.evaluate(() => {
+    const goldish = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = +match[1]
+        const g = +match[2]
+        const b = +match[3]
+        const a = match[4] === undefined ? 1 : +match[4]
+        if (a > 0.05 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const pieceGold = []
+    for (const el of document.querySelectorAll('.lamp-upgrade-glyph .is-stroke, .lamp-upgrade-glyph .is-gap, .lamp-upgrade-glyph .is-dot')) {
+      const style = getComputedStyle(el)
+      if (goldish(style.stroke) || goldish(style.fill)) pieceGold.push(el.getAttribute('class'))
+    }
+    const gold = []
+    for (const el of document.querySelectorAll('.defend-page *')) {
+      if (el.closest('path.defend-road, path.defend-heaven-wall, [hidden]')) continue
+      const style = getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+      const rect = el.getBoundingClientRect()
+      if (rect.width <= 0 || rect.height <= 0 || rect.right <= 0 || rect.bottom <= 0 || rect.left >= innerWidth || rect.top >= innerHeight) continue
+      let why = false
+      if (el instanceof SVGElement) {
+        if (style.stroke !== 'none' && parseFloat(style.strokeWidth) > 0 && goldish(style.stroke)) why = true
+        if (style.fill !== 'none' && goldish(style.fill)) why = true
+      } else if (goldish(style.backgroundImage) || goldish(style.backgroundColor)) why = true
+      else if (['Top', 'Right', 'Bottom', 'Left'].some((side) => parseFloat(style[`border${side}Width`]) > 0 && style[`border${side}Style`] !== 'none' && goldish(style[`border${side}Color`]))) why = true
+      else if (goldish(style.boxShadow)) why = true
+      if (why) gold.push(`${el.tagName.toLowerCase()}.${String(el.getAttribute('class') ?? '').split(/\s+/).slice(0, 2).join('.')}`)
+    }
+    return { gold, pieceGold }
+  })
+}
+
+/** What one lamp shows right now: its mark, the card, and how they sit. */
+function readGlyphStage(page, tool) {
+  return page.evaluate((toolId) => {
+    const frame = window.__glyphSample(toolId)
+    const glyph = document.querySelector(`.defend-pad[data-tower-type="${toolId}"] .lamp-upgrade-glyph[data-glyph-variant="map"]`)
+    const strokes = glyph ? [...glyph.querySelectorAll('.is-stroke, .is-gap')] : []
+    return {
+      ...frame,
+      pieces: strokes.length,
+      tone: glyph?.getAttribute('data-glyph-tone') ?? null,
+      colors: [...new Set(strokes.map((el) => getComputedStyle(el).stroke))],
+      rails: [...document.querySelectorAll('.defend-ability-tier.is-glyph .lamp-upgrade-glyph')].map((node) => {
+        const rect = node.getBoundingClientRect()
+        return { stage: node.getAttribute('data-glyph-stage'), w: rect.width, h: rect.height }
+      }),
+    }
+  }, tool)
+}
+
+async function checkRingArcDraw(browser, port, errors) {
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width: 375, height: 667 },
+    deviceScaleFactor: 1,
+    reducedMotion: 'no-preference',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: SAVE },
+  )
+  const page = await context.newPage()
+  page.on('pageerror', (error) => errors.push(`glyph arcs ${error}`))
+  await page.goto('/?playtest=1')
+  await page.getByRole('button', { name: 'Settings' }).click()
+  await page.locator('summary', { hasText: 'Developer' }).click()
+  const top = await page.locator('.lamp-glyph-preview figure').count()
+  const arcs = page.locator(`.lamp-glyph-preview figure[data-preview-stage="${top - 1}"] path.is-stroke[d*="A"]`)
+  assert.equal(await arcs.count(), 4, 'ring arcs: the top stage has four arc pieces')
+  const lengths = await arcs.evaluateAll((nodes) => nodes.map((node) => node.getAttribute('pathLength')))
+  assert.deepEqual(lengths, ['1', '1', '1', '1'], 'ring arcs: every arc has pathLength 1')
+  const frames = await page.evaluate(async () => {
+    const arc = document.querySelector('.lamp-glyph-preview figure:last-child path.is-stroke[d*="A"]')
+    const rows = []
+    arc.setAttribute('data-glyph-piece', '10')
+    arc.setAttribute('data-glyph-draw', 'yes')
+    arc.classList.add('is-draw')
+    await new Promise((resolve) => {
+      const start = performance.now()
+      const tick = (now) => {
+        const style = getComputedStyle(arc)
+        rows.push({
+          t: now,
+          draw: [
+            {
+              stage: 10,
+              dash: parseFloat(style.strokeDasharray),
+              len: arc.getAttribute('pathLength'),
+              share: 1 - Math.min(1, Math.max(0, parseFloat(style.strokeDashoffset))),
+            },
+          ],
+        })
+        if (now - start < 500) requestAnimationFrame(tick)
+        else resolve()
+      }
+      requestAnimationFrame(tick)
+    })
+    return rows
+  })
+  const arc = assertDrawOn(frames, 10, 'ring arc')
+  console.log(`checkLampGlyph ok ring arcs pathLength 1 on 4/4 arcs draw-on ${Math.round(arc.span)}ms over ${arc.count} frames first share ${arc.first.toFixed(2)}`)
+  await context.close()
+}
+
+/**
+ * One gold cue per screen. A bank of sparks lights the New lamp buttons (#924, out of scope),
+ * so this runs on the plain night with no sparks: pick a lamp, plant it, open its card.
+ * Zero gold and two or more gold both fail. The selected-lamp state is a second lamp picked while one is planted.
+ */
+async function checkGlyphOneGold(browser, port, errors, width, height) {
+  const label = `${width}x${height}`
+  const { context, page } = await openMap(browser, port, width, height, 'a2', { motion: true })
+  page.on('pageerror', (error) => errors.push(`glyph gold ${label} ${error}`))
+  const selected = () =>
+    page.evaluate(() => [...document.querySelectorAll('.nw-rail .defend-ability.is-on')].map((node) => (node.textContent || '').trim()))
+  const plant = async (tool) => {
+    const seat = await firstLiveSeat(page)
+    await page.mouse.click(seat.x, seat.y)
+    await page.locator(`.defend-pad[data-tower-type="${tool}"] .lamp-upgrade-glyph[data-glyph-variant="map"]`).waitFor()
+    await page.waitForTimeout(150)
+  }
+  const first = await selected()
+  assert.ok(first.length === 1 && first[0].startsWith('Love'), `${label} Love starts selected ${JSON.stringify(first)}`)
+  await plant('love')
+  const plantedGold = await readGold(page, 'love')
+  assert.deepEqual(plantedGold.pieceGold, [], `${label} planted glyph paint is gold`)
+  assert.equal(plantedGold.gold.length, 1, `${label} planted lamp has exactly one gold cue ${JSON.stringify(plantedGold.gold)}`)
+  // The selected-lamp state: a second lamp is picked on the rail, nothing planted for it yet.
+  await page.locator('.nw-rail .defend-ability').nth(1).click()
+  const picked = await selected()
+  assert.equal(picked.length, 1, `${label} one lamp is selected ${JSON.stringify(picked)}`)
+  assert.ok(picked[0].startsWith('Logic'), `${label} Logic is the selected lamp ${JSON.stringify(picked)}`)
+  const selectedGold = await readGold(page)
+  assert.equal(selectedGold.gold.length, 1, `${label} selected lamp has exactly one gold cue ${JSON.stringify(selectedGold.gold)}`)
+  await plant('logic')
+  await page.locator('.defend-pad[data-tower-type="logic"]').click({ force: true })
+  await page.locator('.defend-tower-card').waitFor()
+  const openGold = await readGold(page, 'logic')
+  assert.deepEqual(openGold.pieceGold, [], `${label} open-card glyph paint is gold`)
+  assert.equal(openGold.gold.length, 1, `${label} open upgrade card has exactly one gold cue ${JSON.stringify(openGold.gold)}`)
+  await context.close()
+  return { selected: selectedGold.gold.length, planted: plantedGold.gold.length, open: openGold.gold.length }
+}
+
+/**
+ * Plants and upgrades through real taps and keeps score. One driver per page so the same
+ * per-frame rules run on the shared night and on every single seat.
+ */
+function glyphDriver(page, label, errors) {
+  const stats = { buys: 0, frames: 0, minSpan: Infinity, maxSpan: 0, maxFirst: 0, maxCard: 0, maxHearts: 0, maxEdge: 0, bothSeen: 0, minGap: Infinity, headerFrames: 0, headerSettled: 0, brightGold: 0, brightBuys: 0 }
+
+  const selected = () =>
+    page.evaluate(() => [...document.querySelectorAll('.nw-rail .defend-ability.is-on')].map((node) => (node.textContent || '').trim()))
+  const closeCard = async () => {
+    if (await page.locator('.defend-tower-card').count()) {
+      await page.keyboard.press('Escape')
+      await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+    }
+  }
+  const openCard = async (tool) => {
+    await closeCard()
+    await page.locator(`.defend-pad[data-tower-type="${tool}"]`).click({ force: true })
+    await page.locator('.defend-tower-card').waitFor()
+    await page.waitForTimeout(450)
+  }
+
+  /**
+   * The card may sit on the map mark only when it shows its own copy of the mark in the header:
+   * same stage, same pieces, a full 28px, inside the card, no gold. Otherwise the card keeps 4px clear.
+   */
+  const assertHeaderCopy = (view, tool, stage, what) => {
+    const header = view.header
+    const where = `${label} ${tool} stage ${stage} ${what}`
+    assert.ok(header, `${where}: no card slot clears the glyph and no header copy is shown`)
+    assert.equal(header.stage, String(stage), `${where}: header copy shows stage ${header.stage}`)
+    assert.equal(header.pieces, view.pieces, `${where}: header copy has ${header.pieces} pieces, the map mark has ${view.pieces}`)
+    assert.ok(header.box && Math.abs(header.box.w - 28) <= 1 && Math.abs(header.box.h - 28) <= 1, `${where}: header copy is ${JSON.stringify(header.box)}`)
+    assert.ok(glyphInside(header.box, view.card), `${where}: header copy ${JSON.stringify(header.box)} is outside the card ${JSON.stringify(view.card)}`)
+  }
+
+  /** Mark and card are both on screen, the mark is on the board, and nothing sits on it. */
+  const assertSettled = async (tool, stage, what) => {
+    const view = await readGlyphStage(page, tool)
+    const where = `${label} ${tool} stage ${stage} ${what}`
+    assert.ok(view.glyph, `${where}: map glyph is present`)
+    assert.ok(view.card, `${where}: upgrade card is present`)
+    assert.ok(view.glyph.w >= 18 && view.glyph.h >= 18, `${where}: map glyph is ${view.glyph.w}x${view.glyph.h}`)
+    const covered = glyphArea(view.glyph, view.card)
+    const gap = glyphGap(view.glyph, view.card)
+    if (view.header) {
+      assertHeaderCopy(view, tool, stage, what)
+      stats.headerSettled += 1
+    } else {
+      assert.equal(covered, 0, `${where}: card covers the glyph by ${covered}px2 and shows no header copy, glyph ${JSON.stringify(view.glyph)} card ${JSON.stringify(view.card)} board ${JSON.stringify(view.board)}`)
+      assert.ok(gap >= GLYPH_MIN_GAP, `${where}: card is ${gap.toFixed(2)}px from the glyph and shows no header copy`)
+      stats.minGap = Math.min(stats.minGap, gap)
+    }
+    assert.ok(glyphInside(view.glyph, view.board), `${where}: glyph ${JSON.stringify(view.glyph)} is outside the board ${JSON.stringify(view.board)}`)
+    assert.ok(glyphInside(view.glyph, view.frame), `${where}: glyph is outside the frame`)
+    for (const hearts of view.hearts) {
+      assert.equal(glyphArea(view.glyph, hearts), 0, `${where}: glyph overlaps hearts`)
+    }
+    stats.bothSeen += 1
+    return view
+  }
+
+  const ladder = async (tool, steps) => {
+    let rail = 0
+    for (let at = 0; at < steps.length; at += 1) {
+      const stage = at + 1
+      const step = steps[at]
+      await openCard(tool)
+      const before = await assertSettled(tool, stage - 1, 'card open before the buy')
+      assert.equal(before.stage, String(stage - 1), `${label} ${tool} stage before buy ${stage}`)
+      const openPaint = await readGold(page)
+      assert.deepEqual(openPaint.pieceGold, [], `${label} ${tool} stage ${stage} card open: glyph paint is gold`)
+      const brightGold = openPaint.gold.filter((entry) => entry.includes('defend-bright-buy'))
+      stats.brightGold += brightGold.length
+      assert.deepEqual(brightGold, [], `${label} ${tool} stage ${stage} card open: the Bright buy is gold`)
+      await page.evaluate((id) => window.__glyphStart(id), tool)
+      const buy = step.bright
+        ? page.locator('.defend-tower-card .defend-bright-buy')
+        : page.locator(`.defend-tower-card button.defend-path-buy[data-path-buy="${step.path}"]`)
+      assert.equal(await buy.count(), 1, `${label} ${tool} stage ${stage} the card offers the real buy ${JSON.stringify(step)}`)
+      if (step.bright) stats.brightBuys += 1
+      await buy.click()
+      await page.waitForTimeout(520)
+      const frames = await page.evaluate(() => window.__glyphEnd())
+      stats.buys += 1
+      stats.frames += frames.length
+      assert.ok(frames.length >= 10, `${label} ${tool} stage ${stage} sampled ${frames.length} frames`)
+
+      let cardFrames = 0
+      for (const [index, frame] of frames.entries()) {
+        const where = `${label} ${tool} stage ${stage} frame ${index}`
+        assert.ok(frame.glyph, `${where}: glyph missing`)
+        assert.ok(frame.board, `${where}: board missing`)
+        assert.ok(glyphInside(frame.glyph, frame.board), `${where}: glyph ${JSON.stringify(frame.glyph)} left the board ${JSON.stringify(frame.board)}`)
+        stats.maxEdge = Math.max(stats.maxEdge, Math.max(frame.board.left - frame.glyph.left, frame.board.top - frame.glyph.top, frame.glyph.right - frame.board.right, frame.glyph.bottom - frame.board.bottom, 0))
+        if (frame.card) {
+          cardFrames += 1
+          const covered = glyphArea(frame.glyph, frame.card)
+          const gap = glyphGap(frame.glyph, frame.card)
+          if (frame.header) {
+            stats.headerFrames += 1
+            const shown = Number(frame.header.stage)
+            assert.ok(shown === stage || shown === stage - 1, `${where}: header copy shows stage ${frame.header.stage}`)
+          } else {
+            stats.maxCard = Math.max(stats.maxCard, covered)
+            assert.equal(covered, 0, `${where}: card covers the glyph by ${covered}px2 and shows no header copy`)
+            assert.ok(gap >= GLYPH_MIN_GAP, `${where}: card is ${gap.toFixed(2)}px from the glyph and shows no header copy, glyph ${JSON.stringify(frame.glyph)} card ${JSON.stringify(frame.card)}`)
+            stats.minGap = Math.min(stats.minGap, gap)
+          }
+        }
+        for (const hearts of frame.hearts) {
+          const area = glyphArea(frame.glyph, hearts)
+          stats.maxHearts = Math.max(stats.maxHearts, area)
+          assert.equal(area, 0, `${where}: glyph overlaps hearts by ${area}px2`)
+        }
+        const neighbors = [
+          ...frame.lamp.map((rect) => ['lamp', rect]),
+          ...frame.buttons.map((rect) => ['ability', rect]),
+          ...frame.notes.map((rect) => ['note', rect]),
+          ...frame.banners.map((rect) => ['banner', rect]),
+          ...frame.pace.map((rect) => ['chip', rect]),
+          ...frame.begin.map((rect) => ['begin', rect]),
+          ...frame.cont.map((rect) => ['continue', rect]),
+          ...frame.others.map((rect) => ['glyph', rect]),
+        ]
+        for (const [name, rect] of neighbors) {
+          assert.equal(glyphArea(frame.glyph, rect), 0, `${where}: glyph overlaps ${name} ${JSON.stringify(frame.glyph)} vs ${JSON.stringify(rect)}`)
+        }
+      }
+      assert.ok(cardFrames > 0, `${label} ${tool} stage ${stage} the card was on screen during the buy`)
+      const drew = assertDrawOn(frames, stage, `${label} ${tool} stage ${stage}`)
+      stats.minSpan = Math.min(stats.minSpan, drew.span)
+      stats.maxSpan = Math.max(stats.maxSpan, drew.span)
+      stats.maxFirst = Math.max(stats.maxFirst, drew.first)
+
+      await page.waitForFunction(
+        ([id, want]) => document.querySelector(`.defend-pad[data-tower-type="${id}"] .lamp-upgrade-glyph[data-glyph-variant="map"]`)?.getAttribute('data-glyph-stage') === want,
+        [tool, String(stage)],
+      )
+      // The card may stay open or close after a buy. Either way, open it and check both again.
+      await page.waitForTimeout(300)
+      await openCard(tool)
+      const after = await assertSettled(tool, stage, 'card open after the real buy')
+      assert.equal(after.stage, String(stage), `${label} ${tool} stage attr after buy ${stage}`)
+      assert.equal(after.pieces, stage, `${label} ${tool} stage ${stage} drawn pieces`)
+      assert.ok(after.rails.some((row) => row.stage === String(stage) && Math.abs(row.w - 28) <= 1 && Math.abs(row.h - 28) <= 1), `${label} ${tool} stage ${stage} rail glyph ${JSON.stringify(after.rails)}`)
+      const paint = await readGold(page)
+      assert.deepEqual(paint.pieceGold, [], `${label} ${tool} stage ${stage} glyph paint is gold ${paint.pieceGold}`)
+      assert.deepEqual(paint.gold.filter((entry) => entry.includes('defend-bright-buy')), [], `${label} ${tool} stage ${stage} the Bright buy is gold`)
+      if (after.tone === 'strong') {
+        assert.deepEqual(after.colors, [hexToRgb(LAMP_GLYPH_COLOR.strong)], `${label} ${tool} stage ${stage} strong arms paint ${after.colors}`)
+      }
+      rail = stage
+    }
+    await closeCard()
+    return rail
+  }
+
+  return { stats, selected, closeCard, openCard, ladder }
+}
+
+function glyphStatsLine(label, what, stats, gold) {
+  return (
+    `checkLampGlyph ok ${label} ${what} real buys ${stats.buys} frames ${stats.frames} ` +
+    `draw-span ${Math.round(stats.minSpan)}-${Math.round(stats.maxSpan)}ms max first-2-frames share ${stats.maxFirst.toFixed(2)} ` +
+    `card/glyph overlap max ${stats.maxCard}px2 min gap ${stats.minGap === Infinity ? 'n/a' : `${stats.minGap.toFixed(2)}px`} ` +
+    `(card+glyph both present ${stats.bothSeen}x) header copy ${stats.headerFrames} frames ${stats.headerSettled} settled ` +
+    `glyph outside board max ${stats.maxEdge.toFixed(1)}px hearts overlap max ${stats.maxHearts}px2 ` +
+    `bright buys ${stats.brightBuys} bright gold===${stats.brightGold}` +
+    (gold ? ` selected-lamp gold===${gold.selected} planted gold===${gold.planted} open-card gold===${gold.open}` : '')
+  )
+}
+
+const SEAT_SWEEP_SIZES = ['375x667', '390x844', '412x915', '320x568']
+/** A narrow phone where seat 464,768 has no clear card slot, so the header copy has to carry the mark. */
+const HEADER_FALLBACK = { size: '320x568', cx: 464, cy: 768 }
+/** The seat the 1.4.568 live re-prove caught: 375x667, board units. */
+const FAILING_SEAT = { size: '375x667', cx: 464, cy: 768 }
+
+/**
+ * Every live seat, one lamp each, the full eight real buys on it. A seat with no clear card slot
+ * must show the header copy; the glyph/card checks fail for it otherwise.
+ */
+async function checkGlyphSeatSweep(browser, port, errors, width, height) {
+  const label = `${width}x${height}`
+  const probe = await openMap(browser, port, width, height, 'a2', { motion: true, search: GLYPH_SEARCH })
+  const rings = await probe.page.evaluate(() =>
+    [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({ cx: Number(ring.getAttribute('cx')), cy: Number(ring.getAttribute('cy')) })),
+  )
+  await probe.context.close()
+  assert.ok(rings.length >= 3, `${label} seat sweep finds ${rings.length} live seats`)
+  if (`${width}x${height}` === FAILING_SEAT.size) {
+    assert.ok(rings.some((ring) => ring.cx === FAILING_SEAT.cx && ring.cy === FAILING_SEAT.cy), `${label} the 1.4.568 failing seat ${FAILING_SEAT.cx},${FAILING_SEAT.cy} is a live seat ${JSON.stringify(rings)}`)
+  }
+  const total = { buys: 0, frames: 0, minSpan: Infinity, maxSpan: 0, maxFirst: 0, maxCard: 0, maxHearts: 0, maxEdge: 0, bothSeen: 0, minGap: Infinity, headerFrames: 0, headerSettled: 0, brightGold: 0, brightBuys: 0 }
+  const seen = []
+  let sawFallback = false
+  for (const ring of rings) {
+    const { context, page } = await openMap(browser, port, width, height, 'a2', { motion: true, search: GLYPH_SEARCH })
+    page.on('pageerror', (error) => errors.push(`glyph seat ${label} ${ring.cx},${ring.cy} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(`glyph seat ${label} ${ring.cx},${ring.cy} ${msg.text()}`)
+    })
+    await glyphSetup(page)
+    const point = await page.evaluate((seat) => {
+      const svg = document.querySelector('.defend-board')
+      const ctm = svg?.getScreenCTM()
+      if (!svg || !ctm) return null
+      const p = svg.createSVGPoint()
+      p.x = seat.cx
+      p.y = seat.cy - 26
+      const q = p.matrixTransform(ctm)
+      const hit = document.elementFromPoint(q.x, q.y)
+      if (!hit || !hit.closest('.defend-board') || hit.closest('button, .nw-rail, .nw-docks')) return null
+      return { x: q.x, y: q.y }
+    }, ring)
+    assert.ok(point, `${label} seat ${ring.cx},${ring.cy} takes a real tap`)
+    const driver = glyphDriver(page, `${label} seat ${ring.cx},${ring.cy}`, errors)
+    const now = await driver.selected()
+    assert.ok(now.length === 1 && now[0].startsWith('Love'), `${label} seat ${ring.cx},${ring.cy} Love is selected ${JSON.stringify(now)}`)
+    await page.mouse.click(point.x, point.y)
+    await page.locator('.defend-pad[data-tower-type="love"] .lamp-upgrade-glyph[data-glyph-variant="map"]').waitFor()
+    await page.waitForTimeout(150)
+    const left = await page.evaluate((seat) => [...document.querySelectorAll('.defend-plant-ground circle.is-live')].some((ring) => Number(ring.getAttribute('cx')) === seat.cx && Number(ring.getAttribute('cy')) === seat.cy), ring)
+    assert.equal(left, false, `${label} the lamp took seat ${ring.cx},${ring.cy}`)
+    assert.equal(await driver.ladder('love', GLYPH_LADDER), 8, `${label} seat ${ring.cx},${ring.cy} reached stage 8 by real buys`)
+    for (const key of ['buys', 'frames', 'bothSeen', 'headerFrames', 'headerSettled', 'brightGold', 'brightBuys']) total[key] += driver.stats[key]
+    for (const key of ['maxFirst', 'maxCard', 'maxHearts', 'maxEdge', 'maxSpan']) total[key] = Math.max(total[key], driver.stats[key])
+    total.minSpan = Math.min(total.minSpan, driver.stats.minSpan)
+    total.minGap = Math.min(total.minGap, driver.stats.minGap)
+    seen.push(`${ring.cx},${ring.cy}${driver.stats.headerSettled > 0 ? ' header' : ''}`)
+    if (label === HEADER_FALLBACK.size && ring.cx === HEADER_FALLBACK.cx && ring.cy === HEADER_FALLBACK.cy) {
+      assert.ok(driver.stats.headerSettled > 0 && driver.stats.headerFrames > 0, `${label} seat ${ring.cx},${ring.cy} has no clear card slot, so the header copy must show (${driver.stats.headerSettled} settled, ${driver.stats.headerFrames} frames)`)
+      sawFallback = true
+    }
+    await context.close()
+  }
+  if (label === HEADER_FALLBACK.size) assert.ok(sawFallback, `${label} the header copy seat was swept`)
+  assert.ok(Number.isFinite(total.minGap) || total.headerSettled > 0, `${label} seat sweep measured a card gap`)
+  if (Number.isFinite(total.minGap)) assert.ok(total.minGap >= GLYPH_MIN_GAP, `${label} seat sweep min gap ${total.minGap.toFixed(2)}px`)
+  console.log(glyphStatsLine(label, `seat sweep ${rings.length} seats [${seen.join(' | ')}]`, total))
+}
+
+async function checkLampGlyph(browser, port, errors) {
+  const only = process.env.NW_GLYPH_SIZE
+  for (const [width, height] of GLYPH_SIZES.filter(([w, h]) => !only || only === `${w}x${h}`)) {
+    const label = `${width}x${height}`
+    const gold = await checkGlyphOneGold(browser, port, errors, width, height)
+    const { context, page } = await openMap(browser, port, width, height, 'a2', {
+      motion: true,
+      search: GLYPH_SEARCH,
+    })
+    page.on('pageerror', (error) => errors.push(`glyph ${label} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(`glyph ${label} ${msg.text()}`)
+    })
+    await glyphSetup(page)
+    const { stats, selected, ladder } = glyphDriver(page, label, errors)
+
+    // Plant one lamp of each type. Every pick is a real tap on the rail, then a real tap on a seat.
+    for (const [index, tool] of GLYPH_TOOLS.entries()) {
+      let now = await selected()
+      if (!(now.length === 1 && now[0].startsWith(GLYPH_NAME[tool]))) {
+        await page.locator('.nw-rail .defend-ability').nth(index).click()
+        now = await selected()
+      }
+      assert.equal(now.length, 1, `${label} ${tool} exactly one lamp is selected ${JSON.stringify(now)}`)
+      assert.ok(now[0].startsWith(GLYPH_NAME[tool]), `${label} ${tool} is the selected lamp ${JSON.stringify(now)}`)
+      const seat = await firstLiveSeat(page)
+      await page.mouse.click(seat.x, seat.y)
+      await page.locator(`.defend-pad[data-tower-type="${tool}"] .lamp-upgrade-glyph[data-glyph-variant="map"]`).waitFor()
+      await page.waitForTimeout(150)
+    }
+
+    assert.equal(await ladder(GLYPH_TOOLS[0], GLYPH_LADDER), 8, `${label} top lamp reached stage 8 by real buys`)
+    for (const tool of GLYPH_TOOLS.slice(1, -1)) {
+      assert.equal(await ladder(tool, GLYPH_LADDER.slice(0, 1)), 1, `${label} ${tool} reached stage 1 by a real buy`)
+    }
+    assert.equal(await ladder(GLYPH_TOOLS[GLYPH_TOOLS.length - 1], GLYPH_LADDER), 8, `${label} lowest lamp reached stage 8 by real buys`)
+
+    console.log(glyphStatsLine(label, 'shared night', stats, gold))
+    await context.close()
+  }
+  for (const size of SEAT_SWEEP_SIZES.filter((entry) => !only || only === entry)) {
+    const [width, height] = size.split('x').map(Number)
+    await checkGlyphSeatSweep(browser, port, errors, width, height)
+  }
+
+  await checkRingArcDraw(browser, port, errors)
+
+  const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }
+  const hard = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width: 375, height: 667 },
+    deviceScaleFactor: 1,
+  })
+  await hard.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: hardSave },
+  )
+  const hardPage = await hard.newPage()
+  hardPage.on('pageerror', (error) => errors.push(`glyph hard ${error}`))
+  await hardPage.goto('/?playtest=1')
+  await hardPage.getByRole('button', { name: 'Hold the night' }).click()
+  await hardPage.locator('.defend-board').waitFor()
+  const hardMarks = await hardPage.evaluate(() => ({
+    glyphs: document.querySelectorAll('.lamp-upgrade-glyph').length,
+    romans: [...document.querySelectorAll('text.defend-level-pip')].map((node) => (node.textContent || '').trim()),
+  }))
+  assert.equal(hardMarks.glyphs, 0, `Hard renders ${hardMarks.glyphs} glyph elements`)
+  assert.ok(hardMarks.romans.length > 0, 'Hard still renders the roman level pip')
+  console.log(`checkLampGlyph ok hard glyphs ${hardMarks.glyphs} romans ${hardMarks.romans.join(',')}`)
+  await hard.close()
+}
+
 export async function checkPhoneFixes() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -1117,6 +2222,18 @@ export async function checkPhoneFixes() {
   const browser = await launchBrowser()
   const errors = []
   try {
+    if (process.env.NW_LEAK_ONLY === '1') {
+      await checkLeakBanner(browser, port, errors)
+      assert.equal(errors.join('\n'), '', '1.4.565 leak banner nights stay free of console errors')
+      return
+    }
+    if (process.env.NW_GLYPH_ONLY === '1') {
+      await checkLampGlyph(browser, port, errors)
+      assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
+      return
+    }
+    await checkLampGlyph(browser, port, errors)
+    if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
         baseURL: `http://127.0.0.1:${port}/`,
@@ -1141,7 +2258,7 @@ export async function checkPhoneFixes() {
       for (let index = 0; index < 5; index += 1) {
         const reason = locked.nth(index).locator('[data-map-reason]')
         const text = (await reason.innerText()).replace(/\s+/g, ' ').trim()
-        assert.match(text, /^Beat round 10 on .+ to unlock$/, `1.4.478 ${width} lock line ${text}`)
+        assert.equal(text.startsWith('Beat round 8 on ') && text.endsWith(' to unlock'), true, `1.4.478 ${width} lock line ${text}`)
         reasons.push(text)
         const seen = await reason.evaluate((node) => {
           const rect = node.getBoundingClientRect()
@@ -1279,6 +2396,9 @@ export async function checkPhoneFixes() {
     await check792bWave(browser, port, errors)
     await check792bSurvived(browser, port, errors, 375, 667)
     await check792bSurvived(browser, port, errors, 390, 844)
+    }
+    await checkMapNote(browser, port, errors)
+    await checkLeakBanner(browser, port, errors)
     assert.equal(errors.join('\n'), '', '1.4.478 phone nights stay free of console errors')
   } finally {
     await browser.close()
@@ -1289,4 +2409,10 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY'].some((name) => process.env[name] === '1')
+  if (!scoped) {
+    // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
+    await import('./check-lockin-843.mjs')
+    console.log('check-lockin-843 ok')
+  }
 }

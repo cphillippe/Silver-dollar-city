@@ -221,7 +221,16 @@ async function openWin(page, id, lines) {
     await page.getByRole('button', { name: line, exact: true }).click()
   }
   await page.locator('.strip-verse blockquote').waitFor()
+  // 1.4.567 (#843): the Easy follow-up asks for the main idea before the why slide.
+  await page.locator('.lockin-recall-show').waitFor()
+  await page.getByRole('button', { name: 'Show me' }).click()
+  await page.getByRole('button', { name: 'I had it' }).click()
   await page.locator('.why-chip').first().waitFor()
+  // Reading the win starts from the top of the page, as a player's first look does.
+  await page.evaluate(() => {
+    window.scrollTo(0, 0)
+    document.querySelector('.app-body')?.scrollTo(0, 0)
+  })
   await page.waitForFunction(() => {
     const slots = [...document.querySelectorAll('.strip-board .strip-slot')]
     return slots.length > 0 && slots.every((slot) => slot.getBoundingClientRect().height > 40)

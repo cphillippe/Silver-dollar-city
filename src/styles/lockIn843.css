@@ -1,0 +1,287 @@
+/* #843 Easy Lock In: recall first, neutral why cards, one gold cue per screen.
+   Easy only. Loaded after sortHold.css so these rules win the cascade. */
+
+html[data-easy='on'] .recall-gate.is-easy-hold.is-lockin-recall {
+  background: #fff6e8;
+  background-image: none;
+  color: #2a2118;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+html[data-easy='on'] .recall-gate.is-easy-hold.is-lockin-recall > .eyebrow {
+  display: none;
+}
+
+html[data-easy='on'] .lockin-recall {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 14px;
+  color: #2a2118;
+}
+
+html[data-easy='on'] .lockin-recall-prompt {
+  margin: 0;
+  text-align: center;
+  font-size: 1.3rem;
+  line-height: 1.3;
+  font-weight: 800;
+  color: #2a2118;
+}
+
+html[data-easy='on'] .lockin-recall-cover {
+  min-height: 120px;
+  flex: 0 1 160px;
+  border-radius: 18px;
+  border: 2px dashed rgba(42, 33, 24, 0.35);
+  background: repeating-linear-gradient(135deg, #fff6e8 0 12px, #f6e6c8 12px 24px);
+}
+
+html[data-easy='on'] .lockin-recall-claim {
+  margin: 0;
+  padding: 18px 14px;
+  text-align: center;
+  font-size: clamp(1.1rem, 4.8vw, 1.4rem);
+  line-height: 1.3;
+  font-weight: 700;
+  color: #2a2118;
+  background: #fff6e8;
+  border: 2px solid rgba(42, 33, 24, 0.35);
+  border-radius: 18px;
+  animation: lockin-reveal 0.22s ease-out both;
+}
+
+@keyframes lockin-reveal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+html[data-easy='on'] .lockin-recall .cta-dock {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  margin: 0;
+  padding: 6px 0 calc(8px + env(safe-area-inset-bottom, 0px));
+  background: transparent;
+}
+
+html[data-easy='on'] .lockin-recall-not-yet {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  color: #2a2118;
+  -webkit-text-fill-color: #2a2118;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 650;
+  text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-easy='on'] .lockin-recall-claim { animation: none; }
+}
+
+/* Eyebrows and the miss badge stay at the 13px floor. */
+html[data-easy='on'] .journal.is-rehearse .rehearse-anchor > .eyebrow,
+html[data-easy='on'] .journal.is-rehearse .recall-gate.is-easy-hold > .eyebrow {
+  font-size: 0.8125rem;
+}
+
+html[data-easy='on'] .journal.is-rehearse .why-blast .why-miss-badge {
+  font-size: 0.8125rem;
+}
+
+/* Teach text is 14px or larger. */
+html[data-easy='on'] .journal.is-rehearse .why-blast .why-miss-hint,
+html[data-easy='on'] .journal.is-rehearse .why-blast .why-miss-answer {
+  font-size: max(14px, 1rem);
+  line-height: 1.35;
+}
+
+/* The Home button on every Lock In screen is a full 44px target. */
+html[data-easy='on'] .journal.is-rehearse.is-easy-hold-practice > .text-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+}
+
+/* Why cards: the same neutral cream card, ink text, ink border. No orange, no gold.
+   The one gold cue on the board is the slide cue; a pressed card swaps it for its gold rim. */
+html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-chip.why-chip {
+  color: #2a2118;
+  -webkit-text-fill-color: #2a2118;
+  background: #fff6e8;
+  background-image: none;
+  border: 2.5px solid rgba(42, 33, 24, 0.4);
+  box-shadow: 0 3px 0 rgba(42, 33, 24, 0.18);
+  /* The entry wiggle moves a card 3px sideways and the retry pulse grows it 6%; the board clips at its edge. */
+  width: calc(100% - 24px);
+  min-height: 64px;
+  margin-inline: 12px;
+}
+
+/* The cue sits in the gap above Main idea, never on top of the last card. */
+html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-claim.why-claim {
+  margin-top: 30px !important;
+}
+
+html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-claim .why-slide-cue {
+  top: -30px;
+}
+
+/* LOCKED!: one gold cue (Continue). Cream card, ink border, no gold flash. */
+html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-score {
+  color: #2a2118;
+  background: #fff6e8;
+  background-image: none;
+  border: 2px solid rgba(42, 33, 24, 0.4);
+  box-shadow: none;
+}
+
+html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-arena {
+  flex: 0 0 0;
+  height: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  overflow: visible;
+}
+
+html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-keep-card {
+  border: 2px solid rgba(42, 33, 24, 0.4);
+  box-shadow: none;
+  gap: 8px;
+  justify-content: center;
+}
+
+html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-keep-card .match-yes {
+  flex: 0 0 auto;
+  gap: 8px;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+}
+
+html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-keep-card .match-yes strong {
+  color: #2a2118;
+  font-size: 1.1rem;
+}
+
+html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-keep-card .match-yes span {
+  font-size: 14px;
+  line-height: 1.35;
+  opacity: 1;
+}
+
+html[data-easy='on'] .why-blast.is-win .why-keep-card .held-from {
+  font-size: 14px;
+  opacity: 1;
+  color: #2a2118;
+  margin: 0;
+  padding: 0;
+}
+
+html[data-easy='on'] .why-blast.is-win > .win-burst .win-flash {
+  background: radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.35) 40%, transparent 75%);
+}
+
+html[data-easy='on'] .why-blast.is-win > .win-burst .win-ring {
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow: none;
+}
+
+/* Recall and reveal sit on the same cream plate as the why slide. */
+@media (max-height: 920px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.journal.is-rehearse .lockin-recall) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    padding-top: 4px;
+    padding-bottom: 0;
+    background: #fff6e8;
+    color: #2a2118;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.lockin-recall) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 4px;
+    overflow: hidden;
+    padding: 8px 10px 0;
+    border-radius: 18px;
+    border: 1px solid rgba(42, 33, 24, 0.1);
+    background: #fff6e8;
+    color: #2a2118;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.lockin-recall) > .text-link {
+    flex: 0 0 auto;
+    color: #7a5a1f;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.lockin-recall) .rehearse-anchor {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    background: #fff6e8;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.lockin-recall) .rehearse-anchor > .eyebrow {
+    display: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.lockin-recall) .recall-gate.is-easy-hold {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    align-self: stretch;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    margin-bottom: 0;
+    overflow: hidden;
+    padding: 12px 14px 0;
+    gap: 8px;
+    border-radius: 16px;
+    border: 1px solid rgba(42, 33, 24, 0.12);
+    background: #fff6e8;
+    color: #2a2118;
+    box-shadow: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.lockin-recall) .recall-gate.is-easy-hold::before {
+    content: none;
+    display: none;
+  }
+}
+
+/* The stamp overshoots 14% when it pops; start it 10px lower so it never dips into the Home button. */
+html[data-easy='on'] .journal.is-rehearse .why-blast.is-win > .win-burst .win-stamp-wrap.win-stamp-wrap {
+  margin-top: 10px;
+}
