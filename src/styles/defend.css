@@ -1524,7 +1524,7 @@ button.defend-cross-lamp {
   margin-top: 6px;
 }
 
-.btn.defend-bright-buy {
+.defend-page.is-easy-watch .btn.defend-bright-buy {
   border-color: rgba(255, 246, 232, 0.6);
 }
 
@@ -6393,4 +6393,9 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   display: block;
   width: 28px;
   height: 28px;
+}
+
+/* 1.4.570: beside the lamp the card has no pointer to give. */
+.defend-page.is-easy-watch .defend-tower-card.is-stemless::after {
+  content: none;
 }
