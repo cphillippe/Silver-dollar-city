@@ -164,10 +164,10 @@ export interface TowerTaps {
 /** The card bottom stays this far above Begin the watch. */
 export const BEGIN_GAP = 8
 /** Placement keeps half a pixel past every measured edge so a rounded box cannot touch it. */
-const TAP_EPS = 0.5
+export const TAP_EPS = 0.5
 /** Begin bobs up 2px on a wide screen (the defend-go keyframes), wherever it was measured. The gap carries that bob. */
 const BEGIN_BOB = 2
-const BEGIN_REACH = BEGIN_GAP + TAP_EPS + BEGIN_BOB
+export const BEGIN_REACH = BEGIN_GAP + TAP_EPS + BEGIN_BOB
 
 function tapBlocks(taps: TowerTaps | null): TowerRect[] {
   if (!taps) return []

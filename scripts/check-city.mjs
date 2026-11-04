@@ -516,6 +516,8 @@ import {
   CLEAR_BAR_RESERVE,
   cardHitsGlyph,
   BEGIN_GAP,
+  BEGIN_REACH,
+  TAP_EPS,
   GLYPH_CLEAR,
   placeTowerCard,
   STRIP_H,
@@ -2040,10 +2042,13 @@ assert.doesNotMatch(
     rail: { left: w - 65, top: 5, right: w - 5, bottom: 221 },
     buttons: [0, 1, 2, 3].map((i) => ({ left: w - 59, top: 11 + i * 52, right: w - 11, bottom: 11 + i * 52 + 46 })),
   })
+  // The same obstacles and slack the placer uses: Begin keeps BEGIN_REACH (gap, the pixel guard and Begin's 2px bob)
+  // and every other tap target keeps TAP_EPS, so a frame this scan calls clear is clear for the placer too.
+  const growTap = (box) => ({ left: box.left - TAP_EPS, top: box.top - TAP_EPS, right: box.right + TAP_EPS, bottom: box.bottom + TAP_EPS })
   const tapBlocksFor = (taps) => [
-    { ...taps.begin, top: taps.begin.top - BEGIN_GAP },
-    taps.rail,
-    ...taps.buttons,
+    { ...taps.begin, top: taps.begin.top - BEGIN_REACH },
+    growTap(taps.rail),
+    ...taps.buttons.map(growTap),
   ]
   const hitsBlock = (card, height, box) =>
     card.left < box.right && card.left + TOWER_CARD_W > box.left && card.top < box.bottom && card.top + height > box.top
@@ -2153,7 +2158,7 @@ assert.doesNotMatch(
             const mark = mapGlyphRect(x, y, 0.62, { left: 0, top: 0, right: W, bottom: H })
             const own = [{ left: x - 30, top: y + 10, right: x + 30, bottom: y + 34 }]
             const t = { ...taps, own }
-            const hard = [...tapBlocksFor(taps), ...newLamp, ...own, { left: -1e6, top: base.begin.top - 8, right: 1e6, bottom: 1e6 }]
+            const hard = [...tapBlocksFor(taps), ...newLamp, ...own, { left: -1e6, top: base.begin.top - BEGIN_REACH, right: 1e6, bottom: 1e6 }]
             const placed = placeTowerCard(point, { w: W, h: H }, [], 0.62, reserve, TOWER_TREE_H, mark, paint, t)
             const where = `lamp ${x},${y} reserve ${reserve} paint ${paint}`
             assert.ok(placed.top + paint <= H - reserve + 0.01, `1.4.572 the card at ${where} stays out of the bottom reserve`)
