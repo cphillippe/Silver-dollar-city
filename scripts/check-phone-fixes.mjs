@@ -2579,6 +2579,375 @@ async function checkLampGlyph(browser, port, errors) {
   await hard.close()
 }
 
+// #905: Night Run maze fixes, live. Real touch (CDP touch events) and mouse clicks drive every action;
+// page.evaluate only sets up a scene (place the walker, add a robber) and reads numbers back.
+async function nr905Open(browser, port, width, height, errors, tag) {
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width, height },
+    isMobile: true,
+    hasTouch: true,
+    deviceScaleFactor: 2,
+  })
+  const page = await context.newPage()
+  const pageErrors = []
+  page.on('pageerror', (error) => {
+    pageErrors.push(String(error))
+    errors.push(`nightRun905 ${tag} ${error}`)
+  })
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') pageErrors.push(msg.text())
+  })
+  const cdp = await context.newCDPSession(page)
+  await page.goto('/night-run/index.html')
+  await page.waitForFunction(() => window.NR && window.NR.S)
+  await page.locator('#go').tap()
+  await page.waitForTimeout(400)
+  // Close any story card the same way a kid would get past it: the scene setup below needs a free board.
+  await page.evaluate(() => {
+    document.querySelectorAll('.card').forEach((c) => (c.style.display = 'none'))
+    window.NR.S.paused = false
+  })
+  return { context, page, cdp, pageErrors }
+}
+
+const nr905Sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+async function nr905Touch(cdp, x, y, ms) {
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] })
+  await nr905Sleep(ms)
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+}
+
+async function nr905Center(page, id) {
+  const b = await page.locator('#' + id).boundingBox()
+  return { x: b.x + b.width / 2, y: b.y + b.height / 2 }
+}
+
+async function nr905Corridor(page, needTrap) {
+  return page.evaluate((needTrap) => {
+    const NR = window.NR, S = NR.S, M = NR.MAP, DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0]
+    const ok = (x, y) => NR.open(x, y) && !'PLHJK'.includes(M[y][x])
+    for (let y = 1; y < NR.H - 1; y++) for (let x = 1; x < NR.W - 1; x++) for (let d = 0; d < 4; d++) {
+      if (!ok(x, y) || NR.trapAt(x, y) >= 0) continue
+      const a = [x + DX[d], y + DY[d]], b = [x + 2 * DX[d], y + 2 * DY[d]]
+      if (!ok(...a) || !ok(...b)) continue
+      const ta = NR.trapAt(...a) >= 0
+      if (needTrap ? !ta : ta || NR.trapAt(...b) >= 0) continue
+      if (needTrap && NR.trapAt(...b) >= 0) continue
+      if (!S.robbers.every((r) => Math.abs(r.x - x) + Math.abs(r.y - y) > 6)) continue
+      return { x, y, d, a, b }
+    }
+    return null
+  }, needTrap)
+}
+
+async function nr905Place(page, c) {
+  await page.evaluate((c) => {
+    const NR = window.NR, S = NR.S
+    S.tw = null; S.x = c.x; S.y = c.y; S.px = c.x + 0.5; S.py = c.y + 0.5; S.dir = c.d
+    S.ang = (c.d * Math.PI) / 2 - Math.PI / 2; S.hist = []; S.inv = 0; S.hearts = 3
+    NR.CTRL.fwd = 0; NR.CTRL.bt = 0
+  }, c)
+  await nr905Sleep(150)
+}
+
+async function nr905Clean(page) {
+  await page.evaluate(() => {
+    const S = window.NR.S
+    S.robbers.forEach((r) => { r.gone = 1e9; r.strike = null })
+    S.inv = 0; S.hearts = 3; S.paused = false
+  })
+}
+
+async function nr905AddRobber(page, cell, extra) {
+  return page.evaluate(([c, o]) => {
+    const S = window.NR.S
+    S.robbers.push(Object.assign({ sx: c[0], sy: c[1], x: c[0], y: c[1], px: c[0] + 0.5, py: c[1] + 0.5, gone: 0, hold: 99, amb: 1 }, o || {}))
+    return S.robbers.length - 1
+  }, [cell, extra])
+}
+
+async function nr905RobberAt(page, i) {
+  return page.evaluate((i) => {
+    const NR = window.NR, S = NR.S, r = S.robbers[i]
+    const q = S.rects.find((q) => q.ref === r && q.kind === 'robber')
+    if (!q) return null
+    const b = document.getElementById('view').getBoundingClientRect()
+    return { x: b.left + ((q.x0 + q.x1) / 2 / NR.RW) * b.width, y: b.top + ((q.y0 + q.y1) / 2 / NR.RH) * b.height }
+  }, i)
+}
+
+const nr905State = (page) => page.evaluate(() => { const S = window.NR.S; return { hearts: S.hearts, pops: S.pops, x: S.x, y: S.y } })
+
+async function nr905Restart(page) {
+  await page.reload()
+  await page.waitForFunction(() => window.NR && window.NR.S)
+  await page.locator('#go').tap()
+  await page.waitForTimeout(400)
+  await page.evaluate(() => {
+    document.querySelectorAll('.card').forEach((c) => (c.style.display = 'none'))
+    window.NR.S.paused = false
+  })
+}
+
+async function nr905Fix1(page, cdp) {
+  const c = await nr905Corridor(page, false)
+  const R = {}
+  for (const kind of ['lunge', 'slow', 'quick', 'mouse', 'noTap']) {
+    await nr905Clean(page)
+    await nr905Place(page, c)
+    const i = await nr905AddRobber(page, c.a)
+    await nr905Sleep(400)
+    const p = await nr905RobberAt(page, i)
+    const s0 = await nr905State(page)
+    if (kind === 'lunge' || kind === 'noTap') await page.evaluate((i) => { const S = window.NR.S, r = S.robbers[i]; r.x = S.x; r.y = S.y }, i)
+    if (p && kind === 'mouse') await page.mouse.click(p.x, p.y)
+    else if (p && kind !== 'noTap') await nr905Touch(cdp, p.x, p.y, kind === 'slow' ? 450 : 60)
+    await nr905Sleep(1500)
+    const s1 = await nr905State(page)
+    R[kind] = { lost: s0.hearts - s1.hearts, popped: s1.pops - s0.pops }
+  }
+  const fails = []
+  for (const k of ['lunge', 'slow', 'quick', 'mouse']) {
+    if (R[k].lost !== 0) fails.push(`fix1 ${k} tap on a robber lost ${R[k].lost} hearts (want 0)`)
+    if (R[k].popped !== 1) fails.push(`fix1 ${k} tap popped ${R[k].popped} robbers (want 1)`)
+  }
+  if (R.noTap.lost !== 1) fails.push(`fix1 no tap lost ${R.noTap.lost} hearts (want exactly 1)`)
+  return { fails, line: `fix1 lunge ${R.lunge.lost}/${R.lunge.popped} slow ${R.slow.lost}/${R.slow.popped} quick ${R.quick.lost}/${R.quick.popped} mouse ${R.mouse.lost}/${R.mouse.popped} noTap lost ${R.noTap.lost}` }
+}
+
+async function nr905Fix2(page, cdp) {
+  const fails = []
+  // Trap: wait on it. A popped robber far away must stay popped through the hit.
+  const t = await nr905Corridor(page, true)
+  await nr905Clean(page)
+  await nr905Place(page, { x: t.a[0], y: t.a[1], d: t.d })
+  const far = await nr905AddRobber(page, [t.a[0], t.a[1]], { gone: 8, hold: 99 })
+  const s0 = await nr905State(page)
+  await nr905Sleep(4000)
+  const trap = await page.evaluate(([s0, far]) => {
+    const NR = window.NR, S = NR.S
+    return { lost: s0.hearts - S.hearts, moved: Math.abs(S.x - s0.x) + Math.abs(S.y - s0.y), onTrap: NR.trapAt(S.x, S.y) >= 0, farGone: +(S.robbers[far].gone || 0).toFixed(2) }
+  }, [s0, far])
+  if (trap.lost !== 1) fails.push(`fix2 trap wait lost ${trap.lost} hearts (want 1)`)
+  if (trap.moved !== 1 || trap.onTrap) fails.push(`fix2 trap hit moved ${trap.moved} squares, on trap ${trap.onTrap} (want 1, off)`)
+  if (!(trap.farGone > 0)) fails.push(`fix2 a popped robber woke on the hit (gone ${trap.farGone}, want > 0)`)
+  // Chase: a robber in your square.
+  await nr905Restart(page)
+  const c = await nr905Corridor(page, false)
+  await nr905Clean(page)
+  await nr905Place(page, c)
+  await nr905AddRobber(page, c.a, { hold: 0, x: c.x, y: c.y, px: c.x + 0.5, py: c.y + 0.5 })
+  await nr905Sleep(5000)
+  const a5 = await nr905State(page)
+  const chase = { hearts5s: a5.hearts }
+  if (chase.hearts5s < 2) fails.push(`fix2 5s chase left ${chase.hearts5s} hearts (want >= 2)`)
+  // Hideout: a popped robber stays hidden while you stand next to its home.
+  await nr905Clean(page)
+  const h = await page.evaluate(() => {
+    const NR = window.NR, M = NR.MAP, DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0]
+    const ok = (x, y) => NR.open(x, y) && NR.trapAt(x, y) < 0 && !'PLHJK'.includes(M[y][x])
+    for (let y = 1; y < NR.H - 1; y++) for (let x = 1; x < NR.W - 1; x++) for (let d = 0; d < 4; d++) {
+      const nx = x + DX[d], ny = y + DY[d]
+      if (ok(x, y) && ok(nx, ny) && window.NR.S.robbers.every((r) => r.gone > 1e6 || Math.abs(r.x - x) + Math.abs(r.y - y) > 6)) return { home: [x, y], x: nx, y: ny, d: (d + 2) % 4 }
+    }
+    return null
+  })
+  await nr905Place(page, h)
+  await nr905AddRobber(page, h.home, { gone: 0.3, hold: 0 })
+  await nr905Sleep(2500)
+  const hide = { lost: 3 - (await nr905State(page)).hearts }
+  if (hide.lost !== 0) fails.push(`fix2 standing by a hideout lost ${hide.lost} hearts (want 0)`)
+  // Retry at a lamp: real tap on Try again.
+  await nr905Restart(page)
+  await nr905Clean(page)
+  const cp = await page.evaluate(() => {
+    const NR = window.NR, S = NR.S, M = NR.MAP, DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0], r = S.robbers[0]
+    for (let d = 0; d < 4; d++) { const x = r.sx + DX[d], y = r.sy + DY[d]; if (NR.open(x, y) && NR.trapAt(x, y) < 0 && !'PLHJK'.includes(M[y][x])) return { x, y, dir: d } }
+    return null
+  })
+  await page.evaluate((cp) => {
+    const S = window.NR.S
+    S.cp = cp; S.hearts = 1; S.inv = 0; S.x = cp.x; S.y = cp.y; S.px = cp.x + 0.5; S.py = cp.y + 0.5; S.tw = null
+    S.robbers.push({ sx: cp.x, sy: cp.y, x: cp.x, y: cp.y, px: cp.x + 0.5, py: cp.y + 0.5, gone: 0, hold: 0, amb: 1 })
+  }, cp)
+  await nr905Sleep(1200)
+  const failShown = await page.evaluate(() => getComputedStyle(document.getElementById('cFail')).display)
+  let retryHearts = -1
+  if (failShown === 'block') {
+    const p = await nr905Center(page, 'retry')
+    await page.mouse.click(p.x, p.y)
+    await nr905Sleep(3000)
+    retryHearts = (await nr905State(page)).hearts
+  }
+  if (failShown !== 'block') fails.push(`fix2 the lamp fail card did not show (${failShown})`)
+  else if (retryHearts !== 3) fails.push(`fix2 Try again at a lamp has ${retryHearts} hearts after 3s (want 3)`)
+  return { fails, line: `fix2 trap lost ${trap.lost} moved ${trap.moved} poppedStays ${trap.farGone > 0} chase5s hearts ${chase.hearts5s} hideout lost ${hide.lost} retry3s hearts ${retryHearts}` }
+}
+
+async function nr905Fix3(page) {
+  await nr905Restart(page)
+  await nr905Clean(page)
+  const r = await page.evaluate(() => {
+    const NR = window.NR, DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0], M = NR.MAP, S = NR.S
+    const walk = (x, y) => NR.open(x, y) || (M[y] && M[y][x] === 'K')
+    const reach = (sx, sy, t) => {
+      const seen = new Set([sx + ',' + sy]), q = [[sx, sy]]
+      while (q.length) {
+        const [x, y] = q.shift()
+        if (x === t.x && y === t.y) return true
+        for (let d = 0; d < 4; d++) {
+          const nx = x + DX[d], ny = y + DY[d], k = nx + ',' + ny
+          if (seen.has(k) || !(walk(nx, ny) || (nx === t.x && ny === t.y))) continue
+          seen.add(k); q.push([nx, ny])
+        }
+      }
+      return false
+    }
+    const set = (x, y) => { S.x = x; S.y = y; S.px = x + 0.5; S.py = y + 0.5 }
+    let seed = 7
+    const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648
+    let x = S.x, y = S.y, prev = null, flips = 0, steps = 0
+    for (let k = 0; k < 4000; k++) {
+      const nb = []
+      for (let d = 0; d < 4; d++) { const nx = x + DX[d], ny = y + DY[d]; if (NR.open(nx, ny) && !'PLHJ'.includes(M[ny][nx])) nb.push([nx, ny]) }
+      if (!nb.length) break
+      ;[x, y] = nb[(rnd() * nb.length) | 0]; set(x, y); steps++
+      const hi = NR.hintInfo()
+      const lab = hi && hi.t ? hi.t.n + '@' + hi.t.x + ',' + hi.t.y : 'Explore'
+      if (prev !== null && lab !== prev) flips++
+      prev = lab
+    }
+    const seen = new Set([x + ',' + y]), q = [[x, y]]
+    let unreach = 0, badStep = 0, cells = 0
+    while (q.length) {
+      const [cx, cy] = q.shift(); cells++; S.gk = null; set(cx, cy)
+      const hi = NR.hintInfo()
+      if (hi && hi.t) {
+        if (!reach(cx, cy, hi.t)) unreach++
+        if (!(walk(hi.n.x, hi.n.y) || (hi.n.x === hi.t.x && hi.n.y === hi.t.y))) badStep++
+      }
+      for (let d = 0; d < 4; d++) {
+        const nx = cx + DX[d], ny = cy + DY[d], kk = nx + ',' + ny
+        if (seen.has(kk) || !walk(nx, ny) || 'PL'.includes(M[ny][nx])) continue
+        seen.add(kk); q.push([nx, ny])
+      }
+    }
+    return { flips, steps, cells, unreach, badStep }
+  })
+  const fails = []
+  if (r.flips !== 0) fails.push(`fix3 FIND label flipped ${r.flips} times over ${r.steps} steps (want 0)`)
+  if (r.unreach !== 0 || r.badStep !== 0) fails.push(`fix3 ${r.unreach} unreachable goals and ${r.badStep} bad next steps over ${r.cells} squares (want 0, 0)`)
+  if (r.cells !== 295) fails.push(`fix3 walked ${r.cells} squares (want 295)`)
+  return { fails, line: `fix3 flips ${r.flips}/${r.steps} steps cells ${r.cells} unreach ${r.unreach} badStep ${r.badStep}` }
+}
+
+async function nr905Fix4(page, cdp) {
+  await nr905Clean(page)
+  await nr905Place(page, await nr905Corridor(page, false))
+  const R = {}
+  for (const [k, id, ms] of [['tapRight', 'br', 60], ['tapLeft', 'bl', 60], ['hold', 'br', 700]]) {
+    const a0 = await page.evaluate(() => window.NR.S.ang)
+    const p = await nr905Center(page, id)
+    await nr905Touch(cdp, p.x, p.y, ms)
+    await nr905Sleep(600)
+    R[k] = +((await page.evaluate(() => window.NR.S.ang)) - a0).toFixed(2)
+  }
+  const fails = []
+  if (Math.abs(R.tapRight - Math.PI / 2) > 0.05) fails.push(`fix4 a tap on Turn right turned ${R.tapRight} rad (want 1.57)`)
+  if (Math.abs(R.tapLeft + Math.PI / 2) > 0.05) fails.push(`fix4 a tap on Turn left turned ${R.tapLeft} rad (want -1.57)`)
+  if (!(R.hold > 0.3)) fails.push(`fix4 holding Turn turned ${R.hold} rad (want > 0.3)`)
+  return { fails, line: `fix4 tapRight ${R.tapRight} tapLeft ${R.tapLeft} hold ${R.hold}` }
+}
+
+async function nr905Fix5(page, cdp) {
+  await nr905Clean(page)
+  const t = await nr905Corridor(page, true)
+  await nr905Place(page, t)
+  const ti = await page.evaluate((t) => window.NR.trapAt(t.a[0], t.a[1]), t)
+  await page.waitForFunction((ti) => { const c = (window.NR.S.t + ti * 1.6) % 3.2; return c > 2.45 && c < 2.6 }, ti, { timeout: 10_000 })
+  const p = await nr905Center(page, 'bf')
+  await nr905Touch(cdp, p.x, p.y, 40)
+  let mism = 0
+  for (let k = 0; k < 26; k++) {
+    await nr905Sleep(45)
+    const s = await page.evaluate(() => {
+      const tt = document.getElementById('toast')
+      return { b: document.getElementById('bf').textContent, w: tt.textContent === 'Wait for green…' && tt.style.opacity !== '0' }
+    })
+    if (s.b.startsWith('GO!') && s.w) mism++
+  }
+  await page.waitForFunction(() => document.getElementById('bf').textContent.startsWith('GO!'), null, { timeout: 5000 })
+  const x0 = await nr905State(page)
+  await nr905Touch(cdp, p.x, p.y, 40)
+  await nr905Sleep(800)
+  const x1 = await nr905State(page)
+  const moved = Math.abs(x1.x - x0.x) + Math.abs(x1.y - x0.y)
+  const fails = []
+  if (mism !== 0) fails.push(`fix5 ${mism} frames showed GO! with Wait for green (want 0)`)
+  if (moved !== 2) fails.push(`fix5 a GO press dashed ${moved} squares (want 2)`)
+  return { fails, line: `fix5 goWaitFrames ${mism} dash ${moved}` }
+}
+
+// Night Run has one play tier (no Hard switch in public/night-run/index.html); this smoke plays it
+// untouched with real input only: Start, Go forward, turns, and checks that a hit costs one heart.
+async function nr905Hard(browser, port, errors) {
+  const { context, page, cdp, pageErrors } = await nr905Open(browser, port, 375, 667, errors, 'hard')
+  const fails = []
+  const s0 = await nr905State(page)
+  await nr905Clean(page)
+  await nr905Place(page, await nr905Corridor(page, false))
+  const fwd = await nr905Center(page, 'bf')
+  const right = await nr905Center(page, 'br')
+  let moves = 0
+  for (let k = 0; k < 8; k++) {
+    const a = await nr905State(page)
+    await nr905Touch(cdp, fwd.x, fwd.y, 600)
+    await nr905Sleep(400)
+    const b = await nr905State(page)
+    if (a.x !== b.x || a.y !== b.y) moves++
+    else { await nr905Touch(cdp, right.x, right.y, 60); await nr905Sleep(400) }
+  }
+  const painted = (await page.locator('#view').screenshot()).length
+  // A robber walks into you (scene setup), you do nothing: exactly one heart goes.
+  await nr905Clean(page)
+  const c = await nr905Corridor(page, false)
+  await nr905Place(page, c)
+  const i = await nr905AddRobber(page, c.a)
+  await page.evaluate((i) => { const S = window.NR.S, r = S.robbers[i]; r.x = S.x; r.y = S.y }, i)
+  await nr905Sleep(1500)
+  const lost = 3 - (await nr905State(page)).hearts
+  if (moves < 2) fails.push(`hard real Go presses moved ${moves} times (want >= 2)`)
+  if (painted < 8000) fails.push(`hard the maze canvas shot is ${painted} bytes (want a drawn maze, >= 8000)`)
+  if (lost !== 1) fails.push(`hard a robber hit cost ${lost} hearts (want 1)`)
+  if (pageErrors.length) fails.push(`hard console errors: ${pageErrors.join(' | ').slice(0, 300)}`)
+  await context.close()
+  return { fails, line: `nightRun905 ok hard 375x667 moves ${moves} canvasPng ${painted}B hitLost ${lost} consoleErrors ${pageErrors.length} startHearts ${s0.hearts}` }
+}
+
+export async function checkNightRun905(browser, port, errors = []) {
+  const all = []
+  for (const [width, height] of [[375, 667], [390, 844]]) {
+    const { context, page, cdp, pageErrors } = await nr905Open(browser, port, width, height, errors, `${width}`)
+    const lines = []
+    for (const fix of [nr905Fix1, nr905Fix2, nr905Fix3, nr905Fix4, nr905Fix5]) {
+      let r
+      try { r = await fix(page, cdp) } catch (error) { r = { fails: [`${fix.name} threw ${String(error).slice(0, 200)}`], line: `${fix.name} threw` } }
+      lines.push(r.line)
+      for (const f of r.fails) { all.push(`${width}x${height} ${f}`); console.log(`nightRun905 FAIL ${width}x${height} ${f}`) }
+    }
+    if (pageErrors.length) all.push(`${width}x${height} console errors ${pageErrors.join(' | ').slice(0, 300)}`)
+    await context.close()
+    if (!all.some((f) => f.startsWith(`${width}x${height}`))) console.log(`nightRun905 ok ${width}x${height} ${lines.join(' | ')}`)
+  }
+  let hard
+  try { hard = await nr905Hard(browser, port, errors) } catch (error) { hard = { fails: [`hard threw ${String(error).slice(0, 200)}`], line: '' } }
+  for (const f of hard.fails) { all.push(f); console.log(`nightRun905 FAIL ${f}`) }
+  if (!hard.fails.length) console.log(hard.line)
+  assert.equal(all.length, 0, `#905 Night Run checks failed:\n${all.join('\n')}`)
+}
+
 export async function checkPhoneFixes() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -2588,6 +2957,10 @@ export async function checkPhoneFixes() {
   const browser = await launchBrowser()
   const errors = []
   try {
+    if (process.env.NR905_ONLY === '1') {
+      await checkNightRun905(browser, port, errors)
+      return
+    }
     if (process.env.NW_LEAK_ONLY === '1') {
       await checkLeakBanner(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.565 leak banner nights stay free of console errors')
@@ -2598,6 +2971,7 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
       return
     }
+    await checkNightRun905(browser, port, errors)
     await checkLampGlyph(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
