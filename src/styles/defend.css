@@ -6410,7 +6410,7 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
 }
 
 /* 1.4.572 Easy lamp mark above every lamp name. The chips paint over the whole board, so a second copy of each
-   mark is drawn in a layer over them. Same box as the board, so the marks line up. Hard never has .is-easy-watch. */
+   mark is drawn in a layer over them. Same box as the board (its 2px border off a phone too), so the marks line up. Hard never has .is-easy-watch. */
 .defend-page.is-easy-watch .defend-glyph-top {
   position: absolute;
   inset: 0;
@@ -6419,7 +6419,13 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   width: 100%;
   height: 100%;
   max-height: 100%;
-  border: 0;
+  border: 2px solid transparent;
   overflow: visible;
   pointer-events: none;
+}
+
+@media (max-width: 480px) {
+  .defend-page.is-easy-watch .defend-glyph-top {
+    border: 0;
+  }
 }

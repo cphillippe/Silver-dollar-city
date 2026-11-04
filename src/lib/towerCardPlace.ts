@@ -165,6 +165,9 @@ export interface TowerTaps {
 export const BEGIN_GAP = 8
 /** Placement keeps half a pixel past every measured edge so a rounded box cannot touch it. */
 const TAP_EPS = 0.5
+/** Begin bobs up 2px on a wide screen (the defend-go keyframes), wherever it was measured. The gap carries that bob. */
+const BEGIN_BOB = 2
+const BEGIN_REACH = BEGIN_GAP + TAP_EPS + BEGIN_BOB
 
 function tapBlocks(taps: TowerTaps | null): TowerRect[] {
   if (!taps) return []
@@ -176,12 +179,12 @@ function tapBlocks(taps: TowerTaps | null): TowerRect[] {
     bottom: r.bottom + TAP_EPS,
   })
   if (taps.begin) {
-    out.push({ ...taps.begin, top: taps.begin.top - BEGIN_GAP - TAP_EPS })
+    out.push({ ...taps.begin, top: taps.begin.top - BEGIN_REACH })
   }
   if (taps.rail) out.push(grow(taps.rail))
   for (const button of taps.buttons) out.push(grow(button))
   if (taps.row != null) {
-    out.push({ left: -1e6, right: 1e6, top: taps.row - BEGIN_GAP - TAP_EPS, bottom: 1e6 })
+    out.push({ left: -1e6, right: 1e6, top: taps.row - BEGIN_REACH, bottom: 1e6 })
   }
   return out
 }
@@ -269,7 +272,7 @@ export function placeTowerCard(
     others.reduce((n, lamp) => n + (upgradeControlsHitLamp(card, lamp, scale, cardHeight, strip) ? 1 : 0), 0)
   if (lampHits(legacy) + glyphHits(legacy) + tapHits(legacy) + ownHits(legacy) + softHits(legacy) === 0) return { ...legacy, markClear: true }
   const maxLeft = Math.max(MARGIN, board.w - W - RAIL)
-  const rowFloor = taps?.row != null ? taps.row - BEGIN_GAP - TAP_EPS : Infinity
+  const rowFloor = taps?.row != null ? taps.row - BEGIN_REACH : Infinity
   const maxTop = Math.max(MARGIN, Math.min(board.h - boundH - MARGIN - reserveBottom, rowFloor - boundH))
   // The wide search leans on the plate edge sideways, and past the fixed rail column only with the measured rail
   // rect. It never goes down: the card stays out of the bottom reserve (Begin, the clear row, the skill kit).

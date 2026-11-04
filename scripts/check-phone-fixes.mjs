@@ -1831,6 +1831,14 @@ async function glyphSetup(page) {
           if (!(z > Math.max(0, ...chips.map((chip) => Number(getComputedStyle(chip).zIndex) || 0)))) return false
           return chips.every((chip) => Boolean(chip.compareDocumentPosition(layer) & Node.DOCUMENT_POSITION_FOLLOWING))
         })(),
+        aboveWhy: (() => {
+          if (!glyph?.id) return 'no glyph id'
+          const top = document.querySelector(`svg.defend-glyph-top use[href="#${CSS.escape(glyph.id)}"]`)
+          const at = box(top)
+          const own = box(glyph)
+          if (!top || !at || !own) return `overlay ${Boolean(top)} at ${JSON.stringify(at)} own ${JSON.stringify(own)}`
+          return `overlay offset ${(at.left - own.left).toFixed(2)},${(at.top - own.top).toFixed(2)} z ${getComputedStyle(top.ownerSVGElement).zIndex}`
+        })(),
         others: [...document.querySelectorAll('.defend-pad .lamp-upgrade-glyph[data-glyph-variant="map"]')]
           .filter((node) => node !== glyph)
           // A lamp panned off the top of the frame has no art on screen to sit over; only lamps in view count.
@@ -2020,6 +2028,8 @@ async function checkGlyphOneGold(browser, port, errors, width, height) {
 const CARD_W = 176
 const SOLVER_GLYPH_ZONE = 6
 const SOLVER_BEGIN_GAP = 8
+/** Begin bobs up 2px on a wide screen (defend-go keyframes); the solver keeps that bob past the asserted gap, as the placer does. */
+const SOLVER_BREATH = 2
 const SOLVER_EDGE = 2
 const SOLVER_FLOOR_MARGIN = 8
 const glyphSpotCache = new Map()
@@ -2048,10 +2058,10 @@ function glyphClearSpots(frame) {
   const zone = { left: glyph.left - SOLVER_GLYPH_ZONE, right: glyph.right + SOLVER_GLYPH_ZONE, top: glyph.top - SOLVER_GLYPH_ZONE, bottom: glyph.bottom + SOLVER_GLYPH_ZONE }
   const blocks = []
   const begin = frame.begin[0]
-  if (begin) blocks.push({ left: begin.left, right: begin.right, top: begin.top - SOLVER_BEGIN_GAP, bottom: begin.bottom })
+  if (begin) blocks.push({ left: begin.left, right: begin.right, top: begin.top - SOLVER_BEGIN_GAP - SOLVER_BREATH, bottom: begin.bottom })
   if (frame.rail) blocks.push(growBox(frame.rail))
   blocks.push(...[...frame.buttons, ...frame.clearButtons, ...frame.kit, ...frame.newLamp, ...frame.recenter, ...frame.own].map(growBox))
-  if (frame.rowTop != null) blocks.push({ left: -1e6, right: 1e6, top: frame.rowTop - SOLVER_BEGIN_GAP, bottom: 1e6 })
+  if (frame.rowTop != null) blocks.push({ left: -1e6, right: 1e6, top: frame.rowTop - SOLVER_BEGIN_GAP - SOLVER_BREATH, bottom: 1e6 })
   blocks.push(...[...frame.nbBodies, ...frame.nbLabels].map(growBox))
   const pointLeft = plate.left + place.x
   const pointTop = plate.top + place.y
@@ -2156,7 +2166,7 @@ function glyphCardRules(frame, where, stats, stageKey, { settled = false } = {})
       if (settled) stats.headerSettled += 1
       else stats.headerFrames += 1
     } else {
-      glyphRule('mark under a neighbour name', !under, `${where}: the mark sits under a neighbour name or type mark that paints over it and the card shows no header copy, glyph ${JSON.stringify(frame.glyph)} over ${JSON.stringify(labelBoxes.filter((box) => glyphArea(frame.glyph, box) > 0))}`)
+      glyphRule('mark under a neighbour name', !under, `${where}: the mark sits under a neighbour name or type mark that paints over it and the card shows no header copy (${frame.aboveWhy}), glyph ${JSON.stringify(frame.glyph)} over ${JSON.stringify(labelBoxes.filter((box) => glyphArea(frame.glyph, box) > 0))}`)
       const covered = glyphArea(frame.glyph, card)
       const gap = glyphGap(frame.glyph, card)
       stats.maxCard = Math.max(stats.maxCard, covered)
@@ -2178,7 +2188,7 @@ function glyphCardRules(frame, where, stats, stageKey, { settled = false } = {})
     assert.equal(over, 0, `${where}: card covers Begin by ${over}px2, card ${JSON.stringify(card)} Begin ${JSON.stringify(begin)}`)
     const slack = begin.top - card.bottom
     stats.beginMinSlack = Math.min(stats.beginMinSlack, slack)
-    assert.ok(slack >= SOLVER_BEGIN_GAP - 0.01, `${where}: card bottom ${card.bottom.toFixed(1)} is ${slack.toFixed(2)}px above Begin (${begin.top.toFixed(1)}), needs ${SOLVER_BEGIN_GAP}`)
+    assert.ok(slack >= SOLVER_BEGIN_GAP - 0.01, `${where}: card bottom ${card.bottom.toFixed(1)} is ${slack.toFixed(2)}px above Begin (${begin.top.toFixed(1)}), needs ${SOLVER_BEGIN_GAP}, place ${JSON.stringify(frame.place)} card ${JSON.stringify(card)}`)
     if (frame.beginHit !== true) stats.beginHitBad += 1
     assert.equal(frame.beginHit, true, `${where}: Begin's centre does not land inside .defend-go`)
   }
