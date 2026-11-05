@@ -28,8 +28,8 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.572',
-    title: 'Night Watch: the lamp mark and the card stay clear of neighbour lamps (1.4.572)',
+    version: '1.4.571',
+    title: 'Night Watch: the lamp mark and the card stay clear of neighbour lamps (1.4.571)',
     when: '2026-11-03',
     items: [
       'The lamp mark now draws above the names and badges of the lamps around it, so a neighbour label never hides it.',

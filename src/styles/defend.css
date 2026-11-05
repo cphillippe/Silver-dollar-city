@@ -5903,7 +5903,7 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
 
 /* 1.4.500 Easy mid-wave. The full lamp card covers the road, so the open card
    becomes a short strip: the buy button and its cost. Cross, Incense, Bell and Candle cards keep the
-   bottom-left strip. A lamp card places its own strip above the bottom row (1.4.572).
+   bottom-left strip. A lamp card places its own strip above the bottom row (1.4.571).
    Hard never has .is-easy-watch. Plant and the clear keep the lamp-side card. */
 .defend-page.is-easy-watch.is-easy-tap .defend-tower-card:not([data-strip='yes']) {
   top: auto !important;
@@ -6409,7 +6409,7 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   content: none;
 }
 
-/* 1.4.572 Easy lamp mark above every lamp name. The chips paint over the whole board, so a second copy of each
+/* 1.4.571 Easy lamp mark above every lamp name. The chips paint over the whole board, so a second copy of each
    mark is drawn in a layer over them. Same box as the board (its 2px border off a phone too), so the marks line up. Hard never has .is-easy-watch. */
 .defend-page.is-easy-watch .defend-glyph-top {
   position: absolute;

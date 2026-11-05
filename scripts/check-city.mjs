@@ -1941,19 +1941,19 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.572')
-assert.equal(CHANGELOG[0].version, '1.4.572', '1.4.572 is the newest row')
+assert.equal(APP_VERSION, '1.4.571')
+assert.equal(CHANGELOG[0].version, '1.4.571', '1.4.571 is the newest row')
 assert.equal(CHANGELOG[1].version, '1.4.570', '1.4.570 follows the newest row')
 assert.equal(CHANGELOG[2].version, '1.4.569', '1.4.569 follows the 1.4.570 row')
 assert.equal(CHANGELOG[3].version, '1.4.568', '1.4.568 follows the 1.4.569 row')
 assert.equal(CHANGELOG[4].version, '1.4.567', '1.4.567 follows the 1.4.568 row')
 assert.equal(CHANGELOG[5].version, '1.4.566', '1.4.566 follows the 1.4.567 row')
-assert.match(latestChange('1.4.572').items.join('\n'), /Refs #923\./, '1.4.572 changelog refs #923')
-assert.doesNotMatch(latestChange('1.4.572').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.572 changelog avoids GitHub close keywords')
+assert.match(latestChange('1.4.571').items.join('\n'), /Refs #923\./, '1.4.571 changelog refs #923')
+assert.doesNotMatch(latestChange('1.4.571').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.571 changelog avoids GitHub close keywords')
 assert.doesNotMatch(
-  playerVisibleChangeItems(latestChange('1.4.572').items).join('\n'),
+  playerVisibleChangeItems(latestChange('1.4.571').items).join('\n'),
   /\bHard\b|\bMedium\b/,
-  '1.4.572 the player note does not name other tiers',
+  '1.4.571 the player note does not name other tiers',
 )
 assert.match(latestChange('1.4.570').items.join('\n'), /Refs #923\./, '1.4.570 changelog refs #923')
 assert.doesNotMatch(latestChange('1.4.570').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.570 changelog avoids GitHub close keywords')
@@ -2127,7 +2127,7 @@ assert.doesNotMatch(
     assert.equal(cardHitsGlyph(short, point, TOWER_TREE_H, 244, mark, 4), false, '1.4.570 the shorter card and pointer stay 4px off the mark')
     for (const block of tapBlocksFor(taps)) assert.equal(hitsBlock(short, 244, block), false, `1.4.570 the shorter card keeps off ${JSON.stringify(block)}`)
   }
-  // 1.4.572: New lamp buttons, the skill kit row and the open lamp's own name are hard. Other lamps and their names are
+  // 1.4.571: New lamp buttons, the skill kit row and the open lamp's own name are hard. Other lamps and their names are
   // soft: a spot that clears them wins, and when none clears the mark, the taps and the neighbours the card says so.
   {
     const W = 375
@@ -2161,12 +2161,12 @@ assert.doesNotMatch(
             const hard = [...tapBlocksFor(taps), ...newLamp, ...own, { left: -1e6, top: base.begin.top - BEGIN_REACH, right: 1e6, bottom: 1e6 }]
             const placed = placeTowerCard(point, { w: W, h: H }, [], 0.62, reserve, TOWER_TREE_H, mark, paint, t)
             const where = `lamp ${x},${y} reserve ${reserve} paint ${paint}`
-            assert.ok(placed.top + paint <= H - reserve + 0.01, `1.4.572 the card at ${where} stays out of the bottom reserve`)
-            assert.ok(placed.top + paint <= base.begin.top - 8 + 0.01, `1.4.572 the card at ${where} stays 8px above the bottom row`)
+            assert.ok(placed.top + paint <= H - reserve + 0.01, `1.4.571 the card at ${where} stays out of the bottom reserve`)
+            assert.ok(placed.top + paint <= base.begin.top - 8 + 0.01, `1.4.571 the card at ${where} stays 8px above the bottom row`)
             if (placed.markClear) {
               clear += 1
-              assert.equal(cardHitsGlyph(placed, point, TOWER_TREE_H, paint, mark, 4), false, `1.4.572 the card at ${where} says it clears the mark but is within 4px`)
-              for (const box of [...hard, ...softAll]) assert.equal(hitsBlock(placed, paint, box), false, `1.4.572 the card at ${where} says it is clear but covers ${JSON.stringify(box)}`)
+              assert.equal(cardHitsGlyph(placed, point, TOWER_TREE_H, paint, mark, 4), false, `1.4.571 the card at ${where} says it clears the mark but is within 4px`)
+              for (const box of [...hard, ...softAll]) assert.equal(hitsBlock(placed, paint, box), false, `1.4.571 the card at ${where} says it is clear but covers ${JSON.stringify(box)}`)
             } else {
               crowdedHere += 1
               let spot = false
@@ -2176,34 +2176,34 @@ assert.doesNotMatch(
                   spot = !cardHitsGlyph(at, point, TOWER_TREE_H, paint, mark, GLYPH_CLEAR) && ![...hard, ...softAll].some((box) => hitsBlock(at, paint, box))
                 }
               }
-              assert.equal(spot, false, `1.4.572 the card at ${where} gave up on the mark though a spot clears it, the taps and every neighbour`)
+              assert.equal(spot, false, `1.4.571 the card at ${where} gave up on the mark though a spot clears it, the taps and every neighbour`)
             }
             if (!own.some((box) => hitsBlock(placed, paint, box))) ownKept += 1
             const strip = placeTowerCard(point, { w: W, h: H }, [], 0.62, reserve, STRIP_H, null, STRIP_H, t, true)
-            assert.ok(strip.top + STRIP_H <= base.begin.top - 8 + 0.01 && strip.top + STRIP_H <= H - reserve + 0.01, `1.4.572 the mid-wave strip at ${where} stays above the bottom row and out of the reserve`)
+            assert.ok(strip.top + STRIP_H <= base.begin.top - 8 + 0.01 && strip.top + STRIP_H <= H - reserve + 0.01, `1.4.571 the mid-wave strip at ${where} stays above the bottom row and out of the reserve`)
             if (![...tapBlocksFor(taps), ...newLamp].some((box) => strip.left < box.right && strip.left + 112 > box.left && strip.top < box.bottom && strip.top + STRIP_H > box.top)) stripped += 1
           }
         }
       }
     }
-    assert.ok(clear > 100, `1.4.572 the neighbour scan found ${clear} cards that clear everything`)
-    assert.ok(crowdedHere > 0, `1.4.572 the neighbour scan reaches seats with no clear spot (${crowdedHere})`)
-    assert.ok(ownKept > (clear + crowdedHere) * 0.9, `1.4.572 the card keeps off the open lamp's own name (${ownKept} of ${clear + crowdedHere})`)
-    assert.ok(stripped > 0, `1.4.572 the strip keeps off the rail and the New lamp buttons (${stripped})`)
+    assert.ok(clear > 100, `1.4.571 the neighbour scan found ${clear} cards that clear everything`)
+    assert.ok(crowdedHere > 0, `1.4.571 the neighbour scan reaches seats with no clear spot (${crowdedHere})`)
+    assert.ok(ownKept > (clear + crowdedHere) * 0.9, `1.4.571 the card keeps off the open lamp's own name (${ownKept} of ${clear + crowdedHere})`)
+    assert.ok(stripped > 0, `1.4.571 the strip keeps off the rail and the New lamp buttons (${stripped})`)
   }
   const card = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
   assert.match(card, /markOnMap && !strip && !placed\.markClear && paths/, '1.4.569 the card shows the header copy exactly when no slot clears the mark')
   assert.match(card, /data-glyph-header="yes"[\s\S]{0,160}variant="rail"/, '1.4.569 the header copy is the same mark at the same stage')
   for (const selector of ["'.defend-go'", "'.nw-rail'", "'.nw-rail .defend-ability'", "'.defend-clear-row button'", "'.defend-kits button'", "'.defend-new-lamp'", "'.defend-type-chip'", "'text.defend-type-label'"]) {
-    assert.ok(card.includes(selector), `1.4.572 the card measures ${selector}`)
+    assert.ok(card.includes(selector), `1.4.571 the card measures ${selector}`)
   }
-  assert.match(card, /placeTowerCard\(point, board, clearOf, cameraScale, reserveBottom, cardH, glyph, paintH, markOnMap \? taps : null, strip\)/, '1.4.572 the card hands the measured boxes to the placer')
-  assert.match(card, /if \(strip && !hasBuy\) return null/, '1.4.572 a wave card with nothing to buy is not painted')
+  assert.match(card, /placeTowerCard\(point, board, clearOf, cameraScale, reserveBottom, cardH, glyph, paintH, markOnMap \? taps : null, strip\)/, '1.4.571 the card hands the measured boxes to the placer')
+  assert.match(card, /if \(strip && !hasBuy\) return null/, '1.4.571 a wave card with nothing to buy is not painted')
   const board572 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
-  assert.match(board572, /className="defend-glyph-top"/, '1.4.572 the board paints the lamp marks in a layer above the lamp names')
-  assert.match(board572, /phase === 'plant' \|\| phase === 'wave'\) \? CLEAR_BAR_RESERVE/, '1.4.572 the wave card keeps out of the bottom reserve')
-  assert.match(defendCss, /\.defend-page\.is-easy-watch \.defend-glyph-top \{[^}]*z-index: 5;/, '1.4.572 the mark layer sits above the name chips (z-index 4)')
-  assert.match(defendCss, /\.defend-page\.is-easy-watch\.is-easy-tap \.defend-tower-card\[data-strip='yes'\] \{\s*bottom: auto !important;/, '1.4.572 the placed wave strip is not pinned to the screen bottom')
+  assert.match(board572, /className="defend-glyph-top"/, '1.4.571 the board paints the lamp marks in a layer above the lamp names')
+  assert.match(board572, /phase === 'plant' \|\| phase === 'wave'\) \? CLEAR_BAR_RESERVE/, '1.4.571 the wave card keeps out of the bottom reserve')
+  assert.match(defendCss, /\.defend-page\.is-easy-watch \.defend-glyph-top \{[^}]*z-index: 5;/, '1.4.571 the mark layer sits above the name chips (z-index 4)')
+  assert.match(defendCss, /\.defend-page\.is-easy-watch\.is-easy-tap \.defend-tower-card\[data-strip='yes'\] \{\s*bottom: auto !important;/, '1.4.571 the placed wave strip is not pinned to the screen bottom')
 }
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.566'), '1.4.566 changelog row')
 assert.doesNotMatch(

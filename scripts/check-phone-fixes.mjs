@@ -2042,7 +2042,7 @@ const growBox = (box) => ({ left: box.left - SOLVER_EPS, top: box.top - SOLVER_E
  * Every 1px card spot on the plate that clears the glyph plus 6 (body and pointer), Begin minus 8, the whole rail,
  * every rail, clear-row, skill kit and New lamp button, the open lamp's own name, every other lamp (art and type
  * mark) and every other lamp's name, and stays 8px above the bottom row. Counts them. Other lamps' art counts since
- * 1.4.572: a spot that covers a neighbour is not a clear spot.
+ * 1.4.571: a spot that covers a neighbour is not a clear spot.
  * Independent of the placer: it reads only measured boxes.
  */
 function glyphClearSpots(frame) {
@@ -2094,7 +2094,7 @@ function glyphClearSpots(frame) {
 }
 
 /**
- * The 1.4.572 rules. They assert, unless NW_GLYPH_COLLECT=1: then a miss is counted by rule so a run against an
+ * The 1.4.571 rules. They assert, unless NW_GLYPH_COLLECT=1: then a miss is counted by rule so a run against an
  * older build lists every rule it breaks instead of stopping at the first.
  */
 const glyphMisses = new Map()
@@ -2204,7 +2204,7 @@ function glyphCardRules(frame, where, stats, stageKey, { settled = false } = {})
     stats.clearMaxOverlap = Math.max(stats.clearMaxOverlap, over)
     assert.equal(over, 0, `${where}: card covers a clear-row button by ${over}px2, card ${JSON.stringify(card)} button ${JSON.stringify(button)}`)
   }
-  // 1.4.572: New lamp and skill kit buttons are tap targets, the open lamp's own name is never covered, and the card
+  // 1.4.571: New lamp and skill kit buttons are tap targets, the open lamp's own name is never covered, and the card
   // never paints an empty body.
   if (frame.newLamp.length > 0) stats.newLampFrames += 1
   for (const button of frame.newLamp) {
@@ -2592,7 +2592,7 @@ async function checkGlyphSeatSweep(browser, port, errors, width, height) {
     mergeGlyphStats(total, driver.stats)
     const headerHere = driver.stats.headerFrames + driver.stats.headerSettled
     seen.push(`${ring.cx},${ring.cy}${headerHere > 0 ? ' header' : ''}`)
-    // 1.4.572: with four neighbour lamps around the seat (they are soft obstacles) a plate may have no spot that clears
+    // 1.4.571: with four neighbour lamps around the seat (they are soft obstacles) a plate may have no spot that clears
     // the mark, the taps and every neighbour. Then the header copy is allowed, and only then: glyphCardRules makes the
     // solver find 0 spots on every header frame. The counts are reported per size, not capped.
     if (label === FAILING_SEAT.size && ring.cx === FAILING_SEAT.cx && ring.cy === FAILING_SEAT.cy) {
@@ -2809,7 +2809,7 @@ async function checkLampGlyph(browser, port, errors) {
   }
 
   if (process.env.NW_GLYPH_COLLECT === '1') {
-    console.log(`checkLampGlyph collected ${glyphMisses.size} broken 1.4.572 rules`)
+    console.log(`checkLampGlyph collected ${glyphMisses.size} broken 1.4.571 rules`)
     for (const [rule, row] of glyphMisses) console.log(`  BROKEN ${rule}: ${row.count} frames, first: ${row.first.slice(0, 420)}`)
     return
   }
