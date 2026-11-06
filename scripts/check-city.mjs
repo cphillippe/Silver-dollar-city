@@ -1941,6 +1941,7 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
+// 1.4.572: Night Run maze fixes from Kid 8 (#905). Re-pin after main took 1.4.571 (#934).
 assert.equal(APP_VERSION, '1.4.572')
 assert.equal(CHANGELOG[0].version, '1.4.572', '1.4.572 is the newest row')
 assert.match(latestChange('1.4.572').items.join('\n'), /Refs #793/, '1.4.572 changelog refs #793')

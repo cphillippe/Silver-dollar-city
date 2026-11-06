@@ -53,8 +53,6 @@ export const CHANGELOG: ChangeNote[] = [
       'Refs #923.',
     ],
   },
-    ],
-  },
   {
     version: '1.4.570',
     title: 'Night Watch: the upgrade card never covers the lamp mark (1.4.570)',
