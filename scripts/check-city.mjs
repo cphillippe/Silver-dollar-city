@@ -516,8 +516,11 @@ import {
   CLEAR_BAR_RESERVE,
   cardHitsGlyph,
   BEGIN_GAP,
+  BEGIN_REACH,
+  TAP_EPS,
   GLYPH_CLEAR,
   placeTowerCard,
+  STRIP_H,
   TOWER_CARD_W,
   TOWER_CARD_H,
   TOWER_TREE_H,
@@ -1938,32 +1941,41 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-assert.equal(APP_VERSION, '1.4.571')
-assert.equal(CHANGELOG[0].version, '1.4.571', '1.4.571 is the newest row')
-assert.match(latestChange('1.4.571').items.join('\n'), /Refs #793/, '1.4.571 changelog refs #793')
-assert.match(latestChange('1.4.571').items.join('\n'), /Hard stays the same\./)
-assert.match(latestChange('1.4.571').items.join('\n'), /never costs a heart/, '1.4.571 names the robber tap fix')
+assert.equal(APP_VERSION, '1.4.572')
+assert.equal(CHANGELOG[0].version, '1.4.572', '1.4.572 is the newest row')
+assert.match(latestChange('1.4.572').items.join('\n'), /Refs #793/, '1.4.572 changelog refs #793')
+assert.match(latestChange('1.4.572').items.join('\n'), /Hard stays the same\./)
+assert.match(latestChange('1.4.572').items.join('\n'), /never costs a heart/, '1.4.572 names the robber tap fix')
 assert.doesNotMatch(
-  latestChange('1.4.571').items.join('\n'),
+  latestChange('1.4.572').items.join('\n'),
   /\?playtest=1|Night Watch debug/,
-  '1.4.571 changelog stays player-facing',
+  '1.4.572 changelog stays player-facing',
 )
 {
   const nr905 = readFileSync(new URL('../public/night-run/index.html', import.meta.url), 'utf8')
-  assert.match(nr905, /rk=q=>q\.kind==='robber'\?0/, '1.4.571 Night Run robber taps win over gems in front')
-  assert.match(nr905, /tapAt\(t\.clientX,t\.clientY,'robber'\)/, '1.4.571 Night Run a slow press on a robber pops it')
-  assert.match(nr905, /function safeNb\(\)/, '1.4.571 Night Run a hit steps you back one safe square')
-  assert.match(nr905, /S\.inv=3;S\.robbers\.forEach/, '1.4.571 Night Run retry at a lamp starts safe')
-  assert.match(nr905, /function hintBfs\(use\)/, '1.4.571 Night Run goal stays on one reachable target')
-  assert.match(nr905, /function turnBtn\(id,sg\)/, '1.4.571 Night Run a tap on Turn turns 90 degrees')
-  assert.match(nr905, /S\.dashG!==ti/, '1.4.571 Night Run dash check matches the button')
-  assert.match(nr905, /r\.strike=null;if\(r\.gone\)return;/, '1.4.571 Night Run a hit never wakes a popped robber')
-  assert.match(nr905, /if\(!r\.gone&&Math\.abs\(r\.sx-S\.x\)\+Math\.abs\(r\.sy-S\.y\)<2\)r\.gone=\.5;/, '1.4.571 Night Run a robber waits while you stand by its hideout')
+  assert.match(nr905, /rk=q=>q\.kind==='robber'\?0/, '1.4.572 Night Run robber taps win over gems in front')
+  assert.match(nr905, /tapAt\(t\.clientX,t\.clientY,'robber'\)/, '1.4.572 Night Run a slow press on a robber pops it')
+  assert.match(nr905, /function safeNb\(\)/, '1.4.572 Night Run a hit steps you back one safe square')
+  assert.match(nr905, /S\.inv=3;S\.robbers\.forEach/, '1.4.572 Night Run retry at a lamp starts safe')
+  assert.match(nr905, /function hintBfs\(use\)/, '1.4.572 Night Run goal stays on one reachable target')
+  assert.match(nr905, /function turnBtn\(id,sg\)/, '1.4.572 Night Run a tap on Turn turns 90 degrees')
+  assert.match(nr905, /S\.dashG!==ti/, '1.4.572 Night Run dash check matches the button')
+  assert.match(nr905, /r\.strike=null;if\(r\.gone\)return;/, '1.4.572 Night Run a hit never wakes a popped robber')
+  assert.match(nr905, /if\(!r\.gone&&Math\.abs\(r\.sx-S\.x\)\+Math\.abs\(r\.sy-S\.y\)<2\)r\.gone=\.5;/, '1.4.572 Night Run a robber waits while you stand by its hideout')
 }
-assert.equal(CHANGELOG[1].version, '1.4.570', '1.4.570 follows the newest row')
-assert.equal(CHANGELOG[2].version, '1.4.569', '1.4.569 follows the 1.4.570 row')
-assert.equal(CHANGELOG[3].version, '1.4.568', '1.4.568 follows the 1.4.569 row')
-assert.equal(CHANGELOG[4].version, '1.4.567', '1.4.567 follows the 1.4.568 row')
+assert.equal(CHANGELOG[1].version, '1.4.571', '1.4.571 follows the newest row')
+assert.equal(CHANGELOG[2].version, '1.4.570', '1.4.570 follows the 1.4.571 row')
+assert.equal(CHANGELOG[3].version, '1.4.569', '1.4.569 follows the 1.4.570 row')
+assert.equal(CHANGELOG[4].version, '1.4.568', '1.4.568 follows the 1.4.569 row')
+assert.equal(CHANGELOG[5].version, '1.4.567', '1.4.567 follows the 1.4.568 row')
+assert.equal(CHANGELOG[6].version, '1.4.566', '1.4.566 follows the 1.4.567 row')
+assert.match(latestChange('1.4.571').items.join('\n'), /Refs #923\./, '1.4.571 changelog refs #923')
+assert.doesNotMatch(latestChange('1.4.571').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.571 changelog avoids GitHub close keywords')
+assert.doesNotMatch(
+  playerVisibleChangeItems(latestChange('1.4.571').items).join('\n'),
+  /\bHard\b|\bMedium\b/,
+  '1.4.571 the player note does not name other tiers',
+)
 assert.match(latestChange('1.4.570').items.join('\n'), /Refs #923\./, '1.4.570 changelog refs #923')
 assert.doesNotMatch(latestChange('1.4.570').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.570 changelog avoids GitHub close keywords')
 assert.doesNotMatch(
@@ -2051,10 +2063,13 @@ assert.doesNotMatch(
     rail: { left: w - 65, top: 5, right: w - 5, bottom: 221 },
     buttons: [0, 1, 2, 3].map((i) => ({ left: w - 59, top: 11 + i * 52, right: w - 11, bottom: 11 + i * 52 + 46 })),
   })
+  // The same obstacles and slack the placer uses: Begin keeps BEGIN_REACH (gap, the pixel guard and Begin's 2px bob)
+  // and every other tap target keeps TAP_EPS, so a frame this scan calls clear is clear for the placer too.
+  const growTap = (box) => ({ left: box.left - TAP_EPS, top: box.top - TAP_EPS, right: box.right + TAP_EPS, bottom: box.bottom + TAP_EPS })
   const tapBlocksFor = (taps) => [
-    { ...taps.begin, top: taps.begin.top - BEGIN_GAP },
-    taps.rail,
-    ...taps.buttons,
+    { ...taps.begin, top: taps.begin.top - BEGIN_REACH },
+    growTap(taps.rail),
+    ...taps.buttons.map(growTap),
   ]
   const hitsBlock = (card, height, box) =>
     card.left < box.right && card.left + TOWER_CARD_W > box.left && card.top < box.bottom && card.top + height > box.top
@@ -2133,11 +2148,83 @@ assert.doesNotMatch(
     assert.equal(cardHitsGlyph(short, point, TOWER_TREE_H, 244, mark, 4), false, '1.4.570 the shorter card and pointer stay 4px off the mark')
     for (const block of tapBlocksFor(taps)) assert.equal(hitsBlock(short, 244, block), false, `1.4.570 the shorter card keeps off ${JSON.stringify(block)}`)
   }
+  // 1.4.571: New lamp buttons, the skill kit row and the open lamp's own name are hard. Other lamps and their names are
+  // soft: a spot that clears them wins, and when none clears the mark, the taps and the neighbours the card says so.
+  {
+    const W = 375
+    const H = 574
+    const base = tapsFor(W, H)
+    const newLamp = [0, 1, 2].map((i) => ({ left: 6, top: 120 + i * 56, right: 56, bottom: 120 + i * 56 + 50 }))
+    const neighbours = [
+      { body: { left: 150, top: 110, right: 200, bottom: 170 }, label: { left: 152, top: 172, right: 198, bottom: 190 } },
+      { body: { left: 110, top: 330, right: 160, bottom: 390 }, label: { left: 112, top: 392, right: 158, bottom: 410 } },
+    ]
+    const taps = {
+      ...base,
+      buttons: [...base.buttons, ...newLamp],
+      row: base.begin.top,
+      lamps: neighbours.map((n) => n.body),
+      labels: neighbours.map((n) => n.label),
+    }
+    const softAll = [...taps.lamps, ...taps.labels]
+    let clear = 0
+    let crowdedHere = 0
+    let ownKept = 0
+    let stripped = 0
+    for (const reserve of [0, CLEAR_BAR_RESERVE]) {
+      for (const paint of [217, 260]) {
+        for (let y = 100; y < H - 60; y += 29) {
+          for (let x = 70; x < W - 80; x += 37) {
+            const point = { left: x, top: y }
+            const mark = mapGlyphRect(x, y, 0.62, { left: 0, top: 0, right: W, bottom: H })
+            const own = [{ left: x - 30, top: y + 10, right: x + 30, bottom: y + 34 }]
+            const t = { ...taps, own }
+            const hard = [...tapBlocksFor(taps), ...newLamp, ...own, { left: -1e6, top: base.begin.top - BEGIN_REACH, right: 1e6, bottom: 1e6 }]
+            const placed = placeTowerCard(point, { w: W, h: H }, [], 0.62, reserve, TOWER_TREE_H, mark, paint, t)
+            const where = `lamp ${x},${y} reserve ${reserve} paint ${paint}`
+            assert.ok(placed.top + paint <= H - reserve + 0.01, `1.4.571 the card at ${where} stays out of the bottom reserve`)
+            assert.ok(placed.top + paint <= base.begin.top - 8 + 0.01, `1.4.571 the card at ${where} stays 8px above the bottom row`)
+            if (placed.markClear) {
+              clear += 1
+              assert.equal(cardHitsGlyph(placed, point, TOWER_TREE_H, paint, mark, 4), false, `1.4.571 the card at ${where} says it clears the mark but is within 4px`)
+              for (const box of [...hard, ...softAll]) assert.equal(hitsBlock(placed, paint, box), false, `1.4.571 the card at ${where} says it is clear but covers ${JSON.stringify(box)}`)
+            } else {
+              crowdedHere += 1
+              let spot = false
+              for (let left = 2; left <= W - TOWER_CARD_W - 2 && !spot; left += 2) {
+                for (let top = 2; top <= H - paint - 8 - reserve && !spot; top += 2) {
+                  const at = { left, top }
+                  spot = !cardHitsGlyph(at, point, TOWER_TREE_H, paint, mark, GLYPH_CLEAR) && ![...hard, ...softAll].some((box) => hitsBlock(at, paint, box))
+                }
+              }
+              assert.equal(spot, false, `1.4.571 the card at ${where} gave up on the mark though a spot clears it, the taps and every neighbour`)
+            }
+            if (!own.some((box) => hitsBlock(placed, paint, box))) ownKept += 1
+            const strip = placeTowerCard(point, { w: W, h: H }, [], 0.62, reserve, STRIP_H, null, STRIP_H, t, true)
+            assert.ok(strip.top + STRIP_H <= base.begin.top - 8 + 0.01 && strip.top + STRIP_H <= H - reserve + 0.01, `1.4.571 the mid-wave strip at ${where} stays above the bottom row and out of the reserve`)
+            if (![...tapBlocksFor(taps), ...newLamp].some((box) => strip.left < box.right && strip.left + 112 > box.left && strip.top < box.bottom && strip.top + STRIP_H > box.top)) stripped += 1
+          }
+        }
+      }
+    }
+    assert.ok(clear > 100, `1.4.571 the neighbour scan found ${clear} cards that clear everything`)
+    assert.ok(crowdedHere > 0, `1.4.571 the neighbour scan reaches seats with no clear spot (${crowdedHere})`)
+    assert.ok(ownKept > (clear + crowdedHere) * 0.9, `1.4.571 the card keeps off the open lamp's own name (${ownKept} of ${clear + crowdedHere})`)
+    assert.ok(stripped > 0, `1.4.571 the strip keeps off the rail and the New lamp buttons (${stripped})`)
+  }
   const card = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
-  assert.match(card, /markOnMap && !placed\.markClear && paths/, '1.4.569 the card shows the header copy exactly when no slot clears the mark')
+  assert.match(card, /markOnMap && !strip && !placed\.markClear && paths/, '1.4.569 the card shows the header copy exactly when no slot clears the mark')
   assert.match(card, /data-glyph-header="yes"[\s\S]{0,160}variant="rail"/, '1.4.569 the header copy is the same mark at the same stage')
-  assert.match(card, /one\('\.defend-go'\)[\s\S]{0,120}one\('\.nw-rail'\)[\s\S]{0,160}\.nw-rail \.defend-ability[\s\S]{0,80}\.defend-clear-row button/, '1.4.570 the card measures Begin, the whole rail, the rail buttons and the clear row buttons')
-  assert.match(card, /placeTowerCard\(point, board, clearOf, cameraScale, reserveBottom, cardH, glyph, paintH, markOnMap \? taps : null\)/, '1.4.570 the card hands the measured boxes to the placer')
+  for (const selector of ["'.defend-go'", "'.nw-rail'", "'.nw-rail .defend-ability'", "'.defend-clear-row button'", "'.defend-kits button'", "'.defend-new-lamp'", "'.defend-type-chip'", "'text.defend-type-label'"]) {
+    assert.ok(card.includes(selector), `1.4.571 the card measures ${selector}`)
+  }
+  assert.match(card, /placeTowerCard\(point, board, clearOf, cameraScale, reserveBottom, cardH, glyph, paintH, markOnMap \? taps : null, strip\)/, '1.4.571 the card hands the measured boxes to the placer')
+  assert.match(card, /if \(strip && !hasBuy\) return null/, '1.4.571 a wave card with nothing to buy is not painted')
+  const board572 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
+  assert.match(board572, /className="defend-glyph-top"/, '1.4.571 the board paints the lamp marks in a layer above the lamp names')
+  assert.match(board572, /phase === 'plant' \|\| phase === 'wave'\) \? CLEAR_BAR_RESERVE/, '1.4.571 the wave card keeps out of the bottom reserve')
+  assert.match(defendCss, /\.defend-page\.is-easy-watch \.defend-glyph-top \{[^}]*z-index: 5;/, '1.4.571 the mark layer sits above the name chips (z-index 4)')
+  assert.match(defendCss, /\.defend-page\.is-easy-watch\.is-easy-tap \.defend-tower-card\[data-strip='yes'\] \{\s*bottom: auto !important;/, '1.4.571 the placed wave strip is not pinned to the screen bottom')
 }
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.566'), '1.4.566 changelog row')
 assert.doesNotMatch(

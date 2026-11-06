@@ -18,13 +18,15 @@ export interface LampUpgradeGlyphProps {
   variant: 'map' | 'rail'
   /** Playtest preview only. A normal lamp leaves this unset and uses the buys. */
   stage?: number
+  /** Map variant only: lets the board paint a second copy of this mark above the lamp names. */
+  domId?: string
 }
 
 /**
  * Inline stroke mark for one Easy lamp.
  * Only the piece just bought draws on. Reduced motion shows that piece at once.
  */
-export function LampUpgradeGlyph({ paths, variant, stage: stageOverride }: LampUpgradeGlyphProps) {
+export function LampUpgradeGlyph({ paths, variant, stage: stageOverride, domId }: LampUpgradeGlyphProps) {
   const stage = stageOverride == null ? lampGlyphStage(paths) : clampGlyphStage(stageOverride)
   const tone = stageOverride == null ? lampGlyphTone(paths) : stage > 0 ? 'strong' : 'rest'
   const pieces = lampGlyphMarks(stage)
@@ -124,6 +126,7 @@ export function LampUpgradeGlyph({ paths, variant, stage: stageOverride }: LampU
     return (
       <g
         ref={svgRef}
+        id={domId}
         {...marks}
         transform={`translate(${box.x} ${box.y}) scale(${scale})`}
       >
