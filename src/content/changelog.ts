@@ -28,9 +28,9 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.571',
+    version: '1.4.572',
     title: 'Night Run: fair robbers, a safe lamp and easy turns',
-    when: '2026-11-03',
+    when: '2026-11-06',
     items: [
       'Night Run: a tap on a robber always pops it. That tap never costs a heart.',
       'One hit costs one heart and moves you back one square. Then you get a short safe moment.',
@@ -40,6 +40,19 @@ export const CHANGELOG: ChangeNote[] = [
       'Wait for green goes away as soon as the button says GO!',
       'Hard stays the same.',
       'Refs #793.',
+    ],
+  },
+  {
+    version: '1.4.571',
+    title: 'Night Watch: the lamp mark and the card stay clear of neighbour lamps (1.4.571)',
+    when: '2026-11-03',
+    items: [
+      'The lamp mark now draws above the names and badges of the lamps around it, so a neighbour label never hides it.',
+      'The upgrade card keeps off the lamps and names around the open lamp, off the New lamp buttons and off the name of its own lamp. On a tight screen with no clear spot, the card shows its own copy of the mark.',
+      'During a wave the small buy card stays above the bottom row. A lamp with nothing left to buy shows no empty card.',
+      'Refs #923.',
+    ],
+  },
     ],
   },
   {
