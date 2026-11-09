@@ -6,8 +6,8 @@
 
 /** Map mark, in CSS pixels, on a phone. */
 export const MAP_GLYPH_PX = 20
-/** Air between the mark and the lamp art when it rides above. */
-export const MAP_GAP_PX = 6
+/** Air between the mark and the lamp art when it rides above. The level-up pulse swells the art a few pixels past its rest box. */
+export const MAP_GAP_PX = 8
 /** The mark never sits closer than this to the board edge. */
 export const MAP_EDGE_PX = 2
 /** The right rail covers this much of the board on a phone. */
@@ -51,7 +51,7 @@ export function mapGlyphRect(ox: number, oy: number, scale: number, clip?: Glyph
     const maxLeft = clip.right - size - MAP_EDGE_PX
     const maxTop = clip.bottom - size - MAP_EDGE_PX
     if (top < minTop) {
-      if (minTop + size + 1 <= artTop) {
+      if (minTop + size + MAP_GAP_PX <= artTop) {
         top = minTop
       } else {
         const gap = LAMP_ART_HALF_UNITS * s + MAP_GAP_PX

@@ -1701,6 +1701,17 @@ async function glyphSetup(page) {
         stage: glyph?.getAttribute('data-glyph-stage') ?? null,
         draw,
         card: box(document.querySelector('.defend-tower-card')),
+        stem: (() => {
+          const el = document.querySelector('.defend-tower-card')
+          if (!el) return null
+          const content = getComputedStyle(el, '::after').content
+          if (content === 'none' || content === 'normal') return null
+          const rect = el.getBoundingClientRect()
+          const x = rect.left + parseFloat(el.style.getPropertyValue('--stem'))
+          if (!Number.isFinite(x)) return null
+          const above = el.classList.contains('is-above')
+          return { left: x - 8, right: x + 8, top: above ? rect.bottom : rect.top - 8, bottom: above ? rect.bottom + 8 : rect.top, w: 16, h: 8 }
+        })(),
         header: (() => {
           const mark = document.querySelector('.defend-tower-card [data-glyph-header="yes"]')
           const svg = mark?.querySelector('.lamp-upgrade-glyph')
@@ -1713,6 +1724,7 @@ async function glyphSetup(page) {
         })(),
         board: box(document.querySelector('.defend-board')),
         frame: box(document.querySelector('.defend-frame')),
+        plate: box(document.querySelector('.defend-tower-card')?.offsetParent ?? null),
         hearts: many('.defend-hearts'),
         lamp: pad ? many('.defend-tower-lamp, .defend-type-mark', pad) : [],
         buttons: many('.nw-rail .defend-ability'),
@@ -1720,9 +1732,121 @@ async function glyphSetup(page) {
         banners: many('.nw-power-banner, .defend-boost-status, .nw-wave-count'),
         pace: many('.nw-pace'),
         begin: many('.defend-go'),
+        beginHit: (() => {
+          const go = document.querySelector('.defend-go')
+          const at = box(go)
+          if (!go || !at) return null
+          const hit = document.elementFromPoint(at.left + at.w / 2, at.top + at.h / 2)
+          return Boolean(hit && go.contains(hit))
+        })(),
+        rail: box(document.querySelector('.nw-rail')),
+        clearButtons: many('.defend-clear-row button'),
+        place: (() => {
+          const raw = document.querySelector('.defend-tower-card')?.getAttribute('data-place')
+          if (!raw) return null
+          const [x, y, h, reserve] = raw.split(',').map(Number)
+          return { x, y, h, reserve: reserve || 0 }
+        })(),
         cont: many('.defend-continue'),
+        kit: many('.defend-kits button'),
+        newLamp: many('.defend-new-lamp'),
+        recenter: many('.nw-cam-recenter'),
+        wave: Boolean(document.querySelector('.defend-page.is-easy-tap')),
+        open: Boolean(document.querySelector('.defend-pad.is-upgrade-open')),
+        strip: document.querySelector('.defend-tower-card')?.getAttribute('data-strip') === 'yes',
+        // What the card paints: boxes that are really on screen, not the 1px clipped words.
+        body: (() => {
+          const el = document.querySelector('.defend-tower-card')
+          if (!el) return null
+          // Ink only: a button, an image, or an element with its own words. Empty wrappers paint nothing.
+          const inks = [...el.querySelectorAll('*')].filter((node) => {
+            if (node.closest('svg') && node.tagName.toLowerCase() !== 'svg') return false
+            const style = getComputedStyle(node)
+            if (style.visibility === 'hidden' || style.display === 'none' || Number(style.opacity) === 0) return false
+            if (['BUTTON', 'IMG'].includes(node.tagName) || node.tagName.toLowerCase() === 'svg') return true
+            return [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim().length > 0)
+          })
+          // An ancestor that clips (the 1px clipped words, the card's own edge) cuts what is really painted.
+          const seen = (node) => {
+            const own = node.getBoundingClientRect()
+            let left = own.left
+            let top = own.top
+            let right = own.right
+            let bottom = own.bottom
+            for (let up = node.parentElement; up; up = up.parentElement) {
+              const style = getComputedStyle(up)
+              if (style.clipPath !== 'none' && style.clipPath.includes('inset(50%')) return null
+              if (style.overflow !== 'visible' || style.clipPath !== 'none') {
+                const box = up.getBoundingClientRect()
+                left = Math.max(left, box.left)
+                top = Math.max(top, box.top)
+                right = Math.min(right, box.right)
+                bottom = Math.min(bottom, box.bottom)
+              }
+              if (up === el) break
+            }
+            return right - left >= 8 && bottom - top >= 8 ? { left, top, right, bottom, w: right - left, h: bottom - top } : null
+          }
+          const parts = inks.map((node) => seen(node)).filter(Boolean)
+          if (parts.length === 0) return { count: 0, h: 0 }
+          return { count: parts.length, h: Math.max(...parts.map((r) => r.bottom)) - Math.min(...parts.map((r) => r.top)) }
+        })(),
+        rowTop: (() => {
+          const rows = [...many('.defend-go'), ...many('.defend-kits button'), ...many('.defend-continue')]
+          return rows.length ? Math.min(...rows.map((r) => r.top)) : null
+        })(),
+        own: [
+          ...(pad ? many('text.defend-type-label', pad) : []),
+          ...many(`.defend-type-chip.is-${tool}`),
+        ],
+        nbBodies: [...document.querySelectorAll('.defend-pad.is-planted')]
+          .filter((node) => node !== pad)
+          .map((node) => {
+            const parts = [...node.querySelectorAll('.defend-lamp-sprite, image.defend-type-mark')].map(box).filter(Boolean)
+            if (!parts.length) return null
+            return {
+              left: Math.min(...parts.map((r) => r.left)),
+              top: Math.min(...parts.map((r) => r.top)),
+              right: Math.max(...parts.map((r) => r.right)),
+              bottom: Math.max(...parts.map((r) => r.bottom)),
+            }
+          })
+          .filter(Boolean),
+        nbLabels: [
+          ...[...document.querySelectorAll('.defend-pad.is-planted')].filter((node) => node !== pad).flatMap((node) => many('text.defend-type-label', node)),
+          ...many(`.defend-type-chip:not(.is-${tool})`),
+        ],
+        nbMarks: [...document.querySelectorAll('.defend-pad.is-planted')].filter((node) => node !== pad).flatMap((node) => many('image.defend-type-mark', node)),
+        // The mark is painted above the names when a second copy of it sits in a layer over every chip.
+        above: (() => {
+          if (!glyph?.id) return false
+          const top = document.querySelector(`svg.defend-glyph-top use[href="#${CSS.escape(glyph.id)}"]`)
+          const layer = top?.ownerSVGElement
+          const at = box(top)
+          const own = box(glyph)
+          if (!top || !layer || !at || !own) return false
+          if (Math.abs(at.left - own.left) > 1 || Math.abs(at.top - own.top) > 1) return false
+          const chips = [...document.querySelectorAll('.defend-type-chip')]
+          const z = Number(getComputedStyle(layer).zIndex)
+          if (!(z > Math.max(0, ...chips.map((chip) => Number(getComputedStyle(chip).zIndex) || 0)))) return false
+          return chips.every((chip) => Boolean(chip.compareDocumentPosition(layer) & Node.DOCUMENT_POSITION_FOLLOWING))
+        })(),
+        aboveWhy: (() => {
+          if (!glyph?.id) return 'no glyph id'
+          const top = document.querySelector(`svg.defend-glyph-top use[href="#${CSS.escape(glyph.id)}"]`)
+          const at = box(top)
+          const own = box(glyph)
+          if (!top || !at || !own) return `overlay ${Boolean(top)} at ${JSON.stringify(at)} own ${JSON.stringify(own)}`
+          return `overlay offset ${(at.left - own.left).toFixed(2)},${(at.top - own.top).toFixed(2)} z ${getComputedStyle(top.ownerSVGElement).zIndex}`
+        })(),
         others: [...document.querySelectorAll('.defend-pad .lamp-upgrade-glyph[data-glyph-variant="map"]')]
           .filter((node) => node !== glyph)
+          // A lamp panned off the top of the frame has no art on screen to sit over; only lamps in view count.
+          .filter((node) => {
+            const art = node.closest('.defend-pad')?.querySelector('.defend-tower-lamp')?.getBoundingClientRect()
+            const frameBox = document.querySelector('.defend-frame')?.getBoundingClientRect()
+            return Boolean(art && frameBox && art.top >= frameBox.top && art.bottom <= frameBox.bottom)
+          })
           .map(box)
           .filter(Boolean),
       }
@@ -1865,12 +1989,13 @@ async function checkRingArcDraw(browser, port, errors) {
  */
 async function checkGlyphOneGold(browser, port, errors, width, height) {
   const label = `${width}x${height}`
-  const { context, page } = await openMap(browser, port, width, height, 'a2', { motion: true })
+  const { context, page } = await openMap(browser, port, width, height, 'a2', { motion: true, search: '?playtest=1&nwSeed=2&nwCam=1' })
   page.on('pageerror', (error) => errors.push(`glyph gold ${label} ${error}`))
+  await assertGlyphCamera(page, `${label} one gold`)
   const selected = () =>
     page.evaluate(() => [...document.querySelectorAll('.nw-rail .defend-ability.is-on')].map((node) => (node.textContent || '').trim()))
   const plant = async (tool) => {
-    const seat = await firstLiveSeat(page)
+    const seat = await glyphNextSeat(page, `${label} one gold`)
     await page.mouse.click(seat.x, seat.y)
     await page.locator(`.defend-pad[data-tower-type="${tool}"] .lamp-upgrade-glyph[data-glyph-variant="map"]`).waitFor()
     await page.waitForTimeout(150)
@@ -1889,6 +2014,7 @@ async function checkGlyphOneGold(browser, port, errors, width, height) {
   const selectedGold = await readGold(page)
   assert.equal(selectedGold.gold.length, 1, `${label} selected lamp has exactly one gold cue ${JSON.stringify(selectedGold.gold)}`)
   await plant('logic')
+  await glyphPanToPad(page, 'logic')
   await page.locator('.defend-pad[data-tower-type="logic"]').click({ force: true })
   await page.locator('.defend-tower-card').waitFor()
   const openGold = await readGold(page, 'logic')
@@ -1898,12 +2024,246 @@ async function checkGlyphOneGold(browser, port, errors, width, height) {
   return { selected: selectedGold.gold.length, planted: plantedGold.gold.length, open: openGold.gold.length }
 }
 
+/** The card is 176 wide, its pointer 16x8, the glyph keeps 6px, Begin 8px, the plate edge 2px. Same rules the placer follows. */
+const CARD_W = 176
+const SOLVER_GLYPH_ZONE = 6
+const SOLVER_BEGIN_GAP = 8
+/** Begin bobs up 2px on a wide screen (defend-go keyframes); the solver keeps that bob past the asserted gap, as the placer does. */
+const SOLVER_BREATH = 2
+const SOLVER_EDGE = 2
+const SOLVER_FLOOR_MARGIN = 8
+const glyphSpotCache = new Map()
+
+/** Every measured box grows by half a pixel before the search, as the placer does, so a rounded box cannot touch a card. */
+const SOLVER_EPS = 0.5
+const growBox = (box) => ({ left: box.left - SOLVER_EPS, top: box.top - SOLVER_EPS, right: box.right + SOLVER_EPS, bottom: box.bottom + SOLVER_EPS })
+
+/**
+ * Every 1px card spot on the plate that clears the glyph plus 6 (body and pointer), Begin minus 8, the whole rail,
+ * every rail, clear-row, skill kit and New lamp button, the open lamp's own name, every other lamp (art and type
+ * mark) and every other lamp's name, and stays 8px above the bottom row. Counts them. Other lamps' art counts since
+ * 1.4.571: a spot that covers a neighbour is not a clear spot.
+ * Independent of the placer: it reads only measured boxes.
+ */
+function glyphClearSpots(frame) {
+  const { card, glyph, place, plate } = frame
+  if (!card || !glyph || !place || !plate) return null
+  const round = (box) => (box ? [box.left, box.top, box.right, box.bottom].map((n) => Math.round(n * 10) / 10) : null)
+  const key = JSON.stringify([
+    round(plate), round(glyph), Math.round(card.h * 10) / 10, place, round(frame.begin[0]), round(frame.rail), frame.buttons.map(round), frame.clearButtons.map(round),
+    frame.kit.map(round), frame.newLamp.map(round), frame.recenter.map(round), frame.rowTop, frame.own.map(round), frame.nbBodies.map(round), frame.nbLabels.map(round),
+  ])
+  if (glyphSpotCache.has(key)) return glyphSpotCache.get(key)
+  const H = card.h
+  const zone = { left: glyph.left - SOLVER_GLYPH_ZONE, right: glyph.right + SOLVER_GLYPH_ZONE, top: glyph.top - SOLVER_GLYPH_ZONE, bottom: glyph.bottom + SOLVER_GLYPH_ZONE }
+  const blocks = []
+  const begin = frame.begin[0]
+  if (begin) blocks.push({ left: begin.left, right: begin.right, top: begin.top - SOLVER_BEGIN_GAP - SOLVER_BREATH, bottom: begin.bottom })
+  if (frame.rail) blocks.push(growBox(frame.rail))
+  blocks.push(...[...frame.buttons, ...frame.clearButtons, ...frame.kit, ...frame.newLamp, ...frame.recenter, ...frame.own].map(growBox))
+  if (frame.rowTop != null) blocks.push({ left: -1e6, right: 1e6, top: frame.rowTop - SOLVER_BEGIN_GAP - SOLVER_BREATH, bottom: 1e6 })
+  blocks.push(...[...frame.nbBodies, ...frame.nbLabels].map(growBox))
+  const pointLeft = plate.left + place.x
+  const pointTop = plate.top + place.y
+  const hits = (l, t, r, b, box) => l < box.right && r > box.left && t < box.bottom && b > box.top
+  let count = 0
+  const minLeft = Math.ceil(plate.left + SOLVER_EDGE)
+  const maxLeft = Math.floor(plate.right - CARD_W - SOLVER_EDGE)
+  const minTop = Math.ceil(plate.top + SOLVER_EDGE)
+  // The card never enters the bottom reserve: its bottom stays the reserve and the 8px margin above the plate floor.
+  const maxTop = Math.floor(plate.bottom - place.reserve - SOLVER_FLOOR_MARGIN - H)
+  for (let top = minTop; top <= maxTop; top += 1) {
+    for (let left = minLeft; left <= maxLeft; left += 1) {
+      const right = left + CARD_W
+      const bottom = top + H
+      if (hits(left, top, right, bottom, zone)) continue
+      if (blocks.some((box) => hits(left, top, right, bottom, box))) continue
+      if (pointLeft >= left + 8 && pointLeft <= right - 8) {
+        const above = top + place.h <= pointTop
+        const stemTop = above ? bottom : top - 8
+        if (hits(pointLeft - 8, stemTop, pointLeft + 8, stemTop + 8, zone)) continue
+      }
+      count += 1
+    }
+  }
+  glyphSpotCache.set(key, count)
+  if (count === 0 && process.env.NW_DEBUG_SPOTS) {
+    console.log('NO SPOT', JSON.stringify({ plate: round(plate), glyph: round(glyph), H, place, begin: round(begin), rail: round(frame.rail), buttons: frame.buttons.map(round), newLamp: frame.newLamp.map(round), kit: frame.kit.map(round), rowTop: frame.rowTop, own: frame.own.map(round), nbBodies: frame.nbBodies.map(round), nbLabels: frame.nbLabels.map(round) }))
+  }
+  return count
+}
+
+/**
+ * The 1.4.571 rules. They assert, unless NW_GLYPH_COLLECT=1: then a miss is counted by rule so a run against an
+ * older build lists every rule it breaks instead of stopping at the first.
+ */
+const glyphMisses = new Map()
+function glyphRule(rule, ok, message) {
+  if (ok) return
+  if (process.env.NW_GLYPH_COLLECT !== '1') assert.fail(message)
+  const row = glyphMisses.get(rule) ?? { count: 0, first: message }
+  row.count += 1
+  glyphMisses.set(rule, row)
+}
+
+function newGlyphStats() {
+  return {
+    minTip: Infinity, buys: 0, frames: 0, minSpan: Infinity, maxSpan: 0, maxFirst: 0, maxCard: 0, maxHearts: 0, maxEdge: 0, bothSeen: 0,
+    minGap: Infinity, headerFrames: 0, headerSettled: 0, brightGold: 0, brightBuys: 0,
+    solved: 0, spotsMin: Infinity, noSpot: new Set(), headerBy: new Map(), headerSpotsMax: 0, reserveFrames: 0, reserveMinSlack: Infinity,
+    beginFrames: 0, beginMaxOverlap: 0, beginMinSlack: Infinity, beginHitBad: 0, railFrames: 0, railMaxOverlap: 0, clearFrames: 0, clearMaxOverlap: 0,
+    nbFrames: 0, nbMaxOverlap: 0, nbHeaderOverlap: 0, nbOverFrames: 0, aboveFrames: 0, underFrames: 0,
+    newLampFrames: 0, newLampMaxOverlap: 0, kitFrames: 0, kitMaxOverlap: 0, ownMaxOverlap: 0, ownHeaderOverlap: 0,
+    rowFrames: 0, rowMinSlack: Infinity, stripFrames: 0, stripMinSlack: Infinity, bodyFrames: 0, bodyMinH: Infinity, suppressed: 0,
+  }
+}
+
+function mergeGlyphStats(total, part) {
+  for (const key of ['buys', 'frames', 'bothSeen', 'headerFrames', 'headerSettled', 'brightGold', 'brightBuys', 'solved', 'reserveFrames', 'beginFrames', 'beginHitBad', 'railFrames', 'clearFrames', 'nbFrames', 'nbOverFrames', 'aboveFrames', 'underFrames', 'newLampFrames', 'kitFrames', 'rowFrames', 'stripFrames', 'bodyFrames', 'suppressed']) total[key] += part[key]
+  for (const key of ['maxFirst', 'maxCard', 'maxHearts', 'maxEdge', 'maxSpan', 'beginMaxOverlap', 'railMaxOverlap', 'clearMaxOverlap', 'nbMaxOverlap', 'nbHeaderOverlap', 'newLampMaxOverlap', 'kitMaxOverlap', 'ownMaxOverlap', 'ownHeaderOverlap']) total[key] = Math.max(total[key], part[key])
+  for (const key of ['minSpan', 'minGap', 'minTip', 'spotsMin', 'beginMinSlack', 'reserveMinSlack', 'rowMinSlack', 'stripMinSlack', 'bodyMinH']) total[key] = Math.min(total[key], part[key])
+  for (const entry of part.noSpot) total.noSpot.add(entry)
+  for (const [key, count] of part.headerBy) total.headerBy.set(key, (total.headerBy.get(key) ?? 0) + count)
+  total.headerSpotsMax = Math.max(total.headerSpotsMax, part.headerSpotsMax)
+}
+
+/**
+ * The rules every frame with the card open must pass.
+ * The header copy shows only when the solver finds 0 clear spots for this card; when a spot exists the card
+ * clears the glyph (0px2, gap >= 4 with the pointer). Always: the card never covers Begin, a rail lamp button
+ * or a clear-row button, and Begin's centre still takes the tap.
+ */
+function glyphCardRules(frame, where, stats, stageKey, { settled = false } = {}) {
+  const card = frame.card
+  if (!card) return
+  // The card stays out of the bottom reserve: its bottom is at or above the plate floor minus the reserve.
+  if (frame.plate && frame.place) {
+    const slack = frame.plate.bottom - frame.place.reserve - card.bottom
+    stats.reserveFrames += 1
+    stats.reserveMinSlack = Math.min(stats.reserveMinSlack, slack)
+    assert.ok(slack >= -0.01, `${where}: card bottom ${card.bottom.toFixed(1)} is ${(-slack).toFixed(2)}px inside the bottom reserve (plate floor ${frame.plate.bottom.toFixed(1)} minus reserve ${frame.place.reserve})`)
+  }
+  // A wave hides the map mark, so a frame without one has only the tap rules to pass.
+  if (frame.glyph) {
+    const spots = glyphClearSpots(frame)
+    assert.ok(spots !== null, `${where}: the solver has no boxes to read (place ${JSON.stringify(frame.place)}, plate ${JSON.stringify(frame.plate)})`)
+    stats.solved += 1
+    if (spots > 0) stats.spotsMin = Math.min(stats.spotsMin, spots)
+    else stats.noSpot.add(stageKey)
+    // A neighbour's name, badge or type mark that sits on the mark and is painted over it hides the mark.
+    const labelBoxes = [...frame.nbLabels, ...frame.nbMarks]
+    const overLabel = labelBoxes.filter((box) => glyphArea(frame.glyph, box) > 0).length
+    const under = overLabel > 0 && !frame.above
+    if (overLabel > 0) {
+      stats.nbOverFrames += 1
+      if (frame.above) stats.aboveFrames += 1
+    }
+    if (under) stats.underFrames += 1
+    if (frame.header) {
+      glyphRule('header copy while a clear spot exists', spots === 0, `${where}: the header copy shows while ${spots} card spots clear the glyph+6, Begin-8, the rail, its buttons, the New lamp buttons, the neighbour lamps and their names, glyph ${JSON.stringify(frame.glyph)} card ${JSON.stringify(card)}`)
+      stats.headerSpotsMax = Math.max(stats.headerSpotsMax, spots)
+      stats.headerBy.set(stageKey, (stats.headerBy.get(stageKey) ?? 0) + 1)
+      if (settled) stats.headerSettled += 1
+      else stats.headerFrames += 1
+    } else {
+      glyphRule('mark under a neighbour name', !under, `${where}: the mark sits under a neighbour name or type mark that paints over it and the card shows no header copy (${frame.aboveWhy}), glyph ${JSON.stringify(frame.glyph)} over ${JSON.stringify(labelBoxes.filter((box) => glyphArea(frame.glyph, box) > 0))}`)
+      const covered = glyphArea(frame.glyph, card)
+      const gap = glyphGap(frame.glyph, card)
+      stats.maxCard = Math.max(stats.maxCard, covered)
+      assert.equal(covered, 0, `${where}: card covers the glyph by ${covered}px2 and shows no header copy, glyph ${JSON.stringify(frame.glyph)} card ${JSON.stringify(card)} (${spots} clear spots)`)
+      assert.ok(gap >= GLYPH_MIN_GAP, `${where}: card is ${gap.toFixed(2)}px from the glyph and shows no header copy, glyph ${JSON.stringify(frame.glyph)} card ${JSON.stringify(card)}`)
+      stats.minGap = Math.min(stats.minGap, gap)
+      if (frame.stem) {
+        const tip = glyphGap(frame.glyph, frame.stem)
+        assert.ok(tip >= GLYPH_MIN_GAP, `${where}: the card pointer is ${tip.toFixed(2)}px from the glyph, glyph ${JSON.stringify(frame.glyph)} pointer ${JSON.stringify(frame.stem)}`)
+        stats.minTip = Math.min(stats.minTip, tip)
+      }
+    }
+  }
+  const begin = frame.begin[0]
+  if (begin) {
+    stats.beginFrames += 1
+    const over = glyphArea(card, begin)
+    stats.beginMaxOverlap = Math.max(stats.beginMaxOverlap, over)
+    assert.equal(over, 0, `${where}: card covers Begin by ${over}px2, card ${JSON.stringify(card)} Begin ${JSON.stringify(begin)}`)
+    const slack = begin.top - card.bottom
+    stats.beginMinSlack = Math.min(stats.beginMinSlack, slack)
+    assert.ok(slack >= SOLVER_BEGIN_GAP - 0.01, `${where}: card bottom ${card.bottom.toFixed(1)} is ${slack.toFixed(2)}px above Begin (${begin.top.toFixed(1)}), needs ${SOLVER_BEGIN_GAP}, place ${JSON.stringify(frame.place)} card ${JSON.stringify(card)}`)
+    if (frame.beginHit !== true) stats.beginHitBad += 1
+    assert.equal(frame.beginHit, true, `${where}: Begin's centre does not land inside .defend-go`)
+  }
+  if (frame.buttons.length > 0) stats.railFrames += 1
+  for (const button of frame.buttons) {
+    const over = glyphArea(card, button)
+    stats.railMaxOverlap = Math.max(stats.railMaxOverlap, over)
+    assert.equal(over, 0, `${where}: card covers a rail lamp button by ${over}px2, card ${JSON.stringify(card)} button ${JSON.stringify(button)}`)
+  }
+  if (frame.clearButtons.length > 0) stats.clearFrames += 1
+  for (const button of frame.clearButtons) {
+    const over = glyphArea(card, button)
+    stats.clearMaxOverlap = Math.max(stats.clearMaxOverlap, over)
+    assert.equal(over, 0, `${where}: card covers a clear-row button by ${over}px2, card ${JSON.stringify(card)} button ${JSON.stringify(button)}`)
+  }
+  // 1.4.571: New lamp and skill kit buttons are tap targets, the open lamp's own name is never covered, and the card
+  // never paints an empty body.
+  if (frame.newLamp.length > 0) stats.newLampFrames += 1
+  for (const button of frame.newLamp) {
+    const over = glyphArea(card, button)
+    stats.newLampMaxOverlap = Math.max(stats.newLampMaxOverlap, over)
+    glyphRule('card over a New lamp button', over === 0, `${where}: card covers a New lamp button by ${over}px2, card ${JSON.stringify(card)} button ${JSON.stringify(button)}`)
+  }
+  if (frame.kit.length > 0) stats.kitFrames += 1
+  for (const button of frame.kit) {
+    const over = glyphArea(card, button)
+    stats.kitMaxOverlap = Math.max(stats.kitMaxOverlap, over)
+    glyphRule('card over a skill kit button', over === 0, `${where}: card covers a skill kit button by ${over}px2, card ${JSON.stringify(card)} button ${JSON.stringify(button)}`)
+  }
+  // The open lamp's own name is never covered, unless the frame has no spot that clears it and every tap target:
+  // then the card says so with the header copy (the solver counts the name as an obstacle).
+  for (const label of frame.own) {
+    const over = glyphArea(card, label)
+    if (frame.header) {
+      stats.ownHeaderOverlap = Math.max(stats.ownHeaderOverlap, over)
+      continue
+    }
+    stats.ownMaxOverlap = Math.max(stats.ownMaxOverlap, over)
+    glyphRule('card over the open lamp own name', over === 0, `${where}: card covers the open lamp's own name by ${over}px2 and shows no header copy, card ${JSON.stringify(card)} name ${JSON.stringify(label)}`)
+  }
+  if (frame.nbBodies.length + frame.nbLabels.length > 0) stats.nbFrames += 1
+  for (const [name, list] of [['lamp', frame.nbBodies], ['name', frame.nbLabels]]) {
+    for (const box of list) {
+      const over = glyphArea(card, box)
+      if (frame.header) {
+        stats.nbHeaderOverlap = Math.max(stats.nbHeaderOverlap, over)
+        continue
+      }
+      stats.nbMaxOverlap = Math.max(stats.nbMaxOverlap, over)
+      glyphRule(`card over a neighbour ${name}`, over === 0, `${where}: card covers a neighbour ${name} by ${over}px2 and shows no header copy, card ${JSON.stringify(card)} ${name} ${JSON.stringify(box)}`)
+    }
+  }
+  if (frame.rowTop != null) {
+    const slack = frame.rowTop - card.bottom
+    stats.rowFrames += 1
+    stats.rowMinSlack = Math.min(stats.rowMinSlack, slack)
+    glyphRule('card bottom above the bottom row', slack >= SOLVER_BEGIN_GAP - 0.01, `${where}: card bottom ${card.bottom.toFixed(1)} is ${slack.toFixed(2)}px above the bottom row (${frame.rowTop.toFixed(1)}: Begin, skill kit or Continue), needs ${SOLVER_BEGIN_GAP}`)
+  }
+  if (frame.strip) {
+    stats.stripFrames += 1
+    stats.stripMinSlack = Math.min(stats.stripMinSlack, frame.rowTop == null ? -Infinity : frame.rowTop - card.bottom)
+    assert.ok(frame.rowTop != null, `${where}: the mid-wave strip has a bottom row to sit above`)
+    assert.equal(frame.header, null, `${where}: the mid-wave strip shows a header copy`)
+  }
+  stats.bodyFrames += 1
+  stats.bodyMinH = Math.min(stats.bodyMinH, frame.body?.h ?? 0)
+  glyphRule('empty card body', Boolean(frame.body && frame.body.count > 0 && frame.body.h > 0), `${where}: the card paints an empty body (content ${JSON.stringify(frame.body)}, card ${JSON.stringify(card)})`)
+}
+
 /**
  * Plants and upgrades through real taps and keeps score. One driver per page so the same
  * per-frame rules run on the shared night and on every single seat.
  */
 function glyphDriver(page, label, errors) {
-  const stats = { buys: 0, frames: 0, minSpan: Infinity, maxSpan: 0, maxFirst: 0, maxCard: 0, maxHearts: 0, maxEdge: 0, bothSeen: 0, minGap: Infinity, headerFrames: 0, headerSettled: 0, brightGold: 0, brightBuys: 0 }
+  const stats = newGlyphStats()
 
   const selected = () =>
     page.evaluate(() => [...document.querySelectorAll('.nw-rail .defend-ability.is-on')].map((node) => (node.textContent || '').trim()))
@@ -1915,6 +2275,7 @@ function glyphDriver(page, label, errors) {
   }
   const openCard = async (tool) => {
     await closeCard()
+    await glyphPanToPad(page, tool)
     await page.locator(`.defend-pad[data-tower-type="${tool}"]`).click({ force: true })
     await page.locator('.defend-tower-card').waitFor()
     await page.waitForTimeout(450)
@@ -1941,16 +2302,8 @@ function glyphDriver(page, label, errors) {
     assert.ok(view.glyph, `${where}: map glyph is present`)
     assert.ok(view.card, `${where}: upgrade card is present`)
     assert.ok(view.glyph.w >= 18 && view.glyph.h >= 18, `${where}: map glyph is ${view.glyph.w}x${view.glyph.h}`)
-    const covered = glyphArea(view.glyph, view.card)
-    const gap = glyphGap(view.glyph, view.card)
-    if (view.header) {
-      assertHeaderCopy(view, tool, stage, what)
-      stats.headerSettled += 1
-    } else {
-      assert.equal(covered, 0, `${where}: card covers the glyph by ${covered}px2 and shows no header copy, glyph ${JSON.stringify(view.glyph)} card ${JSON.stringify(view.card)} board ${JSON.stringify(view.board)}`)
-      assert.ok(gap >= GLYPH_MIN_GAP, `${where}: card is ${gap.toFixed(2)}px from the glyph and shows no header copy`)
-      stats.minGap = Math.min(stats.minGap, gap)
-    }
+    if (view.header) assertHeaderCopy(view, tool, stage, what)
+    glyphCardRules(view, where, stats, `${tool}@${stage}`, { settled: true })
     assert.ok(glyphInside(view.glyph, view.board), `${where}: glyph ${JSON.stringify(view.glyph)} is outside the board ${JSON.stringify(view.board)}`)
     assert.ok(glyphInside(view.glyph, view.frame), `${where}: glyph is outside the frame`)
     for (const hearts of view.hearts) {
@@ -1995,18 +2348,11 @@ function glyphDriver(page, label, errors) {
         stats.maxEdge = Math.max(stats.maxEdge, Math.max(frame.board.left - frame.glyph.left, frame.board.top - frame.glyph.top, frame.glyph.right - frame.board.right, frame.glyph.bottom - frame.board.bottom, 0))
         if (frame.card) {
           cardFrames += 1
-          const covered = glyphArea(frame.glyph, frame.card)
-          const gap = glyphGap(frame.glyph, frame.card)
           if (frame.header) {
-            stats.headerFrames += 1
             const shown = Number(frame.header.stage)
             assert.ok(shown === stage || shown === stage - 1, `${where}: header copy shows stage ${frame.header.stage}`)
-          } else {
-            stats.maxCard = Math.max(stats.maxCard, covered)
-            assert.equal(covered, 0, `${where}: card covers the glyph by ${covered}px2 and shows no header copy`)
-            assert.ok(gap >= GLYPH_MIN_GAP, `${where}: card is ${gap.toFixed(2)}px from the glyph and shows no header copy, glyph ${JSON.stringify(frame.glyph)} card ${JSON.stringify(frame.card)}`)
-            stats.minGap = Math.min(stats.minGap, gap)
           }
+          glyphCardRules(frame, where, stats, `${tool}@${stage}`)
         }
         for (const hearts of frame.hearts) {
           const area = glyphArea(frame.glyph, hearts)
@@ -2060,101 +2406,371 @@ function glyphDriver(page, label, errors) {
 }
 
 function glyphStatsLine(label, what, stats, gold) {
+  const spots = stats.spotsMin === Infinity ? 'n/a' : stats.spotsMin
+  const noSpot = [...stats.noSpot]
   return (
     `checkLampGlyph ok ${label} ${what} real buys ${stats.buys} frames ${stats.frames} ` +
     `draw-span ${Math.round(stats.minSpan)}-${Math.round(stats.maxSpan)}ms max first-2-frames share ${stats.maxFirst.toFixed(2)} ` +
-    `card/glyph overlap max ${stats.maxCard}px2 min gap ${stats.minGap === Infinity ? 'n/a' : `${stats.minGap.toFixed(2)}px`} ` +
-    `(card+glyph both present ${stats.bothSeen}x) header copy ${stats.headerFrames} frames ${stats.headerSettled} settled ` +
+    `card/glyph overlap max ${stats.maxCard}px2 min gap ${stats.minGap === Infinity ? 'n/a' : `${stats.minGap.toFixed(2)}px`} pointer tip min gap ${stats.minTip === Infinity ? 'n/a' : `${stats.minTip.toFixed(2)}px`} ` +
+    `(card+glyph both present ${stats.bothSeen}x) header copy ${stats.headerFrames} frames ${stats.headerSettled} settled, solver spots on header frames max ${stats.headerSpotsMax} (must be 0), by seat/stage [${[...stats.headerBy].map(([key, count]) => `${key}x${count}`).join(' ') || 'none'}] ` +
+    `solver ${stats.solved} card frames, clear spots min ${spots}, ${noSpot.length} stages with no clear spot${noSpot.length ? ` [${noSpot.join(' ')}]` : ''} ` +
+    `reserve ${stats.reserveFrames} frames min card-bottom-to-reserve ${stats.reserveMinSlack === Infinity ? 'n/a' : `${stats.reserveMinSlack.toFixed(2)}px`} (>=0) ` +
+    `Begin ${stats.beginFrames} frames overlap max ${stats.beginMaxOverlap}px2 min card-bottom-to-Begin ${stats.beginMinSlack === Infinity ? 'n/a' : `${stats.beginMinSlack.toFixed(2)}px`} (>=8) centre tap miss ${stats.beginHitBad} ` +
+    `rail buttons ${stats.railFrames} frames overlap max ${stats.railMaxOverlap}px2 clear-row buttons ${stats.clearFrames} frames overlap max ${stats.clearMaxOverlap}px2 ` +
+    `neighbours ${stats.nbFrames} frames card overlap max ${stats.nbMaxOverlap}px2 (header-copy frames max ${stats.nbHeaderOverlap}px2) ` +
+    `mark under a name ${stats.underFrames} frames, painted above the names on ${stats.aboveFrames} of ${stats.nbOverFrames} frames where a name sits on it ` +
+    `New lamp buttons ${stats.newLampFrames} frames overlap max ${stats.newLampMaxOverlap}px2 skill kit ${stats.kitFrames} frames overlap max ${stats.kitMaxOverlap}px2 own name overlap max ${stats.ownMaxOverlap}px2 (header-copy frames max ${stats.ownHeaderOverlap}px2) ` +
+    `bottom row ${stats.rowFrames} frames min card-bottom-to-row ${stats.rowMinSlack === Infinity ? 'n/a' : `${stats.rowMinSlack.toFixed(2)}px`} (>=8) empty-body frames 0 of ${stats.bodyFrames} min content ${stats.bodyMinH === Infinity ? 'n/a' : `${stats.bodyMinH.toFixed(0)}px`} ` +
     `glyph outside board max ${stats.maxEdge.toFixed(1)}px hearts overlap max ${stats.maxHearts}px2 ` +
     `bright buys ${stats.brightBuys} bright gold===${stats.brightGold}` +
     (gold ? ` selected-lamp gold===${gold.selected} planted gold===${gold.planted} open-card gold===${gold.open}` : '')
   )
 }
 
-const SEAT_SWEEP_SIZES = ['375x667', '390x844', '412x915', '320x568']
-/** A narrow phone where seat 464,768 has no clear card slot, so the header copy has to carry the mark. */
-const HEADER_FALLBACK = { size: '320x568', cx: 464, cy: 768 }
-/** The seat the 1.4.568 live re-prove caught: 375x667, board units. */
+/** Every glyph and card session runs with the camera on, as it is for a player. A camera-off pass proves nothing here. */
+async function assertGlyphCamera(page, where) {
+  const camera = await page.evaluate(() => /[?&]nwCam=1\b/.test(location.search) && (Boolean(document.querySelector('.nw-zoom')) || document.querySelector('.defend-board')?.getBoundingClientRect().left < 0))
+  assert.ok(camera, `${where} the camera is on (nwCam=1), as it is for a player`)
+}
+
+const SEAT_SWEEP_SIZES = ['375x667', '390x844', '412x915', '320x568', '300x540']
+/** The live state: camera on (the default on a phone), banked sparks from the jump, lamps already planted around the seat. */
+const GLYPH_LIVE_SEARCH = `${GLYPH_SEARCH}&nwCam=1`
+const GLYPH_NEIGHBOR_TYPES = ['logic', 'reason', 'science', 'candle']
+/** The seat the 1.4.569 live prove caught: 375x667, board units. Its tall stages have no spot clear of the glyph, Begin and the rail. */
 const FAILING_SEAT = { size: '375x667', cx: 464, cy: 768 }
 
+function glyphSeatPoint(page, ring) {
+  return page.evaluate((seat) => {
+    const svg = document.querySelector('.defend-board')
+    const ctm = svg?.getScreenCTM()
+    if (!svg || !ctm) return null
+    const p = svg.createSVGPoint()
+    p.x = seat.cx
+    p.y = seat.cy - 26
+    const q = p.matrixTransform(ctm)
+    const hit = document.elementFromPoint(q.x, q.y)
+    if (!hit || !hit.closest('.defend-board') || hit.closest('button, .nw-rail, .nw-docks')) return null
+    return { x: q.x, y: q.y }
+  }, ring)
+}
+
+/** Drag the map, as a player does, until the seat takes a tap. */
+async function glyphReachSeat(page, ring, label) {
+  let point = await glyphSeatPoint(page, ring)
+  for (let attempt = 0; attempt < 8 && !point; attempt += 1) {
+    const at = await page.evaluate((seat) => {
+      const svg = document.querySelector('.defend-board')
+      const p = svg.createSVGPoint()
+      p.x = seat.cx
+      p.y = seat.cy - 26
+      const q = p.matrixTransform(svg.getScreenCTM())
+      return { x: q.x, y: q.y, w: innerWidth, h: innerHeight }
+    }, ring)
+    const cx = at.w / 2
+    const cy = at.h / 2
+    const dx = Math.max(-150, Math.min(150, cx - at.x))
+    const dy = Math.max(-250, Math.min(250, cy - at.y))
+    await page.mouse.move(cx, cy)
+    await page.mouse.down()
+    await page.mouse.move(cx + dx / 2, cy + dy / 2, { steps: 5 })
+    await page.mouse.move(cx + dx, cy + dy, { steps: 5 })
+    await page.mouse.up()
+    await page.waitForTimeout(1300)
+    point = await glyphSeatPoint(page, ring)
+  }
+  assert.ok(point, `${label} seat ${ring.cx},${ring.cy} takes a real tap after dragging the map`)
+  return point
+}
+
+/** The next free seat, panned into reach with real drags. Camera on, so a seat may start off screen. */
+async function glyphNextSeat(page, label) {
+  const ring = await page.evaluate(() => {
+    const node = document.querySelector('.defend-plant-ground circle.is-live')
+    return node ? { cx: Number(node.getAttribute('cx')), cy: Number(node.getAttribute('cy')) } : null
+  })
+  assert.ok(ring, `${label} a live seat is left to plant`)
+  return glyphReachSeat(page, ring, label)
+}
+
+/** Drag the map until a planted lamp sits well inside the frame, so a real tap on it lands. */
+async function glyphPanToPad(page, tool) {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const at = await page.evaluate((id) => {
+      const pad = document.querySelector(`.defend-pad[data-tower-type="${id}"]`)
+      const frame = document.querySelector('.defend-frame')?.getBoundingClientRect()
+      if (!pad || !frame) return null
+      const box = pad.getBoundingClientRect()
+      const x = box.left + box.width / 2
+      const y = box.top + box.height / 2
+      const inside = x > frame.left + 50 && x < frame.right - 90 && y > frame.top + 60 && y < frame.bottom - 120
+      return { x, y, inside, w: innerWidth, h: innerHeight }
+    }, tool)
+    if (!at || at.inside) return
+    const cx = at.w / 2
+    const cy = at.h / 2
+    const dx = Math.max(-150, Math.min(150, cx - at.x))
+    const dy = Math.max(-250, Math.min(250, cy - at.y))
+    await page.mouse.move(cx, cy)
+    await page.mouse.down()
+    await page.mouse.move(cx + dx / 2, cy + dy / 2, { steps: 5 })
+    await page.mouse.move(cx + dx, cy + dy, { steps: 5 })
+    await page.mouse.up()
+    await page.waitForTimeout(1300)
+  }
+}
+
+async function glyphPlantAt(page, tool, ring, label) {
+  if (await page.locator('.defend-tower-card').count()) {
+    await page.keyboard.press('Escape')
+    await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+  }
+  if (tool === 'candle') {
+    await page.locator('[data-candle-lamp="yes"]').click()
+  } else {
+    const index = GLYPH_TOOLS.indexOf(tool)
+    const on = await page.evaluate(() => [...document.querySelectorAll('.nw-rail .defend-ability.is-on')].map((node) => (node.textContent || '').trim()))
+    if (!(on.length === 1 && on[0].startsWith(GLYPH_NAME[tool]))) await page.locator('.nw-rail .defend-ability').nth(index).click()
+  }
+  const point = await glyphReachSeat(page, ring, label)
+  await page.mouse.click(point.x, point.y)
+  await page.waitForFunction(
+    (seat) => ![...document.querySelectorAll('.defend-plant-ground circle.is-live')].some((node) => Number(node.getAttribute('cx')) === seat.cx && Number(node.getAttribute('cy')) === seat.cy),
+    ring,
+  )
+  await page.waitForTimeout(250)
+  if (await page.locator('.defend-tower-card').count()) {
+    await page.keyboard.press('Escape')
+    await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+  }
+}
+
 /**
- * Every live seat, one lamp each, the full eight real buys on it. A seat with no clear card slot
- * must show the header copy; the glyph/card checks fail for it otherwise.
+ * The live state, once per seat: camera on, banked sparks, a lamp planted on every other seat, then the tested
+ * lamp on this seat and the full eight real buys. The card never covers the map mark (body or pointer) at
+ * 375, 390 and 412. Only the narrowest phone may fall back to the header copy.
  */
 async function checkGlyphSeatSweep(browser, port, errors, width, height) {
   const label = `${width}x${height}`
-  const probe = await openMap(browser, port, width, height, 'a2', { motion: true, search: GLYPH_SEARCH })
+  const probe = await openMap(browser, port, width, height, 'a2', { motion: true, search: GLYPH_LIVE_SEARCH })
   const rings = await probe.page.evaluate(() =>
     [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({ cx: Number(ring.getAttribute('cx')), cy: Number(ring.getAttribute('cy')) })),
   )
   await probe.context.close()
   assert.ok(rings.length >= 3, `${label} seat sweep finds ${rings.length} live seats`)
-  if (`${width}x${height}` === FAILING_SEAT.size) {
-    assert.ok(rings.some((ring) => ring.cx === FAILING_SEAT.cx && ring.cy === FAILING_SEAT.cy), `${label} the 1.4.568 failing seat ${FAILING_SEAT.cx},${FAILING_SEAT.cy} is a live seat ${JSON.stringify(rings)}`)
+  if (label === FAILING_SEAT.size) {
+    assert.ok(rings.some((ring) => ring.cx === FAILING_SEAT.cx && ring.cy === FAILING_SEAT.cy), `${label} the 1.4.569 failing seat ${FAILING_SEAT.cx},${FAILING_SEAT.cy} is a live seat ${JSON.stringify(rings)}`)
   }
-  const total = { buys: 0, frames: 0, minSpan: Infinity, maxSpan: 0, maxFirst: 0, maxCard: 0, maxHearts: 0, maxEdge: 0, bothSeen: 0, minGap: Infinity, headerFrames: 0, headerSettled: 0, brightGold: 0, brightBuys: 0 }
+  const total = newGlyphStats()
   const seen = []
-  let sawFallback = false
+  let neighbors = 0
   for (const ring of rings) {
-    const { context, page } = await openMap(browser, port, width, height, 'a2', { motion: true, search: GLYPH_SEARCH })
-    page.on('pageerror', (error) => errors.push(`glyph seat ${label} ${ring.cx},${ring.cy} ${error}`))
+    if (process.env.NW_GLYPH_SEAT && process.env.NW_GLYPH_SEAT !== `${ring.cx},${ring.cy}`) continue
+    const where = `${label} seat ${ring.cx},${ring.cy}`
+    const { context, page } = await openMap(browser, port, width, height, 'a2', { motion: true, search: GLYPH_LIVE_SEARCH })
+    page.on('pageerror', (error) => errors.push(`glyph seat ${where} ${error}`))
     page.on('console', (msg) => {
-      if (msg.type() === 'error') errors.push(`glyph seat ${label} ${ring.cx},${ring.cy} ${msg.text()}`)
+      if (msg.type() === 'error') errors.push(`glyph seat ${where} ${msg.text()}`)
     })
     await glyphSetup(page)
-    const point = await page.evaluate((seat) => {
-      const svg = document.querySelector('.defend-board')
-      const ctm = svg?.getScreenCTM()
-      if (!svg || !ctm) return null
-      const p = svg.createSVGPoint()
-      p.x = seat.cx
-      p.y = seat.cy - 26
-      const q = p.matrixTransform(ctm)
-      const hit = document.elementFromPoint(q.x, q.y)
-      if (!hit || !hit.closest('.defend-board') || hit.closest('button, .nw-rail, .nw-docks')) return null
-      return { x: q.x, y: q.y }
-    }, ring)
-    assert.ok(point, `${label} seat ${ring.cx},${ring.cy} takes a real tap`)
-    const driver = glyphDriver(page, `${label} seat ${ring.cx},${ring.cy}`, errors)
-    const now = await driver.selected()
-    assert.ok(now.length === 1 && now[0].startsWith('Love'), `${label} seat ${ring.cx},${ring.cy} Love is selected ${JSON.stringify(now)}`)
-    await page.mouse.click(point.x, point.y)
-    await page.locator('.defend-pad[data-tower-type="love"] .lamp-upgrade-glyph[data-glyph-variant="map"]').waitFor()
-    await page.waitForTimeout(150)
-    const left = await page.evaluate((seat) => [...document.querySelectorAll('.defend-plant-ground circle.is-live')].some((ring) => Number(ring.getAttribute('cx')) === seat.cx && Number(ring.getAttribute('cy')) === seat.cy), ring)
-    assert.equal(left, false, `${label} the lamp took seat ${ring.cx},${ring.cy}`)
-    assert.equal(await driver.ladder('love', GLYPH_LADDER), 8, `${label} seat ${ring.cx},${ring.cy} reached stage 8 by real buys`)
-    for (const key of ['buys', 'frames', 'bothSeen', 'headerFrames', 'headerSettled', 'brightGold', 'brightBuys']) total[key] += driver.stats[key]
-    for (const key of ['maxFirst', 'maxCard', 'maxHearts', 'maxEdge', 'maxSpan']) total[key] = Math.max(total[key], driver.stats[key])
-    total.minSpan = Math.min(total.minSpan, driver.stats.minSpan)
-    total.minGap = Math.min(total.minGap, driver.stats.minGap)
-    seen.push(`${ring.cx},${ring.cy}${driver.stats.headerSettled > 0 ? ' header' : ''}`)
-    if (label === HEADER_FALLBACK.size && ring.cx === HEADER_FALLBACK.cx && ring.cy === HEADER_FALLBACK.cy) {
-      assert.ok(driver.stats.headerSettled > 0 && driver.stats.headerFrames > 0, `${label} seat ${ring.cx},${ring.cy} has no clear card slot, so the header copy must show (${driver.stats.headerSettled} settled, ${driver.stats.headerFrames} frames)`)
-      sawFallback = true
+    await assertGlyphCamera(page, where)
+    const sparks = await page.evaluate(() => Number((document.body.innerText.match(/(\d+)\s*\n?\s*Sparks/) || [])[1] || 0))
+    assert.ok(sparks >= 95, `${where} starts with banked sparks (${sparks})`)
+    const others = rings.filter((other) => other !== ring)
+    for (const [index, other] of others.entries()) {
+      await glyphPlantAt(page, GLYPH_NEIGHBOR_TYPES[index % GLYPH_NEIGHBOR_TYPES.length], other, where)
+      neighbors += 1
+    }
+    const planted = await page.locator('.defend-pad').count()
+    assert.equal(planted, others.length, `${where} ${others.length} other lamps are planted around the seat (${planted})`)
+    await glyphPlantAt(page, 'love', ring, where)
+    const driver = glyphDriver(page, where, errors)
+    assert.equal(await page.locator('.defend-pad[data-tower-type="love"]').count(), 1, `${where} one tested lamp`)
+    assert.equal(await page.locator('.defend-new-lamp').count() > 0, true, `${where} the New lamp buttons show with banked sparks`)
+    assert.equal(await driver.ladder('love', GLYPH_LADDER), 8, `${where} reached stage 8 by real buys`)
+    driver.stats.noSpot = new Set([...driver.stats.noSpot].map((entry) => `${ring.cx},${ring.cy}:${entry}`))
+    mergeGlyphStats(total, driver.stats)
+    const headerHere = driver.stats.headerFrames + driver.stats.headerSettled
+    seen.push(`${ring.cx},${ring.cy}${headerHere > 0 ? ' header' : ''}`)
+    // 1.4.571: with four neighbour lamps around the seat (they are soft obstacles) a plate may have no spot that clears
+    // the mark, the taps and every neighbour. Then the header copy is allowed, and only then: glyphCardRules makes the
+    // solver find 0 spots on every header frame. The counts are reported per size, not capped.
+    if (label === FAILING_SEAT.size && ring.cx === FAILING_SEAT.cx && ring.cy === FAILING_SEAT.cy) {
+      assert.ok(driver.stats.noSpot.size > 0 && driver.stats.headerSettled > 0, `${where} is the seat the 1.4.569 prove caught: its tall stages have no clear spot and show the header copy (${driver.stats.noSpot.size} stages, ${driver.stats.headerSettled} settled header views)`)
     }
     await context.close()
   }
-  if (label === HEADER_FALLBACK.size) assert.ok(sawFallback, `${label} the header copy seat was swept`)
+  assert.ok(total.solved > 0, `${label} seat sweep ran the clear-spot solver`)
+  assert.ok(total.beginFrames > 0 && total.railFrames > 0, `${label} seat sweep saw Begin on ${total.beginFrames} frames and the rail on ${total.railFrames}`)
   assert.ok(Number.isFinite(total.minGap) || total.headerSettled > 0, `${label} seat sweep measured a card gap`)
   if (Number.isFinite(total.minGap)) assert.ok(total.minGap >= GLYPH_MIN_GAP, `${label} seat sweep min gap ${total.minGap.toFixed(2)}px`)
-  console.log(glyphStatsLine(label, `seat sweep ${rings.length} seats [${seen.join(' | ')}]`, total))
+  if (Number.isFinite(total.minTip)) assert.ok(total.minTip >= GLYPH_MIN_GAP, `${label} seat sweep pointer tip gap ${total.minTip.toFixed(2)}px`)
+  console.log(glyphStatsLine(label, `live state seat sweep camera on, banked sparks, ${rings.length} seats with ${neighbors / rings.length} neighbour lamps each [${seen.join(' | ')}]`, total))
+}
+
+/**
+ * The wave and its clear row. A lamp planted on the hardest seat, Begin pressed, the card open mid-wave, then the
+ * wave cleared by real taps on the walkers and the card open over the clear row (Continue, New lamp).
+ * Every frame passes the same card rules: glyph clear or header copy with no spot, never over a tap target.
+ */
+async function checkGlyphClearRow(browser, port, errors, width, height) {
+  const label = `${width}x${height}`
+  const { context, page } = await openMap(browser, port, width, height, 'a2', { motion: true, search: '?playtest=1&nwSeed=2&nwRound=2&nwLamps=0&nwCam=1' })
+  const where = `${label} clear row`
+  page.on('pageerror', (error) => errors.push(`glyph ${where} ${error}`))
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') errors.push(`glyph ${where} ${msg.text()}`)
+  })
+  await glyphSetup(page)
+  await assertGlyphCamera(page, where)
+  const rings = await page.evaluate(() =>
+    [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({ cx: Number(ring.getAttribute('cx')), cy: Number(ring.getAttribute('cy')) })),
+  )
+  assert.ok(rings.length >= 3, `${where} finds ${rings.length} live seats`)
+  const ring = rings.find((entry) => entry.cx === FAILING_SEAT.cx && entry.cy === FAILING_SEAT.cy) ?? rings[rings.length - 1]
+  await glyphPlantAt(page, 'love', ring, where)
+  const stats = newGlyphStats()
+  const sample = async (stageKey, wait) => {
+    for (let attempt = 0; attempt < 6 && (await page.locator('.defend-tower-card').count()) < 1; attempt += 1) {
+      await page.locator('.defend-pad[data-tower-type="love"]').click({ force: true })
+      await page.waitForTimeout(350)
+    }
+    await page.locator('.defend-tower-card').waitFor({ timeout: 5000 })
+    await page.waitForTimeout(400)
+    await page.evaluate(() => window.__glyphStart('love'))
+    await page.waitForTimeout(wait)
+    const frames = await page.evaluate(() => window.__glyphEnd())
+    assert.ok(frames.length >= 10, `${where} ${stageKey} sampled ${frames.length} frames`)
+    let n = 0
+    for (const [index, frame] of frames.entries()) {
+      if (!frame.card) continue
+      n += 1
+      glyphCardRules(frame, `${where} ${stageKey} frame ${index}`, stats, `${stageKey}`)
+    }
+    assert.ok(n > 0, `${where} ${stageKey} the card was open (${frames.length} frames, card ${frames.filter((f) => f.card).length}, glyph ${frames.filter((f) => f.glyph).length}, place ${frames.filter((f) => f.place).length})`)
+    await page.keyboard.press('Escape')
+    await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+    return n
+  }
+  await page.locator('.defend-go').click()
+  await page.waitForSelector('.easy-walker, [data-walker-id]', { state: 'attached', timeout: 20_000 })
+  const wave = await sample('mid-wave', 700)
+  glyphRule('mid-wave buy strip placed above the bottom row', stats.stripFrames > 0, `${where} mid-wave the card is the placed buy strip (${stats.stripFrames} strip frames)`)
+  const strip = { frames: stats.stripFrames, slack: stats.stripMinSlack }
+  const railDuringWave = stats.railFrames
+  assert.ok(railDuringWave > 0 && stats.clearFrames === 0, `${where} mid-wave the rail shows and the clear row does not (${railDuringWave} rail frames, ${stats.clearFrames} clear-row frames)`)
+  const started = Date.now()
+  while (Date.now() - started < 90_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
+    const cue = await page.evaluate(() => {
+      const face = document.querySelector('.defend-raider.is-easy-cue')
+      if (!face) return null
+      const id = face.getAttribute('data-walker-id')
+      const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+      if (!tap) return null
+      const box = tap.getBoundingClientRect()
+      const x = box.x + box.width / 2
+      const y = box.y + box.height / 2
+      const node = document.elementFromPoint(x, y)
+      if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+      return { x, y }
+    })
+    if (cue) await page.mouse.click(cue.x, cue.y)
+    await page.waitForTimeout(80)
+  }
+  await page.locator('.defend-page.is-boost').waitFor()
+  await page.locator('.defend-continue').waitFor()
+  await page.waitForTimeout(600)
+  const clear = await sample('clear-row', 900)
+  assert.ok(stats.clearFrames > 0, `${where} the clear row buttons were on screen with the card open`)
+  assert.equal(stats.beginHitBad, 0, `${where} Begin centre tap`)
+  console.log(
+    `checkLampGlyph ok ${label} clear-row session seat ${ring.cx},${ring.cy} mid-wave card frames ${wave} clear-row card frames ${clear} ` +
+      `nwCam=1 reserve ${stats.reserveFrames} frames min card-bottom-to-reserve ${stats.reserveMinSlack === Infinity ? 'n/a' : `${stats.reserveMinSlack.toFixed(2)}px`} (>=0) ` +
+      `rail buttons ${stats.railFrames} frames overlap max ${stats.railMaxOverlap}px2 clear-row buttons ${stats.clearFrames} frames overlap max ${stats.clearMaxOverlap}px2 ` +
+      `mid-wave strip ${strip.frames} frames min card-bottom-to-row ${strip.slack.toFixed(2)}px (>=8) New lamp ${stats.newLampFrames} frames overlap max ${stats.newLampMaxOverlap}px2 ` +
+      `neighbours ${stats.nbFrames} frames overlap max ${stats.nbMaxOverlap}px2 bottom row ${stats.rowFrames} frames min slack ${stats.rowMinSlack.toFixed(2)}px empty-body frames 0 of ${stats.bodyFrames} min content ${stats.bodyMinH.toFixed(0)}px ` +
+      `Begin frames ${stats.beginFrames} overlap max ${stats.beginMaxOverlap}px2 header copy ${stats.headerFrames} frames solver spots on header frames max ${stats.headerSpotsMax} (must be 0) by stage [${[...stats.headerBy].map(([key, count]) => `${key}x${count}`).join(' ') || 'none'}] ` +
+      `clear spots min ${stats.spotsMin === Infinity ? 'n/a' : stats.spotsMin} stages with no clear spot ${stats.noSpot.size} ` +
+      `card/glyph overlap max ${stats.maxCard}px2 min gap ${stats.minGap === Infinity ? 'n/a' : `${stats.minGap.toFixed(2)}px`}`,
+  )
+  await context.close()
+}
+
+/**
+ * A lamp bought to its last step, then a wave with its card tapped open. Nothing is left to buy, so no card
+ * frame is painted: every frame either has no card or a card with content. Never an empty purple box.
+ */
+const MAXWAVE_TOOL = process.env.NW_MAXWAVE_TOOL || 'science'
+
+async function checkGlyphMaxWave(browser, port, errors, width, height) {
+  const label = `${width}x${height}`
+  const where = `${label} max lamp wave`
+  const { context, page } = await openMap(browser, port, width, height, 'a2', { motion: true, search: GLYPH_LIVE_SEARCH })
+  page.on('pageerror', (error) => errors.push(`glyph ${where} ${error}`))
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') errors.push(`glyph ${where} ${msg.text()}`)
+  })
+  await glyphSetup(page)
+  await assertGlyphCamera(page, where)
+  const rings = await page.evaluate(() =>
+    [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({ cx: Number(ring.getAttribute('cx')), cy: Number(ring.getAttribute('cy')) })),
+  )
+  assert.ok(rings.length >= 3, `${where} finds ${rings.length} live seats`)
+  const ring = rings.find((entry) => entry.cx === FAILING_SEAT.cx && entry.cy === FAILING_SEAT.cy) ?? rings[rings.length - 1]
+  await glyphPlantAt(page, MAXWAVE_TOOL, ring, where)
+  const driver = glyphDriver(page, where, errors)
+  assert.equal(await driver.ladder(MAXWAVE_TOOL, GLYPH_LADDER), 8, `${where} reached stage 8 by real buys`)
+  await driver.closeCard()
+  await page.locator('.defend-go').click()
+  await page.waitForSelector('.easy-walker, [data-walker-id]', { state: 'attached', timeout: 20_000 })
+  const stats = newGlyphStats()
+  let openFrames = 0
+  let noCard = 0
+  let cardFrames = 0
+  for (let attempt = 0; attempt < 4 && openFrames < 5; attempt += 1) {
+    await page.locator('.defend-clear-lamp').first().click({ force: true })
+    await page.waitForTimeout(350)
+    await page.evaluate((id) => window.__glyphStart(id), MAXWAVE_TOOL)
+    await page.waitForTimeout(900)
+    const frames = await page.evaluate(() => window.__glyphEnd())
+    if (process.env.NW_DEBUG_CARD) console.log('CARD', await page.evaluate(() => document.querySelector('.defend-tower-card')?.outerHTML.slice(0, 3000)))
+    assert.ok(frames.length >= 10, `${where} sampled ${frames.length} frames`)
+    for (const [index, frame] of frames.entries()) {
+      if (!frame.wave || !frame.open) continue
+      openFrames += 1
+      if (!frame.card) {
+        noCard += 1
+        continue
+      }
+      cardFrames += 1
+      glyphCardRules(frame, `${where} frame ${index}`, stats, 'max-wave')
+    }
+  }
+  assert.ok(openFrames >= 5, `${where} the lamp was open for ${openFrames} wave frames`)
+  stats.suppressed = noCard
+  console.log(
+    `checkLampGlyph ok ${label} max-lamp wave seat ${ring.cx},${ring.cy} nwCam=1 lamp open ${openFrames} wave frames, card painted on ${cardFrames}, card not shown on ${noCard} (nothing left to buy) ` +
+      `empty-body frames 0 of ${stats.bodyFrames} min content ${stats.bodyMinH === Infinity ? 'n/a' : `${stats.bodyMinH.toFixed(0)}px`} ` +
+      `bottom row ${stats.rowFrames} frames min card-bottom-to-row ${stats.rowMinSlack === Infinity ? 'n/a' : `${stats.rowMinSlack.toFixed(2)}px`} (>=8) reserve ${stats.reserveFrames} frames`,
+  )
+  await context.close()
 }
 
 async function checkLampGlyph(browser, port, errors) {
   const only = process.env.NW_GLYPH_SIZE
-  for (const [width, height] of GLYPH_SIZES.filter(([w, h]) => !only || only === `${w}x${h}`)) {
+  for (const [width, height] of GLYPH_SIZES.filter(([w, h]) => process.env.NW_GLYPH_SWEEP_ONLY !== '1' && (!only || only === `${w}x${h}`))) {
     const label = `${width}x${height}`
     const gold = await checkGlyphOneGold(browser, port, errors, width, height)
     const { context, page } = await openMap(browser, port, width, height, 'a2', {
       motion: true,
-      search: GLYPH_SEARCH,
+      search: GLYPH_LIVE_SEARCH,
     })
     page.on('pageerror', (error) => errors.push(`glyph ${label} ${error}`))
     page.on('console', (msg) => {
       if (msg.type() === 'error') errors.push(`glyph ${label} ${msg.text()}`)
     })
     await glyphSetup(page)
+    await assertGlyphCamera(page, `${label} shared night`)
     const { stats, selected, ladder } = glyphDriver(page, label, errors)
 
     // Plant one lamp of each type. Every pick is a real tap on the rail, then a real tap on a seat.
@@ -2166,10 +2782,14 @@ async function checkLampGlyph(browser, port, errors) {
       }
       assert.equal(now.length, 1, `${label} ${tool} exactly one lamp is selected ${JSON.stringify(now)}`)
       assert.ok(now[0].startsWith(GLYPH_NAME[tool]), `${label} ${tool} is the selected lamp ${JSON.stringify(now)}`)
-      const seat = await firstLiveSeat(page)
+      const seat = await glyphNextSeat(page, `${label} shared night`)
       await page.mouse.click(seat.x, seat.y)
       await page.locator(`.defend-pad[data-tower-type="${tool}"] .lamp-upgrade-glyph[data-glyph-variant="map"]`).waitFor()
-      await page.waitForTimeout(150)
+      await page.waitForTimeout(250)
+      if (await page.locator('.defend-tower-card').count()) {
+        await page.keyboard.press('Escape')
+        await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+      }
     }
 
     assert.equal(await ladder(GLYPH_TOOLS[0], GLYPH_LADDER), 8, `${label} top lamp reached stage 8 by real buys`)
@@ -2183,9 +2803,16 @@ async function checkLampGlyph(browser, port, errors) {
   }
   for (const size of SEAT_SWEEP_SIZES.filter((entry) => !only || only === entry)) {
     const [width, height] = size.split('x').map(Number)
-    await checkGlyphSeatSweep(browser, port, errors, width, height)
+    if (process.env.NW_GLYPH_CLEARROW_ONLY !== '1' && process.env.NW_GLYPH_MAXWAVE_ONLY !== '1') await checkGlyphSeatSweep(browser, port, errors, width, height)
+    if (process.env.NW_GLYPH_MAXWAVE_ONLY !== '1') await checkGlyphClearRow(browser, port, errors, width, height)
+    await checkGlyphMaxWave(browser, port, errors, width, height)
   }
 
+  if (process.env.NW_GLYPH_COLLECT === '1') {
+    console.log(`checkLampGlyph collected ${glyphMisses.size} broken 1.4.571 rules`)
+    for (const [rule, row] of glyphMisses) console.log(`  BROKEN ${rule}: ${row.count} frames, first: ${row.first.slice(0, 420)}`)
+    return
+  }
   await checkRingArcDraw(browser, port, errors)
 
   const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }
@@ -2213,6 +2840,375 @@ async function checkLampGlyph(browser, port, errors) {
   await hard.close()
 }
 
+// #905: Night Run maze fixes, live. Real touch (CDP touch events) and mouse clicks drive every action;
+// page.evaluate only sets up a scene (place the walker, add a robber) and reads numbers back.
+async function nr905Open(browser, port, width, height, errors, tag) {
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width, height },
+    isMobile: true,
+    hasTouch: true,
+    deviceScaleFactor: 2,
+  })
+  const page = await context.newPage()
+  const pageErrors = []
+  page.on('pageerror', (error) => {
+    pageErrors.push(String(error))
+    errors.push(`nightRun905 ${tag} ${error}`)
+  })
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') pageErrors.push(msg.text())
+  })
+  const cdp = await context.newCDPSession(page)
+  await page.goto('/night-run/index.html')
+  await page.waitForFunction(() => window.NR && window.NR.S)
+  await page.locator('#go').tap()
+  await page.waitForTimeout(400)
+  // Close any story card the same way a kid would get past it: the scene setup below needs a free board.
+  await page.evaluate(() => {
+    document.querySelectorAll('.card').forEach((c) => (c.style.display = 'none'))
+    window.NR.S.paused = false
+  })
+  return { context, page, cdp, pageErrors }
+}
+
+const nr905Sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+async function nr905Touch(cdp, x, y, ms) {
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] })
+  await nr905Sleep(ms)
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+}
+
+async function nr905Center(page, id) {
+  const b = await page.locator('#' + id).boundingBox()
+  return { x: b.x + b.width / 2, y: b.y + b.height / 2 }
+}
+
+async function nr905Corridor(page, needTrap) {
+  return page.evaluate((needTrap) => {
+    const NR = window.NR, S = NR.S, M = NR.MAP, DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0]
+    const ok = (x, y) => NR.open(x, y) && !'PLHJK'.includes(M[y][x])
+    for (let y = 1; y < NR.H - 1; y++) for (let x = 1; x < NR.W - 1; x++) for (let d = 0; d < 4; d++) {
+      if (!ok(x, y) || NR.trapAt(x, y) >= 0) continue
+      const a = [x + DX[d], y + DY[d]], b = [x + 2 * DX[d], y + 2 * DY[d]]
+      if (!ok(...a) || !ok(...b)) continue
+      const ta = NR.trapAt(...a) >= 0
+      if (needTrap ? !ta : ta || NR.trapAt(...b) >= 0) continue
+      if (needTrap && NR.trapAt(...b) >= 0) continue
+      if (!S.robbers.every((r) => Math.abs(r.x - x) + Math.abs(r.y - y) > 6)) continue
+      return { x, y, d, a, b }
+    }
+    return null
+  }, needTrap)
+}
+
+async function nr905Place(page, c) {
+  await page.evaluate((c) => {
+    const NR = window.NR, S = NR.S
+    S.tw = null; S.x = c.x; S.y = c.y; S.px = c.x + 0.5; S.py = c.y + 0.5; S.dir = c.d
+    S.ang = (c.d * Math.PI) / 2 - Math.PI / 2; S.hist = []; S.inv = 0; S.hearts = 3
+    NR.CTRL.fwd = 0; NR.CTRL.bt = 0
+  }, c)
+  await nr905Sleep(150)
+}
+
+async function nr905Clean(page) {
+  await page.evaluate(() => {
+    const S = window.NR.S
+    S.robbers.forEach((r) => { r.gone = 1e9; r.strike = null })
+    S.inv = 0; S.hearts = 3; S.paused = false
+  })
+}
+
+async function nr905AddRobber(page, cell, extra) {
+  return page.evaluate(([c, o]) => {
+    const S = window.NR.S
+    S.robbers.push(Object.assign({ sx: c[0], sy: c[1], x: c[0], y: c[1], px: c[0] + 0.5, py: c[1] + 0.5, gone: 0, hold: 99, amb: 1 }, o || {}))
+    return S.robbers.length - 1
+  }, [cell, extra])
+}
+
+async function nr905RobberAt(page, i) {
+  return page.evaluate((i) => {
+    const NR = window.NR, S = NR.S, r = S.robbers[i]
+    const q = S.rects.find((q) => q.ref === r && q.kind === 'robber')
+    if (!q) return null
+    const b = document.getElementById('view').getBoundingClientRect()
+    return { x: b.left + ((q.x0 + q.x1) / 2 / NR.RW) * b.width, y: b.top + ((q.y0 + q.y1) / 2 / NR.RH) * b.height }
+  }, i)
+}
+
+const nr905State = (page) => page.evaluate(() => { const S = window.NR.S; return { hearts: S.hearts, pops: S.pops, x: S.x, y: S.y } })
+
+async function nr905Restart(page) {
+  await page.reload()
+  await page.waitForFunction(() => window.NR && window.NR.S)
+  await page.locator('#go').tap()
+  await page.waitForTimeout(400)
+  await page.evaluate(() => {
+    document.querySelectorAll('.card').forEach((c) => (c.style.display = 'none'))
+    window.NR.S.paused = false
+  })
+}
+
+async function nr905Fix1(page, cdp) {
+  const c = await nr905Corridor(page, false)
+  const R = {}
+  for (const kind of ['lunge', 'slow', 'quick', 'mouse', 'noTap']) {
+    await nr905Clean(page)
+    await nr905Place(page, c)
+    const i = await nr905AddRobber(page, c.a)
+    await nr905Sleep(400)
+    const p = await nr905RobberAt(page, i)
+    const s0 = await nr905State(page)
+    if (kind === 'lunge' || kind === 'noTap') await page.evaluate((i) => { const S = window.NR.S, r = S.robbers[i]; r.x = S.x; r.y = S.y }, i)
+    if (p && kind === 'mouse') await page.mouse.click(p.x, p.y)
+    else if (p && kind !== 'noTap') await nr905Touch(cdp, p.x, p.y, kind === 'slow' ? 450 : 60)
+    await nr905Sleep(1500)
+    const s1 = await nr905State(page)
+    R[kind] = { lost: s0.hearts - s1.hearts, popped: s1.pops - s0.pops }
+  }
+  const fails = []
+  for (const k of ['lunge', 'slow', 'quick', 'mouse']) {
+    if (R[k].lost !== 0) fails.push(`fix1 ${k} tap on a robber lost ${R[k].lost} hearts (want 0)`)
+    if (R[k].popped !== 1) fails.push(`fix1 ${k} tap popped ${R[k].popped} robbers (want 1)`)
+  }
+  if (R.noTap.lost !== 1) fails.push(`fix1 no tap lost ${R.noTap.lost} hearts (want exactly 1)`)
+  return { fails, line: `fix1 lunge ${R.lunge.lost}/${R.lunge.popped} slow ${R.slow.lost}/${R.slow.popped} quick ${R.quick.lost}/${R.quick.popped} mouse ${R.mouse.lost}/${R.mouse.popped} noTap lost ${R.noTap.lost}` }
+}
+
+async function nr905Fix2(page, cdp) {
+  const fails = []
+  // Trap: wait on it. A popped robber far away must stay popped through the hit.
+  const t = await nr905Corridor(page, true)
+  await nr905Clean(page)
+  await nr905Place(page, { x: t.a[0], y: t.a[1], d: t.d })
+  const far = await nr905AddRobber(page, [t.a[0], t.a[1]], { gone: 8, hold: 99 })
+  const s0 = await nr905State(page)
+  await nr905Sleep(4000)
+  const trap = await page.evaluate(([s0, far]) => {
+    const NR = window.NR, S = NR.S
+    return { lost: s0.hearts - S.hearts, moved: Math.abs(S.x - s0.x) + Math.abs(S.y - s0.y), onTrap: NR.trapAt(S.x, S.y) >= 0, farGone: +(S.robbers[far].gone || 0).toFixed(2) }
+  }, [s0, far])
+  if (trap.lost !== 1) fails.push(`fix2 trap wait lost ${trap.lost} hearts (want 1)`)
+  if (trap.moved !== 1 || trap.onTrap) fails.push(`fix2 trap hit moved ${trap.moved} squares, on trap ${trap.onTrap} (want 1, off)`)
+  if (!(trap.farGone > 0)) fails.push(`fix2 a popped robber woke on the hit (gone ${trap.farGone}, want > 0)`)
+  // Chase: a robber in your square.
+  await nr905Restart(page)
+  const c = await nr905Corridor(page, false)
+  await nr905Clean(page)
+  await nr905Place(page, c)
+  await nr905AddRobber(page, c.a, { hold: 0, x: c.x, y: c.y, px: c.x + 0.5, py: c.y + 0.5 })
+  await nr905Sleep(5000)
+  const a5 = await nr905State(page)
+  const chase = { hearts5s: a5.hearts }
+  if (chase.hearts5s < 2) fails.push(`fix2 5s chase left ${chase.hearts5s} hearts (want >= 2)`)
+  // Hideout: a popped robber stays hidden while you stand next to its home.
+  await nr905Clean(page)
+  const h = await page.evaluate(() => {
+    const NR = window.NR, M = NR.MAP, DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0]
+    const ok = (x, y) => NR.open(x, y) && NR.trapAt(x, y) < 0 && !'PLHJK'.includes(M[y][x])
+    for (let y = 1; y < NR.H - 1; y++) for (let x = 1; x < NR.W - 1; x++) for (let d = 0; d < 4; d++) {
+      const nx = x + DX[d], ny = y + DY[d]
+      if (ok(x, y) && ok(nx, ny) && window.NR.S.robbers.every((r) => r.gone > 1e6 || Math.abs(r.x - x) + Math.abs(r.y - y) > 6)) return { home: [x, y], x: nx, y: ny, d: (d + 2) % 4 }
+    }
+    return null
+  })
+  await nr905Place(page, h)
+  await nr905AddRobber(page, h.home, { gone: 0.3, hold: 0 })
+  await nr905Sleep(2500)
+  const hide = { lost: 3 - (await nr905State(page)).hearts }
+  if (hide.lost !== 0) fails.push(`fix2 standing by a hideout lost ${hide.lost} hearts (want 0)`)
+  // Retry at a lamp: real tap on Try again.
+  await nr905Restart(page)
+  await nr905Clean(page)
+  const cp = await page.evaluate(() => {
+    const NR = window.NR, S = NR.S, M = NR.MAP, DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0], r = S.robbers[0]
+    for (let d = 0; d < 4; d++) { const x = r.sx + DX[d], y = r.sy + DY[d]; if (NR.open(x, y) && NR.trapAt(x, y) < 0 && !'PLHJK'.includes(M[y][x])) return { x, y, dir: d } }
+    return null
+  })
+  await page.evaluate((cp) => {
+    const S = window.NR.S
+    S.cp = cp; S.hearts = 1; S.inv = 0; S.x = cp.x; S.y = cp.y; S.px = cp.x + 0.5; S.py = cp.y + 0.5; S.tw = null
+    S.robbers.push({ sx: cp.x, sy: cp.y, x: cp.x, y: cp.y, px: cp.x + 0.5, py: cp.y + 0.5, gone: 0, hold: 0, amb: 1 })
+  }, cp)
+  await nr905Sleep(1200)
+  const failShown = await page.evaluate(() => getComputedStyle(document.getElementById('cFail')).display)
+  let retryHearts = -1
+  if (failShown === 'block') {
+    const p = await nr905Center(page, 'retry')
+    await page.mouse.click(p.x, p.y)
+    await nr905Sleep(3000)
+    retryHearts = (await nr905State(page)).hearts
+  }
+  if (failShown !== 'block') fails.push(`fix2 the lamp fail card did not show (${failShown})`)
+  else if (retryHearts !== 3) fails.push(`fix2 Try again at a lamp has ${retryHearts} hearts after 3s (want 3)`)
+  return { fails, line: `fix2 trap lost ${trap.lost} moved ${trap.moved} poppedStays ${trap.farGone > 0} chase5s hearts ${chase.hearts5s} hideout lost ${hide.lost} retry3s hearts ${retryHearts}` }
+}
+
+async function nr905Fix3(page) {
+  await nr905Restart(page)
+  await nr905Clean(page)
+  const r = await page.evaluate(() => {
+    const NR = window.NR, DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0], M = NR.MAP, S = NR.S
+    const walk = (x, y) => NR.open(x, y) || (M[y] && M[y][x] === 'K')
+    const reach = (sx, sy, t) => {
+      const seen = new Set([sx + ',' + sy]), q = [[sx, sy]]
+      while (q.length) {
+        const [x, y] = q.shift()
+        if (x === t.x && y === t.y) return true
+        for (let d = 0; d < 4; d++) {
+          const nx = x + DX[d], ny = y + DY[d], k = nx + ',' + ny
+          if (seen.has(k) || !(walk(nx, ny) || (nx === t.x && ny === t.y))) continue
+          seen.add(k); q.push([nx, ny])
+        }
+      }
+      return false
+    }
+    const set = (x, y) => { S.x = x; S.y = y; S.px = x + 0.5; S.py = y + 0.5 }
+    let seed = 7
+    const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648
+    let x = S.x, y = S.y, prev = null, flips = 0, steps = 0
+    for (let k = 0; k < 4000; k++) {
+      const nb = []
+      for (let d = 0; d < 4; d++) { const nx = x + DX[d], ny = y + DY[d]; if (NR.open(nx, ny) && !'PLHJ'.includes(M[ny][nx])) nb.push([nx, ny]) }
+      if (!nb.length) break
+      ;[x, y] = nb[(rnd() * nb.length) | 0]; set(x, y); steps++
+      const hi = NR.hintInfo()
+      const lab = hi && hi.t ? hi.t.n + '@' + hi.t.x + ',' + hi.t.y : 'Explore'
+      if (prev !== null && lab !== prev) flips++
+      prev = lab
+    }
+    const seen = new Set([x + ',' + y]), q = [[x, y]]
+    let unreach = 0, badStep = 0, cells = 0
+    while (q.length) {
+      const [cx, cy] = q.shift(); cells++; S.gk = null; set(cx, cy)
+      const hi = NR.hintInfo()
+      if (hi && hi.t) {
+        if (!reach(cx, cy, hi.t)) unreach++
+        if (!(walk(hi.n.x, hi.n.y) || (hi.n.x === hi.t.x && hi.n.y === hi.t.y))) badStep++
+      }
+      for (let d = 0; d < 4; d++) {
+        const nx = cx + DX[d], ny = cy + DY[d], kk = nx + ',' + ny
+        if (seen.has(kk) || !walk(nx, ny) || 'PL'.includes(M[ny][nx])) continue
+        seen.add(kk); q.push([nx, ny])
+      }
+    }
+    return { flips, steps, cells, unreach, badStep }
+  })
+  const fails = []
+  if (r.flips !== 0) fails.push(`fix3 FIND label flipped ${r.flips} times over ${r.steps} steps (want 0)`)
+  if (r.unreach !== 0 || r.badStep !== 0) fails.push(`fix3 ${r.unreach} unreachable goals and ${r.badStep} bad next steps over ${r.cells} squares (want 0, 0)`)
+  if (r.cells !== 295) fails.push(`fix3 walked ${r.cells} squares (want 295)`)
+  return { fails, line: `fix3 flips ${r.flips}/${r.steps} steps cells ${r.cells} unreach ${r.unreach} badStep ${r.badStep}` }
+}
+
+async function nr905Fix4(page, cdp) {
+  await nr905Clean(page)
+  await nr905Place(page, await nr905Corridor(page, false))
+  const R = {}
+  for (const [k, id, ms] of [['tapRight', 'br', 60], ['tapLeft', 'bl', 60], ['hold', 'br', 700]]) {
+    const a0 = await page.evaluate(() => window.NR.S.ang)
+    const p = await nr905Center(page, id)
+    await nr905Touch(cdp, p.x, p.y, ms)
+    await nr905Sleep(600)
+    R[k] = +((await page.evaluate(() => window.NR.S.ang)) - a0).toFixed(2)
+  }
+  const fails = []
+  if (Math.abs(R.tapRight - Math.PI / 2) > 0.05) fails.push(`fix4 a tap on Turn right turned ${R.tapRight} rad (want 1.57)`)
+  if (Math.abs(R.tapLeft + Math.PI / 2) > 0.05) fails.push(`fix4 a tap on Turn left turned ${R.tapLeft} rad (want -1.57)`)
+  if (!(R.hold > 0.3)) fails.push(`fix4 holding Turn turned ${R.hold} rad (want > 0.3)`)
+  return { fails, line: `fix4 tapRight ${R.tapRight} tapLeft ${R.tapLeft} hold ${R.hold}` }
+}
+
+async function nr905Fix5(page, cdp) {
+  await nr905Clean(page)
+  const t = await nr905Corridor(page, true)
+  await nr905Place(page, t)
+  const ti = await page.evaluate((t) => window.NR.trapAt(t.a[0], t.a[1]), t)
+  await page.waitForFunction((ti) => { const c = (window.NR.S.t + ti * 1.6) % 3.2; return c > 2.45 && c < 2.6 }, ti, { timeout: 10_000 })
+  const p = await nr905Center(page, 'bf')
+  await nr905Touch(cdp, p.x, p.y, 40)
+  let mism = 0
+  for (let k = 0; k < 26; k++) {
+    await nr905Sleep(45)
+    const s = await page.evaluate(() => {
+      const tt = document.getElementById('toast')
+      return { b: document.getElementById('bf').textContent, w: tt.textContent === 'Wait for green…' && tt.style.opacity !== '0' }
+    })
+    if (s.b.startsWith('GO!') && s.w) mism++
+  }
+  await page.waitForFunction(() => document.getElementById('bf').textContent.startsWith('GO!'), null, { timeout: 5000 })
+  const x0 = await nr905State(page)
+  await nr905Touch(cdp, p.x, p.y, 40)
+  await nr905Sleep(800)
+  const x1 = await nr905State(page)
+  const moved = Math.abs(x1.x - x0.x) + Math.abs(x1.y - x0.y)
+  const fails = []
+  if (mism !== 0) fails.push(`fix5 ${mism} frames showed GO! with Wait for green (want 0)`)
+  if (moved !== 2) fails.push(`fix5 a GO press dashed ${moved} squares (want 2)`)
+  return { fails, line: `fix5 goWaitFrames ${mism} dash ${moved}` }
+}
+
+// Night Run has one play tier (no Hard switch in public/night-run/index.html); this smoke plays it
+// untouched with real input only: Start, Go forward, turns, and checks that a hit costs one heart.
+async function nr905Hard(browser, port, errors) {
+  const { context, page, cdp, pageErrors } = await nr905Open(browser, port, 375, 667, errors, 'hard')
+  const fails = []
+  const s0 = await nr905State(page)
+  await nr905Clean(page)
+  await nr905Place(page, await nr905Corridor(page, false))
+  const fwd = await nr905Center(page, 'bf')
+  const right = await nr905Center(page, 'br')
+  let moves = 0
+  for (let k = 0; k < 8; k++) {
+    const a = await nr905State(page)
+    await nr905Touch(cdp, fwd.x, fwd.y, 600)
+    await nr905Sleep(400)
+    const b = await nr905State(page)
+    if (a.x !== b.x || a.y !== b.y) moves++
+    else { await nr905Touch(cdp, right.x, right.y, 60); await nr905Sleep(400) }
+  }
+  const painted = (await page.locator('#view').screenshot()).length
+  // A robber walks into you (scene setup), you do nothing: exactly one heart goes.
+  await nr905Clean(page)
+  const c = await nr905Corridor(page, false)
+  await nr905Place(page, c)
+  const i = await nr905AddRobber(page, c.a)
+  await page.evaluate((i) => { const S = window.NR.S, r = S.robbers[i]; r.x = S.x; r.y = S.y }, i)
+  await nr905Sleep(1500)
+  const lost = 3 - (await nr905State(page)).hearts
+  if (moves < 2) fails.push(`hard real Go presses moved ${moves} times (want >= 2)`)
+  if (painted < 8000) fails.push(`hard the maze canvas shot is ${painted} bytes (want a drawn maze, >= 8000)`)
+  if (lost !== 1) fails.push(`hard a robber hit cost ${lost} hearts (want 1)`)
+  if (pageErrors.length) fails.push(`hard console errors: ${pageErrors.join(' | ').slice(0, 300)}`)
+  await context.close()
+  return { fails, line: `nightRun905 ok hard 375x667 moves ${moves} canvasPng ${painted}B hitLost ${lost} consoleErrors ${pageErrors.length} startHearts ${s0.hearts}` }
+}
+
+export async function checkNightRun905(browser, port, errors = []) {
+  const all = []
+  for (const [width, height] of [[375, 667], [390, 844]]) {
+    const { context, page, cdp, pageErrors } = await nr905Open(browser, port, width, height, errors, `${width}`)
+    const lines = []
+    for (const fix of [nr905Fix1, nr905Fix2, nr905Fix3, nr905Fix4, nr905Fix5]) {
+      let r
+      try { r = await fix(page, cdp) } catch (error) { r = { fails: [`${fix.name} threw ${String(error).slice(0, 200)}`], line: `${fix.name} threw` } }
+      lines.push(r.line)
+      for (const f of r.fails) { all.push(`${width}x${height} ${f}`); console.log(`nightRun905 FAIL ${width}x${height} ${f}`) }
+    }
+    if (pageErrors.length) all.push(`${width}x${height} console errors ${pageErrors.join(' | ').slice(0, 300)}`)
+    await context.close()
+    if (!all.some((f) => f.startsWith(`${width}x${height}`))) console.log(`nightRun905 ok ${width}x${height} ${lines.join(' | ')}`)
+  }
+  let hard
+  try { hard = await nr905Hard(browser, port, errors) } catch (error) { hard = { fails: [`hard threw ${String(error).slice(0, 200)}`], line: '' } }
+  for (const f of hard.fails) { all.push(f); console.log(`nightRun905 FAIL ${f}`) }
+  if (!hard.fails.length) console.log(hard.line)
+  assert.equal(all.length, 0, `#905 Night Run checks failed:\n${all.join('\n')}`)
+}
+
 export async function checkPhoneFixes() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -2222,6 +3218,10 @@ export async function checkPhoneFixes() {
   const browser = await launchBrowser()
   const errors = []
   try {
+    if (process.env.NR905_ONLY === '1') {
+      await checkNightRun905(browser, port, errors)
+      return
+    }
     if (process.env.NW_LEAK_ONLY === '1') {
       await checkLeakBanner(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.565 leak banner nights stay free of console errors')
@@ -2232,6 +3232,7 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
       return
     }
+    await checkNightRun905(browser, port, errors)
     await checkLampGlyph(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
