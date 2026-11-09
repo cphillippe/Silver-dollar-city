@@ -2603,7 +2603,8 @@ async function checkGlyphSeatSweep(browser, port, errors, width, height) {
     // the mark, the taps and every neighbour. Then the header copy is allowed, and only then: glyphCardRules makes the
     // solver find 0 spots on every header frame. The counts are reported per size, not capped.
     if (label === FAILING_SEAT.size && ring.cx === FAILING_SEAT.cx && ring.cy === FAILING_SEAT.cy) {
-      assert.ok(driver.stats.noSpot.size > 0 && driver.stats.headerSettled > 0, `${where} is the seat the 1.4.569 prove caught: its tall stages have no clear spot and show the header copy (${driver.stats.noSpot.size} stages, ${driver.stats.headerSettled} settled header views)`)
+      assert.equal(headerHere, 0, `${where} the compact card keeps a clear spot, so the header copy stays off (${headerHere} header frames, ${driver.stats.noSpot.size} stages with no spot)`)
+      assert.equal(driver.stats.noSpot.size, 0, `${where} every stage has a clear spot`)
     }
     await context.close()
   }
@@ -3311,6 +3312,331 @@ export async function checkNightRun905(browser, port, errors = []) {
   assert.equal(all.length, 0, `#905 Night Run checks failed:\n${all.join('\n')}`)
 }
 
+const COMPACT_SIZES = [[375, 667], [390, 844], [412, 915]]
+const COMPACT_SEATS = [
+  { cx: 600, cy: 88 },
+  { cx: 464, cy: 224 },
+  { cx: 464, cy: 360 },
+  { cx: 464, cy: 768 },
+  { cx: 600, cy: 904 },
+]
+const COMPACT_NEIGHBORS = ['logic', 'reason', 'science', 'candle']
+
+function blankCompact() {
+  return {
+    frames: 0,
+    cardH: 0,
+    header: 0,
+    overlap: 0,
+    minGap: Infinity,
+    minTip: Infinity,
+    beginFrames: 0,
+    beginSlack: Infinity,
+    beginHitBad: 0,
+    railFrames: 0,
+    railOver: 0,
+    clearFrames: 0,
+    clearOver: 0,
+    waveFrames: 0,
+    goldBad: 0,
+    goldSample: '',
+  }
+}
+
+/** Count card-open frames. Header copy, glyph gap (pointer included), Begin, rail and clear-row. */
+function eatCompact(stats, frames) {
+  let n = 0
+  for (const frame of frames) {
+    if (!frame.card) continue
+    n += 1
+    stats.frames += 1
+    stats.cardH = Math.max(stats.cardH, frame.card.h)
+    if (frame.header) stats.header += 1
+    if (frame.glyph) {
+      stats.overlap = Math.max(stats.overlap, glyphArea(frame.glyph, frame.card))
+      stats.minGap = Math.min(stats.minGap, glyphGap(frame.glyph, frame.card))
+      if (frame.stem) stats.minTip = Math.min(stats.minTip, glyphGap(frame.glyph, frame.stem))
+    }
+    const begin = frame.begin[0]
+    if (begin) {
+      stats.beginFrames += 1
+      stats.beginSlack = Math.min(stats.beginSlack, begin.top - frame.card.bottom)
+      if (frame.beginHit !== true) stats.beginHitBad += 1
+    }
+    if (frame.buttons.length) stats.railFrames += 1
+    for (const button of frame.buttons) stats.railOver = Math.max(stats.railOver, glyphArea(frame.card, button))
+    if (frame.clearButtons.length) stats.clearFrames += 1
+    for (const button of frame.clearButtons) stats.clearOver = Math.max(stats.clearOver, glyphArea(frame.card, button))
+    if (frame.wave) stats.waveFrames += 1
+  }
+  return n
+}
+
+function compactDetail(label, stats) {
+  const gap = stats.minGap === Infinity ? 'n/a' : stats.minGap.toFixed(2)
+  const tip = stats.minTip === Infinity ? 'n/a' : stats.minTip.toFixed(2)
+  const slack = stats.beginSlack === Infinity ? 'n/a' : stats.beginSlack.toFixed(2)
+  return (
+    `${label} frames=${stats.frames} cardH=${Math.round(stats.cardH)} header=${stats.header} ` +
+    `overlap=${stats.overlap}px2 gap=${gap}px tip=${tip}px beginSlack=${slack}px beginHitBad=${stats.beginHitBad} ` +
+    `railOver=${stats.railOver}px2 clearOver=${stats.clearOver}px2 waveFrames=${stats.waveFrames} goldBad=${stats.goldBad} ${stats.goldSample}`
+  )
+}
+
+async function compactBuy(page, where, index) {
+  if ((await page.locator('.defend-tower-card').count()) < 1) {
+    await glyphPanToPad(page, 'love')
+    await page.locator('.defend-pad[data-tower-type="love"]').click({ force: true })
+    await page.locator('.defend-tower-card').waitFor()
+  }
+  const step = GLYPH_LADDER[index]
+  const buy = step.bright
+    ? page.locator('.defend-tower-card .defend-bright-buy')
+    : page.locator(`.defend-tower-card button.defend-path-buy[data-path-buy="${step.path}"]`)
+  assert.equal(await buy.count(), 1, `${where} stage ${index} offers ${JSON.stringify(step)}`)
+  const before = await page.evaluate(() => ({
+    stage: document.querySelector('.defend-pad[data-tower-type="love"] .lamp-upgrade-glyph[data-glyph-variant="map"]')?.getAttribute('data-glyph-stage'),
+    buys: [...document.querySelectorAll('.defend-tower-card .defend-path-buy, .defend-tower-card .defend-bright-buy')].map((node) => ({
+      path: node.getAttribute('data-path-buy') || node.getAttribute('data-bright-buy'),
+      disabled: node.disabled,
+      text: (node.textContent || '').trim().slice(0, 40),
+    })),
+  }))
+  await buy.click()
+  try {
+    await page.waitForFunction(
+      (want) => document.querySelector('.defend-pad[data-tower-type="love"] .lamp-upgrade-glyph[data-glyph-variant="map"]')?.getAttribute('data-glyph-stage') === want,
+      String(index + 1),
+      { timeout: 8_000 },
+    )
+  } catch (error) {
+    const after = await page.evaluate(() => document.querySelector('.defend-pad[data-tower-type="love"] .lamp-upgrade-glyph[data-glyph-variant="map"]')?.getAttribute('data-glyph-stage'))
+    throw new Error(`${where} buy ${index} stayed at stage ${after} (before ${JSON.stringify(before)}) ${error.message}`)
+  }
+  // A path buy ignores a second tap for 350ms. Wait that out before the next one.
+  await page.waitForTimeout(420)
+}
+
+/** Card pop-in frames, from the tap that opens it. */
+async function compactPop(page) {
+  if (await page.locator('.defend-tower-card').count()) {
+    await page.keyboard.press('Escape')
+    await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+  }
+  await glyphPanToPad(page, 'love')
+  await page.evaluate(() => window.__glyphStart('love'))
+  const lamp = page.locator('.defend-clear-lamp[data-tower-type="love"]')
+  for (let attempt = 0; attempt < 6 && (await page.locator('.defend-tower-card').count()) < 1; attempt += 1) {
+    if (await lamp.count()) await lamp.click({ force: true })
+    else await page.locator('.defend-pad[data-tower-type="love"]').click({ force: true })
+    await page.waitForTimeout(280)
+  }
+  await page.locator('.defend-tower-card').waitFor({ timeout: 8000 })
+  await page.waitForTimeout(520)
+  return page.evaluate(() => window.__glyphEnd())
+}
+
+async function compactFonts(page, where) {
+  if (process.env.NW_LAMP_CARD_573 === '1') return
+  const small = await page.evaluate(() => {
+    const sels = ['.defend-tower-tool', '.defend-path-name', '.defend-path-line', '.defend-path-lock', '.defend-path-pip', '.defend-path-buy', '.defend-bright-buy', '.defend-bright-line', '.defend-bright-on', '.defend-tower-road']
+    const out = []
+    for (const sel of sels) {
+      for (const node of document.querySelectorAll(`.defend-tower-card ${sel}`)) {
+        const px = parseFloat(getComputedStyle(node).fontSize)
+        if (px < 13 - 0.05) out.push(`${sel} ${px.toFixed(2)}px`)
+      }
+    }
+    return out
+  })
+  assert.deepEqual(small, [], `${where} font floor stays >= 13px ${JSON.stringify(small)}`)
+}
+
+/**
+ * The one filled gold cue. Begin while it is up, the walker ring mid-wave, Continue on the clear.
+ * The card, its buys and the lamp mark must not add a second one. Neighbour paint and the New lamp
+ * buttons stay out of this count: a spark bank lights those (#924) and this sweep banks sparks.
+ * Zero and two-or-more both fail.
+ */
+async function compactGold(page, stats, where) {
+  const paint = await page.evaluate(() => {
+    const goldish = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = +match[1]
+        const g = +match[2]
+        const b = +match[3]
+        const a = match[4] === undefined ? 1 : +match[4]
+        if (a > 0.05 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const names = []
+    const sels = '.defend-go, .defend-continue, .defend-raider.is-easy-cue .defend-raider-face, .defend-path-buy, .defend-bright-buy, .defend-tower-card, .lamp-upgrade-glyph .is-stroke, .lamp-upgrade-glyph .is-gap, .lamp-upgrade-glyph .is-dot'
+    for (const el of document.querySelectorAll(sels)) {
+      const style = getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+      const rect = el.getBoundingClientRect()
+      if (rect.width <= 0 || rect.height <= 0) continue
+      let why = false
+      if (el instanceof SVGElement) {
+        if (style.stroke !== 'none' && parseFloat(style.strokeWidth) > 0 && goldish(style.stroke)) why = true
+        if (style.fill !== 'none' && goldish(style.fill)) why = true
+        if (goldish(style.filter)) why = true
+      } else if (goldish(style.backgroundImage) || goldish(style.backgroundColor) || goldish(style.boxShadow) || goldish(style.borderTopColor) || goldish(style.filter)) why = true
+      if (why) names.push(String(el.getAttribute('class') || el.tagName).split(/\s+/).slice(0, 3).join('.'))
+    }
+    return names
+  })
+  if (paint.length !== 1) {
+    stats.goldBad += 1
+    stats.goldSample = `${where} gold ${paint.length} ${JSON.stringify(paint)}`
+    const cue = await page.evaluate(() => {
+      const face = document.querySelector('.defend-raider.is-easy-cue .defend-raider-face')
+      const go = document.querySelector('.defend-go')
+      return {
+        cues: document.querySelectorAll('.defend-raider.is-easy-cue').length,
+        face: face ? getComputedStyle(face).filter.slice(0, 180) : null,
+        go: go ? getComputedStyle(go).display : null,
+      }
+    })
+    console.log(`checkCompactLampCard gold ${stats.goldSample} cue ${JSON.stringify(cue)}`)
+  }
+}
+
+/**
+ * 1.4.574 (#933). Live sweep at 375, 390 and 412: camera on, banked sparks, four neighbour lamps,
+ * seats 600,88 | 464,224 | 464,360 | 464,768 | 600,904, love stages 2–7. The header glyph copy
+ * never shows. NW_LAMP_CARD_573=1 restores the 1.4.573 card height, which fails this check.
+ */
+async function checkCompactLampCard(browser, port, errors) {
+  const onlySize = process.env.NW_COMPACT_SIZE
+  const onlySeat = process.env.NW_COMPACT_SEAT
+  const tall = process.env.NW_LAMP_CARD_573 === '1'
+  for (const [width, height] of COMPACT_SIZES) {
+    const label = `${width}x${height}`
+    if (onlySize && onlySize !== label) continue
+    const stats = blankCompact()
+    let waved = false
+    for (const seat of COMPACT_SEATS) {
+      const seatKey = `${seat.cx},${seat.cy}`
+      if (onlySeat && onlySeat !== seatKey) continue
+      const where = `${label} seat ${seatKey}`
+      const { context, page } = await openMap(browser, port, width, height, 'a2', { motion: true, search: GLYPH_LIVE_SEARCH })
+      page.on('pageerror', (error) => errors.push(`compact ${where} ${error}`))
+      page.on('console', (msg) => {
+        if (msg.type() === 'error') errors.push(`compact ${where} ${msg.text()}`)
+      })
+      if (tall) await page.evaluate(() => document.documentElement.classList.add('is-lamp-card-573'))
+      await glyphSetup(page)
+      await assertGlyphCamera(page, where)
+      const rings = await page.evaluate(() =>
+        [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({ cx: Number(ring.getAttribute('cx')), cy: Number(ring.getAttribute('cy')) })),
+      )
+      for (const want of COMPACT_SEATS) {
+        assert.ok(rings.some((ring) => ring.cx === want.cx && ring.cy === want.cy), `${where} seat ${want.cx},${want.cy} is live ${JSON.stringify(rings)}`)
+      }
+      const sparks = await page.evaluate(() => Number((document.body.innerText.match(/(\d+)\s*\n?\s*Sparks/) || [])[1] || 0))
+      assert.ok(sparks >= 95, `${where} starts with banked sparks (${sparks})`)
+      const others = COMPACT_SEATS.filter((other) => other !== seat)
+      for (const [index, other] of others.entries()) {
+        await glyphPlantAt(page, COMPACT_NEIGHBORS[index], other, where)
+      }
+      assert.equal(await page.locator('.defend-pad').count(), 4, `${where} four neighbour lamps`)
+      await glyphPlantAt(page, 'love', seat, where)
+      assert.equal(await page.locator('.defend-pad[data-tower-type="love"]').count(), 1, `${where} Love is planted`)
+      for (let step = 0; step < 2; step += 1) await compactBuy(page, where, step)
+      for (let stage = 2; stage <= 7; stage += 1) {
+        const frames = await compactPop(page)
+        const n = eatCompact(stats, frames)
+        assert.ok(n >= 8, `${where} love@${stage} sampled ${n} card frames`)
+        const shown = await page.evaluate(() => document.querySelector('.defend-pad[data-tower-type="love"] .lamp-upgrade-glyph[data-glyph-variant="map"]')?.getAttribute('data-glyph-stage'))
+        assert.equal(shown, String(stage), `${where} card opened on love@${stage}`)
+        await compactGold(page, stats, `${where} love@${stage}`)
+        await compactFonts(page, `${where} love@${stage}`)
+        if (process.env.NW_COMPACT_SHOT === '1' && width === 375 && seat.cx === 464 && seat.cy === 768 && stage === 4) {
+          const dir = process.env.NW_COMPACT_SHOT_DIR || '/opt/cursor/artifacts'
+          mkdirSync(dir, { recursive: true })
+          const name = tall ? '375-love4-before' : '375-love4-after'
+          await page.screenshot({ path: join(dir, `${name}.png`) })
+          const clip = await page.evaluate(() => {
+            const card = document.querySelector('.defend-tower-card')?.getBoundingClientRect()
+            const glyph = document.querySelector('.defend-pad[data-tower-type="love"] .lamp-upgrade-glyph[data-glyph-variant="map"]')?.getBoundingClientRect()
+            if (!card) return null
+            const left = Math.max(0, Math.min(card.left, glyph?.left ?? card.left) - 12)
+            const top = Math.max(0, Math.min(card.top, glyph?.top ?? card.top) - 12)
+            const right = Math.min(innerWidth, Math.max(card.right, glyph?.right ?? card.right) + 12)
+            const bottom = Math.min(innerHeight, Math.max(card.bottom, glyph?.bottom ?? card.bottom) + 16)
+            return { x: left, y: top, width: Math.max(8, right - left), height: Math.max(8, bottom - top) }
+          })
+          if (clip) await page.screenshot({ path: join(dir, `${name}-crop.png`), clip })
+        }
+        if (stage < 7) await compactBuy(page, where, stage)
+      }
+      if (!waved && seat.cx === 464 && seat.cy === 768 && process.env.NW_COMPACT_SKIP_WAVE !== '1') {
+        if (await page.locator('.defend-tower-card').count()) {
+          await page.keyboard.press('Escape')
+          await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+        }
+        await page.locator('.defend-go').click()
+        await page.waitForSelector('.easy-walker, [data-walker-id]', { state: 'attached', timeout: 20_000 })
+        const waveFrames = await compactPop(page)
+        const waveN = eatCompact(stats, waveFrames)
+        assert.ok(waveN >= 8, `${where} mid-wave sampled ${waveN} card frames`)
+        await page.locator('.defend-raider.is-easy-cue').waitFor({ timeout: 8_000 }).catch(() => {})
+        await compactGold(page, stats, `${where} mid-wave`)
+        await page.keyboard.press('Escape')
+        await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+        const started = Date.now()
+        while (Date.now() - started < 90_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
+          const cue = await page.evaluate(() => {
+            const face = document.querySelector('.defend-raider.is-easy-cue')
+            if (!face) return null
+            const id = face.getAttribute('data-walker-id')
+            const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+            if (!tap) return null
+            const box = tap.getBoundingClientRect()
+            const x = box.x + box.width / 2
+            const y = box.y + box.height / 2
+            const node = document.elementFromPoint(x, y)
+            if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+            return { x, y }
+          })
+          if (cue) await page.mouse.click(cue.x, cue.y)
+          await page.waitForTimeout(80)
+        }
+        await page.locator('.defend-page.is-boost').waitFor()
+        await page.locator('.defend-continue').waitFor()
+        await page.waitForTimeout(400)
+        const clearFrames = await compactPop(page)
+        const clearN = eatCompact(stats, clearFrames)
+        assert.ok(clearN >= 8, `${where} clear-row sampled ${clearN} card frames`)
+        await compactGold(page, stats, `${where} clear-row`)
+        if (!tall) await compactFonts(page, `${where} clear-row`)
+        waved = true
+      }
+      await context.close()
+    }
+    const detail = compactDetail(label, stats)
+    console.log(`checkCompactLampCard measure ${detail}`)
+    assert.equal(stats.header, 0, `checkCompactLampCard header-copy frames ${detail}`)
+    assert.equal(stats.overlap, 0, `checkCompactLampCard card intersects glyph ${detail}`)
+    assert.ok(stats.minGap >= GLYPH_MIN_GAP, `checkCompactLampCard gap ${detail}`)
+    if (Number.isFinite(stats.minTip)) assert.ok(stats.minTip >= GLYPH_MIN_GAP, `checkCompactLampCard pointer tip ${detail}`)
+    assert.ok(stats.beginFrames > 0 && stats.beginSlack >= SOLVER_BEGIN_GAP - 0.01, `checkCompactLampCard Begin card bottom <= goTop-8 ${detail}`)
+    assert.equal(stats.beginHitBad, 0, `checkCompactLampCard Begin centre hits .defend-go ${detail}`)
+    assert.ok(stats.railFrames > 0 && stats.railOver === 0, `checkCompactLampCard rail overlap ${detail}`)
+    if (process.env.NW_COMPACT_SKIP_WAVE !== '1') {
+      assert.ok(stats.clearFrames > 0 && stats.clearOver === 0, `checkCompactLampCard clear-row overlap ${detail}`)
+      assert.ok(stats.waveFrames > 0, `checkCompactLampCard mid-wave frames ${detail}`)
+    }
+    assert.equal(stats.goldBad, 0, `checkCompactLampCard gold count === 1 ${detail}`)
+    assert.ok(stats.frames > 0, `checkCompactLampCard sampled no card frames ${detail}`)
+    console.log(`checkCompactLampCard ok ${label} frames=${stats.frames} cardH=${Math.round(stats.cardH)}`)
+  }
+}
+
 export async function checkPhoneFixes() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -3329,6 +3655,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', '1.4.565 leak banner nights stay free of console errors')
       return
     }
+    if (process.env.NW_COMPACT_ONLY === '1') {
+      await checkCompactLampCard(browser, port, errors)
+      assert.equal(errors.join('\n'), '', '1.4.574 compact lamp card nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
@@ -3336,6 +3667,7 @@ export async function checkPhoneFixes() {
     }
     await checkNightRun905(browser, port, errors)
     await checkLampGlyph(browser, port, errors)
+    await checkCompactLampCard(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -3512,7 +3844,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
