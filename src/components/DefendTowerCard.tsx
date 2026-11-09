@@ -4,11 +4,16 @@ import { isFreeSpot } from '../lib/lampPlace'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
 import {
   placeTowerCard,
+  STRIP_H,
+  STRIP_W,
   TOWER_CARD_H,
   TOWER_CARD_W,
   TOWER_TREE_H,
   TOWER_TREE_LESSON_H,
+  stemShows,
   type TowerCardPoint,
+  type TowerRect,
+  type TowerTaps,
 } from '../lib/towerCardPlace'
 import { mapGlyphRect } from '../nightWatch/lampGlyphPlace'
 import { lampGlyphStage } from '../nightWatch/lampGlyph'
@@ -92,6 +97,105 @@ function PathMark({ path }: { path: TreePath }) {
         fill="currentColor"
       />
     </svg>
+  )
+}
+
+/** Boxes the card must keep off, in the card's own offset parent (the frame). Null when the card is not placed yet. */
+function measureTaps(card: HTMLElement, plotId: string): TowerTaps | null {
+  const parent = card.offsetParent
+  if (!(parent instanceof HTMLElement)) return null
+  const origin = parent.getBoundingClientRect()
+  const ox = origin.left + parent.clientLeft
+  const oy = origin.top + parent.clientTop
+  const rect = (el: Element): TowerRect | null => {
+    const style = getComputedStyle(el)
+    if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return null
+    const box = el.getBoundingClientRect()
+    if (box.width < 1 || box.height < 1) return null
+    return { left: box.left - ox, top: box.top - oy, right: box.right - ox, bottom: box.bottom - oy }
+  }
+  const one = (sel: string) => {
+    const el = document.querySelector(sel)
+    return el ? rect(el) : null
+  }
+  const many = (sel: string) =>
+    [...document.querySelectorAll(sel)].map(rect).filter((box): box is TowerRect => box !== null)
+  const kit = many('.defend-kits button')
+  const clear = many('.defend-clear-row button')
+  const begin = one('.defend-go')
+  // The bottom row: Begin, the skill kit, Continue. The New lamp buttons stand in their own column.
+  const rows = [begin, ...kit, ...many('.defend-continue')].filter((box): box is TowerRect => box !== null)
+  const open = document.querySelector('.defend-pad.is-upgrade-open')
+  const pads = [...document.querySelectorAll('.defend-pad.is-planted')].filter((pad) => pad !== open)
+  const lamps: TowerRect[] = []
+  for (const pad of pads) {
+    const parts = [...pad.querySelectorAll('.defend-lamp-sprite, image.defend-type-mark')]
+      .map(rect)
+      .filter((box): box is TowerRect => box !== null)
+    if (parts.length === 0) continue
+    lamps.push({
+      left: Math.min(...parts.map((box) => box.left)),
+      top: Math.min(...parts.map((box) => box.top)),
+      right: Math.max(...parts.map((box) => box.right)),
+      bottom: Math.max(...parts.map((box) => box.bottom)),
+    })
+  }
+  const chips = [...document.querySelectorAll('.defend-type-chip')]
+  return {
+    begin,
+    rail: one('.nw-rail'),
+    buttons: [
+      ...many('.nw-rail .defend-ability'),
+      ...clear,
+      ...kit,
+      ...many('.defend-new-lamp'),
+      ...many('.nw-cam-recenter'),
+    ],
+    row: rows.length ? Math.min(...rows.map((box) => box.top)) : null,
+    own: [
+      ...(open ? [...open.querySelectorAll('text.defend-type-label')].map(rect) : []),
+      ...chips.filter((chip) => chip.getAttribute('data-chip-plot') === plotId).map(rect),
+    ].filter((box): box is TowerRect => box !== null),
+    lamps,
+    labels: [
+      ...pads.flatMap((pad) => [...pad.querySelectorAll('text.defend-type-label')].map(rect)),
+      ...chips.filter((chip) => chip.getAttribute('data-chip-plot') !== plotId).map(rect),
+    ].filter((box): box is TowerRect => box !== null),
+  }
+}
+
+function sameRect(a: TowerRect | null, b: TowerRect | null): boolean {
+  if (!a || !b) return a === b
+  return (
+    Math.abs(a.left - b.left) < 0.25 &&
+    Math.abs(a.top - b.top) < 0.25 &&
+    Math.abs(a.right - b.right) < 0.25 &&
+    Math.abs(a.bottom - b.bottom) < 0.25
+  )
+}
+
+function sameRects(a: readonly TowerRect[] = [], b: readonly TowerRect[] = []): boolean {
+  return a.length === b.length && a.every((box, index) => sameRect(box, b[index]))
+}
+
+function sameTaps(a: TowerTaps | null, b: TowerTaps | null): boolean {
+  if (!a || !b) return a === b
+  return (
+    sameRect(a.begin, b.begin) &&
+    sameRect(a.rail, b.rail) &&
+    sameRects(a.buttons, b.buttons) &&
+    (a.row ?? null) === (b.row ?? null) &&
+    sameRects(a.own, b.own) &&
+    sameRects(a.lamps, b.lamps) &&
+    sameRects(a.labels, b.labels)
+  )
+}
+
+/** True when another lamp's name or badge sits on the mark and nothing paints the mark above it. */
+function labelOverGlyph(glyph: { left: number; top: number; right: number; bottom: number } | null, taps: TowerTaps | null, mountedAbove: boolean): boolean {
+  if (!glyph || !taps || mountedAbove) return false
+  return [...(taps.labels ?? []), ...(taps.lamps ?? [])].some(
+    (box) => box.left < glyph.right && box.right > glyph.left && box.top < glyph.bottom && box.bottom > glyph.top,
   )
 }
 
@@ -196,15 +300,28 @@ export function DefendTowerCard({
       paths &&
       TREE_PATHS.some((path) => canTake(paths, path, gate).gate === 'lesson'),
   )
-  const cardH = easy && paths ? (lessonCue ? TOWER_TREE_LESSON_H : TOWER_TREE_H) : TOWER_CARD_H
   const markOnMap = Boolean(
     easy && paths && onUpgradePath && !isIncense(ability) && !isCross(ability) && !isBell(ability) && !isCandle(ability),
   )
-  const glyph = markOnMap
-    ? mapGlyphRect(point.left, point.top, cameraScale, { left: 0, top: 0, right: board.w, bottom: board.h })
-    : null
+  // Mid-wave the lamp card is a short buy strip. It places like the full card, above the bottom row.
+  const strip = markOnMap && midWave
+  const hasBuy = Boolean(paths && TREE_PATHS.some((path) => canTake(paths, path, gate).ok))
+  const cardH = strip ? STRIP_H : easy && paths ? (lessonCue ? TOWER_TREE_LESSON_H : TOWER_TREE_H) : TOWER_CARD_H
+  // A wave hides the map mark, so only a lamp card outside a wave has a mark to keep clear.
+  const glyph =
+    markOnMap && !midWave
+      ? mapGlyphRect(point.left, point.top, cameraScale, { left: 0, top: 0, right: board.w, bottom: board.h })
+      : null
   const [paintH, setPaintH] = useState(0)
-  const placed = placeTowerCard(point, board, clearOf, cameraScale, reserveBottom, cardH, glyph, paintH)
+  const [taps, setTaps] = useState<TowerTaps | null>(null)
+  const placedRaw = placeTowerCard(point, board, clearOf, cameraScale, reserveBottom, cardH, glyph, paintH, markOnMap ? taps : null, strip)
+  const covered = labelOverGlyph(
+    glyph,
+    markOnMap ? taps : null,
+    typeof document !== 'undefined' &&
+      [...document.querySelectorAll('[data-glyph-top]')].some((node) => node.getAttribute('data-glyph-top') === plotId),
+  )
+  const placed = covered ? { ...placedRaw, markClear: false } : placedRaw
   const levelLine = maxed ? TIER_MARK[tier] : `${TIER_MARK[next]} · ${cost}✦`
   const bursting = Boolean(levelBurst && levelBurst.to > levelBurst.from)
   const fromMark = bursting ? TIER_MARK[levelBurst!.from] : ''
@@ -213,6 +330,8 @@ export function DefendTowerCard({
   useLayoutEffect(() => {
     const painted = cardRef.current?.getBoundingClientRect().height ?? 0
     setPaintH((prev) => (Math.abs(prev - painted) < 0.5 ? prev : painted))
+    const next = markOnMap && cardRef.current ? measureTaps(cardRef.current, plotId) : null
+    setTaps((prev) => (sameTaps(prev, next) ? prev : next))
   })
 
   useEffect(() => {
@@ -842,12 +961,16 @@ export function DefendTowerCard({
   }
 
   if (easy && paths && onUpgradePath) {
+    // Nothing to buy mid-wave: the strip would be an empty box, so it is not shown at all.
+    if (strip && !hasBuy) return null
     return (
       <div
         ref={cardRef}
-        className={`defend-tower-card is-tree is-${placed.side}`}
+        className={`defend-tower-card is-tree is-${placed.side}${markOnMap && !stemShows(placed.left, point.left) ? ' is-stemless' : ''}`}
         data-upgrade-card
         data-upgrade-tree="yes"
+        data-strip={strip ? 'yes' : undefined}
+        data-place={`${point.left.toFixed(1)},${point.top.toFixed(1)},${cardH},${reserveBottom}`}
         data-mid-wave={midWave ? 'yes' : undefined}
         data-upgrade-plot={plotId}
         role="dialog"
@@ -856,7 +979,7 @@ export function DefendTowerCard({
         style={{
           left: placed.left,
           top: placed.top,
-          width: TOWER_CARD_W,
+          width: strip ? STRIP_W : TOWER_CARD_W,
           ['--stem' as string]: `${Math.round(point.left - placed.left)}px`,
         }}
       >
@@ -907,7 +1030,7 @@ export function DefendTowerCard({
           </div>
         ) : null}
         <p className="defend-tower-tool">{label}</p>
-        {markOnMap && !placed.markClear && paths ? (
+        {markOnMap && !strip && !placed.markClear && paths ? (
           <div className="defend-tower-mark" data-glyph-header="yes" data-glyph-stage={lampGlyphStage(paths)}>
             <LampUpgradeGlyph paths={paths} variant="rail" />
           </div>

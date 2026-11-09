@@ -189,6 +189,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
             <span
               key={id}
               className={`defend-type-chip is-${type}`}
+              data-chip-plot={id}
               style={{ left: at.left, top: at.top }}
             >
               {isIncense(type) ? INCENSE_LABEL : isCross(type) ? CROSS_LABEL : isBell(type) ? 'Bell' : isCandle(type) ? 'Candle' : (WATCH_ABILITY_LABEL[type] ?? type)}
@@ -196,6 +197,26 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           )
         })
       : null
+  // The mark rides above every lamp name and badge: HTML chips paint over the whole board, so a second copy of each
+  // mark is drawn in a layer over them. Same box, same camera. A wave hides the marks, so the layer is off there.
+  const glyphTop =
+    easy && phase !== 'wave' && boardBox && boardBox.w > 0 && planted.length > 0 ? (
+      <svg className="defend-glyph-top" viewBox={viewBox} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        {planted.map((id) => {
+          const type = towerType[id]
+          if (!type || isIncense(type) || isCross(type) || isBell(type)) return null
+          const at = nightTowers.anchor(id)
+          return (
+            <use
+              key={id}
+              href={`#lamp-glyph-${id}`}
+              data-glyph-top={id}
+              transform={`translate(${at.x} ${at.y + (lampRise[id] ?? 0)})`}
+            />
+          )
+        })}
+      </svg>
+    ) : null
   const towerCard = showCard ? (
     <DefendTowerCard
       plotId={upgradeAt as CityPlotId}
@@ -219,7 +240,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
       roadNote={roadNote}
       easy={easy}
       midWave={phase === 'wave'}
-      reserveBottom={easy && (boosting || phase === 'plant') ? CLEAR_BAR_RESERVE : 0}
+      reserveBottom={easy && (boosting || phase === 'plant' || phase === 'wave') ? CLEAR_BAR_RESERVE : 0}
       gate={lessonGate}
       onOpenLessons={onOpenLessons}
     />
@@ -388,6 +409,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
             })
         : null}
       {typeChips}
+      {glyphTop}
       <DefendNightWalkerCue
         easyTap={easyTap}
         tapTarget={tapTarget}

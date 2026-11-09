@@ -738,7 +738,7 @@ export function DefendNightActorsSvg({
                               {bellMark(tree)}
                             </text>
                           ) : tree ? (
-                            <LampUpgradeGlyph paths={tree} variant="map" />
+                            <LampUpgradeGlyph paths={tree} variant="map" domId={`lamp-glyph-${id}`} />
                           ) : (
                             <text
                               className={`defend-level-pip${justUp ? ' is-bump' : ''}`}
