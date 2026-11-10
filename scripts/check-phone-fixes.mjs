@@ -1816,6 +1816,7 @@ async function glyphSetup(page) {
           ...[...document.querySelectorAll('.defend-pad.is-planted')].filter((node) => node !== pad).flatMap((node) => many('text.defend-type-label', node)),
           ...many(`.defend-type-chip:not(.is-${tool})`),
         ],
+        typeLabels: [...document.querySelectorAll('text.defend-type-label')].map(box).filter(Boolean),
         nbMarks: [...document.querySelectorAll('.defend-pad.is-planted')].filter((node) => node !== pad).flatMap((node) => many('image.defend-type-mark', node)),
         // The mark is painted above the names when a second copy of it sits in a layer over every chip.
         above: (() => {
@@ -2159,9 +2160,15 @@ function glyphCardRules(frame, where, stats, stageKey, { settled = false } = {})
       if (frame.above) stats.aboveFrames += 1
     }
     if (under) stats.underFrames += 1
+    const typeOver = (frame.typeLabels ?? []).reduce((max, box) => Math.max(max, glyphArea(frame.glyph, box)), 0)
+    assert.ok(
+      typeOver === 0 || frame.header,
+      `${where}: a .defend-type-label overlaps the glyph by ${typeOver}px2 and the card shows no header copy, glyph ${JSON.stringify(frame.glyph)} labels ${JSON.stringify((frame.typeLabels ?? []).filter((box) => glyphArea(frame.glyph, box) > 0))}`,
+    )
     if (frame.header) {
-      glyphRule('header copy while a clear spot exists', spots === 0, `${where}: the header copy shows while ${spots} card spots clear the glyph+6, Begin-8, the rail, its buttons, the New lamp buttons, the neighbour lamps and their names, glyph ${JSON.stringify(frame.glyph)} card ${JSON.stringify(card)}`)
-      stats.headerSpotsMax = Math.max(stats.headerSpotsMax, spots)
+      const labelOnMark = frame.nbLabels.some((box) => glyphArea(frame.glyph, box) > 0)
+      glyphRule('header copy while a clear spot exists', spots === 0 || labelOnMark, `${where}: the header copy shows while ${spots} card spots clear the glyph+6, Begin-8, the rail, its buttons, the New lamp buttons, the neighbour lamps and their names, glyph ${JSON.stringify(frame.glyph)} card ${JSON.stringify(card)}`)
+      if (!labelOnMark) stats.headerSpotsMax = Math.max(stats.headerSpotsMax, spots)
       stats.headerBy.set(stageKey, (stats.headerBy.get(stageKey) ?? 0) + 1)
       if (settled) stats.headerSettled += 1
       else stats.headerFrames += 1
@@ -2756,7 +2763,102 @@ async function checkGlyphMaxWave(browser, port, errors, width, height) {
   await context.close()
 }
 
+/** Love at 464,360 with Reason on the seat above. The 1.4.571 live fail: Reason's name sits on the Love mark. */
+const LABEL_OVER_SEATS = { love: { cx: 464, cy: 360 }, reason: { cx: 464, cy: 224 } }
+const LABEL_OVER_SEARCH = '?playtest=1&nwSeed=2&nwMap=a2&nwRound=18&nwLamps=0&nwCam=1'
+const LABEL_OVER_SIZES = (process.env.NW_LABEL_SIZE || '375x667,390x844,412x915').split(',').map((size) => size.split('x').map(Number))
+
+async function checkLabelOverGlyph(browser, port, errors) {
+  for (const [width, height] of LABEL_OVER_SIZES) {
+    const label = `${width}x${height}`
+    const where = `${label} label over glyph`
+    const { context, page } = await openMap(browser, port, width, height, 'a2', { motion: true, search: LABEL_OVER_SEARCH })
+    page.on('pageerror', (error) => errors.push(`label over glyph ${where} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(`label over glyph ${where} ${msg.text()}`)
+    })
+    await glyphSetup(page)
+    await assertGlyphCamera(page, where)
+    const rings = await page.evaluate(() =>
+      [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({ cx: Number(ring.getAttribute('cx')), cy: Number(ring.getAttribute('cy')) })),
+    )
+    for (const seat of [LABEL_OVER_SEATS.reason, LABEL_OVER_SEATS.love]) {
+      assert.ok(rings.some((ring) => ring.cx === seat.cx && ring.cy === seat.cy), `${where} seat ${seat.cx},${seat.cy} is live ${JSON.stringify(rings)}`)
+    }
+    await glyphPlantAt(page, 'reason', LABEL_OVER_SEATS.reason, where)
+    await glyphPlantAt(page, 'love', LABEL_OVER_SEATS.love, where)
+    assert.equal(await page.locator('.defend-pad[data-tower-type="reason"]').count(), 1, `${where} Reason is planted`)
+    assert.equal(await page.locator('.defend-pad[data-tower-type="love"]').count(), 1, `${where} Love is planted`)
+    const driver = glyphDriver(page, where, errors)
+    assert.equal(await driver.ladder('love', GLYPH_LADDER), 8, `${where} reached stage 8 by real buys`)
+    await driver.closeCard()
+    await glyphPanToPad(page, 'love')
+    // 923e framed Love's mark near x=140. Centered, the card has no clear spot, so the header hides the label overlap.
+    for (let nudge = 0; nudge < 4; nudge += 1) {
+      const at = await page.evaluate(() => {
+        const box = document.querySelector('.defend-pad[data-tower-type="love"] .lamp-upgrade-glyph[data-glyph-variant="map"]')?.getBoundingClientRect()
+        return box ? { left: box.left, w: innerWidth, h: innerHeight } : null
+      })
+      if (!at || Math.abs(at.left - 140) < 8) break
+      const dx = Math.max(-140, Math.min(140, 140 - at.left))
+      const cx = at.w / 2
+      const cy = at.h / 2
+      await page.mouse.move(cx, cy)
+      await page.mouse.down()
+      await page.mouse.move(cx + dx, cy, { steps: 6 })
+      await page.mouse.up()
+      await page.waitForTimeout(500)
+    }
+    await page.evaluate(() => window.__glyphStart('love'))
+    await page.locator('.defend-pad[data-tower-type="love"]').click({ force: true })
+    await page.locator('.defend-tower-card').waitFor()
+    await page.waitForTimeout(520)
+    const frames = await page.evaluate(() => window.__glyphEnd())
+    const stats = newGlyphStats()
+    let n = 0
+    let maxOver = 0
+    for (const [index, frame] of frames.entries()) {
+      if (!frame.card || !frame.glyph) continue
+      n += 1
+      const over = (frame.typeLabels ?? []).reduce((max, box) => Math.max(max, glyphArea(frame.glyph, box)), 0)
+      maxOver = Math.max(maxOver, over)
+      assert.ok(
+        over === 0 || frame.header,
+        `${where} pop frame ${index}: a .defend-type-label overlaps the glyph by ${over}px2 and the card shows no header copy, glyph ${JSON.stringify(frame.glyph)} labels ${JSON.stringify(frame.typeLabels)} header ${JSON.stringify(frame.header)}`,
+      )
+      glyphCardRules(frame, `${where} pop frame ${index}`, stats, 'pop')
+    }
+    assert.ok(n >= 8, `${where} sampled ${n} card-open frames (need every pop-in frame, not one)`)
+    assert.equal(stats.beginHitBad, 0, `${where} Begin centre tap`)
+    assert.ok(stats.beginFrames > 0 && stats.railFrames > 0, `${where} saw Begin and the rail with the card open`)
+    const shotDir = process.env.NW_LABEL_SHOT_DIR
+    if (shotDir && width === 375) {
+      mkdirSync(shotDir, { recursive: true })
+      await page.screenshot({ path: join(shotDir, '375-card-open.png') })
+      const clip = await page.evaluate(() => {
+        const glyph = document.querySelector('.defend-pad[data-tower-type="love"] .lamp-upgrade-glyph[data-glyph-variant="map"]')?.getBoundingClientRect()
+        const label = [...document.querySelectorAll('text.defend-type-label')].find((node) => (node.textContent || '').includes('Reason'))?.getBoundingClientRect()
+        if (!glyph) return null
+        const left = Math.max(0, Math.min(glyph.left, label?.left ?? glyph.left) - 40)
+        const top = Math.max(0, Math.min(glyph.top, label?.top ?? glyph.top) - 40)
+        const right = Math.min(innerWidth, Math.max(glyph.right, label?.right ?? glyph.right) + 40)
+        const bottom = Math.min(innerHeight, Math.max(glyph.bottom, label?.bottom ?? glyph.bottom) + 56)
+        return { x: left, y: top, width: Math.max(8, right - left), height: Math.max(8, bottom - top) }
+      })
+      if (clip) await page.screenshot({ path: join(shotDir, '375-glyph-crop.png'), clip })
+    }
+    console.log(`checkLabelOverGlyph ok ${label} frames=${n}`)
+    if (maxOver > 0) console.log(`checkLabelOverGlyph ${label} header covered label overlap max ${maxOver.toFixed(2)}px2`)
+    await context.close()
+  }
+}
+
 async function checkLampGlyph(browser, port, errors) {
+  if (process.env.NW_LABEL_ONLY === '1') {
+    await checkLabelOverGlyph(browser, port, errors)
+    return
+  }
+  await checkLabelOverGlyph(browser, port, errors)
   const only = process.env.NW_GLYPH_SIZE
   for (const [width, height] of GLYPH_SIZES.filter(([w, h]) => process.env.NW_GLYPH_SWEEP_ONLY !== '1' && (!only || only === `${w}x${h}`))) {
     const label = `${width}x${height}`
@@ -3227,7 +3329,7 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', '1.4.565 leak banner nights stay free of console errors')
       return
     }
-    if (process.env.NW_GLYPH_ONLY === '1') {
+    if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
       return
@@ -3410,7 +3512,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
