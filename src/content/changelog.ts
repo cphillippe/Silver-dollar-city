@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.575',
+    title: 'Easy word search: the hint stays above the letters',
+    when: '2026-11-10',
+    items: [
+      'Word search: the hint stays above the letters.',
+      'Hard stays the same.',
+      'Refs #899.',
+    ],
+  },
+  {
     version: '1.4.574',
     title: 'Night Watch: the lamp card stays short on a phone',
     when: '2026-11-09',
