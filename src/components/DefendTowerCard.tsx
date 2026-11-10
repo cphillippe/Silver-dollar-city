@@ -1049,7 +1049,7 @@ export function DefendTowerCard({
     return (
       <div
         ref={cardRef}
-        className={`defend-tower-card is-tree is-${placed.side}${markOnMap && !stemShows(placed.left, point.left) ? ' is-stemless' : ''}`}
+        className={`defend-tower-card is-tree is-lamp-rows is-${placed.side}${markOnMap && !stemShows(placed.left, point.left) ? ' is-stemless' : ''}`}
         data-upgrade-card
         data-upgrade-tree="yes"
         data-strip={strip ? 'yes' : undefined}

@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.574',
+    title: 'Night Watch: the lamp card stays short on a phone',
+    when: '2026-11-09',
+    items: [
+      'On a phone, the lamp card is shorter, so the lamp mark stays on the map.',
+      'Hard stays the same.',
+      'Refs #933.',
+    ],
+  },
+  {
     version: '1.4.573',
     title: 'Night Watch: a neighbour name stays off the lamp mark',
     when: '2026-11-09',
