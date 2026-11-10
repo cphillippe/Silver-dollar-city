@@ -30,7 +30,7 @@ function savePayload() {
   return {
     kind: 'silver-city-save',
     schemaVersion: 1,
-    appVersion: '1.4.572',
+    appVersion: '1.4.575',
     savedAt: now.toISOString(),
     progress: {
       started: true,
@@ -603,7 +603,7 @@ async function assertOneGoldCue(page, tag) {
 }
 
 function assertTapSource() {
-  assert.equal(APP_VERSION, '1.4.573')
+  assert.equal(APP_VERSION, '1.4.575')
   assert.equal(GEM_TAP_MAX_TRAVEL_PX, 6)
   assert.equal(GEM_TAP_MAX_MS, 800)
   const kept = extendStraightTap([{ r: 2, c: 1 }], { r: 2, c: 4 }, 8)
