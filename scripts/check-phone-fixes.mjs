@@ -12,6 +12,7 @@ import { chromium } from '@playwright/test'
 import { SAVE_KIND } from '../src/lib/save.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 import { LAMP_GLYPH_COLOR } from '../src/nightWatch/lampGlyph.ts'
+import { withPlaytest1 } from './dev-ui-playtest.mjs'
 
 const SAVE = {
   kind: SAVE_KIND,
@@ -3505,6 +3506,150 @@ async function compactGold(page, stats, where) {
   }
 }
 
+const HINT_SIZES = [[375, 667], [390, 844]]
+const HINT_FRAMES = 30
+const HINT_SHOTS = process.env.GEM_HINT_SHOT_DIR || join(tmpdir(), 'gem-hint-slot')
+
+function hintSave() {
+  const now = new Date()
+  const today = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-')
+  return {
+    kind: SAVE_KIND,
+    schemaVersion: SAVE_SCHEMA_VERSION,
+    appVersion: '1.4.574',
+    savedAt: now.toISOString(),
+    progress: {
+      started: true,
+      easyMode: true,
+      lastDailyDate: today,
+      dailyDates: [today],
+      completed: [],
+      held: [],
+      easyTaught: [],
+      easyHeld: [],
+      taught: [],
+      journal: [],
+      learnings: [],
+      memory: {},
+      matchLifetime: 5000,
+      matchSkillSeen: 2,
+    },
+  }
+}
+
+async function hintPointer(page, locator) {
+  await locator.scrollIntoViewIfNeeded()
+  const box = await locator.boundingBox()
+  assert.ok(box && box.width > 0 && box.height > 0, 'Easy Match pointer target has no box')
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.up()
+}
+
+/** Story-docked Easy panel-blast. Same open as check-gem-pop-live: ?gemSeed, Settings debug, wait for the board. */
+async function openEasyMatch(page, lineId, seed) {
+  await page.goto(withPlaytest1(`/?gemSeed=${seed}`))
+  await page.getByRole('main', { name: 'Home' }).waitFor()
+  await hintPointer(page, page.getByRole('button', { name: 'Settings', exact: true }))
+  await hintPointer(page, page.locator('details.settings-debug summary'))
+  await hintPointer(page, page.locator('details.settings-debug').getByRole('button', { name: new RegExp(`^${lineId} ·`) }).first())
+  await page.locator('.gem-board').waitFor()
+  await page.locator('.gem-hint-slot').waitFor()
+}
+
+/**
+ * #899. Easy Match open, story-docked panel-blast, html[data-easy=on].
+ * Many frames: the hint slot ends at or above the board, letters stay >= 16.5px,
+ * and the gold-pop slot count is exactly 1 (0 or 2+ fail).
+ * 1.4.574 already clears both sizes (375 gap 0.48px, 390 gap 86px). No CSS change.
+ * The preselected .is-start-gold cell is 0; tap-live locks that.
+ */
+export async function checkGemHintSlot(browser, port, errors = []) {
+  for (const [width, height] of HINT_SIZES) {
+    const label = `${width}x${height}`
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      isMobile: true,
+    })
+    await context.addInitScript(
+      ({ key, save }) => localStorage.setItem(key, JSON.stringify(save)),
+      { key: STORAGE_KEY, save: hintSave() },
+    )
+    const page = await context.newPage()
+    page.on('pageerror', (error) => errors.push(`hint ${label} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(`hint ${label} ${msg.text()}`)
+    })
+    await openEasyMatch(page, 'ob-tuning', 0)
+    const frames = await page.evaluate(async (count) => {
+      const shown = (el) => {
+        if (!el) return false
+        const style = getComputedStyle(el)
+        const box = el.getBoundingClientRect()
+        return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0.05 && box.width > 1 && box.height > 1
+      }
+      const overlap = (a, b) => {
+        const wide = Math.min(a.right, b.right) - Math.max(a.left, b.left)
+        const tall = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top)
+        return wide > 0 && tall > 0 ? wide * tall : 0
+      }
+      const out = []
+      for (let i = 0; i < count; i += 1) {
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+        const slot = document.querySelector('.gem-hint-slot')
+        const board = document.querySelector('.gem-board')
+        const slotBox = slot?.getBoundingClientRect()
+        const boardBox = board?.getBoundingClientRect()
+        const sizes = [...document.querySelectorAll('.gem-board .gem-letter, .gem-board .gem-cell')]
+          .map((el) => parseFloat(getComputedStyle(el).fontSize))
+          .filter((n) => Number.isFinite(n) && n > 0)
+        out.push({
+          gold: [...document.querySelectorAll('.gem-hint-slot')].filter(shown).length,
+          startGold: document.querySelectorAll('.gem-cell.is-start-gold').length,
+          slotBottom: slotBox ? slotBox.bottom : null,
+          boardTop: boardBox ? boardBox.top : null,
+          overlap: slotBox && boardBox ? overlap(slotBox, boardBox) : null,
+          letterMin: sizes.length ? Math.min(...sizes) : null,
+          easy: document.documentElement.dataset.easy === 'on',
+          docked: Boolean(document.querySelector('html[data-easy="on"] .play.is-gem-search.is-panel-blast.is-story-docked .gem-hint-slot')),
+          boardShown: shown(board),
+        })
+      }
+      return out
+    }, HINT_FRAMES)
+    assert.ok(frames.length >= 20, `${label} sampled ${frames.length} frames`)
+    let letterMin = Infinity
+    for (const [index, frame] of frames.entries()) {
+      assert.equal(frame.easy, true, `${label} frame ${index} html[data-easy=on]`)
+      assert.equal(frame.docked, true, `${label} frame ${index} story-docked panel-blast`)
+      assert.equal(frame.boardShown, true, `${label} frame ${index} board is visible`)
+      assert.equal(frame.gold, 1, `${label} frame ${index} gold count === 1 (saw ${frame.gold}, start-gold ${frame.startGold})`)
+      assert.ok(frame.slotBottom != null && frame.boardTop != null, `${label} frame ${index} slot and board rects`)
+      assert.ok(frame.slotBottom <= frame.boardTop, `${label} frame ${index} slot bottom ${frame.slotBottom} <= board top ${frame.boardTop}`)
+      assert.equal(frame.overlap, 0, `${label} frame ${index} overlap area ${frame.overlap}`)
+      assert.ok(frame.letterMin >= 16.5, `${label} frame ${index} letter ${frame.letterMin}px >= 16.5`)
+      letterMin = Math.min(letterMin, frame.letterMin)
+    }
+    if (process.env.GEM_HINT_SHOT_DIR && width === 375) {
+      mkdirSync(HINT_SHOTS, { recursive: true })
+      const clip = await page.evaluate(() => {
+        const slot = document.querySelector('.gem-hint-slot')?.getBoundingClientRect()
+        const board = document.querySelector('.gem-board')?.getBoundingClientRect()
+        if (!slot || !board) return null
+        const top = Math.max(0, Math.min(slot.top, board.top) - 8)
+        const bottom = Math.min(innerHeight, board.top + 48)
+        return { x: 0, y: top, width: innerWidth, height: Math.max(8, bottom - top) }
+      })
+      if (clip) await page.screenshot({ path: join(HINT_SHOTS, '375-after.png'), clip })
+    }
+    const shown = Number(letterMin.toFixed(2))
+    console.log(`checkGemHintSlot ok ${label} frames=${frames.length} letterMin=${shown}`)
+    await context.close()
+  }
+}
+
 /**
  * 1.4.574 (#933). Live sweep at 375, 390 and 412: camera on, banked sparks, four neighbour lamps,
  * seats 600,88 | 464,224 | 464,360 | 464,768 | 600,904, love stages 2–7. The header glyph copy
@@ -3660,11 +3805,17 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', '1.4.574 compact lamp card nights stay free of console errors')
       return
     }
+    if (process.env.GEM_HINT_ONLY === '1') {
+      await checkGemHintSlot(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'hint slot nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
       return
     }
+    await checkGemHintSlot(browser, port, errors)
     await checkNightRun905(browser, port, errors)
     await checkLampGlyph(browser, port, errors)
     await checkCompactLampCard(browser, port, errors)
@@ -3844,7 +3995,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
