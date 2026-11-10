@@ -3556,7 +3556,7 @@ async function checkCompactLampCard(browser, port, errors) {
         await compactGold(page, stats, `${where} love@${stage}`)
         await compactFonts(page, `${where} love@${stage}`)
         if (process.env.NW_COMPACT_SHOT === '1' && width === 375 && seat.cx === 464 && seat.cy === 768 && stage === 4) {
-          const dir = process.env.NW_COMPACT_SHOT_DIR || '/opt/cursor/artifacts'
+          const dir = process.env.NW_COMPACT_SHOT_DIR || join(tmpdir(), 'nw-compact-shots')
           mkdirSync(dir, { recursive: true })
           const name = tall ? '375-love4-before' : '375-love4-after'
           await page.screenshot({ path: join(dir, `${name}.png`) })
