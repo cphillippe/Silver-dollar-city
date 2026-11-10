@@ -28,9 +28,9 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.574',
+    version: '1.4.575',
     title: 'Night Run: five real forces at the Just Right Gate',
-    when: '2026-11-09',
+    when: '2026-11-10',
     items: [
       'After the three cranks, the Star Tower gate shows five real forces: gravity, strong, electric, weak and space.',
       'Turn a spinner dial to tune each one. Each has to land inside its real window for life.',
