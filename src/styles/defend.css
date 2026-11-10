@@ -4824,7 +4824,7 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
    html.is-lamp-card-573 restores the 1.4.573 height for the proof. */
 @media (max-width: 412px) {
   html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows {
-    padding: 2px 6px 2px;
+    padding: 1px 6px 1px;
   }
 
   html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-tower-tool {
@@ -4835,12 +4835,12 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
 
   html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path {
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: 2px 6px;
-    margin-top: 2px;
+    gap: 1px 6px;
+    margin-top: 1px;
   }
 
   html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path + .defend-path {
-    margin-top: 2px;
+    margin-top: 1px;
   }
 
   html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path-name {
@@ -4873,13 +4873,14 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
     line-height: 1.05;
   }
 
+  /* 1.4.576 Easy phone lamp reason. The lock and Bright wrap. Ellipsis was cutting them. */
   html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path-line,
   html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path-lock,
   html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-bright-line,
   html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-tower-road {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
   }
 
   html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path-pip {
@@ -4905,28 +4906,31 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
     grid-row: 1 / span 2;
     align-self: center;
     height: 44px;
+    /* The pull control sits on the top-right. The buy stays to its left. */
+    margin-right: 34px;
   }
 
   html[data-easy='on']:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-bright-buy {
-    flex-direction: row;
-    align-items: center;
-    gap: 4px;
-    margin-top: 2px;
-    min-height: 28px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    margin-top: 1px;
+    min-height: 0;
     height: auto;
-    padding: 2px 6px;
+    padding: 0 4px;
     font-size: 13px;
     line-height: 1.05;
-    white-space: nowrap;
+    white-space: normal;
     box-shadow: none;
   }
 
   html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-bright-line {
+    display: block;
     min-width: 0;
   }
 
   html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-bright-on {
-    margin-top: 2px;
+    margin-top: 1px;
   }
 
   /* The buy stays the path colour. The gold lip would be a second cue beside Begin. */
