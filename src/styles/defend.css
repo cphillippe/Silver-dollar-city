@@ -4818,6 +4818,124 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   animation: none;
 }
 
+/* 1.4.574 Easy phone lamp card. Tighter rows, a one-line reason, and a shorter step row
+   beside the buy, so the card finds a clear spot and the header glyph copy stays off.
+   Phone widths through 412. Hard never has .is-easy-watch. The mid-wave strip keeps its box.
+   html.is-lamp-card-573 restores the 1.4.573 height for the proof. */
+@media (max-width: 412px) {
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows {
+    padding: 2px 6px 2px;
+  }
+
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-tower-tool {
+    margin: 0 28px 0 0;
+    font-size: 13px;
+    line-height: 1.05;
+  }
+
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2px 6px;
+    margin-top: 2px;
+  }
+
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path + .defend-path {
+    margin-top: 2px;
+  }
+
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path-name {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+    font-size: 13px;
+    line-height: 1.05;
+  }
+
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path-pips {
+    grid-column: 1;
+    grid-row: 2;
+    gap: 2px;
+  }
+
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path-lock,
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-lesson-cue {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path-line,
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path-lock,
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-bright-line,
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-bright-on,
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-tower-road,
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-lesson-pillar {
+    font-size: 13px;
+    line-height: 1.05;
+  }
+
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path-line,
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path-lock,
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-bright-line,
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-tower-road {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path-pip {
+    width: auto;
+    min-width: 18px;
+    height: 16px;
+    padding: 0 2px;
+    font-size: 13px;
+    line-height: 16px;
+  }
+
+  html[data-easy='on']:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path-buy,
+  html[data-easy='on']:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-lesson-open {
+    min-height: 44px;
+    padding: 2px 6px;
+    font-size: 13px;
+    line-height: 1.05;
+    box-shadow: none;
+  }
+
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path-buy {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    height: 44px;
+  }
+
+  html[data-easy='on']:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-bright-buy {
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    margin-top: 2px;
+    min-height: 28px;
+    height: auto;
+    padding: 2px 6px;
+    font-size: 13px;
+    line-height: 1.05;
+    white-space: nowrap;
+    box-shadow: none;
+  }
+
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-bright-line {
+    min-width: 0;
+  }
+
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-bright-on {
+    margin-top: 2px;
+  }
+
+  /* The buy stays the path colour. The gold lip would be a second cue beside Begin. */
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch .defend-tower-card.is-lamp-rows .defend-path-buy,
+  html:not(.is-lamp-card-573) .defend-page.is-easy-watch .defend-tower-card.is-lamp-rows .defend-bright-buy {
+    box-shadow: none;
+  }
+}
+
 /* 1.4.464: the map list sits on the plate. Gaps and the caption let a plant tap through. */
 .defend-page.is-placing .nw-map-pick,
 .defend-page.is-placing .nw-map-rule {
