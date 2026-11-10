@@ -41,6 +41,17 @@ export const CHANGELOG: ChangeNote[] = [
     ],
   },
   {
+    version: '1.4.573',
+    title: 'Night Watch: a neighbour name stays off the lamp mark',
+    when: '2026-11-09',
+    items: [
+      'Opening a lamp keeps a neighbour name off the lamp mark.',
+      'When the screen has no clear spot, the card shows its own copy of the mark.',
+      'Hard stays the same.',
+      'Refs #923.',
+    ],
+  },
+  {
     version: '1.4.572',
     title: 'Night Run: fair robbers, a safe lamp and easy turns',
     when: '2026-11-06',
