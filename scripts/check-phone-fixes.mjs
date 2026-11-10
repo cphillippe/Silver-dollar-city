@@ -1852,7 +1852,7 @@ async function glyphSetup(page) {
           })
           .map(box)
           .filter(Boolean),
-        // 1.4.576: every painted text line on the compact card. The 1px mid-wave clip is not a line.
+        // 1.4.576: every painted text line. Hidden lines use visibility:hidden and are skipped here.
         lines: window.__compactLines ? (() => {
           const card = document.querySelector('.defend-tower-card')
           if (!card) return []
@@ -1862,10 +1862,8 @@ async function glyphSetup(page) {
             if (!direct) continue
             const style = getComputedStyle(node)
             if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
-            if (style.clipPath && style.clipPath.includes('inset(50%')) continue
             const rect = node.getBoundingClientRect()
-            const reasonNode = node.matches('.defend-path-lock, .defend-bright-line, .defend-path-line, .defend-tower-road')
-            if (!reasonNode && (rect.width < 8 || rect.height < 8)) continue
+            if (rect.width < 1 || rect.height < 1) continue
             const text = (node.textContent || '').replace(/\s+/g, ' ').trim()
             if (!text) continue
             let kind = 'text'
@@ -1880,6 +1878,8 @@ async function glyphSetup(page) {
               overflow: style.textOverflow,
               scroll: node.scrollWidth,
               client: node.clientWidth,
+              scrollH: node.scrollHeight,
+              clientH: node.clientHeight,
             })
           }
           return out
@@ -3438,22 +3438,23 @@ function eatCompact(stats, frames) {
       stats.lineFrames += 1
       for (const line of frame.lines) {
         const source = compactReasonSource(line)
-        const ellipsis = line.overflow === 'ellipsis' && line.scroll > line.client + 1
+        const cut = line.scroll > line.client + 1 || line.scrollH > line.clientH + 1
+        const ellipsis = line.overflow === 'ellipsis'
         const marker = line.text.includes('…') || line.text.endsWith('...')
         const mismatch = source !== null && source !== line.text
-        const note = `${line.kind}|${line.overflow}|${line.scroll}|${line.client}|${line.text}`
+        const note = `${line.kind}|${line.overflow}|${line.scroll}|${line.client}|${line.scrollH}|${line.clientH}|${line.text}`
         if (line.kind !== 'text' && !stats.lineSeen.has(note) && stats.lineNotes.length < 24) {
           stats.lineSeen.add(note)
           stats.lineNotes.push(
-            `${line.kind} overflow=${line.overflow} scroll=${line.scroll} client=${line.client} text=${JSON.stringify(line.text)}`,
+            `${line.kind} overflow=${line.overflow} scroll=${line.scroll} client=${line.client} scrollH=${line.scrollH} clientH=${line.clientH} text=${JSON.stringify(line.text)}`,
           )
         }
-        if (ellipsis || marker || mismatch) {
+        if (cut || ellipsis || marker || mismatch) {
           stats.clipped += 1
           if (!stats.clipSeen.has(line.text) && stats.clipSample.length < 8) {
             stats.clipSeen.add(line.text)
             stats.clipSample.push(
-              `${line.kind} ${JSON.stringify(line.text)} overflow=${line.overflow} scroll=${line.scroll} client=${line.client} source=${JSON.stringify(source)}`,
+              `${line.kind} ${JSON.stringify(line.text)} overflow=${line.overflow} scroll=${line.scroll} client=${line.client} scrollH=${line.scrollH} clientH=${line.clientH} source=${JSON.stringify(source)}`,
             )
           }
         }

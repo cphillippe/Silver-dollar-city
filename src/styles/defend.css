@@ -4889,7 +4889,7 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
     height: 16px;
     padding: 0 2px;
     font-size: 13px;
-    line-height: 16px;
+    line-height: 14px;
   }
 
   html[data-easy='on']:not(.is-lamp-card-573) .defend-page.is-easy-watch:not(.is-easy-tap) .defend-tower-card.is-lamp-rows .defend-path-buy,
@@ -6116,6 +6116,7 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+  visibility: hidden;
 }
 
 /* 1.4.507 Easy showdown crown. The hold and the drain stay on the board.
@@ -6400,7 +6401,9 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   box-shadow: 0 0 12px var(--berry);
 }
 
-/* 792b NWUI-5: the plant card drops its two reach lines (scan-read clip, never display:none) so it stays short and off Begin. */
+/* 792b NWUI-5: the plant card drops its two reach lines so it stays short and off Begin.
+   1.4.576: visibility:hidden, not a 1px clip. The lines are not painted while placing.
+   Never display:none. */
 .defend-page.is-easy-watch.is-placing .defend-tower-card .defend-path-line {
   position: absolute;
   width: 1px;
@@ -6412,6 +6415,7 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+  visibility: hidden;
 }
 
 /* 792b NWUI-8: Wave survived! holds about 2.4s. It never takes a tap (pointer-events inherited from the base rule). */
