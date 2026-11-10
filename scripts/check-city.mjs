@@ -1941,27 +1941,27 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-// 1.4.574: Night Run five real forces just-right gate (#901). Provisional — re-pins to main+1 at gate after #938; #937/#923 1.4.573 is now in the log.
-assert.equal(APP_VERSION, '1.4.574')
-assert.equal(CHANGELOG[0].version, '1.4.574', '1.4.574 is the newest row')
-assert.match(latestChange('1.4.574').items.join('\n'), /Refs #901/, '1.4.574 changelog refs #901')
-assert.doesNotMatch(latestChange('1.4.574').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.574 changelog uses Refs only')
+// 1.4.575: Night Run five real forces just-right gate (#901). Provisional — #938 owns 1.4.574; re-pin to main+1 after #938 lands.
+assert.equal(APP_VERSION, '1.4.575')
+assert.equal(CHANGELOG[0].version, '1.4.575', '1.4.575 is the newest row')
+assert.match(latestChange('1.4.575').items.join('\n'), /Refs #901/, '1.4.575 changelog refs #901')
+assert.doesNotMatch(latestChange('1.4.575').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.575 changelog uses Refs only')
 assert.doesNotMatch(
-  [latestChange('1.4.574').title, ...latestChange('1.4.574').items].join('\n'),
+  [latestChange('1.4.575').title, ...latestChange('1.4.575').items].join('\n'),
   /\bHard\b|\bMedium\b|\?playtest=1/,
-  '1.4.574 changelog stays Easy-only and player-facing',
+  '1.4.575 changelog stays Easy-only and player-facing',
 )
 assert.equal(
-  playerVisibleChangeItems(latestChange('1.4.574').items).length,
+  playerVisibleChangeItems(latestChange('1.4.575').items).length,
   5,
-  '1.4.574 player list drops only the Refs line',
+  '1.4.575 player list drops only the Refs line',
 )
 {
   const nr901 = readFileSync(new URL('../public/night-run/index.html', import.meta.url), 'utf8')
-  assert.match(nr901, /function goalReady\(d\)/, '1.4.574 Night Run goalReady for Star Tower after parts')
-  assert.match(nr901, /function hintBfs\(use\)/, '1.4.574 keeps #905 hintBfs sticky goal')
-  assert.match(nr901, /rk=q=>q\.kind==='robber'\?0/, '1.4.574 keeps #905 robber tap priority')
-  assert.match(nr901, /function turnBtn\(id,sg\)/, '1.4.574 keeps #905 turn tap')
+  assert.match(nr901, /function goalReady\(d\)/, '1.4.575 Night Run goalReady for Star Tower after parts')
+  assert.match(nr901, /function hintBfs\(use\)/, '1.4.575 keeps #905 hintBfs sticky goal')
+  assert.match(nr901, /rk=q=>q\.kind==='robber'\?0/, '1.4.575 keeps #905 robber tap priority')
+  assert.match(nr901, /function turnBtn\(id,sg\)/, '1.4.575 keeps #905 turn tap')
 }
 // 1.4.573: neighbour type names on the open lamp mark are hard obstacles (#923). Easy only.
 assert.equal(CHANGELOG[1].version, '1.4.573', '1.4.573 follows the newest row')
