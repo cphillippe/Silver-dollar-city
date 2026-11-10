@@ -3507,7 +3507,7 @@ async function compactGold(page, stats, where) {
 }
 
 const HINT_SIZES = [[375, 667], [390, 844]]
-const HINT_FRAMES = 30
+const HINT_SAMPLE_MS = 1500
 const HINT_SHOTS = process.env.GEM_HINT_SHOT_DIR || join(tmpdir(), 'gem-hint-slot')
 
 function hintSave() {
@@ -3559,10 +3559,10 @@ async function openEasyMatch(page, lineId, seed) {
 
 /**
  * #899. Easy Match open, story-docked panel-blast, html[data-easy=on].
- * Many frames: the hint slot ends at or above the board, letters stay >= 16.5px,
- * and the gold-pop slot count is exactly 1 (0 or 2+ fail).
- * 1.4.574 already clears both sizes (375 gap 0.48px, 390 gap 86px). No CSS change.
- * The preselected .is-start-gold cell is 0; tap-live locks that.
+ * From the first board-visible frame through at least 1.5s: the hint slot ends at or
+ * above the board (overlap 0), letters stay >= 16.5px, exactly one hint slot.
+ * Gold cues use the mapGoldCues color test on the play screen. Tile fills are palette.
+ * 1.4.564 removed the preselected gold cell; check-gem-tap-live locks that at 0.
  */
 export async function checkGemHintSlot(browser, port, errors = []) {
   for (const [width, height] of HINT_SIZES) {
@@ -3583,55 +3583,110 @@ export async function checkGemHintSlot(browser, port, errors = []) {
       if (msg.type() === 'error') errors.push(`hint ${label} ${msg.text()}`)
     })
     await openEasyMatch(page, 'ob-tuning', 0)
-    const frames = await page.evaluate(async (count) => {
+    const sample = await page.evaluate(async (minMs) => {
+      // Same gold test as mapGoldCues, rooted on the Easy Match play screen.
+      const gold = (value) => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+        let match
+        while ((match = re.exec(value || ''))) {
+          const r = Number(match[1])
+          const g = Number(match[2])
+          const b = Number(match[3])
+          const a = match[4] === undefined ? 1 : Number(match[4])
+          if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
       const shown = (el) => {
         if (!el) return false
         const style = getComputedStyle(el)
         const box = el.getBoundingClientRect()
-        return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0.05 && box.width > 1 && box.height > 1
+        return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0 && box.width > 1 && box.height > 1
       }
-      const overlap = (a, b) => {
+      const overlapOf = (a, b) => {
         const wide = Math.min(a.right, b.right) - Math.max(a.left, b.left)
         const tall = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top)
         return wide > 0 && tall > 0 ? wide * tall : 0
       }
-      const out = []
-      for (let i = 0; i < count; i += 1) {
+      const playGoldCues = () => {
+        const root = document.querySelector('.play.is-gem-search')
+        if (!root) return []
+        const names = []
+        for (const node of root.querySelectorAll('*')) {
+          if (!shown(node)) continue
+          const style = getComputedStyle(node)
+          const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+          const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+          const tile = node.classList.contains('gem-cell')
+          // Board tile fills are palette, not a cue (same skip as the Match gold helpers).
+          const fill = tile ? false : gold(style.backgroundImage) || gold(style.backgroundColor)
+          const glow = gold(style.boxShadow) || (text && gold(style.color))
+          if (fill || border || glow) {
+            names.push(`${node.tagName}.${node.getAttribute('class') || ''}`.replace(/\s+/g, '.').slice(0, 80))
+          }
+        }
+        return names
+      }
+      const frames = []
+      let started = 0
+      const giveUp = performance.now() + 8000
+      while (performance.now() < giveUp) {
         await new Promise((resolve) => requestAnimationFrame(resolve))
         const slot = document.querySelector('.gem-hint-slot')
         const board = document.querySelector('.gem-board')
-        const slotBox = slot?.getBoundingClientRect()
-        const boardBox = board?.getBoundingClientRect()
+        if (!shown(board)) {
+          if (started) break
+          continue
+        }
+        const now = performance.now()
+        if (!started) started = now
+        const slotBox = shown(slot) ? slot.getBoundingClientRect() : null
+        const boardBox = board.getBoundingClientRect()
         const sizes = [...document.querySelectorAll('.gem-board .gem-letter, .gem-board .gem-cell')]
           .map((el) => parseFloat(getComputedStyle(el).fontSize))
           .filter((n) => Number.isFinite(n) && n > 0)
-        out.push({
-          gold: [...document.querySelectorAll('.gem-hint-slot')].filter(shown).length,
-          startGold: document.querySelectorAll('.gem-cell.is-start-gold').length,
+        const cues = playGoldCues()
+        frames.push({
+          t: now - started,
+          goldCues: cues.length,
+          goldNames: cues.slice(0, 8),
+          slots: [...document.querySelectorAll('.gem-hint-slot')].filter(shown).length,
           slotBottom: slotBox ? slotBox.bottom : null,
-          boardTop: boardBox ? boardBox.top : null,
-          overlap: slotBox && boardBox ? overlap(slotBox, boardBox) : null,
+          boardTop: boardBox.top,
+          overlap: slotBox ? overlapOf(slotBox, boardBox) : null,
           letterMin: sizes.length ? Math.min(...sizes) : null,
           easy: document.documentElement.dataset.easy === 'on',
-          docked: Boolean(document.querySelector('html[data-easy="on"] .play.is-gem-search.is-panel-blast.is-story-docked .gem-hint-slot')),
-          boardShown: shown(board),
+          docked: Boolean(document.querySelector('html[data-easy="on"] .play.is-gem-search.is-panel-blast.is-story-docked')),
         })
+        if (now - started >= minMs) break
       }
-      return out
-    }, HINT_FRAMES)
-    assert.ok(frames.length >= 20, `${label} sampled ${frames.length} frames`)
+      const span = frames.length ? frames[frames.length - 1].t - frames[0].t : 0
+      return { frames, span }
+    }, HINT_SAMPLE_MS)
+    const frames = sample.frames
+    assert.ok(frames.length >= 20, `${label} sampled ${frames.length} frames across ${sample.span.toFixed(0)}ms`)
+    assert.ok(sample.span >= HINT_SAMPLE_MS, `${label} sampled ${sample.span.toFixed(0)}ms from the first board frame (need ${HINT_SAMPLE_MS})`)
     let letterMin = Infinity
+    let gapMin = Infinity
+    const goldSeen = new Set()
     for (const [index, frame] of frames.entries()) {
       assert.equal(frame.easy, true, `${label} frame ${index} html[data-easy=on]`)
       assert.equal(frame.docked, true, `${label} frame ${index} story-docked panel-blast`)
-      assert.equal(frame.boardShown, true, `${label} frame ${index} board is visible`)
-      assert.equal(frame.gold, 1, `${label} frame ${index} gold count === 1 (saw ${frame.gold}, start-gold ${frame.startGold})`)
-      assert.ok(frame.slotBottom != null && frame.boardTop != null, `${label} frame ${index} slot and board rects`)
+      assert.equal(frame.slots, 1, `${label} frame ${index} hint slot count === 1 (saw ${frame.slots})`)
+      assert.equal(
+        frame.goldCues,
+        0,
+        `${label} frame ${index} goldCues === 0 (locked by check-gem-tap-live) (saw ${frame.goldCues} ${frame.goldNames.join(' | ')})`,
+      )
+      assert.ok(frame.slotBottom != null, `${label} frame ${index} hint slot has a rect`)
       assert.ok(frame.slotBottom <= frame.boardTop, `${label} frame ${index} slot bottom ${frame.slotBottom} <= board top ${frame.boardTop}`)
       assert.equal(frame.overlap, 0, `${label} frame ${index} overlap area ${frame.overlap}`)
       assert.ok(frame.letterMin >= 16.5, `${label} frame ${index} letter ${frame.letterMin}px >= 16.5`)
       letterMin = Math.min(letterMin, frame.letterMin)
+      gapMin = Math.min(gapMin, frame.boardTop - frame.slotBottom)
+      goldSeen.add(frame.goldCues)
     }
+    assert.equal(goldSeen.size, 1, `${label} gold cue count changed across frames ${[...goldSeen].join(',')}`)
     if (process.env.GEM_HINT_SHOT_DIR && width === 375) {
       mkdirSync(HINT_SHOTS, { recursive: true })
       const clip = await page.evaluate(() => {
@@ -3644,8 +3699,10 @@ export async function checkGemHintSlot(browser, port, errors = []) {
       })
       if (clip) await page.screenshot({ path: join(HINT_SHOTS, '375-after.png'), clip })
     }
-    const shown = Number(letterMin.toFixed(2))
-    console.log(`checkGemHintSlot ok ${label} frames=${frames.length} letterMin=${shown}`)
+    const gap = Number(gapMin.toFixed(2))
+    const letters = Number(letterMin.toFixed(2))
+    const gold = frames[0].goldCues
+    console.log(`checkGemHintSlot ok ${label} frames=${frames.length} gap=${gap} letterMin=${letters} gold=${gold}`)
     await context.close()
   }
 }
