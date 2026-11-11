@@ -2962,10 +2962,16 @@ async function checkOffTopGlyph(browser, port, errors) {
           await page.locator('.defend-tower-card').waitFor()
         }
         await page.locator('.defend-tower-card button.defend-path-buy[data-path-buy="strong"]').click()
-        await page.waitForTimeout(260)
+        // A path buy ignores a second tap for 350ms. Wait that out before Escape.
+        await page.waitForTimeout(420)
       }
+      const card = page.locator('.defend-tower-card')
       await page.keyboard.press('Escape')
-      await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+      for (let attempt = 0; attempt < 3 && (await card.count()); attempt += 1) {
+        await page.waitForTimeout(120)
+        await page.keyboard.press('Escape')
+      }
+      await card.waitFor({ state: 'detached' })
     }
     await page.evaluate(
       ({ half, up }) => {
