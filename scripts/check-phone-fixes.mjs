@@ -3227,6 +3227,38 @@ async function nr905Touch(cdp, x, y, ms) {
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
 }
 
+async function nr905Frames(page, n = 2) {
+  await page.evaluate((n) => new Promise((r) => {
+    const step = () => { n -= 1; if (n <= 0) r(); else requestAnimationFrame(step) }
+    requestAnimationFrame(step)
+  }), n)
+}
+
+// Wait until any snap tween has finished. Two rAF first so pointerup can start S.tw
+// before we look; a short poll then waitForFunction so a hold (no tween) still proceeds.
+async function nr905AfterTurn(page) {
+  await nr905Frames(page, 2)
+  const deadline = Date.now() + 400
+  while (Date.now() < deadline) {
+    if (await page.evaluate(() => Boolean(window.NR.S.tw))) break
+    await nr905Frames(page, 1)
+  }
+  await page.waitForFunction(() => !window.NR.S.tw, null, { timeout: 5000 })
+  await nr905Frames(page, 1)
+}
+
+// Press a Night Run button with CDP touch, but only start the hold-ms clock after the
+// page has seen pointerdown (class "down"). That keeps a 60ms tap under the 250ms snap cutoff.
+async function nr905Press(page, cdp, id, ms) {
+  const p = await nr905Center(page, id)
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: p.x, y: p.y }] })
+  await page.waitForFunction((id) => document.getElementById(id)?.classList.contains('down'), id, { timeout: 2000 })
+  if (ms > 0) await page.waitForTimeout(ms)
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await page.waitForFunction((id) => !document.getElementById(id)?.classList.contains('down'), id, { timeout: 2000 })
+  await nr905AfterTurn(page)
+}
+
 async function nr905Center(page, id) {
   const b = await page.locator('#' + id).boundingBox()
   return { x: b.x + b.width / 2, y: b.y + b.height / 2 }
@@ -3457,9 +3489,7 @@ async function nr905Fix4(page, cdp) {
   const R = {}
   for (const [k, id, ms] of [['tapRight', 'br', 60], ['tapLeft', 'bl', 60], ['hold', 'br', 700]]) {
     const a0 = await page.evaluate(() => window.NR.S.ang)
-    const p = await nr905Center(page, id)
-    await nr905Touch(cdp, p.x, p.y, ms)
-    await nr905Sleep(600)
+    await nr905Press(page, cdp, id, ms)
     R[k] = +((await page.evaluate(() => window.NR.S.ang)) - a0).toFixed(2)
   }
   const fails = []
