@@ -3979,6 +3979,270 @@ async function checkCompactLampCard(browser, port, errors) {
   assert.equal(clipFails.length, 0, clipFails.join('\n'))
 }
 
+/** 1.4.576 Easy pre-plant, camera off, reduced motion. Begin, live seats, the rail, and the rail tower taps. */
+const TABLET_BEGIN_MAIN = {
+  '375x667': {
+    begin: { x: 67.5, y: 602.6, w: 240, h: 56.4 },
+    rail: { x: 310, y: 98, w: 60, h: 216 },
+    seats: [
+      { x: 266, y: 114.3, w: 46.6, h: 46.6 },
+      { x: 197.1, y: 183.1, w: 46.6, h: 46.6 },
+      { x: 197.1, y: 251.9, w: 46.6, h: 46.6 },
+      { x: 197.1, y: 458.5, w: 46.6, h: 46.6 },
+      { x: 266, y: 527.3, w: 46.6, h: 46.6 },
+    ],
+    towers: [
+      { x: 316, y: 104, w: 48, h: 48 },
+      { x: 316, y: 156, w: 48, h: 48 },
+      { x: 316, y: 208, w: 48, h: 48 },
+      { x: 316, y: 260, w: 48, h: 48 },
+    ],
+  },
+  '390x844': {
+    begin: { x: 75, y: 779.6, w: 240, h: 56.4 },
+    rail: { x: 325, y: 98, w: 60, h: 216 },
+    seats: [
+      { x: 297.6, y: 120.8, w: 60.9, h: 60.9 },
+      { x: 207.6, y: 210.9, w: 60.9, h: 60.9 },
+      { x: 207.6, y: 300.9, w: 60.9, h: 60.9 },
+      { x: 207.6, y: 571.1, w: 60.9, h: 60.9 },
+      { x: 297.6, y: 661.2, w: 60.9, h: 60.9 },
+    ],
+    towers: [
+      { x: 331, y: 104, w: 48, h: 48 },
+      { x: 331, y: 156, w: 48, h: 48 },
+      { x: 331, y: 208, w: 48, h: 48 },
+      { x: 331, y: 260, w: 48, h: 48 },
+    ],
+  },
+  '412x915': {
+    begin: { x: 86, y: 850.6, w: 240, h: 56.4 },
+    rail: { x: 347, y: 98, w: 60, h: 216 },
+    seats: [
+      { x: 318.4, y: 123.4, w: 66.7, h: 66.7 },
+      { x: 219.8, y: 222, w: 66.7, h: 66.7 },
+      { x: 219.8, y: 320.6, w: 66.7, h: 66.7 },
+      { x: 219.8, y: 616.4, w: 66.7, h: 66.7 },
+      { x: 318.4, y: 714.9, w: 66.7, h: 66.7 },
+    ],
+    towers: [
+      { x: 353, y: 104, w: 48, h: 48 },
+      { x: 353, y: 156, w: 48, h: 48 },
+      { x: 353, y: 208, w: 48, h: 48 },
+      { x: 353, y: 260, w: 48, h: 48 },
+    ],
+  },
+  '768x1024': {
+    begin: { x: 77.8, y: 934, w: 162, h: 56 },
+    rail: { x: 674, y: 113, w: 76, h: 311.3 },
+    seats: [
+      { x: 505.3, y: 140.7, w: 72, h: 72 },
+      { x: 398.9, y: 247.1, w: 72, h: 72 },
+      { x: 398.9, y: 353.5, w: 72, h: 72 },
+      { x: 398.9, y: 672.8, w: 72, h: 72 },
+      { x: 505.3, y: 779.2, w: 72, h: 72 },
+    ],
+    towers: [
+      { x: 682, y: 121, w: 60, h: 69.3 },
+      { x: 682, y: 196.3, w: 60, h: 69.3 },
+      { x: 682, y: 271.6, w: 60, h: 69.3 },
+      { x: 682, y: 346.9, w: 60, h: 69.3 },
+    ],
+  },
+}
+
+const TABLET_BEGIN_SIZES = [
+  [375, 667],
+  [390, 844],
+  [412, 915],
+  [768, 1024],
+]
+
+function rectDelta(now, was) {
+  return {
+    x: now.x - was.x,
+    y: now.y - was.y,
+    w: now.w - was.w,
+    h: now.h - was.h,
+  }
+}
+
+function maxRectDelta(pairs) {
+  let worst = 0
+  for (const { now, was } of pairs) {
+    const d = rectDelta(now, was)
+    for (const key of ['x', 'y', 'w', 'h']) worst = Math.max(worst, Math.abs(d[key]))
+  }
+  return worst
+}
+
+/**
+ * 1.4.577 (#884a). Easy pre-plant Begin is grey on a tablet, same as a phone.
+ * One gold cue (the first-seat ring). Begin is not in mapGoldCues.
+ * `nwLamps=0` is the playtest bare path and paints Begin live (`is-after-plant`), so this opens
+ * the filed camera-off pre-plant night instead.
+ */
+async function checkTabletBeginGold(browser, port, errors) {
+  const only = process.env.NW_BEGIN_SIZE
+  for (const [width, height] of TABLET_BEGIN_SIZES) {
+    const label = `${width}x${height}`
+    if (only && only !== label) continue
+    const { context, page } = await openMap(browser, port, width, height, 'a2', {
+      search: '?playtest=1&nwSeed=2&nwCam=0',
+    })
+    page.on('pageerror', (error) => errors.push(`begin-gold ${label} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(`begin-gold ${label} ${msg.text()}`)
+    })
+    await page.locator('.defend-go.is-awaiting-plant').waitFor()
+    const sampled = await page.evaluate(async () => {
+      const gold = (value) => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+        let match
+        while ((match = re.exec(value || ''))) {
+          const r = Number(match[1])
+          const g = Number(match[2])
+          const b = Number(match[3])
+          const a = match[4] === undefined ? 1 : Number(match[4])
+          if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
+      const round = (n) => Math.round(n * 10) / 10
+      const box = (el) => {
+        if (!el) return null
+        const r = el.getBoundingClientRect()
+        if (r.width < 1 || r.height < 1) return null
+        return { x: round(r.x), y: round(r.y), w: round(r.width), h: round(r.height) }
+      }
+      const read = () => {
+        const root = document.querySelector('.defend-page')
+        const chrome = 'button, .defend-abilities, .defend-boost, .defend-tower-card, .defend-path-pip, .nw-balloon-orb, .defend-wave, .defend-ability-stock'
+        const names = !root
+          ? []
+          : [...root.querySelectorAll(chrome)]
+              .filter((node) => !node.closest('.defend-nw-debug'))
+              .filter((node) => {
+                const rect = node.getBoundingClientRect()
+                const style = getComputedStyle(node)
+                return rect.width > 1 && rect.height > 1 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0
+              })
+              .filter((node) => {
+                const style = getComputedStyle(node)
+                const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+                const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+                return gold(style.backgroundImage) || gold(style.backgroundColor) || border || gold(style.boxShadow) || (text && gold(style.color))
+              })
+              .map((node) => `${node.tagName}.${node.getAttribute('class') || ''}`.slice(0, 80))
+        const rings = [...document.querySelectorAll('.defend-plant-ground circle')].filter((node) => {
+          const rect = node.getBoundingClientRect()
+          const style = getComputedStyle(node)
+          if (rect.width <= 1 || rect.height <= 1 || style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+          return gold(style.stroke) || gold(style.fill) || gold(style.filter)
+        })
+        const go = document.querySelector('.defend-go')
+        const goStyle = go ? getComputedStyle(go) : null
+        const goGold = Boolean(
+          goStyle &&
+            (gold(goStyle.backgroundImage) ||
+              gold(goStyle.backgroundColor) ||
+              gold(goStyle.color) ||
+              gold(goStyle.boxShadow) ||
+              ['Top', 'Right', 'Bottom', 'Left'].some((side) => goStyle[`border${side}Width`] !== '0px' && gold(goStyle[`border${side}Color`]))),
+        )
+        return {
+          names,
+          rings: rings.length,
+          gold: names.length + rings.length,
+          beginGold: names.some((name) => name.includes('defend-go')) || goGold ? 1 : 0,
+          awaiting: go?.classList.contains('is-awaiting-plant') ? 1 : 0,
+          text: (go?.textContent || '').replace(/\s+/g, ' ').trim(),
+          begin: box(go),
+          rail: box(document.querySelector('.nw-rail')),
+          seats: [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map(box).filter(Boolean),
+          towers: [...document.querySelectorAll('.nw-rail .defend-ability, button.defend-new-lamp, .defend-pad')].map(box).filter(Boolean),
+        }
+      }
+      const frames = []
+      const start = performance.now()
+      await new Promise((resolve) => {
+        const tick = () => {
+          frames.push(read())
+          if (performance.now() - start < 1500) requestAnimationFrame(tick)
+          else resolve()
+        }
+        requestAnimationFrame(tick)
+      })
+      return { frames, ms: Math.round(performance.now() - start) }
+    })
+    const cues = await mapGoldCues(page)
+    const last = sampled.frames.at(-1)
+    assert.ok(last, `${label} sampled no pre-plant frames`)
+    assert.deepEqual(
+      cues.filter((name) => name.includes('defend-go')),
+      last.names.filter((name) => name.includes('defend-go')),
+      `${label} mapGoldCues Begin membership matches the last frame`,
+    )
+    assert.ok(sampled.ms >= 1500, `${label} sampled ${sampled.ms}ms, want at least 1500`)
+    assert.ok(sampled.frames.length >= 30, `${label} sampled ${sampled.frames.length} frames`)
+    const goldCounts = [...new Set(sampled.frames.map((frame) => frame.gold))]
+    const beginCounts = [...new Set(sampled.frames.map((frame) => frame.beginGold))]
+    const nameSet = [...new Set(sampled.frames.flatMap((frame) => frame.names))]
+    console.log(
+      `checkTabletBeginGold measure ${label} frames=${sampled.frames.length} ms=${sampled.ms} gold=${goldCounts.join('|')} beginGold=${beginCounts.join('|')} rings=${last.rings} names=${nameSet.join(' | ') || '(none)'}`,
+    )
+    const main = TABLET_BEGIN_MAIN[label]
+    const worst = { begin: 0, seat: 0, rail: 0, tower: 0 }
+    for (const frame of sampled.frames) {
+      assert.equal(frame.awaiting, 1, `${label} Begin stays is-awaiting-plant`)
+      assert.equal(frame.text, 'Begin the watch', `${label} Begin copy stays Begin the watch`)
+      assert.equal(frame.seats.length, main.seats.length, `${label} live seat count`)
+      assert.equal(frame.towers.length, main.towers.length, `${label} tower tap count`)
+      assert.ok(frame.begin && frame.rail, `${label} Begin and rail have rects`)
+      worst.begin = Math.max(worst.begin, maxRectDelta([{ now: frame.begin, was: main.begin }]))
+      worst.rail = Math.max(worst.rail, maxRectDelta([{ now: frame.rail, was: main.rail }]))
+      worst.seat = Math.max(
+        worst.seat,
+        maxRectDelta(frame.seats.map((now, index) => ({ now, was: main.seats[index] }))),
+      )
+      worst.tower = Math.max(
+        worst.tower,
+        maxRectDelta(frame.towers.map((now, index) => ({ now, was: main.towers[index] }))),
+      )
+    }
+    const fmt = (n) => n.toFixed(1)
+    console.log(
+      `checkTabletBeginGold delta ${label} begin=${fmt(worst.begin)} seat=${fmt(worst.seat)} rail=${fmt(worst.rail)} tower=${fmt(worst.tower)}`,
+    )
+    assert.ok(worst.begin <= 1 && worst.seat <= 1 && worst.rail <= 1 && worst.tower <= 1, `${label} tap targets moved more than 1px`)
+    const badGold = sampled.frames.filter((frame) => frame.gold !== 1 || frame.beginGold !== 0)
+    if (process.env.NW_BEGIN_SHOT === '1' && (width === 375 || width === 768)) {
+      const dir = process.env.NW_BEGIN_SHOT_DIR || join(tmpdir(), 'nw-begin-gold')
+      mkdirSync(dir, { recursive: true })
+      const tag = process.env.NW_BEGIN_SHOT_TAG || 'shot'
+      await page.screenshot({ path: join(dir, `${width}-preplant-FREEZE-${tag}.png`) })
+      const clip = await page.evaluate(() => {
+        const go = document.querySelector('.defend-go')?.getBoundingClientRect()
+        if (!go) return null
+        const left = Math.max(0, go.left - 16)
+        const top = Math.max(0, go.top - 24)
+        const right = Math.min(innerWidth, go.right + 16)
+        const bottom = Math.min(innerHeight, go.bottom + 16)
+        return { x: left, y: top, width: Math.max(8, right - left), height: Math.max(8, bottom - top) }
+      })
+      if (clip) await page.screenshot({ path: join(dir, `${width}-preplant-begin-${tag}.png`), clip })
+    }
+    if (badGold.length) {
+      console.log(
+        `checkTabletBeginGold fail ${label} frames=${badGold.length} gold=${goldCounts.join('|')} beginGold=${beginCounts.join('|')} names=${nameSet.join(' | ') || '(none)'}`,
+      )
+    }
+    assert.equal(badGold.length, 0, `${label} gold must be 1 and beginGold 0 on every frame (gold=${goldCounts.join('|')} beginGold=${beginCounts.join('|')})`)
+    console.log(`checkTabletBeginGold ok ${label} gold=1 beginGold=0`)
+    await context.close()
+  }
+}
+
 export async function checkPhoneFixes() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -4007,12 +4271,18 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'hint slot nights stay free of console errors')
       return
     }
+    if (process.env.NW_TABLET_BEGIN_ONLY === '1') {
+      await checkTabletBeginGold(browser, port, errors)
+      assert.equal(errors.join('\n'), '', '1.4.577 tablet Begin nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
       return
     }
     await checkGemHintSlot(browser, port, errors)
+    await checkTabletBeginGold(browser, port, errors)
     await checkNightRun905(browser, port, errors)
     await checkLampGlyph(browser, port, errors)
     await checkCompactLampCard(browser, port, errors)
@@ -4192,7 +4462,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
