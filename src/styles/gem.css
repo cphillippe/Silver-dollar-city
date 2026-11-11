@@ -724,10 +724,11 @@ html[data-easy='on'] .play.is-gem-search .gem-hint-slot {
 }
 
 /* #899: on a short phone the square board is centered about 8.5px into this slot.
-   Move the slot up without changing the board, dock, or score. */
+   1.4.579: -13px (4px more than -9px) leaves at least 4px between the slot and the letters.
+   Transform only — the board, dock, and score stay put. */
 @media (max-height: 720px) {
   html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .gem-hint-slot {
-    transform: translateY(-9px);
+    transform: translateY(-13px);
   }
 }
 

@@ -14,6 +14,7 @@ import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 import { LAMP_GLYPH_COLOR } from '../src/nightWatch/lampGlyph.ts'
 import { LAMP_ART_HALF_UNITS, LAMP_ART_UP_UNITS } from '../src/nightWatch/lampGlyphPlace.ts'
 import { BRIGHT_LINE, LESSON_LOCK, PATH_LINE, TREE_LOCK } from '../src/nightWatch/upgradeTree.ts'
+import { EASY } from '../src/lib/easyUi.ts'
 import { withPlaytest1 } from './dev-ui-playtest.mjs'
 
 const SAVE = {
@@ -3802,8 +3803,9 @@ async function compactGold(page, stats, where) {
   }
 }
 
-const HINT_SIZES = [[375, 667], [390, 844]]
+const HINT_SIZES = [[375, 667], [390, 844], [412, 915]]
 const HINT_SAMPLE_MS = 1500
+const HINT_GAP_MIN = 4
 const HINT_SHOTS = process.env.GEM_HINT_SHOT_DIR || join(tmpdir(), 'gem-hint-slot')
 
 function hintSave() {
@@ -3855,12 +3857,16 @@ async function openEasyMatch(page, lineId, seed) {
 
 /**
  * #899. Easy Match open, story-docked panel-blast, html[data-easy=on].
- * From the first board-visible frame through at least 1.5s: the hint slot ends at or
- * above the board (overlap 0), letters stay >= 16.5px, exactly one hint slot.
+ * From the first board-visible frame through at least 1.5s: the hint slot stays at least
+ * HINT_GAP_MIN px above the board (overlap 0) at 375, 390 and 412, letters stay >= 16.5px,
+ * exactly one hint slot. Every painted text node in the slot must fit its own box
+ * (scrollWidth/scrollHeight within 1px of the client box, whatever text-overflow is),
+ * show no ellipsis, and paint the source string.
  * Gold cues use the mapGoldCues color test on the play screen. Tile fills are palette.
- * 1.4.564 removed the preselected gold cell; check-gem-tap-live locks that at 0.
+ * 1.4.564 removed the preselected gold cell; check-gem-tap-live locks goldCues at 0.
  */
 export async function checkGemHintSlot(browser, port, errors = []) {
+  const pending = []
   for (const [width, height] of HINT_SIZES) {
     const label = `${width}x${height}`
     const context = await browser.newContext({
@@ -3879,7 +3885,7 @@ export async function checkGemHintSlot(browser, port, errors = []) {
       if (msg.type() === 'error') errors.push(`hint ${label} ${msg.text()}`)
     })
     await openEasyMatch(page, 'ob-tuning', 0)
-    const sample = await page.evaluate(async (minMs) => {
+    const sample = await page.evaluate(async ({ minMs, how, tap }) => {
       // Same gold test as mapGoldCues, rooted on the Easy Match play screen.
       const gold = (value) => {
         const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
@@ -3923,6 +3929,68 @@ export async function checkGemHintSlot(browser, port, errors = []) {
         }
         return names
       }
+      const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+      const hintLines = () => {
+        const slot = document.querySelector('.gem-hint-slot')
+        if (!shown(slot)) return []
+        const out = []
+        for (const node of slot.querySelectorAll('*')) {
+          const directs = [...node.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+          if (!directs.length) continue
+          const style = getComputedStyle(node)
+          if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+          const rect = node.getBoundingClientRect()
+          if (rect.width < 1 || rect.height < 1) continue
+          const dom = norm(directs.map((child) => child.textContent).join(''))
+          const source = node.classList.contains('gem-start-hint')
+            ? (node.classList.contains('is-tap-next') ? tap : how)
+            : dom
+          const padL = parseFloat(style.paddingLeft) || 0
+          const padR = parseFloat(style.paddingRight) || 0
+          const padT = parseFloat(style.paddingTop) || 0
+          const padB = parseFloat(style.paddingBottom) || 0
+          const content = {
+            left: rect.left + (parseFloat(style.borderLeftWidth) || 0) + padL - 1,
+            right: rect.right - (parseFloat(style.borderRightWidth) || 0) - padR + 1,
+            top: rect.top + (parseFloat(style.borderTopWidth) || 0) + padT - 1,
+            bottom: rect.bottom - (parseFloat(style.borderBottomWidth) || 0) - padB + 1,
+          }
+          const range = document.createRange()
+          let rendered = ''
+          for (const child of directs) {
+            const raw = child.textContent
+            for (let i = 0; i < raw.length; i += 1) {
+              const ch = raw[i]
+              if (!ch.trim()) {
+                rendered += ch
+                continue
+              }
+              range.setStart(child, i)
+              range.setEnd(child, i + 1)
+              let painted = false
+              for (const box of range.getClientRects()) {
+                if (box.width <= 0 || box.height <= 0) continue
+                if (box.left >= content.left && box.right <= content.right && box.top >= content.top && box.bottom <= content.bottom) {
+                  painted = true
+                  break
+                }
+              }
+              if (painted) rendered += ch
+            }
+          }
+          out.push({
+            source,
+            dom,
+            rendered: norm(rendered),
+            overflow: style.textOverflow,
+            scroll: node.scrollWidth,
+            client: node.clientWidth,
+            scrollH: node.scrollHeight,
+            clientH: node.clientHeight,
+          })
+        }
+        return out
+      }
       const frames = []
       let started = 0
       const giveUp = performance.now() + 8000
@@ -3953,18 +4021,23 @@ export async function checkGemHintSlot(browser, port, errors = []) {
           letterMin: sizes.length ? Math.min(...sizes) : null,
           easy: document.documentElement.dataset.easy === 'on',
           docked: Boolean(document.querySelector('html[data-easy="on"] .play.is-gem-search.is-panel-blast.is-story-docked')),
+          lines: hintLines(),
         })
         if (now - started >= minMs) break
       }
       const span = frames.length ? frames[frames.length - 1].t - frames[0].t : 0
       return { frames, span }
-    }, HINT_SAMPLE_MS)
+    }, { minMs: HINT_SAMPLE_MS, how: EASY.gemHow, tap: EASY.gemTapNext })
     const frames = sample.frames
     assert.ok(frames.length >= 20, `${label} sampled ${frames.length} frames across ${sample.span.toFixed(0)}ms`)
     assert.ok(sample.span >= HINT_SAMPLE_MS, `${label} sampled ${sample.span.toFixed(0)}ms from the first board frame (need ${HINT_SAMPLE_MS})`)
     let letterMin = Infinity
     let gapMin = Infinity
+    let clipped = 0
     const goldSeen = new Set()
+    const loggedLines = new Set()
+    const clipSample = []
+    const seenCopy = new Set()
     for (const [index, frame] of frames.entries()) {
       assert.equal(frame.easy, true, `${label} frame ${index} html[data-easy=on]`)
       assert.equal(frame.docked, true, `${label} frame ${index} story-docked panel-blast`)
@@ -3981,8 +4054,37 @@ export async function checkGemHintSlot(browser, port, errors = []) {
       letterMin = Math.min(letterMin, frame.letterMin)
       gapMin = Math.min(gapMin, frame.boardTop - frame.slotBottom)
       goldSeen.add(frame.goldCues)
+      if (!frame.lines.length) {
+        clipped += 1
+        if (clipSample.length < 4) clipSample.push(`frame ${index} painted no text`)
+      }
+      for (const line of frame.lines) {
+        const cut = line.scroll > line.client + 1 || line.scrollH > line.clientH + 1
+        const ellipsis = line.overflow === 'ellipsis' || line.rendered.includes('…') || (line.rendered.includes('...') && !line.source.includes('...'))
+        const mismatch = line.rendered !== line.source || line.dom !== line.source
+        const note = `${line.overflow}|${line.scroll}|${line.client}|${line.scrollH}|${line.clientH}|${line.rendered}|${line.source}`
+        if (!loggedLines.has(note)) {
+          loggedLines.add(note)
+          console.log(
+            `checkGemHintSlot line ${label} overflow=${line.overflow} scroll=${line.scroll} client=${line.client} scrollH=${line.scrollH} clientH=${line.clientH} rendered=${JSON.stringify(line.rendered)} source=${JSON.stringify(line.source)}`,
+          )
+        }
+        seenCopy.add(line.source)
+        if (cut || ellipsis || mismatch) {
+          clipped += 1
+          if (clipSample.length < 4) {
+            clipSample.push(
+              `overflow=${line.overflow} scroll=${line.scroll} client=${line.client} scrollH=${line.scrollH} clientH=${line.clientH} rendered=${JSON.stringify(line.rendered)} source=${JSON.stringify(line.source)}`,
+            )
+          }
+        }
+      }
     }
     assert.equal(goldSeen.size, 1, `${label} gold cue count changed across frames ${[...goldSeen].join(',')}`)
+    assert.ok(
+      seenCopy.has(EASY.gemHow) || seenCopy.has(EASY.gemTapNext),
+      `${label} painted hint copy was not ${EASY.gemHow}`,
+    )
     if (process.env.GEM_HINT_SHOT_DIR && width === 375) {
       mkdirSync(HINT_SHOTS, { recursive: true })
       const clip = await page.evaluate(() => {
@@ -3998,9 +4100,22 @@ export async function checkGemHintSlot(browser, port, errors = []) {
     const gap = Number(gapMin.toFixed(2))
     const letters = Number(letterMin.toFixed(2))
     const gold = frames[0].goldCues
-    console.log(`checkGemHintSlot ok ${label} frames=${frames.length} gap=${gap} letterMin=${letters} gold=${gold}`)
+    if (gap < HINT_GAP_MIN) {
+      const msg = `checkGemHintSlot fail ${label} frames=${frames.length} gap=${gap} < ${HINT_GAP_MIN}`
+      console.log(msg)
+      pending.push(msg)
+    }
+    if (clipped !== 0) {
+      const msg = `checkGemHintSlot fail ${label} frames=${frames.length} gap=${gap} clipped=${clipped} ${clipSample.join(' | ')}`
+      console.log(msg)
+      pending.push(msg)
+    }
+    if (gap >= HINT_GAP_MIN && clipped === 0) {
+      console.log(`checkGemHintSlot ok ${label} frames=${frames.length} gap=${gap} clipped=0 letterMin=${letters} gold=${gold}`)
+    }
     await context.close()
   }
+  assert.equal(pending.length, 0, pending.join('\n'))
 }
 
 /**
