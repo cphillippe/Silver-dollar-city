@@ -28,6 +28,17 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.582',
+    title: 'Easy Home and Settings: one gold cue',
+    when: '2026-11-11',
+    items: [
+      'Home keeps one gold next step. The porch ring uses the house cream.',
+      'Settings keeps Open Profile gold. The picked theme uses the selected chip.',
+      'Hard stays the same.',
+      'Refs #916.',
+    ],
+  },
+  {
     version: '1.4.579',
     title: 'Easy word search: the hint clears the letters',
     when: '2026-11-11',

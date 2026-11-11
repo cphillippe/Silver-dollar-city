@@ -15,6 +15,7 @@ import { LAMP_GLYPH_COLOR } from '../src/nightWatch/lampGlyph.ts'
 import { LAMP_ART_HALF_UNITS, LAMP_ART_UP_UNITS } from '../src/nightWatch/lampGlyphPlace.ts'
 import { BRIGHT_LINE, LESSON_LOCK, PATH_LINE, TREE_LOCK } from '../src/nightWatch/upgradeTree.ts'
 import { EASY } from '../src/lib/easyUi.ts'
+import { shortestMazePath } from '../src/lib/roadMaze.ts'
 import { withPlaytest1 } from './dev-ui-playtest.mjs'
 
 const SAVE = {
@@ -4639,6 +4640,460 @@ async function checkTabletBeginGold(browser, port, errors) {
   }
 }
 
+const EASY_ONE_GOLD_SIZES = [[375, 667], [390, 844], [412, 915]]
+
+const EASY_ONE_GOLD_MS = 1500
+
+/**
+ * Viewport rects of the gold button and the buttons this hop touches, measured on 1.4.579
+ * at scroll 0 (settings included). Rounded to 0.1px. Null until that measure is pinned.
+ */
+const EASY_GOLD_BASE_1579 = {
+  '375x667 home-first': { '2 Help': { x: 131, y: 561, w: 113, h: 48 } },
+  '375x667 home-after-l1': { '3 Lock In': { x: 250, y: 584.1, w: 113, h: 48 } },
+  '375x667 settings-more': {
+    'Open Profile': { x: 41, y: 1406.5, w: 130, h: 52 },
+    Candy: { x: 41, y: 1814.6, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1814.6, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1874.6, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2177.9, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2423.7, w: 176, h: 52 },
+  },
+  '390x844 home-first': { '2 Help': { x: 136, y: 738, w: 118, h: 48 } },
+  '390x844 home-after-l1': { '3 Lock In': { x: 260, y: 761.1, w: 118, h: 48 } },
+  '390x844 settings-more': {
+    'Open Profile': { x: 41, y: 1407.9, w: 130, h: 52 },
+    Candy: { x: 41, y: 1816, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1816, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1876, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2154.5, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2400.3, w: 176, h: 52 },
+  },
+  '412x915 home-first': { '2 Help': { x: 143.3, y: 809, w: 125.3, h: 48 } },
+  '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
+  '412x915 settings-more': {
+    'Open Profile': { x: 41, y: 1360.7, w: 130, h: 52 },
+    Candy: { x: 41, y: 1768.8, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1768.8, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1828.8, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2107.3, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2353.1, w: 176, h: 52 },
+  },
+}
+
+function easyGoldRound(n) {
+  return Math.round(n * 10) / 10
+}
+
+function assertEasyGoldRects(size, screen, rects) {
+  const base = EASY_GOLD_BASE_1579[`${size} ${screen}`] || {}
+  const shifts = []
+  for (const [name, was] of Object.entries(base)) {
+    const rect = rects[name]
+    assert.ok(rect, `${size} ${screen} missing 1.4.579 rect for ${name}`)
+    const d = {
+      x: easyGoldRound(rect.x - was.x),
+      y: easyGoldRound(rect.y - was.y),
+      w: easyGoldRound(rect.w - was.w),
+      h: easyGoldRound(rect.h - was.h),
+    }
+    assert.equal(d.x, 0, `${size} ${screen} ${name} x delta vs 1.4.579 is ${d.x}`)
+    assert.equal(d.w, 0, `${size} ${screen} ${name} w delta vs 1.4.579 is ${d.w}`)
+    assert.equal(d.h, 0, `${size} ${screen} ${name} h delta vs 1.4.579 is ${d.h}`)
+    if (screen === 'settings-more' && name !== 'Open Profile') shifts.push(d.y)
+    else assert.equal(d.y, 0, `${size} ${screen} ${name} y delta vs 1.4.579 is ${d.y}`)
+  }
+  if (shifts.length) {
+    assert.equal(new Set(shifts).size, 1, `${size} ${screen} button y shift is not one What's new growth ${shifts.join(',')}`)
+  }
+}
+
+/**
+ * #916. Easy only. One gold cue per screen: a filled button or a ring/halo/glow.
+ * Same gold color test as mapGoldCues. Rings use the home halo selector set
+ * (stroke, fill, filter). A hairline --line border or gold text is not a cue.
+ */
+async function readEasyGold(page) {
+  return page.evaluate(async (minMs) => {
+    const gold = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = Number(match[1])
+        const g = Number(match[2])
+        const b = Number(match[3])
+        const a = match[4] === undefined ? 1 : Number(match[4])
+        if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const shown = (el) => {
+      const style = getComputedStyle(el)
+      const box = el.getBoundingClientRect()
+      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0 && box.width > 1 && box.height > 1
+    }
+    const inView = (box) => box.bottom > 0 && box.right > 0 && box.top < innerHeight && box.left < innerWidth
+    const round = (n) => Math.round(n * 10) / 10
+    const boxOf = (el) => {
+      const r = el.getBoundingClientRect()
+      const scroller = document.querySelector('.app-body')
+      const x = r.x + (scroller ? scroller.scrollLeft : 0)
+      const y = r.y + (scroller ? scroller.scrollTop : 0)
+      return { x: round(x), y: round(y), w: round(r.width), h: round(r.height), vx: r.x, vy: r.y }
+    }
+    const labelOf = (el) => {
+      const parts = []
+      const walk = (node) => {
+        if (node.nodeType === 3) {
+          const text = node.textContent.replace(/\s+/g, ' ').trim()
+          if (text) parts.push(text)
+          return
+        }
+        if (node.nodeType === 1) {
+          for (const child of node.childNodes) walk(child)
+        }
+      }
+      walk(el)
+      const aria = el.getAttribute('aria-label')
+      const text = parts.join(' ') || (aria || '').replace(/\s+/g, ' ').trim()
+      return text.slice(0, 48)
+    }
+    const nameOf = (el) => {
+      const cls = String(el.getAttribute('class') || '').split(/\s+/).filter(Boolean).slice(0, 4).join('.')
+      const text = labelOf(el)
+      return `${el.tagName.toLowerCase()}.${cls}${text ? ` "${text}"` : ''}`
+    }
+    const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+    const lineOf = (el) => {
+      const directs = [...el.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+      if (!directs.length || !shown(el)) return null
+      const style = getComputedStyle(el)
+      const rect = el.getBoundingClientRect()
+      const source = norm(directs.map((child) => child.textContent).join(''))
+      const padL = parseFloat(style.paddingLeft) || 0
+      const padR = parseFloat(style.paddingRight) || 0
+      const padT = parseFloat(style.paddingTop) || 0
+      const padB = parseFloat(style.paddingBottom) || 0
+      const content = {
+        left: rect.left + (parseFloat(style.borderLeftWidth) || 0) + padL - 1,
+        right: rect.right - (parseFloat(style.borderRightWidth) || 0) - padR + 1,
+        top: rect.top + (parseFloat(style.borderTopWidth) || 0) + padT - 1,
+        bottom: rect.bottom - (parseFloat(style.borderBottomWidth) || 0) - padB + 1,
+      }
+      const range = document.createRange()
+      let rendered = ''
+      for (const child of directs) {
+        const raw = child.textContent
+        for (let i = 0; i < raw.length; i += 1) {
+          const ch = raw[i]
+          if (!ch.trim()) {
+            rendered += ch
+            continue
+          }
+          range.setStart(child, i)
+          range.setEnd(child, i + 1)
+          let painted = false
+          for (const bit of range.getClientRects()) {
+            if (bit.width <= 0 || bit.height <= 0) continue
+            if (bit.left >= content.left && bit.right <= content.right && bit.top >= content.top && bit.bottom <= content.bottom) {
+              painted = true
+              break
+            }
+          }
+          if (painted) rendered += ch
+        }
+      }
+      return {
+        name: nameOf(el),
+        source,
+        rendered: norm(rendered),
+        overflow: style.textOverflow,
+        scroll: el.scrollWidth,
+        client: el.clientWidth,
+        scrollH: el.scrollHeight,
+        clientH: el.clientHeight,
+      }
+    }
+    const cues = () => {
+      const names = []
+      const buttons = []
+      for (const el of document.querySelectorAll('button, a.btn')) {
+        if (!(el instanceof HTMLElement)) continue
+        if (el.closest('[hidden], .easy-core')) continue
+        if (!shown(el) || !inView(el.getBoundingClientRect())) continue
+        const style = getComputedStyle(el)
+        const fill = gold(style.backgroundImage) || gold(style.backgroundColor)
+        const glow = gold(style.boxShadow)
+        if (!fill && !glow) continue
+        names.push(nameOf(el))
+        buttons.push(el)
+      }
+      const rings = []
+      for (const el of document.querySelectorAll('.city-next-halo, .city-plot-select, .city-plot.is-ready .city-plot-hit, [class*="halo"], [class*="glow"]')) {
+        if (el.closest('[hidden]')) continue
+        if (!shown(el) || !inView(el.getBoundingClientRect())) continue
+        const style = getComputedStyle(el)
+        const stroke = style.stroke !== 'none' && parseFloat(style.strokeWidth) > 0 && gold(style.stroke)
+        const fill = style.fill !== 'none' && gold(style.fill)
+        const filter = gold(style.filter)
+        const glow = gold(style.boxShadow)
+        if (!stroke && !fill && !filter && !glow) continue
+        const name = nameOf(el)
+        if (!names.includes(name)) names.push(name)
+        rings.push(el)
+      }
+      return { names, buttons }
+    }
+    const touched = () => {
+      const out = []
+      const take = (el) => {
+        if (!(el instanceof HTMLElement) || out.includes(el)) return
+        if (el.closest('[hidden], .easy-core')) return
+        if (!shown(el)) return
+        out.push(el)
+      }
+      for (const el of document.querySelectorAll('.theme-picks .btn, button')) {
+        const text = labelOf(el)
+        if (text === 'Import pasted save' || text === 'Export JSON') take(el)
+      }
+      for (const el of document.querySelectorAll('.theme-picks .btn')) take(el)
+      for (const el of cues().buttons) take(el)
+      return out
+    }
+    const read = () => {
+      const found = cues()
+      const theme = document.querySelector('.theme-picks')
+      const themeBox = theme ? theme.getBoundingClientRect() : null
+      const themeVisible = Boolean(themeBox && themeBox.height > 1 && inView(themeBox) && themeBox.bottom > 8 && themeBox.top < innerHeight - 8)
+      const hits = []
+      const rects = {}
+      const lines = []
+      for (const el of touched()) {
+        const name = nameOf(el)
+        const rect = boxOf(el)
+        rects[labelOf(el)] = rect
+        const cx = rect.vx + rect.w / 2
+        const cy = rect.vy + rect.h / 2
+        const barBottom = document.querySelector('.topbar')?.getBoundingClientRect().bottom ?? 0
+        const centerIn = cy > barBottom + 1 && cy < innerHeight - 1 && cx > 1 && cx < innerWidth - 1
+        if (centerIn) {
+          const node = document.elementFromPoint(cx, cy)
+          const hit = node === el || (node && el.contains(node))
+          if (!hit) hits.push(`${name} -> ${node ? nameOf(node) : 'none'}`)
+          const walk = (node) => {
+            const line = lineOf(node)
+            if (line) lines.push(line)
+            for (const child of node.children) walk(child)
+          }
+          walk(el)
+        }
+      }
+      return { names: found.names, gold: found.names.length, theme: themeVisible, hits, rects, lines }
+    }
+    const frames = []
+    const start = performance.now()
+    await new Promise((resolve) => {
+      const tick = () => {
+        frames.push(read())
+        if (performance.now() - start < minMs) requestAnimationFrame(tick)
+        else resolve()
+      }
+      requestAnimationFrame(tick)
+    })
+    return { frames, ms: Math.round(performance.now() - start) }
+  }, EASY_ONE_GOLD_MS)
+}
+
+function easyGoldReport(size, screen, sampled) {
+  const frames = sampled.frames
+  const counts = [...new Set(frames.map((frame) => frame.gold))]
+  const names = [...new Set(frames.flatMap((frame) => frame.names))]
+  const themeFrames = frames.filter((frame) => frame.theme)
+    const bad = frames.filter((frame) => (screen === 'settings-more' ? frame.gold >= 2 : frame.gold !== 1))
+  const sawOne = frames.some((frame) => frame.gold === 1)
+  const themeOk = screen !== 'settings-more' || (
+    themeFrames.length > 0 &&
+    themeFrames.some((frame) => frame.gold === 1) &&
+    themeFrames.every((frame) => frame.gold < 2)
+  )
+  const ok = bad.length === 0 && sawOne && themeOk && sampled.ms >= EASY_ONE_GOLD_MS && frames.length >= 20
+  const goldLabel = ok ? '1' : (bad.length ? [...new Set(bad.map((frame) => frame.gold))].join('|') : counts.join('|') || '0')
+  const nameLabel = names.join(' | ') || '(none)'
+  const line = ok
+    ? `checkEasyOneGold ok ${size} ${screen} frames=${frames.length} gold=1 names=${nameLabel}`
+    : `checkEasyOneGold fail ${size} ${screen} frames=${frames.length} gold=${goldLabel} names=${nameLabel}`
+  return { ok, line, frames, names }
+}
+
+async function finishEasyLessonOne(page) {
+  await page.locator('.easy-home-steps li.is-now .easy-coach-step').click()
+  await page.locator('[data-maze-cell].is-here').waitFor({ timeout: 20_000 })
+  const read = async (sel) => {
+    const loc = page.locator(sel).first()
+    return {
+      r: Number(await loc.getAttribute('data-r')),
+      c: Number(await loc.getAttribute('data-c')),
+    }
+  }
+  const tap = async (cell) => {
+    const loc = page.locator(`[data-maze-cell][data-r="${cell.r}"][data-c="${cell.c}"]`)
+    const box = await loc.boundingBox()
+    if (!box) throw new Error(`maze cell ${cell.r},${cell.c} has no box`)
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+  }
+  const walk = async (target) => {
+    for (let guard = 0; guard < 40; guard += 1) {
+      if ((await page.locator('[data-maze-cell].is-here').count()) === 0) return
+      const at = await read('[data-maze-cell].is-here')
+      if (at.r === target.r && at.c === target.c) return
+      const path = shortestMazePath(at, target)
+      if (!path || path.length < 2) throw new Error(`no road from ${at.r},${at.c} to ${target.r},${target.c}`)
+      await tap(path[1])
+      if (path[1].r === target.r && path[1].c === target.c) {
+        await page.locator('.play.is-road-maze.is-helped, .play.is-road-maze.is-win, [data-maze-dock]').first().waitFor({ timeout: 4000 }).catch(() => {})
+        return
+      }
+      await page.waitForFunction(
+        ({ r, c }) => {
+          const here = document.querySelector('[data-maze-cell].is-here')
+          return here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)
+        },
+        path[1],
+        { timeout: 4000 },
+      )
+    }
+    throw new Error(`maze walk did not reach ${target.r},${target.c}`)
+  }
+  await walk(await read('[data-maze-cell].is-hurt'))
+  await page.locator('.play.is-road-maze.is-helped, .play.is-road-maze.is-win').first().waitFor({ timeout: 4000 })
+  await walk(await read('[data-maze-cell].is-inn'))
+  await page.locator('[data-maze-dock]').waitFor({ timeout: 8000 })
+  await page.locator('[data-maze-dock] button', { hasText: 'Home' }).click()
+  await page.locator('main.hub.is-easy-home').waitFor()
+}
+
+async function sampleEasyScreen(page, size, screen, fails) {
+  const sampled = await readEasyGold(page)
+  const report = easyGoldReport(size, screen, sampled)
+  console.log(report.line)
+  const rects = report.frames[0]?.rects || {}
+  for (const [name, rect] of Object.entries(rects)) {
+    console.log(`checkEasyOneGold rect ${size} ${screen} ${name} x=${rect.x} y=${rect.y} w=${rect.w} h=${rect.h}`)
+  }
+  const logged = new Set()
+  let clipped = 0
+  for (const frame of report.frames) {
+    for (const line of frame.lines) {
+      const note = `${line.name}|${line.overflow}|${line.scroll}|${line.client}|${line.scrollH}|${line.clientH}|${line.rendered}|${line.source}`
+      if (!logged.has(note)) {
+        logged.add(note)
+        console.log(
+          `checkEasyOneGold line ${size} ${screen} ${line.name} overflow=${line.overflow} scroll=${line.scroll} client=${line.client} scrollH=${line.scrollH} clientH=${line.clientH} rendered=${JSON.stringify(line.rendered)} source=${JSON.stringify(line.source)}`,
+        )
+      }
+      const cut = line.scroll > line.client + 1 || line.scrollH > line.clientH + 1
+      if (cut || line.overflow === 'ellipsis' || line.rendered !== line.source) clipped += 1
+    }
+    for (const miss of frame.hits) {
+      assert.equal(miss, '', `${size} ${screen} centre tap missed ${miss}`)
+    }
+  }
+  assert.equal(clipped, 0, `${size} ${screen} clipped text`)
+  assert.ok(sampled.ms >= EASY_ONE_GOLD_MS, `${size} ${screen} sampled ${sampled.ms}ms`)
+  assert.ok(report.frames.length >= 20, `${size} ${screen} sampled ${report.frames.length} frames`)
+  assertEasyGoldRects(size, screen, rects)
+  if (!report.ok) fails.push(report.line)
+}
+
+/**
+ * 1.4.582 (#916). Fresh Easy save. One gold cue on Home (first view and after lesson 1)
+ * and on Settings → More at every scroll stop that shows a gold cue or the Look row.
+ */
+async function checkEasyOneGold(browser, port, errors) {
+  const only = process.env.EASY_ONE_GOLD_SIZE
+  const fails = []
+  for (const [width, height] of EASY_ONE_GOLD_SIZES) {
+    const size = `${width}x${height}`
+    if (only && only !== size) continue
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      reducedMotion: 'reduce',
+    })
+    await context.addInitScript(() => localStorage.clear())
+    const page = await context.newPage()
+    page.on('pageerror', (error) => errors.push(`easy-gold ${size} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(`easy-gold ${size} ${msg.text()}`)
+    })
+    await page.goto('/?playtest=1')
+    await page.getByRole('button', { name: 'Start Easy' }).click()
+    await page.locator('main.hub.is-easy-home').waitFor()
+    await page.locator('.city-next-halo, .easy-home-steps li.is-now').first().waitFor()
+    await sampleEasyScreen(page, size, 'home-first', fails)
+    await finishEasyLessonOne(page)
+    await page.locator('.easy-home-steps li.is-now').waitFor()
+    await sampleEasyScreen(page, size, 'home-after-l1', fails)
+    await page.getByRole('button', { name: 'Settings' }).click()
+    await page.locator('summary', { hasText: 'More' }).click()
+    await page.locator('.theme-picks').waitFor()
+    const stops = []
+    let guard = 0
+    let lastTop = -1
+    while (guard < 16) {
+      const top = await page.evaluate(() => {
+        const scroller = document.querySelector('.app-body')
+        return scroller ? scroller.scrollTop : 0
+      })
+      if (guard > 0 && Math.abs(top - lastTop) < 2) break
+      lastTop = top
+      const sampled = await readEasyGold(page)
+      stops.push(sampled)
+      const moved = await page.evaluate(() => {
+        const scroller = document.querySelector('.app-body')
+        if (!scroller) return false
+        const before = scroller.scrollTop
+        scroller.scrollTop = before + Math.round(scroller.clientHeight * 0.7)
+        return scroller.scrollTop !== before
+      })
+      guard += 1
+      if (!moved) break
+    }
+    const frames = stops.flatMap((stop) => stop.frames)
+    const merged = { frames, ms: stops.reduce((sum, stop) => sum + stop.ms, 0) }
+    const report = easyGoldReport(size, 'settings-more', merged)
+    console.log(report.line)
+    const rects = {}
+    for (const stop of stops) Object.assign(rects, stop.frames[0]?.rects || {})
+    for (const [name, rect] of Object.entries(rects)) {
+      console.log(`checkEasyOneGold rect ${size} settings-more ${name} x=${rect.x} y=${rect.y} w=${rect.w} h=${rect.h}`)
+    }
+    assertEasyGoldRects(size, 'settings-more', rects)
+    const logged = new Set()
+    let clipped = 0
+    for (const frame of frames) {
+      for (const line of frame.lines) {
+        const note = `${line.name}|${line.rendered}|${line.source}|${line.scroll}|${line.client}`
+        if (logged.has(note)) continue
+        logged.add(note)
+        console.log(
+          `checkEasyOneGold line ${size} settings-more ${line.name} overflow=${line.overflow} scroll=${line.scroll} client=${line.client} scrollH=${line.scrollH} clientH=${line.clientH} rendered=${JSON.stringify(line.rendered)} source=${JSON.stringify(line.source)}`,
+        )
+        const cut = line.scroll > line.client + 1 || line.scrollH > line.clientH + 1
+        if (cut || line.overflow === 'ellipsis' || line.rendered !== line.source) clipped += 1
+      }
+      for (const miss of frame.hits) assert.equal(miss, '', `${size} settings-more centre tap missed ${miss}`)
+    }
+    assert.equal(clipped, 0, `${size} settings-more clipped text`)
+    assert.ok(frames.some((frame) => frame.theme), `${size} settings-more never showed the Look row`)
+    if (!report.ok) fails.push(report.line)
+    await context.close()
+  }
+  assert.equal(fails.length, 0, fails.join('\n'))
+}
+
+
 export async function checkPhoneFixes() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -4677,11 +5132,17 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', '1.4.578 off-top glyph nights stay free of console errors')
       return
     }
+    if (process.env.EASY_ONE_GOLD_ONLY === '1') {
+      await checkEasyOneGold(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'easy one-gold screens stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
       return
     }
+    await checkEasyOneGold(browser, port, errors)
     await checkGemHintSlot(browser, port, errors)
     await checkTabletBeginGold(browser, port, errors)
     await checkNightRun905(browser, port, errors)
