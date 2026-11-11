@@ -12,6 +12,10 @@ import { chromium } from '@playwright/test'
 import { SAVE_KIND } from '../src/lib/save.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 import { LAMP_GLYPH_COLOR } from '../src/nightWatch/lampGlyph.ts'
+import { LAMP_ART_HALF_UNITS, LAMP_ART_UP_UNITS } from '../src/nightWatch/lampGlyphPlace.ts'
+import { BRIGHT_LINE, LESSON_LOCK, PATH_LINE, TREE_LOCK } from '../src/nightWatch/upgradeTree.ts'
+import { EASY } from '../src/lib/easyUi.ts'
+import { withPlaytest1 } from './dev-ui-playtest.mjs'
 
 const SAVE = {
   kind: SAVE_KIND,
@@ -1816,6 +1820,7 @@ async function glyphSetup(page) {
           ...[...document.querySelectorAll('.defend-pad.is-planted')].filter((node) => node !== pad).flatMap((node) => many('text.defend-type-label', node)),
           ...many(`.defend-type-chip:not(.is-${tool})`),
         ],
+        typeLabels: [...document.querySelectorAll('text.defend-type-label')].map(box).filter(Boolean),
         nbMarks: [...document.querySelectorAll('.defend-pad.is-planted')].filter((node) => node !== pad).flatMap((node) => many('image.defend-type-mark', node)),
         // The mark is painted above the names when a second copy of it sits in a layer over every chip.
         above: (() => {
@@ -1849,6 +1854,38 @@ async function glyphSetup(page) {
           })
           .map(box)
           .filter(Boolean),
+        // 1.4.576: every painted text line. Hidden lines use visibility:hidden and are skipped here.
+        lines: window.__compactLines ? (() => {
+          const card = document.querySelector('.defend-tower-card')
+          if (!card) return []
+          const out = []
+          for (const node of card.querySelectorAll('*')) {
+            const direct = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim().length > 0)
+            if (!direct) continue
+            const style = getComputedStyle(node)
+            if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+            const rect = node.getBoundingClientRect()
+            if (rect.width < 1 || rect.height < 1) continue
+            const text = (node.textContent || '').replace(/\s+/g, ' ').trim()
+            if (!text) continue
+            let kind = 'text'
+            if (node.matches('.defend-path-lock')) kind = 'lock'
+            else if (node.matches('.defend-bright-line')) kind = 'bright'
+            else if (node.matches('.defend-path-line')) kind = 'path'
+            else if (node.matches('.defend-tower-road')) kind = 'road'
+            out.push({
+              kind,
+              path: node.closest('[data-path]')?.getAttribute('data-path') || '',
+              text,
+              overflow: style.textOverflow,
+              scroll: node.scrollWidth,
+              client: node.clientWidth,
+              scrollH: node.scrollHeight,
+              clientH: node.clientHeight,
+            })
+          }
+          return out
+        })() : [],
       }
     }
     window.__glyphRun = null
@@ -2159,9 +2196,15 @@ function glyphCardRules(frame, where, stats, stageKey, { settled = false } = {})
       if (frame.above) stats.aboveFrames += 1
     }
     if (under) stats.underFrames += 1
+    const typeOver = (frame.typeLabels ?? []).reduce((max, box) => Math.max(max, glyphArea(frame.glyph, box)), 0)
+    assert.ok(
+      typeOver === 0 || frame.header,
+      `${where}: a .defend-type-label overlaps the glyph by ${typeOver}px2 and the card shows no header copy, glyph ${JSON.stringify(frame.glyph)} labels ${JSON.stringify((frame.typeLabels ?? []).filter((box) => glyphArea(frame.glyph, box) > 0))}`,
+    )
     if (frame.header) {
-      glyphRule('header copy while a clear spot exists', spots === 0, `${where}: the header copy shows while ${spots} card spots clear the glyph+6, Begin-8, the rail, its buttons, the New lamp buttons, the neighbour lamps and their names, glyph ${JSON.stringify(frame.glyph)} card ${JSON.stringify(card)}`)
-      stats.headerSpotsMax = Math.max(stats.headerSpotsMax, spots)
+      const labelOnMark = frame.nbLabels.some((box) => glyphArea(frame.glyph, box) > 0)
+      glyphRule('header copy while a clear spot exists', spots === 0 || labelOnMark, `${where}: the header copy shows while ${spots} card spots clear the glyph+6, Begin-8, the rail, its buttons, the New lamp buttons, the neighbour lamps and their names, glyph ${JSON.stringify(frame.glyph)} card ${JSON.stringify(card)}`)
+      if (!labelOnMark) stats.headerSpotsMax = Math.max(stats.headerSpotsMax, spots)
       stats.headerBy.set(stageKey, (stats.headerBy.get(stageKey) ?? 0) + 1)
       if (settled) stats.headerSettled += 1
       else stats.headerFrames += 1
@@ -2596,7 +2639,8 @@ async function checkGlyphSeatSweep(browser, port, errors, width, height) {
     // the mark, the taps and every neighbour. Then the header copy is allowed, and only then: glyphCardRules makes the
     // solver find 0 spots on every header frame. The counts are reported per size, not capped.
     if (label === FAILING_SEAT.size && ring.cx === FAILING_SEAT.cx && ring.cy === FAILING_SEAT.cy) {
-      assert.ok(driver.stats.noSpot.size > 0 && driver.stats.headerSettled > 0, `${where} is the seat the 1.4.569 prove caught: its tall stages have no clear spot and show the header copy (${driver.stats.noSpot.size} stages, ${driver.stats.headerSettled} settled header views)`)
+      assert.equal(headerHere, 0, `${where} the compact card keeps a clear spot, so the header copy stays off (${headerHere} header frames, ${driver.stats.noSpot.size} stages with no spot)`)
+      assert.equal(driver.stats.noSpot.size, 0, `${where} every stage has a clear spot`)
     }
     await context.close()
   }
@@ -2756,7 +2800,310 @@ async function checkGlyphMaxWave(browser, port, errors, width, height) {
   await context.close()
 }
 
+/** Love at 464,360 with Reason on the seat above. The 1.4.571 live fail: Reason's name sits on the Love mark. */
+const LABEL_OVER_SEATS = { love: { cx: 464, cy: 360 }, reason: { cx: 464, cy: 224 } }
+const LABEL_OVER_SEARCH = '?playtest=1&nwSeed=2&nwMap=a2&nwRound=18&nwLamps=0&nwCam=1'
+const LABEL_OVER_SIZES = (process.env.NW_LABEL_SIZE || '375x667,390x844,412x915').split(',').map((size) => size.split('x').map(Number))
+
+async function checkLabelOverGlyph(browser, port, errors) {
+  for (const [width, height] of LABEL_OVER_SIZES) {
+    const label = `${width}x${height}`
+    const where = `${label} label over glyph`
+    const { context, page } = await openMap(browser, port, width, height, 'a2', { motion: true, search: LABEL_OVER_SEARCH })
+    page.on('pageerror', (error) => errors.push(`label over glyph ${where} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(`label over glyph ${where} ${msg.text()}`)
+    })
+    await glyphSetup(page)
+    await assertGlyphCamera(page, where)
+    const rings = await page.evaluate(() =>
+      [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({ cx: Number(ring.getAttribute('cx')), cy: Number(ring.getAttribute('cy')) })),
+    )
+    for (const seat of [LABEL_OVER_SEATS.reason, LABEL_OVER_SEATS.love]) {
+      assert.ok(rings.some((ring) => ring.cx === seat.cx && ring.cy === seat.cy), `${where} seat ${seat.cx},${seat.cy} is live ${JSON.stringify(rings)}`)
+    }
+    await glyphPlantAt(page, 'reason', LABEL_OVER_SEATS.reason, where)
+    await glyphPlantAt(page, 'love', LABEL_OVER_SEATS.love, where)
+    assert.equal(await page.locator('.defend-pad[data-tower-type="reason"]').count(), 1, `${where} Reason is planted`)
+    assert.equal(await page.locator('.defend-pad[data-tower-type="love"]').count(), 1, `${where} Love is planted`)
+    const driver = glyphDriver(page, where, errors)
+    assert.equal(await driver.ladder('love', GLYPH_LADDER), 8, `${where} reached stage 8 by real buys`)
+    await driver.closeCard()
+    await glyphPanToPad(page, 'love')
+    // 923e framed Love's mark near x=140. Centered, the card has no clear spot, so the header hides the label overlap.
+    for (let nudge = 0; nudge < 4; nudge += 1) {
+      const at = await page.evaluate(() => {
+        const box = document.querySelector('.defend-pad[data-tower-type="love"] .lamp-upgrade-glyph[data-glyph-variant="map"]')?.getBoundingClientRect()
+        return box ? { left: box.left, w: innerWidth, h: innerHeight } : null
+      })
+      if (!at || Math.abs(at.left - 140) < 8) break
+      const dx = Math.max(-140, Math.min(140, 140 - at.left))
+      const cx = at.w / 2
+      const cy = at.h / 2
+      await page.mouse.move(cx, cy)
+      await page.mouse.down()
+      await page.mouse.move(cx + dx, cy, { steps: 6 })
+      await page.mouse.up()
+      await page.waitForTimeout(500)
+    }
+    await page.evaluate(() => window.__glyphStart('love'))
+    await page.locator('.defend-pad[data-tower-type="love"]').click({ force: true })
+    await page.locator('.defend-tower-card').waitFor()
+    await page.waitForTimeout(520)
+    const frames = await page.evaluate(() => window.__glyphEnd())
+    const stats = newGlyphStats()
+    let n = 0
+    let maxOver = 0
+    for (const [index, frame] of frames.entries()) {
+      if (!frame.card || !frame.glyph) continue
+      n += 1
+      const over = (frame.typeLabels ?? []).reduce((max, box) => Math.max(max, glyphArea(frame.glyph, box)), 0)
+      maxOver = Math.max(maxOver, over)
+      assert.ok(
+        over === 0 || frame.header,
+        `${where} pop frame ${index}: a .defend-type-label overlaps the glyph by ${over}px2 and the card shows no header copy, glyph ${JSON.stringify(frame.glyph)} labels ${JSON.stringify(frame.typeLabels)} header ${JSON.stringify(frame.header)}`,
+      )
+      glyphCardRules(frame, `${where} pop frame ${index}`, stats, 'pop')
+    }
+    assert.ok(n >= 8, `${where} sampled ${n} card-open frames (need every pop-in frame, not one)`)
+    assert.equal(stats.beginHitBad, 0, `${where} Begin centre tap`)
+    assert.ok(stats.beginFrames > 0 && stats.railFrames > 0, `${where} saw Begin and the rail with the card open`)
+    const shotDir = process.env.NW_LABEL_SHOT_DIR
+    if (shotDir && width === 375) {
+      mkdirSync(shotDir, { recursive: true })
+      await page.screenshot({ path: join(shotDir, '375-card-open.png') })
+      const clip = await page.evaluate(() => {
+        const glyph = document.querySelector('.defend-pad[data-tower-type="love"] .lamp-upgrade-glyph[data-glyph-variant="map"]')?.getBoundingClientRect()
+        const label = [...document.querySelectorAll('text.defend-type-label')].find((node) => (node.textContent || '').includes('Reason'))?.getBoundingClientRect()
+        if (!glyph) return null
+        const left = Math.max(0, Math.min(glyph.left, label?.left ?? glyph.left) - 40)
+        const top = Math.max(0, Math.min(glyph.top, label?.top ?? glyph.top) - 40)
+        const right = Math.min(innerWidth, Math.max(glyph.right, label?.right ?? glyph.right) + 40)
+        const bottom = Math.min(innerHeight, Math.max(glyph.bottom, label?.bottom ?? glyph.bottom) + 56)
+        return { x: left, y: top, width: Math.max(8, right - left), height: Math.max(8, bottom - top) }
+      })
+      if (clip) await page.screenshot({ path: join(shotDir, '375-glyph-crop.png'), clip })
+    }
+    console.log(`checkLabelOverGlyph ok ${label} frames=${n}`)
+    if (maxOver > 0) console.log(`checkLabelOverGlyph ${label} header covered label overlap max ${maxOver.toFixed(2)}px2`)
+    await context.close()
+  }
+}
+
+const OFFTOP_SIZES = [
+  [375, 667],
+  [390, 844],
+  [412, 915],
+]
+
+/** Drag the camera. Content follows the finger: up (negative dy) sends lamps toward the top of the clip. */
+async function offTopDrag(page, dy) {
+  const box = await page.locator('.nw-cam').boundingBox()
+  assert.ok(box, 'off-top pan needs the camera')
+  const x0 = box.x + Math.min(box.width * 0.42, box.width - 90)
+  const y0 = box.y + box.height * 0.5
+  const y1 = Math.max(box.y + 24, Math.min(box.y + box.height - 24, y0 + dy))
+  await page.mouse.move(x0, y0)
+  await page.mouse.down()
+  await page.mouse.move(x0, y1, { steps: 8 })
+  await page.mouse.up()
+  await page.waitForTimeout(40)
+}
+
+/**
+ * #932: a lamp whose art is fully above the clip paints no map mark, and two marks never overlap.
+ * Pan one lamp off the top, then both, then bring one back. Sample every frame.
+ */
+async function checkOffTopGlyph(browser, port, errors) {
+  for (const [width, height] of OFFTOP_SIZES) {
+    const label = `${width}x${height}`
+    const { context, page } = await openMap(browser, port, width, height, 'a2', {
+      motion: true,
+      search: '?playtest=1&nwSeed=2&nwRound=24&nwLamps=0&nwCam=1',
+    })
+    page.on('pageerror', (error) => errors.push(`off top ${label} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(`off top ${label} ${msg.text()}`)
+    })
+    await assertGlyphCamera(page, `${label} off top`)
+    const plan = await page.evaluate(() => {
+      const cam = document.querySelector('.nw-cam')
+      const zoom = document.querySelector('.nw-zoom')
+      const seats = [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((node) => ({
+        cx: Number(node.getAttribute('cx')),
+        cy: Number(node.getAttribute('cy')),
+      }))
+      if (!cam || !zoom) return { seats, yMax: null }
+      const camW = cam.clientWidth
+      const camH = cam.clientHeight
+      const s0 = Number.parseFloat(zoom.style.width) / 798
+      const z = Number.parseFloat((String(zoom.style.transform).match(/scale\(([^)]+)\)/) || [])[1] || '1')
+      const k = s0 * z
+      const tyMin = camH - 1134 * k
+      return { seats, yMax: k > 0 ? -tyMin / k : null, camW, camH, k }
+    })
+    assert.ok(plan.yMax != null, `${label} camera pan limit`)
+    const able = plan.seats.filter((seat) => seat.cy <= plan.yMax - 4).sort((a, b) => a.cy - b.cy || a.cx - b.cx)
+    const high = able[0]
+    const low = able.find((seat) => high && seat.cy >= high.cy + 40)
+    assert.ok(
+      high && low,
+      `${label} needs two live seats that can pan fully above the clip (yMax ${plan.yMax == null ? 'n/a' : plan.yMax.toFixed(1)}, seats ${JSON.stringify(plan.seats)})`,
+    )
+    await glyphPlantAt(page, 'love', high, `${label} off top`)
+    await glyphPlantAt(page, 'logic', low, `${label} off top`)
+    assert.equal(await page.locator('.defend-pad[data-tower-type="love"]').count(), 1, `${label} Love is planted`)
+    assert.equal(await page.locator('.defend-pad[data-tower-type="logic"]').count(), 1, `${label} Logic is planted`)
+    for (const tool of ['love', 'logic']) {
+      await glyphPanToPad(page, tool)
+      for (let step = 0; step < 3; step += 1) {
+        if ((await page.locator('.defend-tower-card').count()) < 1) {
+          await page.locator(`.defend-pad[data-tower-type="${tool}"]`).click({ force: true })
+          await page.locator('.defend-tower-card').waitFor()
+        }
+        await page.locator('.defend-tower-card button.defend-path-buy[data-path-buy="strong"]').click()
+        // A path buy ignores a second tap for 350ms. Wait that out before Escape.
+        await page.waitForTimeout(420)
+      }
+      const card = page.locator('.defend-tower-card')
+      await page.keyboard.press('Escape')
+      for (let attempt = 0; attempt < 3 && (await card.count()); attempt += 1) {
+        await page.waitForTimeout(120)
+        await page.keyboard.press('Escape')
+      }
+      await card.waitFor({ state: 'detached' })
+    }
+    await page.evaluate(
+      ({ half, up }) => {
+        const boxOf = (el) => {
+          if (!el) return null
+          const rect = el.getBoundingClientRect()
+          if (rect.width < 1 || rect.height < 1) return null
+          return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom }
+        }
+        const overlap = (a, b) => {
+          const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left))
+          const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+          return w * h
+        }
+        window.__offTopSample = () => {
+          const board = document.querySelector('.defend-board')
+          const frame = board?.closest('.defend-frame')?.getBoundingClientRect()
+          const edge = board?.getBoundingClientRect()
+          const ctm = board?.getScreenCTM()
+          if (!board || !edge || !ctm) return null
+          const clip = {
+            left: Math.max(edge.left, frame?.left ?? edge.left),
+            top: Math.max(edge.top, frame?.top ?? edge.top),
+            right: Math.min(edge.right, frame?.right ?? edge.right),
+            bottom: Math.min(edge.bottom, frame?.bottom ?? edge.bottom),
+          }
+          const scale = Math.hypot(ctm.a, ctm.b)
+          const lamps = [...document.querySelectorAll('.defend-pad.is-planted')].map((pad) => {
+            const feet = pad.getScreenCTM()
+            if (!feet) return null
+            const art = {
+              left: feet.e - half * scale,
+              right: feet.e + half * scale,
+              top: feet.f - up * scale,
+              bottom: feet.f,
+            }
+            const glyphEl = pad.querySelector('.lamp-upgrade-glyph[data-glyph-variant="map"]')
+            const glyph = boxOf(glyphEl)
+            const above = art.bottom <= clip.top
+            return {
+              id: pad.getAttribute('data-tower-type'),
+              above,
+              glyph: Boolean(glyphEl),
+              box: glyph,
+            }
+          }).filter(Boolean)
+          const visible = lamps.map((lamp) => lamp.box).filter(Boolean)
+          let glyphOverlap = 0
+          for (let i = 0; i < visible.length; i += 1) {
+            for (let j = i + 1; j < visible.length; j += 1) glyphOverlap += overlap(visible[i], visible[j])
+          }
+          return {
+            t: performance.now(),
+            aboveCount: lamps.filter((lamp) => lamp.above).length,
+            offTopGlyphs: lamps.filter((lamp) => lamp.above && lamp.glyph).length,
+            glyphOverlap,
+            back: lamps.filter((lamp) => !lamp.above && lamp.glyph).map((lamp) => lamp.id),
+          }
+        }
+        const run = { frames: [], stop: false }
+        window.__offTopRun = run
+        const tick = () => {
+          const frame = window.__offTopSample()
+          if (frame) run.frames.push(frame)
+          if (!run.stop) requestAnimationFrame(tick)
+        }
+        requestAnimationFrame(tick)
+      },
+      { half: LAMP_ART_HALF_UNITS, up: LAMP_ART_UP_UNITS },
+    )
+    let sawOne = false
+    let sawBoth = false
+    for (let step = 0; step < 24 && !sawBoth; step += 1) {
+      await offTopDrag(page, -48)
+      const now = await page.evaluate(() => window.__offTopSample())
+      if (now?.aboveCount === 1) sawOne = true
+      if (now?.aboveCount >= 2) sawBoth = true
+    }
+    assert.ok(sawOne, `${label} panning sends one lamp fully above the clip before the other`)
+    assert.ok(sawBoth, `${label} panning sends both lamps fully above the clip`)
+    const shotDir = process.env.NW_OFFTOP_SHOT_DIR
+    if (shotDir && width === 375) {
+      mkdirSync(shotDir, { recursive: true })
+      const tag = process.env.NW_OFFTOP_SHOT_TAG || 'shot'
+      const clip = await page.evaluate(() => {
+        const frame = document.querySelector('.defend-frame')?.getBoundingClientRect()
+        const top = Math.max(0, (frame?.top ?? 0) - 6)
+        return {
+          x: 0,
+          y: top,
+          width: Math.min(375, window.innerWidth),
+          height: Math.min(132, Math.max(88, window.innerHeight - top)),
+        }
+      })
+      await page.screenshot({
+        path: join(shotDir, `375-off-top-${tag}.png`),
+        clip: { x: clip.x, y: clip.y, width: clip.width, height: clip.height },
+      })
+    }
+    let broughtBack = false
+    for (let step = 0; step < 24 && !broughtBack; step += 1) {
+      await offTopDrag(page, 48)
+      const now = await page.evaluate(() => window.__offTopSample())
+      if (now && now.aboveCount < 2 && now.back.length > 0) broughtBack = true
+    }
+    assert.ok(broughtBack, `${label} a lamp panned back into the clip gets its map mark again`)
+    const frames = await page.evaluate(() => {
+      window.__offTopRun.stop = true
+      return window.__offTopRun.frames
+    })
+    assert.ok(frames.length >= 8, `${label} sampled ${frames.length} frames`)
+    const offTopGlyphs = frames.reduce((sum, frame) => sum + frame.offTopGlyphs, 0)
+    const glyphOverlap = frames.reduce((max, frame) => Math.max(max, frame.glyphOverlap), 0)
+    const detail = `${label} frames=${frames.length} offTopGlyphs=${offTopGlyphs} glyphOverlap=${glyphOverlap}`
+    assert.equal(offTopGlyphs, 0, `checkOffTopGlyph ${detail}`)
+    assert.equal(glyphOverlap, 0, `checkOffTopGlyph ${detail}`)
+    console.log(`checkOffTopGlyph ok ${label} frames=${frames.length} offTopGlyphs=0 glyphOverlap=0`)
+    await context.close()
+  }
+}
+
 async function checkLampGlyph(browser, port, errors) {
+  if (process.env.NW_OFFTOP_ONLY === '1') {
+    await checkOffTopGlyph(browser, port, errors)
+    return
+  }
+  if (process.env.NW_LABEL_ONLY === '1') {
+    await checkLabelOverGlyph(browser, port, errors)
+    return
+  }
+  await checkLabelOverGlyph(browser, port, errors)
+  await checkOffTopGlyph(browser, port, errors)
   const only = process.env.NW_GLYPH_SIZE
   for (const [width, height] of GLYPH_SIZES.filter(([w, h]) => process.env.NW_GLYPH_SWEEP_ONLY !== '1' && (!only || only === `${w}x${h}`))) {
     const label = `${width}x${height}`
@@ -3209,6 +3556,1089 @@ export async function checkNightRun905(browser, port, errors = []) {
   assert.equal(all.length, 0, `#905 Night Run checks failed:\n${all.join('\n')}`)
 }
 
+const COMPACT_SIZES = [[375, 667], [390, 844], [412, 915]]
+const COMPACT_SEATS = [
+  { cx: 600, cy: 88 },
+  { cx: 464, cy: 224 },
+  { cx: 464, cy: 360 },
+  { cx: 464, cy: 768 },
+  { cx: 600, cy: 904 },
+]
+const COMPACT_NEIGHBORS = ['logic', 'reason', 'science', 'candle']
+
+function blankCompact() {
+  return {
+    frames: 0,
+    cardH: 0,
+    header: 0,
+    overlap: 0,
+    minGap: Infinity,
+    minTip: Infinity,
+    beginFrames: 0,
+    beginSlack: Infinity,
+    beginHitBad: 0,
+    railFrames: 0,
+    railOver: 0,
+    clearFrames: 0,
+    clearOver: 0,
+    waveFrames: 0,
+    goldBad: 0,
+    goldSample: '',
+    goldCounts: new Set(),
+    clipped: 0,
+    clipSample: [],
+    clipSeen: new Set(),
+    lineFrames: 0,
+    lineNotes: [],
+    lineSeen: new Set(),
+    reasons: new Map(),
+  }
+}
+
+/** Reason lines the compact card paints. Same strings the tree and the road note use. */
+const COMPACT_LOCKS = new Set([
+  TREE_LOCK,
+  LESSON_LOCK,
+  'This path is full.',
+  'Finish this lamp first.',
+  'Bright is on.',
+  'One path goes to two. This one stops at one.',
+])
+const COMPACT_ROADS = new Set([
+  'Reaches on Far step 1',
+  'Reaches on Far step 2',
+  'Reaches on Far step 3',
+  'Too far from the road',
+])
+
+function compactReasonSource(line) {
+  if (line.kind === 'bright') return BRIGHT_LINE
+  if (line.kind === 'path') return PATH_LINE[line.path] || ''
+  if (line.kind === 'lock') return COMPACT_LOCKS.has(line.text) ? line.text : ''
+  if (line.kind === 'road') return COMPACT_ROADS.has(line.text) ? line.text : ''
+  return null
+}
+
+/** Count card-open frames. Header copy, glyph gap (pointer included), Begin, rail and clear-row. */
+function eatCompact(stats, frames) {
+  let n = 0
+  for (const frame of frames) {
+    if (!frame.card) continue
+    n += 1
+    stats.frames += 1
+    stats.cardH = Math.max(stats.cardH, frame.card.h)
+    if (frame.header) stats.header += 1
+    if (frame.glyph) {
+      stats.overlap = Math.max(stats.overlap, glyphArea(frame.glyph, frame.card))
+      stats.minGap = Math.min(stats.minGap, glyphGap(frame.glyph, frame.card))
+      if (frame.stem) stats.minTip = Math.min(stats.minTip, glyphGap(frame.glyph, frame.stem))
+    }
+    const begin = frame.begin[0]
+    if (begin) {
+      stats.beginFrames += 1
+      stats.beginSlack = Math.min(stats.beginSlack, begin.top - frame.card.bottom)
+      if (frame.beginHit !== true) stats.beginHitBad += 1
+    }
+    if (frame.buttons.length) stats.railFrames += 1
+    for (const button of frame.buttons) stats.railOver = Math.max(stats.railOver, glyphArea(frame.card, button))
+    if (frame.clearButtons.length) stats.clearFrames += 1
+    for (const button of frame.clearButtons) stats.clearOver = Math.max(stats.clearOver, glyphArea(frame.card, button))
+    if (frame.wave) stats.waveFrames += 1
+    if (frame.lines?.length) {
+      stats.lineFrames += 1
+      for (const line of frame.lines) {
+        const source = compactReasonSource(line)
+        const cut = line.scroll > line.client + 1 || line.scrollH > line.clientH + 1
+        const ellipsis = line.overflow === 'ellipsis'
+        const marker = line.text.includes('…') || line.text.endsWith('...')
+        const mismatch = source !== null && source !== line.text
+        const note = `${line.kind}|${line.overflow}|${line.scroll}|${line.client}|${line.scrollH}|${line.clientH}|${line.text}`
+        if (line.kind !== 'text' && !stats.lineSeen.has(note) && stats.lineNotes.length < 24) {
+          stats.lineSeen.add(note)
+          stats.lineNotes.push(
+            `${line.kind} overflow=${line.overflow} scroll=${line.scroll} client=${line.client} scrollH=${line.scrollH} clientH=${line.clientH} text=${JSON.stringify(line.text)}`,
+          )
+        }
+        if (cut || ellipsis || marker || mismatch) {
+          stats.clipped += 1
+          if (!stats.clipSeen.has(line.text) && stats.clipSample.length < 8) {
+            stats.clipSeen.add(line.text)
+            stats.clipSample.push(
+              `${line.kind} ${JSON.stringify(line.text)} overflow=${line.overflow} scroll=${line.scroll} client=${line.client} scrollH=${line.scrollH} clientH=${line.clientH} source=${JSON.stringify(source)}`,
+            )
+          }
+        }
+        if (source !== null) stats.reasons.set(line.text, source)
+      }
+    }
+  }
+  return n
+}
+
+function compactDetail(label, stats) {
+  const gap = stats.minGap === Infinity ? 'n/a' : stats.minGap.toFixed(2)
+  const tip = stats.minTip === Infinity ? 'n/a' : stats.minTip.toFixed(2)
+  const slack = stats.beginSlack === Infinity ? 'n/a' : stats.beginSlack.toFixed(2)
+  return (
+    `${label} frames=${stats.frames} cardH=${Math.round(stats.cardH)} header=${stats.header} ` +
+    `overlap=${stats.overlap}px2 gap=${gap}px tip=${tip}px beginSlack=${slack}px beginHitBad=${stats.beginHitBad} ` +
+    `railOver=${stats.railOver}px2 clearOver=${stats.clearOver}px2 waveFrames=${stats.waveFrames} goldBad=${stats.goldBad} ${stats.goldSample}`
+  )
+}
+
+async function compactBuy(page, where, index) {
+  if ((await page.locator('.defend-tower-card').count()) < 1) {
+    await glyphPanToPad(page, 'love')
+    await page.locator('.defend-pad[data-tower-type="love"]').click({ force: true })
+    await page.locator('.defend-tower-card').waitFor()
+  }
+  const step = GLYPH_LADDER[index]
+  const buy = step.bright
+    ? page.locator('.defend-tower-card .defend-bright-buy')
+    : page.locator(`.defend-tower-card button.defend-path-buy[data-path-buy="${step.path}"]`)
+  assert.equal(await buy.count(), 1, `${where} stage ${index} offers ${JSON.stringify(step)}`)
+  const before = await page.evaluate(() => ({
+    stage: document.querySelector('.defend-pad[data-tower-type="love"] .lamp-upgrade-glyph[data-glyph-variant="map"]')?.getAttribute('data-glyph-stage'),
+    buys: [...document.querySelectorAll('.defend-tower-card .defend-path-buy, .defend-tower-card .defend-bright-buy')].map((node) => ({
+      path: node.getAttribute('data-path-buy') || node.getAttribute('data-bright-buy'),
+      disabled: node.disabled,
+      text: (node.textContent || '').trim().slice(0, 40),
+    })),
+  }))
+  await buy.click()
+  try {
+    await page.waitForFunction(
+      (want) => document.querySelector('.defend-pad[data-tower-type="love"] .lamp-upgrade-glyph[data-glyph-variant="map"]')?.getAttribute('data-glyph-stage') === want,
+      String(index + 1),
+      { timeout: 8_000 },
+    )
+  } catch (error) {
+    const after = await page.evaluate(() => document.querySelector('.defend-pad[data-tower-type="love"] .lamp-upgrade-glyph[data-glyph-variant="map"]')?.getAttribute('data-glyph-stage'))
+    throw new Error(`${where} buy ${index} stayed at stage ${after} (before ${JSON.stringify(before)}) ${error.message}`)
+  }
+  // A path buy ignores a second tap for 350ms. Wait that out before the next one.
+  await page.waitForTimeout(420)
+}
+
+/** Card pop-in frames, from the tap that opens it. */
+async function compactPop(page) {
+  if (await page.locator('.defend-tower-card').count()) {
+    await page.keyboard.press('Escape')
+    await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+  }
+  await glyphPanToPad(page, 'love')
+  await page.evaluate(() => window.__glyphStart('love'))
+  const lamp = page.locator('.defend-clear-lamp[data-tower-type="love"]')
+  for (let attempt = 0; attempt < 6 && (await page.locator('.defend-tower-card').count()) < 1; attempt += 1) {
+    if (await lamp.count()) await lamp.click({ force: true })
+    else await page.locator('.defend-pad[data-tower-type="love"]').click({ force: true })
+    await page.waitForTimeout(280)
+  }
+  await page.locator('.defend-tower-card').waitFor({ timeout: 8000 })
+  await page.waitForTimeout(520)
+  return page.evaluate(() => window.__glyphEnd())
+}
+
+async function compactFonts(page, where) {
+  if (process.env.NW_LAMP_CARD_573 === '1') return
+  const small = await page.evaluate(() => {
+    const sels = ['.defend-tower-tool', '.defend-path-name', '.defend-path-line', '.defend-path-lock', '.defend-path-pip', '.defend-path-buy', '.defend-bright-buy', '.defend-bright-line', '.defend-bright-on', '.defend-tower-road']
+    const out = []
+    for (const sel of sels) {
+      for (const node of document.querySelectorAll(`.defend-tower-card ${sel}`)) {
+        const px = parseFloat(getComputedStyle(node).fontSize)
+        if (px < 13 - 0.05) out.push(`${sel} ${px.toFixed(2)}px`)
+      }
+    }
+    return out
+  })
+  assert.deepEqual(small, [], `${where} font floor stays >= 13px ${JSON.stringify(small)}`)
+}
+
+/**
+ * The one filled gold cue. Begin while it is up, the walker ring mid-wave, Continue on the clear.
+ * The card, its buys and the lamp mark must not add a second one. Neighbour paint and the New lamp
+ * buttons stay out of this count: a spark bank lights those (#924) and this sweep banks sparks.
+ * Zero and two-or-more both fail.
+ */
+async function compactGold(page, stats, where) {
+  const paint = await page.evaluate(() => {
+    const goldish = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = +match[1]
+        const g = +match[2]
+        const b = +match[3]
+        const a = match[4] === undefined ? 1 : +match[4]
+        if (a > 0.05 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const names = []
+    const sels = '.defend-go, .defend-continue, .defend-raider.is-easy-cue .defend-raider-face, .defend-path-buy, .defend-bright-buy, .defend-tower-card, .lamp-upgrade-glyph .is-stroke, .lamp-upgrade-glyph .is-gap, .lamp-upgrade-glyph .is-dot'
+    for (const el of document.querySelectorAll(sels)) {
+      const style = getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+      const rect = el.getBoundingClientRect()
+      if (rect.width <= 0 || rect.height <= 0) continue
+      let why = false
+      if (el instanceof SVGElement) {
+        if (style.stroke !== 'none' && parseFloat(style.strokeWidth) > 0 && goldish(style.stroke)) why = true
+        if (style.fill !== 'none' && goldish(style.fill)) why = true
+        if (goldish(style.filter)) why = true
+      } else if (goldish(style.backgroundImage) || goldish(style.backgroundColor) || goldish(style.boxShadow) || goldish(style.borderTopColor) || goldish(style.filter)) why = true
+      if (why) names.push(String(el.getAttribute('class') || el.tagName).split(/\s+/).slice(0, 3).join('.'))
+    }
+    return names
+  })
+  stats.goldCounts.add(paint.length)
+  if (paint.length !== 1) {
+    stats.goldBad += 1
+    stats.goldSample = `${where} gold ${paint.length} ${JSON.stringify(paint)}`
+    const cue = await page.evaluate(() => {
+      const face = document.querySelector('.defend-raider.is-easy-cue .defend-raider-face')
+      const go = document.querySelector('.defend-go')
+      return {
+        cues: document.querySelectorAll('.defend-raider.is-easy-cue').length,
+        face: face ? getComputedStyle(face).filter.slice(0, 180) : null,
+        go: go ? getComputedStyle(go).display : null,
+      }
+    })
+    console.log(`checkCompactLampCard gold ${stats.goldSample} cue ${JSON.stringify(cue)}`)
+  }
+}
+
+const HINT_SIZES = [[375, 667], [390, 844], [412, 915]]
+const HINT_SAMPLE_MS = 1500
+const HINT_GAP_MIN = 4
+const HINT_SHOTS = process.env.GEM_HINT_SHOT_DIR || join(tmpdir(), 'gem-hint-slot')
+
+function hintSave() {
+  const now = new Date()
+  const today = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-')
+  return {
+    kind: SAVE_KIND,
+    schemaVersion: SAVE_SCHEMA_VERSION,
+    appVersion: '1.4.574',
+    savedAt: now.toISOString(),
+    progress: {
+      started: true,
+      easyMode: true,
+      lastDailyDate: today,
+      dailyDates: [today],
+      completed: [],
+      held: [],
+      easyTaught: [],
+      easyHeld: [],
+      taught: [],
+      journal: [],
+      learnings: [],
+      memory: {},
+      matchLifetime: 5000,
+      matchSkillSeen: 2,
+    },
+  }
+}
+
+async function hintPointer(page, locator) {
+  await locator.scrollIntoViewIfNeeded()
+  const box = await locator.boundingBox()
+  assert.ok(box && box.width > 0 && box.height > 0, 'Easy Match pointer target has no box')
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.up()
+}
+
+/** Story-docked Easy panel-blast. Same open as check-gem-pop-live: ?gemSeed, Settings debug, wait for the board. */
+async function openEasyMatch(page, lineId, seed) {
+  await page.goto(withPlaytest1(`/?gemSeed=${seed}`))
+  await page.getByRole('main', { name: 'Home' }).waitFor()
+  await hintPointer(page, page.getByRole('button', { name: 'Settings', exact: true }))
+  await hintPointer(page, page.locator('details.settings-debug summary'))
+  await hintPointer(page, page.locator('details.settings-debug').getByRole('button', { name: new RegExp(`^${lineId} ·`) }).first())
+  await page.locator('.gem-board').waitFor()
+  await page.locator('.gem-hint-slot').waitFor()
+}
+
+/**
+ * #899. Easy Match open, story-docked panel-blast, html[data-easy=on].
+ * From the first board-visible frame through at least 1.5s: the hint slot stays at least
+ * HINT_GAP_MIN px above the board (overlap 0) at 375, 390 and 412, and its top stays at or
+ * below the word-search header and any Gem Jar above it (topGap >= 0). A centre tap on the
+ * jar or a header button lands on that element, not the slot. Letters stay >= 16.5px,
+ * exactly one hint slot. Every painted text node in the slot must fit its own box
+ * (scrollWidth/scrollHeight within 1px of the client box, whatever text-overflow is),
+ * show no ellipsis, and paint the source string.
+ * Gold cues use the mapGoldCues color test on the play screen. Tile fills are palette.
+ * 1.4.564 removed the preselected gold cell; check-gem-tap-live locks goldCues at 0.
+ */
+export async function checkGemHintSlot(browser, port, errors = []) {
+  const pending = []
+  for (const [width, height] of HINT_SIZES) {
+    const label = `${width}x${height}`
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      isMobile: true,
+    })
+    await context.addInitScript(
+      ({ key, save }) => localStorage.setItem(key, JSON.stringify(save)),
+      { key: STORAGE_KEY, save: hintSave() },
+    )
+    const page = await context.newPage()
+    page.on('pageerror', (error) => errors.push(`hint ${label} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(`hint ${label} ${msg.text()}`)
+    })
+    await openEasyMatch(page, 'ob-tuning', 0)
+    const sample = await page.evaluate(async ({ minMs, how, tap }) => {
+      // Same gold test as mapGoldCues, rooted on the Easy Match play screen.
+      const gold = (value) => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+        let match
+        while ((match = re.exec(value || ''))) {
+          const r = Number(match[1])
+          const g = Number(match[2])
+          const b = Number(match[3])
+          const a = match[4] === undefined ? 1 : Number(match[4])
+          if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
+      const shown = (el) => {
+        if (!el) return false
+        const style = getComputedStyle(el)
+        const box = el.getBoundingClientRect()
+        return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0 && box.width > 1 && box.height > 1
+      }
+      const overlapOf = (a, b) => {
+        const wide = Math.min(a.right, b.right) - Math.max(a.left, b.left)
+        const tall = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top)
+        return wide > 0 && tall > 0 ? wide * tall : 0
+      }
+      const playGoldCues = () => {
+        const root = document.querySelector('.play.is-gem-search')
+        if (!root) return []
+        const names = []
+        for (const node of root.querySelectorAll('*')) {
+          if (!shown(node)) continue
+          const style = getComputedStyle(node)
+          const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+          const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+          const tile = node.classList.contains('gem-cell')
+          // Board tile fills are palette, not a cue (same skip as the Match gold helpers).
+          const fill = tile ? false : gold(style.backgroundImage) || gold(style.backgroundColor)
+          const glow = gold(style.boxShadow) || (text && gold(style.color))
+          if (fill || border || glow) {
+            names.push(`${node.tagName}.${node.getAttribute('class') || ''}`.replace(/\s+/g, '.').slice(0, 80))
+          }
+        }
+        return names
+      }
+      const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+      const hintLines = () => {
+        const slot = document.querySelector('.gem-hint-slot')
+        if (!shown(slot)) return []
+        const out = []
+        for (const node of slot.querySelectorAll('*')) {
+          const directs = [...node.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+          if (!directs.length) continue
+          const style = getComputedStyle(node)
+          if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+          const rect = node.getBoundingClientRect()
+          if (rect.width < 1 || rect.height < 1) continue
+          const dom = norm(directs.map((child) => child.textContent).join(''))
+          const source = node.classList.contains('gem-start-hint')
+            ? (node.classList.contains('is-tap-next') ? tap : how)
+            : dom
+          const padL = parseFloat(style.paddingLeft) || 0
+          const padR = parseFloat(style.paddingRight) || 0
+          const padT = parseFloat(style.paddingTop) || 0
+          const padB = parseFloat(style.paddingBottom) || 0
+          const content = {
+            left: rect.left + (parseFloat(style.borderLeftWidth) || 0) + padL - 1,
+            right: rect.right - (parseFloat(style.borderRightWidth) || 0) - padR + 1,
+            top: rect.top + (parseFloat(style.borderTopWidth) || 0) + padT - 1,
+            bottom: rect.bottom - (parseFloat(style.borderBottomWidth) || 0) - padB + 1,
+          }
+          const range = document.createRange()
+          let rendered = ''
+          for (const child of directs) {
+            const raw = child.textContent
+            for (let i = 0; i < raw.length; i += 1) {
+              const ch = raw[i]
+              if (!ch.trim()) {
+                rendered += ch
+                continue
+              }
+              range.setStart(child, i)
+              range.setEnd(child, i + 1)
+              let painted = false
+              for (const box of range.getClientRects()) {
+                if (box.width <= 0 || box.height <= 0) continue
+                if (box.left >= content.left && box.right <= content.right && box.top >= content.top && box.bottom <= content.bottom) {
+                  painted = true
+                  break
+                }
+              }
+              if (painted) rendered += ch
+            }
+          }
+          out.push({
+            source,
+            dom,
+            rendered: norm(rendered),
+            overflow: style.textOverflow,
+            scroll: node.scrollWidth,
+            client: node.clientWidth,
+            scrollH: node.scrollHeight,
+            clientH: node.clientHeight,
+          })
+        }
+        return out
+      }
+      // Word-search header (top bar and story dock) is the neighbour above the slot even when the
+      // slot's translate covers it. The Gem Jar counts only when it sits above the slot; on a win it
+      // replaces the score line under the board and is not a top neighbour.
+      const aboveBottom = (slotBox) => {
+        let maxBottom = null
+        const take = (box) => {
+          maxBottom = maxBottom == null ? box.bottom : Math.max(maxBottom, box.bottom)
+        }
+        for (const el of document.querySelectorAll('header.topbar, .story-strip.is-dock, .match-teach-dock')) {
+          if (!shown(el)) continue
+          take(el.getBoundingClientRect())
+        }
+        const slotMid = slotBox.top + slotBox.height / 2
+        for (const el of document.querySelectorAll('.gem-jar-slot, [data-gem-jar]')) {
+          if (!shown(el)) continue
+          const box = el.getBoundingClientRect()
+          if (box.top + box.height / 2 < slotMid) take(box)
+        }
+        return maxBottom
+      }
+      const coverCheck = (slot) => {
+        const bad = []
+        let checked = 0
+        for (const el of document.querySelectorAll('header.topbar button, .match-teach-dock button, .match-teach-dock [role="button"], .story-strip.is-dock, [data-gem-jar]')) {
+          if (!shown(el)) continue
+          const box = el.getBoundingClientRect()
+          const x = box.left + box.width / 2
+          const y = box.top + box.height / 2
+          if (x < 0 || y < 0 || x > innerWidth || y > innerHeight) continue
+          const hit = document.elementFromPoint(x, y)
+          checked += 1
+          const stolen = !hit || hit === slot || Boolean(slot && slot.contains(hit)) || !el.contains(hit)
+          if (stolen) {
+            const name = `${el.tagName}.${String(el.getAttribute('class') || '').split(/\s+/).slice(0, 2).join('.')}`
+            const seen = hit ? `${hit.tagName}.${String(hit.getAttribute('class') || '').split(/\s+/).slice(0, 2).join('.')}` : 'none'
+            bad.push(`${name} -> ${seen}`)
+          }
+        }
+        return { checked, bad }
+      }
+      const frames = []
+      let started = 0
+      const giveUp = performance.now() + 8000
+      while (performance.now() < giveUp) {
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+        const slot = document.querySelector('.gem-hint-slot')
+        const board = document.querySelector('.gem-board')
+        if (!shown(board)) {
+          if (started) break
+          continue
+        }
+        const now = performance.now()
+        if (!started) started = now
+        const slotBox = shown(slot) ? slot.getBoundingClientRect() : null
+        const boardBox = board.getBoundingClientRect()
+        const above = slotBox ? aboveBottom(slotBox) : null
+        const cover = coverCheck(slot)
+        const sizes = [...document.querySelectorAll('.gem-board .gem-letter, .gem-board .gem-cell')]
+          .map((el) => parseFloat(getComputedStyle(el).fontSize))
+          .filter((n) => Number.isFinite(n) && n > 0)
+        const cues = playGoldCues()
+        frames.push({
+          t: now - started,
+          goldCues: cues.length,
+          goldNames: cues.slice(0, 8),
+          slots: [...document.querySelectorAll('.gem-hint-slot')].filter(shown).length,
+          slotTop: slotBox ? slotBox.top : null,
+          slotBottom: slotBox ? slotBox.bottom : null,
+          aboveBottom: above,
+          topGap: slotBox && above != null ? slotBox.top - above : null,
+          hitChecked: cover.checked,
+          hitBad: cover.bad,
+          boardTop: boardBox.top,
+          overlap: slotBox ? overlapOf(slotBox, boardBox) : null,
+          letterMin: sizes.length ? Math.min(...sizes) : null,
+          easy: document.documentElement.dataset.easy === 'on',
+          docked: Boolean(document.querySelector('html[data-easy="on"] .play.is-gem-search.is-panel-blast.is-story-docked')),
+          lines: hintLines(),
+        })
+        if (now - started >= minMs) break
+      }
+      const span = frames.length ? frames[frames.length - 1].t - frames[0].t : 0
+      return { frames, span }
+    }, { minMs: HINT_SAMPLE_MS, how: EASY.gemHow, tap: EASY.gemTapNext })
+    const frames = sample.frames
+    assert.ok(frames.length >= 20, `${label} sampled ${frames.length} frames across ${sample.span.toFixed(0)}ms`)
+    assert.ok(sample.span >= HINT_SAMPLE_MS, `${label} sampled ${sample.span.toFixed(0)}ms from the first board frame (need ${HINT_SAMPLE_MS})`)
+    let letterMin = Infinity
+    let gapMin = Infinity
+    let topGapMin = Infinity
+    let clipped = 0
+    let hitBad = 0
+    const goldSeen = new Set()
+    const hitSample = []
+    const loggedLines = new Set()
+    const clipSample = []
+    const seenCopy = new Set()
+    for (const [index, frame] of frames.entries()) {
+      assert.equal(frame.easy, true, `${label} frame ${index} html[data-easy=on]`)
+      assert.equal(frame.docked, true, `${label} frame ${index} story-docked panel-blast`)
+      assert.equal(frame.slots, 1, `${label} frame ${index} hint slot count === 1 (saw ${frame.slots})`)
+      assert.equal(
+        frame.goldCues,
+        0,
+        `${label} frame ${index} goldCues === 0 (locked by check-gem-tap-live) (saw ${frame.goldCues} ${frame.goldNames.join(' | ')})`,
+      )
+      assert.ok(frame.slotTop != null && frame.slotBottom != null, `${label} frame ${index} hint slot has a rect`)
+      assert.ok(frame.aboveBottom != null, `${label} frame ${index} header or gem jar sits above the hint`)
+      assert.ok(frame.slotBottom <= frame.boardTop, `${label} frame ${index} slot bottom ${frame.slotBottom} <= board top ${frame.boardTop}`)
+      topGapMin = Math.min(topGapMin, frame.topGap)
+      assert.ok(frame.hitChecked >= 1, `${label} frame ${index} checked a header button or the gem jar`)
+      if (frame.hitBad.length) {
+        hitBad += frame.hitBad.length
+        for (const item of frame.hitBad) {
+          if (hitSample.length < 4 && !hitSample.includes(item)) hitSample.push(item)
+        }
+      }
+      assert.equal(frame.overlap, 0, `${label} frame ${index} overlap area ${frame.overlap}`)
+      assert.ok(frame.letterMin >= 16.5, `${label} frame ${index} letter ${frame.letterMin}px >= 16.5`)
+      letterMin = Math.min(letterMin, frame.letterMin)
+      gapMin = Math.min(gapMin, frame.boardTop - frame.slotBottom)
+      goldSeen.add(frame.goldCues)
+      if (!frame.lines.length) {
+        clipped += 1
+        if (clipSample.length < 4) clipSample.push(`frame ${index} painted no text`)
+      }
+      for (const line of frame.lines) {
+        const cut = line.scroll > line.client + 1 || line.scrollH > line.clientH + 1
+        const ellipsis = line.overflow === 'ellipsis' || line.rendered.includes('…') || (line.rendered.includes('...') && !line.source.includes('...'))
+        const mismatch = line.rendered !== line.source || line.dom !== line.source
+        const note = `${line.overflow}|${line.scroll}|${line.client}|${line.scrollH}|${line.clientH}|${line.rendered}|${line.source}`
+        if (!loggedLines.has(note)) {
+          loggedLines.add(note)
+          console.log(
+            `checkGemHintSlot line ${label} overflow=${line.overflow} scroll=${line.scroll} client=${line.client} scrollH=${line.scrollH} clientH=${line.clientH} rendered=${JSON.stringify(line.rendered)} source=${JSON.stringify(line.source)}`,
+          )
+        }
+        seenCopy.add(line.source)
+        if (cut || ellipsis || mismatch) {
+          clipped += 1
+          if (clipSample.length < 4) {
+            clipSample.push(
+              `overflow=${line.overflow} scroll=${line.scroll} client=${line.client} scrollH=${line.scrollH} clientH=${line.clientH} rendered=${JSON.stringify(line.rendered)} source=${JSON.stringify(line.source)}`,
+            )
+          }
+        }
+      }
+    }
+    assert.equal(goldSeen.size, 1, `${label} gold cue count changed across frames ${[...goldSeen].join(',')}`)
+    assert.ok(
+      seenCopy.has(EASY.gemHow) || seenCopy.has(EASY.gemTapNext),
+      `${label} painted hint copy was not ${EASY.gemHow}`,
+    )
+    if (process.env.GEM_HINT_SHOT_DIR && width === 375) {
+      mkdirSync(HINT_SHOTS, { recursive: true })
+      const clip = await page.evaluate(() => {
+        const slot = document.querySelector('.gem-hint-slot')?.getBoundingClientRect()
+        const board = document.querySelector('.gem-board')?.getBoundingClientRect()
+        if (!slot || !board) return null
+        const top = Math.max(0, Math.min(slot.top, board.top) - 8)
+        const bottom = Math.min(innerHeight, board.top + 48)
+        return { x: 0, y: top, width: innerWidth, height: Math.max(8, bottom - top) }
+      })
+      if (clip) await page.screenshot({ path: join(HINT_SHOTS, '375-after.png'), clip })
+    }
+    const gap = Number(gapMin.toFixed(2))
+    const topGap = Number(topGapMin.toFixed(2))
+    const letters = Number(letterMin.toFixed(2))
+    const gold = frames[0].goldCues
+    if (gap < HINT_GAP_MIN) {
+      const msg = `checkGemHintSlot fail ${label} frames=${frames.length} gap=${gap} < ${HINT_GAP_MIN}`
+      console.log(msg)
+      pending.push(msg)
+    }
+    if (!(topGap >= 0)) {
+      const msg = `checkGemHintSlot fail ${label} frames=${frames.length} topGap=${topGap} < 0`
+      console.log(msg)
+      pending.push(msg)
+    }
+    if (clipped !== 0) {
+      const msg = `checkGemHintSlot fail ${label} frames=${frames.length} gap=${gap} clipped=${clipped} ${clipSample.join(' | ')}`
+      console.log(msg)
+      pending.push(msg)
+    }
+    if (hitBad !== 0) {
+      const msg = `checkGemHintSlot fail ${label} frames=${frames.length} headerHit=${hitBad} ${hitSample.join(' | ')}`
+      console.log(msg)
+      pending.push(msg)
+    }
+    if (gap >= HINT_GAP_MIN && topGap >= 0 && clipped === 0 && hitBad === 0) {
+      console.log(`checkGemHintSlot ok ${label} frames=${frames.length} gap=${gap} clipped=0 topGap=${topGap} letterMin=${letters} gold=${gold}`)
+    }
+    await context.close()
+  }
+  assert.equal(pending.length, 0, pending.join('\n'))
+}
+
+/**
+ * 1.4.574 (#933). Live sweep at 375, 390 and 412: camera on, banked sparks, four neighbour lamps,
+ * seats 600,88 | 464,224 | 464,360 | 464,768 | 600,904, love stages 2–7. The header glyph copy
+ * never shows. NW_LAMP_CARD_573=1 restores the 1.4.573 card height, which fails this check.
+ */
+async function checkCompactLampCard(browser, port, errors) {
+  const onlySize = process.env.NW_COMPACT_SIZE
+  const onlySeat = process.env.NW_COMPACT_SEAT
+  const tall = process.env.NW_LAMP_CARD_573 === '1'
+  const clipFails = []
+  for (const [width, height] of COMPACT_SIZES) {
+    const label = `${width}x${height}`
+    if (onlySize && onlySize !== label) continue
+    const stats = blankCompact()
+    let waved = false
+    for (const seat of COMPACT_SEATS) {
+      const seatKey = `${seat.cx},${seat.cy}`
+      if (onlySeat && onlySeat !== seatKey) continue
+      const where = `${label} seat ${seatKey}`
+      const { context, page } = await openMap(browser, port, width, height, 'a2', { motion: true, search: GLYPH_LIVE_SEARCH })
+      page.on('pageerror', (error) => errors.push(`compact ${where} ${error}`))
+      page.on('console', (msg) => {
+        if (msg.type() === 'error') errors.push(`compact ${where} ${msg.text()}`)
+      })
+      if (tall) await page.evaluate(() => document.documentElement.classList.add('is-lamp-card-573'))
+      await glyphSetup(page)
+      await page.evaluate(() => { window.__compactLines = true })
+      await assertGlyphCamera(page, where)
+      const rings = await page.evaluate(() =>
+        [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({ cx: Number(ring.getAttribute('cx')), cy: Number(ring.getAttribute('cy')) })),
+      )
+      for (const want of COMPACT_SEATS) {
+        assert.ok(rings.some((ring) => ring.cx === want.cx && ring.cy === want.cy), `${where} seat ${want.cx},${want.cy} is live ${JSON.stringify(rings)}`)
+      }
+      const sparks = await page.evaluate(() => Number((document.body.innerText.match(/(\d+)\s*\n?\s*Sparks/) || [])[1] || 0))
+      assert.ok(sparks >= 95, `${where} starts with banked sparks (${sparks})`)
+      const others = COMPACT_SEATS.filter((other) => other !== seat)
+      for (const [index, other] of others.entries()) {
+        await glyphPlantAt(page, COMPACT_NEIGHBORS[index], other, where)
+      }
+      assert.equal(await page.locator('.defend-pad').count(), 4, `${where} four neighbour lamps`)
+      await glyphPlantAt(page, 'love', seat, where)
+      assert.equal(await page.locator('.defend-pad[data-tower-type="love"]').count(), 1, `${where} Love is planted`)
+      for (let step = 0; step < 2; step += 1) await compactBuy(page, where, step)
+      for (let stage = 2; stage <= 7; stage += 1) {
+        const frames = await compactPop(page)
+        const n = eatCompact(stats, frames)
+        const placedBad = frames.filter((frame) => frame.card && (frame.header || (frame.glyph && glyphArea(frame.glyph, frame.card) > 0)))
+        if (placedBad.length) {
+          const worst = placedBad.reduce((best, frame) => Math.max(best, frame.glyph ? glyphArea(frame.glyph, frame.card) : 0), 0)
+          console.log(`checkCompactLampCard place ${where} love@${stage} headerFrames=${placedBad.filter((frame) => frame.header).length} overlap=${worst.toFixed(1)}px2`)
+        }
+        assert.ok(n >= 8, `${where} love@${stage} sampled ${n} card frames`)
+        const shown = await page.evaluate(() => document.querySelector('.defend-pad[data-tower-type="love"] .lamp-upgrade-glyph[data-glyph-variant="map"]')?.getAttribute('data-glyph-stage'))
+        assert.equal(shown, String(stage), `${where} card opened on love@${stage}`)
+        await compactGold(page, stats, `${where} love@${stage}`)
+        await compactFonts(page, `${where} love@${stage}`)
+        if (process.env.NW_REASON_SHOT === '1' && width === 375 && seat.cx === 464 && seat.cy === 360 && (stage === 4 || stage === 7)) {
+          const dir = process.env.NW_REASON_SHOT_DIR || join(tmpdir(), 'nw-reason-shots')
+          mkdirSync(dir, { recursive: true })
+          const clip = await page.evaluate(() => {
+            const card = document.querySelector('.defend-tower-card')?.getBoundingClientRect()
+            if (!card) return null
+            const left = Math.max(0, card.left - 8)
+            const top = Math.max(0, card.top - 8)
+            const right = Math.min(innerWidth, card.right + 8)
+            const bottom = Math.min(innerHeight, card.bottom + 8)
+            return { x: left, y: top, width: Math.max(8, right - left), height: Math.max(8, bottom - top) }
+          })
+          if (clip) await page.screenshot({ path: join(dir, `375-love-${stage}.png`), clip })
+        }
+        if (process.env.NW_COMPACT_SHOT === '1' && width === 375 && seat.cx === 464 && seat.cy === 768 && stage === 4) {
+          const dir = process.env.NW_COMPACT_SHOT_DIR || join(tmpdir(), 'nw-compact-shots')
+          mkdirSync(dir, { recursive: true })
+          const name = tall ? '375-love4-before' : '375-love4-after'
+          await page.screenshot({ path: join(dir, `${name}.png`) })
+          const clip = await page.evaluate(() => {
+            const card = document.querySelector('.defend-tower-card')?.getBoundingClientRect()
+            const glyph = document.querySelector('.defend-pad[data-tower-type="love"] .lamp-upgrade-glyph[data-glyph-variant="map"]')?.getBoundingClientRect()
+            if (!card) return null
+            const left = Math.max(0, Math.min(card.left, glyph?.left ?? card.left) - 12)
+            const top = Math.max(0, Math.min(card.top, glyph?.top ?? card.top) - 12)
+            const right = Math.min(innerWidth, Math.max(card.right, glyph?.right ?? card.right) + 12)
+            const bottom = Math.min(innerHeight, Math.max(card.bottom, glyph?.bottom ?? card.bottom) + 16)
+            return { x: left, y: top, width: Math.max(8, right - left), height: Math.max(8, bottom - top) }
+          })
+          if (clip) await page.screenshot({ path: join(dir, `${name}-crop.png`), clip })
+        }
+        if (stage < 7) await compactBuy(page, where, stage)
+      }
+      if (!waved && seat.cx === 464 && seat.cy === 768 && process.env.NW_COMPACT_SKIP_WAVE !== '1') {
+        if (await page.locator('.defend-tower-card').count()) {
+          await page.keyboard.press('Escape')
+          await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+        }
+        await page.locator('.defend-go').click()
+        await page.waitForSelector('.easy-walker, [data-walker-id]', { state: 'attached', timeout: 20_000 })
+        const waveFrames = await compactPop(page)
+        const waveN = eatCompact(stats, waveFrames)
+        const waveBad = waveFrames.filter((frame) => frame.card && (frame.header || (frame.glyph && glyphArea(frame.glyph, frame.card) > 0)))
+        if (waveBad.length) {
+          const worst = waveBad.reduce((best, frame) => Math.max(best, frame.glyph ? glyphArea(frame.glyph, frame.card) : 0), 0)
+          console.log(`checkCompactLampCard place ${where} mid-wave headerFrames=${waveBad.filter((frame) => frame.header).length} overlap=${worst.toFixed(1)}px2`)
+        }
+        assert.ok(waveN >= 8, `${where} mid-wave sampled ${waveN} card frames`)
+        await page.locator('.defend-raider.is-easy-cue').waitFor({ timeout: 8_000 }).catch(() => {})
+        await compactGold(page, stats, `${where} mid-wave`)
+        await page.keyboard.press('Escape')
+        await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+        const started = Date.now()
+        while (Date.now() - started < 90_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
+          const cue = await page.evaluate(() => {
+            const face = document.querySelector('.defend-raider.is-easy-cue')
+            if (!face) return null
+            const id = face.getAttribute('data-walker-id')
+            const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+            if (!tap) return null
+            const box = tap.getBoundingClientRect()
+            const x = box.x + box.width / 2
+            const y = box.y + box.height / 2
+            const node = document.elementFromPoint(x, y)
+            if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+            return { x, y }
+          })
+          if (cue) await page.mouse.click(cue.x, cue.y)
+          await page.waitForTimeout(80)
+        }
+        await page.locator('.defend-page.is-boost').waitFor()
+        await page.locator('.defend-continue').waitFor()
+        await page.waitForTimeout(400)
+        const clearFrames = await compactPop(page)
+        const clearN = eatCompact(stats, clearFrames)
+        const clearBad = clearFrames.filter((frame) => frame.card && (frame.header || (frame.glyph && glyphArea(frame.glyph, frame.card) > 0)))
+        if (clearBad.length) {
+          const worst = clearBad.reduce((best, frame) => Math.max(best, frame.glyph ? glyphArea(frame.glyph, frame.card) : 0), 0)
+          console.log(`checkCompactLampCard place ${where} clear-row headerFrames=${clearBad.filter((frame) => frame.header).length} overlap=${worst.toFixed(1)}px2`)
+        }
+        assert.ok(clearN >= 8, `${where} clear-row sampled ${clearN} card frames`)
+        await compactGold(page, stats, `${where} clear-row`)
+        if (!tall) await compactFonts(page, `${where} clear-row`)
+        waved = true
+      }
+      await context.close()
+    }
+    const detail = compactDetail(label, stats)
+    console.log(`checkCompactLampCard measure ${detail}`)
+    assert.equal(stats.header, 0, `checkCompactLampCard header-copy frames ${detail}`)
+    assert.equal(stats.overlap, 0, `checkCompactLampCard card intersects glyph ${detail}`)
+    assert.ok(stats.minGap >= GLYPH_MIN_GAP, `checkCompactLampCard gap ${detail}`)
+    if (Number.isFinite(stats.minTip)) assert.ok(stats.minTip >= GLYPH_MIN_GAP, `checkCompactLampCard pointer tip ${detail}`)
+    assert.ok(stats.beginFrames > 0 && stats.beginSlack >= SOLVER_BEGIN_GAP - 0.01, `checkCompactLampCard Begin card bottom <= goTop-8 ${detail}`)
+    assert.equal(stats.beginHitBad, 0, `checkCompactLampCard Begin centre hits .defend-go ${detail}`)
+    assert.ok(stats.railFrames > 0 && stats.railOver === 0, `checkCompactLampCard rail overlap ${detail}`)
+    if (process.env.NW_COMPACT_SKIP_WAVE !== '1') {
+      assert.ok(stats.clearFrames > 0 && stats.clearOver === 0, `checkCompactLampCard clear-row overlap ${detail}`)
+      assert.ok(stats.waveFrames > 0, `checkCompactLampCard mid-wave frames ${detail}`)
+    }
+    assert.equal(stats.goldBad, 0, `checkCompactLampCard gold count === 1 ${detail}`)
+    assert.deepEqual([...stats.goldCounts], [1], `checkCompactLampCard gold === 1 ${detail}`)
+    console.log(`checkCompactLampCard gold ${label} gold=1`)
+    assert.ok(stats.frames > 0, `checkCompactLampCard sampled no card frames ${detail}`)
+    assert.ok(stats.lineFrames > 0, `checkCompactLampCard sampled no text lines ${detail}`)
+    for (const [rendered, source] of stats.reasons) {
+      console.log(`checkCompactLampCard reason ${label} rendered=${JSON.stringify(rendered)} source=${JSON.stringify(source)}`)
+    }
+    for (const note of stats.lineNotes) console.log(`checkCompactLampCard line ${label} ${note}`)
+    if (stats.clipped !== 0) {
+      const msg = `checkCompactLampCard clip ${label} clipped=${stats.clipped} ${stats.clipSample.join(' | ')}`
+      console.log(msg)
+      clipFails.push(msg)
+    } else {
+      console.log(`checkCompactLampCard ok ${label} frames=${stats.frames} cardH=${Math.round(stats.cardH)} clipped=0`)
+    }
+    assert.equal(stats.reasons.get(TREE_LOCK), TREE_LOCK, `${label} path lock renders ${TREE_LOCK}`)
+    assert.equal(stats.reasons.get(BRIGHT_LINE), BRIGHT_LINE, `${label} Bright line renders ${BRIGHT_LINE}`)
+  }
+  assert.equal(clipFails.length, 0, clipFails.join('\n'))
+}
+
+/** 1.4.576 Easy pre-plant, camera off, reduced motion. Begin, live seats, the rail, and the rail tower taps. */
+const TABLET_BEGIN_MAIN = {
+  '375x667': {
+    begin: { x: 67.5, y: 602.6, w: 240, h: 56.4 },
+    rail: { x: 310, y: 98, w: 60, h: 216 },
+    seats: [
+      { x: 266, y: 114.3, w: 46.6, h: 46.6 },
+      { x: 197.1, y: 183.1, w: 46.6, h: 46.6 },
+      { x: 197.1, y: 251.9, w: 46.6, h: 46.6 },
+      { x: 197.1, y: 458.5, w: 46.6, h: 46.6 },
+      { x: 266, y: 527.3, w: 46.6, h: 46.6 },
+    ],
+    towers: [
+      { x: 316, y: 104, w: 48, h: 48 },
+      { x: 316, y: 156, w: 48, h: 48 },
+      { x: 316, y: 208, w: 48, h: 48 },
+      { x: 316, y: 260, w: 48, h: 48 },
+    ],
+  },
+  '390x844': {
+    begin: { x: 75, y: 779.6, w: 240, h: 56.4 },
+    rail: { x: 325, y: 98, w: 60, h: 216 },
+    seats: [
+      { x: 297.6, y: 120.8, w: 60.9, h: 60.9 },
+      { x: 207.6, y: 210.9, w: 60.9, h: 60.9 },
+      { x: 207.6, y: 300.9, w: 60.9, h: 60.9 },
+      { x: 207.6, y: 571.1, w: 60.9, h: 60.9 },
+      { x: 297.6, y: 661.2, w: 60.9, h: 60.9 },
+    ],
+    towers: [
+      { x: 331, y: 104, w: 48, h: 48 },
+      { x: 331, y: 156, w: 48, h: 48 },
+      { x: 331, y: 208, w: 48, h: 48 },
+      { x: 331, y: 260, w: 48, h: 48 },
+    ],
+  },
+  '412x915': {
+    begin: { x: 86, y: 850.6, w: 240, h: 56.4 },
+    rail: { x: 347, y: 98, w: 60, h: 216 },
+    seats: [
+      { x: 318.4, y: 123.4, w: 66.7, h: 66.7 },
+      { x: 219.8, y: 222, w: 66.7, h: 66.7 },
+      { x: 219.8, y: 320.6, w: 66.7, h: 66.7 },
+      { x: 219.8, y: 616.4, w: 66.7, h: 66.7 },
+      { x: 318.4, y: 714.9, w: 66.7, h: 66.7 },
+    ],
+    towers: [
+      { x: 353, y: 104, w: 48, h: 48 },
+      { x: 353, y: 156, w: 48, h: 48 },
+      { x: 353, y: 208, w: 48, h: 48 },
+      { x: 353, y: 260, w: 48, h: 48 },
+    ],
+  },
+  '768x1024': {
+    begin: { x: 77.8, y: 934, w: 162, h: 56 },
+    rail: { x: 674, y: 113, w: 76, h: 311.3 },
+    seats: [
+      { x: 505.3, y: 140.7, w: 72, h: 72 },
+      { x: 398.9, y: 247.1, w: 72, h: 72 },
+      { x: 398.9, y: 353.5, w: 72, h: 72 },
+      { x: 398.9, y: 672.8, w: 72, h: 72 },
+      { x: 505.3, y: 779.2, w: 72, h: 72 },
+    ],
+    towers: [
+      { x: 682, y: 121, w: 60, h: 69.3 },
+      { x: 682, y: 196.3, w: 60, h: 69.3 },
+      { x: 682, y: 271.6, w: 60, h: 69.3 },
+      { x: 682, y: 346.9, w: 60, h: 69.3 },
+    ],
+  },
+}
+
+const TABLET_BEGIN_SIZES = [
+  [375, 667],
+  [390, 844],
+  [412, 915],
+  [768, 1024],
+]
+
+function rectDelta(now, was) {
+  return {
+    x: now.x - was.x,
+    y: now.y - was.y,
+    w: now.w - was.w,
+    h: now.h - was.h,
+  }
+}
+
+function maxRectDelta(pairs) {
+  let worst = 0
+  for (const { now, was } of pairs) {
+    const d = rectDelta(now, was)
+    for (const key of ['x', 'y', 'w', 'h']) worst = Math.max(worst, Math.abs(d[key]))
+  }
+  return worst
+}
+
+/**
+ * 1.4.577 (#884a). Easy pre-plant Begin is grey on a tablet, same as a phone.
+ * One gold cue (the first-seat ring). Begin is not in mapGoldCues.
+ * `nwLamps=0` is the playtest bare path and paints Begin live (`is-after-plant`), so this opens
+ * the filed camera-off pre-plant night instead.
+ */
+async function checkTabletBeginGold(browser, port, errors) {
+  const only = process.env.NW_BEGIN_SIZE
+  for (const [width, height] of TABLET_BEGIN_SIZES) {
+    const label = `${width}x${height}`
+    if (only && only !== label) continue
+    const { context, page } = await openMap(browser, port, width, height, 'a2', {
+      search: '?playtest=1&nwSeed=2&nwCam=0',
+    })
+    page.on('pageerror', (error) => errors.push(`begin-gold ${label} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(`begin-gold ${label} ${msg.text()}`)
+    })
+    await page.locator('.defend-go.is-awaiting-plant').waitFor()
+    const sampled = await page.evaluate(async () => {
+      const gold = (value) => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+        let match
+        while ((match = re.exec(value || ''))) {
+          const r = Number(match[1])
+          const g = Number(match[2])
+          const b = Number(match[3])
+          const a = match[4] === undefined ? 1 : Number(match[4])
+          if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
+      const round = (n) => Math.round(n * 10) / 10
+      const box = (el) => {
+        if (!el) return null
+        const r = el.getBoundingClientRect()
+        if (r.width < 1 || r.height < 1) return null
+        return { x: round(r.x), y: round(r.y), w: round(r.width), h: round(r.height) }
+      }
+      const read = () => {
+        const root = document.querySelector('.defend-page')
+        const chrome = 'button, .defend-abilities, .defend-boost, .defend-tower-card, .defend-path-pip, .nw-balloon-orb, .defend-wave, .defend-ability-stock'
+        const names = !root
+          ? []
+          : [...root.querySelectorAll(chrome)]
+              .filter((node) => !node.closest('.defend-nw-debug'))
+              .filter((node) => {
+                const rect = node.getBoundingClientRect()
+                const style = getComputedStyle(node)
+                return rect.width > 1 && rect.height > 1 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0
+              })
+              .filter((node) => {
+                const style = getComputedStyle(node)
+                const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+                const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+                return gold(style.backgroundImage) || gold(style.backgroundColor) || border || gold(style.boxShadow) || (text && gold(style.color))
+              })
+              .map((node) => `${node.tagName}.${node.getAttribute('class') || ''}`.slice(0, 80))
+        const rings = [...document.querySelectorAll('.defend-plant-ground circle')].filter((node) => {
+          const rect = node.getBoundingClientRect()
+          const style = getComputedStyle(node)
+          if (rect.width <= 1 || rect.height <= 1 || style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+          return gold(style.stroke) || gold(style.fill) || gold(style.filter)
+        })
+        const go = document.querySelector('.defend-go')
+        const goStyle = go ? getComputedStyle(go) : null
+        const goGold = Boolean(
+          goStyle &&
+            (gold(goStyle.backgroundImage) ||
+              gold(goStyle.backgroundColor) ||
+              gold(goStyle.color) ||
+              gold(goStyle.boxShadow) ||
+              ['Top', 'Right', 'Bottom', 'Left'].some((side) => goStyle[`border${side}Width`] !== '0px' && gold(goStyle[`border${side}Color`]))),
+        )
+        return {
+          names,
+          rings: rings.length,
+          gold: names.length + rings.length,
+          beginGold: names.some((name) => name.includes('defend-go')) || goGold ? 1 : 0,
+          awaiting: go?.classList.contains('is-awaiting-plant') ? 1 : 0,
+          text: (go?.textContent || '').replace(/\s+/g, ' ').trim(),
+          begin: box(go),
+          rail: box(document.querySelector('.nw-rail')),
+          seats: [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map(box).filter(Boolean),
+          towers: [...document.querySelectorAll('.nw-rail .defend-ability, button.defend-new-lamp, .defend-pad')].map(box).filter(Boolean),
+        }
+      }
+      const frames = []
+      const start = performance.now()
+      await new Promise((resolve) => {
+        const tick = () => {
+          frames.push(read())
+          if (performance.now() - start < 1500) requestAnimationFrame(tick)
+          else resolve()
+        }
+        requestAnimationFrame(tick)
+      })
+      return { frames, ms: Math.round(performance.now() - start) }
+    })
+    const cues = await mapGoldCues(page)
+    const last = sampled.frames.at(-1)
+    assert.ok(last, `${label} sampled no pre-plant frames`)
+    assert.deepEqual(
+      cues.filter((name) => name.includes('defend-go')),
+      last.names.filter((name) => name.includes('defend-go')),
+      `${label} mapGoldCues Begin membership matches the last frame`,
+    )
+    assert.ok(sampled.ms >= 1500, `${label} sampled ${sampled.ms}ms, want at least 1500`)
+    assert.ok(sampled.frames.length >= 30, `${label} sampled ${sampled.frames.length} frames`)
+    const goldCounts = [...new Set(sampled.frames.map((frame) => frame.gold))]
+    const beginCounts = [...new Set(sampled.frames.map((frame) => frame.beginGold))]
+    const nameSet = [...new Set(sampled.frames.flatMap((frame) => frame.names))]
+    console.log(
+      `checkTabletBeginGold measure ${label} frames=${sampled.frames.length} ms=${sampled.ms} gold=${goldCounts.join('|')} beginGold=${beginCounts.join('|')} rings=${last.rings} names=${nameSet.join(' | ') || '(none)'}`,
+    )
+    const main = TABLET_BEGIN_MAIN[label]
+    const worst = { begin: 0, seat: 0, rail: 0, tower: 0 }
+    for (const frame of sampled.frames) {
+      assert.equal(frame.awaiting, 1, `${label} Begin stays is-awaiting-plant`)
+      assert.equal(frame.text, 'Begin the watch', `${label} Begin copy stays Begin the watch`)
+      assert.equal(frame.seats.length, main.seats.length, `${label} live seat count`)
+      assert.equal(frame.towers.length, main.towers.length, `${label} tower tap count`)
+      assert.ok(frame.begin && frame.rail, `${label} Begin and rail have rects`)
+      worst.begin = Math.max(worst.begin, maxRectDelta([{ now: frame.begin, was: main.begin }]))
+      worst.rail = Math.max(worst.rail, maxRectDelta([{ now: frame.rail, was: main.rail }]))
+      worst.seat = Math.max(
+        worst.seat,
+        maxRectDelta(frame.seats.map((now, index) => ({ now, was: main.seats[index] }))),
+      )
+      worst.tower = Math.max(
+        worst.tower,
+        maxRectDelta(frame.towers.map((now, index) => ({ now, was: main.towers[index] }))),
+      )
+    }
+    const fmt = (n) => n.toFixed(1)
+    console.log(
+      `checkTabletBeginGold delta ${label} begin=${fmt(worst.begin)} seat=${fmt(worst.seat)} rail=${fmt(worst.rail)} tower=${fmt(worst.tower)}`,
+    )
+    assert.ok(worst.begin <= 1 && worst.seat <= 1 && worst.rail <= 1 && worst.tower <= 1, `${label} tap targets moved more than 1px`)
+    const badGold = sampled.frames.filter((frame) => frame.gold !== 1 || frame.beginGold !== 0)
+    if (process.env.NW_BEGIN_SHOT === '1' && (width === 375 || width === 768)) {
+      const dir = process.env.NW_BEGIN_SHOT_DIR || join(tmpdir(), 'nw-begin-gold')
+      mkdirSync(dir, { recursive: true })
+      const tag = process.env.NW_BEGIN_SHOT_TAG || 'shot'
+      await page.screenshot({ path: join(dir, `${width}-preplant-FREEZE-${tag}.png`) })
+      const clip = await page.evaluate(() => {
+        const go = document.querySelector('.defend-go')?.getBoundingClientRect()
+        if (!go) return null
+        const left = Math.max(0, go.left - 16)
+        const top = Math.max(0, go.top - 24)
+        const right = Math.min(innerWidth, go.right + 16)
+        const bottom = Math.min(innerHeight, go.bottom + 16)
+        return { x: left, y: top, width: Math.max(8, right - left), height: Math.max(8, bottom - top) }
+      })
+      if (clip) await page.screenshot({ path: join(dir, `${width}-preplant-begin-${tag}.png`), clip })
+    }
+    if (badGold.length) {
+      console.log(
+        `checkTabletBeginGold fail ${label} frames=${badGold.length} gold=${goldCounts.join('|')} beginGold=${beginCounts.join('|')} names=${nameSet.join(' | ') || '(none)'}`,
+      )
+    }
+    assert.equal(badGold.length, 0, `${label} gold must be 1 and beginGold 0 on every frame (gold=${goldCounts.join('|')} beginGold=${beginCounts.join('|')})`)
+    console.log(`checkTabletBeginGold ok ${label} gold=1 beginGold=0`)
+    await context.close()
+  }
+}
+
 export async function checkPhoneFixes() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -3227,13 +4657,36 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', '1.4.565 leak banner nights stay free of console errors')
       return
     }
-    if (process.env.NW_GLYPH_ONLY === '1') {
+    if (process.env.NW_COMPACT_ONLY === '1') {
+      await checkCompactLampCard(browser, port, errors)
+      assert.equal(errors.join('\n'), '', '1.4.574 compact lamp card nights stay free of console errors')
+      return
+    }
+    if (process.env.GEM_HINT_ONLY === '1') {
+      await checkGemHintSlot(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'hint slot nights stay free of console errors')
+      return
+    }
+    if (process.env.NW_TABLET_BEGIN_ONLY === '1') {
+      await checkTabletBeginGold(browser, port, errors)
+      assert.equal(errors.join('\n'), '', '1.4.577 tablet Begin nights stay free of console errors')
+      return
+    }
+    if (process.env.NW_OFFTOP_ONLY === '1') {
+      await checkLampGlyph(browser, port, errors)
+      assert.equal(errors.join('\n'), '', '1.4.578 off-top glyph nights stay free of console errors')
+      return
+    }
+    if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
       return
     }
+    await checkGemHintSlot(browser, port, errors)
+    await checkTabletBeginGold(browser, port, errors)
     await checkNightRun905(browser, port, errors)
     await checkLampGlyph(browser, port, errors)
+    await checkCompactLampCard(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -3410,7 +4863,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')

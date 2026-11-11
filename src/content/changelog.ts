@@ -28,15 +28,74 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.573',
-    title: 'Night Run: shorter, kinder clue cards',
+    version: '1.4.579',
+    title: 'Easy word search: the hint clears the letters',
+    when: '2026-11-11',
+    items: [
+      'On a short phone, the hint sits clear of the letters.',
+      'Hard stays the same.',
+      'Refs #899.',
+    ],
+  },
+  {
+    version: '1.4.578',
+    title: 'Night Watch: a lamp off the map hides its mark',
+    when: '2026-11-11',
+    items: [
+      'A lamp scrolled off the map takes its mark with it.',
+      'Hard stays the same.',
+      'Refs #932.',
+    ],
+  },
+  {
+    version: '1.4.577',
+    title: 'Night Watch: Begin stays grey on a tablet',
+    when: '2026-11-11',
+    items: [
+      'On a tablet, Begin stays grey until a lamp is planted.',
+      'Hard stays the same.',
+      'Refs #884.',
+    ],
+  },
+  {
+    version: '1.4.576',
+    title: 'Night Watch: the lamp card shows the full reason',
+    when: '2026-11-10',
+    items: [
+      'On a phone, the lamp card shows the full reason.',
+      'Hard stays the same.',
+      'Refs #940.',
+    ],
+  },
+  {
+    version: '1.4.575',
+    title: 'Easy word search: the hint stays above the letters',
+    when: '2026-11-10',
+    items: [
+      'Word search: the hint stays above the letters.',
+      'Hard stays the same.',
+      'Refs #899.',
+    ],
+  },
+  {
+    version: '1.4.574',
+    title: 'Night Watch: the lamp card stays short on a phone',
     when: '2026-11-09',
     items: [
-      'Night Run: clue cards use shorter, easier words.',
-      'Clue cards show short sources. The Journal still shows the full ones.',
-      'The Good Samaritan road has a new Luke 10:33 card. A Samaritan saw the hurt man and stopped.',
-      'The priest and the Levite saw the hurt man and passed by.',
-      'Refs #793.',
+      'On a phone, the lamp card is shorter, so the lamp mark stays on the map.',
+      'Hard stays the same.',
+      'Refs #933.',
+    ],
+  },
+  {
+    version: '1.4.573',
+    title: 'Night Watch: a neighbour name stays off the lamp mark',
+    when: '2026-11-09',
+    items: [
+      'Opening a lamp keeps a neighbour name off the lamp mark.',
+      'When the screen has no clear spot, the card shows its own copy of the mark.',
+      'Hard stays the same.',
+      'Refs #923.',
     ],
   },
   {
