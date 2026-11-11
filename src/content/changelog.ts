@@ -28,6 +28,18 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.580',
+    title: 'Night Run: shorter, kinder clue cards',
+    when: '2026-11-11',
+    items: [
+      'Night Run: clue cards use shorter, easier words.',
+      'Clue cards show short sources. The Journal still shows the full ones.',
+      'The Good Samaritan road has a new Luke 10:33 card. A Samaritan saw the hurt man and stopped.',
+      'The priest and the Levite saw the hurt man and passed by.',
+      'Refs #793.',
+    ],
+  },
+  {
     version: '1.4.579',
     title: 'Easy word search: the hint clears the letters',
     when: '2026-11-11',
