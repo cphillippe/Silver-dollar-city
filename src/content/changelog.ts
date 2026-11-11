@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.577',
+    title: 'Night Watch: Begin stays grey on a tablet',
+    when: '2026-11-11',
+    items: [
+      'On a tablet, Begin stays grey until a lamp is planted.',
+      'Hard stays the same.',
+      'Refs #884.',
+    ],
+  },
+  {
     version: '1.4.576',
     title: 'Night Watch: the lamp card shows the full reason',
     when: '2026-11-10',

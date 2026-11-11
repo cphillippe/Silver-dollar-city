@@ -4623,6 +4623,24 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   }
 }
 
+/* 1.4.577: tablets use the same pre-plant grey as phones (#884).
+   The 480px rule above is unchanged. After a plant, Begin keeps .btn.primary gold.
+   Animation stops so the gold keyframe shadow cannot return. Transform stays the layout's own. */
+@media (min-width: 481px) {
+  .defend-page.is-easy-watch .nw-docks .defend-go.is-awaiting-plant,
+  .defend-page.is-easy-watch .nw-docks .defend-go.is-awaiting-plant:disabled {
+    animation: none;
+    opacity: 1;
+    cursor: not-allowed;
+    color: #5c5468;
+    -webkit-text-fill-color: #5c5468;
+    background: linear-gradient(180deg, #e4deea 0%, #c8c0d2 52%, #b0a8ba);
+    border-color: #d5cedf;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    filter: none;
+  }
+}
+
 .defend-plant-first {
   margin: 0;
   padding: 3px 8px;
