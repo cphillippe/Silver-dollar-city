@@ -12,6 +12,7 @@ import { chromium } from '@playwright/test'
 import { SAVE_KIND } from '../src/lib/save.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 import { LAMP_GLYPH_COLOR } from '../src/nightWatch/lampGlyph.ts'
+import { BRIGHT_LINE, LESSON_LOCK, PATH_LINE, TREE_LOCK } from '../src/nightWatch/upgradeTree.ts'
 import { withPlaytest1 } from './dev-ui-playtest.mjs'
 
 const SAVE = {
@@ -1851,6 +1852,38 @@ async function glyphSetup(page) {
           })
           .map(box)
           .filter(Boolean),
+        // 1.4.576: every painted text line. Hidden lines use visibility:hidden and are skipped here.
+        lines: window.__compactLines ? (() => {
+          const card = document.querySelector('.defend-tower-card')
+          if (!card) return []
+          const out = []
+          for (const node of card.querySelectorAll('*')) {
+            const direct = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim().length > 0)
+            if (!direct) continue
+            const style = getComputedStyle(node)
+            if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+            const rect = node.getBoundingClientRect()
+            if (rect.width < 1 || rect.height < 1) continue
+            const text = (node.textContent || '').replace(/\s+/g, ' ').trim()
+            if (!text) continue
+            let kind = 'text'
+            if (node.matches('.defend-path-lock')) kind = 'lock'
+            else if (node.matches('.defend-bright-line')) kind = 'bright'
+            else if (node.matches('.defend-path-line')) kind = 'path'
+            else if (node.matches('.defend-tower-road')) kind = 'road'
+            out.push({
+              kind,
+              path: node.closest('[data-path]')?.getAttribute('data-path') || '',
+              text,
+              overflow: style.textOverflow,
+              scroll: node.scrollWidth,
+              client: node.clientWidth,
+              scrollH: node.scrollHeight,
+              clientH: node.clientHeight,
+            })
+          }
+          return out
+        })() : [],
       }
     }
     window.__glyphRun = null
@@ -3341,7 +3374,39 @@ function blankCompact() {
     waveFrames: 0,
     goldBad: 0,
     goldSample: '',
+    goldCounts: new Set(),
+    clipped: 0,
+    clipSample: [],
+    clipSeen: new Set(),
+    lineFrames: 0,
+    lineNotes: [],
+    lineSeen: new Set(),
+    reasons: new Map(),
   }
+}
+
+/** Reason lines the compact card paints. Same strings the tree and the road note use. */
+const COMPACT_LOCKS = new Set([
+  TREE_LOCK,
+  LESSON_LOCK,
+  'This path is full.',
+  'Finish this lamp first.',
+  'Bright is on.',
+  'One path goes to two. This one stops at one.',
+])
+const COMPACT_ROADS = new Set([
+  'Reaches on Far step 1',
+  'Reaches on Far step 2',
+  'Reaches on Far step 3',
+  'Too far from the road',
+])
+
+function compactReasonSource(line) {
+  if (line.kind === 'bright') return BRIGHT_LINE
+  if (line.kind === 'path') return PATH_LINE[line.path] || ''
+  if (line.kind === 'lock') return COMPACT_LOCKS.has(line.text) ? line.text : ''
+  if (line.kind === 'road') return COMPACT_ROADS.has(line.text) ? line.text : ''
+  return null
 }
 
 /** Count card-open frames. Header copy, glyph gap (pointer included), Begin, rail and clear-row. */
@@ -3369,6 +3434,33 @@ function eatCompact(stats, frames) {
     if (frame.clearButtons.length) stats.clearFrames += 1
     for (const button of frame.clearButtons) stats.clearOver = Math.max(stats.clearOver, glyphArea(frame.card, button))
     if (frame.wave) stats.waveFrames += 1
+    if (frame.lines?.length) {
+      stats.lineFrames += 1
+      for (const line of frame.lines) {
+        const source = compactReasonSource(line)
+        const cut = line.scroll > line.client + 1 || line.scrollH > line.clientH + 1
+        const ellipsis = line.overflow === 'ellipsis'
+        const marker = line.text.includes('…') || line.text.endsWith('...')
+        const mismatch = source !== null && source !== line.text
+        const note = `${line.kind}|${line.overflow}|${line.scroll}|${line.client}|${line.scrollH}|${line.clientH}|${line.text}`
+        if (line.kind !== 'text' && !stats.lineSeen.has(note) && stats.lineNotes.length < 24) {
+          stats.lineSeen.add(note)
+          stats.lineNotes.push(
+            `${line.kind} overflow=${line.overflow} scroll=${line.scroll} client=${line.client} scrollH=${line.scrollH} clientH=${line.clientH} text=${JSON.stringify(line.text)}`,
+          )
+        }
+        if (cut || ellipsis || marker || mismatch) {
+          stats.clipped += 1
+          if (!stats.clipSeen.has(line.text) && stats.clipSample.length < 8) {
+            stats.clipSeen.add(line.text)
+            stats.clipSample.push(
+              `${line.kind} ${JSON.stringify(line.text)} overflow=${line.overflow} scroll=${line.scroll} client=${line.client} scrollH=${line.scrollH} clientH=${line.clientH} source=${JSON.stringify(source)}`,
+            )
+          }
+        }
+        if (source !== null) stats.reasons.set(line.text, source)
+      }
+    }
   }
   return n
 }
@@ -3490,6 +3582,7 @@ async function compactGold(page, stats, where) {
     }
     return names
   })
+  stats.goldCounts.add(paint.length)
   if (paint.length !== 1) {
     stats.goldBad += 1
     stats.goldSample = `${where} gold ${paint.length} ${JSON.stringify(paint)}`
@@ -3716,6 +3809,7 @@ async function checkCompactLampCard(browser, port, errors) {
   const onlySize = process.env.NW_COMPACT_SIZE
   const onlySeat = process.env.NW_COMPACT_SEAT
   const tall = process.env.NW_LAMP_CARD_573 === '1'
+  const clipFails = []
   for (const [width, height] of COMPACT_SIZES) {
     const label = `${width}x${height}`
     if (onlySize && onlySize !== label) continue
@@ -3732,6 +3826,7 @@ async function checkCompactLampCard(browser, port, errors) {
       })
       if (tall) await page.evaluate(() => document.documentElement.classList.add('is-lamp-card-573'))
       await glyphSetup(page)
+      await page.evaluate(() => { window.__compactLines = true })
       await assertGlyphCamera(page, where)
       const rings = await page.evaluate(() =>
         [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({ cx: Number(ring.getAttribute('cx')), cy: Number(ring.getAttribute('cy')) })),
@@ -3752,11 +3847,30 @@ async function checkCompactLampCard(browser, port, errors) {
       for (let stage = 2; stage <= 7; stage += 1) {
         const frames = await compactPop(page)
         const n = eatCompact(stats, frames)
+        const placedBad = frames.filter((frame) => frame.card && (frame.header || (frame.glyph && glyphArea(frame.glyph, frame.card) > 0)))
+        if (placedBad.length) {
+          const worst = placedBad.reduce((best, frame) => Math.max(best, frame.glyph ? glyphArea(frame.glyph, frame.card) : 0), 0)
+          console.log(`checkCompactLampCard place ${where} love@${stage} headerFrames=${placedBad.filter((frame) => frame.header).length} overlap=${worst.toFixed(1)}px2`)
+        }
         assert.ok(n >= 8, `${where} love@${stage} sampled ${n} card frames`)
         const shown = await page.evaluate(() => document.querySelector('.defend-pad[data-tower-type="love"] .lamp-upgrade-glyph[data-glyph-variant="map"]')?.getAttribute('data-glyph-stage'))
         assert.equal(shown, String(stage), `${where} card opened on love@${stage}`)
         await compactGold(page, stats, `${where} love@${stage}`)
         await compactFonts(page, `${where} love@${stage}`)
+        if (process.env.NW_REASON_SHOT === '1' && width === 375 && seat.cx === 464 && seat.cy === 360 && (stage === 4 || stage === 7)) {
+          const dir = process.env.NW_REASON_SHOT_DIR || join(tmpdir(), 'nw-reason-shots')
+          mkdirSync(dir, { recursive: true })
+          const clip = await page.evaluate(() => {
+            const card = document.querySelector('.defend-tower-card')?.getBoundingClientRect()
+            if (!card) return null
+            const left = Math.max(0, card.left - 8)
+            const top = Math.max(0, card.top - 8)
+            const right = Math.min(innerWidth, card.right + 8)
+            const bottom = Math.min(innerHeight, card.bottom + 8)
+            return { x: left, y: top, width: Math.max(8, right - left), height: Math.max(8, bottom - top) }
+          })
+          if (clip) await page.screenshot({ path: join(dir, `375-love-${stage}.png`), clip })
+        }
         if (process.env.NW_COMPACT_SHOT === '1' && width === 375 && seat.cx === 464 && seat.cy === 768 && stage === 4) {
           const dir = process.env.NW_COMPACT_SHOT_DIR || join(tmpdir(), 'nw-compact-shots')
           mkdirSync(dir, { recursive: true })
@@ -3785,6 +3899,11 @@ async function checkCompactLampCard(browser, port, errors) {
         await page.waitForSelector('.easy-walker, [data-walker-id]', { state: 'attached', timeout: 20_000 })
         const waveFrames = await compactPop(page)
         const waveN = eatCompact(stats, waveFrames)
+        const waveBad = waveFrames.filter((frame) => frame.card && (frame.header || (frame.glyph && glyphArea(frame.glyph, frame.card) > 0)))
+        if (waveBad.length) {
+          const worst = waveBad.reduce((best, frame) => Math.max(best, frame.glyph ? glyphArea(frame.glyph, frame.card) : 0), 0)
+          console.log(`checkCompactLampCard place ${where} mid-wave headerFrames=${waveBad.filter((frame) => frame.header).length} overlap=${worst.toFixed(1)}px2`)
+        }
         assert.ok(waveN >= 8, `${where} mid-wave sampled ${waveN} card frames`)
         await page.locator('.defend-raider.is-easy-cue').waitFor({ timeout: 8_000 }).catch(() => {})
         await compactGold(page, stats, `${where} mid-wave`)
@@ -3813,6 +3932,11 @@ async function checkCompactLampCard(browser, port, errors) {
         await page.waitForTimeout(400)
         const clearFrames = await compactPop(page)
         const clearN = eatCompact(stats, clearFrames)
+        const clearBad = clearFrames.filter((frame) => frame.card && (frame.header || (frame.glyph && glyphArea(frame.glyph, frame.card) > 0)))
+        if (clearBad.length) {
+          const worst = clearBad.reduce((best, frame) => Math.max(best, frame.glyph ? glyphArea(frame.glyph, frame.card) : 0), 0)
+          console.log(`checkCompactLampCard place ${where} clear-row headerFrames=${clearBad.filter((frame) => frame.header).length} overlap=${worst.toFixed(1)}px2`)
+        }
         assert.ok(clearN >= 8, `${where} clear-row sampled ${clearN} card frames`)
         await compactGold(page, stats, `${where} clear-row`)
         if (!tall) await compactFonts(page, `${where} clear-row`)
@@ -3834,9 +3958,25 @@ async function checkCompactLampCard(browser, port, errors) {
       assert.ok(stats.waveFrames > 0, `checkCompactLampCard mid-wave frames ${detail}`)
     }
     assert.equal(stats.goldBad, 0, `checkCompactLampCard gold count === 1 ${detail}`)
+    assert.deepEqual([...stats.goldCounts], [1], `checkCompactLampCard gold === 1 ${detail}`)
+    console.log(`checkCompactLampCard gold ${label} gold=1`)
     assert.ok(stats.frames > 0, `checkCompactLampCard sampled no card frames ${detail}`)
-    console.log(`checkCompactLampCard ok ${label} frames=${stats.frames} cardH=${Math.round(stats.cardH)}`)
+    assert.ok(stats.lineFrames > 0, `checkCompactLampCard sampled no text lines ${detail}`)
+    for (const [rendered, source] of stats.reasons) {
+      console.log(`checkCompactLampCard reason ${label} rendered=${JSON.stringify(rendered)} source=${JSON.stringify(source)}`)
+    }
+    for (const note of stats.lineNotes) console.log(`checkCompactLampCard line ${label} ${note}`)
+    if (stats.clipped !== 0) {
+      const msg = `checkCompactLampCard clip ${label} clipped=${stats.clipped} ${stats.clipSample.join(' | ')}`
+      console.log(msg)
+      clipFails.push(msg)
+    } else {
+      console.log(`checkCompactLampCard ok ${label} frames=${stats.frames} cardH=${Math.round(stats.cardH)} clipped=0`)
+    }
+    assert.equal(stats.reasons.get(TREE_LOCK), TREE_LOCK, `${label} path lock renders ${TREE_LOCK}`)
+    assert.equal(stats.reasons.get(BRIGHT_LINE), BRIGHT_LINE, `${label} Bright line renders ${BRIGHT_LINE}`)
   }
+  assert.equal(clipFails.length, 0, clipFails.join('\n'))
 }
 
 export async function checkPhoneFixes() {
