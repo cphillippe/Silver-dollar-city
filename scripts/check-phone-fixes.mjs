@@ -12,6 +12,7 @@ import { chromium } from '@playwright/test'
 import { SAVE_KIND } from '../src/lib/save.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 import { LAMP_GLYPH_COLOR } from '../src/nightWatch/lampGlyph.ts'
+import { LAMP_ART_HALF_UNITS, LAMP_ART_UP_UNITS } from '../src/nightWatch/lampGlyphPlace.ts'
 import { BRIGHT_LINE, LESSON_LOCK, PATH_LINE, TREE_LOCK } from '../src/nightWatch/upgradeTree.ts'
 import { withPlaytest1 } from './dev-ui-playtest.mjs'
 
@@ -2888,12 +2889,214 @@ async function checkLabelOverGlyph(browser, port, errors) {
   }
 }
 
+const OFFTOP_SIZES = [
+  [375, 667],
+  [390, 844],
+  [412, 915],
+]
+
+/** Drag the camera. Content follows the finger: up (negative dy) sends lamps toward the top of the clip. */
+async function offTopDrag(page, dy) {
+  const box = await page.locator('.nw-cam').boundingBox()
+  assert.ok(box, 'off-top pan needs the camera')
+  const x0 = box.x + Math.min(box.width * 0.42, box.width - 90)
+  const y0 = box.y + box.height * 0.5
+  const y1 = Math.max(box.y + 24, Math.min(box.y + box.height - 24, y0 + dy))
+  await page.mouse.move(x0, y0)
+  await page.mouse.down()
+  await page.mouse.move(x0, y1, { steps: 8 })
+  await page.mouse.up()
+  await page.waitForTimeout(40)
+}
+
+/**
+ * #932: a lamp whose art is fully above the clip paints no map mark, and two marks never overlap.
+ * Pan one lamp off the top, then both, then bring one back. Sample every frame.
+ */
+async function checkOffTopGlyph(browser, port, errors) {
+  for (const [width, height] of OFFTOP_SIZES) {
+    const label = `${width}x${height}`
+    const { context, page } = await openMap(browser, port, width, height, 'a2', {
+      motion: true,
+      search: '?playtest=1&nwSeed=2&nwRound=24&nwLamps=0&nwCam=1',
+    })
+    page.on('pageerror', (error) => errors.push(`off top ${label} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(`off top ${label} ${msg.text()}`)
+    })
+    await assertGlyphCamera(page, `${label} off top`)
+    const plan = await page.evaluate(() => {
+      const cam = document.querySelector('.nw-cam')
+      const zoom = document.querySelector('.nw-zoom')
+      const seats = [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((node) => ({
+        cx: Number(node.getAttribute('cx')),
+        cy: Number(node.getAttribute('cy')),
+      }))
+      if (!cam || !zoom) return { seats, yMax: null }
+      const camW = cam.clientWidth
+      const camH = cam.clientHeight
+      const s0 = Number.parseFloat(zoom.style.width) / 798
+      const z = Number.parseFloat((String(zoom.style.transform).match(/scale\(([^)]+)\)/) || [])[1] || '1')
+      const k = s0 * z
+      const tyMin = camH - 1134 * k
+      return { seats, yMax: k > 0 ? -tyMin / k : null, camW, camH, k }
+    })
+    assert.ok(plan.yMax != null, `${label} camera pan limit`)
+    const able = plan.seats.filter((seat) => seat.cy <= plan.yMax - 4).sort((a, b) => a.cy - b.cy || a.cx - b.cx)
+    const high = able[0]
+    const low = able.find((seat) => high && seat.cy >= high.cy + 40)
+    assert.ok(
+      high && low,
+      `${label} needs two live seats that can pan fully above the clip (yMax ${plan.yMax == null ? 'n/a' : plan.yMax.toFixed(1)}, seats ${JSON.stringify(plan.seats)})`,
+    )
+    await glyphPlantAt(page, 'love', high, `${label} off top`)
+    await glyphPlantAt(page, 'logic', low, `${label} off top`)
+    assert.equal(await page.locator('.defend-pad[data-tower-type="love"]').count(), 1, `${label} Love is planted`)
+    assert.equal(await page.locator('.defend-pad[data-tower-type="logic"]').count(), 1, `${label} Logic is planted`)
+    for (const tool of ['love', 'logic']) {
+      await glyphPanToPad(page, tool)
+      for (let step = 0; step < 3; step += 1) {
+        if ((await page.locator('.defend-tower-card').count()) < 1) {
+          await page.locator(`.defend-pad[data-tower-type="${tool}"]`).click({ force: true })
+          await page.locator('.defend-tower-card').waitFor()
+        }
+        await page.locator('.defend-tower-card button.defend-path-buy[data-path-buy="strong"]').click()
+        await page.waitForTimeout(260)
+      }
+      await page.keyboard.press('Escape')
+      await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+    }
+    await page.evaluate(
+      ({ half, up }) => {
+        const boxOf = (el) => {
+          if (!el) return null
+          const rect = el.getBoundingClientRect()
+          if (rect.width < 1 || rect.height < 1) return null
+          return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom }
+        }
+        const overlap = (a, b) => {
+          const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left))
+          const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+          return w * h
+        }
+        window.__offTopSample = () => {
+          const board = document.querySelector('.defend-board')
+          const frame = board?.closest('.defend-frame')?.getBoundingClientRect()
+          const edge = board?.getBoundingClientRect()
+          const ctm = board?.getScreenCTM()
+          if (!board || !edge || !ctm) return null
+          const clip = {
+            left: Math.max(edge.left, frame?.left ?? edge.left),
+            top: Math.max(edge.top, frame?.top ?? edge.top),
+            right: Math.min(edge.right, frame?.right ?? edge.right),
+            bottom: Math.min(edge.bottom, frame?.bottom ?? edge.bottom),
+          }
+          const scale = Math.hypot(ctm.a, ctm.b)
+          const lamps = [...document.querySelectorAll('.defend-pad.is-planted')].map((pad) => {
+            const feet = pad.getScreenCTM()
+            if (!feet) return null
+            const art = {
+              left: feet.e - half * scale,
+              right: feet.e + half * scale,
+              top: feet.f - up * scale,
+              bottom: feet.f,
+            }
+            const glyphEl = pad.querySelector('.lamp-upgrade-glyph[data-glyph-variant="map"]')
+            const glyph = boxOf(glyphEl)
+            const above = art.bottom <= clip.top
+            return {
+              id: pad.getAttribute('data-tower-type'),
+              above,
+              glyph: Boolean(glyphEl),
+              box: glyph,
+            }
+          }).filter(Boolean)
+          const visible = lamps.map((lamp) => lamp.box).filter(Boolean)
+          let glyphOverlap = 0
+          for (let i = 0; i < visible.length; i += 1) {
+            for (let j = i + 1; j < visible.length; j += 1) glyphOverlap += overlap(visible[i], visible[j])
+          }
+          return {
+            t: performance.now(),
+            aboveCount: lamps.filter((lamp) => lamp.above).length,
+            offTopGlyphs: lamps.filter((lamp) => lamp.above && lamp.glyph).length,
+            glyphOverlap,
+            back: lamps.filter((lamp) => !lamp.above && lamp.glyph).map((lamp) => lamp.id),
+          }
+        }
+        const run = { frames: [], stop: false }
+        window.__offTopRun = run
+        const tick = () => {
+          const frame = window.__offTopSample()
+          if (frame) run.frames.push(frame)
+          if (!run.stop) requestAnimationFrame(tick)
+        }
+        requestAnimationFrame(tick)
+      },
+      { half: LAMP_ART_HALF_UNITS, up: LAMP_ART_UP_UNITS },
+    )
+    let sawOne = false
+    let sawBoth = false
+    for (let step = 0; step < 24 && !sawBoth; step += 1) {
+      await offTopDrag(page, -48)
+      const now = await page.evaluate(() => window.__offTopSample())
+      if (now?.aboveCount === 1) sawOne = true
+      if (now?.aboveCount >= 2) sawBoth = true
+    }
+    assert.ok(sawOne, `${label} panning sends one lamp fully above the clip before the other`)
+    assert.ok(sawBoth, `${label} panning sends both lamps fully above the clip`)
+    const shotDir = process.env.NW_OFFTOP_SHOT_DIR
+    if (shotDir && width === 375) {
+      mkdirSync(shotDir, { recursive: true })
+      const tag = process.env.NW_OFFTOP_SHOT_TAG || 'shot'
+      const clip = await page.evaluate(() => {
+        const frame = document.querySelector('.defend-frame')?.getBoundingClientRect()
+        const top = Math.max(0, (frame?.top ?? 0) - 6)
+        return {
+          x: 0,
+          y: top,
+          width: Math.min(375, window.innerWidth),
+          height: Math.min(132, Math.max(88, window.innerHeight - top)),
+        }
+      })
+      await page.screenshot({
+        path: join(shotDir, `375-off-top-${tag}.png`),
+        clip: { x: clip.x, y: clip.y, width: clip.width, height: clip.height },
+      })
+    }
+    let broughtBack = false
+    for (let step = 0; step < 24 && !broughtBack; step += 1) {
+      await offTopDrag(page, 48)
+      const now = await page.evaluate(() => window.__offTopSample())
+      if (now && now.aboveCount < 2 && now.back.length > 0) broughtBack = true
+    }
+    assert.ok(broughtBack, `${label} a lamp panned back into the clip gets its map mark again`)
+    const frames = await page.evaluate(() => {
+      window.__offTopRun.stop = true
+      return window.__offTopRun.frames
+    })
+    assert.ok(frames.length >= 8, `${label} sampled ${frames.length} frames`)
+    const offTopGlyphs = frames.reduce((sum, frame) => sum + frame.offTopGlyphs, 0)
+    const glyphOverlap = frames.reduce((max, frame) => Math.max(max, frame.glyphOverlap), 0)
+    const detail = `${label} frames=${frames.length} offTopGlyphs=${offTopGlyphs} glyphOverlap=${glyphOverlap}`
+    assert.equal(offTopGlyphs, 0, `checkOffTopGlyph ${detail}`)
+    assert.equal(glyphOverlap, 0, `checkOffTopGlyph ${detail}`)
+    console.log(`checkOffTopGlyph ok ${label} frames=${frames.length} offTopGlyphs=0 glyphOverlap=0`)
+    await context.close()
+  }
+}
+
 async function checkLampGlyph(browser, port, errors) {
+  if (process.env.NW_OFFTOP_ONLY === '1') {
+    await checkOffTopGlyph(browser, port, errors)
+    return
+  }
   if (process.env.NW_LABEL_ONLY === '1') {
     await checkLabelOverGlyph(browser, port, errors)
     return
   }
   await checkLabelOverGlyph(browser, port, errors)
+  await checkOffTopGlyph(browser, port, errors)
   const only = process.env.NW_GLYPH_SIZE
   for (const [width, height] of GLYPH_SIZES.filter(([w, h]) => process.env.NW_GLYPH_SWEEP_ONLY !== '1' && (!only || only === `${w}x${h}`))) {
     const label = `${width}x${height}`
@@ -4276,6 +4479,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', '1.4.577 tablet Begin nights stay free of console errors')
       return
     }
+    if (process.env.NW_OFFTOP_ONLY === '1') {
+      await checkLampGlyph(browser, port, errors)
+      assert.equal(errors.join('\n'), '', '1.4.578 off-top glyph nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
@@ -4462,7 +4670,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')

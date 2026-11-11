@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import type { LampPaths } from '../nightWatch/upgradeTree'
 import {
   LAMP_GLYPH_VIEW,
@@ -33,7 +34,7 @@ export function LampUpgradeGlyph({ paths, variant, stage: stageOverride, domId }
   const svgRef = useRef<SVGSVGElement | SVGGElement>(null)
   const prevStage = useRef<number | null>(null)
   const [drawFrom, setDrawFrom] = useState<number | null>(null)
-  const [box, setBox] = useState({ units: 26, x: -13, y: -64 - 8 - 26 })
+  const [box, setBox] = useState<{ units: number; x: number; y: number } | null>(null)
 
   useLayoutEffect(() => {
     if (prevStage.current == null) {
@@ -54,33 +55,58 @@ export function LampUpgradeGlyph({ paths, variant, stage: stageOverride, domId }
 
   useLayoutEffect(() => {
     if (variant !== 'map') return
-    const node = svgRef.current
-    const board = node?.ownerSVGElement
-    const lamp = node?.parentNode as SVGGraphicsElement | null | undefined
-    const ctm = board?.getScreenCTM()
-    const feet = lamp?.getScreenCTM?.()
-    if (!ctm || !feet) return
-    const px = Math.hypot(ctm.a, ctm.b)
-    if (!(px > 0.05)) return
-    const frame = board?.closest('.defend-frame')?.getBoundingClientRect()
-    const edge = board?.getBoundingClientRect()
-    const clip = edge
-      ? {
-          left: Math.max(edge.left, frame?.left ?? edge.left),
-          top: Math.max(edge.top, frame?.top ?? edge.top),
-          right: Math.min(edge.right, frame?.right ?? edge.right),
-          bottom: Math.min(edge.bottom, frame?.bottom ?? edge.bottom),
-        }
-      : null
-    const rect = mapGlyphRect(feet.e, feet.f, px, clip)
-    const units = MAP_GLYPH_PX / px
-    const x = (rect.left - feet.e) / px
-    const y = (rect.top - feet.f) / px
-    setBox((prev) =>
-      Math.abs(prev.units - units) < 0.15 && Math.abs(prev.x - x) < 0.15 && Math.abs(prev.y - y) < 0.15
-        ? prev
-        : { units, x, y },
-    )
+    const hide = (sync: boolean) => {
+      const apply = (prev: { units: number; x: number; y: number } | null) => (prev == null ? prev : null)
+      if (sync) flushSync(() => setBox(apply))
+      else setBox(apply)
+    }
+    const place = (sync: boolean) => {
+      const node = svgRef.current
+      const board = node?.ownerSVGElement
+      const lamp = node?.parentNode as SVGGraphicsElement | null | undefined
+      const ctm = board?.getScreenCTM()
+      const feet = lamp?.getScreenCTM?.()
+      if (!board || !ctm || !feet) {
+        hide(sync)
+        return
+      }
+      const px = Math.hypot(ctm.a, ctm.b)
+      if (!(px > 0.05)) {
+        hide(sync)
+        return
+      }
+      const frame = board.closest('.defend-frame')?.getBoundingClientRect()
+      const edge = board.getBoundingClientRect()
+      const clip = edge
+        ? {
+            left: Math.max(edge.left, frame?.left ?? edge.left),
+            top: Math.max(edge.top, frame?.top ?? edge.top),
+            right: Math.min(edge.right, frame?.right ?? edge.right),
+            bottom: Math.min(edge.bottom, frame?.bottom ?? edge.bottom),
+          }
+        : null
+      const rect = mapGlyphRect(feet.e, feet.f, px, clip)
+      if (!rect) {
+        hide(sync)
+        return
+      }
+      const units = MAP_GLYPH_PX / px
+      const x = (rect.left - feet.e) / px
+      const y = (rect.top - feet.f) / px
+      const apply = (prev: { units: number; x: number; y: number } | null) =>
+        prev != null && Math.abs(prev.units - units) < 0.15 && Math.abs(prev.x - x) < 0.15 && Math.abs(prev.y - y) < 0.15
+          ? prev
+          : { units, x, y }
+      if (sync) flushSync(() => setBox(apply))
+      else setBox(apply)
+    }
+    place(false)
+    // A drag writes the pan transform without rendering. Hide the mark in that same turn, before the next paint.
+    const pan = svgRef.current?.ownerSVGElement?.closest('.nw-pan')
+    if (!pan) return
+    const obs = new MutationObserver(() => place(true))
+    obs.observe(pan, { attributes: true, attributeFilter: ['style'] })
+    return () => obs.disconnect()
   })
 
   const drawing = (piece: LampGlyphMark) => drawFrom != null && piece.stage > drawFrom && piece.stage <= stage
@@ -122,6 +148,7 @@ export function LampUpgradeGlyph({ paths, variant, stage: stageOverride, domId }
   }
 
   if (variant === 'map') {
+    if (!box) return <g ref={svgRef} data-glyph-anchor="map" pointerEvents="none" />
     const scale = box.units / LAMP_GLYPH_VIEW
     return (
       <g
