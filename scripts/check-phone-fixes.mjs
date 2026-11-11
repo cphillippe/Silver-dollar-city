@@ -3858,7 +3858,9 @@ async function openEasyMatch(page, lineId, seed) {
 /**
  * #899. Easy Match open, story-docked panel-blast, html[data-easy=on].
  * From the first board-visible frame through at least 1.5s: the hint slot stays at least
- * HINT_GAP_MIN px above the board (overlap 0) at 375, 390 and 412, letters stay >= 16.5px,
+ * HINT_GAP_MIN px above the board (overlap 0) at 375, 390 and 412, and its top stays at or
+ * below the word-search header and any Gem Jar above it (topGap >= 0). A centre tap on the
+ * jar or a header button lands on that element, not the slot. Letters stay >= 16.5px,
  * exactly one hint slot. Every painted text node in the slot must fit its own box
  * (scrollWidth/scrollHeight within 1px of the client box, whatever text-overflow is),
  * show no ellipsis, and paint the source string.
@@ -3991,6 +3993,46 @@ export async function checkGemHintSlot(browser, port, errors = []) {
         }
         return out
       }
+      // Word-search header (top bar and story dock) is the neighbour above the slot even when the
+      // slot's translate covers it. The Gem Jar counts only when it sits above the slot; on a win it
+      // replaces the score line under the board and is not a top neighbour.
+      const aboveBottom = (slotBox) => {
+        let maxBottom = null
+        const take = (box) => {
+          maxBottom = maxBottom == null ? box.bottom : Math.max(maxBottom, box.bottom)
+        }
+        for (const el of document.querySelectorAll('header.topbar, .story-strip.is-dock, .match-teach-dock')) {
+          if (!shown(el)) continue
+          take(el.getBoundingClientRect())
+        }
+        const slotMid = slotBox.top + slotBox.height / 2
+        for (const el of document.querySelectorAll('.gem-jar-slot, [data-gem-jar]')) {
+          if (!shown(el)) continue
+          const box = el.getBoundingClientRect()
+          if (box.top + box.height / 2 < slotMid) take(box)
+        }
+        return maxBottom
+      }
+      const coverCheck = (slot) => {
+        const bad = []
+        let checked = 0
+        for (const el of document.querySelectorAll('header.topbar button, .match-teach-dock button, .match-teach-dock [role="button"], .story-strip.is-dock, [data-gem-jar]')) {
+          if (!shown(el)) continue
+          const box = el.getBoundingClientRect()
+          const x = box.left + box.width / 2
+          const y = box.top + box.height / 2
+          if (x < 0 || y < 0 || x > innerWidth || y > innerHeight) continue
+          const hit = document.elementFromPoint(x, y)
+          checked += 1
+          const stolen = !hit || hit === slot || Boolean(slot && slot.contains(hit)) || !el.contains(hit)
+          if (stolen) {
+            const name = `${el.tagName}.${String(el.getAttribute('class') || '').split(/\s+/).slice(0, 2).join('.')}`
+            const seen = hit ? `${hit.tagName}.${String(hit.getAttribute('class') || '').split(/\s+/).slice(0, 2).join('.')}` : 'none'
+            bad.push(`${name} -> ${seen}`)
+          }
+        }
+        return { checked, bad }
+      }
       const frames = []
       let started = 0
       const giveUp = performance.now() + 8000
@@ -4006,6 +4048,8 @@ export async function checkGemHintSlot(browser, port, errors = []) {
         if (!started) started = now
         const slotBox = shown(slot) ? slot.getBoundingClientRect() : null
         const boardBox = board.getBoundingClientRect()
+        const above = slotBox ? aboveBottom(slotBox) : null
+        const cover = coverCheck(slot)
         const sizes = [...document.querySelectorAll('.gem-board .gem-letter, .gem-board .gem-cell')]
           .map((el) => parseFloat(getComputedStyle(el).fontSize))
           .filter((n) => Number.isFinite(n) && n > 0)
@@ -4015,7 +4059,12 @@ export async function checkGemHintSlot(browser, port, errors = []) {
           goldCues: cues.length,
           goldNames: cues.slice(0, 8),
           slots: [...document.querySelectorAll('.gem-hint-slot')].filter(shown).length,
+          slotTop: slotBox ? slotBox.top : null,
           slotBottom: slotBox ? slotBox.bottom : null,
+          aboveBottom: above,
+          topGap: slotBox && above != null ? slotBox.top - above : null,
+          hitChecked: cover.checked,
+          hitBad: cover.bad,
           boardTop: boardBox.top,
           overlap: slotBox ? overlapOf(slotBox, boardBox) : null,
           letterMin: sizes.length ? Math.min(...sizes) : null,
@@ -4033,8 +4082,11 @@ export async function checkGemHintSlot(browser, port, errors = []) {
     assert.ok(sample.span >= HINT_SAMPLE_MS, `${label} sampled ${sample.span.toFixed(0)}ms from the first board frame (need ${HINT_SAMPLE_MS})`)
     let letterMin = Infinity
     let gapMin = Infinity
+    let topGapMin = Infinity
     let clipped = 0
+    let hitBad = 0
     const goldSeen = new Set()
+    const hitSample = []
     const loggedLines = new Set()
     const clipSample = []
     const seenCopy = new Set()
@@ -4047,8 +4099,17 @@ export async function checkGemHintSlot(browser, port, errors = []) {
         0,
         `${label} frame ${index} goldCues === 0 (locked by check-gem-tap-live) (saw ${frame.goldCues} ${frame.goldNames.join(' | ')})`,
       )
-      assert.ok(frame.slotBottom != null, `${label} frame ${index} hint slot has a rect`)
+      assert.ok(frame.slotTop != null && frame.slotBottom != null, `${label} frame ${index} hint slot has a rect`)
+      assert.ok(frame.aboveBottom != null, `${label} frame ${index} header or gem jar sits above the hint`)
       assert.ok(frame.slotBottom <= frame.boardTop, `${label} frame ${index} slot bottom ${frame.slotBottom} <= board top ${frame.boardTop}`)
+      topGapMin = Math.min(topGapMin, frame.topGap)
+      assert.ok(frame.hitChecked >= 1, `${label} frame ${index} checked a header button or the gem jar`)
+      if (frame.hitBad.length) {
+        hitBad += frame.hitBad.length
+        for (const item of frame.hitBad) {
+          if (hitSample.length < 4 && !hitSample.includes(item)) hitSample.push(item)
+        }
+      }
       assert.equal(frame.overlap, 0, `${label} frame ${index} overlap area ${frame.overlap}`)
       assert.ok(frame.letterMin >= 16.5, `${label} frame ${index} letter ${frame.letterMin}px >= 16.5`)
       letterMin = Math.min(letterMin, frame.letterMin)
@@ -4098,10 +4159,16 @@ export async function checkGemHintSlot(browser, port, errors = []) {
       if (clip) await page.screenshot({ path: join(HINT_SHOTS, '375-after.png'), clip })
     }
     const gap = Number(gapMin.toFixed(2))
+    const topGap = Number(topGapMin.toFixed(2))
     const letters = Number(letterMin.toFixed(2))
     const gold = frames[0].goldCues
     if (gap < HINT_GAP_MIN) {
       const msg = `checkGemHintSlot fail ${label} frames=${frames.length} gap=${gap} < ${HINT_GAP_MIN}`
+      console.log(msg)
+      pending.push(msg)
+    }
+    if (!(topGap >= 0)) {
+      const msg = `checkGemHintSlot fail ${label} frames=${frames.length} topGap=${topGap} < 0`
       console.log(msg)
       pending.push(msg)
     }
@@ -4110,8 +4177,13 @@ export async function checkGemHintSlot(browser, port, errors = []) {
       console.log(msg)
       pending.push(msg)
     }
-    if (gap >= HINT_GAP_MIN && clipped === 0) {
-      console.log(`checkGemHintSlot ok ${label} frames=${frames.length} gap=${gap} clipped=0 letterMin=${letters} gold=${gold}`)
+    if (hitBad !== 0) {
+      const msg = `checkGemHintSlot fail ${label} frames=${frames.length} headerHit=${hitBad} ${hitSample.join(' | ')}`
+      console.log(msg)
+      pending.push(msg)
+    }
+    if (gap >= HINT_GAP_MIN && topGap >= 0 && clipped === 0 && hitBad === 0) {
+      console.log(`checkGemHintSlot ok ${label} frames=${frames.length} gap=${gap} clipped=0 topGap=${topGap} letterMin=${letters} gold=${gold}`)
     }
     await context.close()
   }
