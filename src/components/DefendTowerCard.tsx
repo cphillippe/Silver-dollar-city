@@ -191,12 +191,92 @@ function sameTaps(a: TowerTaps | null, b: TowerTaps | null): boolean {
   )
 }
 
-/** True when another lamp's name or badge sits on the mark and nothing paints the mark above it. */
+function rectsHit(
+  a: { left: number; top: number; right: number; bottom: number },
+  b: { left: number; top: number; right: number; bottom: number },
+): boolean {
+  return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
+}
+
+/**
+ * True when another lamp's name sits on the mark.
+ * Neighbour type labels are hard obstacles: a mounted glyph-top copy does not clear them.
+ * Glyph-top only clears other lamp art, and only while that layer is mounted.
+ */
 function labelOverGlyph(glyph: { left: number; top: number; right: number; bottom: number } | null, taps: TowerTaps | null, mountedAbove: boolean): boolean {
-  if (!glyph || !taps || mountedAbove) return false
-  return [...(taps.labels ?? []), ...(taps.lamps ?? [])].some(
-    (box) => box.left < glyph.right && box.right > glyph.left && box.top < glyph.bottom && box.bottom > glyph.top,
-  )
+  if (!glyph || !taps) return false
+  const hit = (box: TowerRect) => rectsHit(box, glyph)
+  if ((taps.labels ?? []).some(hit)) return true
+  if (mountedAbove) return false
+  return (taps.lamps ?? []).some(hit)
+}
+
+function restoreParkedLabels() {
+  if (typeof document === 'undefined') return
+  for (const label of document.querySelectorAll('[data-label-park]')) {
+    label.removeAttribute('dx')
+    label.removeAttribute('dy')
+    if (label instanceof HTMLElement || label instanceof SVGElement) label.style.visibility = ''
+    if (label instanceof HTMLElement) label.style.transform = ''
+    label.removeAttribute('data-label-park')
+  }
+}
+
+/**
+ * Easy, card open. Slide a neighbour type name off the open mark. Towers, seats and tap targets stay.
+ * Glyph-top does not paint these words clear, so the name itself moves. Hide it only if the slide still lands on the mark.
+ */
+function parkNeighbourLabels() {
+  if (typeof document === 'undefined') return
+  restoreParkedLabels()
+  const glyphEl = document.querySelector('.defend-pad.is-upgrade-open .lamp-upgrade-glyph[data-glyph-variant="map"]')
+  if (!glyphEl) return
+  const glyph = glyphEl.getBoundingClientRect()
+  if (glyph.width < 1 || glyph.height < 1) return
+  const open = glyphEl.closest('.defend-pad')
+  for (const label of document.querySelectorAll('text.defend-type-label')) {
+    if (!(label instanceof SVGTextElement) || open?.contains(label)) continue
+    const style = getComputedStyle(label)
+    if (style.display === 'none' || style.visibility === 'hidden') continue
+    label.removeAttribute('dx')
+    label.removeAttribute('dy')
+    const box = label.getBoundingClientRect()
+    if (box.width < 1 || box.height < 1 || !rectsHit(box, glyph)) continue
+    const ctm = label.getScreenCTM()
+    const scale = ctm ? Math.hypot(ctm.a, ctm.b) : 1
+    const unit = scale > 0.05 ? scale : 1
+    const overlapY = Math.min(box.bottom, glyph.bottom) - Math.max(box.top, glyph.top)
+    const overlapX = Math.min(box.right, glyph.right) - Math.max(box.left, glyph.left)
+    label.setAttribute('data-label-park', 'yes')
+    if (overlapY <= overlapX + 0.5) {
+      const dir = (box.top + box.bottom) / 2 <= (glyph.top + glyph.bottom) / 2 ? -1 : 1
+      label.setAttribute('dy', String((dir * (overlapY + 4)) / unit))
+    } else {
+      const dir = (box.left + box.right) / 2 <= (glyph.left + glyph.right) / 2 ? -1 : 1
+      label.setAttribute('dx', String((dir * (overlapX + 4)) / unit))
+    }
+    if (rectsHit(label.getBoundingClientRect(), glyph)) label.style.visibility = 'hidden'
+  }
+  const openId = document.querySelector('.defend-tower-card')?.getAttribute('data-upgrade-plot')
+  for (const chip of document.querySelectorAll('.defend-type-chip')) {
+    if (!(chip instanceof HTMLElement) || (openId && chip.getAttribute('data-chip-plot') === openId)) continue
+    const style = getComputedStyle(chip)
+    if (style.display === 'none' || style.visibility === 'hidden') continue
+    chip.style.transform = ''
+    const box = chip.getBoundingClientRect()
+    if (box.width < 1 || box.height < 1 || !rectsHit(box, glyph)) continue
+    const overlapY = Math.min(box.bottom, glyph.bottom) - Math.max(box.top, glyph.top)
+    const overlapX = Math.min(box.right, glyph.right) - Math.max(box.left, glyph.left)
+    chip.setAttribute('data-label-park', 'yes')
+    if (overlapY <= overlapX + 0.5) {
+      const dir = (box.top + box.bottom) / 2 <= (glyph.top + glyph.bottom) / 2 ? -1 : 1
+      chip.style.transform = `translate(-50%, calc(10px + ${dir * (overlapY + 4)}px))`
+    } else {
+      const dir = (box.left + box.right) / 2 <= (glyph.left + glyph.right) / 2 ? -1 : 1
+      chip.style.transform = `translate(calc(-50% + ${dir * (overlapX + 4)}px), 10px)`
+    }
+    if (rectsHit(chip.getBoundingClientRect(), glyph)) chip.style.visibility = 'hidden'
+  }
 }
 
 export interface LevelBurst {
@@ -330,8 +410,11 @@ export function DefendTowerCard({
   useLayoutEffect(() => {
     const painted = cardRef.current?.getBoundingClientRect().height ?? 0
     setPaintH((prev) => (Math.abs(prev - painted) < 0.5 ? prev : painted))
+    if (markOnMap && !strip && cardRef.current) parkNeighbourLabels()
+    else restoreParkedLabels()
     const next = markOnMap && cardRef.current ? measureTaps(cardRef.current, plotId) : null
     setTaps((prev) => (sameTaps(prev, next) ? prev : next))
+    return () => restoreParkedLabels()
   })
 
   useEffect(() => {
@@ -966,7 +1049,7 @@ export function DefendTowerCard({
     return (
       <div
         ref={cardRef}
-        className={`defend-tower-card is-tree is-${placed.side}${markOnMap && !stemShows(placed.left, point.left) ? ' is-stemless' : ''}`}
+        className={`defend-tower-card is-tree is-lamp-rows is-${placed.side}${markOnMap && !stemShows(placed.left, point.left) ? ' is-stemless' : ''}`}
         data-upgrade-card
         data-upgrade-tree="yes"
         data-strip={strip ? 'yes' : undefined}

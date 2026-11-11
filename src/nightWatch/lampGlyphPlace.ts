@@ -33,14 +33,33 @@ export interface GlyphRect {
   bottom: number
 }
 
+/** Lamp picture. Feet sit on `(ox, oy)`. Left and right clear the pulse; the top is the art, not the type mark. */
+function lampArtBox(ox: number, oy: number, s: number): GlyphRect {
+  const half = LAMP_ART_HALF_UNITS * s
+  return {
+    left: ox - half,
+    right: ox + half,
+    top: oy - LAMP_ART_UP_UNITS * s,
+    bottom: oy,
+  }
+}
+
+/** No shared area with the clip, including an edge that only touches. */
+function artMissesClip(art: GlyphRect, clip: GlyphClip): boolean {
+  return art.right <= clip.left || art.left >= clip.right || art.bottom <= clip.top || art.top >= clip.bottom
+}
+
 /**
  * The mark's box in the same pixel space as `ox`, `oy` (the lamp feet) and `clip`.
  * It rides above the lamp art. A lamp near the top edge cannot spare that room,
  * so the mark slides down while it still clears the art, then steps beside the art.
  * It is never outside the clip.
+ * When the lamp art sits fully outside the clip, there is no mark.
+ * With no clip, the mark keeps its box above the art.
  */
-export function mapGlyphRect(ox: number, oy: number, scale: number, clip?: GlyphClip | null): GlyphRect {
+export function mapGlyphRect(ox: number, oy: number, scale: number, clip?: GlyphClip | null): GlyphRect | null {
   const s = scale > 0.01 ? scale : 1
+  if (clip && artMissesClip(lampArtBox(ox, oy, s), clip)) return null
   const size = MAP_GLYPH_PX
   const artTop = oy - Math.max(LAMP_ART_UP_UNITS, LAMP_TYPE_MARK_UP_UNITS) * s
   let left = ox - size / 2
