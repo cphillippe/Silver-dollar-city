@@ -6573,3 +6573,65 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
     border: 0;
   }
 }
+
+/* 1.4.582 (#924). Easy keeps one gold cue. The new-lamp docks use the unselected
+   rail chip (dusk fill, berry edge). A pressed dock uses the selected rail chip.
+   Medium and Hard never have .is-easy-watch. The press shift stays the old one. */
+.defend-page.is-easy-watch button.defend-new-lamp {
+  background: linear-gradient(180deg, rgba(58, 20, 128, 0.7), rgba(26, 8, 64, 0.85));
+  border-color: var(--berry);
+  box-shadow: none;
+  color: var(--parchment);
+  -webkit-text-fill-color: var(--parchment);
+}
+
+.defend-page.is-easy-watch button.defend-new-lamp[aria-pressed='true'] {
+  background: linear-gradient(180deg, var(--berry), var(--dusk-2));
+  border-color: var(--parchment);
+  box-shadow: none;
+  color: var(--parchment);
+  -webkit-text-fill-color: var(--parchment);
+}
+
+@media (max-width: 480px) {
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) button.defend-new-lamp::before,
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) button.defend-new-lamp::after {
+    color: var(--parchment);
+  }
+}
+
+/* An open lamp card: the first buy that is actually there is the one gold action.
+   Begin and the other buy become the plain button. The gold lip stays off. */
+.defend-page.is-easy-watch .defend-tower-card .defend-path-buy,
+.defend-page.is-easy-watch .defend-tower-card .defend-bright-buy {
+  box-shadow: none;
+}
+
+.defend-page.is-easy-watch:not(.is-easy-tap):not(.is-boost) .defend-tower-card .defend-path[data-path='far'] .defend-path-buy,
+.defend-page.is-easy-watch:not(.is-easy-tap):not(.is-boost) .defend-tower-card:not(:has([data-path='far'] .defend-path-buy)) .defend-path[data-path='strong'] .defend-path-buy {
+  background: linear-gradient(180deg, #fff6b8 0%, #ffcc33 46%, #ff9f1a);
+  background-color: #ffcc33;
+  border-color: #fff3c4;
+  color: #2a1c08;
+  -webkit-text-fill-color: #2a1c08;
+  box-shadow: none;
+}
+
+.defend-page.is-easy-watch:not(.is-easy-tap):not(.is-boost):has(.defend-tower-card) .nw-docks .defend-go.is-after-plant {
+  background: transparent;
+  background-image: none;
+  color: var(--parchment);
+  -webkit-text-fill-color: var(--parchment);
+  border-color: var(--berry);
+  box-shadow: none;
+  opacity: 1;
+  filter: none;
+}
+
+/* The next-step pip is a button, so `font: inherit` was ignoring the 10px pip.
+   Easy only. The 20px box stays. Phones keep the shorter card's own size. */
+.defend-page.is-easy-watch .defend-tower-card button.defend-path-pip {
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 800;
+}
