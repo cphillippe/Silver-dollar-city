@@ -2355,7 +2355,7 @@ async function proveHomeNoHiddenFounders(browser, origin, size, errorsOut) {
   }
 }
 
-// Bar 4: exactly one gold cue in view at open, on the target.
+// Bar 4: the ground ring stays on the target and is not a second gold. The dock button is the one gold.
 async function proveHomeOneGold(browser, origin, size, errorsOut) {
   const where = `${size[0]}x${size[1]}`
   for (const kind of ['fresh', 'hollow-next', 'bench-next', 'ready', 'late']) {
@@ -2364,9 +2364,13 @@ async function proveHomeOneGold(browser, origin, size, errorsOut) {
       await settleHome(page)
       const { cues, recenter } = await mapGoldCues(page)
       const target = await cueTarget(page)
-      assert.equal(cues.length, 1, `homePan gold: ${where} ${kind} shows exactly one gold map cue ${JSON.stringify(cues)}`)
-      assert.equal(cues[0].kind, 'halo', `${where} ${kind} the one cue is the halo`)
-      assert.equal(cues[0].x, target.x, `${where} ${kind} the halo sits on ${target.id}`)
+      assert.equal(cues.length, 0, `homePan gold: ${where} ${kind} the ground ring is not a second gold ${JSON.stringify(cues)}`)
+      const haloX = await page.evaluate(() => {
+        const mark = document.querySelector('.city-next-halo')?.closest('g.city-next-mark')
+        const found = /translate\(\s*([-\d.]+)[ ,]+([-\d.]+)/.exec(mark?.getAttribute('transform') || '')
+        return found ? Number(found[1]) : null
+      })
+      assert.equal(haloX, target.x, `${where} ${kind} the ground ring sits on ${target.id}`)
       assert.equal(recenter, null, `${where} ${kind} no center button at open`)
       assert.equal((await filledGolds(page)).length, 1, `${where} ${kind} the dock keeps its one filled gold`)
       const view = await homeView(page)
@@ -2859,7 +2863,7 @@ async function proveHomeBeginRim(browser, origin, size, errorsOut) {
     assert.equal(isGoldPaint(paint.bg), false, `${where} Begin the watch is not filled gold`)
     const { cues } = await mapGoldCues(page)
     const filled = await filledGolds(page)
-    assert.equal(cues.length + filled.length, 2, `${where} mid-trail Home gold: one map halo plus the one dock button (${JSON.stringify({ cues, filled })})`)
+    assert.equal(cues.length + filled.length, 1, `${where} mid-trail Home gold: the dock button is the one gold (${JSON.stringify({ cues, filled })})`)
     assert.equal(filled.length, 1, `${where} mid-trail Home keeps one filled gold`)
     return { cues: cues.length, filled: filled.length }
   } finally {
