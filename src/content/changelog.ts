@@ -28,7 +28,7 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.582',
+    version: '1.4.581',
     title: 'Easy Home and Settings: one gold cue',
     when: '2026-11-11',
     items: [
@@ -36,6 +36,15 @@ export const CHANGELOG: ChangeNote[] = [
       'Settings keeps Open Profile gold. The picked theme uses the selected chip.',
       'Hard stays the same.',
       'Refs #916.',
+    ],
+  },
+  {
+    version: '1.4.580',
+    title: 'Behind the scenes: Night Run turn check waits for the turn to finish',
+    when: '2026-11-11',
+    items: [
+      'Nothing changes for players yet.',
+      'Refs #946.',
     ],
   },
   {
