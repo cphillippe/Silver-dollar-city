@@ -320,7 +320,7 @@ export async function checkHomePorch() {
         await beside.page.locator('.city-next-halo.is-easy-ground').waitFor()
         await beside.page.waitForTimeout(250)
         const openRings = await beside.page.evaluate(countGoldRings)
-        assert.deepEqual(openRings, ['city-next-halo is-easy-ground'], `${tag} no selection shows the ground halo ${JSON.stringify(openRings)}`)
+        assert.deepEqual(openRings, [], `${tag} the ground ring is not a second gold ${JSON.stringify(openRings)}`)
         await beside.page.screenshot({ path: join(SHOTS, `halo-${tag}.png`) })
         await beside.page.locator('g.city-plot[data-plot="gate"]').click()
         await beside.page.getByRole('button', { name: /Build this/ }).click()

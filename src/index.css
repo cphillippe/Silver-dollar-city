@@ -1753,6 +1753,25 @@ p {
   gap: 8px;
 }
 
+/* Easy picked theme uses the selected lamp chip (berry and dusk). */
+html[data-easy='on'] .settings .theme-picks .btn.is-on {
+  background: linear-gradient(180deg, var(--berry), var(--dusk-2));
+  color: var(--parchment);
+  -webkit-text-fill-color: var(--parchment);
+  border-color: var(--parchment);
+  box-shadow: none;
+}
+
+/* Easy extra actions keep the primary metrics and wear the plain button. */
+html[data-easy='on'] .settings .btn.primary.is-plain {
+  background: transparent;
+  background-image: none;
+  color: var(--parchment);
+  -webkit-text-fill-color: var(--parchment);
+  border-color: var(--line);
+  box-shadow: none;
+}
+
 html[data-theme='parchment'] .topbar,
 html[data-theme='parchment'] .goalbar {
   background: linear-gradient(180deg, rgba(255, 246, 232, 0.96), rgba(231, 214, 180, 0.92));

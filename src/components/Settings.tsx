@@ -338,7 +338,7 @@ export function Settings({ onNavigate }: SettingsProps) {
             <button
               key={theme}
               type="button"
-              className={`btn ${progress.theme === theme ? 'primary' : ''}`}
+              className={`btn ${progress.theme === theme ? (easy ? 'is-on' : 'primary') : ''}`}
               aria-pressed={progress.theme === theme}
               onClick={() => setTheme(theme)}
             >
@@ -357,7 +357,7 @@ export function Settings({ onNavigate }: SettingsProps) {
           this walk.
         </p>
         <div className="settings-actions">
-          <button type="button" className="btn primary" onClick={downloadJson}>
+          <button type="button" className={easy ? 'btn primary is-plain' : 'btn primary'} onClick={downloadJson}>
             Export JSON
           </button>
           <button type="button" className="btn gold" onClick={() => void copyCode()}>
@@ -393,7 +393,7 @@ export function Settings({ onNavigate }: SettingsProps) {
         </label>
         <button
           type="button"
-          className="btn primary"
+          className={easy ? 'btn primary is-plain' : 'btn primary'}
           disabled={!paste.trim()}
           onClick={() => {
             const ok = window.confirm(
