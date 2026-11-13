@@ -50,6 +50,45 @@ export type DefendNightBoardProps = Omit<DefendNightSkyProps, 'children'> &
     cam?: { s0: number; z: number; tx: number; ty: number }
   }
 
+function chromeBoxShown(el: Element): boolean {
+  const style = getComputedStyle(el)
+  if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+  const box = el.getBoundingClientRect()
+  return box.width > 1 && box.height > 1
+}
+
+function boxesHit(a: DOMRect, b: DOMRect): boolean {
+  return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
+}
+
+/**
+ * Easy only. Hide a type name whose box meets Begin, Continue, the rail, the clear row,
+ * a New-lamp dock, or the hearts/round HUD. The lamp art is not moved.
+ * Re-reads on pan, resize, card open and the clear.
+ */
+function hideTypeLabelsOnChrome(board: SVGSVGElement) {
+  const page = board.closest('.defend-page')
+  if (!(page instanceof HTMLElement) || !page.classList.contains('is-easy-watch')) return
+  const chrome = [
+    ...page.querySelectorAll(
+      '.defend-go, .defend-continue, .nw-rail, .defend-clear-row button:not(.defend-continue), button.defend-new-lamp, .nw-hud, .nw-wave-overlay .defend-wave',
+    ),
+  ]
+    .filter(chromeBoxShown)
+    .map((el) => el.getBoundingClientRect())
+  for (const label of page.querySelectorAll('text.defend-type-label')) {
+    if (!(label instanceof SVGTextElement)) continue
+    const style = getComputedStyle(label)
+    if (style.display === 'none' || Number(style.opacity) === 0) {
+      label.removeAttribute('data-chrome-hide')
+      continue
+    }
+    const box = label.getBoundingClientRect()
+    if (box.width < 1 || box.height < 1 || !chrome.some((other) => boxesHit(box, other))) label.removeAttribute('data-chrome-hide')
+    else label.setAttribute('data-chrome-hide', 'yes')
+  }
+}
+
 export function DefendNightBoard(props: DefendNightBoardProps) {
   const {
     boardRef, viewBox, shake, won, phase, fireBest, easyTap, onBoardTap,
@@ -173,6 +212,25 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     if (panel instanceof HTMLElement) observer.observe(panel)
     return () => observer.disconnect()
   }, [easy, boosting, boardBox, planted, cameraScale, boardRef, camOn])
+  useLayoutEffect(() => {
+    if (!easy) return
+    const board = boardRef.current
+    if (!board) return
+    const hide = () => hideTypeLabelsOnChrome(board)
+    hide()
+    const pan = board.closest('.nw-pan')
+    const watch = new MutationObserver(hide)
+    if (pan) watch.observe(pan, { attributes: true, attributeFilter: ['style'] })
+    const frame = board.closest('.defend-frame')
+    const resize = new ResizeObserver(hide)
+    if (frame instanceof HTMLElement) resize.observe(frame)
+    window.addEventListener('resize', hide)
+    return () => {
+      watch.disconnect()
+      resize.disconnect()
+      window.removeEventListener('resize', hide)
+    }
+  }, [easy, phase, boosting, upgradeAt, planted, boardBox, cam, boardRef])
   const lampRise: Record<string, number> = {}
   if (cameraScale > 0) {
     for (const [id, lift] of Object.entries(lampLift)) {
