@@ -227,7 +227,7 @@ export function DefendNightActorsSvg({
   const faceAim = useRef<{ id: number; point: { x: number; y: number } | null; pointerType: string } | null>(null)
   const groundRef = useRef<SVGGElement | null>(null)
   const [seatPick, setSeatPick] = useState<number | null>(null)
-  // Ring the first open seat that is fully on screen and clear of the lamp rail and bars.
+  // Ring the first open seat that is fully on screen and clear of the lamp rail, the docks, and the bars.
   useLayoutEffect(() => {
     const ground = groundRef.current
     if (!ground || firstSeatAt !== undefined) {
@@ -235,22 +235,40 @@ export function DefendNightActorsSvg({
       return
     }
     const choose = () => {
-      const covers = [...document.querySelectorAll('.nw-rail, .nw-balloon-slot, .defend-go, .defend-hud')]
-        .map((node) => node.getBoundingClientRect())
-        .filter((rect) => rect.width > 0 && rect.height > 0)
       const wide = window.innerWidth
       const tall = window.innerHeight
       const pad = 4
+      const coverQuery =
+        '.nw-rail, .nw-balloon-slot, .defend-go, .defend-hud, .nw-docks button, button.defend-new-lamp, button.defend-candle-lamp'
       const circles = [...ground.querySelectorAll('circle')]
+      const svg = ground.ownerSVGElement
+      const ctm = svg?.getScreenCTM() ?? null
+      const point = svg?.createSVGPoint()
+      // A seat is covered only when a stroke sample lands on a dock, rail, or bar.
+      // A padded box around the Candle chip is wider than the painted ring.
+      const strokeCovered = (node: Element) => {
+        if (!(node instanceof SVGCircleElement) || !svg || !ctm || !point) return true
+        const radius = Number(node.getAttribute('r'))
+        const cx = Number(node.getAttribute('cx'))
+        const cy = Number(node.getAttribute('cy'))
+        for (let i = 0; i < 48; i += 1) {
+          const angle = (i / 48) * Math.PI * 2
+          point.x = cx + Math.cos(angle) * radius
+          point.y = cy + Math.sin(angle) * radius
+          const at = point.matrixTransform(ctm)
+          if (at.x < 0 || at.y < 0 || at.x > wide || at.y > tall) return true
+          const top = document.elementFromPoint(at.x, at.y)
+          const cover = top?.closest(coverQuery)
+          if (cover && !cover.closest('.defend-board')) return true
+        }
+        return false
+      }
       const open = circles.findIndex((node) => {
         if (!node.classList.contains('is-live')) return false
         const box = node.getBoundingClientRect()
         if (box.width <= 0) return false
         if (box.left < pad || box.top < pad || box.right > wide - pad || box.bottom > tall - pad) return false
-        return !covers.some(
-          (rect) =>
-            box.left - pad < rect.right && box.right + pad > rect.left && box.top - pad < rect.bottom && box.bottom + pad > rect.top,
-        )
+        return !strokeCovered(node)
       })
       setSeatPick(open >= 0 ? open : null)
     }
@@ -471,7 +489,9 @@ export function DefendNightActorsSvg({
   })
   const liveSeat = groundHints.findIndex((spot) => spot.live)
   const pinned = firstSeatAt ? groundHints.findIndex((spot) => spot.x === firstSeatAt.x && spot.y === firstSeatAt.y) : -1
-  const firstSeat = firstSeatAt === null ? -1 : pinned >= 0 ? pinned : (seatPick ?? (liveSeat >= 0 ? liveSeat : 0))
+  // Camera off has no pinned seat. A dock-covered seat is not a fallback. Camera on keeps its pick.
+  const camOffSeat = firstSeatAt === undefined ? (seatPick ?? -1) : (seatPick ?? (liveSeat >= 0 ? liveSeat : 0))
+  const firstSeat = firstSeatAt === null ? -1 : pinned >= 0 ? pinned : camOffSeat
   return (
     <>
               {groundHints.length > 0 ? (
