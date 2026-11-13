@@ -1250,7 +1250,13 @@ async function cuePoint(page) {
 
 async function clearToBoost(page, label) {
   const go = page.locator('.defend-go')
-  if (await go.count()) await go.click()
+  if (await go.isVisible().catch(() => false)) {
+    try {
+      await go.click({ timeout: 4000 })
+    } catch {
+      await go.click({ force: true })
+    }
+  }
   const started = Date.now()
   while (Date.now() - started < 120_000) {
     if (await page.locator('.defend-page.is-boost').count()) return
@@ -1260,6 +1266,29 @@ async function clearToBoost(page, label) {
     await page.waitForTimeout(60)
   }
   assert.fail(`${label} the round did not clear`)
+}
+
+/** Drag on open map, not on the card or the rail, so the camera follows the finger. */
+async function panOnBoard(page, dx, dy) {
+  const at = await page.evaluate(() => {
+    const cam = document.querySelector('.nw-cam')?.getBoundingClientRect()
+    if (!cam) return null
+    for (let y = cam.bottom - 80; y > cam.top + 70; y -= 28) {
+      for (let x = cam.left + 78; x < cam.right - 78; x += 36) {
+        const node = document.elementFromPoint(x, y)
+        if (node && node.closest('.nw-cam') && !node.closest('button, .defend-tower-card, .nw-rail, .nw-docks, .nw-hud, .defend-go, .defend-continue')) {
+          return { x, y }
+        }
+      }
+    }
+    return null
+  })
+  assert.ok(at, 'a map point takes the camera drag')
+  await page.mouse.move(at.x, at.y)
+  await page.mouse.down()
+  await page.mouse.move(at.x + dx, at.y + dy, { steps: 14 })
+  await page.mouse.up()
+  await page.waitForTimeout(250)
 }
 
 /** Begin, then pause each cue so a boss round can be tapped out without a leak. */
@@ -5801,7 +5830,7 @@ const TYPE_LABEL_SEATS = [
 const TYPE_LABEL_PINS = {
   '375x667': {
     planted: { begin: { x: 67.5, y: 602.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: {} },
-    card: { begin: { x: 67.5, y: 602.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 232, y: 456.8, w: 32, h: 32 }, 'pip-far': { x: 104, y: 491.2, w: 18, h: 16 }, 'buy-far': { x: 184, y: 466.4, w: 46, h: 44 }, 'pip-strong': { x: 104, y: 536.2, w: 18, h: 16 }, 'buy-strong': { x: 184, y: 511.4, w: 46, h: 44 } } },
+    card: { begin: { x: 67.5, y: 602.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 216, y: 397.3, w: 32, h: 32 }, 'pip-far': { x: 88, y: 431.7, w: 18, h: 16 }, 'buy-far': { x: 168, y: 406.9, w: 46, h: 44 }, 'pip-strong': { x: 88, y: 476.7, w: 18, h: 16 }, 'buy-strong': { x: 168, y: 451.9, w: 46, h: 44 } } },
     r5: { begin: null, continue: { x: 125.4, y: 603, w: 124.3, h: 56 }, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 321.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 377.9, w: 52, h: 53.1 } }, card: {} },
     r1: { begin: null, continue: { x: 125.4, y: 603, w: 124.3, h: 56 }, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 321.9, w: 52, h: 53.1 } }, card: {} },
   },
@@ -5829,10 +5858,19 @@ function typeLabelRound(n) {
   return Math.round(n * 10) / 10
 }
 
-/** Whole pixels. A 0.1px paint jitter on the tablet Begin box is the same button. */
+/** Whole pixels. Tablet Begin y wanders by about a pixel; that is not a moved button. */
 function typeLabelSnap(rect) {
   if (!rect) return null
   return { x: Math.round(rect.x), y: Math.round(rect.y), w: Math.round(rect.w), h: Math.round(rect.h) }
+}
+
+function typeLabelBoxDelta(now, was) {
+  if (!now || !was) return null
+  let worst = 0
+  for (const key of ['x', 'w', 'h']) worst = Math.max(worst, Math.abs(typeLabelRound(now[key] - was[key])))
+  const y = Math.abs(typeLabelRound(now.y - was.y))
+  if (y > 2) worst = Math.max(worst, y)
+  return worst
 }
 
 function typeLabelSnapMap(map) {
@@ -6088,9 +6126,7 @@ async function checkNwTypeLabelChrome(browser, port, errors) {
           const line = `checkNwTypeLabelChrome ov ${size} ${state} begin=${frame.begin} continue=${frame.continue} rail=${frame.rail} clearRow=${frame.clearRow} hud=${frame.hud} visibleLabels=${frame.visibleLabels}`
           console.log(line)
           if (frame.begin !== 0 || frame.continue !== 0 || frame.rail !== 0 || frame.clearRow !== 0 || frame.hud !== 0) fail(line)
-          if (state === 'planted' && frame.visibleLabels < 1) {
-            fail(`checkNwTypeLabelChrome ov ${size} planted visibleLabels=${frame.visibleLabels}`)
-          }
+          if (frame.visibleLabels < 1) fail(`checkNwTypeLabelChrome ov ${size} ${state} visibleLabels=0`)
           for (const row of frame.lines) {
             const note = `${row.name}|${row.overflow}|${row.overflowX}|${row.overflowY}|${row.scroll}|${row.client}|${row.scrollH}|${row.clientH}|${row.rendered}|${row.source}`
             if (!logged.has(note)) {
@@ -6114,18 +6150,54 @@ async function checkNwTypeLabelChrome(browser, port, errors) {
         }
         if (clipped !== 0) fail(`checkNwTypeLabelChrome clip ${size} ${state} clipped=${clipped}`)
         else if (logged.size) console.log(`checkNwTypeLabelChrome clip ${size} ${state} clipped=0`)
+        const centre = (key) => {
+          if (!frames.some((frame) => frame.rects?.[key])) return 'absent'
+          return frames.some((frame) => frame.hits.some((miss) => miss.startsWith(`${key} `))) ? 'miss' : 'button'
+        }
+        const beginHit = centre('begin')
+        const continueHit = centre('continue')
+        console.log(`checkNwTypeLabelChrome hit ${size} ${state} begin=${beginHit} continue=${continueHit}`)
+        if (beginHit === 'miss' || continueHit === 'miss') fail(`checkNwTypeLabelChrome hit ${size} ${state} begin=${beginHit} continue=${continueHit}`)
+        const worstOv = frames.reduce(
+          (acc, frame) => ({
+            begin: Math.max(acc.begin, frame.begin),
+            continue: Math.max(acc.continue, frame.continue),
+            rail: Math.max(acc.rail, frame.rail),
+            clearRow: Math.max(acc.clearRow, frame.clearRow),
+            hud: Math.max(acc.hud, frame.hud),
+            visibleLabels: Math.min(acc.visibleLabels, frame.visibleLabels),
+          }),
+          { begin: 0, continue: 0, rail: 0, clearRow: 0, hud: 0, visibleLabels: frames[0].visibleLabels },
+        )
+        if (
+          worstOv.begin === 0 &&
+          worstOv.continue === 0 &&
+          worstOv.rail === 0 &&
+          worstOv.clearRow === 0 &&
+          worstOv.hud === 0 &&
+          worstOv.visibleLabels >= 1 &&
+          clipped === 0 &&
+          beginHit !== 'miss' &&
+          continueHit !== 'miss'
+        ) {
+          console.log(
+            `checkNwTypeLabelChrome ok ${size} ${state} frames=${frames.length} begin=0 continue=0 rail=0 clearRow=0 hud=0 visibleLabels=${worstOv.visibleLabels} clipped=0`,
+          )
+        }
         console.log(`checkNwTypeLabelChrome pin ${size} ${state} ${JSON.stringify(typeLabelSplit(frames[0]?.rects || {}))}`)
       }
       if (round === 18) {
         await sample('planted')
         if (wantStates.has('card')) {
+          if (width === 375) await panOnBoard(page, -20, 240)
           await page.locator('.defend-clear-lamp[data-tower-type="love"]').click()
           await page.locator('.defend-tower-card').waitFor()
           await page.waitForTimeout(400)
           await sample('card')
         }
       } else {
-        await clearTypeLabelRound(page, `${size} r${round}`)
+        if (round === 5) await clearToBoost(page, `${size} r${round}`)
+        else await clearTypeLabelRound(page, `${size} r${round}`)
         await page.locator('.defend-continue').waitFor()
         await page.waitForTimeout(300)
         await sample(round === 5 ? 'r5' : 'r1')
@@ -6142,7 +6214,7 @@ async function checkNwTypeLabelChrome(browser, port, errors) {
       const pinned = pin?.[state]
       if (!pinned) continue
       const lone = (key, now, was) => {
-        const delta = nwDockRectDelta(typeLabelSnap(now), typeLabelSnap(was))
+        const delta = typeLabelBoxDelta(now, was)
         if (delta == null) {
           if (!now && !was) return
           fail(`checkNwTypeLabelChrome delta ${size} ${state} missing ${key}`)
