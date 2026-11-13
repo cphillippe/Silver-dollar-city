@@ -227,7 +227,7 @@ export function DefendNightActorsSvg({
   const faceAim = useRef<{ id: number; point: { x: number; y: number } | null; pointerType: string } | null>(null)
   const groundRef = useRef<SVGGElement | null>(null)
   const [seatPick, setSeatPick] = useState<number | null>(null)
-  // Ring the first open seat that is fully on screen and clear of the lamp rail and bars.
+  // Ring the first open seat that is fully on screen and clear of the lamp rail, the docks, and the bars.
   useLayoutEffect(() => {
     const ground = groundRef.current
     if (!ground || firstSeatAt !== undefined) {
@@ -235,7 +235,11 @@ export function DefendNightActorsSvg({
       return
     }
     const choose = () => {
-      const covers = [...document.querySelectorAll('.nw-rail, .nw-balloon-slot, .defend-go, .defend-hud')]
+      const covers = [
+        ...document.querySelectorAll(
+          '.nw-rail, .nw-balloon-slot, .defend-go, .defend-hud, .nw-docks button, button.defend-new-lamp, button.defend-candle-lamp',
+        ),
+      ]
         .map((node) => node.getBoundingClientRect())
         .filter((rect) => rect.width > 0 && rect.height > 0)
       const wide = window.innerWidth
@@ -471,7 +475,9 @@ export function DefendNightActorsSvg({
   })
   const liveSeat = groundHints.findIndex((spot) => spot.live)
   const pinned = firstSeatAt ? groundHints.findIndex((spot) => spot.x === firstSeatAt.x && spot.y === firstSeatAt.y) : -1
-  const firstSeat = firstSeatAt === null ? -1 : pinned >= 0 ? pinned : (seatPick ?? (liveSeat >= 0 ? liveSeat : 0))
+  // Camera off has no pinned seat. A dock-covered seat is not a fallback. Camera on keeps its pick.
+  const camOffSeat = firstSeatAt === undefined ? (seatPick ?? -1) : (seatPick ?? (liveSeat >= 0 ? liveSeat : 0))
+  const firstSeat = firstSeatAt === null ? -1 : pinned >= 0 ? pinned : camOffSeat
   return (
     <>
               {groundHints.length > 0 ? (

@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.584',
+    title: 'Night Watch: the gold seat stays clear of Candle',
+    when: '2026-11-13',
+    items: [
+      'On Easy, the first gold seat stays clear of the Candle button.',
+      'Hard stays the same.',
+      'Refs #884.',
+    ],
+  },
+  {
     version: '1.4.583',
     title: 'Night Watch: lamp names stay off the buttons',
     when: '2026-11-13',
