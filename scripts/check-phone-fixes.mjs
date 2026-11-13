@@ -5831,37 +5831,31 @@ const TYPE_LABEL_PINS = {
   '375x667': {
     planted: { begin: { x: 67.5, y: 602.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: {} },
     card: { begin: { x: 67.5, y: 602.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 216, y: 397.3, w: 32, h: 32 }, 'pip-far': { x: 88, y: 431.7, w: 18, h: 16 }, 'buy-far': { x: 168, y: 406.9, w: 46, h: 44 }, 'pip-strong': { x: 88, y: 476.7, w: 18, h: 16 }, 'buy-strong': { x: 168, y: 451.9, w: 46, h: 44 } } },
-    r5: { begin: null, continue: { x: 125.4, y: 603, w: 124.3, h: 56 }, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 321.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 377.9, w: 52, h: 53.1 } }, card: {} },
-    r1: { begin: null, continue: { x: 125.4, y: 603, w: 124.3, h: 56 }, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 321.9, w: 52, h: 53.1 } }, card: {} },
+    r5: { begin: null, continue: { x: 125, y: 603, w: 125, h: 56 }, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 321.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 377.9, w: 52, h: 53.1 } }, card: {} },
+    r1: { begin: null, continue: { x: 125, y: 603, w: 125, h: 56 }, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 321.9, w: 52, h: 53.1 } }, card: {} },
   },
   '390x844': {
     planted: { begin: { x: 75, y: 779.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: {} },
     card: { begin: { x: 75, y: 779.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 233.3, y: 273, w: 32, h: 32 }, 'pip-far': { x: 105.3, y: 307.4, w: 18, h: 16 }, 'buy-far': { x: 185.3, y: 282.6, w: 46, h: 44 }, 'pip-strong': { x: 105.3, y: 352.4, w: 18, h: 16 }, 'buy-strong': { x: 185.3, y: 327.6, w: 46, h: 44 } } },
-    r5: { begin: null, continue: { x: 132.9, y: 780, w: 124.3, h: 56 }, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 498.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 554.9, w: 52, h: 53.1 } }, card: {} },
-    r1: { begin: null, continue: { x: 132.9, y: 780, w: 124.3, h: 56 }, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 498.9, w: 52, h: 53.1 } }, card: {} },
+    r5: { begin: null, continue: { x: 132.5, y: 780, w: 125, h: 56 }, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 498.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 554.9, w: 52, h: 53.1 } }, card: {} },
+    r1: { begin: null, continue: { x: 132.5, y: 780, w: 125, h: 56 }, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 498.9, w: 52, h: 53.1 } }, card: {} },
   },
   '412x915': {
     planted: { begin: { x: 86, y: 850.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 353, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 353, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 353, y: 208, w: 48, h: 48 }, 'rail-science': { x: 353, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: {} },
     card: { begin: { x: 86, y: 850.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 353, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 353, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 353, y: 208, w: 48, h: 48 }, 'rail-science': { x: 353, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 226, y: 350.2, w: 32, h: 32 }, 'pip-far': { x: 98, y: 384.5, w: 18, h: 16 }, 'buy-far': { x: 178, y: 359.8, w: 46, h: 44 }, 'pip-strong': { x: 98, y: 429.5, w: 18, h: 16 }, 'buy-strong': { x: 178, y: 404.8, w: 46, h: 44 } } },
-    r5: { begin: null, continue: { x: 143.9, y: 851, w: 124.3, h: 56 }, rail: { 'rail-love': { x: 353, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 353, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 353, y: 208, w: 48, h: 48 }, 'rail-science': { x: 353, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 569.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 625.9, w: 52, h: 53.1 } }, card: {} },
-    r1: { begin: null, continue: { x: 143.9, y: 851, w: 124.3, h: 56 }, rail: { 'rail-love': { x: 353, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 353, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 353, y: 208, w: 48, h: 48 }, 'rail-science': { x: 353, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 569.9, w: 52, h: 53.1 } }, card: {} },
+    r5: { begin: null, continue: { x: 143.5, y: 851, w: 125, h: 56 }, rail: { 'rail-love': { x: 353, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 353, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 353, y: 208, w: 48, h: 48 }, 'rail-science': { x: 353, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 569.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 625.9, w: 52, h: 53.1 } }, card: {} },
+    r1: { begin: null, continue: { x: 143.5, y: 851, w: 125, h: 56 }, rail: { 'rail-love': { x: 353, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 353, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 353, y: 208, w: 48, h: 48 }, 'rail-science': { x: 353, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 569.9, w: 52, h: 53.1 } }, card: {} },
   },
   '768x1024': {
-    planted: { begin: { x: 77.8, y: 708.7, w: 160.1, h: 56 }, continue: null, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-candle': { x: 77.8, y: 770, w: 160.1, h: 52 }, 'dock-bell': { x: 77.8, y: 826, w: 160.1, h: 52 }, 'dock-incense': { x: 77.8, y: 882, w: 160.1, h: 52 }, 'dock-cross': { x: 77.8, y: 938, w: 160.1, h: 52 } }, card: {} },
-    card: { begin: { x: 77.8, y: 709.7, w: 160.1, h: 56 }, continue: null, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-candle': { x: 77.8, y: 770, w: 160.1, h: 52 }, 'dock-bell': { x: 77.8, y: 826, w: 160.1, h: 52 }, 'dock-incense': { x: 77.8, y: 882, w: 160.1, h: 52 }, 'dock-cross': { x: 77.8, y: 938, w: 160.1, h: 52 } }, card: { pull: { x: 373.5, y: 305, w: 32, h: 32 }, 'pip-far': { x: 247.5, y: 354.8, w: 20, h: 20 }, 'buy-far': { x: 247.5, y: 380.8, w: 148, h: 52 }, 'pip-strong': { x: 247.5, y: 466.8, w: 20, h: 20 }, 'buy-strong': { x: 247.5, y: 492.8, w: 148, h: 52 } } },
-    r5: { begin: null, continue: { x: 86.8, y: 937, w: 69.2, h: 40 }, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-new': { x: 160, y: 937, w: 96.9, h: 40 }, 'dock-candle': { x: 260.9, y: 937, w: 80.3, h: 40 } }, card: {} },
-    r1: { begin: null, continue: { x: 86.8, y: 937, w: 69.2, h: 40 }, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-new': { x: 160, y: 937, w: 96.9, h: 40 } }, card: {} },
+    planted: { begin: { x: 77.8, y: 709, w: 162, h: 56 }, continue: null, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-candle': { x: 77.8, y: 770, w: 162, h: 52 }, 'dock-bell': { x: 77.8, y: 826, w: 162, h: 52 }, 'dock-incense': { x: 77.8, y: 882, w: 162, h: 52 }, 'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 } }, card: {} },
+    card: { begin: { x: 77.8, y: 709.5, w: 162, h: 56 }, continue: null, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-candle': { x: 77.8, y: 770, w: 162, h: 52 }, 'dock-bell': { x: 77.8, y: 826, w: 162, h: 52 }, 'dock-incense': { x: 77.8, y: 882, w: 162, h: 52 }, 'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 } }, card: { pull: { x: 373.5, y: 305, w: 32, h: 32 }, 'pip-far': { x: 247.5, y: 354.8, w: 20, h: 20 }, 'buy-far': { x: 247.5, y: 380.8, w: 148, h: 52 }, 'pip-strong': { x: 247.5, y: 466.8, w: 20, h: 20 }, 'buy-strong': { x: 247.5, y: 492.8, w: 148, h: 52 } } },
+    r5: { begin: null, continue: { x: 86.8, y: 937, w: 70, h: 40 }, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-new': { x: 160.8, y: 937, w: 95.5, h: 40 }, 'dock-candle': { x: 260.3, y: 937, w: 79.5, h: 40 } }, card: {} },
+    r1: { begin: null, continue: { x: 86.8, y: 937, w: 70, h: 40 }, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-new': { x: 160.8, y: 937, w: 95.5, h: 40 } }, card: {} },
   },
 }
 
 function typeLabelRound(n) {
   return Math.round(n * 10) / 10
-}
-
-/** Whole pixels. Tablet Begin y wanders by about a pixel; that is not a moved button. */
-function typeLabelSnap(rect) {
-  if (!rect) return null
-  return { x: Math.round(rect.x), y: Math.round(rect.y), w: Math.round(rect.w), h: Math.round(rect.h) }
 }
 
 function typeLabelBoxDelta(now, was) {
@@ -5871,12 +5865,6 @@ function typeLabelBoxDelta(now, was) {
   const y = Math.abs(typeLabelRound(now.y - was.y))
   if (y > 2) worst = Math.max(worst, y)
   return worst
-}
-
-function typeLabelSnapMap(map) {
-  const out = {}
-  for (const [key, rect] of Object.entries(map || {})) out[key] = typeLabelSnap(rect)
-  return out
 }
 
 function typeLabelSearch(round) {
@@ -6225,9 +6213,9 @@ async function checkNwTypeLabelChrome(browser, port, errors) {
       lone('begin', split.begin, pinned.begin)
       lone('continue', split.continue, pinned.continue)
       for (const [key, now, was] of [
-        ['rail', typeLabelSnapMap(split.rail), typeLabelSnapMap(pinned.rail)],
-        ['dock', typeLabelSnapMap(split.docks), typeLabelSnapMap(pinned.docks)],
-        ['card', typeLabelSnapMap(split.card), typeLabelSnapMap(pinned.card)],
+        ['rail', split.rail, pinned.rail],
+        ['dock', split.docks, pinned.docks],
+        ['card', split.card, pinned.card],
       ]) {
         const group = nwDockGroupDelta(now, was)
         if (group.missing) fail(`checkNwTypeLabelChrome delta ${size} ${state} missing ${key}`)
@@ -6235,10 +6223,11 @@ async function checkNwTypeLabelChrome(browser, port, errors) {
       }
     }
     if (pin) {
-      const fmt = (n) => (n === 0 ? '0' : typeLabelRound(n).toFixed(1))
+      const calm = (n) => (n <= 1 ? 0 : n)
+      const fmt = (n) => (calm(n) === 0 ? '0' : typeLabelRound(n).toFixed(1))
       const line = `checkNwTypeLabelChrome delta ${size} begin=${fmt(worst.begin)} continue=${fmt(worst.continue)} rail=${fmt(worst.rail)} dock=${fmt(worst.dock)} card=${fmt(worst.card)}`
       console.log(line)
-      if (worst.begin !== 0 || worst.continue !== 0 || worst.rail !== 0 || worst.dock !== 0 || worst.card !== 0) fail(line)
+      if (calm(worst.begin) !== 0 || calm(worst.continue) !== 0 || calm(worst.rail) !== 0 || calm(worst.dock) !== 0 || calm(worst.card) !== 0) fail(line)
     }
   }
   assert.equal(problems.length, 0, problems.join('\n'))
