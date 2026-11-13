@@ -5123,6 +5123,633 @@ async function checkEasyOneGold(browser, port, errors) {
   assert.equal(fails.length, 0, fails.join('\n'))
 }
 
+const NW_DOCK_GOLD_SIZES = [
+  [375, 667],
+  [390, 844],
+  [412, 915],
+  [768, 1024],
+]
+const NW_DOCK_GOLD_MS = 1500
+const NW_DOCK_GOLD_SEARCH = '?playtest=1&nwSeed=2&nwMap=a2&nwRound=18&nwLamps=0'
+
+/**
+ * Viewport rects of Begin, the rail, the four docks and the open card actions,
+ * measured on unmodified 1.4.581 (the live fail). Rounded to 0.1px.
+ * The pressed Candle dock sits 1px lower; that shift is the existing press, not this hop.
+ */
+const NW_DOCK_GOLD_BASE = {
+  '375x667': {
+    plant: {
+      begin: { x: 67.5, y: 602.6, w: 240, h: 56.4 },
+      rail: { x: 310, y: 98, w: 60, h: 216 },
+      docks: {
+        'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 },
+        'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 },
+        'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 },
+        'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 },
+      },
+      card: {},
+    },
+    selected: {
+      begin: { x: 67.5, y: 602.6, w: 240, h: 56.4 },
+      rail: { x: 310, y: 98, w: 60, h: 216 },
+      docks: {
+        'dock-candle': { x: 6, y: 178, w: 52, h: 53.1 },
+        'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 },
+        'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 },
+        'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 },
+      },
+      card: {},
+    },
+    planted: {
+      begin: { x: 67.5, y: 602.6, w: 240, h: 56.4 },
+      rail: { x: 310, y: 98, w: 60, h: 216 },
+      docks: {
+        'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 },
+        'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 },
+        'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 },
+        'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 },
+      },
+      card: {},
+    },
+    card: {
+      begin: { x: 67.5, y: 602.6, w: 240, h: 56.4 },
+      rail: { x: 310, y: 98, w: 60, h: 216 },
+      docks: {
+        'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 },
+        'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 },
+        'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 },
+        'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 },
+      },
+      card: {
+        pull: { x: 194.5, y: 167.7, w: 32, h: 32 },
+        'pip-far': { x: 66.5, y: 202.1, w: 18, h: 16 },
+        'buy-far': { x: 146.5, y: 177.3, w: 46, h: 44 },
+        'pip-strong': { x: 66.5, y: 247.1, w: 18, h: 16 },
+        'buy-strong': { x: 146.5, y: 222.3, w: 46, h: 44 },
+      },
+    },
+  },
+  '390x844': {
+    plant: {
+      begin: { x: 75, y: 779.6, w: 240, h: 56.4 },
+      rail: { x: 325, y: 98, w: 60, h: 216 },
+      docks: {
+        'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 },
+        'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 },
+        'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 },
+        'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 },
+      },
+      card: {},
+    },
+    selected: {
+      begin: { x: 75, y: 779.6, w: 240, h: 56.4 },
+      rail: { x: 325, y: 98, w: 60, h: 216 },
+      docks: {
+        'dock-candle': { x: 6, y: 178, w: 52, h: 53.1 },
+        'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 },
+        'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 },
+        'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 },
+      },
+      card: {},
+    },
+    planted: {
+      begin: { x: 75, y: 779.6, w: 240, h: 56.4 },
+      rail: { x: 325, y: 98, w: 60, h: 216 },
+      docks: {
+        'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 },
+        'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 },
+        'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 },
+        'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 },
+      },
+      card: {},
+    },
+    card: {
+      begin: { x: 75, y: 779.6, w: 240, h: 56.4 },
+      rail: { x: 325, y: 98, w: 60, h: 216 },
+      docks: {
+        'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 },
+        'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 },
+        'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 },
+        'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 },
+      },
+      card: {
+        pull: { x: 272.2, y: 130, w: 32, h: 32 },
+        'pip-far': { x: 144.2, y: 164.4, w: 18, h: 16 },
+        'buy-far': { x: 224.2, y: 139.6, w: 46, h: 44 },
+        'pip-strong': { x: 144.2, y: 209.4, w: 18, h: 16 },
+        'buy-strong': { x: 224.2, y: 184.6, w: 46, h: 44 },
+      },
+    },
+  },
+  '412x915': {
+    plant: {
+      begin: { x: 86, y: 850.6, w: 240, h: 56.4 },
+      rail: { x: 347, y: 98, w: 60, h: 216 },
+      docks: {
+        'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 },
+        'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 },
+        'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 },
+        'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 },
+      },
+      card: {},
+    },
+    selected: {
+      begin: { x: 86, y: 850.6, w: 240, h: 56.4 },
+      rail: { x: 347, y: 98, w: 60, h: 216 },
+      docks: {
+        'dock-candle': { x: 6, y: 178, w: 52, h: 53.1 },
+        'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 },
+        'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 },
+        'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 },
+      },
+      card: {},
+    },
+    planted: {
+      begin: { x: 86, y: 850.6, w: 240, h: 56.4 },
+      rail: { x: 347, y: 98, w: 60, h: 216 },
+      docks: {
+        'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 },
+        'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 },
+        'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 },
+        'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 },
+      },
+      card: {},
+    },
+    card: {
+      begin: { x: 86, y: 850.6, w: 240, h: 56.4 },
+      rail: { x: 347, y: 98, w: 60, h: 216 },
+      docks: {
+        'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 },
+        'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 },
+        'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 },
+        'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 },
+      },
+      card: {
+        pull: { x: 274.8, y: 130, w: 32, h: 32 },
+        'pip-far': { x: 146.8, y: 164.4, w: 18, h: 16 },
+        'buy-far': { x: 226.8, y: 139.6, w: 46, h: 44 },
+        'pip-strong': { x: 146.8, y: 209.4, w: 18, h: 16 },
+        'buy-strong': { x: 226.8, y: 184.6, w: 46, h: 44 },
+      },
+    },
+  },
+  '768x1024': {
+    plant: {
+      begin: { x: 77.8, y: 710, w: 162, h: 56 },
+      rail: { x: 674, y: 113, w: 76, h: 311.3 },
+      docks: {
+        'dock-candle': { x: 77.8, y: 770, w: 162, h: 52 },
+        'dock-bell': { x: 77.8, y: 826, w: 162, h: 52 },
+        'dock-incense': { x: 77.8, y: 882, w: 162, h: 52 },
+        'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 },
+      },
+      card: {},
+    },
+    selected: {
+      begin: { x: 77.8, y: 710, w: 162, h: 56 },
+      rail: { x: 674, y: 113, w: 76, h: 311.3 },
+      docks: {
+        'dock-candle': { x: 77.8, y: 771, w: 162, h: 52 },
+        'dock-bell': { x: 77.8, y: 826, w: 162, h: 52 },
+        'dock-incense': { x: 77.8, y: 882, w: 162, h: 52 },
+        'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 },
+      },
+      card: {},
+    },
+    planted: {
+      begin: { x: 77.8, y: 710, w: 162, h: 56 },
+      rail: { x: 674, y: 113, w: 76, h: 311.3 },
+      docks: {
+        'dock-candle': { x: 77.8, y: 770, w: 162, h: 52 },
+        'dock-bell': { x: 77.8, y: 826, w: 162, h: 52 },
+        'dock-incense': { x: 77.8, y: 882, w: 162, h: 52 },
+        'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 },
+      },
+      card: {},
+    },
+    card: {
+      begin: { x: 77.8, y: 710, w: 162, h: 56 },
+      rail: { x: 674, y: 113, w: 76, h: 311.3 },
+      docks: {
+        'dock-candle': { x: 77.8, y: 770, w: 162, h: 52 },
+        'dock-bell': { x: 77.8, y: 826, w: 162, h: 52 },
+        'dock-incense': { x: 77.8, y: 882, w: 162, h: 52 },
+        'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 },
+      },
+      card: {
+        pull: { x: 480.6, y: 121, w: 32, h: 32 },
+        'pip-far': { x: 354.6, y: 170.8, w: 20, h: 20 },
+        'buy-far': { x: 354.6, y: 196.8, w: 148, h: 52 },
+        'pip-strong': { x: 354.6, y: 282.8, w: 20, h: 20 },
+        'buy-strong': { x: 354.6, y: 308.8, w: 148, h: 52 },
+      },
+    },
+  },
+}
+
+function nwDockRound(n) {
+  return Math.round(n * 10) / 10
+}
+
+function nwDockRectDelta(now, was) {
+  if (!now || !was) return null
+  let worst = 0
+  for (const key of ['x', 'y', 'w', 'h']) {
+    worst = Math.max(worst, Math.abs(nwDockRound(now[key] - was[key])))
+  }
+  return worst
+}
+
+function nwDockGroupDelta(nowMap, wasMap) {
+  const keys = new Set([...Object.keys(nowMap || {}), ...Object.keys(wasMap || {})])
+  let worst = 0
+  let missing = false
+  for (const key of keys) {
+    const delta = nwDockRectDelta(nowMap?.[key], wasMap?.[key])
+    if (delta == null) missing = true
+    else worst = Math.max(worst, delta)
+  }
+  return { worst, missing }
+}
+
+/**
+ * #924. Easy R18 plant, debug freeze on, then Jump.
+ * One gold cue per frame: computed background, border or lip (box-shadow) in the
+ * same gold family as mapGoldCues, on a visible actionable control.
+ * Never passes on 0 or on 2+.
+ */
+async function readNwDockGold(page) {
+  return page.evaluate(async (minMs) => {
+    const gold = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = Number(match[1])
+        const g = Number(match[2])
+        const b = Number(match[3])
+        const a = match[4] === undefined ? 1 : Number(match[4])
+        if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const visible = (el) => {
+      const style = getComputedStyle(el)
+      const box = el.getBoundingClientRect()
+      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0 && box.width > 1 && box.height > 1
+    }
+    const shown = (el) => visible(el) && getComputedStyle(el).pointerEvents !== 'none'
+    const inView = (box) => box.bottom > 1 && box.right > 1 && box.top < innerHeight - 1 && box.left < innerWidth - 1
+    const round = (n) => Math.round(n * 10) / 10
+    const boxOf = (el) => {
+      if (!el) return null
+      const r = el.getBoundingClientRect()
+      if (r.width < 1 || r.height < 1) return null
+      return { x: round(r.x), y: round(r.y), w: round(r.width), h: round(r.height) }
+    }
+    const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+    const nameOf = (el) => {
+      const base = `${el.tagName}.${el.getAttribute('class') || ''}`.replace(/\s+/g, ' ').trim().slice(0, 80)
+      const path = el.getAttribute('data-path-buy') || el.getAttribute('data-path-pip') || ''
+      return path ? `${base} ${path}` : base
+    }
+    const tapKey = (el) => {
+      if (el.classList.contains('defend-go')) return 'begin'
+      if (el.classList.contains('defend-candle-lamp')) return 'dock-candle'
+      if (el.classList.contains('defend-bell-lamp')) return 'dock-bell'
+      if (el.classList.contains('defend-incense-lamp')) return 'dock-incense'
+      if (el.classList.contains('defend-cross-lamp')) return 'dock-cross'
+      if (el.classList.contains('defend-new-lamp')) return 'dock-new'
+      const buy = el.getAttribute('data-path-buy')
+      if (buy) return `buy-${buy}`
+      const pip = el.getAttribute('data-path-pip')
+      if (pip) return `pip-${pip}`
+      if (el.classList.contains('defend-tower-pull')) return 'pull'
+      if (el.classList.contains('defend-tower-upgrade')) return 'upgrade'
+      if (el.classList.contains('defend-bright-buy')) return 'bright'
+      if (el.classList.contains('defend-lesson-open')) return 'lesson'
+      if (el.classList.contains('defend-pull-keep')) return 'keep'
+      if (el.classList.contains('defend-pull-do')) return 'pull-do'
+      return ''
+    }
+    const goldOf = (el) => {
+      const style = getComputedStyle(el)
+      const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => parseFloat(style[`border${side}Width`]) > 0 && gold(style[`border${side}Color`]))
+      return gold(style.backgroundImage) || gold(style.backgroundColor) || border || gold(style.boxShadow)
+    }
+    const controls = () => [...document.querySelectorAll('button, a.btn, [role="button"]')].filter((el) => {
+      if (!(el instanceof HTMLElement)) return false
+      if (el.closest('.defend-nw-debug, [hidden]')) return false
+      if (!shown(el)) return false
+      return inView(el.getBoundingClientRect())
+    })
+    const lineOf = (el) => {
+      const directs = [...el.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+      if (!directs.length || !visible(el)) return null
+      if (el.closest('svg')) return null
+      const style = getComputedStyle(el)
+      const rect = el.getBoundingClientRect()
+      if (rect.width < 2 || rect.height < 2) return null
+      const source = norm(directs.map((child) => child.textContent).join(''))
+      const range = document.createRange()
+      let rendered = ''
+      const host = { left: rect.left - 1, right: rect.right + 1, top: rect.top - 1, bottom: rect.bottom + 1 }
+      for (const child of directs) {
+        const raw = child.textContent
+        for (let i = 0; i < raw.length; i += 1) {
+          const ch = raw[i]
+          if (!ch.trim()) {
+            rendered += ch
+            continue
+          }
+          range.setStart(child, i)
+          range.setEnd(child, i + 1)
+          let painted = false
+          for (const bit of range.getClientRects()) {
+            if (bit.width <= 0 || bit.height <= 0) continue
+            if (bit.right > host.left && bit.left < host.right && bit.bottom > host.top && bit.top < host.bottom) {
+              painted = true
+              break
+            }
+          }
+          if (painted) rendered += ch
+        }
+      }
+      return {
+        name: nameOf(el),
+        source,
+        rendered: norm(rendered),
+        overflow: style.textOverflow,
+        scroll: el.scrollWidth,
+        client: el.clientWidth,
+        scrollH: el.scrollHeight,
+        clientH: el.clientHeight,
+      }
+    }
+    const cardLines = () => {
+      const card = document.querySelector('.defend-tower-card')
+      if (!card) return []
+      const lines = []
+      for (const node of card.querySelectorAll('*')) {
+        const line = lineOf(node)
+        if (line) lines.push(line)
+      }
+      return lines
+    }
+    const read = () => {
+      const found = controls().filter(goldOf)
+      const names = found.map(nameOf)
+      const rects = {}
+      const hits = []
+      const take = (key, el) => {
+        if (!key || !el || rects[key]) return
+        const rect = boxOf(el)
+        if (!rect) return
+        rects[key] = rect
+        const cx = rect.x + rect.w / 2
+        const cy = rect.y + rect.h / 2
+        if (cx <= 1 || cy <= 1 || cx >= innerWidth - 1 || cy >= innerHeight - 1) {
+          hits.push(`${key} offscreen`)
+          return
+        }
+        const node = document.elementFromPoint(cx, cy)
+        const hit = node === el || Boolean(node && el.contains(node))
+        if (!hit) hits.push(`${key} -> ${node ? nameOf(node) : 'none'}`)
+      }
+      const rail = document.querySelector('.nw-rail')
+      if (rail) {
+        const rect = boxOf(rail)
+        if (rect) rects.rail = rect
+      }
+      for (const el of document.querySelectorAll('.nw-rail .defend-ability')) {
+        take(`rail-${el.getAttribute('data-type') || 'x'}`, el)
+      }
+      for (const key of Object.keys(rects)) {
+        if (key.startsWith('rail-')) delete rects[key]
+      }
+      for (const el of controls()) take(tapKey(el), el)
+      return {
+        names,
+        gold: names.length,
+        rects,
+        hits,
+        lines: cardLines(),
+        card: document.querySelector('.defend-tower-card') ? 1 : 0,
+        docks: document.querySelectorAll('button.defend-new-lamp').length,
+      }
+    }
+    const frames = []
+    const start = performance.now()
+    await new Promise((resolve) => {
+      const tick = () => {
+        frames.push(read())
+        if (performance.now() - start < minMs) requestAnimationFrame(tick)
+        else resolve()
+      }
+      requestAnimationFrame(tick)
+    })
+    return { frames, ms: Math.round(performance.now() - start) }
+  }, NW_DOCK_GOLD_MS)
+}
+
+async function openNwDockGold(browser, port, width, height, errors) {
+  const label = `${width}x${height}`
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width, height },
+    deviceScaleFactor: 1,
+    reducedMotion: 'reduce',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: SAVE },
+  )
+  const page = await context.newPage()
+  page.on('pageerror', (error) => errors.push(`dock-gold ${label} ${error}`))
+  page.on('console', (msg) => {
+    if (msg.type() !== 'error') return
+    const text = msg.text()
+    if (text.includes('Encountered two children with the same key')) return
+    errors.push(`dock-gold ${label} ${text}`)
+  })
+  await page.goto(`/${NW_DOCK_GOLD_SEARCH}`)
+  await page.getByRole('button', { name: 'Settings' }).click()
+  await page.locator('summary', { hasText: 'Developer' }).click()
+  await page.getByRole('button', { name: 'Debug freeze · OFF' }).click()
+  await page.getByRole('button', { name: 'Debug freeze · ON' }).waitFor()
+  await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
+  await page.locator('.defend-board').waitFor()
+  if (await page.locator('[data-map-overlay]').count()) {
+    await page.locator('[data-map="a2"]').click()
+    await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+  }
+  await page.locator('.defend-go').waitFor()
+  await page.locator('button.defend-new-lamp').nth(3).waitFor()
+  const frozen = await page.evaluate(() => sessionStorage.getItem('silver-city-nw-debug-session'))
+  assert.equal(frozen, 'on', `${label} debug freeze is on for this visit`)
+  return { context, page, label }
+}
+
+async function nwDockSeat(page, label) {
+  const ready = await page.evaluate(() => {
+    const svg = document.querySelector('.defend-board')
+    const ctm = svg?.getScreenCTM()
+    if (!svg || !ctm) return null
+    for (const ring of document.querySelectorAll('.defend-plant-ground circle.is-live')) {
+      const p = svg.createSVGPoint()
+      p.x = Number(ring.getAttribute('cx'))
+      p.y = Number(ring.getAttribute('cy')) - 26
+      const q = p.matrixTransform(ctm)
+      if (q.x < 8 || q.y < 8 || q.x > innerWidth - 8 || q.y > innerHeight - 8) continue
+      const hit = document.elementFromPoint(q.x, q.y)
+      if (hit && hit.closest('.defend-board') && !hit.closest('button, .nw-rail, .nw-docks, .defend-tower-card')) {
+        return { x: q.x, y: q.y }
+      }
+    }
+    return null
+  })
+  if (ready) return ready
+  return glyphNextSeat(page, label)
+}
+
+function nwDockSplit(rects) {
+  const docks = {}
+  const card = {}
+  let begin = null
+  let rail = null
+  for (const [key, rect] of Object.entries(rects || {})) {
+    if (key === 'begin') begin = rect
+    else if (key === 'rail') rail = rect
+    else if (key.startsWith('dock-')) docks[key] = rect
+    else card[key] = rect
+  }
+  return { begin, rail, docks, card }
+}
+
+/**
+ * #924a. Easy Night Watch keeps one gold cue on the R18 plant and on the
+ * banked-spark selected, planted and card-open boards. Phone and tablet.
+ */
+async function checkNwDockGold(browser, port, errors) {
+  const only = process.env.NW_DOCK_GOLD_SIZE
+  const fails = []
+  const clips = []
+  const tapFails = []
+  for (const [width, height] of NW_DOCK_GOLD_SIZES) {
+    const size = `${width}x${height}`
+    if (only && only !== size) continue
+    const { context, page, label } = await openNwDockGold(browser, port, width, height, errors)
+    const sparks = Number((await page.locator('.nw-balloon-count').innerText()).replace(/[^\d]/g, ''))
+    const dockCount = await page.locator('button.defend-new-lamp').count()
+    console.log(`checkNwDockGold sparks ${size} ${sparks} docks=${dockCount}`)
+    if (dockCount !== 4) fails.push(`checkNwDockGold fail ${size} plant docks=${dockCount} want 4`)
+    const seen = {}
+    const sample = async (state) => {
+      await page.waitForTimeout(80)
+      const sampled = await readNwDockGold(page)
+      const frames = sampled.frames
+      assert.ok(sampled.ms >= NW_DOCK_GOLD_MS, `${label} ${state} sampled ${sampled.ms}ms`)
+      assert.ok(frames.length >= 20, `${label} ${state} sampled ${frames.length} frames`)
+      const counts = [...new Set(frames.map((frame) => frame.gold))]
+      const names = [...new Set(frames.flatMap((frame) => frame.names))]
+      const bad = frames.filter((frame) => frame.gold !== 1)
+      const line = bad.length
+        ? `checkNwDockGold fail ${size} ${state} frames=${frames.length} gold=${counts.join('|')} names=${names.join(' | ') || '(none)'}`
+        : `checkNwDockGold ok ${size} ${state} frames=${frames.length} gold=1 names=${names.join(' | ') || '(none)'}`
+      console.log(line)
+      if (bad.length) fails.push(line)
+      const rects = frames[0]?.rects || {}
+      seen[state] = rects
+      let move = 0
+      for (const frame of frames) {
+        const splitNow = nwDockSplit(frame.rects)
+        const splitWas = nwDockSplit(rects)
+        for (const group of ['begin', 'rail']) {
+          const delta = nwDockRectDelta(splitNow[group], splitWas[group])
+          if (delta == null) continue
+          move = Math.max(move, delta)
+        }
+        move = Math.max(move, nwDockGroupDelta(splitNow.docks, splitWas.docks).worst, nwDockGroupDelta(splitNow.card, splitWas.card).worst)
+      }
+      if (move !== 0) tapFails.push(`${size} ${state} frame delta ${move}`)
+      const wantHit = state === 'card'
+        ? Object.keys(rects).filter((key) => !key.startsWith('dock-') && key !== 'rail' && key !== 'begin')
+        : ['begin', 'dock-candle', 'dock-bell', 'dock-incense', 'dock-cross']
+      const hitBad = new Set()
+      for (const frame of frames) {
+        for (const miss of frame.hits) {
+          const key = miss.split(' ')[0]
+          if (wantHit.includes(key) || (state !== 'card' && key.startsWith('rail-'))) hitBad.add(miss)
+        }
+      }
+      if (hitBad.size) tapFails.push(`${size} ${state} ${[...hitBad].join(' | ')}`)
+      console.log(`checkNwDockGold pin ${size} ${state} ${JSON.stringify(nwDockSplit(rects))}`)
+      if (state === 'card') {
+        const logged = new Set()
+        let clipped = 0
+        for (const frame of frames) {
+          for (const row of frame.lines) {
+            const note = `${row.name}|${row.overflow}|${row.scroll}|${row.client}|${row.scrollH}|${row.clientH}|${row.rendered}|${row.source}`
+            if (!logged.has(note)) {
+              logged.add(note)
+              console.log(
+                `checkNwDockGold line ${size} ${state} ${row.name} overflow=${row.overflow} scroll=${row.scroll} client=${row.client} scrollH=${row.scrollH} clientH=${row.clientH} rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(row.source)}`,
+              )
+            }
+            if (row.scroll > row.client + 1 || row.scrollH > row.clientH + 1) clipped += 1
+          }
+        }
+        if (logged.size === 0) clips.push(`checkNwDockGold clip ${size} card had no text lines`)
+        if (clipped !== 0) clips.push(`checkNwDockGold clip ${size} clipped=${clipped}`)
+        else if (logged.size) console.log(`checkNwDockGold clip ${size} clipped=0`)
+      }
+    }
+    await sample('plant')
+    await page.locator('button.defend-candle-lamp').click()
+    await page.locator('button.defend-candle-lamp[aria-pressed="true"]').waitFor()
+    await sample('selected')
+    await page.locator('button.defend-candle-lamp[aria-pressed="true"]').click()
+    await page.waitForFunction(() => !document.querySelector('button.defend-candle-lamp[aria-pressed="true"]'))
+    await page.locator('.nw-rail .defend-ability[data-type="love"]').click()
+    const seat = await nwDockSeat(page, `${label} plant`)
+    await page.mouse.click(seat.x, seat.y)
+    await page.locator('.defend-pad[data-tower-type="love"]').waitFor()
+    if (await page.locator('.defend-tower-card').count()) {
+      await page.keyboard.press('Escape')
+      await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+    }
+    await sample('planted')
+    await page.locator('.defend-pad[data-tower-type="love"]').click({ force: true })
+    await page.locator('.defend-tower-card').waitFor()
+    await sample('card')
+    const base = NW_DOCK_GOLD_BASE[size]
+    const worst = { begin: 0, rail: 0, dock: 0, card: 0 }
+    for (const [state, rects] of Object.entries(seen)) {
+      const split = nwDockSplit(rects)
+      const pinned = base?.[state]
+      if (!pinned) continue
+      const begin = nwDockRectDelta(split.begin, pinned.begin)
+      const rail = nwDockRectDelta(split.rail, pinned.rail)
+      const dock = nwDockGroupDelta(split.docks, pinned.docks)
+      const card = nwDockGroupDelta(split.card, pinned.card)
+      if (begin == null || rail == null || dock.missing || card.missing) {
+        tapFails.push(`${size} ${state} missing a pinned rect`)
+      }
+      worst.begin = Math.max(worst.begin, begin || 0)
+      worst.rail = Math.max(worst.rail, rail || 0)
+      worst.dock = Math.max(worst.dock, dock.worst)
+      worst.card = Math.max(worst.card, card.worst)
+    }
+    const fmt = (n) => (n === 0 ? '0' : nwDockRound(n).toFixed(1))
+    console.log(`checkNwDockGold delta ${size} begin=${fmt(worst.begin)} rail=${fmt(worst.rail)} dock=${fmt(worst.dock)} card=${fmt(worst.card)}`)
+    if (base && (worst.begin !== 0 || worst.rail !== 0 || worst.dock !== 0 || worst.card !== 0)) {
+      tapFails.push(`checkNwDockGold delta ${size} begin=${fmt(worst.begin)} rail=${fmt(worst.rail)} dock=${fmt(worst.dock)} card=${fmt(worst.card)}`)
+    }
+    await context.close()
+  }
+  const problems = [...fails, ...clips, ...tapFails]
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
 
 export async function checkPhoneFixes() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
@@ -5167,6 +5794,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'easy one-gold screens stay free of console errors')
       return
     }
+    if (process.env.NW_DOCK_GOLD_ONLY === '1') {
+      await checkNwDockGold(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'dock gold nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
@@ -5178,6 +5810,7 @@ export async function checkPhoneFixes() {
     await checkNightRun905(browser, port, errors)
     await checkLampGlyph(browser, port, errors)
     await checkCompactLampCard(browser, port, errors)
+    await checkNwDockGold(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -5354,7 +5987,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
