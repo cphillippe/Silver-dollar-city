@@ -28,6 +28,17 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.582',
+    title: 'Night Watch: one gold cue',
+    when: '2026-11-12',
+    items: [
+      'On Easy, the new-lamp buttons beside Begin stay plain.',
+      'An open lamp card keeps one gold action.',
+      'Hard stays the same.',
+      'Refs #924.',
+    ],
+  },
+  {
     version: '1.4.581',
     title: 'Easy Home and Settings: one gold cue',
     when: '2026-11-11',

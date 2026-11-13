@@ -1376,7 +1376,7 @@ async function checkGoldCues(browser, port, errors, width, height) {
   assert.ok(planted.length <= 1, `#792b NWUI-1 ${label} after a plant, with the card open, has at most one gold (${planted})`)
   if (width === 390) {
     assert.equal(planted.length, 1, `#792b NWUI-1 ${label} after a plant has exactly one gold (${planted})`)
-    assert.ok(planted[0].includes('defend-go'), `#792b NWUI-1 ${label} the one gold after a plant is Begin (${planted})`)
+    assert.ok(planted[0].includes('defend-path-buy'), `#792b NWUI-1 ${label} the one gold after a plant is the card buy (${planted})`)
   }
   assert.equal(await page.getByRole('button', { name: /^Far, (need \d+|\d+ sparks)$/ }).count(), 1, `#792b NWUI-3 ${label} one Far button pre-Begin`)
   assert.equal(await page.getByRole('button', { name: /^Strong, (need \d+|\d+ sparks)$/ }).count(), 1, `#792b NWUI-3 ${label} one Strong button pre-Begin`)

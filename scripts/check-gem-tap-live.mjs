@@ -603,7 +603,7 @@ async function assertOneGoldCue(page, tag) {
 }
 
 function assertTapSource() {
-  assert.equal(APP_VERSION, '1.4.581')
+  assert.equal(APP_VERSION, '1.4.582')
   assert.equal(GEM_TAP_MAX_TRAVEL_PX, 6)
   assert.equal(GEM_TAP_MAX_MS, 800)
   const kept = extendStraightTap([{ r: 2, c: 1 }], { r: 2, c: 4 }, 8)
