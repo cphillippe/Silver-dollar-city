@@ -1976,6 +1976,7 @@ assert.doesNotMatch(
   )
   assert.match(actors584, /firstSeatAt === undefined\s*\?\s*\(seatPick \?\? -1\)/, '1.4.584 a covered seat is not the cam-off fallback')
   assert.match(actors584, /if \(!ground \|\| firstSeatAt !== undefined\)/, '1.4.584 the camera-on path still returns before the picker')
+  assert.match(actors584, /elementFromPoint\(at\.x, at\.y\)/, '1.4.584 the cover test samples the ring stroke')
 }
 
 // 1.4.583: Easy Night Watch type labels stay off Begin, Continue, the rail, the clear row and the HUD (#949).

@@ -6307,6 +6307,17 @@ const MAP05_RING_PINS = {
   },
 }
 
+/** Gold seat the camera-on picker used on 1.4.583 at 390. The cam-off stroke test must not move it. */
+const MAP05_CAM_ON_GOLD = '328,904'
+
+/** Camera-off gold seats. 375 and 768 were already clear on 192,224. */
+const MAP05_GOLD_SEAT = {
+  '375x667': '192,224',
+  '390x844': '328,904',
+  '412x915': '328,904',
+  '768x1024': '192,224',
+}
+
 /** Camera-on map05 at 390. The picker must not move these. */
 const MAP05_RING_CAM_ON = {
   begin: { x: 75, y: 779.6, w: 240, h: 56.4 },
@@ -6384,6 +6395,10 @@ async function checkMap05CamOffRing(browser, port, errors) {
         const range = document.createRange()
         const host = el.getBoundingClientRect()
         let rendered = ''
+        let left = Infinity
+        let top = Infinity
+        let right = -Infinity
+        let bottom = -Infinity
         for (const child of directs) {
           const raw = child.textContent
           for (let i = 0; i < raw.length; i += 1) {
@@ -6399,6 +6414,10 @@ async function checkMap05CamOffRing(browser, port, errors) {
               if (bit.width <= 0 || bit.height <= 0) continue
               if (bit.right > host.left - 1 && bit.left < host.right + 1 && bit.bottom > host.top - 1 && bit.top < host.bottom + 1) {
                 painted = true
+                left = Math.min(left, bit.left)
+                top = Math.min(top, bit.top)
+                right = Math.max(right, bit.right)
+                bottom = Math.max(bottom, bit.bottom)
                 break
               }
             }
@@ -6414,7 +6433,79 @@ async function checkMap05CamOffRing(browser, port, errors) {
           clientH: el.clientHeight,
           rendered: rendered.replace(/\s+/g, ' ').trim(),
           source,
+          box: left === Infinity ? null : { x: round(left), y: round(top), w: round(right - left), h: round(bottom - top) },
         }
+      }
+      const cssText = (value) => {
+        if (!value || value === 'none' || value === 'normal') return ''
+        const first = /^"((?:\\.|[^"\\])*)"/.exec(value)
+        return first ? first[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\') : ''
+      }
+      const paintBox = (text, style, host) => {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return null
+        const size = Number.isFinite(parseFloat(style.lineHeight)) ? `${style.fontSize}/${style.lineHeight}` : style.fontSize
+        ctx.font = `${style.fontStyle} ${style.fontWeight} ${size} ${style.fontFamily}`
+        const width = ctx.measureText(text).width
+        const line = parseFloat(style.lineHeight)
+        const height = Number.isFinite(line) && line > 0 ? line : parseFloat(style.fontSize) * 1.2
+        const align = style.textAlign || 'center'
+        let x = host.x
+        if (align === 'center') x = host.x + (host.width - width) / 2
+        else if (align === 'right' || align === 'end') x = host.right - width
+        const y = host.y + (host.height - height) / 2
+        return { x: round(x), y: round(y), w: round(width), h: round(height) }
+      }
+      const pseudoParts = (el) => {
+        const host = el.getBoundingClientRect()
+        const hostStyle = getComputedStyle(el)
+        const parts = ['::before', '::after']
+          .map((pseudo) => {
+            const style = getComputedStyle(el, pseudo)
+            const source = cssText(style.content).replace(/\s+/g, ' ').trim()
+            if (!source) return null
+            const painted =
+              style.display !== 'none' &&
+              style.visibility !== 'hidden' &&
+              Number(style.opacity) > 0 &&
+              parseFloat(style.fontSize) > 0 &&
+              host.width > 1 &&
+              host.height > 1
+            const measured = paintBox(source, style, host)
+            const cssW = parseFloat(style.width)
+            const cssH = parseFloat(style.height)
+            const w = Number.isFinite(cssW) && cssW > 0 ? cssW : measured?.w || 0
+            const h = Number.isFinite(cssH) && cssH > 0 ? cssH : measured?.h || 0
+            return { pseudo, style, source, painted, w, h, hostStyle, host }
+          })
+          .filter(Boolean)
+        const column = hostStyle.display === 'flex' && hostStyle.flexDirection === 'column'
+        const total = parts.reduce((sum, part) => sum + part.h, 0)
+        let y = host.y + Math.max(0, (host.height - total) / 2)
+        return parts.map((part) => {
+          const x = host.x + Math.max(0, (host.width - part.w) / 2)
+          const box = part.painted ? { x: round(x), y: round(column ? y : host.y + (host.height - part.h) / 2), w: round(part.w), h: round(part.h) } : null
+          if (column) y += part.h
+          return {
+            name: `${selectorOf(el)}${part.pseudo}`,
+            overflow: hostStyle.overflow,
+            scroll: el.scrollWidth,
+            client: el.clientWidth,
+            scrollH: el.scrollHeight,
+            clientH: el.clientHeight,
+            rendered: part.painted ? part.source : '',
+            source: part.source,
+            box,
+          }
+        })
+      }
+      const linesFor = (el) => {
+        if (!el) return []
+        const pseudos = pseudoParts(el)
+        if (pseudos.length) return pseudos
+        const text = lineOf(el)
+        return text ? [text] : []
       }
       const read = () => {
         const root = document.querySelector('.defend-page')
@@ -6480,16 +6571,84 @@ async function checkMap05CamOffRing(browser, port, errors) {
           }
         }
         const hitOf = (el) => {
-          if (!el) return { hit: 'missing', on: 0 }
+          if (!el) return { hit: 'missing', on: 0, own: 0 }
           const rect = el.getBoundingClientRect()
           const cx = rect.x + rect.width / 2
           const cy = rect.y + rect.height / 2
           const on = cx > 1 && cy > 1 && cx < innerWidth - 1 && cy < innerHeight - 1 ? 1 : 0
           const node = on ? document.elementFromPoint(cx, cy) : null
-          return { hit: node ? selectorOf(node) : 'offscreen', on }
+          const own = node === el || Boolean(node && el.contains(node)) ? 1 : 0
+          return { hit: node ? selectorOf(node) : 'offscreen', on, own }
+        }
+        const plateOf = (clientX, clientY) => {
+          const svg = document.querySelector('.defend-board')
+          const ctm = svg?.getScreenCTM()
+          if (!svg || !ctm) return null
+          const point = svg.createSVGPoint()
+          point.x = clientX
+          point.y = clientY
+          const local = point.matrixTransform(ctm.inverse())
+          return { x: local.x, y: local.y }
+        }
+        const nearestSeat = (clientX, clientY) => {
+          const at = plateOf(clientX, clientY)
+          if (!at) return ''
+          let best = ''
+          let bestD = 46
+          for (const ring of document.querySelectorAll('.defend-plant-ground circle.is-live')) {
+            const away = Math.hypot(at.x - Number(ring.getAttribute('cx')), at.y - Number(ring.getAttribute('cy')))
+            if (away > bestD) continue
+            bestD = away
+            best = `${ring.getAttribute('cx')},${ring.getAttribute('cy')}`
+          }
+          return best
         }
         const seats = [...document.querySelectorAll('.defend-plant-ground circle.is-live')]
         const candle = document.querySelector('button.defend-candle-lamp')
+        const railButtons = [...document.querySelectorAll('.nw-rail button.defend-ability')].filter((el) => {
+          const rect = el.getBoundingClientRect()
+          const style = getComputedStyle(el)
+          return rect.width > 1 && rect.height > 1 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0
+        })
+        const filed = [...document.querySelectorAll('.defend-plant-ground circle')].find(
+          (node) => node.getAttribute('cx') === '192' && node.getAttribute('cy') === '224',
+        )
+        const filedBox = filed ? filed.getBoundingClientRect() : null
+        const candleBox = candle ? candle.getBoundingClientRect() : null
+        const pad = 4
+        const padOverlap = Boolean(
+          filedBox &&
+            candleBox &&
+            filedBox.left - pad < candleBox.right &&
+            filedBox.right + pad > candleBox.left &&
+            filedBox.top - pad < candleBox.bottom &&
+            filedBox.bottom + pad > candleBox.top,
+        )
+        let strokeCovered = 0
+        let strokeSelector = ''
+        if (filed?.ownerSVGElement?.getScreenCTM()) {
+          const svg = filed.ownerSVGElement
+          const ctm = svg.getScreenCTM()
+          const point = svg.createSVGPoint()
+          const radius = Number(filed.getAttribute('r'))
+          const strokeCounts = {}
+          for (let i = 0; i < 48; i += 1) {
+            const angle = (i / 48) * Math.PI * 2
+            point.x = 192 + Math.cos(angle) * radius
+            point.y = 224 + Math.sin(angle) * radius
+            const at = point.matrixTransform(ctm)
+            if (at.x < 0 || at.y < 0 || at.x > innerWidth || at.y > innerHeight) continue
+            const top = document.elementFromPoint(at.x, at.y)
+            const cover = top?.closest?.('button, .nw-rail, .nw-docks, .defend-hud, .defend-go')
+            if (cover && !cover.closest('.defend-board')) {
+              strokeCovered += 1
+              const name = selectorOf(cover)
+              strokeCounts[name] = (strokeCounts[name] || 0) + 1
+            }
+          }
+          const ranked = Object.entries(strokeCounts).sort((a, b) => b[1] - a[1])
+          strokeSelector = ranked[0]?.[0] || ''
+        }
         const cueNames = ringNodes.length ? [...names, 'circle.is-first-seat'] : names
         return {
           names: cueNames,
@@ -6511,11 +6670,27 @@ async function checkMap05CamOffRing(browser, port, errors) {
           hits: {
             begin: hitOf(go),
             candle: hitOf(candle),
-            rail: hitOf(document.querySelector('.nw-rail')),
-            seats: seats.map(hitOf),
+            railCount: document.querySelectorAll('.nw-rail').length,
+            railButtons: railButtons.map((el) => {
+              const hit = hitOf(el)
+              return { type: el.getAttribute('data-type') || '', hit: hit.hit, own: hit.own, on: hit.on }
+            }),
+            seats: seats.map((el) => {
+              const hit = hitOf(el)
+              const rect = el.getBoundingClientRect()
+              const mapped = hit.on ? nearestSeat(rect.x + rect.width / 2, rect.y + rect.height / 2) : ''
+              return { hit: hit.hit, on: hit.on, at: `${el.getAttribute('cx')},${el.getAttribute('cy')}`, mapped }
+            }),
           },
-          lines: { begin: lineOf(go), candle: lineOf(candle) },
+          lines: [...linesFor(go), ...linesFor(candle)],
           ringLine: lineOf(first),
+          cover: {
+            ring: filedBox ? box(filed) : null,
+            candle: candleBox ? box(candle) : null,
+            padOverlap: padOverlap ? 1 : 0,
+            strokeCovered,
+            strokeSelector,
+          },
         }
       }
       const frames = []
@@ -6588,15 +6763,21 @@ async function checkMap05CamOffRing(browser, port, errors) {
         coverSelector = covered[0][0]
         coverCount = Math.max(coverCount, covered[0][1])
       }
-      for (const row of [frame.ringLine, frame.lines.begin, frame.lines.candle]) {
+      for (const row of [frame.ringLine, ...frame.lines]) {
         if (!row) continue
         if (row.scroll > row.client + 1 || row.scrollH > row.clientH + 1) clipped += 1
       }
-      const own = (hit, token) => hit.on === 1 && hit.hit.includes(token)
-      const seatHit = frame.hits.seats.every((hit) => hit.on === 0 || (hit.hit.includes('defend-board') && !hit.hit.includes('defend-go') && !hit.hit.includes('defend-candle-lamp')))
-      if (!own(frame.hits.begin, 'defend-go') || !own(frame.hits.candle, 'defend-candle-lamp') || !seatHit) {
+      const own = (hit, token) => hit.on === 1 && hit.own === 1 && hit.hit.includes(token)
+      const railMiss = frame.hits.railButtons.filter((hit) => hit.on !== 1 || hit.own !== 1)
+      const seatMiss = frame.hits.seats.filter(
+        (hit) => hit.on === 1 && (!hit.hit.includes('defend-board') || hit.mapped !== hit.at),
+      )
+      if (!own(frame.hits.begin, 'defend-go') || !own(frame.hits.candle, 'defend-candle-lamp') || railMiss.length || seatMiss.length) {
+        const railText = frame.hits.railButtons.length
+          ? frame.hits.railButtons.map((hit) => `${hit.type}:${hit.hit}`).join(',')
+          : `absent buttons=0 rails=${frame.hits.railCount}`
         fail(
-          `checkMap05CamOffRing hit ${label} begin=${frame.hits.begin.hit} candle=${frame.hits.candle.hit} rail=${frame.hits.rail.hit} seats=${frame.hits.seats.map((hit) => hit.hit).join(',')}`,
+          `checkMap05CamOffRing hit ${label} begin=${frame.hits.begin.hit} candle=${frame.hits.candle.hit} rail=${railText} seats=${frame.hits.seats.map((hit) => (hit.on ? `${hit.hit}→${hit.mapped}` : 'offscreen')).join(',')}`,
         )
       }
     }
@@ -6605,17 +6786,37 @@ async function checkMap05CamOffRing(browser, port, errors) {
     console.log(deltaLine)
     if (worst.begin > 0.5 || worst.candle > 0.5 || worst.rail > 0.5 || worst.seat > 0.5) fail(deltaLine)
     const logged = new Set()
-    for (const row of [last.lines.begin, last.lines.candle]) {
+    if (!last.lines.length) fail(`checkMap05CamOffRing line ${label} rendered="" source=""`)
+    for (const row of last.lines) {
       if (!row || logged.has(row.name)) continue
       logged.add(row.name)
+      const boxText = row.box ? `${row.box.x},${row.box.y},${row.box.w},${row.box.h}` : 'none'
       console.log(
-        `checkMap05CamOffRing line ${label} ${row.name} overflow=${row.overflow} scroll=${row.scroll} client=${row.client} scrollH=${row.scrollH} clientH=${row.clientH} rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(row.source)}`,
+        `checkMap05CamOffRing line ${label} ${row.name} overflow=${row.overflow} scroll=${row.scroll} client=${row.client} scrollH=${row.scrollH} clientH=${row.clientH} rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(row.source)} box=${boxText}`,
       )
+      if (!row.rendered || row.rendered !== row.source) {
+        fail(
+          `checkMap05CamOffRing line ${label} ${row.name} rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(row.source)}`,
+        )
+      }
     }
+    const cover = last.cover
+    const ringText = cover.ring ? `${cover.ring.x},${cover.ring.y},${cover.ring.w},${cover.ring.h}` : 'none'
+    const candleText = cover.candle ? `${cover.candle.x},${cover.candle.y},${cover.candle.w},${cover.candle.h}` : 'none'
+    console.log(
+      `checkMap05CamOffRing cover ${label} filed=192,224 ring=${ringText} candle=${candleText} padOverlap=${cover.padOverlap} strokeCovered=${cover.strokeCovered} selector=${cover.strokeSelector || 'none'}`,
+    )
     if (clipped !== 0) fail(`checkMap05CamOffRing clip ${label} clipped=${clipped}`)
     else console.log(`checkMap05CamOffRing clip ${label} clipped=0`)
-    const hitLine = `checkMap05CamOffRing hit ${label} begin=${last.hits.begin.hit} candle=${last.hits.candle.hit} rail=${last.hits.rail.hit} seats=${last.hits.seats.map((hit) => hit.hit).join(',')}`
+    const railText = last.hits.railButtons.length
+      ? last.hits.railButtons.map((hit) => `${hit.type}:button.defend-ability`).join(',')
+      : `absent buttons=0 rails=${last.hits.railCount}`
+    const seatText = last.hits.seats.map((hit) => (hit.on ? `board→${hit.mapped}` : 'offscreen')).join(',')
+    const hitLine = `checkMap05CamOffRing hit ${label} begin=${last.hits.begin.hit} candle=${last.hits.candle.hit} rail=${railText} seats=${seatText}`
     console.log(hitLine)
+    const wantSeat = camOn ? MAP05_CAM_ON_GOLD : MAP05_GOLD_SEAT[size]
+    if (wantSeat && last.seat !== wantSeat) fail(`checkMap05CamOffRing seat ${label} gold=${last.seat} want=${wantSeat}`)
+    if (camOn) console.log(`checkMap05CamOffRing pin ${label} liveSeat=${MAP05_CAM_ON_GOLD}`)
     const nameLabel = nameSet.join(' | ') || '(none)'
     const badGold = frames.filter((frame) => frame.gold !== 1 || frame.beginGold !== 0)
     const covered = worstShare < 1 || coverSelector
