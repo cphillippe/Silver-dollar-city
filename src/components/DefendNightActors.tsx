@@ -716,7 +716,13 @@ export function DefendNightActorsSvg({
                             height={44}
                           />
                         ) : null}
-                        {candle && candleRowSize(id, candlePlants) >= 2 ? null : (
+                        {candle && candleRowSize(id, candlePlants) >= 2 ? null : easy ? (
+                          <g data-label-hold="yes">
+                            <text className="defend-type-label" x={0} y={candle || bell || incense || cross ? -58 : 30} textAnchor="start">
+                              {typeName}
+                            </text>
+                          </g>
+                        ) : (
                           <text className="defend-type-label" y={candle || bell || incense || cross ? -58 : 30} textAnchor="middle">
                             {typeName}
                           </text>
