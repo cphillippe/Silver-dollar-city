@@ -1250,7 +1250,13 @@ async function cuePoint(page) {
 
 async function clearToBoost(page, label) {
   const go = page.locator('.defend-go')
-  if (await go.count()) await go.click()
+  if (await go.isVisible().catch(() => false)) {
+    try {
+      await go.click({ timeout: 4000 })
+    } catch {
+      await go.click({ force: true })
+    }
+  }
   const started = Date.now()
   while (Date.now() - started < 120_000) {
     if (await page.locator('.defend-page.is-boost').count()) return
@@ -1258,6 +1264,61 @@ async function clearToBoost(page, label) {
     const cue = await cuePoint(page)
     if (cue) await page.mouse.click(cue.x, cue.y)
     await page.waitForTimeout(60)
+  }
+  assert.fail(`${label} the round did not clear`)
+}
+
+/** Drag on open map, not on the card or the rail, so the camera follows the finger. */
+async function panOnBoard(page, dx, dy) {
+  const at = await page.evaluate(() => {
+    const cam = document.querySelector('.nw-cam')?.getBoundingClientRect()
+    if (!cam) return null
+    for (let y = cam.bottom - 80; y > cam.top + 70; y -= 28) {
+      for (let x = cam.left + 78; x < cam.right - 78; x += 36) {
+        const node = document.elementFromPoint(x, y)
+        if (node && node.closest('.nw-cam') && !node.closest('button, .defend-tower-card, .nw-rail, .nw-docks, .nw-hud, .defend-go, .defend-continue')) {
+          return { x, y }
+        }
+      }
+    }
+    return null
+  })
+  assert.ok(at, 'a map point takes the camera drag')
+  await page.mouse.move(at.x, at.y)
+  await page.mouse.down()
+  await page.mouse.move(at.x + dx, at.y + dy, { steps: 14 })
+  await page.mouse.up()
+  await page.waitForTimeout(250)
+}
+
+/** Begin, then pause each cue so a boss round can be tapped out without a leak. */
+async function clearTypeLabelRound(page, label) {
+  const go = page.locator('.defend-go')
+  if (await go.isVisible().catch(() => false)) {
+    try {
+      await go.click({ timeout: 4000 })
+    } catch {
+      await go.click({ force: true })
+    }
+  }
+  await page.locator('.defend-page.is-easy-tap, .defend-page.is-boost').waitFor({ timeout: 10_000 })
+  const started = Date.now()
+  while (Date.now() - started < 90_000) {
+    if (await page.locator('.defend-page.is-boost').count()) return
+    if (await page.locator('.defend-page.is-lost').count()) assert.fail(`${label} the round was lost`)
+    const mode = await page.evaluate(() => {
+      const button = [...document.querySelectorAll('button')].find((node) => /^(Pause|Resume) walkers$/.test((node.textContent || '').trim()))
+      return {
+        pause: button ? (button.textContent || '').trim() : '',
+        cue: document.querySelectorAll('.defend-raider.is-easy-cue').length,
+        alive: document.querySelectorAll('.defend-raider:not(.is-turned)').length,
+      }
+    })
+    if (mode.cue > 0 && mode.pause === 'Pause walkers') await page.getByRole('button', { name: 'Pause walkers' }).click()
+    else if (mode.alive === 0 && mode.pause === 'Resume walkers') await page.getByRole('button', { name: 'Resume walkers' }).click()
+    const tap = page.locator('.defend-walker-tap.is-cue')
+    if (await tap.count()) await tap.first().click({ force: true, timeout: 1000 }).catch(() => {})
+    await page.waitForTimeout(30)
   }
   assert.fail(`${label} the round did not clear`)
 }
@@ -5751,6 +5812,447 @@ async function checkNwDockGold(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #949. Easy, camera on. Science sits on 464,768 and Love on 464,360. */
+const TYPE_LABEL_SEARCH = '?playtest=1&nwSeed=2&nwMap=a2&nwRound=18&nwLamps=0&nwCam=1'
+const TYPE_LABEL_SIZES = [
+  [375, 667],
+  [390, 844],
+  [412, 915],
+  [768, 1024],
+]
+const TYPE_LABEL_SEATS = [
+  { type: 'love', cx: 464, cy: 360 },
+  { type: 'logic', cx: 600, cy: 88 },
+  { type: 'reason', cx: 464, cy: 224 },
+  { type: 'science', cx: 464, cy: 768 },
+]
+/** Tap rects measured on this Easy night. Begin at 390 matches the 1.4.582 dock pin. */
+const TYPE_LABEL_PINS = {
+  '375x667': {
+    planted: { begin: { x: 67.5, y: 602.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: {} },
+    card: { begin: { x: 67.5, y: 602.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 216, y: 397.3, w: 32, h: 32 }, 'pip-far': { x: 88, y: 431.7, w: 18, h: 16 }, 'buy-far': { x: 168, y: 406.9, w: 46, h: 44 }, 'pip-strong': { x: 88, y: 476.7, w: 18, h: 16 }, 'buy-strong': { x: 168, y: 451.9, w: 46, h: 44 } } },
+    r5: { begin: null, continue: { x: 125, y: 603, w: 125, h: 56 }, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 321.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 377.9, w: 52, h: 53.1 } }, card: {} },
+    r1: { begin: null, continue: { x: 125, y: 603, w: 125, h: 56 }, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 321.9, w: 52, h: 53.1 } }, card: {} },
+  },
+  '390x844': {
+    planted: { begin: { x: 75, y: 779.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: {} },
+    card: { begin: { x: 75, y: 779.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 233.3, y: 273, w: 32, h: 32 }, 'pip-far': { x: 105.3, y: 307.4, w: 18, h: 16 }, 'buy-far': { x: 185.3, y: 282.6, w: 46, h: 44 }, 'pip-strong': { x: 105.3, y: 352.4, w: 18, h: 16 }, 'buy-strong': { x: 185.3, y: 327.6, w: 46, h: 44 } } },
+    r5: { begin: null, continue: { x: 132.5, y: 780, w: 125, h: 56 }, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 498.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 554.9, w: 52, h: 53.1 } }, card: {} },
+    r1: { begin: null, continue: { x: 132.5, y: 780, w: 125, h: 56 }, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 498.9, w: 52, h: 53.1 } }, card: {} },
+  },
+  '412x915': {
+    planted: { begin: { x: 86, y: 850.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 353, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 353, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 353, y: 208, w: 48, h: 48 }, 'rail-science': { x: 353, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: {} },
+    card: { begin: { x: 86, y: 850.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 353, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 353, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 353, y: 208, w: 48, h: 48 }, 'rail-science': { x: 353, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 226, y: 350.2, w: 32, h: 32 }, 'pip-far': { x: 98, y: 384.5, w: 18, h: 16 }, 'buy-far': { x: 178, y: 359.8, w: 46, h: 44 }, 'pip-strong': { x: 98, y: 429.5, w: 18, h: 16 }, 'buy-strong': { x: 178, y: 404.8, w: 46, h: 44 } } },
+    r5: { begin: null, continue: { x: 143.5, y: 851, w: 125, h: 56 }, rail: { 'rail-love': { x: 353, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 353, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 353, y: 208, w: 48, h: 48 }, 'rail-science': { x: 353, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 569.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 625.9, w: 52, h: 53.1 } }, card: {} },
+    r1: { begin: null, continue: { x: 143.5, y: 851, w: 125, h: 56 }, rail: { 'rail-love': { x: 353, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 353, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 353, y: 208, w: 48, h: 48 }, 'rail-science': { x: 353, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 569.9, w: 52, h: 53.1 } }, card: {} },
+  },
+  '768x1024': {
+    planted: { begin: { x: 77.8, y: 709, w: 162, h: 56 }, continue: null, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-candle': { x: 77.8, y: 770, w: 162, h: 52 }, 'dock-bell': { x: 77.8, y: 826, w: 162, h: 52 }, 'dock-incense': { x: 77.8, y: 882, w: 162, h: 52 }, 'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 } }, card: {} },
+    card: { begin: { x: 77.8, y: 709.5, w: 162, h: 56 }, continue: null, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-candle': { x: 77.8, y: 770, w: 162, h: 52 }, 'dock-bell': { x: 77.8, y: 826, w: 162, h: 52 }, 'dock-incense': { x: 77.8, y: 882, w: 162, h: 52 }, 'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 } }, card: { pull: { x: 373.5, y: 305, w: 32, h: 32 }, 'pip-far': { x: 247.5, y: 354.8, w: 20, h: 20 }, 'buy-far': { x: 247.5, y: 380.8, w: 148, h: 52 }, 'pip-strong': { x: 247.5, y: 466.8, w: 20, h: 20 }, 'buy-strong': { x: 247.5, y: 492.8, w: 148, h: 52 } } },
+    r5: { begin: null, continue: { x: 86.8, y: 937, w: 70, h: 40 }, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-new': { x: 160.8, y: 937, w: 95.5, h: 40 }, 'dock-candle': { x: 260.3, y: 937, w: 79.5, h: 40 } }, card: {} },
+    r1: { begin: null, continue: { x: 86.8, y: 937, w: 70, h: 40 }, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-new': { x: 160.8, y: 937, w: 95.5, h: 40 } }, card: {} },
+  },
+}
+
+function typeLabelRound(n) {
+  return Math.round(n * 10) / 10
+}
+
+function typeLabelBoxDelta(now, was) {
+  if (!now || !was) return null
+  let worst = 0
+  for (const key of ['x', 'y', 'w', 'h']) worst = Math.max(worst, Math.abs(typeLabelRound(now[key] - was[key])))
+  return worst
+}
+
+function typeLabelSearch(round) {
+  return TYPE_LABEL_SEARCH.replace('nwRound=18', `nwRound=${round}`)
+}
+
+async function sampleTypeLabelChrome(page) {
+  return page.evaluate(async () => {
+    const round = (n) => Math.round(n * 10) / 10
+    const shown = (el) => {
+      if (!el) return false
+      const style = getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+      const box = el.getBoundingClientRect()
+      return box.width > 1 && box.height > 1
+    }
+    const boxOf = (el) => {
+      const rect = el.getBoundingClientRect()
+      return {
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        x: round(rect.x),
+        y: round(rect.y),
+        w: round(rect.width),
+        h: round(rect.height),
+      }
+    }
+    const paintOf = (el) => {
+      const rect = el.getBoundingClientRect()
+      let left = rect.left
+      let right = rect.right
+      let top = rect.top
+      let bottom = rect.bottom
+      const range = document.createRange()
+      for (const child of el.childNodes) {
+        if (child.nodeType !== 3 || !(child.textContent || '').trim()) continue
+        range.selectNodeContents(child)
+        for (const bit of range.getClientRects()) {
+          if (bit.width <= 0 || bit.height <= 0) continue
+          left = Math.min(left, bit.left)
+          right = Math.max(right, bit.right)
+          top = Math.min(top, bit.top)
+          bottom = Math.max(bottom, bit.bottom)
+        }
+      }
+      const extraW = Math.max(0, el.scrollWidth - Math.max(el.clientWidth, right - left))
+      const extraH = Math.max(0, el.scrollHeight - Math.max(el.clientHeight, bottom - top))
+      left -= extraW / 2
+      right += extraW / 2
+      top -= extraH / 2
+      bottom += extraH / 2
+      return { left, top, right, bottom, x: round(left), y: round(top), w: round(right - left), h: round(bottom - top) }
+    }
+    const area = (a, b) => {
+      const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left))
+      const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+      return w * h
+    }
+    const union = (sel) => [...document.querySelectorAll(sel)].filter(shown).map(boxOf)
+    const nameOf = (el) => `${el.tagName}.${el.getAttribute('class') || ''}`.replace(/\s+/g, ' ').trim().slice(0, 80)
+    const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+    const lineOf = (el) => {
+      if (!shown(el)) return null
+      const directs = [...el.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+      const style = getComputedStyle(el)
+      const rect = el.getBoundingClientRect()
+      const source = norm(directs.length ? directs.map((child) => child.textContent).join('') : el.textContent)
+      const range = document.createRange()
+      let rendered = ''
+      const host = { left: rect.left - 1, right: rect.right + 1, top: rect.top - 1, bottom: rect.bottom + 1 }
+      const nodes = directs.length ? directs : []
+      for (const child of nodes) {
+        const raw = child.textContent || ''
+        for (let i = 0; i < raw.length; i += 1) {
+          const ch = raw[i]
+          if (!ch.trim()) {
+            rendered += ch
+            continue
+          }
+          range.setStart(child, i)
+          range.setEnd(child, i + 1)
+          let painted = false
+          for (const bit of range.getClientRects()) {
+            if (bit.width <= 0 || bit.height <= 0) continue
+            if (bit.right > host.left && bit.left < host.right && bit.bottom > host.top && bit.top < host.bottom) {
+              painted = true
+              break
+            }
+          }
+          if (painted) rendered += ch
+        }
+      }
+      if (!nodes.length) rendered = source
+      return {
+        name: nameOf(el),
+        source,
+        rendered: norm(rendered),
+        overflow: style.overflow,
+        overflowX: style.overflowX,
+        overflowY: style.overflowY,
+        scroll: el.scrollWidth,
+        client: el.clientWidth,
+        scrollH: el.scrollHeight,
+        clientH: el.clientHeight,
+      }
+    }
+    const tapKey = (el) => {
+      if (el.classList.contains('defend-go')) return 'begin'
+      if (el.classList.contains('defend-continue')) return 'continue'
+      if (el.classList.contains('defend-candle-lamp')) return 'dock-candle'
+      if (el.classList.contains('defend-bell-lamp')) return 'dock-bell'
+      if (el.classList.contains('defend-incense-lamp')) return 'dock-incense'
+      if (el.classList.contains('defend-cross-lamp')) return 'dock-cross'
+      if (el.classList.contains('defend-new-lamp')) return 'dock-new'
+      const buy = el.getAttribute('data-path-buy')
+      if (buy) return `buy-${buy}`
+      const pip = el.getAttribute('data-path-pip')
+      if (pip) return `pip-${pip}`
+      if (el.classList.contains('defend-tower-pull')) return 'pull'
+      if (el.classList.contains('defend-bright-buy')) return 'bright'
+      if (el.classList.contains('defend-lesson-open')) return 'lesson'
+      return ''
+    }
+    const read = () => {
+      const labels = [...document.querySelectorAll('text.defend-type-label')].filter(shown).map((el) => ({
+        text: norm(el.textContent),
+        box: paintOf(el),
+      }))
+      const regions = {
+        begin: union('.defend-go'),
+        continue: union('.defend-continue'),
+        rail: union('.nw-rail'),
+        clearRow: union('.defend-clear-row button:not(.defend-continue), button.defend-new-lamp'),
+        hud: union('.nw-hud, .nw-wave-overlay .defend-wave'),
+      }
+      const sum = (key) => Math.round(labels.reduce((total, label) => total + regions[key].reduce((hit, box) => hit + area(label.box, box), 0), 0))
+      const rects = {}
+      const hits = []
+      const take = (key, el) => {
+        if (!key || !el || !shown(el) || rects[key]) return
+        const rect = boxOf(el)
+        rects[key] = { x: rect.x, y: rect.y, w: rect.w, h: rect.h }
+        const cx = rect.left + (rect.right - rect.left) / 2
+        const cy = rect.top + (rect.bottom - rect.top) / 2
+        if (cx <= 1 || cy <= 1 || cx >= innerWidth - 1 || cy >= innerHeight - 1) {
+          hits.push(`${key} offscreen`)
+          return
+        }
+        const node = document.elementFromPoint(cx, cy)
+        const hit = node === el || Boolean(node && el.contains(node))
+        if (!hit) hits.push(`${key} -> ${node ? nameOf(node) : 'none'}`)
+      }
+      for (const el of document.querySelectorAll('.nw-rail .defend-ability')) take(`rail-${el.getAttribute('data-type') || 'x'}`, el)
+      for (const el of document.querySelectorAll('button, a.btn, [role="button"]')) {
+        if (!(el instanceof HTMLElement)) continue
+        if (el.closest('.defend-nw-debug, [hidden]')) continue
+        take(tapKey(el), el)
+      }
+      const lines = [...document.querySelectorAll('text.defend-type-label')].map(lineOf).filter(Boolean)
+      const pan = document.querySelector('.nw-pan')?.style?.transform || ''
+      return {
+        begin: sum('begin'),
+        continue: sum('continue'),
+        rail: sum('rail'),
+        clearRow: sum('clearRow'),
+        hud: sum('hud'),
+        visibleLabels: labels.length,
+        labels,
+        rects,
+        hits,
+        lines,
+        pan,
+      }
+    }
+    const frames = []
+    await new Promise((resolve) => {
+      const tick = () => {
+        frames.push(read())
+        if (frames.length < 8) requestAnimationFrame(tick)
+        else resolve()
+      }
+      requestAnimationFrame(tick)
+    })
+    return frames
+  })
+}
+
+async function plantTypeLabelSeats(page, label) {
+  const rings = await page.evaluate(() =>
+    [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({
+      cx: Number(ring.getAttribute('cx')),
+      cy: Number(ring.getAttribute('cy')),
+    })),
+  )
+  for (const seat of TYPE_LABEL_SEATS) {
+    assert.ok(
+      rings.some((ring) => ring.cx === seat.cx && ring.cy === seat.cy),
+      `${label} seat ${seat.type}@${seat.cx},${seat.cy} is live ${JSON.stringify(rings)}`,
+    )
+    await glyphPlantAt(page, seat.type, seat, label)
+  }
+  assert.equal(await page.locator('.defend-pad').count(), 4, `${label} four lamps are planted`)
+  if (process.env.NW_TYPE_LABEL_RECENTER === '1') {
+    const recenter = page.getByRole('button', { name: 'Recenter map' })
+    if (await recenter.count()) {
+      await recenter.click()
+      await page.waitForTimeout(250)
+    }
+  }
+}
+
+function typeLabelSplit(rects) {
+  const docks = {}
+  const card = {}
+  const rail = {}
+  let begin = null
+  let cont = null
+  for (const [key, rect] of Object.entries(rects || {})) {
+    if (key === 'begin') begin = rect
+    else if (key === 'continue') cont = rect
+    else if (key.startsWith('rail-')) rail[key] = rect
+    else if (key.startsWith('dock-')) docks[key] = rect
+    else card[key] = rect
+  }
+  return { begin, continue: cont, rail, docks, card }
+}
+
+/**
+ * #949. Easy type labels stay off Begin, Continue, the rail, the clear row and the HUD.
+ * Phone and tablet. Reuses the Night Watch plant helpers and clearToBoost.
+ */
+async function checkNwTypeLabelChrome(browser, port, errors) {
+  const only = process.env.NW_TYPE_LABEL_SIZE
+  const wantStates = new Set((process.env.NW_TYPE_LABEL_STATE || 'planted,card,r5,r1').split(','))
+  const problems = []
+  const seenProblems = new Set()
+  const fail = (line) => {
+    if (seenProblems.has(line)) return
+    seenProblems.add(line)
+    problems.push(line)
+  }
+  for (const [width, height] of TYPE_LABEL_SIZES) {
+    const size = `${width}x${height}`
+    if (only && only !== size) continue
+    const seen = {}
+    const run = async (round, states) => {
+      const { context, page } = await openMap(browser, port, width, height, 'a2', {
+        motion: true,
+        search: typeLabelSearch(round),
+      })
+      page.on('pageerror', (error) => errors.push(`type-label ${size} r${round} ${error}`))
+      page.on('console', (msg) => {
+        if (msg.type() !== 'error') return
+        const text = msg.text()
+        if (text.includes('Encountered two children with the same key')) return
+        errors.push(`type-label ${size} r${round} ${text}`)
+      })
+      if (width <= 480) await assertGlyphCamera(page, `${size} r${round}`)
+      await page.evaluate(() => document.fonts?.ready)
+      await plantTypeLabelSeats(page, `${size} r${round}`)
+      const sample = async (state) => {
+        if (!wantStates.has(state)) return
+        await page.waitForTimeout(80)
+        const frames = await sampleTypeLabelChrome(page)
+        assert.ok(frames.length >= 8, `${size} ${state} sampled ${frames.length} frames`)
+        seen[state] = frames[0]?.rects || {}
+        console.log(`checkNwTypeLabelChrome box ${size} ${state} pan=${JSON.stringify(frames[0]?.pan || '')} ${JSON.stringify(frames[0]?.labels || [])}`)
+        let clipped = 0
+        const logged = new Set()
+        for (const frame of frames) {
+          const line = `checkNwTypeLabelChrome ov ${size} ${state} begin=${frame.begin} continue=${frame.continue} rail=${frame.rail} clearRow=${frame.clearRow} hud=${frame.hud} visibleLabels=${frame.visibleLabels}`
+          console.log(line)
+          if (frame.begin !== 0 || frame.continue !== 0 || frame.rail !== 0 || frame.clearRow !== 0 || frame.hud !== 0) fail(line)
+          if (frame.visibleLabels < 1) fail(`checkNwTypeLabelChrome ov ${size} ${state} visibleLabels=0`)
+          for (const row of frame.lines) {
+            const note = `${row.name}|${row.overflow}|${row.overflowX}|${row.overflowY}|${row.scroll}|${row.client}|${row.scrollH}|${row.clientH}|${row.rendered}|${row.source}`
+            if (!logged.has(note)) {
+              logged.add(note)
+              console.log(
+                `checkNwTypeLabelChrome line ${size} ${state} ${row.name} overflow=${row.overflow} overflowX=${row.overflowX} overflowY=${row.overflowY} scroll=${row.scroll} client=${row.client} scrollH=${row.scrollH} clientH=${row.clientH} rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(row.source)}`,
+              )
+            }
+            if (row.scroll > row.client + 1 || row.scrollH > row.clientH + 1) clipped += 1
+          }
+          const wantHit = []
+          if (frame.rects.begin) wantHit.push('begin')
+          if (frame.rects.continue) wantHit.push('continue')
+          for (const miss of frame.hits) {
+            const key = miss.split(' ')[0]
+            if (wantHit.includes(key)) fail(`checkNwTypeLabelChrome hit ${size} ${state} ${miss}`)
+          }
+        }
+        if (clipped !== 0) fail(`checkNwTypeLabelChrome clip ${size} ${state} clipped=${clipped}`)
+        else if (logged.size) console.log(`checkNwTypeLabelChrome clip ${size} ${state} clipped=0`)
+        const centre = (key) => {
+          if (!frames.some((frame) => frame.rects?.[key])) return 'absent'
+          return frames.some((frame) => frame.hits.some((miss) => miss.startsWith(`${key} `))) ? 'miss' : 'button'
+        }
+        const beginHit = centre('begin')
+        const continueHit = centre('continue')
+        console.log(`checkNwTypeLabelChrome hit ${size} ${state} begin=${beginHit} continue=${continueHit}`)
+        if (beginHit === 'miss' || continueHit === 'miss') fail(`checkNwTypeLabelChrome hit ${size} ${state} begin=${beginHit} continue=${continueHit}`)
+        const worstOv = frames.reduce(
+          (acc, frame) => ({
+            begin: Math.max(acc.begin, frame.begin),
+            continue: Math.max(acc.continue, frame.continue),
+            rail: Math.max(acc.rail, frame.rail),
+            clearRow: Math.max(acc.clearRow, frame.clearRow),
+            hud: Math.max(acc.hud, frame.hud),
+            visibleLabels: Math.min(acc.visibleLabels, frame.visibleLabels),
+          }),
+          { begin: 0, continue: 0, rail: 0, clearRow: 0, hud: 0, visibleLabels: frames[0].visibleLabels },
+        )
+        if (
+          worstOv.begin === 0 &&
+          worstOv.continue === 0 &&
+          worstOv.rail === 0 &&
+          worstOv.clearRow === 0 &&
+          worstOv.hud === 0 &&
+          worstOv.visibleLabels >= 1 &&
+          clipped === 0 &&
+          beginHit !== 'miss' &&
+          continueHit !== 'miss'
+        ) {
+          console.log(
+            `checkNwTypeLabelChrome ok ${size} ${state} frames=${frames.length} begin=0 continue=0 rail=0 clearRow=0 hud=0 visibleLabels=${worstOv.visibleLabels} clipped=0`,
+          )
+        }
+        console.log(`checkNwTypeLabelChrome pin ${size} ${state} ${JSON.stringify(typeLabelSplit(frames[0]?.rects || {}))}`)
+      }
+      if (round === 18) {
+        await sample('planted')
+        if (wantStates.has('card')) {
+          if (width === 375) await panOnBoard(page, -20, 240)
+          await page.locator('.defend-clear-lamp[data-tower-type="love"]').click()
+          await page.locator('.defend-tower-card').waitFor()
+          await page.waitForTimeout(400)
+          await sample('card')
+        }
+      } else {
+        if (round === 5) await clearToBoost(page, `${size} r${round}`)
+        else await clearTypeLabelRound(page, `${size} r${round}`)
+        await page.locator('.defend-continue').waitFor()
+        await page.waitForTimeout(300)
+        await sample(round === 5 ? 'r5' : 'r1')
+      }
+      await context.close()
+    }
+    if (wantStates.has('planted') || wantStates.has('card')) await run(18, ['planted', 'card'])
+    if (wantStates.has('r5')) await run(5, ['r5'])
+    if (wantStates.has('r1')) await run(1, ['r1'])
+    const worst = { begin: 0, continue: 0, rail: 0, dock: 0, card: 0 }
+    const pin = TYPE_LABEL_PINS?.[size]
+    for (const [state, rects] of Object.entries(seen)) {
+      const split = typeLabelSplit(rects)
+      const pinned = pin?.[state]
+      if (!pinned) continue
+      const lone = (key, now, was) => {
+        const delta = typeLabelBoxDelta(now, was)
+        if (delta == null) {
+          if (!now && !was) return
+          fail(`checkNwTypeLabelChrome delta ${size} ${state} missing ${key}`)
+          return
+        }
+        worst[key] = Math.max(worst[key], delta)
+      }
+      lone('begin', split.begin, pinned.begin)
+      lone('continue', split.continue, pinned.continue)
+      for (const [key, now, was] of [
+        ['rail', split.rail, pinned.rail],
+        ['dock', split.docks, pinned.docks],
+        ['card', split.card, pinned.card],
+      ]) {
+        const group = nwDockGroupDelta(now, was)
+        if (group.missing) fail(`checkNwTypeLabelChrome delta ${size} ${state} missing ${key}`)
+        worst[key] = Math.max(worst[key], group.worst)
+      }
+    }
+    if (pin) {
+      const fmt = (n) => typeLabelRound(n).toFixed(1)
+      const line = `checkNwTypeLabelChrome delta ${size} begin=${fmt(worst.begin)} continue=${fmt(worst.continue)} rail=${fmt(worst.rail)} dock=${fmt(worst.dock)} card=${fmt(worst.card)}`
+      console.log(line)
+      if (worst.begin > 0.5 || worst.continue > 0.5 || worst.rail > 0.5 || worst.dock > 0.5 || worst.card > 0.5) fail(line)
+    }
+  }
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 export async function checkPhoneFixes() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -5799,6 +6301,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'dock gold nights stay free of console errors')
       return
     }
+    if (process.env.NW_TYPE_LABEL_ONLY === '1') {
+      await checkNwTypeLabelChrome(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'type label nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
@@ -5811,6 +6318,7 @@ export async function checkPhoneFixes() {
     await checkLampGlyph(browser, port, errors)
     await checkCompactLampCard(browser, port, errors)
     await checkNwDockGold(browser, port, errors)
+    await checkNwTypeLabelChrome(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -5987,7 +6495,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')

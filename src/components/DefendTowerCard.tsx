@@ -211,6 +211,25 @@ function labelOverGlyph(glyph: { left: number; top: number; right: number; botto
   return (taps.lamps ?? []).some(hit)
 }
 
+/** The name starts at x=0 so its box is the whole word, then slides left by half so it stays centered. */
+export function holdTypeLabelBoxes() {
+  if (typeof document === 'undefined') return
+  for (const label of document.querySelectorAll('text.defend-type-label')) {
+    if (!(label instanceof SVGTextElement)) continue
+    const host = label.parentElement
+    if (!(host instanceof SVGGElement) || host.dataset.labelHold !== 'yes') continue
+    if (label.getAttribute('text-anchor') !== 'start') label.setAttribute('text-anchor', 'start')
+    if (label.getAttribute('x') !== '0') label.setAttribute('x', '0')
+    label.removeAttribute('dx')
+    label.removeAttribute('dy')
+    const len = label.getComputedTextLength()
+    if (!(len > 0)) continue
+    const nx = Number(host.dataset.nudgeX || '0')
+    const ny = Number(host.dataset.nudgeY || '0')
+    host.setAttribute('transform', `translate(${(-len / 2 + nx).toFixed(2)} ${ny.toFixed(2)})`)
+  }
+}
+
 function restoreParkedLabels() {
   if (typeof document === 'undefined') return
   for (const label of document.querySelectorAll('[data-label-park]')) {
@@ -218,6 +237,10 @@ function restoreParkedLabels() {
     label.removeAttribute('dy')
     if (label instanceof HTMLElement || label instanceof SVGElement) label.style.visibility = ''
     if (label instanceof HTMLElement) label.style.transform = ''
+    if (label instanceof SVGGElement) {
+      delete label.dataset.nudgeX
+      delete label.dataset.nudgeY
+    }
     label.removeAttribute('data-label-park')
   }
 }
@@ -229,6 +252,7 @@ function restoreParkedLabels() {
 function parkNeighbourLabels() {
   if (typeof document === 'undefined') return
   restoreParkedLabels()
+  holdTypeLabelBoxes()
   const glyphEl = document.querySelector('.defend-pad.is-upgrade-open .lamp-upgrade-glyph[data-glyph-variant="map"]')
   if (!glyphEl) return
   const glyph = glyphEl.getBoundingClientRect()
@@ -247,13 +271,26 @@ function parkNeighbourLabels() {
     const unit = scale > 0.05 ? scale : 1
     const overlapY = Math.min(box.bottom, glyph.bottom) - Math.max(box.top, glyph.top)
     const overlapX = Math.min(box.right, glyph.right) - Math.max(box.left, glyph.left)
-    label.setAttribute('data-label-park', 'yes')
+    const host = label.parentElement
+    const hold = host instanceof SVGGElement && host.dataset.labelHold === 'yes' ? host : null
+    const parked = hold ?? label
+    parked.setAttribute('data-label-park', 'yes')
     if (overlapY <= overlapX + 0.5) {
       const dir = (box.top + box.bottom) / 2 <= (glyph.top + glyph.bottom) / 2 ? -1 : 1
-      label.setAttribute('dy', String((dir * (overlapY + 4)) / unit))
+      const shift = (dir * (overlapY + 4)) / unit
+      if (hold) hold.dataset.nudgeY = String(shift)
+      else label.setAttribute('dy', String(shift))
     } else {
       const dir = (box.left + box.right) / 2 <= (glyph.left + glyph.right) / 2 ? -1 : 1
-      label.setAttribute('dx', String((dir * (overlapX + 4)) / unit))
+      const shift = (dir * (overlapX + 4)) / unit
+      if (hold) hold.dataset.nudgeX = String(shift)
+      else label.setAttribute('dx', String(shift))
+    }
+    if (hold) {
+      const len = label.getComputedTextLength()
+      const nx = Number(hold.dataset.nudgeX || '0')
+      const ny = Number(hold.dataset.nudgeY || '0')
+      if (len > 0) hold.setAttribute('transform', `translate(${(-len / 2 + nx).toFixed(2)} ${ny.toFixed(2)})`)
     }
     if (rectsHit(label.getBoundingClientRect(), glyph)) label.style.visibility = 'hidden'
   }

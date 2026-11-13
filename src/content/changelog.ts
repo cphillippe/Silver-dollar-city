@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.583',
+    title: 'Night Watch: lamp names stay off the buttons',
+    when: '2026-11-13',
+    items: [
+      'On Easy, a lamp name stays off Begin, Continue, the side buttons, and the hearts.',
+      'Hard stays the same.',
+      'Refs #949.',
+    ],
+  },
+  {
     version: '1.4.582',
     title: 'Night Watch: one gold cue',
     when: '2026-11-12',

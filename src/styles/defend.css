@@ -3741,11 +3741,17 @@ button.defend-path-pip {
   font-family: var(--sans);
   font-size: 20px;
   font-weight: 800;
+  white-space: nowrap;
   fill: #fff6e8;
   stroke: #1a0840;
   stroke-width: 4px;
   paint-order: stroke fill;
   pointer-events: none;
+}
+
+/* 1.4.583 Easy only. A type name that sits on Begin, Continue, the rail, the clear row or the HUD is hidden. The lamp art stays. Hard never has is-easy-watch. */
+.defend-page.is-easy-watch text.defend-type-label[data-chrome-hide='yes'] {
+  visibility: hidden;
 }
 
 .defend-type-chip {
