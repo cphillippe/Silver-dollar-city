@@ -4647,9 +4647,12 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   }
 
   /* 1.4.585: after a plant, Begin keeps .btn.primary gold.
-     Animation stops so the gold keyframe shadow cannot return. Transform stays the layout's own. */
+     Animation stops so the gold keyframe shadow cannot return.
+     Transition stops so that shadow cannot fade out through the one-gold check.
+     Transform stays the layout's own. */
   .defend-page.is-easy-watch .nw-docks .defend-go.is-after-plant {
     animation: none;
+    transition: none;
   }
 }
 
