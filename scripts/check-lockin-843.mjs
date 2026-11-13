@@ -95,7 +95,7 @@ const debtClaim = easyFacingLine('ph-debt', easyBrief('ph-debt').claim)
 assert.ok(debtClaim.length > 10, 'ph-debt Easy claim is live (D2)')
 
 // Version, changelog.
-assert.equal(APP_VERSION, '1.4.584')
+assert.equal(APP_VERSION, '1.4.585')
 assert.equal(JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version, APP_VERSION)
 const lockInRow = CHANGELOG.find((note) => note.version === '1.4.567')
 assert.ok(lockInRow, 'the 1.4.567 Lock In row is shipped')

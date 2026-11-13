@@ -5847,8 +5847,8 @@ const TYPE_LABEL_PINS = {
     r1: { begin: null, continue: { x: 143.5, y: 851, w: 125, h: 56 }, rail: { 'rail-love': { x: 353, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 353, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 353, y: 208, w: 48, h: 48 }, 'rail-science': { x: 353, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 569.9, w: 52, h: 53.1 } }, card: {} },
   },
   '768x1024': {
-    planted: { begin: { x: 77.8, y: 709, w: 162, h: 56 }, continue: null, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-candle': { x: 77.8, y: 770, w: 162, h: 52 }, 'dock-bell': { x: 77.8, y: 826, w: 162, h: 52 }, 'dock-incense': { x: 77.8, y: 882, w: 162, h: 52 }, 'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 } }, card: {} },
-    card: { begin: { x: 77.8, y: 709.5, w: 162, h: 56 }, continue: null, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-candle': { x: 77.8, y: 770, w: 162, h: 52 }, 'dock-bell': { x: 77.8, y: 826, w: 162, h: 52 }, 'dock-incense': { x: 77.8, y: 882, w: 162, h: 52 }, 'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 } }, card: { pull: { x: 373.5, y: 305, w: 32, h: 32 }, 'pip-far': { x: 247.5, y: 354.8, w: 20, h: 20 }, 'buy-far': { x: 247.5, y: 380.8, w: 148, h: 52 }, 'pip-strong': { x: 247.5, y: 466.8, w: 20, h: 20 }, 'buy-strong': { x: 247.5, y: 492.8, w: 148, h: 52 } } },
+    planted: { begin: { x: 77.8, y: 710, w: 162, h: 56 }, continue: null, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-candle': { x: 77.8, y: 770, w: 162, h: 52 }, 'dock-bell': { x: 77.8, y: 826, w: 162, h: 52 }, 'dock-incense': { x: 77.8, y: 882, w: 162, h: 52 }, 'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 } }, card: {} },
+    card: { begin: { x: 77.8, y: 710, w: 162, h: 56 }, continue: null, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-candle': { x: 77.8, y: 770, w: 162, h: 52 }, 'dock-bell': { x: 77.8, y: 826, w: 162, h: 52 }, 'dock-incense': { x: 77.8, y: 882, w: 162, h: 52 }, 'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 } }, card: { pull: { x: 373.5, y: 305, w: 32, h: 32 }, 'pip-far': { x: 247.5, y: 354.8, w: 20, h: 20 }, 'buy-far': { x: 247.5, y: 380.8, w: 148, h: 52 }, 'pip-strong': { x: 247.5, y: 466.8, w: 20, h: 20 }, 'buy-strong': { x: 247.5, y: 492.8, w: 148, h: 52 } } },
     r5: { begin: null, continue: { x: 86.8, y: 937, w: 70, h: 40 }, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-new': { x: 160.8, y: 937, w: 95.5, h: 40 }, 'dock-candle': { x: 260.3, y: 937, w: 79.5, h: 40 } }, card: {} },
     r1: { begin: null, continue: { x: 86.8, y: 937, w: 70, h: 40 }, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-new': { x: 160.8, y: 937, w: 95.5, h: 40 } }, card: {} },
   },
@@ -6127,6 +6127,30 @@ async function checkNwTypeLabelChrome(browser, port, errors) {
       await plantTypeLabelSeats(page, `${size} r${round}`)
       const sample = async (state) => {
         if (!wantStates.has(state)) return
+        if (width === 768) {
+          const settled = await page.evaluate(async () => {
+            const go = document.querySelector('.defend-go')
+            if (!(go instanceof HTMLElement) || go.getClientRects().length === 0) return { ok: true, absent: true }
+            const running = () => go.getAnimations().some((anim) => anim.animationName === 'defend-go' && anim.playState === 'running')
+            const box = () => {
+              const rect = go.getBoundingClientRect()
+              return [rect.x, rect.y, rect.width, rect.height].map((n) => (Math.round(n * 10) / 10).toFixed(1)).join(',')
+            }
+            const start = performance.now()
+            let reads = []
+            while (performance.now() - start < 200) {
+              if (running()) reads = []
+              else {
+                reads.push(box())
+                if (reads.length > 4) reads.shift()
+                if (reads.length === 4 && reads.every((item) => item === reads[0])) return { ok: true, running: false, box: reads[0] }
+              }
+              await new Promise((resolve) => requestAnimationFrame(resolve))
+            }
+            return { ok: false, running: running(), animation: getComputedStyle(go).animation, box: box() }
+          })
+          if (!settled.ok) fail(`checkNwTypeLabelChrome bob ${size} ${state} defend-go still running animation=${settled.animation} box=${settled.box}`)
+        }
         await page.waitForTimeout(80)
         const frames = await sampleTypeLabelChrome(page)
         assert.ok(frames.length >= 8, `${size} ${state} sampled ${frames.length} frames`)
