@@ -128,6 +128,8 @@ export interface DefendNightActorsProps {
   armorFrom?: number
   /** Lamp that just spent a spark. Brief ring only — peel 4 owns the burst. */
   upFlashId?: CityPlotId | null
+  /** Easy plant (#957). Brief shockwave on a new lamp. */
+  plantIgniteIds?: ReadonlySet<CityPlotId>
   /** playtest=1 or nwDebug. Logs each walker's first draw. A normal night stays quiet. */
   spawnLog?: boolean
   /** Soft marks on ground that can take the picked lamp. `live` meets the road now. */
@@ -211,6 +213,7 @@ export function DefendNightActorsSvg({
   upgradeAt = null,
   onOpenUpgrade,
   upFlashId = null,
+  plantIgniteIds,
   ghost = null,
   groundHints = [],
   firstSeatAt,
@@ -611,7 +614,7 @@ export function DefendNightActorsSvg({
                   <g
                     key={id}
                     data-person-node={scenery ? undefined : 'pad'}
-                    className={`defend-pad is-${stage} ${on ? `is-planted is-${using}` : ''} ${hot ? 'is-hot' : ''} ${firing ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''} ${boostPad ? 'is-boost-pick' : ''} ${upgrading ? 'is-upgrade-open' : ''} ${justUp ? 'is-up' : ''} ${reachMiss.includes(id) ? 'is-reach-miss' : ''}`}
+                    className={`defend-pad is-${stage} ${on ? `is-planted is-${using}` : ''} ${hot ? 'is-hot' : ''} ${firing ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''} ${boostPad ? 'is-boost-pick' : ''} ${upgrading ? 'is-upgrade-open' : ''} ${justUp ? 'is-up' : ''} ${plantIgniteIds?.has(id) ? 'is-plant-ignite' : ''} ${reachMiss.includes(id) ? 'is-reach-miss' : ''}`}
                     data-reach-miss={reachMiss.includes(id) ? 'yes' : undefined}
                     data-tower-type={on ? using : undefined}
                     data-level={on ? (cross && tree ? crossMark(tree) : bell && tree ? bellMark(tree) : tierMark) : undefined}
@@ -693,6 +696,12 @@ export function DefendNightActorsSvg({
                       <g className="defend-lamp-art" transform={lampShift ? `translate(0 ${lampShift})` : undefined}>
                         <ellipse className="defend-pool" cx="0" cy="12" rx={hot ? 30 : 20} ry={hot ? 11 : 7} />
                         <circle className="defend-type-ring" r={candle ? 16 : 34} />
+                        {plantIgniteIds?.has(id) ? (
+                          <g className="defend-plant-ignite" pointerEvents="none" aria-hidden="true">
+                            <circle className="defend-plant-ignite-under" r="34" />
+                            <circle className="defend-plant-ignite-ring" r="34" />
+                          </g>
+                        ) : null}
                         <g className="defend-lamp-sprite">
                           {incense ? (
                             <IncenseSprite />

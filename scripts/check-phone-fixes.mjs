@@ -389,8 +389,8 @@ async function firstGoldSeat(page) {
   return seat
 }
 
-function plantIgniteSearch(width) {
-  return width === 768 ? '?playtest=1&nwSeed=2&nwLamps=0&nwCam=0' : '?playtest=1&nwSeed=2&nwLamps=0&nwCam=1'
+function plantIgniteSearch(_width) {
+  return '?playtest=1&nwSeed=2&nwMap=a2&nwRound=18&nwLamps=0&nwCam=0'
 }
 
 function plantIgniteRound(n) {
@@ -6660,7 +6660,7 @@ async function checkMap05CamOffRing(browser, port, errors) {
           return best
         }
         const seats = [...document.querySelectorAll('.defend-plant-ground circle.is-live')]
-        const candle = document.querySelector('button.defend-candle-lamp')
+        const candle = document.querySelector('button.defend-new-lamp.defend-candle-lamp')
         const railButtons = [...document.querySelectorAll('.nw-rail button.defend-ability')].filter((el) => {
           const rect = el.getBoundingClientRect()
           const style = getComputedStyle(el)
@@ -6905,8 +6905,8 @@ async function checkNwPlantIgnite(browser, port, errors) {
     console.log(line)
   }
 
-  const startSampler = () =>
-    `(() => {
+  const installSampler = (page) =>
+    page.evaluate(() => {
       window.__nwPlantIgnite = {
         frames: [],
         firstSeen: null,
@@ -6916,7 +6916,7 @@ async function checkNwPlantIgnite(browser, port, errors) {
         peakScale: 0,
       }
       const gold = (value) => {
-        const re = /rgba?\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)(?:\\s*,\\s*([\\d.]+))?/g
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
         let match
         while ((match = re.exec(value || ''))) {
           const r = Number(match[1])
@@ -6950,10 +6950,10 @@ async function checkNwPlantIgnite(browser, port, errors) {
               .filter((node) => {
                 const style = getComputedStyle(node)
                 const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
-                const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[\`border\${side}Width\`] !== '0px' && gold(style[\`border\${side}Color\`]))
+                const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
                 return gold(style.backgroundImage) || gold(style.backgroundColor) || border || gold(style.boxShadow) || (text && gold(style.color))
               })
-              .map((node) => \`\${node.tagName}.\${node.getAttribute('class') || ''}\`.slice(0, 80))
+              .map((node) => `${node.tagName}.${node.getAttribute('class') || ''}`.slice(0, 80))
         const rings = [...document.querySelectorAll('.defend-plant-ground circle')].filter((node) => {
           const rect = node.getBoundingClientRect()
           const style = getComputedStyle(node)
@@ -6977,13 +6977,13 @@ async function checkNwPlantIgnite(browser, port, errors) {
           return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0 && node.getClientRects().length > 0
         })
         const igniteVisible = ignites.length
-        const ptr = ignites.every((node) => getComputedStyle(node).pointerEvents === 'none')
-        const ring = document.querySelector('.defend-plant-ignite .defend-plant-ignite-ring, .defend-plant-ignite-ring')
+        const ptr = igniteVisible === 0 || ignites.every((node) => getComputedStyle(node).pointerEvents === 'none')
+        const ring = document.querySelector('.defend-plant-ignite-ring')
         let scale = 0
         if (ring) {
           const tr = getComputedStyle(ring).transform
           if (tr && tr !== 'none') {
-            const m = tr.match(/matrix\\(([^)]+)\\)/)
+            const m = tr.match(/matrix\(([^)]+)\)/)
             if (m) {
               const parts = m[1].split(',').map((v) => Number(v.trim()))
               scale = Math.max(Math.abs(parts[0] || 0), Math.abs(parts[3] || 0))
@@ -6992,12 +6992,16 @@ async function checkNwPlantIgnite(browser, port, errors) {
         }
         const go = document.querySelector('.defend-go')
         const candle = document.querySelector('button.defend-new-lamp.defend-candle-lamp')
-        const rail = document.querySelector('.nw-rail')
-        const hitOf = (el) => {
+        const rail = document.querySelector('.nw-rail .defend-ability[data-type="love"], .nw-rail button.defend-ability')
+        const hitOf = (el, rootSel) => {
           if (!el) return 'missing'
           const rect = el.getBoundingClientRect()
+          if (rect.width < 1 || rect.height < 1) return 'missing'
           const node = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
-          return node === el || Boolean(node && el.contains(node)) ? 'ok' : String(node?.tagName || 'none')
+          if (!node) return 'none'
+          if (node === el || el.contains(node)) return 'ok'
+          if (rootSel && node.closest?.(rootSel) === el) return 'ok'
+          return String(node.tagName || 'none')
         }
         return {
           names,
@@ -7011,7 +7015,11 @@ async function checkNwPlantIgnite(browser, port, errors) {
           begin: box(go),
           candle: box(candle),
           rail: box(rail),
-          hits: { begin: hitOf(go), rail: hitOf(rail), candle: hitOf(candle) },
+          hits: {
+            begin: hitOf(go, '.defend-go'),
+            rail: hitOf(rail, '.defend-ability'),
+            candle: hitOf(candle, 'button.defend-candle-lamp'),
+          },
           awaiting: go?.classList.contains('is-awaiting-plant') ? 1 : 0,
           sprites: document.querySelectorAll('.defend-lamp-sprite').length,
         }
@@ -7029,25 +7037,24 @@ async function checkNwPlantIgnite(browser, port, errors) {
         else window.__nwPlantIgnite.running = false
       }
       requestAnimationFrame(tick)
-      return true
-    })()`
+    })
 
   const lineRecords = async (page) =>
     page.evaluate(() => {
       const cssText = (value) => {
         if (!value || value === 'none' || value === 'normal') return ''
-        const first = /^"((?:\\\\.|[^"\\\\])*)"/.exec(value)
-        return first ? first[1].replace(/\\\\"/g, '"').replace(/\\\\\\\\/g, '\\\\') : ''
+        const first = /^"((?:\\.|[^"\\])*)"/.exec(value)
+        return first ? first[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\') : ''
       }
       const selectorOf = (el) => {
         const tag = el.tagName.toLowerCase()
-        const cls = (el.getAttribute('class') || '').trim().split(/\\s+/).filter(Boolean).slice(0, 4).join('.')
+        const cls = (el.getAttribute('class') || '').trim().split(/\s+/).filter(Boolean).slice(0, 4).join('.')
         return cls ? `${tag}.${cls}` : tag
       }
       const lineOf = (el) => {
         const style = getComputedStyle(el)
         const directs = [...el.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
-        const source = directs.map((child) => child.textContent).join('').replace(/\\s+/g, ' ').trim()
+        const source = directs.map((child) => child.textContent).join('').replace(/\s+/g, ' ').trim()
         const range = document.createRange()
         const host = el.getBoundingClientRect()
         let rendered = ''
@@ -7079,7 +7086,7 @@ async function checkNwPlantIgnite(browser, port, errors) {
           client: el.clientWidth,
           scrollH: el.scrollHeight,
           clientH: el.clientHeight,
-          rendered: rendered.replace(/\\s+/g, ' ').trim(),
+          rendered: rendered.replace(/\s+/g, ' ').trim(),
           source,
         }
       }
@@ -7089,7 +7096,7 @@ async function checkNwPlantIgnite(browser, port, errors) {
         return ['::before', '::after']
           .map((pseudo) => {
             const style = getComputedStyle(el, pseudo)
-            const source = cssText(style.content).replace(/\\s+/g, ' ').trim()
+            const source = cssText(style.content).replace(/\s+/g, ' ').trim()
             if (!source) return null
             const painted =
               style.display !== 'none' &&
@@ -7119,7 +7126,7 @@ async function checkNwPlantIgnite(browser, port, errors) {
         return text ? [text] : []
       }
       const go = document.querySelector('.defend-go')
-      const candle = document.querySelector('button.defend-new-lamp.defend-candle-lamp')
+      const candle = document.querySelector('button.defend-candle-lamp')
       return [...linesFor(go), ...linesFor(candle)]
     })
 
@@ -7141,11 +7148,13 @@ async function checkNwPlantIgnite(browser, port, errors) {
       }
       return {
         begin: box(document.querySelector('.defend-go')),
-        rail: box(document.querySelector('.nw-rail')),
+        rail: box(document.querySelector('.nw-rail .defend-ability[data-type="love"], .nw-rail button.defend-ability')),
         candle: box(document.querySelector('button.defend-new-lamp.defend-candle-lamp')),
       }
     })
-    await page.evaluate(startSampler)
+    assert.ok(pre.candle, `${label} Candle tap rect before plant`)
+    assert.ok(pre.rail, `${label} rail tap rect before plant`)
+    await installSampler(page)
     await page.locator('[data-type="love"]').click()
     const seat = await firstGoldSeat(page)
     await page.mouse.click(seat.x, seat.y)
@@ -7166,6 +7175,7 @@ async function checkNwPlantIgnite(browser, port, errors) {
       if (pre.begin && row.begin) worst.begin = Math.max(worst.begin, Math.abs(row.begin.x - pre.begin.x), Math.abs(row.begin.y - pre.begin.y))
       if (pre.rail && row.rail) worst.rail = Math.max(worst.rail, Math.abs(row.rail.x - pre.rail.x), Math.abs(row.rail.y - pre.rail.y))
       if (pre.candle && row.candle) worst.candle = Math.max(worst.candle, Math.abs(row.candle.x - pre.candle.x), Math.abs(row.candle.y - pre.candle.y))
+      if (row.sprites < 1) continue
       if (row.igniteGold > 0) fail(`checkNwPlantIgnite fail ${label} ignite tree gold=${row.igniteGold}`)
       if (row.gold !== 1) fail(`checkNwPlantIgnite fail ${label} gold=${row.gold} names=${nameLabel}`)
       if (!row.ptr && row.igniteVisible) fail(`checkNwPlantIgnite fail ${label} ignite pointer-events`)

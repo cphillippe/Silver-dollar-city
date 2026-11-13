@@ -123,7 +123,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     boardRef, viewBox, shake, won, phase, fireBest, easyTap, onBoardTap,
     pads, planted, progress, raiders, raiderAt, ability, towerType, unlocked,
     flash, togglePad, fire, fireAtRaider, shots, easy, blasts, tapTarget, tapPos, tapJuice,
-    walkerCalls, loreLine, runTier, boosting, onBoostTower,     upgradeAt, onOpenUpgrade, upFlashId, ghost = null,
+    walkerCalls, loreLine, runTier, boosting, onBoostTower,     upgradeAt, onOpenUpgrade, upFlashId, plantIgniteIds, ghost = null,
     groundHints = [],
     firstSeatAt,
     reachMiss = [],
@@ -387,6 +387,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           upgradeAt={upgradeAt}
           onOpenUpgrade={onOpenUpgrade}
           upFlashId={upFlashId}
+          plantIgniteIds={plantIgniteIds}
           ghost={ghost}
           groundHints={groundHints}
           firstSeatAt={firstSeatAt}
