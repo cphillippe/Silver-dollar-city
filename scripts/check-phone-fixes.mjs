@@ -5861,9 +5861,7 @@ function typeLabelRound(n) {
 function typeLabelBoxDelta(now, was) {
   if (!now || !was) return null
   let worst = 0
-  for (const key of ['x', 'w', 'h']) worst = Math.max(worst, Math.abs(typeLabelRound(now[key] - was[key])))
-  const y = Math.abs(typeLabelRound(now.y - was.y))
-  if (y > 2) worst = Math.max(worst, y)
+  for (const key of ['x', 'y', 'w', 'h']) worst = Math.max(worst, Math.abs(typeLabelRound(now[key] - was[key])))
   return worst
 }
 
@@ -5893,6 +5891,32 @@ async function sampleTypeLabelChrome(page) {
         w: round(rect.width),
         h: round(rect.height),
       }
+    }
+    const paintOf = (el) => {
+      const rect = el.getBoundingClientRect()
+      let left = rect.left
+      let right = rect.right
+      let top = rect.top
+      let bottom = rect.bottom
+      const range = document.createRange()
+      for (const child of el.childNodes) {
+        if (child.nodeType !== 3 || !(child.textContent || '').trim()) continue
+        range.selectNodeContents(child)
+        for (const bit of range.getClientRects()) {
+          if (bit.width <= 0 || bit.height <= 0) continue
+          left = Math.min(left, bit.left)
+          right = Math.max(right, bit.right)
+          top = Math.min(top, bit.top)
+          bottom = Math.max(bottom, bit.bottom)
+        }
+      }
+      const extraW = Math.max(0, el.scrollWidth - Math.max(el.clientWidth, right - left))
+      const extraH = Math.max(0, el.scrollHeight - Math.max(el.clientHeight, bottom - top))
+      left -= extraW / 2
+      right += extraW / 2
+      top -= extraH / 2
+      bottom += extraH / 2
+      return { left, top, right, bottom, x: round(left), y: round(top), w: round(right - left), h: round(bottom - top) }
     }
     const area = (a, b) => {
       const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left))
@@ -5967,7 +5991,7 @@ async function sampleTypeLabelChrome(page) {
     const read = () => {
       const labels = [...document.querySelectorAll('text.defend-type-label')].filter(shown).map((el) => ({
         text: norm(el.textContent),
-        box: boxOf(el),
+        box: paintOf(el),
       }))
       const regions = {
         begin: union('.defend-go'),
@@ -6123,10 +6147,7 @@ async function checkNwTypeLabelChrome(browser, port, errors) {
                 `checkNwTypeLabelChrome line ${size} ${state} ${row.name} overflow=${row.overflow} overflowX=${row.overflowX} overflowY=${row.overflowY} scroll=${row.scroll} client=${row.client} scrollH=${row.scrollH} clientH=${row.clientH} rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(row.source)}`,
               )
             }
-            const clips = row.overflowX !== 'visible' || row.overflowY !== 'visible' || row.overflow === 'hidden' || row.overflow === 'clip'
-            const scrollClip = clips && (row.scroll > row.client + 1 || row.scrollH > row.clientH + 1)
-            const textClip = row.rendered !== row.source
-            if (scrollClip || textClip) clipped += 1
+            if (row.scroll > row.client + 1 || row.scrollH > row.clientH + 1) clipped += 1
           }
           const wantHit = []
           if (frame.rects.begin) wantHit.push('begin')
@@ -6223,11 +6244,10 @@ async function checkNwTypeLabelChrome(browser, port, errors) {
       }
     }
     if (pin) {
-      const calm = (n) => (n <= 1 ? 0 : n)
-      const fmt = (n) => (calm(n) === 0 ? '0' : typeLabelRound(n).toFixed(1))
+      const fmt = (n) => typeLabelRound(n).toFixed(1)
       const line = `checkNwTypeLabelChrome delta ${size} begin=${fmt(worst.begin)} continue=${fmt(worst.continue)} rail=${fmt(worst.rail)} dock=${fmt(worst.dock)} card=${fmt(worst.card)}`
       console.log(line)
-      if (calm(worst.begin) !== 0 || calm(worst.continue) !== 0 || calm(worst.rail) !== 0 || calm(worst.dock) !== 0 || calm(worst.card) !== 0) fail(line)
+      if (worst.begin > 0.5 || worst.continue > 0.5 || worst.rail > 0.5 || worst.dock > 0.5 || worst.card > 0.5) fail(line)
     }
   }
   assert.equal(problems.length, 0, problems.join('\n'))

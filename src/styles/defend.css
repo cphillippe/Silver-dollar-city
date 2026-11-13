@@ -3741,6 +3741,7 @@ button.defend-path-pip {
   font-family: var(--sans);
   font-size: 20px;
   font-weight: 800;
+  white-space: nowrap;
   fill: #fff6e8;
   stroke: #1a0840;
   stroke-width: 4px;

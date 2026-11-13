@@ -7,7 +7,7 @@ import { EASY_CROWN_HIT_R, EASY_FACE_HIT_R, PATH_WALKER_FACE_DY, WATCH_ABILITY_L
 import { boardFill, boardFillPoint, boardPoint as mapBoardPoint, boardView, lampIconBox, nightTowers } from '../nightWatch'
 import type { DefendNightSkyProps } from './DefendNightSky'
 import { DefendNightSky } from './DefendNightSky'
-import { DefendTowerCard, lampPlotTitle, type TowerCardPoint } from './DefendTowerCard'
+import { DefendTowerCard, holdTypeLabelBoxes, lampPlotTitle, type TowerCardPoint } from './DefendTowerCard'
 import { camPoint } from './nwCamera'
 import { samePillarLessons } from '../nightWatch/lampPillar'
 import { easyShotReach, pathsOf, type BonusGate, type LampPaths, type TreePath } from '../nightWatch/upgradeTree'
@@ -57,8 +57,36 @@ function chromeBoxShown(el: Element): boolean {
   return box.width > 1 && box.height > 1
 }
 
-function boxesHit(a: DOMRect, b: DOMRect): boolean {
+function boxesHit(a: { left: number; right: number; top: number; bottom: number }, b: { left: number; right: number; top: number; bottom: number }): boolean {
   return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
+}
+
+/** Ink of the name, including the part that sticks out of a short client box. */
+function labelPaintBox(el: SVGTextElement) {
+  const rect = el.getBoundingClientRect()
+  let left = rect.left
+  let right = rect.right
+  let top = rect.top
+  let bottom = rect.bottom
+  const range = document.createRange()
+  for (const child of el.childNodes) {
+    if (child.nodeType !== Node.TEXT_NODE || !(child.textContent || '').trim()) continue
+    range.selectNodeContents(child)
+    for (const bit of range.getClientRects()) {
+      if (bit.width <= 0 || bit.height <= 0) continue
+      left = Math.min(left, bit.left)
+      right = Math.max(right, bit.right)
+      top = Math.min(top, bit.top)
+      bottom = Math.max(bottom, bit.bottom)
+    }
+  }
+  const extraW = Math.max(0, el.scrollWidth - Math.max(el.clientWidth, right - left))
+  const extraH = Math.max(0, el.scrollHeight - Math.max(el.clientHeight, bottom - top))
+  left -= extraW / 2
+  right += extraW / 2
+  top -= extraH / 2
+  bottom += extraH / 2
+  return { left, right, top, bottom, width: right - left, height: bottom - top }
 }
 
 /**
@@ -69,6 +97,7 @@ function boxesHit(a: DOMRect, b: DOMRect): boolean {
 function hideTypeLabelsOnChrome(board: SVGSVGElement) {
   const page = board.closest('.defend-page')
   if (!(page instanceof HTMLElement) || !page.classList.contains('is-easy-watch')) return
+  holdTypeLabelBoxes()
   const chrome = [
     ...page.querySelectorAll(
       '.defend-go, .defend-continue, .nw-rail, .defend-clear-row button:not(.defend-continue), button.defend-new-lamp, .nw-hud, .nw-wave-overlay .defend-wave',
@@ -83,7 +112,7 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
       label.removeAttribute('data-chrome-hide')
       continue
     }
-    const box = label.getBoundingClientRect()
+    const box = labelPaintBox(label)
     if (box.width < 1 || box.height < 1 || !chrome.some((other) => boxesHit(box, other))) label.removeAttribute('data-chrome-hide')
     else label.setAttribute('data-chrome-hide', 'yes')
   }
@@ -225,7 +254,12 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     const resize = new ResizeObserver(hide)
     if (frame instanceof HTMLElement) resize.observe(frame)
     window.addEventListener('resize', hide)
+    let dropFont = false
+    void document.fonts?.ready.then(() => {
+      if (!dropFont) hide()
+    })
     return () => {
+      dropFont = true
       watch.disconnect()
       resize.disconnect()
       window.removeEventListener('resize', hide)
