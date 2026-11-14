@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.587',
+    title: 'Night Watch: one lamp name, off the buttons',
+    when: '2026-11-14',
+    items: [
+      'On Easy, each lamp shows one name, and that name stays off Begin, Continue, the side buttons, and the hearts.',
+      'Hard stays the same.',
+      'Refs #949 and Refs #953.',
+    ],
+  },
+  {
     version: '1.4.586',
     title: 'Night Watch: planting a lamp thumps and rings',
     when: '2026-11-14',

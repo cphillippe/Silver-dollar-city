@@ -116,6 +116,17 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
     if (box.width < 1 || box.height < 1 || !chrome.some((other) => boxesHit(box, other))) label.removeAttribute('data-chrome-hide')
     else label.setAttribute('data-chrome-hide', 'yes')
   }
+  for (const chip of page.querySelectorAll('.defend-type-chip')) {
+    if (!(chip instanceof HTMLElement)) continue
+    const style = getComputedStyle(chip)
+    if (style.display === 'none' || Number(style.opacity) === 0) {
+      chip.removeAttribute('data-chrome-hide')
+      continue
+    }
+    const box = chip.getBoundingClientRect()
+    if (box.width < 1 || box.height < 1 || !chrome.some((other) => boxesHit(box, other))) chip.removeAttribute('data-chrome-hide')
+    else chip.setAttribute('data-chrome-hide', 'yes')
+  }
 }
 
 export function DefendNightBoard(props: DefendNightBoardProps) {

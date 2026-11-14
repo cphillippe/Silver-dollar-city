@@ -3754,6 +3754,15 @@ button.defend-path-pip {
   visibility: hidden;
 }
 
+/* 1.4.587 Easy plant / clear: one name, the HTML chip. Wave already hides both. */
+.defend-page.is-easy-watch:has(.defend-type-chip) text.defend-type-label {
+  visibility: hidden;
+}
+
+.defend-page.is-easy-watch .defend-type-chip[data-chrome-hide='yes'] {
+  visibility: hidden;
+}
+
 .defend-type-chip {
   position: absolute;
   z-index: 4;
