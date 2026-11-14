@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.586',
+    title: 'Night Watch: planting a lamp thumps and rings',
+    when: '2026-11-14',
+    items: [
+      'On Easy, planting a lamp lands with a thump and a light ring.',
+      'Hard stays the same.',
+      'Refs #957.',
+    ],
+  },
+  {
     version: '1.4.585',
     title: 'Night Watch: Begin stays still after a plant',
     when: '2026-11-13',

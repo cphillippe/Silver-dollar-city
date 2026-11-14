@@ -598,6 +598,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const pathBuyStamp = useRef(0)
   const boostPathRef = useRef<(plotId: CityPlotId, path: TreePath, fromPip: boolean) => void>(() => {})
   const [upFlash, setUpFlash] = useState<CityPlotId | null>(null)
+  const [plantIgniteIds, setPlantIgniteIds] = useState<ReadonlySet<CityPlotId>>(() => new Set())
+  const plantIgniteTimers = useRef<Partial<Record<CityPlotId, number>>>({})
   const [levelBurst, setLevelBurst] = useState<{ plotId: CityPlotId; from: number; to: number } | null>(null)
   const [sparkSpend, setSparkSpend] = useState(false)
   const [sparkSpent, setSparkSpent] = useState(1)
@@ -844,6 +846,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setLevelBurst(null)
     setSparkSpend(false)
     setGhost(null)
+    setPlantIgniteIds(new Set())
+    for (const id of Object.keys(plantIgniteTimers.current)) {
+      window.clearTimeout(plantIgniteTimers.current[id as CityPlotId]!)
+    }
+    plantIgniteTimers.current = {}
     window.clearTimeout(burstTimer.current)
   }, [phase])
 
@@ -1458,6 +1465,15 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     plantsRef.current = shown.plants
     setPlants(shown.plants)
   }, [easy])
+
+  useEffect(
+    () => () => {
+      for (const id of Object.keys(plantIgniteTimers.current)) {
+        window.clearTimeout(plantIgniteTimers.current[id as CityPlotId]!)
+      }
+    },
+    [],
+  )
 
   useEffect(() => {
     const saved = progress.defense.met ?? []
@@ -2315,6 +2331,28 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     return Boolean(node?.closest?.('.defend-raider, .defend-pad, .defend-tower-card'))
   }
 
+  const PLANT_IGNITE_MS = 900
+
+  function flashPlantIgnite(spot: CityPlotId) {
+    if (!easy) return
+    setPlantIgniteIds((current) => {
+      if (current.has(spot)) return current
+      const next = new Set(current)
+      next.add(spot)
+      return next
+    })
+    if (plantIgniteTimers.current[spot]) return
+    plantIgniteTimers.current[spot] = window.setTimeout(() => {
+      setPlantIgniteIds((current) => {
+        if (!current.has(spot)) return current
+        const next = new Set(current)
+        next.delete(spot)
+        return next
+      })
+      delete plantIgniteTimers.current[spot]
+    }, PLANT_IGNITE_MS)
+  }
+
   /** Free before Begin. After Begin, a new type spends EASY_LAMP_COST. */
   function finishPlace(
     plantsNow: Record<string, string>,
@@ -2382,6 +2420,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       if (bell || incense || candle || cross) paidTypes.current.add(next.preview.spot)
       else paidTypes.current.add(using)
     }
+    flashPlantIgnite(next.preview.spot as CityPlotId)
     closeUpgrade(true)
     return true
   }
@@ -2420,9 +2459,15 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     if (phase !== 'plant') return
     if (plants[id]) return
     const using = unlocked.includes(ability) ? ability : 'love'
+    let plantedNew = false
     flushSync(() => {
-      setPlants((current) => plantType(current, id, using))
+      setPlants((current) => {
+        if (current[id]) return current
+        plantedNew = true
+        return plantType(current, id, using)
+      })
     })
+    if (plantedNew) flashPlantIgnite(id)
     closeUpgrade(true)
   }
 
@@ -4703,6 +4748,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                   roundIndex={waveIndex}
                   spawnLog={easy && debugPanel}
                   upFlashId={upFlash}
+                  plantIgniteIds={plantIgniteIds}
                   levelBurst={
                     levelBurst && upgradeAt === levelBurst.plotId
                       ? { from: levelBurst.from, to: levelBurst.to }

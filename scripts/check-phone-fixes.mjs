@@ -372,6 +372,38 @@ async function firstLiveSeat(page) {
   return seat
 }
 
+/** Client point for the gold first-seat ring (#957). */
+async function firstGoldSeat(page) {
+  const seat = await page.evaluate(() => {
+    const svg = document.querySelector('.defend-board')
+    const ring = document.querySelector('.defend-plant-ground circle.is-first-seat')
+    const ctm = svg?.getScreenCTM()
+    if (!svg || !ring || !ctm) return null
+    const p = svg.createSVGPoint()
+    p.x = Number(ring.getAttribute('cx'))
+    p.y = Number(ring.getAttribute('cy')) - 26
+    const q = p.matrixTransform(ctm)
+    return { x: q.x, y: q.y }
+  })
+  assert.ok(seat, 'first gold seat point')
+  return seat
+}
+
+function plantIgniteSearch(_width) {
+  return '?playtest=1&nwSeed=2&nwMap=a2&nwRound=18&nwLamps=0&nwCam=0'
+}
+
+function plantIgniteRound(n) {
+  return Math.round(n * 10) / 10
+}
+
+const PLANT_IGNITE_SIZES = [
+  [375, 667],
+  [390, 844],
+  [412, 915],
+  [768, 1024],
+]
+
 function inside(box, frame, slack = 1) {
   return box.left >= frame.left - slack && box.right <= frame.right + slack && box.top >= frame.top - slack && box.bottom <= frame.bottom + slack
 }
@@ -6628,7 +6660,7 @@ async function checkMap05CamOffRing(browser, port, errors) {
           return best
         }
         const seats = [...document.querySelectorAll('.defend-plant-ground circle.is-live')]
-        const candle = document.querySelector('button.defend-candle-lamp')
+        const candle = document.querySelector('button.defend-new-lamp.defend-candle-lamp')
         const railButtons = [...document.querySelectorAll('.nw-rail button.defend-ability')].filter((el) => {
           const rect = el.getBoundingClientRect()
           const style = getComputedStyle(el)
@@ -6861,6 +6893,381 @@ async function checkMap05CamOffRing(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #957 Easy first plant shockwave — live hook and no-fire cases. */
+async function checkNwPlantIgnite(browser, port, errors) {
+  const only = process.env.NW_PLANT_IGNITE_SIZE
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+
+  const installSampler = (page) =>
+    page.evaluate(() => {
+      window.__nwPlantIgnite = {
+        frames: [],
+        firstSeen: null,
+        lastSeen: null,
+        running: true,
+        start: performance.now(),
+        peakScale: 0,
+      }
+      const gold = (value) => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+        let match
+        while ((match = re.exec(value || ''))) {
+          const r = Number(match[1])
+          const g = Number(match[2])
+          const b = Number(match[3])
+          const a = match[4] === undefined ? 1 : Number(match[4])
+          if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
+      const round = (n) => Math.round(n * 10) / 10
+      const box = (el) => {
+        if (!el) return null
+        const r = el.getBoundingClientRect()
+        if (r.width < 1 && r.height < 1) return null
+        return { x: round(r.x), y: round(r.y), w: round(r.width), h: round(r.height) }
+      }
+      const readFrame = () => {
+        const root = document.querySelector('.defend-page')
+        const chrome =
+          'button, .defend-abilities, .defend-boost, .defend-tower-card, .defend-path-pip, .nw-balloon-orb, .defend-wave, .defend-ability-stock'
+        const names = !root
+          ? []
+          : [...root.querySelectorAll(chrome)]
+              .filter((node) => !node.closest('.defend-nw-debug'))
+              .filter((node) => {
+                const rect = node.getBoundingClientRect()
+                const style = getComputedStyle(node)
+                return rect.width > 1 && rect.height > 1 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0
+              })
+              .filter((node) => {
+                const style = getComputedStyle(node)
+                const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+                const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+                return gold(style.backgroundImage) || gold(style.backgroundColor) || border || gold(style.boxShadow) || (text && gold(style.color))
+              })
+              .map((node) => `${node.tagName}.${node.getAttribute('class') || ''}`.slice(0, 80))
+        const rings = [...document.querySelectorAll('.defend-plant-ground circle')].filter((node) => {
+          const rect = node.getBoundingClientRect()
+          const style = getComputedStyle(node)
+          if (rect.width <= 1 || rect.height <= 1 || style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+          return gold(style.stroke) || gold(style.fill) || gold(style.filter)
+        })
+        let igniteGold = 0
+        for (const node of document.querySelectorAll('.defend-plant-ignite, .defend-plant-ignite *')) {
+          const style = getComputedStyle(node)
+          if (
+            gold(style.stroke) ||
+            gold(style.fill) ||
+            gold(style.filter) ||
+            gold(style.color) ||
+            gold(style.backgroundColor) ||
+            gold(style.boxShadow)
+          ) igniteGold += 1
+        }
+        const ignites = [...document.querySelectorAll('.defend-plant-ignite')].filter((node) => {
+          const style = getComputedStyle(node)
+          return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0 && node.getClientRects().length > 0
+        })
+        const igniteVisible = ignites.length
+        const ptr = igniteVisible === 0 || ignites.every((node) => getComputedStyle(node).pointerEvents === 'none')
+        const ring = document.querySelector('.defend-plant-ignite-ring')
+        let scale = 0
+        if (ring) {
+          const tr = getComputedStyle(ring).transform
+          if (tr && tr !== 'none') {
+            const m = tr.match(/matrix\(([^)]+)\)/)
+            if (m) {
+              const parts = m[1].split(',').map((v) => Number(v.trim()))
+              scale = Math.max(Math.abs(parts[0] || 0), Math.abs(parts[3] || 0))
+            }
+          } else scale = 1
+        }
+        const go = document.querySelector('.defend-go')
+        const candle = document.querySelector('button.defend-new-lamp.defend-candle-lamp')
+        const rail = document.querySelector('.nw-rail .defend-ability[data-type="love"], .nw-rail button.defend-ability')
+        const hitOf = (el, rootSel) => {
+          if (!el) return 'missing'
+          const rect = el.getBoundingClientRect()
+          if (rect.width < 1 || rect.height < 1) return 'missing'
+          const node = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
+          if (!node) return 'none'
+          if (node === el || el.contains(node)) return 'ok'
+          if (rootSel && node.closest?.(rootSel) === el) return 'ok'
+          return String(node.tagName || 'none')
+        }
+        return {
+          names,
+          rings: rings.length,
+          gold: names.length + rings.length,
+          igniteGold,
+          igniteVisible,
+          ptr,
+          scale,
+          igniteBox: ring ? box(ring) : null,
+          begin: box(go),
+          candle: box(candle),
+          rail: box(rail),
+          hits: {
+            begin: hitOf(go, '.defend-go'),
+            rail: hitOf(rail, '.defend-ability'),
+            candle: hitOf(candle, 'button.defend-candle-lamp'),
+          },
+          awaiting: go?.classList.contains('is-awaiting-plant') ? 1 : 0,
+          sprites: document.querySelectorAll('.defend-lamp-sprite').length,
+        }
+      }
+      const tick = () => {
+        const frame = readFrame()
+        window.__nwPlantIgnite.frames.push(frame)
+        const now = performance.now()
+        if (frame.igniteVisible) {
+          if (window.__nwPlantIgnite.firstSeen == null) window.__nwPlantIgnite.firstSeen = now
+          window.__nwPlantIgnite.lastSeen = now
+        }
+        window.__nwPlantIgnite.peakScale = Math.max(window.__nwPlantIgnite.peakScale, frame.scale)
+        if (window.__nwPlantIgnite.running && now - window.__nwPlantIgnite.start < 920) requestAnimationFrame(tick)
+        else window.__nwPlantIgnite.running = false
+      }
+      requestAnimationFrame(tick)
+    })
+
+  const lineRecords = async (page) =>
+    page.evaluate(() => {
+      const cssText = (value) => {
+        if (!value || value === 'none' || value === 'normal') return ''
+        const first = /^"((?:\\.|[^"\\])*)"/.exec(value)
+        return first ? first[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\') : ''
+      }
+      const selectorOf = (el) => {
+        const tag = el.tagName.toLowerCase()
+        const cls = (el.getAttribute('class') || '').trim().split(/\s+/).filter(Boolean).slice(0, 4).join('.')
+        return cls ? `${tag}.${cls}` : tag
+      }
+      const lineOf = (el) => {
+        const style = getComputedStyle(el)
+        const directs = [...el.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+        const source = directs.map((child) => child.textContent).join('').replace(/\s+/g, ' ').trim()
+        const range = document.createRange()
+        const host = el.getBoundingClientRect()
+        let rendered = ''
+        for (const child of directs) {
+          const raw = child.textContent
+          for (let i = 0; i < raw.length; i += 1) {
+            const ch = raw[i]
+            if (!ch.trim()) {
+              rendered += ch
+              continue
+            }
+            range.setStart(child, i)
+            range.setEnd(child, i + 1)
+            let painted = false
+            for (const bit of range.getClientRects()) {
+              if (bit.width <= 0 || bit.height <= 0) continue
+              if (bit.right > host.left - 1 && bit.left < host.right + 1 && bit.bottom > host.top - 1 && bit.top < host.bottom + 1) {
+                painted = true
+                break
+              }
+            }
+            if (painted) rendered += ch
+          }
+        }
+        return {
+          name: selectorOf(el),
+          overflow: style.overflow,
+          scroll: el.scrollWidth,
+          client: el.clientWidth,
+          scrollH: el.scrollHeight,
+          clientH: el.clientHeight,
+          rendered: rendered.replace(/\s+/g, ' ').trim(),
+          source,
+        }
+      }
+      const pseudoParts = (el) => {
+        const host = el.getBoundingClientRect()
+        const hostStyle = getComputedStyle(el)
+        return ['::before', '::after']
+          .map((pseudo) => {
+            const style = getComputedStyle(el, pseudo)
+            const source = cssText(style.content).replace(/\s+/g, ' ').trim()
+            if (!source) return null
+            const painted =
+              style.display !== 'none' &&
+              style.visibility !== 'hidden' &&
+              Number(style.opacity) > 0 &&
+              parseFloat(style.fontSize) > 0 &&
+              host.width > 1 &&
+              host.height > 1
+            return {
+              name: `${selectorOf(el)}${pseudo}`,
+              overflow: hostStyle.overflow,
+              scroll: el.scrollWidth,
+              client: el.clientWidth,
+              scrollH: el.scrollHeight,
+              clientH: el.clientHeight,
+              rendered: painted ? source : '',
+              source,
+            }
+          })
+          .filter(Boolean)
+      }
+      const linesFor = (el) => {
+        if (!el) return []
+        const pseudos = pseudoParts(el)
+        if (pseudos.length) return pseudos
+        const text = lineOf(el)
+        return text ? [text] : []
+      }
+      const go = document.querySelector('.defend-go')
+      const candle = document.querySelector('button.defend-candle-lamp')
+      return [...linesFor(go), ...linesFor(candle)]
+    })
+
+  const runPlant = async (width, height, motion) => {
+    const label = `${width}x${height}${motion ? ' motion' : ''}`
+    if (only && only !== label && only !== `${width}x${height}`) return
+    const { context, page } = await openMap(browser, port, width, height, 'a2', {
+      motion,
+      search: plantIgniteSearch(width),
+    })
+    page.on('pageerror', (error) => errors.push(`plant-ignite ${label} ${error}`))
+    await page.locator('.defend-plant-ground circle.is-first-seat').waitFor()
+    const pre = await page.evaluate(() => {
+      const round = (n) => Math.round(n * 10) / 10
+      const box = (el) => {
+        if (!el) return null
+        const r = el.getBoundingClientRect()
+        return { x: round(r.x), y: round(r.y), w: round(r.width), h: round(r.height) }
+      }
+      return {
+        begin: box(document.querySelector('.defend-go')),
+        rail: box(document.querySelector('.nw-rail .defend-ability[data-type="love"], .nw-rail button.defend-ability')),
+        candle: box(document.querySelector('button.defend-new-lamp.defend-candle-lamp')),
+      }
+    })
+    assert.ok(pre.candle, `${label} Candle tap rect before plant`)
+    assert.ok(pre.rail, `${label} rail tap rect before plant`)
+    await installSampler(page)
+    await page.locator('[data-type="love"]').click()
+    const seat = await firstGoldSeat(page)
+    await page.mouse.click(seat.x, seat.y)
+    await page.waitForFunction(() => window.__nwPlantIgnite && !window.__nwPlantIgnite.running, undefined, { timeout: 5000 })
+    assert.equal(await page.locator('.defend-go.is-awaiting-plant').count(), 0, `${label} Begin stops awaiting plant`)
+    assert.equal(await page.locator('.defend-lamp-sprite').count(), 1, `${label} one lamp sprite`)
+    const sample = await page.evaluate(() => window.__nwPlantIgnite)
+    const visibleFrames = sample.frames.filter((frame) => frame.igniteVisible > 0).length
+    const holdMs =
+      sample.firstSeen != null && sample.lastSeen != null ? Math.round(sample.lastSeen - sample.firstSeen) : 0
+    const motionReduce = !motion
+    const wantPeak = motionReduce ? 1.6 : 2.1
+    const peakOk = sample.peakScale >= wantPeak - 0.35
+    const nameLabel = [...new Set(sample.frames.flatMap((row) => row.names))].join(' | ') || '(none)'
+    const fmt = (n) => plantIgniteRound(n).toFixed(1)
+    const worst = { begin: 0, rail: 0, candle: 0 }
+    for (const row of sample.frames) {
+      if (pre.begin && row.begin) worst.begin = Math.max(worst.begin, Math.abs(row.begin.x - pre.begin.x), Math.abs(row.begin.y - pre.begin.y))
+      if (pre.rail && row.rail) worst.rail = Math.max(worst.rail, Math.abs(row.rail.x - pre.rail.x), Math.abs(row.rail.y - pre.rail.y))
+      if (pre.candle && row.candle) worst.candle = Math.max(worst.candle, Math.abs(row.candle.x - pre.candle.x), Math.abs(row.candle.y - pre.candle.y))
+      if (row.sprites < 1) continue
+      if (row.igniteGold > 0) fail(`checkNwPlantIgnite fail ${label} ignite tree gold=${row.igniteGold}`)
+      if (row.gold !== 1) fail(`checkNwPlantIgnite fail ${label} gold=${row.gold} names=${nameLabel}`)
+      if (!row.ptr && row.igniteVisible) fail(`checkNwPlantIgnite fail ${label} ignite pointer-events`)
+      if (row.hits.begin !== 'ok' || row.hits.rail !== 'ok' || row.hits.candle !== 'ok')
+        fail(`checkNwPlantIgnite hit ${label} begin=${row.hits.begin} rail=${row.hits.rail} candle=${row.hits.candle}`)
+    }
+    console.log(`checkNwPlantIgnite delta ${label} begin=${fmt(worst.begin)} rail=${fmt(worst.rail)} candle=${fmt(worst.candle)}`)
+    if (worst.begin > 0.5 || worst.rail > 0.5 || worst.candle > 0.5)
+      fail(`checkNwPlantIgnite delta ${label} begin=${fmt(worst.begin)} rail=${fmt(worst.rail)} candle=${fmt(worst.candle)}`)
+    const lines = await lineRecords(page)
+    let clipped = 0
+    for (const row of lines) {
+      console.log(
+        `checkNwPlantIgnite line ${label} ${row.name} overflow=${row.overflow} scroll=${row.scroll} client=${row.client} scrollH=${row.scrollH} clientH=${row.clientH} rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(row.source)}`,
+      )
+      if (row.rendered !== row.source) fail(`checkNwPlantIgnite line ${label} ${row.name}`)
+      if (row.scroll > row.client + 1 || row.scrollH > row.clientH + 1) clipped += 1
+    }
+    if (clipped !== 0) fail(`checkNwPlantIgnite clip ${label} clipped=${clipped}`)
+    else console.log(`checkNwPlantIgnite clip ${label} clipped=0`)
+    if (visibleFrames === 0 || holdMs < 500)
+      fail(`checkNwPlantIgnite fail ${label} ignite=${visibleFrames} visibleFrames=${visibleFrames}`)
+    if (visibleFrames > 0 && peakOk) {
+      const { frame: frameBox, boxes } = await frameBoxes(page, '.defend-plant-ignite-ring')
+      const okBox = boxes.some((box) => inside(box, frameBox))
+      if (!okBox) fail(`checkNwPlantIgnite bbox ${label} peak=${sample.peakScale}`)
+      else console.log(`checkNwPlantIgnite bbox ${label} peak=${sample.peakScale.toFixed(2)} holdMs=${holdMs}`)
+    } else if (visibleFrames > 0 && !peakOk) {
+      fail(`checkNwPlantIgnite bbox ${label} peak=${sample.peakScale} want=${wantPeak}`)
+    }
+    const bad = problems.length
+    if (visibleFrames > 0 && bad === 0)
+      console.log(`checkNwPlantIgnite ok ${label} gold=1 names=${nameLabel} ignite=${visibleFrames} holdMs=${holdMs}`)
+    await context.close()
+  }
+
+  for (const [width, height] of PLANT_IGNITE_SIZES) {
+    await runPlant(width, height, false)
+    await runPlant(width, height, true)
+  }
+
+  const jumpSearch = '?playtest=1&nwSeed=2&nwMap=a2&nwRound=18&nwLamps=2'
+  {
+    const { context, page } = await openMap(browser, port, 375, 667, 'a2', { search: jumpSearch })
+    page.on('pageerror', (error) => errors.push(`plant-ignite jump ${error}`))
+    await page.waitForTimeout(100)
+    const jumpSample = await page.evaluate(async () => {
+      const frames = []
+      const start = performance.now()
+      while (performance.now() - start < 920) {
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+        frames.push(document.querySelectorAll('.defend-plant-ignite').length)
+      }
+      return { max: Math.max(0, ...frames), ms: Math.round(performance.now() - start) }
+    })
+    if (jumpSample.max !== 0) fail(`checkNwPlantIgnite no-fire jump ignite=${jumpSample.max}`)
+    else console.log(`checkNwPlantIgnite no-fire jump ignite=0 ms=${jumpSample.ms}`)
+    await context.close()
+  }
+
+  const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }
+  const hard = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width: 375, height: 667 },
+    deviceScaleFactor: 1,
+  })
+  await hard.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: hardSave },
+  )
+  const hardPage = await hard.newPage()
+  hardPage.on('pageerror', (error) => errors.push(`plant-ignite hard ${error}`))
+  await hardPage.goto('/?playtest=1')
+  await hardPage.getByRole('button', { name: 'Hold the night' }).click()
+  await hardPage.locator('.defend-board').waitFor()
+  assert.equal(await hardPage.locator('.defend-page.is-easy-watch').count(), 0, 'Hard has no easy-watch class')
+  const hardSample = await hardPage.evaluate(async () => {
+    const frames = []
+    const start = performance.now()
+    while (performance.now() - start < 920) {
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+      frames.push(document.querySelectorAll('.defend-plant-ignite').length)
+    }
+    return { max: Math.max(0, ...frames), ms: Math.round(performance.now() - start) }
+  })
+  if (hardSample.max !== 0) fail(`checkNwPlantIgnite no-fire hard ignite=${hardSample.max}`)
+  else console.log(`checkNwPlantIgnite no-fire hard ignite=0 ms=${hardSample.ms}`)
+  await hard.close()
+
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 export async function checkPhoneFixes() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -6919,6 +7326,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'map05 camera-off ring nights stay free of console errors')
       return
     }
+    if (process.env.NW_PLANT_IGNITE_ONLY === '1') {
+      await checkNwPlantIgnite(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'plant ignite nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
@@ -6933,6 +7345,7 @@ export async function checkPhoneFixes() {
     await checkNwDockGold(browser, port, errors)
     await checkNwTypeLabelChrome(browser, port, errors)
     await checkMap05CamOffRing(browser, port, errors)
+    await checkNwPlantIgnite(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -7109,7 +7522,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
