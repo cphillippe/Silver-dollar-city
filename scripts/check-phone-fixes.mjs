@@ -327,9 +327,9 @@ async function waitForFirstWalkerVisible(page, ceilingMs = FIRST_WALKER_VISIBLE_
   assert.fail(`first walker visible within ${ceilingMs}ms`)
 }
 
-async function openMap(browser, port, width, height, map, { motion = false, search = '?playtest=1&nwSeed=2' } = {}) {
+async function openMap(browser, port, width, height, map, { motion = false, search = '?playtest=1&nwSeed=2', baseURL } = {}) {
   const context = await browser.newContext({
-    baseURL: `http://127.0.0.1:${port}/`,
+    baseURL: baseURL || `http://127.0.0.1:${port}/`,
     viewport: { width, height },
     deviceScaleFactor: 1,
     reducedMotion: motion ? 'no-preference' : 'reduce',
@@ -340,7 +340,24 @@ async function openMap(browser, port, width, height, map, { motion = false, sear
   )
   const page = await context.newPage()
   const query = search.includes('nwCam=') ? search : `${search}&nwCam=0`
-  await page.goto(map === 'a2' ? `/${query}` : `${query}&nwMap=${map}`)
+  const withMap = map === 'a2' ? query : `${query}&nwMap=${map}`
+  const live = baseURL && /github\.io\//.test(baseURL)
+  const dest = live
+    ? withMap.includes('cb=')
+      ? withMap
+      : `${withMap}&cb=${Date.now()}`
+    : withMap.startsWith('?')
+      ? withMap
+      : `?${withMap}`
+  await page.goto(dest, live ? { timeout: 45_000, waitUntil: 'domcontentloaded' } : undefined)
+  if (live) {
+    await page.waitForTimeout(1800)
+    const start = page.getByRole('button', { name: 'Start Easy' })
+    if (await start.count()) {
+      await start.click()
+      await page.waitForTimeout(1400)
+    }
+  }
   await page.getByRole('button', { name: 'Settings' }).click()
   await page.locator('summary', { hasText: 'Developer' }).click()
   await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
@@ -5863,26 +5880,26 @@ const TYPE_LABEL_PINS = {
   '375x667': {
     planted: { begin: { x: 67.5, y: 602.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: {} },
     card: { begin: { x: 67.5, y: 602.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 216, y: 397.3, w: 32, h: 32 }, 'pip-far': { x: 88, y: 431.7, w: 18, h: 16 }, 'buy-far': { x: 168, y: 406.9, w: 46, h: 44 }, 'pip-strong': { x: 88, y: 476.7, w: 18, h: 16 }, 'buy-strong': { x: 168, y: 451.9, w: 46, h: 44 } } },
-    r5: { begin: null, continue: { x: 125, y: 603, w: 125, h: 56 }, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 321.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 377.9, w: 52, h: 53.1 } }, card: {} },
-    r1: { begin: null, continue: { x: 125, y: 603, w: 125, h: 56 }, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 321.9, w: 52, h: 53.1 } }, card: {} },
+    r5: { begin: null, continue: { x: 125.4, y: 603, w: 124.3, h: 56 }, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 321.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 377.9, w: 52, h: 53.1 } }, card: {} },
+    r1: { begin: null, continue: { x: 125.4, y: 603, w: 124.3, h: 56 }, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 321.9, w: 52, h: 53.1 } }, card: {} },
   },
   '390x844': {
     planted: { begin: { x: 75, y: 779.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: {} },
-    card: { begin: { x: 75, y: 779.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 233.3, y: 273, w: 32, h: 32 }, 'pip-far': { x: 105.3, y: 307.4, w: 18, h: 16 }, 'buy-far': { x: 185.3, y: 282.6, w: 46, h: 44 }, 'pip-strong': { x: 105.3, y: 352.4, w: 18, h: 16 }, 'buy-strong': { x: 185.3, y: 327.6, w: 46, h: 44 } } },
-    r5: { begin: null, continue: { x: 132.5, y: 780, w: 125, h: 56 }, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 498.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 554.9, w: 52, h: 53.1 } }, card: {} },
-    r1: { begin: null, continue: { x: 132.5, y: 780, w: 125, h: 56 }, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 498.9, w: 52, h: 53.1 } }, card: {} },
+    card: { begin: { x: 75, y: 779.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 194.5, y: 319, w: 32, h: 32 }, 'pip-far': { x: 66.5, y: 353.4, w: 18, h: 16 }, 'buy-far': { x: 146.5, y: 328.7, w: 46, h: 44 }, 'pip-strong': { x: 66.5, y: 398.4, w: 18, h: 16 }, 'buy-strong': { x: 146.5, y: 373.7, w: 46, h: 44 } } },
+    r5: { begin: null, continue: { x: 132.9, y: 780, w: 124.3, h: 56 }, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 498.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 554.9, w: 52, h: 53.1 } }, card: {} },
+    r1: { begin: null, continue: { x: 132.9, y: 780, w: 124.3, h: 56 }, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 498.9, w: 52, h: 53.1 } }, card: {} },
   },
   '412x915': {
     planted: { begin: { x: 86, y: 850.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 353, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 353, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 353, y: 208, w: 48, h: 48 }, 'rail-science': { x: 353, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: {} },
-    card: { begin: { x: 86, y: 850.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 353, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 353, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 353, y: 208, w: 48, h: 48 }, 'rail-science': { x: 353, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 226, y: 350.2, w: 32, h: 32 }, 'pip-far': { x: 98, y: 384.5, w: 18, h: 16 }, 'buy-far': { x: 178, y: 359.8, w: 46, h: 44 }, 'pip-strong': { x: 98, y: 429.5, w: 18, h: 16 }, 'buy-strong': { x: 178, y: 404.8, w: 46, h: 44 } } },
-    r5: { begin: null, continue: { x: 143.5, y: 851, w: 125, h: 56 }, rail: { 'rail-love': { x: 353, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 353, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 353, y: 208, w: 48, h: 48 }, 'rail-science': { x: 353, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 569.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 625.9, w: 52, h: 53.1 } }, card: {} },
-    r1: { begin: null, continue: { x: 143.5, y: 851, w: 125, h: 56 }, rail: { 'rail-love': { x: 353, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 353, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 353, y: 208, w: 48, h: 48 }, 'rail-science': { x: 353, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 569.9, w: 52, h: 53.1 } }, card: {} },
+    card: { begin: { x: 86, y: 850.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 353, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 353, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 353, y: 208, w: 48, h: 48 }, 'rail-science': { x: 353, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 226, y: 349, w: 32, h: 32 }, 'pip-far': { x: 98, y: 383.4, w: 18, h: 16 }, 'buy-far': { x: 178, y: 358.6, w: 46, h: 44 }, 'pip-strong': { x: 98, y: 428.4, w: 18, h: 16 }, 'buy-strong': { x: 178, y: 403.6, w: 46, h: 44 } } },
+    r5: { begin: null, continue: { x: 143.9, y: 851, w: 124.3, h: 56 }, rail: { 'rail-love': { x: 353, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 353, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 353, y: 208, w: 48, h: 48 }, 'rail-science': { x: 353, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 569.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 625.9, w: 52, h: 53.1 } }, card: {} },
+    r1: { begin: null, continue: { x: 143.9, y: 851, w: 124.3, h: 56 }, rail: { 'rail-love': { x: 353, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 353, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 353, y: 208, w: 48, h: 48 }, 'rail-science': { x: 353, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 569.9, w: 52, h: 53.1 } }, card: {} },
   },
   '768x1024': {
-    planted: { begin: { x: 77.8, y: 710, w: 162, h: 56 }, continue: null, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-candle': { x: 77.8, y: 770, w: 162, h: 52 }, 'dock-bell': { x: 77.8, y: 826, w: 162, h: 52 }, 'dock-incense': { x: 77.8, y: 882, w: 162, h: 52 }, 'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 } }, card: {} },
-    card: { begin: { x: 77.8, y: 710, w: 162, h: 56 }, continue: null, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-candle': { x: 77.8, y: 770, w: 162, h: 52 }, 'dock-bell': { x: 77.8, y: 826, w: 162, h: 52 }, 'dock-incense': { x: 77.8, y: 882, w: 162, h: 52 }, 'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 } }, card: { pull: { x: 373.5, y: 305, w: 32, h: 32 }, 'pip-far': { x: 247.5, y: 354.8, w: 20, h: 20 }, 'buy-far': { x: 247.5, y: 380.8, w: 148, h: 52 }, 'pip-strong': { x: 247.5, y: 466.8, w: 20, h: 20 }, 'buy-strong': { x: 247.5, y: 492.8, w: 148, h: 52 } } },
-    r5: { begin: null, continue: { x: 86.8, y: 937, w: 70, h: 40 }, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-new': { x: 160.8, y: 937, w: 95.5, h: 40 }, 'dock-candle': { x: 260.3, y: 937, w: 79.5, h: 40 } }, card: {} },
-    r1: { begin: null, continue: { x: 86.8, y: 937, w: 70, h: 40 }, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-new': { x: 160.8, y: 937, w: 95.5, h: 40 } }, card: {} },
+    planted: { begin: { x: 77.8, y: 710, w: 160.1, h: 56 }, continue: null, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-candle': { x: 77.8, y: 770, w: 160.1, h: 52 }, 'dock-bell': { x: 77.8, y: 826, w: 160.1, h: 52 }, 'dock-incense': { x: 77.8, y: 882, w: 160.1, h: 52 }, 'dock-cross': { x: 77.8, y: 938, w: 160.1, h: 52 } }, card: {} },
+    card: { begin: { x: 77.8, y: 710, w: 160.1, h: 56 }, continue: null, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-candle': { x: 77.8, y: 770, w: 160.1, h: 52 }, 'dock-bell': { x: 77.8, y: 826, w: 160.1, h: 52 }, 'dock-incense': { x: 77.8, y: 882, w: 160.1, h: 52 }, 'dock-cross': { x: 77.8, y: 938, w: 160.1, h: 52 } }, card: { pull: { x: 373.5, y: 305, w: 32, h: 32 }, 'pip-far': { x: 247.5, y: 354.8, w: 20, h: 20 }, 'buy-far': { x: 247.5, y: 380.8, w: 148, h: 52 }, 'pip-strong': { x: 247.5, y: 466.8, w: 20, h: 20 }, 'buy-strong': { x: 247.5, y: 492.8, w: 148, h: 52 } } },
+    r5: { begin: null, continue: { x: 86.8, y: 937, w: 69.2, h: 40 }, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-new': { x: 160, y: 937, w: 96.9, h: 40 }, 'dock-candle': { x: 260.9, y: 937, w: 80.3, h: 40 } }, card: {} },
+    r1: { begin: null, continue: { x: 86.8, y: 937, w: 69.2, h: 40 }, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-new': { x: 160, y: 937, w: 96.9, h: 40 } }, card: {} },
   },
 }
 
@@ -5899,6 +5916,43 @@ function typeLabelBoxDelta(now, was) {
 
 function typeLabelSearch(round) {
   return TYPE_LABEL_SEARCH.replace('nwRound=18', `nwRound=${round}`)
+}
+
+/** One gold on this frame: Begin when planted, a path buy on the open card, Continue after a clear. */
+async function typeLabelGoldCount(page, state) {
+  return page.evaluate((state) => {
+    const gold = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = Number(match[1])
+        const g = Number(match[2])
+        const b = Number(match[3])
+        const a = match[4] === undefined ? 1 : Number(match[4])
+        if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const visible = (el) => {
+      const style = getComputedStyle(el)
+      const box = el.getBoundingClientRect()
+      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0 && box.width > 1 && box.height > 1
+    }
+    const goldOf = (el) => {
+      const style = getComputedStyle(el)
+      const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => parseFloat(style[`border${side}Width`]) > 0 && gold(style[`border${side}Color`]))
+      return gold(style.backgroundImage) || gold(style.backgroundColor) || border || gold(style.boxShadow)
+    }
+    const nameOf = (el) => `${el.tagName}.${el.getAttribute('class') || ''}`.replace(/\s+/g, ' ').trim().slice(0, 80)
+    const want =
+      state === 'planted'
+        ? document.querySelectorAll('.defend-go')
+        : state === 'card'
+          ? document.querySelectorAll('.defend-tower-card [data-path-buy]')
+          : document.querySelectorAll('.defend-continue, button.defend-new-lamp')
+    const names = [...want].filter((el) => visible(el) && goldOf(el)).map(nameOf)
+    return { gold: names.length, names }
+  }, state)
 }
 
 async function sampleTypeLabelChrome(page) {
@@ -6020,10 +6074,20 @@ async function sampleTypeLabelChrome(page) {
       if (el.classList.contains('defend-lesson-open')) return 'lesson'
       return ''
     }
+    const selOf = (el) => {
+      const cls = (el.getAttribute('class') || '').replace(/\s+/g, '.')
+      const plot = el.getAttribute('data-chip-plot')
+      const hide = el.getAttribute('data-chrome-hide')
+      return `${el.tagName.toLowerCase()}${cls ? '.' + cls : ''}${plot ? `[data-chip-plot=${plot}]` : ''}${hide ? `[data-chrome-hide=${hide}]` : ''}`
+    }
+    const labelBox = (el) => (el.matches('.defend-type-chip') ? boxOf(el) : paintOf(el))
     const read = () => {
-      const labels = [...document.querySelectorAll('text.defend-type-label')].filter(shown).map((el) => ({
+      const nodes = [...document.querySelectorAll('text.defend-type-label, .defend-type-chip')]
+      const visibleNodes = nodes.filter(shown).map((el) => ({
+        selector: selOf(el),
         text: norm(el.textContent),
-        box: paintOf(el),
+        kind: el.matches('.defend-type-chip') ? 'chip' : 'svg',
+        box: labelBox(el),
       }))
       const regions = {
         begin: union('.defend-go'),
@@ -6032,7 +6096,19 @@ async function sampleTypeLabelChrome(page) {
         clearRow: union('.defend-clear-row button:not(.defend-continue), button.defend-new-lamp'),
         hud: union('.nw-hud, .nw-wave-overlay .defend-wave'),
       }
-      const sum = (key) => Math.round(labels.reduce((total, label) => total + regions[key].reduce((hit, box) => hit + area(label.box, box), 0), 0))
+      const sum = (key) =>
+        Math.round(
+          visibleNodes.reduce(
+            (total, label) => total + regions[key].reduce((hit, box) => hit + area(label.box, box), 0),
+            0,
+          ),
+        )
+      const byText = {}
+      for (const n of visibleNodes) {
+        byText[n.text] = byText[n.text] || []
+        byText[n.text].push(`${n.kind}:${n.selector}`)
+      }
+      const doubles = Object.entries(byText).filter(([, v]) => v.length > 1)
       const rects = {}
       const hits = []
       const take = (key, el) => {
@@ -6055,7 +6131,7 @@ async function sampleTypeLabelChrome(page) {
         if (el.closest('.defend-nw-debug, [hidden]')) continue
         take(tapKey(el), el)
       }
-      const lines = [...document.querySelectorAll('text.defend-type-label')].map(lineOf).filter(Boolean)
+      const lines = nodes.map(lineOf).filter(Boolean)
       const pan = document.querySelector('.nw-pan')?.style?.transform || ''
       return {
         begin: sum('begin'),
@@ -6063,8 +6139,10 @@ async function sampleTypeLabelChrome(page) {
         rail: sum('rail'),
         clearRow: sum('clearRow'),
         hud: sum('hud'),
-        visibleLabels: labels.length,
-        labels,
+        visibleLabels: visibleNodes.length,
+        labels: visibleNodes,
+        selectors: visibleNodes.map((n) => n.selector),
+        doubles,
         rects,
         hits,
         lines,
@@ -6131,6 +6209,8 @@ function typeLabelSplit(rects) {
 async function checkNwTypeLabelChrome(browser, port, errors) {
   const only = process.env.NW_TYPE_LABEL_SIZE
   const wantStates = new Set((process.env.NW_TYPE_LABEL_STATE || 'planted,card,r5,r1').split(','))
+  const liveBase =
+    process.env.NW_TYPE_LABEL_LIVE === '1' ? 'https://cphillippe.github.io/Silver-dollar-city/' : undefined
   const problems = []
   const seenProblems = new Set()
   const fail = (line) => {
@@ -6146,6 +6226,7 @@ async function checkNwTypeLabelChrome(browser, port, errors) {
       const { context, page } = await openMap(browser, port, width, height, 'a2', {
         motion: true,
         search: typeLabelSearch(round),
+        baseURL: liveBase,
       })
       page.on('pageerror', (error) => errors.push(`type-label ${size} r${round} ${error}`))
       page.on('console', (msg) => {
@@ -6185,16 +6266,24 @@ async function checkNwTypeLabelChrome(browser, port, errors) {
         }
         await page.waitForTimeout(80)
         const frames = await sampleTypeLabelChrome(page)
+        const goldCues = await typeLabelGoldCount(page, state)
         assert.ok(frames.length >= 8, `${size} ${state} sampled ${frames.length} frames`)
         seen[state] = frames[0]?.rects || {}
-        console.log(`checkNwTypeLabelChrome box ${size} ${state} pan=${JSON.stringify(frames[0]?.pan || '')} ${JSON.stringify(frames[0]?.labels || [])}`)
+        console.log(
+          `checkNwTypeLabelChrome box ${size} ${state} pan=${JSON.stringify(frames[0]?.pan || '')} selectors=${JSON.stringify(frames[0]?.selectors || [])}`,
+        )
+        console.log(`checkNwTypeLabelChrome sel ${size} ${state} ${JSON.stringify(frames[0]?.selectors || [])}`)
         let clipped = 0
+        let lineMismatch = 0
         const logged = new Set()
         for (const frame of frames) {
           const line = `checkNwTypeLabelChrome ov ${size} ${state} begin=${frame.begin} continue=${frame.continue} rail=${frame.rail} clearRow=${frame.clearRow} hud=${frame.hud} visibleLabels=${frame.visibleLabels}`
           console.log(line)
           if (frame.begin !== 0 || frame.continue !== 0 || frame.rail !== 0 || frame.clearRow !== 0 || frame.hud !== 0) fail(line)
           if (frame.visibleLabels < 1) fail(`checkNwTypeLabelChrome ov ${size} ${state} visibleLabels=0`)
+          for (const [text, parts] of frame.doubles || []) {
+            fail(`checkNwTypeLabelChrome double ${size} ${state} ${text} ${parts.join(' ')}`)
+          }
           for (const row of frame.lines) {
             const note = `${row.name}|${row.overflow}|${row.overflowX}|${row.overflowY}|${row.scroll}|${row.client}|${row.scrollH}|${row.clientH}|${row.rendered}|${row.source}`
             if (!logged.has(note)) {
@@ -6203,11 +6292,18 @@ async function checkNwTypeLabelChrome(browser, port, errors) {
                 `checkNwTypeLabelChrome line ${size} ${state} ${row.name} overflow=${row.overflow} overflowX=${row.overflowX} overflowY=${row.overflowY} scroll=${row.scroll} client=${row.client} scrollH=${row.scrollH} clientH=${row.clientH} rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(row.source)}`,
               )
             }
+            if (row.rendered !== row.source) {
+              lineMismatch += 1
+              fail(
+                `checkNwTypeLabelChrome line ${size} ${state} ${row.name} rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(row.source)}`,
+              )
+            }
             if (row.scroll > row.client + 1 || row.scrollH > row.clientH + 1) clipped += 1
           }
           const wantHit = []
           if (frame.rects.begin) wantHit.push('begin')
           if (frame.rects.continue) wantHit.push('continue')
+          for (const key of Object.keys(frame.rects)) if (key.startsWith('rail-')) wantHit.push(key)
           for (const miss of frame.hits) {
             const key = miss.split(' ')[0]
             if (wantHit.includes(key)) fail(`checkNwTypeLabelChrome hit ${size} ${state} ${miss}`)
@@ -6221,8 +6317,19 @@ async function checkNwTypeLabelChrome(browser, port, errors) {
         }
         const beginHit = centre('begin')
         const continueHit = centre('continue')
-        console.log(`checkNwTypeLabelChrome hit ${size} ${state} begin=${beginHit} continue=${continueHit}`)
-        if (beginHit === 'miss' || continueHit === 'miss') fail(`checkNwTypeLabelChrome hit ${size} ${state} begin=${beginHit} continue=${continueHit}`)
+        const railKeys = [...new Set(frames.flatMap((frame) => Object.keys(frame.rects || {}).filter((key) => key.startsWith('rail-'))))]
+        const railHit =
+          railKeys.length === 0
+            ? 'absent'
+            : railKeys.some((key) => frames.some((frame) => frame.hits.some((miss) => miss.startsWith(`${key} `))))
+              ? 'miss'
+              : 'button'
+        console.log(`checkNwTypeLabelChrome hit ${size} ${state} begin=${beginHit} continue=${continueHit} rail=${railHit}`)
+        if (beginHit === 'miss' || continueHit === 'miss' || railHit === 'miss') {
+          fail(`checkNwTypeLabelChrome hit ${size} ${state} begin=${beginHit} continue=${continueHit} rail=${railHit}`)
+        }
+        const gold = goldCues.gold
+        if (gold !== 1) fail(`checkNwTypeLabelChrome gold ${size} ${state} gold=${gold} names=${goldCues.names.join(' | ') || '(none)'}`)
         const worstOv = frames.reduce(
           (acc, frame) => ({
             begin: Math.max(acc.begin, frame.begin),
@@ -6242,11 +6349,14 @@ async function checkNwTypeLabelChrome(browser, port, errors) {
           worstOv.hud === 0 &&
           worstOv.visibleLabels >= 1 &&
           clipped === 0 &&
+          lineMismatch === 0 &&
           beginHit !== 'miss' &&
-          continueHit !== 'miss'
+          continueHit !== 'miss' &&
+          railHit !== 'miss' &&
+          gold === 1
         ) {
           console.log(
-            `checkNwTypeLabelChrome ok ${size} ${state} frames=${frames.length} begin=0 continue=0 rail=0 clearRow=0 hud=0 visibleLabels=${worstOv.visibleLabels} clipped=0`,
+            `checkNwTypeLabelChrome ok ${size} ${state} frames=${frames.length} begin=0 continue=0 rail=0 clearRow=0 hud=0 visibleLabels=${worstOv.visibleLabels} clipped=0 gold=1`,
           )
         }
         console.log(`checkNwTypeLabelChrome pin ${size} ${state} ${JSON.stringify(typeLabelSplit(frames[0]?.rects || {}))}`)
