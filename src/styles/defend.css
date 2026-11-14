@@ -3763,6 +3763,13 @@ button.defend-path-pip {
   visibility: hidden;
 }
 
+/* 1.4.588 Easy: the chip is the only type name on plant/clear — keep the 13px floor. */
+.defend-page.is-easy-watch .defend-type-chip {
+  font-size: 0.8125rem;
+  padding: 0 6px;
+  letter-spacing: 0;
+}
+
 .defend-type-chip {
   position: absolute;
   z-index: 4;
