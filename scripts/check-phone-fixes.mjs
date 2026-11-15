@@ -5247,6 +5247,7 @@ const NW_DOCK_GOLD_SEARCH = '?playtest=1&nwSeed=2&nwMap=a2&nwRound=18&nwLamps=0'
  * measured on unmodified 1.4.581 (the live fail). Rounded to 0.1px.
  * The pressed Candle dock sits 1px lower; that shift is the existing press, not this hop.
  */
+// 1.4.588: 13px Easy chip moves the open card <=1.1px (placement avoids the chip rect)
 const NW_DOCK_GOLD_BASE = {
   '375x667': {
     plant: {
@@ -5292,11 +5293,11 @@ const NW_DOCK_GOLD_BASE = {
         'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 },
       },
       card: {
-        pull: { x: 194.5, y: 167.7, w: 32, h: 32 },
-        'pip-far': { x: 66.5, y: 202.1, w: 18, h: 16 },
-        'buy-far': { x: 146.5, y: 177.3, w: 46, h: 44 },
-        'pip-strong': { x: 66.5, y: 247.1, w: 18, h: 16 },
-        'buy-strong': { x: 146.5, y: 222.3, w: 46, h: 44 },
+        pull: { x: 194.5, y: 168.4, w: 32, h: 32 },
+        'pip-far': { x: 66.5, y: 202.8, w: 18, h: 16 },
+        'buy-far': { x: 146.5, y: 178.1, w: 46, h: 44 },
+        'pip-strong': { x: 66.5, y: 247.8, w: 18, h: 16 },
+        'buy-strong': { x: 146.5, y: 223.1, w: 46, h: 44 },
       },
     },
   },
@@ -5344,11 +5345,11 @@ const NW_DOCK_GOLD_BASE = {
         'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 },
       },
       card: {
-        pull: { x: 272.2, y: 130, w: 32, h: 32 },
-        'pip-far': { x: 144.2, y: 164.4, w: 18, h: 16 },
-        'buy-far': { x: 224.2, y: 139.6, w: 46, h: 44 },
-        'pip-strong': { x: 144.2, y: 209.4, w: 18, h: 16 },
-        'buy-strong': { x: 224.2, y: 184.6, w: 46, h: 44 },
+        pull: { x: 273.3, y: 130, w: 32, h: 32 },
+        'pip-far': { x: 145.3, y: 164.4, w: 18, h: 16 },
+        'buy-far': { x: 225.3, y: 139.6, w: 46, h: 44 },
+        'pip-strong': { x: 145.3, y: 209.4, w: 18, h: 16 },
+        'buy-strong': { x: 225.3, y: 184.6, w: 46, h: 44 },
       },
     },
   },
@@ -5396,11 +5397,11 @@ const NW_DOCK_GOLD_BASE = {
         'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 },
       },
       card: {
-        pull: { x: 274.8, y: 130, w: 32, h: 32 },
-        'pip-far': { x: 146.8, y: 164.4, w: 18, h: 16 },
-        'buy-far': { x: 226.8, y: 139.6, w: 46, h: 44 },
-        'pip-strong': { x: 146.8, y: 209.4, w: 18, h: 16 },
-        'buy-strong': { x: 226.8, y: 184.6, w: 46, h: 44 },
+        pull: { x: 275.9, y: 130, w: 32, h: 32 },
+        'pip-far': { x: 147.9, y: 164.4, w: 18, h: 16 },
+        'buy-far': { x: 227.9, y: 139.6, w: 46, h: 44 },
+        'pip-strong': { x: 147.9, y: 209.4, w: 18, h: 16 },
+        'buy-strong': { x: 227.9, y: 184.6, w: 46, h: 44 },
       },
     },
   },
@@ -5448,11 +5449,11 @@ const NW_DOCK_GOLD_BASE = {
         'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 },
       },
       card: {
-        pull: { x: 480.6, y: 121, w: 32, h: 32 },
-        'pip-far': { x: 354.6, y: 170.8, w: 20, h: 20 },
-        'buy-far': { x: 354.6, y: 196.8, w: 148, h: 52 },
-        'pip-strong': { x: 354.6, y: 282.8, w: 20, h: 20 },
-        'buy-strong': { x: 354.6, y: 308.8, w: 148, h: 52 },
+        pull: { x: 479.8, y: 121, w: 32, h: 32 },
+        'pip-far': { x: 353.8, y: 170.8, w: 20, h: 20 },
+        'buy-far': { x: 353.8, y: 196.8, w: 148, h: 52 },
+        'pip-strong': { x: 353.8, y: 282.8, w: 20, h: 20 },
+        'buy-strong': { x: 353.8, y: 308.8, w: 148, h: 52 },
       },
     },
   },
