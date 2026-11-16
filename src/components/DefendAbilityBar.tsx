@@ -60,6 +60,8 @@ export interface DefendAbilityBarProps {
   playtestSteps?: boolean
   /** 0-based round. The step past Strong 4 stays shut until round 15 is clear. */
   roundIndex?: number
+  /** Easy (#968). This planted type's rail slot shakes, empty, while its lamp hops. */
+  emptyShake?: string | null
 }
 
 export function DefendAbilityBar({
@@ -87,6 +89,7 @@ export function DefendAbilityBar({
   onOpenTree,
   playtestSteps = false,
   roundIndex = -1,
+  emptyShake = null,
 }: DefendAbilityBarProps) {
   const swallowClick = useRef(false)
   const stopListen = useRef<(() => void) | null>(null)
@@ -214,7 +217,7 @@ export function DefendAbilityBar({
                 <button
                   key={tool.id}
                   type="button"
-                  className={`defend-ability ${ability === tool.id ? 'is-on' : ''} ${open ? '' : 'is-locked'} ${placed ? 'is-placed' : ''} ${firing && firingId === tool.id ? 'is-firing' : ''} ${spendDry ? 'is-spark-dry' : ''}`}
+                  className={`defend-ability ${ability === tool.id ? 'is-on' : ''} ${open ? '' : 'is-locked'} ${placed ? 'is-placed' : ''} ${firing && firingId === tool.id ? 'is-firing' : ''} ${spendDry ? 'is-spark-dry' : ''} ${easy && emptyShake === tool.id ? 'is-empty-shake' : ''}`}
                   data-type={tool.id}
                   data-lamp-selected={
                     lampArmed === tool.id || (!paidPlace && placing && ability === tool.id) ? 'yes' : undefined

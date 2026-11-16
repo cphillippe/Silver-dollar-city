@@ -8522,6 +8522,444 @@ async function checkNwPlantNoCard(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #968 Easy: a second empty seat moves the only lamp. The hop has to show that move. */
+const LAMP_MOVE_SIZES = [
+  [375, 667],
+  [390, 844],
+  [412, 915],
+  [768, 1024],
+]
+
+async function checkNwLampMoveHop(browser, port, errors) {
+  const only = process.env.NW_LAMP_MOVE_SIZE
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+
+  for (const [width, height] of LAMP_MOVE_SIZES) {
+    const label = `${width}x${height}`
+    if (only && only !== label) continue
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      reducedMotion: 'no-preference',
+      hasTouch: true,
+      isMobile: width < 768,
+    })
+    await context.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: SAVE },
+    )
+    const page = await context.newPage()
+    page.on('pageerror', (error) => errors.push(`lamp-move ${label} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() !== 'error') return
+      const text = msg.text()
+      if (text.includes('Encountered two children with the same key')) return
+      errors.push(`lamp-move ${label} ${text}`)
+    })
+    await page.goto(PLANT_NO_CARD_SEARCH)
+    await page.getByRole('button', { name: 'Settings' }).click()
+    await page.locator('summary', { hasText: 'Developer' }).click()
+    await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
+    await page.locator('.defend-board').waitFor()
+    if (await page.locator('[data-map-overlay]').count()) {
+      await page.locator('[data-map="a2"]').click()
+      await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+    }
+    await page.locator('.defend-go').waitFor()
+    await page.locator('.defend-plant-ground circle.is-first-seat').waitFor()
+    await page.locator('[data-type="love"]').click()
+    const first = await page.evaluate(() => {
+      const svg = document.querySelector('.defend-board')
+      const ring = document.querySelector('.defend-plant-ground circle.is-first-seat')
+      const ctm = svg?.getScreenCTM()
+      if (!svg || !ring || !ctm) return null
+      const p = svg.createSVGPoint()
+      p.x = Number(ring.getAttribute('cx'))
+      p.y = Number(ring.getAttribute('cy')) - 26
+      const q = p.matrixTransform(ctm)
+      return { x: q.x, y: q.y }
+    })
+    assert.ok(first, `${label} first gold seat`)
+    await page.touchscreen.tap(first.x, first.y)
+    await page.waitForFunction(
+      () =>
+        document.querySelectorAll('.defend-lamp-sprite').length >= 1 &&
+        document.querySelectorAll('.defend-pad.is-plant-ignite').length === 0,
+      undefined,
+      { timeout: 4000 },
+    )
+    const plan = await page.evaluate(() => {
+      const svg = document.querySelector('.defend-board')
+      const ctm = svg?.getScreenCTM()
+      const pad = document.querySelector('.defend-pad.is-planted')
+      const tr = pad?.getAttribute('transform') || ''
+      const parsed = /translate\(\s*([-\d.]+)[ ,]+([-\d.]+)/.exec(tr)
+      if (!svg || !ctm || !parsed) return null
+      const ax = Number(parsed[1])
+      const ay = Number(parsed[2])
+      const screen = (x, y) => {
+        const p = svg.createSVGPoint()
+        p.x = x
+        p.y = y
+        const q = p.matrixTransform(ctm)
+        return { x: q.x, y: q.y }
+      }
+      const old = screen(ax, ay)
+      const margin = 16
+      const onScreen = (point) => point.x > margin && point.y > margin && point.x < innerWidth - margin && point.y < innerHeight - margin
+      let best = null
+      for (const ring of document.querySelectorAll('.defend-plant-ground circle.is-live')) {
+        const cx = Number(ring.getAttribute('cx'))
+        const cy = Number(ring.getAttribute('cy'))
+        if (Math.hypot(cx - ax, cy - ay) < 8) continue
+        const at = screen(cx, cy)
+        const lifted = screen(cx, cy - 26)
+        let chosen = null
+        for (const point of [at, lifted]) {
+          if (!onScreen(point)) continue
+          const node = document.elementFromPoint(point.x, point.y)
+          if (!node?.closest?.('.defend-board')) continue
+          if (node.closest('button, a, .nw-rail, .nw-docks, .topbar, .brand')) continue
+          chosen = {
+            point,
+            hit: `${node.tagName}.${node.getAttribute('class') || ''}`.replace(/\s+/g, ' ').trim().slice(0, 80),
+          }
+          break
+        }
+        if (!chosen) continue
+        const away = Math.hypot(cx - ax, cy - ay)
+        if (!best || away > best.away) best = { cx, cy, at, tap: chosen.point, away, hit: chosen.hit }
+      }
+      const box = (el) => {
+        if (!el) return null
+        const r = el.getBoundingClientRect()
+        return { x: r.x, y: r.y, w: r.width, h: r.height, left: r.left, top: r.top, right: r.right, bottom: r.bottom }
+      }
+      const seats = [...document.querySelectorAll('.defend-plant-ground circle')].map((el) => ({
+        at: `${el.getAttribute('cx')},${el.getAttribute('cy')}`,
+        ...box(el),
+      }))
+      return {
+        old,
+        best,
+        pad: { x: ax, y: ay },
+        begin: box(document.querySelector('.defend-go')),
+        rail: box(document.querySelector('.nw-rail .defend-ability[data-type="love"]')),
+        docks: box(document.querySelector('.nw-docks')),
+        cont: box(document.querySelector('.defend-continue')),
+        candle: box(document.querySelector('button.defend-candle-lamp')),
+        seats,
+      }
+    })
+    assert.ok(plan?.best, `${label} second empty seat on screen`)
+    await page.evaluate(() => {
+      const state = { frames: [], done: false }
+      window.__nwLampHopRun = state
+      const gold = (value) => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+        let match
+        while ((match = re.exec(value || ''))) {
+          const r = Number(match[1])
+          const g = Number(match[2])
+          const b = Number(match[3])
+          const a = match[4] === undefined ? 1 : Number(match[4])
+          if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
+      const box = (el) => {
+        if (!el) return null
+        const r = el.getBoundingClientRect()
+        if (r.width < 1 && r.height < 1) return null
+        return { x: r.x, y: r.y, w: r.width, h: r.height, left: r.left, top: r.top, right: r.right, bottom: r.bottom }
+      }
+      const center = (rect) => (rect ? { x: rect.left + rect.w / 2, y: rect.top + rect.h / 2 } : null)
+      const nameOf = (el) => `${el?.tagName || 'none'}.${el?.getAttribute?.('class') || ''}`.replace(/\s+/g, ' ').trim().slice(0, 80)
+      const overlap = (a, b) => {
+        if (!a || !b) return 0
+        const w = Math.min(a.right, b.right) - Math.max(a.left, b.left)
+        const h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top)
+        return w > 0 && h > 0 ? w * h : 0
+      }
+      const hitOf = (el) => {
+        if (!el) return 'absent'
+        const rect = el.getBoundingClientRect()
+        if (rect.width < 1 || rect.height < 1) return 'absent'
+        const node = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
+        if (!node) return 'none'
+        if (node.closest?.('[data-lamp-hop], .defend-lamp-hop, .defend-lamp-hop-puff')) return 'hop'
+        if (node === el || el.contains(node)) return 'ok'
+        return nameOf(node)
+      }
+      const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+      const cssText = (value) => {
+        if (!value || value === 'none' || value === 'normal') return ''
+        const first = /^"((?:\\.|[^"\\])*)"/.exec(value)
+        return first ? first[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\') : ''
+      }
+      const selectorOf = (el) => {
+        const tag = el.tagName.toLowerCase()
+        const cls = (el.getAttribute('class') || '').trim().split(/\s+/).filter(Boolean).slice(0, 4).join('.')
+        return cls ? `${tag}.${cls}` : tag
+      }
+      const lineOf = (el) => {
+        if (!el) return null
+        const style = getComputedStyle(el)
+        const directs = [...el.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+        if (!directs.length) return null
+        const source = norm(directs.map((child) => child.textContent).join(''))
+        const range = document.createRange()
+        const host = el.getBoundingClientRect()
+        let rendered = ''
+        for (const child of directs) {
+          const raw = child.textContent
+          for (let i = 0; i < raw.length; i += 1) {
+            const ch = raw[i]
+            if (!ch.trim()) {
+              rendered += ch
+              continue
+            }
+            range.setStart(child, i)
+            range.setEnd(child, i + 1)
+            let painted = false
+            for (const bit of range.getClientRects()) {
+              if (bit.width <= 0 || bit.height <= 0) continue
+              if (bit.right > host.left - 1 && bit.left < host.right + 1 && bit.bottom > host.top - 1 && bit.top < host.bottom + 1) {
+                painted = true
+                break
+              }
+            }
+            if (painted) rendered += ch
+          }
+        }
+        return {
+          name: selectorOf(el),
+          overflow: style.overflow,
+          scroll: el.scrollWidth,
+          client: el.clientWidth,
+          scrollH: el.scrollHeight,
+          clientH: el.clientHeight,
+          rendered: norm(rendered),
+          source,
+        }
+      }
+      const linesFor = (el) => {
+        if (!el) return []
+        const hostStyle = getComputedStyle(el)
+        const pseudos = ['::before', '::after']
+          .map((pseudo) => {
+            const style = getComputedStyle(el, pseudo)
+            const source = cssText(style.content).replace(/\s+/g, ' ').trim()
+            if (!source) return null
+            const host = el.getBoundingClientRect()
+            const painted =
+              style.display !== 'none' &&
+              style.visibility !== 'hidden' &&
+              Number(style.opacity) > 0 &&
+              parseFloat(style.fontSize) > 0 &&
+              host.width > 1 &&
+              host.height > 1
+            return {
+              name: `${selectorOf(el)}${pseudo}`,
+              overflow: hostStyle.overflow,
+              scroll: el.scrollWidth,
+              client: el.clientWidth,
+              scrollH: el.scrollHeight,
+              clientH: el.clientHeight,
+              rendered: painted ? source : '',
+              source,
+            }
+          })
+          .filter(Boolean)
+        if (pseudos.length) return pseudos
+        const text = lineOf(el)
+        return text ? [text] : []
+      }
+      const read = () => {
+        const root = document.querySelector('.defend-page')
+        const chrome =
+          'button, .defend-abilities, .defend-boost, .defend-tower-card, .defend-path-pip, .nw-balloon-orb, .defend-wave, .defend-ability-stock'
+        const names = !root
+          ? []
+          : [...root.querySelectorAll(chrome)]
+              .filter((node) => !node.closest('.defend-nw-debug'))
+              .filter((node) => {
+                const rect = node.getBoundingClientRect()
+                const style = getComputedStyle(node)
+                return rect.width > 1 && rect.height > 1 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0
+              })
+              .filter((node) => {
+                const style = getComputedStyle(node)
+                const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+                const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+                return gold(style.backgroundImage) || gold(style.backgroundColor) || border || gold(style.boxShadow) || (text && gold(style.color))
+              })
+              .map((node) => nameOf(node))
+        const rings = [...document.querySelectorAll('.defend-plant-ground circle')].filter((node) => {
+          const rect = node.getBoundingClientRect()
+          const style = getComputedStyle(node)
+          if (rect.width <= 1 || rect.height <= 1 || style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+          return gold(style.stroke) || gold(style.fill) || gold(style.filter)
+        })
+        const hopNodes = [...document.querySelectorAll('[data-lamp-hop], .defend-lamp-hop-art, .defend-lamp-hop-puff circle')]
+        for (const node of hopNodes) {
+          const style = getComputedStyle(node)
+          if (gold(style.stroke) || gold(style.fill) || gold(style.filter) || gold(style.backgroundColor)) names.push(nameOf(node))
+        }
+        const hopEl = document.querySelector('[data-lamp-hop]')
+        const hopBox = box(hopEl)
+        const beginEl = document.querySelector('.defend-go')
+        const railEl = document.querySelector('.nw-rail .defend-ability[data-type="love"]')
+        const railWrap = document.querySelector('.nw-rail')
+        const docksEl = document.querySelector('.nw-docks')
+        const contEl = document.querySelector('.defend-continue')
+        const candleEl = document.querySelector('button.defend-candle-lamp')
+        const pad = document.querySelector('.defend-pad.is-planted')
+        const parsed = /translate\(\s*([-\d.]+)[ ,]+([-\d.]+)/.exec(pad?.getAttribute('transform') || '')
+        const pieces = hopNodes.map((node) => box(node)).filter(Boolean)
+        const chromeBoxes = [box(beginEl), box(railEl), box(railWrap), box(docksEl), box(contEl)].filter(Boolean)
+        let cover = 0
+        for (const piece of pieces) {
+          for (const other of chromeBoxes) cover = Math.max(cover, overlap(piece, other))
+        }
+        const seats = [...document.querySelectorAll('.defend-plant-ground circle')].map((el) => ({
+          at: `${el.getAttribute('cx')},${el.getAttribute('cy')}`,
+          ...box(el),
+        }))
+        const lines = [beginEl, contEl, ...document.querySelectorAll('button.defend-new-lamp')].flatMap((el) => linesFor(el))
+        return {
+          hop: center(hopBox),
+          hops: hopEl ? 1 : 0,
+          gold: names.length + rings.length,
+          names,
+          card: document.querySelector('.defend-tower-card') ? 1 : 0,
+          sprites: document.querySelectorAll('.defend-lamp-sprite').length,
+          pad: parsed ? { x: Number(parsed[1]), y: Number(parsed[2]) } : null,
+          begin: box(beginEl),
+          rail: box(railEl),
+          docks: box(docksEl),
+          cont: box(contEl),
+          candle: box(candleEl),
+          seats,
+          cover,
+          hits: {
+            begin: hitOf(beginEl),
+            rail: hitOf(railEl),
+            docks: hitOf(docksEl),
+            cont: hitOf(contEl),
+            candle: hitOf(candleEl),
+          },
+          lines,
+        }
+      }
+      const start = performance.now()
+      const tick = () => {
+        state.frames.push(read())
+        if (performance.now() - start < 700) requestAnimationFrame(tick)
+        else state.done = true
+      }
+      tick()
+    })
+    await page.touchscreen.tap(plan.best.tap.x, plan.best.tap.y)
+    await page.waitForFunction(() => window.__nwLampHopRun && window.__nwLampHopRun.done, undefined, { timeout: 4000 })
+    const frames = await page.evaluate(() => window.__nwLampHopRun.frames)
+    const dist = (a, b) => (a && b ? Math.hypot(a.x - b.x, a.y - b.y) : Infinity)
+    const last = frames[frames.length - 1]
+    const moved = last?.pad && last.pad.x === plan.best.cx && last.pad.y === plan.best.cy ? 1 : 0
+    const hopFrames = frames.filter((frame) => frame.hop)
+    if (!hopFrames.length) {
+      fail(`checkNwLampMoveHop fail ${label} hop=0 moved=${moved}`)
+      await context.close()
+      continue
+    }
+    if (moved !== 1) fail(`checkNwLampMoveHop fail ${label} lamp=${last?.pad ? `${last.pad.x},${last.pad.y}` : 'none'} seat=${plan.best.cx},${plan.best.cy}`)
+    if (frames.some((frame) => frame.card !== 0)) fail(`checkNwLampMoveHop fail ${label} card=1`)
+    const goldCounts = [...new Set(frames.map((frame) => frame.gold))]
+    const nameLabel = [...new Set(frames.flatMap((frame) => frame.names))].join(' | ') || '(none)'
+    if (frames.some((frame) => frame.gold !== 1)) fail(`checkNwLampMoveHop fail ${label} gold=${goldCounts.join('|')} names=${nameLabel}`)
+    const firstHop = hopFrames[0].hop
+    const endHop = hopFrames[hopFrames.length - 1].hop
+    const span = dist(plan.old, plan.best.at)
+    const traveled = dist(firstHop, endHop)
+    if (dist(firstHop, plan.old) > 16) fail(`checkNwLampMoveHop fail ${label} start=${dist(firstHop, plan.old).toFixed(1)}`)
+    if (dist(endHop, plan.best.at) > 16) fail(`checkNwLampMoveHop fail ${label} end=${dist(endHop, plan.best.at).toFixed(1)}`)
+    if (!(traveled > span * 0.55)) fail(`checkNwLampMoveHop fail ${label} travel=${traveled.toFixed(1)} span=${span.toFixed(1)}`)
+    if (hopFrames.length < 3) fail(`checkNwLampMoveHop fail ${label} frames=${hopFrames.length}`)
+    const rawDelta = (now, was) => {
+      if (!now && !was) return 0
+      if (!now || !was) return null
+      return Math.max(Math.abs(now.x - was.x), Math.abs(now.y - was.y), Math.abs(now.w - was.w), Math.abs(now.h - was.h))
+    }
+    const worst = { begin: 0, rail: 0, docks: 0, cont: 0, candle: 0, seat: 0 }
+    for (const frame of frames) {
+      for (const key of ['begin', 'rail', 'docks', 'cont', 'candle']) {
+        const delta = rawDelta(frame[key], plan[key])
+        if (delta == null) fail(`checkNwLampMoveHop delta ${label} missing ${key}`)
+        else worst[key] = Math.max(worst[key], delta)
+      }
+      for (const seatBox of plan.seats) {
+        const now = frame.seats.find((item) => item.at === seatBox.at)
+        if (!now) continue
+        const delta = rawDelta(now, seatBox)
+        if (delta != null) worst.seat = Math.max(worst.seat, delta)
+      }
+      const hit = frame.hits
+      if (hit.begin === 'hop' || hit.rail === 'hop' || hit.docks === 'hop' || hit.cont === 'hop' || hit.candle === 'hop') {
+        fail(`checkNwLampMoveHop hit ${label} begin=${hit.begin} rail=${hit.rail} docks=${hit.docks} cont=${hit.cont} candle=${hit.candle}`)
+      }
+      if (hit.begin !== 'ok' || hit.rail !== 'ok') {
+        fail(`checkNwLampMoveHop hit ${label} begin=${hit.begin} rail=${hit.rail} docks=${hit.docks} cont=${hit.cont} candle=${hit.candle}`)
+      }
+      if (hit.docks !== 'ok' && hit.docks !== 'absent') {
+        fail(`checkNwLampMoveHop hit ${label} begin=${hit.begin} rail=${hit.rail} docks=${hit.docks} cont=${hit.cont} candle=${hit.candle}`)
+      }
+      if (hit.cont !== 'ok' && hit.cont !== 'absent') {
+        fail(`checkNwLampMoveHop hit ${label} begin=${hit.begin} rail=${hit.rail} docks=${hit.docks} cont=${hit.cont} candle=${hit.candle}`)
+      }
+      if (plan.candle && hit.candle !== 'ok') {
+        fail(`checkNwLampMoveHop hit ${label} begin=${hit.begin} rail=${hit.rail} docks=${hit.docks} cont=${hit.cont} candle=${hit.candle}`)
+      }
+      if (frame.cover > 0) fail(`checkNwLampMoveHop cover ${label} overlap=${frame.cover.toFixed(1)}`)
+    }
+    const fmt = (n) => (n === 0 ? '0' : n.toFixed(1))
+    const deltaLine = `checkNwLampMoveHop delta ${label} begin=${fmt(worst.begin)} rail=${fmt(worst.rail)} docks=${fmt(worst.docks)} cont=${fmt(worst.cont)} candle=${fmt(worst.candle)} seat=${fmt(worst.seat)}`
+    console.log(deltaLine)
+    if (worst.begin > 0.5 || worst.rail > 0.5 || worst.docks > 0.5 || worst.cont > 0.5 || worst.candle > 0.5 || worst.seat > 0.5) fail(deltaLine)
+    const logged = new Set()
+    let clipped = 0
+    if (!last?.lines?.length) fail(`checkNwLampMoveHop line ${label} rendered="" source=""`)
+    for (const frame of frames) {
+      for (const row of frame.lines) {
+        const note = `${row.name}|${row.rendered}|${row.source}|${row.scroll}|${row.client}|${row.scrollH}|${row.clientH}`
+        if (!logged.has(note)) {
+          logged.add(note)
+          console.log(
+            `checkNwLampMoveHop line ${label} ${row.name} overflow=${row.overflow} scroll=${row.scroll} client=${row.client} scrollH=${row.scrollH} clientH=${row.clientH} rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(row.source)}`,
+          )
+        }
+        if (row.rendered !== row.source) fail(`checkNwLampMoveHop line ${label} ${row.name} rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(row.source)}`)
+        if (row.scroll > row.client + 1 || row.scrollH > row.clientH + 1) clipped += 1
+      }
+    }
+    if (clipped !== 0) fail(`checkNwLampMoveHop clip ${label} clipped=${clipped}`)
+    else if (logged.size) console.log(`checkNwLampMoveHop clip ${label} clipped=0`)
+    const localFail = problems.some((line) => line.includes(label))
+    if (!localFail) console.log(`checkNwLampMoveHop ok ${label} hop=1 gold=1`)
+    await context.close()
+  }
+
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
+
 export async function checkPhoneFixes() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -8596,6 +9034,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'plant no-card nights stay free of console errors')
       return
     }
+    if (process.env.NW_LAMP_MOVE_ONLY === '1') {
+      await checkNwLampMoveHop(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'lamp move hop nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
@@ -8612,6 +9055,7 @@ export async function checkPhoneFixes() {
     await checkMap05CamOffRing(browser, port, errors)
     await checkNwPlantIgnite(browser, port, errors)
     await checkNwPlantNoCard(browser, port, errors)
+    await checkNwLampMoveHop(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -8788,7 +9232,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
