@@ -295,14 +295,19 @@ function assertShopOffManifestHasNoBilling() {
   }
   writeFileSync(join('android', 'local.properties'), `sdk.dir=${sdk.replaceAll('\\', '\\\\')}\n`)
   delete env.VITE_PLAY_SHOP
-  const result = spawnSync(
-    './gradlew',
-    [':app:processShopOffReleaseManifest', '--no-daemon', '--stacktrace'],
-    { cwd: 'android', env, encoding: 'utf8', timeout: 600_000 },
-  )
-  if (result.status !== 0) {
+  let result
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    result = spawnSync(
+      './gradlew',
+      [':app:processShopOffReleaseManifest', '--no-daemon', '--stacktrace'],
+      { cwd: 'android', env, encoding: 'utf8', timeout: 600_000 },
+    )
+    if (result.status === 0) break
     const log = `${result.stdout || ''}\n${result.stderr || ''}`
-    throw new Error(`shop-off manifest merge failed\n${log.slice(-4000)}`)
+    const dropped = /Connection reset|SocketException|Connection timed out/i.test(log)
+    if (!dropped || attempt === 3) {
+      throw new Error(`shop-off manifest merge failed\n${log.slice(-4000)}`)
+    }
   }
   const merged = findMergedManifests(process.cwd()).filter((file) => file.includes('shopOff'))
   assert.ok(merged.length > 0, 'shop-off merged manifest was not written')
