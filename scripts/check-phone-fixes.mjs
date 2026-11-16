@@ -8141,7 +8141,6 @@ export async function checkPhoneFixes() {
     }
     if (process.env.NW_PLANT_IGNITE_ONLY === '1') {
       await checkNwPlantIgnite(browser, port, errors)
-    await checkNwRoundCheer(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'plant ignite nights stay free of console errors')
       return
     }
@@ -8165,6 +8164,7 @@ export async function checkPhoneFixes() {
     await checkNwTypeLabelChrome(browser, port, errors)
     await checkMap05CamOffRing(browser, port, errors)
     await checkNwPlantIgnite(browser, port, errors)
+    await checkNwRoundCheer(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({

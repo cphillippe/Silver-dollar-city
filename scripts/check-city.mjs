@@ -1957,7 +1957,17 @@ assert.doesNotMatch(
   const defend589 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   const phone589 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
   assert.match(phone589, /async function checkNwRoundCheer/, '1.4.589 checkNwRoundCheer is defined')
-  assert.match(phone589, /await checkNwRoundCheer\(/, '1.4.589 checkPhoneFixes calls checkNwRoundCheer')
+  const igniteOnly589 = phone589.slice(
+    phone589.indexOf("if (process.env.NW_PLANT_IGNITE_ONLY === '1')"),
+    phone589.indexOf("if (process.env.NW_ROUND_CHEER_ONLY === '1')"),
+  )
+  assert.doesNotMatch(igniteOnly589, /checkNwRoundCheer/, '1.4.589 the plant-ignite-only branch does not run the cheer scan')
+  const fullRun589 = phone589.slice(phone589.lastIndexOf('await checkNwPlantIgnite(browser, port, errors)'))
+  assert.match(
+    fullRun589,
+    /^await checkNwPlantIgnite\(browser, port, errors\)\n\s*await checkNwRoundCheer\(browser, port, errors\)/,
+    '1.4.589 the full scan calls checkNwRoundCheer right after checkNwPlantIgnite',
+  )
   const rules = defend589.match(/^[.\s@][^\n{]*\.defend-clear-cheer[^{\n]*\{/gm) ?? []
   assert.ok(rules.length > 0, '1.4.589 the cheer rules exist')
   for (const rule of rules) {
