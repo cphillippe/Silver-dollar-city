@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.590',
+    title: 'Night Watch: planting a lamp leaves the road clear',
+    when: '2026-11-16',
+    items: [
+      'On Easy, planting a lamp leaves the road in view. Tap the lamp when you want its card.',
+      'Hard stays the same.',
+      'Refs #967.',
+    ],
+  },
+  {
     version: '1.4.589',
     title: 'Night Watch: lamps cheer when a round clears',
     when: '2026-11-16',

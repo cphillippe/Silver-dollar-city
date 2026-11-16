@@ -594,6 +594,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const [helpOpen, setHelpOpen] = useState(false)
   const upgradeAtRef = useRef<CityPlotId | null>(null)
   const upgradeTapRef = useRef<{ id: CityPlotId; at: number }>({ id: 'porch', at: -1e9 })
+  /**
+   * A touch plant's click lands on the lamp button that just appeared.
+   * Easy ignores that same tap. A later tap still opens the card. Hard does not set this.
+   */
+  const plantCardEcho = useRef<{ id: CityPlotId; at: number } | null>(null)
   /** Pointer is down on a path pip. Begin and Continue must not take that gesture. */
   const armedPathBuy = useRef<{ plotId: CityPlotId; path: TreePath } | null>(null)
   const pathBuyAt = useRef(0)
@@ -2356,6 +2361,19 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   }
 
   const PLANT_IGNITE_MS = 900
+  /** Same gesture as the plant. Longer than a frame, shorter than a second tap. */
+  const PLANT_CARD_ECHO_MS = 80
+
+  function notePlantCardEcho(id: CityPlotId) {
+    if (!easy) return
+    const at = performance.now()
+    plantCardEcho.current = { id, at }
+    // The retargeted click is still this turn. A later tap is a new turn.
+    window.setTimeout(() => {
+      const echo = plantCardEcho.current
+      if (echo && echo.id === id && echo.at === at) plantCardEcho.current = null
+    }, 0)
+  }
 
   function flashPlantIgnite(spot: CityPlotId) {
     if (!easy) return
@@ -2445,6 +2463,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       else paidTypes.current.add(using)
     }
     flashPlantIgnite(next.preview.spot as CityPlotId)
+    notePlantCardEcho(next.preview.spot as CityPlotId)
     closeUpgrade(true)
     return true
   }
@@ -2491,7 +2510,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         return plantType(current, id, using)
       })
     })
-    if (plantedNew) flashPlantIgnite(id)
+    if (plantedNew) {
+      flashPlantIgnite(id)
+      notePlantCardEcho(id)
+    }
     closeUpgrade(true)
   }
 
@@ -2627,6 +2649,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   }
 
   function openUpgrade(id: CityPlotId) {
+    const echo = plantCardEcho.current
+    if (easy && echo && echo.id === id && performance.now() - echo.at < PLANT_CARD_ECHO_MS) return
     setSpendOpen(false)
     setHelpOpen(false)
     if (placeArmRef.current) clearPlaceArm()
