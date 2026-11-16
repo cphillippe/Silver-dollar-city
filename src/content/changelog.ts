@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.589',
+    title: 'Night Watch: lamps cheer when a round clears',
+    when: '2026-11-16',
+    items: [
+      'On Easy, your lamps hop and sparkle when you clear a round.',
+      'Hard stays the same.',
+      'Refs #962.',
+    ],
+  },
+  {
     version: '1.4.588',
     title: 'Night Watch: lamp names easier to read',
     when: '2026-11-14',

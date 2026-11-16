@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import {
   EASY_CROWN_HIT_R,
   EASY_FACE_HIT_R,
@@ -130,6 +130,8 @@ export interface DefendNightActorsProps {
   upFlashId?: CityPlotId | null
   /** Easy plant (#957). Brief shockwave on a new lamp. */
   plantIgniteIds?: ReadonlySet<CityPlotId>
+  /** Easy round clear (#962). Planted lamps hop once, left to right. */
+  clearCheer?: boolean
   /** playtest=1 or nwDebug. Logs each walker's first draw. A normal night stays quiet. */
   spawnLog?: boolean
   /** Soft marks on ground that can take the picked lamp. `live` meets the road now. */
@@ -214,6 +216,7 @@ export function DefendNightActorsSvg({
   onOpenUpgrade,
   upFlashId = null,
   plantIgniteIds,
+  clearCheer = false,
   ghost = null,
   groundHints = [],
   firstSeatAt,
@@ -495,6 +498,17 @@ export function DefendNightActorsSvg({
   // Camera off has no pinned seat. A dock-covered seat is not a fallback. Camera on keeps its pick.
   const camOffSeat = firstSeatAt === undefined ? (seatPick ?? -1) : (seatPick ?? (liveSeat >= 0 ? liveSeat : 0))
   const firstSeat = firstSeatAt === null ? -1 : pinned >= 0 ? pinned : camOffSeat
+  const cheerRank = new Map<string, number>()
+  if (clearCheer) {
+    const ordered = [...planted].sort((a, b) => {
+      const ax = nightTowers.anchor(a).x
+      const bx = nightTowers.anchor(b).x
+      if (ax !== bx) return ax - bx
+      return nightTowers.anchor(a).y - nightTowers.anchor(b).y
+    })
+    // Five delays, indexes 0..4 (80ms apart). Lamps past that share the last delay.
+    ordered.forEach((id, index) => cheerRank.set(id, Math.min(index, 4)))
+  }
   return (
     <>
               {groundHints.length > 0 ? (
@@ -614,7 +628,8 @@ export function DefendNightActorsSvg({
                   <g
                     key={id}
                     data-person-node={scenery ? undefined : 'pad'}
-                    className={`defend-pad is-${stage} ${on ? `is-planted is-${using}` : ''} ${hot ? 'is-hot' : ''} ${firing ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''} ${boostPad ? 'is-boost-pick' : ''} ${upgrading ? 'is-upgrade-open' : ''} ${justUp ? 'is-up' : ''} ${plantIgniteIds?.has(id) ? 'is-plant-ignite' : ''} ${reachMiss.includes(id) ? 'is-reach-miss' : ''}`}
+                    className={`defend-pad is-${stage} ${on ? `is-planted is-${using}` : ''} ${hot ? 'is-hot' : ''} ${firing ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''} ${boostPad ? 'is-boost-pick' : ''} ${upgrading ? 'is-upgrade-open' : ''} ${justUp ? 'is-up' : ''} ${plantIgniteIds?.has(id) ? 'is-plant-ignite' : ''} ${clearCheer && on ? 'is-clear-cheer' : ''} ${reachMiss.includes(id) ? 'is-reach-miss' : ''}`}
+                    style={clearCheer && on ? ({ '--cheer-i': cheerRank.get(id) ?? 0 } as CSSProperties) : undefined}
                     data-reach-miss={reachMiss.includes(id) ? 'yes' : undefined}
                     data-tower-type={on ? using : undefined}
                     data-level={on ? (cross && tree ? crossMark(tree) : bell && tree ? bellMark(tree) : tierMark) : undefined}
@@ -700,6 +715,13 @@ export function DefendNightActorsSvg({
                           <g className="defend-plant-ignite" pointerEvents="none" aria-hidden="true">
                             <circle className="defend-plant-ignite-under" r="34" />
                             <circle className="defend-plant-ignite-ring" r="34" />
+                          </g>
+                        ) : null}
+                        {clearCheer && on ? (
+                          <g className="defend-clear-cheer" pointerEvents="none" aria-hidden="true">
+                            {[-24, -12, 0, 12, 24].map((x) => (
+                              <circle key={x} cx={x} cy={-8} r={3.5} />
+                            ))}
                           </g>
                         ) : null}
                         <g className="defend-lamp-sprite">
