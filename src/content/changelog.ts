@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.593',
+    title: 'Night Watch: one plant shockwave per run',
+    when: '2026-11-17',
+    items: [
+      'On Easy, the white shockwave when you plant a lamp shows only the first time you plant on that run.',
+      'Hard stays the same.',
+      'Refs #959.',
+    ],
+  },
+  {
     version: '1.4.592',
     title: 'Night Watch: the Candle gets a name on the clear screen',
     when: '2026-11-17',

@@ -8259,6 +8259,253 @@ async function checkNwCandleName(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #957 / Refs #959: Easy shockwave ring only on the first plant of the run. */
+const PLANT_RING_ONCE_SIZES = [
+  [375, 812],
+  [390, 844],
+]
+
+async function checkNwPlantRingOnce(browser, port, errors) {
+  const only = process.env.NW_PLANT_RING_ONCE_SIZE
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+
+  const installRingCounter = (page) =>
+    page.evaluate(() => {
+      const gold = (value) => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+        let match
+        while ((match = re.exec(value || ''))) {
+          const r = Number(match[1])
+          const g = Number(match[2])
+          const b = Number(match[3])
+          const a = match[4] === undefined ? 1 : Number(match[4])
+          if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
+      const countGold = () => {
+        const root = document.querySelector('.defend-page')
+        if (!root) return 0
+        const chrome =
+          'button, .defend-abilities, .defend-boost, .defend-tower-card, .defend-path-pip, .nw-balloon-orb, .defend-wave, .defend-ability-stock'
+        const names = [...root.querySelectorAll(chrome)]
+          .filter((node) => !node.closest('.defend-nw-debug'))
+          .filter((node) => {
+            const rect = node.getBoundingClientRect()
+            const style = getComputedStyle(node)
+            return rect.width > 1 && rect.height > 1 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0
+          })
+          .filter((node) => {
+            const style = getComputedStyle(node)
+            const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+            const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+            return gold(style.backgroundImage) || gold(style.backgroundColor) || border || gold(style.boxShadow) || (text && gold(style.color))
+          })
+        const rings = [...document.querySelectorAll('.defend-plant-ground circle')].filter((node) => {
+          const style = getComputedStyle(node)
+          return gold(style.stroke) || gold(style.fill) || gold(style.filter)
+        })
+        return names.length + rings.length
+      }
+      window.__nwPlantRingOnce = { rings: 0, saw: false, firstPlant: null, gold: null, running: true }
+      const tick = () => {
+        const ring = document.querySelector('.defend-plant-ignite-ring')
+        const lit =
+          ring &&
+          getComputedStyle(ring).display !== 'none' &&
+          getComputedStyle(ring).visibility !== 'hidden' &&
+          Number(getComputedStyle(ring).opacity) > 0.05
+        if (lit && !window.__nwPlantRingOnce.saw) {
+          window.__nwPlantRingOnce.rings += 1
+          if (window.__nwPlantRingOnce.firstPlant == null) {
+            window.__nwPlantRingOnce.firstPlant = document.querySelectorAll('.defend-lamp-sprite').length
+            window.__nwPlantRingOnce.gold = countGold()
+          }
+          window.__nwPlantRingOnce.saw = true
+        }
+        if (!lit) window.__nwPlantRingOnce.saw = false
+        if (window.__nwPlantRingOnce.running) requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    })
+
+  const tapUntilBoost = async (page) => {
+    const started = Date.now()
+    while (Date.now() - started < 90_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
+      const cue = await page.evaluate(() => {
+        const face = document.querySelector('.defend-raider.is-easy-cue')
+        if (!face) return null
+        const id = face.getAttribute('data-walker-id')
+        const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+        if (!tap) return null
+        const box = tap.getBoundingClientRect()
+        const x = box.x + box.width / 2
+        const y = box.y + box.height / 2
+        const node = document.elementFromPoint(x, y)
+        if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+        return { x, y }
+      })
+      if (cue) await page.mouse.click(cue.x, cue.y)
+      await page.waitForTimeout(80)
+    }
+  }
+
+  const seatPoint = async (page, pick) =>
+    page.evaluate((mode) => {
+      const svg = document.querySelector('.defend-board')
+      const ctm = svg?.getScreenCTM()
+      if (!svg || !ctm) return null
+      const screen = (x, y) => {
+        const p = svg.createSVGPoint()
+        p.x = x
+        p.y = y
+        const q = p.matrixTransform(ctm)
+        return { x: q.x, y: q.y }
+      }
+      const pad = document.querySelector('.defend-pad.is-planted')
+      const tr = pad?.getAttribute('transform') || ''
+      const parsed = /translate\(\s*([-\d.]+)[ ,]+([-\d.]+)/.exec(tr)
+      const ax = parsed ? Number(parsed[1]) : null
+      const ay = parsed ? Number(parsed[2]) : null
+      const margin = 16
+      const onScreen = (point) => point.x > margin && point.y > margin && point.x < innerWidth - margin && point.y < innerHeight - margin
+      if (mode === 'first') {
+        const ring = document.querySelector('.defend-plant-ground circle.is-first-seat')
+        if (!ring) return null
+        return screen(Number(ring.getAttribute('cx')), Number(ring.getAttribute('cy')) - 26)
+      }
+      let best = null
+      for (const ring of document.querySelectorAll('.defend-plant-ground circle.is-live')) {
+        const cx = Number(ring.getAttribute('cx'))
+        const cy = Number(ring.getAttribute('cy'))
+        if (ax != null && Math.hypot(cx - ax, cy - ay) < 8) continue
+        const at = screen(cx, cy)
+        const lifted = screen(cx, cy - 26)
+        for (const point of [at, lifted]) {
+          if (!onScreen(point)) continue
+          const node = document.elementFromPoint(point.x, point.y)
+          if (!node?.closest?.('.defend-board')) continue
+          if (node.closest('button, a, .nw-rail, .nw-docks, .topbar, .brand')) continue
+          const away = ax == null ? 1 : Math.hypot(cx - ax, cy - ay)
+          if (!best || away > best.away) best = { point, away }
+          break
+        }
+      }
+      return best?.point ?? null
+    }, pick)
+
+  const waitIgniteClear = async (page) => {
+    await page.waitForFunction(
+      () => document.querySelectorAll('.defend-pad.is-plant-ignite').length === 0,
+      undefined,
+      { timeout: 2500 },
+    ).catch(() => {})
+    await page.waitForTimeout(120)
+  }
+
+  for (const [width, height] of PLANT_RING_ONCE_SIZES) {
+    const label = `${width}x${height}`
+    if (only && only !== label) continue
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      reducedMotion: 'no-preference',
+      hasTouch: true,
+      isMobile: true,
+    })
+    await context.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: SAVE },
+    )
+    const page = await context.newPage()
+    page.on('pageerror', (error) => errors.push(`plant-ring-once ${label} ${error}`))
+    await page.goto(PLANT_NO_CARD_SEARCH)
+    await page.getByRole('button', { name: 'Settings' }).click()
+    await page.locator('summary', { hasText: 'Developer' }).click()
+    await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
+    await page.locator('.defend-board').waitFor()
+    if (await page.locator('[data-map-overlay]').count()) {
+      await page.locator('[data-map="a2"]').click()
+      await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+    }
+    await page.locator('.defend-go').waitFor()
+    await installRingCounter(page)
+    await page.locator('[data-type="love"]').click()
+    const first = await seatPoint(page, 'first')
+    assert.ok(first, `${label} first gold seat`)
+    await page.touchscreen.tap(first.x, first.y)
+    await waitIgniteClear(page)
+    const second = await seatPoint(page, 'next')
+    assert.ok(second, `${label} second seat`)
+    await page.touchscreen.tap(second.x, second.y)
+    await waitIgniteClear(page)
+    await page.locator('.defend-go').click()
+    await tapUntilBoost(page)
+    const reached = (await page.locator('.defend-page.is-boost').count()) > 0
+    if (reached) {
+      await page.locator('.defend-continue').click()
+      await page.locator('.defend-page:not(.is-boost)').waitFor({ timeout: 20_000 }).catch(() => {})
+      const third = await seatPoint(page, 'next')
+      if (third && (await page.locator('.defend-go').count()) > 0) {
+        if ((await page.locator('[data-type="love"]').count()) > 0) await page.locator('[data-type="love"]').click()
+        await page.touchscreen.tap(third.x, third.y)
+        await waitIgniteClear(page)
+      }
+    }
+    const tally = await page.evaluate(() => {
+      const out = window.__nwPlantRingOnce
+      if (out) out.running = false
+      return out
+    })
+    if (tally.rings !== 1) fail(`checkNwPlantRingOnce fail ${label} rings=${tally.rings} want=1 firstPlant=${tally.firstPlant}`)
+    if (tally.firstPlant !== 1) fail(`checkNwPlantRingOnce fail ${label} firstPlant=${tally.firstPlant} want=1`)
+    if (tally.gold !== 1) fail(`checkNwPlantRingOnce fail ${label} gold=${tally.gold} want=1`)
+    if (!problems.some((line) => line.includes(` ${label} `))) {
+      console.log(`checkNwPlantRingOnce ok ${label} rings=1 firstPlant=1 gold=1`)
+    }
+    await context.close()
+  }
+
+  if (!only) {
+    const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }
+    const hard = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 390, height: 844 },
+      deviceScaleFactor: 1,
+    })
+    await hard.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: hardSave },
+    )
+    const hardPage = await hard.newPage()
+    hardPage.on('pageerror', (error) => errors.push(`plant-ring-once hard ${error}`))
+    await hardPage.goto('/?playtest=1')
+    await hardPage.getByRole('button', { name: 'Hold the night' }).click()
+    await hardPage.locator('.defend-board').waitFor()
+    await hardPage.waitForTimeout(400)
+    const hardRead = await hardPage.evaluate(() => ({
+      easy: document.querySelectorAll('.defend-page.is-easy-watch').length,
+      ignite: document.querySelectorAll('.defend-plant-ignite').length,
+    }))
+    if (hardRead.easy !== 0 || hardRead.ignite !== 0) {
+      fail(`checkNwPlantRingOnce fail hard easy=${hardRead.easy} ignite=${hardRead.ignite}`)
+    } else {
+      console.log(`checkNwPlantRingOnce ok hard unchanged easy=0 ignite=0`)
+    }
+    await hard.close()
+  }
+
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 /** #967 Easy first plant must not open the upgrade card. A touch tap does, on the parent. */
 const PLANT_NO_CARD_SIZES = [
   [375, 667],
@@ -9221,6 +9468,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'candle name nights stay free of console errors')
       return
     }
+    if (process.env.NW_PLANT_RING_ONCE_ONLY === '1') {
+      await checkNwPlantRingOnce(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'plant ring once nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
@@ -9240,6 +9492,7 @@ export async function checkPhoneFixes() {
     await checkNwPlantNoCard(browser, port, errors)
     await checkNwLampMoveHop(browser, port, errors)
     await checkNwCandleName(browser, port, errors)
+    await checkNwPlantRingOnce(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -9416,7 +9669,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
