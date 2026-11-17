@@ -19,6 +19,8 @@ import { shortestMazePath } from '../src/lib/roadMaze.ts'
 import { withPlaytest1 } from './dev-ui-playtest.mjs'
 import { lineTakeaway } from '../src/lib/successBeat.ts'
 import { SOURCE_DIG_AGAIN } from '../src/lib/sourceDig.ts'
+import { GEM_SIGHT_CUE } from '../src/lib/gemJar.ts'
+import { buildGemPuzzle } from '../src/lib/gemSearch.ts'
 
 const SAVE = {
   kind: SAVE_KIND,
@@ -9071,7 +9073,7 @@ async function checkDigWinReadable(browser, port, errors) {
     const hardSave = {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.595',
+      appVersion: '1.4.596',
       savedAt: new Date().toISOString(),
       progress: { ...SAVE.progress, easyMode: false, started: true },
     }
@@ -9096,6 +9098,292 @@ async function checkDigWinReadable(browser, port, errors) {
   }
 
   for (const err of errors.slice(errorMark)) fail(`checkDigWinReadable error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
+const GEM_SIGHT_SIZES = [
+  [375, 812],
+  [390, 844],
+]
+const GEM_SIGHT_LINE = 'ob-tuning'
+const GEM_SIGHT_SEED = 0
+
+function gemSightSave() {
+  const now = new Date()
+  const today = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-')
+  return {
+    kind: SAVE_KIND,
+    schemaVersion: SAVE_SCHEMA_VERSION,
+    appVersion: '1.4.596',
+    savedAt: now.toISOString(),
+    progress: {
+      started: true,
+      easyMode: true,
+      lastDailyDate: today,
+      dailyDates: [today],
+      completed: [],
+      held: [],
+      easyTaught: [],
+      easyHeld: [],
+      taught: [],
+      journal: [],
+      learnings: [],
+      memory: {},
+      matchLifetime: 5000,
+      matchSkillSeen: 1,
+    },
+  }
+}
+
+async function openGemSightBoard(page, lineId, seed) {
+  await page.goto(withPlaytest1(`/?gemSeed=${seed}`))
+  await page.getByRole('main', { name: 'Home' }).waitFor()
+  await hintPointer(page, page.getByRole('button', { name: 'Settings', exact: true }))
+  await hintPointer(page, page.locator('details.settings-debug summary'))
+  await hintPointer(page, page.locator('details.settings-debug').getByRole('button', { name: new RegExp(`^${lineId} ·`) }).first())
+  await page.locator('.gem-board').waitFor()
+}
+
+async function checkGemSightCue(browser, port, errors) {
+  const only = process.env.GEM_SIGHT_CUE_ONLY === '1' ? null : process.env.GEM_SIGHT_CUE_SIZE
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+  const puzzle = buildGemPuzzle(GEM_SIGHT_LINE, GEM_SIGHT_SEED)
+  const totalWords = puzzle.words.length
+
+  for (const [width, height] of GEM_SIGHT_SIZES) {
+    const tag = `${width}x${height}`
+    if (only && only !== tag) continue
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      isMobile: true,
+      reducedMotion: 'reduce',
+    })
+    await context.addInitScript(
+      ({ key, save }) => localStorage.setItem(key, JSON.stringify(save)),
+      { key: STORAGE_KEY, save: gemSightSave() },
+    )
+    const page = await context.newPage()
+    page.on('pageerror', (error) => errors.push(`gem-sight ${tag} ${error}`))
+    let goldBefore = 0
+    try {
+      await openGemSightBoard(page, GEM_SIGHT_LINE, GEM_SIGHT_SEED)
+      goldBefore = await page.evaluate(() => {
+        const shown = (el) => {
+          if (!el) return false
+          const style = getComputedStyle(el)
+          const box = el.getBoundingClientRect()
+          return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0.05 && box.width > 1 && box.height > 1
+        }
+        const gold = (value) => {
+          const text = String(value || '')
+          if (/#ffcc33|#ffb020|#ff9f1a|rgb\(255,\s*204,\s*51/i.test(text)) return true
+          const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+          let match
+          while ((match = re.exec(text))) {
+            const r = Number(match[1])
+            const g = Number(match[2])
+            const b = Number(match[3])
+            const a = match[4] === undefined ? 1 : Number(match[4])
+            if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+          }
+          return false
+        }
+        const root = document.querySelector('.challenge-page') || document.querySelector('.play.is-gem-search')
+        if (!root) return 0
+        const dockSealed = [...document.querySelectorAll('.story-strip.is-dock.is-sealed')].filter(shown)
+        if (dockSealed.length) return 1
+        let count = 0
+        for (const node of root.querySelectorAll('*')) {
+          if (node.closest('[data-gem-sight-cue]')) continue
+          if (!shown(node)) continue
+          const tile = node.classList.contains('gem-cell')
+          const sight = tile && node.classList.contains('is-sight')
+          if (tile || sight) continue
+          const style = getComputedStyle(node)
+          const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+          const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+          const fill = gold(style.backgroundImage) || gold(style.backgroundColor)
+          const glow = gold(style.boxShadow) || (text && gold(style.color))
+          if (fill || border || glow) count += 1
+        }
+        return count
+      })
+      await page.locator('.gem-cell.is-sight').first().waitFor({ timeout: 2000 })
+    } catch (error) {
+      fail(`checkGemSightCue fail ${tag} open ${error}`)
+      await context.close()
+      continue
+    }
+
+    const read = await page.evaluate((cueSource) => {
+      const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+      const shown = (el) => {
+        if (!el) return false
+        const style = getComputedStyle(el)
+        const box = el.getBoundingClientRect()
+        return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0.05 && box.width > 1 && box.height > 1
+      }
+      const gold = (value) => {
+        const text = String(value || '')
+        if (/#ffcc33|#ffb020|#ff9f1a|rgb\(255,\s*204,\s*51/i.test(text)) return true
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+        let match
+        while ((match = re.exec(text))) {
+          const r = Number(match[1])
+          const g = Number(match[2])
+          const b = Number(match[3])
+          const a = match[4] === undefined ? 1 : Number(match[4])
+          if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
+      const playGoldCues = () => {
+        const dockSealed = [...document.querySelectorAll('.story-strip.is-dock.is-sealed')].filter(shown)
+        if (dockSealed.length) return ['story-strip.is-dock.is-sealed']
+        const root = document.querySelector('.challenge-page') || document.querySelector('.play.is-gem-search')
+        if (!root) return []
+        const names = []
+        for (const node of root.querySelectorAll('*')) {
+          if (node.closest('[data-gem-sight-cue]')) continue
+          if (!shown(node)) continue
+          const style = getComputedStyle(node)
+          const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+          const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+          const tile = node.classList.contains('gem-cell')
+          const sight = tile && node.classList.contains('is-sight')
+          const fill = tile || sight ? false : gold(style.backgroundImage) || gold(style.backgroundColor)
+          const glow = gold(style.boxShadow) || (text && gold(style.color))
+          if (fill || border || glow) names.push(node.className)
+        }
+        return names
+      }
+      const cue = document.querySelector('[data-gem-sight-cue]')
+      const cueStyle = cue ? getComputedStyle(cue) : null
+      const sightCells = [...document.querySelectorAll('.gem-cell.is-sight')]
+      const found = document.querySelectorAll('.story-dock-word.is-found, .gem-word.is-found').length
+      const boardHits = []
+      for (const cell of document.querySelectorAll('[data-gem-cell]')) {
+        const rect = cell.getBoundingClientRect()
+        if (rect.width < 1 || rect.height < 1) continue
+        const cx = rect.left + rect.width / 2
+        const cy = rect.top + rect.height / 2
+        const hit = document.elementFromPoint(cx, cy)
+        if (!hit || (!cell.contains(hit) && hit !== cell)) boardHits.push(`${cell.dataset.r}:${cell.dataset.c}`)
+      }
+      return {
+        cueRendered: cue ? norm(cue.textContent) : '',
+        cueFont: cueStyle ? parseFloat(cueStyle.fontSize) : 0,
+        cueScrollW: cue?.scrollWidth ?? 0,
+        cueClientW: cue?.clientWidth ?? 0,
+        cueScrollH: cue?.scrollHeight ?? 0,
+        cueClientH: cue?.clientHeight ?? 0,
+        gold: playGoldCues().length,
+        sightCount: sightCells.length,
+        sightKeys: sightCells.map((n) => `${n.dataset.r}:${n.dataset.c}`),
+        found,
+        boardHits,
+        cueSource,
+      }
+    }, GEM_SIGHT_CUE)
+
+    const clipped =
+      read.cueScrollW > read.cueClientW + 1 || read.cueScrollH > read.cueClientH + 1 ? 1 : 0
+    if (!read.cueRendered) fail(`checkGemSightCue fail ${tag} cue missing`)
+    if (read.cueRendered !== GEM_SIGHT_CUE) {
+      fail(`checkGemSightCue fail ${tag} cue rendered=${JSON.stringify(read.cueRendered)} source=${JSON.stringify(GEM_SIGHT_CUE)}`)
+    }
+    if (clipped !== 0) fail(`checkGemSightCue fail ${tag} clipped=${clipped}`)
+    if (!(read.cueFont >= 13)) fail(`checkGemSightCue fail ${tag} font=${read.cueFont}`)
+    if (read.gold !== goldBefore) fail(`checkGemSightCue fail ${tag} gold=${read.gold} before=${goldBefore}`)
+    const goldLabel = read.gold
+    const cueGold = await page.locator('[data-gem-sight-cue]').evaluate((el) => {
+      const gold = (value) => /rgba?\(255,\s*204,\s*51/.test(String(value || ''))
+      const style = getComputedStyle(el)
+      return gold(style.backgroundColor) || gold(style.color) || gold(style.boxShadow)
+    })
+    if (cueGold) fail(`checkGemSightCue fail ${tag} cueGold=1`)
+    if (read.sightCount < 1) fail(`checkGemSightCue fail ${tag} sightCount=${read.sightCount}`)
+    if (read.found !== 0) fail(`checkGemSightCue fail ${tag} found=${read.found}/${totalWords}`)
+    if (read.boardHits.length) {
+      fail(`checkGemSightCue fail ${tag} cueCovers=${read.boardHits.join(',')}`)
+    }
+    const planted = puzzle.planted.map((word) => (puzzle.bonusPaths[word.id] ?? []).map((cell) => `${cell.r}:${cell.c}`))
+    const sightOnOne = planted.some((cells) => read.sightKeys.length > 0 && read.sightKeys.every((key) => cells.includes(key)))
+    if (!sightOnOne) {
+      fail(`checkGemSightCue fail ${tag} sightKeys=${read.sightKeys.join(',')} not one planted word`)
+    }
+
+    await context.close()
+
+    const seenSave = {
+      ...gemSightSave(),
+      progress: { ...gemSightSave().progress, matchSightCueSeen: true },
+    }
+    const second = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      isMobile: true,
+      reducedMotion: 'reduce',
+    })
+    await second.addInitScript(
+      ({ key, save }) => localStorage.setItem(key, JSON.stringify(save)),
+      { key: STORAGE_KEY, save: seenSave },
+    )
+    const secondPage = await second.newPage()
+    secondPage.on('pageerror', (error) => errors.push(`gem-sight ${tag}-2 ${error}`))
+    await openGemSightBoard(secondPage, GEM_SIGHT_LINE, GEM_SIGHT_SEED + 1)
+    await secondPage.locator('.gem-cell.is-sight').first().waitFor({ timeout: 2000 })
+    const secondCue = await secondPage.locator('[data-gem-sight-cue]').count()
+    if (secondCue !== 0) fail(`checkGemSightCue fail ${tag} secondCue=${secondCue}`)
+    await second.close()
+
+    if (!problems.some((line) => line.includes(` ${tag} `))) {
+      console.log(`checkGemSightCue ok ${tag} sight=${read.sightCount} clipped=0 font=${read.cueFont}px gold=${goldLabel} found=0/${totalWords} secondCue=0`)
+    }
+  }
+
+  if (!only) {
+    const hardSave = {
+      kind: SAVE_KIND,
+      schemaVersion: SAVE_SCHEMA_VERSION,
+      appVersion: '1.4.596',
+      savedAt: new Date().toISOString(),
+      progress: { ...SAVE.progress, easyMode: false, started: true, matchLifetime: 5000, matchSkillSeen: 1 },
+    }
+    const hard = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 390, height: 844 },
+      deviceScaleFactor: 1,
+    })
+    await hard.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: hardSave },
+    )
+    const hardPage = await hard.newPage()
+    hardPage.on('pageerror', (error) => errors.push(`gem-sight hard ${error}`))
+    await hardPage.goto(withPlaytest1('/'))
+    const hardRead = await hardPage.evaluate(() => ({
+      easy: document.documentElement.getAttribute('data-easy'),
+      cue: document.querySelectorAll('[data-gem-sight-cue]').length,
+    }))
+    if (hardRead.easy === 'on') fail(`checkGemSightCue fail hard easy=on`)
+    else if (hardRead.cue !== 0) fail(`checkGemSightCue fail hard cue=${hardRead.cue}`)
+    else console.log(`checkGemSightCue ok hard easy=0 cue=0`)
+    await hard.close()
+  }
+
+  for (const err of errors.slice(errorMark)) fail(`checkGemSightCue error ${err}`)
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
@@ -10076,6 +10364,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'dig win readable nights stay free of console errors')
       return
     }
+    if (process.env.GEM_SIGHT_CUE_ONLY === '1') {
+      await checkGemSightCue(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'gem sight cue nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
@@ -10098,6 +10391,7 @@ export async function checkPhoneFixes() {
     await checkNwPlantRingOnce(browser, port, errors)
     await checkNwStripWords(browser, port, errors)
     await checkDigWinReadable(browser, port, errors)
+    await checkGemSightCue(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({

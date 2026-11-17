@@ -366,6 +366,7 @@ export function normalizeProgress(parsed: Partial<ProgressState> | ProgressState
     base.lampStyle = parsed.lampStyle
   }
   if (parsed.foundersGiftSeen === true) base.foundersGiftSeen = true
+  if (parsed.matchSightCueSeen === true) base.matchSightCueSeen = true
   base.memory = migrateMemory({ ...base, memory: parsed.memory ?? {} })
   base.cityBuilt =
     parsed.cityBuilt === undefined

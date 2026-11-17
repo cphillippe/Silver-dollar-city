@@ -196,6 +196,48 @@
   animation-delay: calc(var(--i) * 24ms);
 }
 
+/* 1.4.596: once-only plain line when Bonus Sight first rings a word (#965). */
+html[data-easy='on'] .play.is-gem-search .gem-hint-slot .gem-sight-cue {
+  margin: 0;
+  padding: 7px 12px;
+  border-radius: 14px;
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--parchment);
+  background: var(--ink);
+  text-align: center;
+  pointer-events: none;
+  animation: gem-sight-cue-out 2.6s ease-out forwards;
+}
+
+@keyframes gem-sight-cue-out {
+  0%,
+  72% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-easy='on'] .play.is-gem-search .gem-hint-slot .gem-sight-cue {
+    animation: gem-sight-cue-out-reduced 1.4s ease-out forwards;
+  }
+
+  @keyframes gem-sight-cue-out-reduced {
+    0%,
+    55% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+}
+
 /* Bonus Sight: unfound planted word shimmers with a pine ring. Never on the start cell. */
 html[data-easy='on'] .play.is-gem-search .gem-cell.is-sight:not(.is-start-gold) {
   z-index: 2;
