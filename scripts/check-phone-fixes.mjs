@@ -17,6 +17,8 @@ import { BRIGHT_LINE, LESSON_LOCK, PATH_LINE, TREE_LOCK } from '../src/nightWatc
 import { EASY } from '../src/lib/easyUi.ts'
 import { shortestMazePath } from '../src/lib/roadMaze.ts'
 import { withPlaytest1 } from './dev-ui-playtest.mjs'
+import { lineTakeaway } from '../src/lib/successBeat.ts'
+import { SOURCE_DIG_AGAIN } from '../src/lib/sourceDig.ts'
 
 const SAVE = {
   kind: SAVE_KIND,
@@ -8804,6 +8806,299 @@ async function checkNwStripWords(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #964 Easy golden-path Dig DUG! (wb-women) — readable secondaries and takeaway gap above Lock In. */
+const DIG_WIN_READABLE_SIZES = [
+  [375, 812],
+  [390, 844],
+]
+const DIG_WIN_LINE = 'wb-women'
+const DIG_WIN_TAP_BASELINE = {
+  '375x812': {
+    again: { x: 22, y: 735.890625, w: 331, h: 54.796875 },
+    home: { x: 22, y: 798.6875, w: 331, h: 54.796875 },
+  },
+  '390x844': {
+    again: { x: 22, y: 735.890625, w: 346, h: 54.796875 },
+    home: { x: 22, y: 798.6875, w: 346, h: 54.796875 },
+  },
+}
+
+async function scrubSourceDigWin(page) {
+  for (let round = 0; round < 8; round += 1) {
+    if (await page.locator('.play.is-source-dig.is-win').count()) return
+    const dirt = page.locator('.dig-tablet.is-buried .dig-dirt').first()
+    if (!(await dirt.count())) break
+    const box = await dirt.boundingBox()
+    if (!box?.width) break
+    const y = box.y + box.height / 2
+    let x = box.x + 12
+    await page.mouse.move(x, y)
+    await page.mouse.down()
+    for (let i = 0; i < 45; i += 1) {
+      x += 7
+      await page.mouse.move(x, y + (i % 3) - 1)
+    }
+    await page.mouse.up()
+    await page.waitForTimeout(60)
+  }
+  await page.locator('.play.is-source-dig.is-win').waitFor({ timeout: 20000 })
+  await page.waitForTimeout(350)
+  await page.evaluate(() => {
+    const body = document.querySelector('.app-body')
+    const dock = document.querySelector('.play.is-source-dig.is-win .cta-dock')
+    if (!body || !dock) return
+    const pad = body.getBoundingClientRect()
+    const tail = dock.getBoundingClientRect()
+    if (tail.bottom > pad.bottom - 2) {
+      body.scrollTop += tail.bottom - pad.bottom + 12
+    }
+  })
+  await page.waitForTimeout(120)
+}
+
+async function openEasyDigWin(page, lineId = DIG_WIN_LINE) {
+  await page.goto(withPlaytest1('/'))
+  await page.getByRole('main', { name: 'Home' }).waitFor({ timeout: 15000 }).catch(() => {})
+  if (await page.getByRole('button', { name: 'Start Easy' }).count()) {
+    await page.getByRole('button', { name: 'Start Easy' }).click()
+    await page.getByRole('main', { name: 'Home' }).waitFor()
+  }
+  await hintPointer(page, page.getByRole('button', { name: 'Settings', exact: true }))
+  const debug = page.locator('details.settings-debug')
+  await debug.waitFor({ timeout: 15000 })
+  await hintPointer(page, debug.locator('summary'))
+  const jump = debug.locator('button', { hasText: new RegExp(`^${lineId} ·`) }).first()
+  await jump.waitFor({ state: 'attached', timeout: 15000 })
+  await jump.evaluate((el) => el.click())
+  await page.locator('.play.is-source-dig').waitFor({ timeout: 15000 })
+  await scrubSourceDigWin(page)
+}
+
+async function checkDigWinReadable(browser, port, errors) {
+  const only = process.env.DIG_WIN_READABLE_ONLY === '1' ? null : process.env.DIG_WIN_READABLE_SIZE
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+  const want = lineTakeaway(DIG_WIN_LINE)
+  const rawDelta = (now, was) => {
+    if (!now && !was) return 0
+    if (!now || !was) return null
+    return Math.max(Math.abs(now.x - was.x), Math.abs(now.y - was.y), Math.abs(now.w - was.w), Math.abs(now.h - was.h))
+  }
+
+  for (const [width, height] of DIG_WIN_READABLE_SIZES) {
+    const tag = `${width}x${height}`
+    if (only && only !== tag) continue
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      reducedMotion: 'reduce',
+    })
+    const page = await context.newPage()
+    page.on('pageerror', (error) => errors.push(`dig-win ${tag} ${error}`))
+    try {
+      await openEasyDigWin(page)
+    } catch (error) {
+      fail(`checkDigWinReadable fail ${tag} open ${error}`)
+      await context.close()
+      continue
+    }
+
+    const read = await page.evaluate(({ claim, why, againLabel, homeLabel }) => {
+      const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+      const parseRgb = (css) => {
+        if (!css || css === 'transparent') return null
+        const m = css.match(/rgba?\(([^)]+)\)/)
+        if (!m) return null
+        const parts = m[1].split(',').map((s) => parseFloat(s.trim()))
+        if (parts.length === 4 && parts[3] <= 0.02) return null
+        return parts.slice(0, 3)
+      }
+      const relLum = ([r, g, b]) => {
+        const f = (v) => {
+          const c = v / 255
+          return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+        }
+        return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b)
+      }
+      const contrast = (fg, bg) => (Math.max(fg, bg) + 0.05) / (Math.min(fg, bg) + 0.05)
+      const effectiveBg = (el) => {
+        let node = el
+        while (node && node !== document.documentElement) {
+          const style = getComputedStyle(node)
+          const solid = parseRgb(style.backgroundColor)
+          if (solid) return solid
+          const img = style.backgroundImage
+          if (img && img !== 'none') {
+            for (const m of img.matchAll(/#([0-9a-fA-F]{6})/g)) {
+              const n = m[1]
+              return [parseInt(n.slice(0, 2), 16), parseInt(n.slice(2, 4), 16), parseInt(n.slice(4, 6), 16)]
+            }
+            for (const m of img.matchAll(/rgba?\(([^)]+)\)/g)) {
+              const p = m[1].split(',').map((s) => parseFloat(s.trim()))
+              if (p.length >= 3 && (p[3] === undefined || p[3] > 0.08)) return p.slice(0, 3)
+            }
+          }
+          node = node.parentElement
+        }
+        return [42, 13, 88]
+      }
+      const lineOf = (el, source) => {
+        if (!el) return null
+        const style = getComputedStyle(el)
+        const rendered = norm(el.textContent)
+        return {
+          source,
+          rendered,
+          scrollW: el.scrollWidth,
+          clientW: el.clientWidth,
+          scrollH: el.scrollHeight,
+          clientH: el.clientHeight,
+          font: parseFloat(style.fontSize),
+          overflow: style.textOverflow,
+        }
+      }
+      const box = (el) => {
+        if (!el) return null
+        const r = el.getBoundingClientRect()
+        return { x: r.x, y: r.y, w: r.width, h: r.height, left: r.left, top: r.top, right: r.right, bottom: r.bottom }
+      }
+      const goldLike = (value) => /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/.test(value) && (() => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g
+        let m
+        while ((m = re.exec(value))) {
+          const r = Number(m[1])
+          const g = Number(m[2])
+          const b = Number(m[3])
+          if (r > 190 && g > 140 && b < 120) return true
+        }
+        return false
+      })()
+      const play = document.querySelector('.play.is-source-dig.is-win')
+      const match = play?.querySelector('.match-yes')
+      const strong = match?.querySelector('strong')
+      const whyEl = match?.querySelector('span:not(.held-from)')
+      const primary = play?.querySelector('.cta-dock .btn.primary')
+      const again = play?.querySelector('[data-dig-again]')
+      const home = [...(play?.querySelectorAll('.cta-dock .btn:not(.primary)') || [])].find(
+        (el) => norm(el.textContent) === homeLabel,
+      )
+      const gap =
+        strong && whyEl && primary
+          ? primary.getBoundingClientRect().top -
+            Math.max(strong.getBoundingClientRect().bottom, whyEl.getBoundingClientRect().bottom)
+          : null
+      const extras = [again, home].filter(Boolean).map((el) => {
+        const style = getComputedStyle(el)
+        const fg = parseRgb(style.color)
+        const ratio = fg ? contrast(relLum(fg), relLum(effectiveBg(el))) : 0
+        const rect = box(el)
+        let hitOk = false
+        if (rect && rect.w > 1 && rect.h > 1) {
+          const cx = rect.left + rect.w / 2
+          let cy = rect.top + rect.h / 2
+          if (rect.bottom > window.innerHeight) {
+            cy = Math.min(rect.bottom - 6, window.innerHeight - 6)
+          }
+          const hit = document.elementFromPoint(cx, cy)
+          hitOk = Boolean(hit && (hit === el || el.contains(hit)))
+        }
+        return {
+          label: norm(el.textContent),
+          ratio,
+          rect,
+          hitOk,
+        }
+      })
+      const gold = [...(play?.querySelectorAll('.cta-dock .btn.primary.snap-bins') || [])].length
+      return {
+        gap,
+        gold,
+        lines: [lineOf(strong, claim), lineOf(whyEl, why)].filter(Boolean),
+        extras,
+      }
+    }, { claim: want.claim, why: want.why, againLabel: SOURCE_DIG_AGAIN, homeLabel: EASY.home })
+
+    const baseline = DIG_WIN_TAP_BASELINE[tag]
+    let clipped = 0
+    let minFont = 99
+    for (const line of read.lines) {
+      if (line.rendered !== line.source) fail(`checkDigWinReadable fail ${tag} line rendered=${JSON.stringify(line.rendered)} source=${JSON.stringify(line.source)}`)
+      const cut = line.scrollW > line.clientW + 1 || line.scrollH > line.clientH + 1
+      if (cut) clipped += 1
+      minFont = Math.min(minFont, line.font)
+    }
+    if (clipped !== 0) fail(`checkDigWinReadable fail ${tag} clipped=${clipped}`)
+    if (!(minFont >= 13)) fail(`checkDigWinReadable fail ${tag} font=${minFont}`)
+    if (!(read.gap >= 8)) fail(`checkDigWinReadable fail ${tag} gap=${read.gap == null ? 'missing' : read.gap.toFixed(2)} want>=8`)
+  for (const row of read.extras) {
+      if (row.label === SOURCE_DIG_AGAIN) {
+        const delta = rawDelta(row.rect, baseline?.again)
+        if (!(row.ratio >= 4.5)) fail(`checkDigWinReadable fail ${tag} again contrast=${row.ratio.toFixed(2)}`)
+        if (!row.hitOk) fail(`checkDigWinReadable fail ${tag} again hit`)
+        if (delta == null || delta > 0.5) fail(`checkDigWinReadable fail ${tag} again tapDelta=${delta == null ? 'missing' : delta.toFixed(2)}`)
+      }
+      if (row.label === EASY.home) {
+        const delta = rawDelta(row.rect, baseline?.home)
+        const homeHit = await page
+          .locator('.play.is-source-dig.is-win .cta-dock .btn', { hasText: EASY.home })
+          .click({ trial: true })
+          .then(() => true)
+          .catch(() => false)
+        if (!(row.ratio >= 4.5)) fail(`checkDigWinReadable fail ${tag} home contrast=${row.ratio.toFixed(2)}`)
+        if (!homeHit) fail(`checkDigWinReadable fail ${tag} home hit`)
+        if (delta == null || delta > 0.5) fail(`checkDigWinReadable fail ${tag} home tapDelta=${delta == null ? 'missing' : delta.toFixed(2)}`)
+      }
+    }
+    if (read.gold !== 1) fail(`checkDigWinReadable fail ${tag} gold=${read.gold}`)
+    if (!problems.some((line) => line.includes(` ${tag} `))) {
+      const againRatio = read.extras.find((row) => row.label === SOURCE_DIG_AGAIN)?.ratio
+      console.log(
+        `checkDigWinReadable ok ${tag} gap=${read.gap.toFixed(1)} again=${againRatio?.toFixed(1)} clipped=0 font=${minFont}px gold=1`,
+      )
+    }
+    await context.close()
+  }
+
+  if (!only) {
+    const hardSave = {
+      kind: SAVE_KIND,
+      schemaVersion: SAVE_SCHEMA_VERSION,
+      appVersion: '1.4.595',
+      savedAt: new Date().toISOString(),
+      progress: { ...SAVE.progress, easyMode: false, started: true },
+    }
+    const hard = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 390, height: 844 },
+      deviceScaleFactor: 1,
+    })
+    await hard.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: hardSave },
+    )
+    const hardPage = await hard.newPage()
+    hardPage.on('pageerror', (error) => errors.push(`dig-win hard ${error}`))
+    await hardPage.goto(withPlaytest1('/'))
+    const hardRead = await hardPage.evaluate(() => ({
+      easy: document.documentElement.getAttribute('data-easy'),
+    }))
+    if (hardRead.easy === 'on') fail(`checkDigWinReadable fail hard easy=on`)
+    else console.log(`checkDigWinReadable ok hard easy=0 wb-women=${DIG_WIN_LINE}`)
+    await hard.close()
+  }
+
+  for (const err of errors.slice(errorMark)) fail(`checkDigWinReadable error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 /** #967 Easy first plant must not open the upgrade card. A touch tap does, on the parent. */
 const PLANT_NO_CARD_SIZES = [
   [375, 667],
@@ -9776,6 +10071,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'strip words nights stay free of console errors')
       return
     }
+    if (process.env.DIG_WIN_READABLE_ONLY === '1') {
+      await checkDigWinReadable(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'dig win readable nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
@@ -9797,6 +10097,7 @@ export async function checkPhoneFixes() {
     await checkNwCandleName(browser, port, errors)
     await checkNwPlantRingOnce(browser, port, errors)
     await checkNwStripWords(browser, port, errors)
+    await checkDigWinReadable(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
