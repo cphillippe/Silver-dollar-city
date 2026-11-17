@@ -8514,15 +8514,24 @@ const NW_STRIP_WORDS_SIZES = [
   [390, 844],
 ]
 const NW_STRIP_WORDS_SEARCH = '?playtest=1&nwSeed=2&nwRound=24&nwLamps=0&nwCam=1'
-/** Parent 1.4.593 strip buy button boxes (mid-wave love lamp). Tap geometry must not move. */
+/** Parent 1.4.593 strip buy button boxes (mid-wave love lamp). Tap geometry must not move.
+ * 375×812 sometimes places the strip flush left (`near`) or over the road (`road`); pin both. */
 const NW_STRIP_TAP_BASELINE = {
   '375x812': {
-    far: { x: 76.9, y: 365.1, w: 104, h: 44 },
-    strong: { x: 76.9, y: 413.1, w: 104, h: 44 },
+    near: {
+      far: { x: 76.9, y: 365.1, w: 104, h: 44 },
+      strong: { x: 76.9, y: 413.1, w: 104, h: 44 },
+    },
+    road: {
+      far: { x: 195, y: 365.1, w: 104, h: 44 },
+      strong: { x: 195, y: 413.1, w: 104, h: 44 },
+    },
   },
   '390x844': {
-    far: { x: 210, y: 382.7, w: 104, h: 44 },
-    strong: { x: 210, y: 430.7, w: 104, h: 44 },
+    road: {
+      far: { x: 210, y: 382.7, w: 104, h: 44 },
+      strong: { x: 210, y: 430.7, w: 104, h: 44 },
+    },
   },
 }
 
@@ -8688,11 +8697,15 @@ async function checkNwStripWords(browser, port, errors) {
         const labelOverlap = cost && before.glyphs.length ? overlap(before.glyphs, cost.glyphs) : false
         return { path, el: box(el), before, cost, hitTarget, labelOverlap }
       })
-      return { rows }
+      const cardBox = box(document.querySelector('.defend-tower-card[data-strip="yes"]'))
+      return { rows, cardLeft: cardBox?.x ?? null }
     })
 
     const tag = `${label} mid-wave`
-    const baseline = NW_STRIP_TAP_BASELINE[label]
+    const viewportPlan = NW_STRIP_TAP_BASELINE[label]
+    const stripSlot =
+      read.cardLeft == null ? null : label === '375x812' ? (read.cardLeft < 120 ? 'near' : 'road') : 'road'
+    const baseline = viewportPlan && stripSlot ? viewportPlan[stripSlot] : null
     let clipped = 0
     let minFont = Infinity
     const stripGold = await page.evaluate(() => {
@@ -8756,6 +8769,7 @@ async function checkNwStripWords(browser, port, errors) {
       }
       if (row.labelOverlap) fail(`checkNwStripWords fail ${tag} ${row.path} label-cost overlap`)
       if (row.hitTarget !== 'ok') fail(`checkNwStripWords fail ${tag} ${row.path} hit=${row.hitTarget}`)
+      if (!baseline) fail(`checkNwStripWords fail ${tag} tapPlan=missing slot=${stripSlot} cardLeft=${read.cardLeft}`)
       if (baseline && row.el) {
         const plan = baseline[row.path]
         const delta = rawDelta(
