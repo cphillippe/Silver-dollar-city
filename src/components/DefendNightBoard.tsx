@@ -61,6 +61,35 @@ function boxesHit(a: { left: number; right: number; top: number; bottom: number 
   return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
 }
 
+/** Easy chip: slide off obstacles before hiding on chrome. Card-open parks use data-label-park. */
+function slideTypeChip(chip: HTMLElement, obstacles: DOMRect[], above: boolean) {
+  let dx = 0
+  let dy = 0
+  const apply = () => {
+    if (above) chip.style.transform = `translate(calc(-50% + ${dx}px), calc(-100% - 18px + ${dy}px))`
+    else if (dx === 0 && dy === 0) chip.style.transform = ''
+    else chip.style.transform = `translate(calc(-50% + ${dx}px), calc(10px + ${dy}px))`
+  }
+  for (let pass = 0; pass < 16; pass++) {
+    apply()
+    const box = chip.getBoundingClientRect()
+    if (box.width < 1 || box.height < 1) return box
+    const other = obstacles.find((bit) => boxesHit(box, bit))
+    if (!other) return box
+    const overlapY = Math.min(box.bottom, other.bottom) - Math.max(box.top, other.top)
+    const overlapX = Math.min(box.right, other.right) - Math.max(box.left, other.left)
+    if (overlapY <= overlapX + 0.5) {
+      const dir = (box.top + box.bottom) / 2 <= (other.top + other.bottom) / 2 ? -1 : 1
+      dy += dir * (overlapY + 4)
+    } else {
+      const dir = (box.left + box.right) / 2 <= (other.left + other.right) / 2 ? -1 : 1
+      dx += dir * (overlapX + 4)
+    }
+  }
+  apply()
+  return chip.getBoundingClientRect()
+}
+
 /** Ink of the name, including the part that sticks out of a short client box. */
 function labelPaintBox(el: SVGTextElement) {
   const rect = el.getBoundingClientRect()
@@ -116,14 +145,30 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
     if (box.width < 1 || box.height < 1 || !chrome.some((other) => boxesHit(box, other))) label.removeAttribute('data-chrome-hide')
     else label.setAttribute('data-chrome-hide', 'yes')
   }
-  for (const chip of page.querySelectorAll('.defend-type-chip')) {
-    if (!(chip instanceof HTMLElement)) continue
+  const chipNodes = [...page.querySelectorAll('.defend-type-chip')]
+    .filter((node): node is HTMLElement => node instanceof HTMLElement)
+    .sort((a, b) => (parseFloat(b.style.top) || 0) - (parseFloat(a.style.top) || 0))
+  const glyphBoxes = [
+    ...page.querySelectorAll('.defend-pad .defend-lamp-sprite, .defend-pad image.defend-type-mark'),
+  ]
+    .filter(chromeBoxShown)
+    .map((el) => el.getBoundingClientRect())
+  for (const chip of chipNodes) {
     const style = getComputedStyle(chip)
     if (style.display === 'none' || Number(style.opacity) === 0) {
       chip.removeAttribute('data-chrome-hide')
       continue
     }
-    const box = chip.getBoundingClientRect()
+    if (!chip.getAttribute('data-label-park')) chip.style.transform = ''
+    chip.removeAttribute('data-chrome-hide')
+    const otherChips = chipNodes
+      .filter((node) => node !== chip && chromeBoxShown(node))
+      .map((node) => node.getBoundingClientRect())
+    const blocks = [...chrome, ...glyphBoxes, ...otherChips]
+    let box = slideTypeChip(chip, blocks, false)
+    if (box.width > 1 && box.height > 1 && chrome.some((other) => boxesHit(box, other))) {
+      box = slideTypeChip(chip, blocks, true)
+    }
     if (box.width < 1 || box.height < 1 || !chrome.some((other) => boxesHit(box, other))) chip.removeAttribute('data-chrome-hide')
     else chip.setAttribute('data-chrome-hide', 'yes')
   }

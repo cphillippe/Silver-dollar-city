@@ -28,6 +28,17 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.598',
+    title: 'Night Watch: Love lamp name on screen',
+    when: '2026-11-17',
+    items: [
+      'On Easy, every planted pillar lamp keeps its type name chip on screen, including Love at the upper seats.',
+      'Chips slide off docks and Begin instead of vanishing when chrome would cover them.',
+      'Hard stays the same.',
+      'Refs #949.',
+    ],
+  },
+  {
     version: '1.4.597',
     title: 'Night Watch: Spend and help on screen',
     when: '2026-11-17',
