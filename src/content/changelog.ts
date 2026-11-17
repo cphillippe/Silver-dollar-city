@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.594',
+    title: 'Night Watch: Far and Strong on the mid-wave buy strip',
+    when: '2026-11-17',
+    items: [
+      'On Easy, the short mid-wave buy strip next to your lamp says Far and Strong with the spark cost in plain words.',
+      'Hard stays the same.',
+      'Refs #950.',
+    ],
+  },
+  {
     version: '1.4.593',
     title: 'Night Watch: one plant shockwave per run',
     when: '2026-11-17',

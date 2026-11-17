@@ -8506,6 +8506,304 @@ async function checkNwPlantRingOnce(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #950 Easy mid-wave buy strip: Far / Strong words and sparks cost (not F / S placeholder letters). */
+const NW_STRIP_WORDS_SIZES = [
+  [375, 812],
+  [390, 844],
+]
+const NW_STRIP_WORDS_SEARCH = '?playtest=1&nwSeed=2&nwRound=24&nwLamps=0&nwCam=1'
+/** Parent 1.4.593 strip buy button boxes (mid-wave love lamp). Tap geometry must not move. */
+const NW_STRIP_TAP_BASELINE = {
+  '375x812': {
+    far: { x: 76.9, y: 365.1, w: 104, h: 44 },
+    strong: { x: 76.9, y: 413.1, w: 104, h: 44 },
+  },
+  '390x844': {
+    far: { x: 210, y: 382.7, w: 104, h: 44 },
+    strong: { x: 210, y: 430.7, w: 104, h: 44 },
+  },
+}
+
+async function checkNwStripWords(browser, port, errors) {
+  const only = process.env.NW_STRIP_WORDS_SIZE
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+  const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+  const cssText = (value) => {
+    if (!value || value === 'none' || value === 'normal') return ''
+    const first = /^"((?:\\.|[^"\\])*)"/.exec(value)
+    return first ? first[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\') : ''
+  }
+  const rawDelta = (now, was) => {
+    if (!now && !was) return 0
+    if (!now || !was) return null
+    return Math.max(Math.abs(now.x - was.x), Math.abs(now.y - was.y), Math.abs(now.w - was.w), Math.abs(now.h - was.h))
+  }
+
+  for (const [width, height] of NW_STRIP_WORDS_SIZES) {
+    const label = `${width}x${height}`
+    if (only && only !== label) continue
+    const { context, page } = await openMap(browser, port, width, height, 'a2', {
+      motion: true,
+      search: NW_STRIP_WORDS_SEARCH,
+    })
+    page.on('pageerror', (error) => errors.push(`strip-words ${label} ${error}`))
+    await glyphSetup(page)
+    await assertGlyphCamera(page, `${label} strip`)
+    const rings = await page.evaluate(() =>
+      [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({
+        cx: Number(ring.getAttribute('cx')),
+        cy: Number(ring.getAttribute('cy')),
+      })),
+    )
+    const ring = rings.find((entry) => entry.cx === FAILING_SEAT.cx && entry.cy === FAILING_SEAT.cy) ?? rings[rings.length - 1]
+    assert.ok(ring, `${label} has a live seat for the strip check`)
+    await glyphPlantAt(page, 'love', ring, `${label} strip`)
+    const sparks = await page.evaluate(() => Number((document.body.innerText.match(/(\d+)\s*\n?\s*Sparks/) || [])[1] || 0))
+    assert.ok(sparks >= 3, `${label} strip has sparks to buy (${sparks})`)
+    await page.locator('.defend-go').click()
+    await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
+    for (let attempt = 0; attempt < 6 && (await page.locator('.defend-tower-card[data-strip="yes"]').count()) < 1; attempt += 1) {
+      await page.locator('.defend-pad[data-tower-type="love"]').click({ force: true })
+      await page.waitForTimeout(350)
+    }
+    await page.locator('.defend-tower-card[data-strip="yes"]').waitFor({ timeout: 5000 })
+    await page.locator('.defend-raider.is-easy-cue').waitFor({ timeout: 60_000 })
+    await page.waitForTimeout(300)
+
+    const read = await page.evaluate(() => {
+      const normLocal = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+      const cssTextLocal = (value) => {
+        if (!value || value === 'none' || value === 'normal') return ''
+        const first = /^"((?:\\.|[^"\\])*)"/.exec(value)
+        return first ? first[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\') : ''
+      }
+      const box = (el) => {
+        if (!el) return null
+        const r = el.getBoundingClientRect()
+        return { x: r.x, y: r.y, w: r.width, h: r.height, left: r.left, top: r.top, right: r.right, bottom: r.bottom }
+      }
+      const glyphRects = (el, pseudo) => {
+        const style = getComputedStyle(el, pseudo)
+        const source = cssTextLocal(style.content).replace(/\s+/g, ' ').trim()
+        if (!source) return { source: '', rendered: '', glyphs: [] }
+        const host = el.getBoundingClientRect()
+        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0 || host.width < 1) {
+          return { source, rendered: '', glyphs: [] }
+        }
+        const range = document.createRange()
+        range.selectNodeContents(el)
+        const before = (() => {
+          const probe = document.createElement('span')
+          probe.textContent = source
+          probe.style.cssText = `position:fixed;left:${host.left}px;top:${host.top}px;font:${style.font};font-size:${style.fontSize};font-weight:${style.fontWeight};white-space:nowrap;pointer-events:none;opacity:0`
+          document.body.appendChild(probe)
+          const r = probe.getBoundingClientRect()
+          document.body.removeChild(probe)
+          return [{ x: r.x, y: r.y, right: r.right, bottom: r.bottom, w: r.width, h: r.height }]
+        })()
+        void range
+        return { source, rendered: source, glyphs: before }
+      }
+      const lineOf = (el) => {
+        if (!el) return null
+        const style = getComputedStyle(el)
+        const directs = [...el.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+        if (!directs.length) return null
+        const source = normLocal(directs.map((child) => child.textContent).join(''))
+        const rect = el.getBoundingClientRect()
+        if (rect.width < 1 || rect.height < 1) return null
+        const range = document.createRange()
+        let rendered = ''
+        const host = { left: rect.left - 1, right: rect.right + 1, top: rect.top - 1, bottom: rect.bottom + 1 }
+        for (const child of directs) {
+          const raw = child.textContent
+          for (let i = 0; i < raw.length; i += 1) {
+            const ch = raw[i]
+            if (!ch.trim()) {
+              rendered += ch
+              continue
+            }
+            range.setStart(child, i)
+            range.setEnd(child, i + 1)
+            let painted = false
+            for (const bit of range.getClientRects()) {
+              if (bit.width <= 0 || bit.height <= 0) continue
+              if (bit.right > host.left && bit.left < host.right && bit.bottom > host.top && bit.top < host.bottom) {
+                painted = true
+                break
+              }
+            }
+            if (painted) rendered += ch
+          }
+        }
+        const glyphs = []
+        for (const child of directs) {
+          const raw = child.textContent
+          for (let i = 0; i < raw.length; i += 1) {
+            if (!raw[i].trim()) continue
+            range.setStart(child, i)
+            range.setEnd(child, i + 1)
+            for (const bit of range.getClientRects()) {
+              if (bit.width > 0 && bit.height > 0) {
+                glyphs.push({ x: bit.x, y: bit.y, right: bit.right, bottom: bit.bottom })
+              }
+            }
+          }
+        }
+        return {
+          source,
+          rendered: normLocal(rendered),
+          font: parseFloat(style.fontSize),
+          scrollW: el.scrollWidth,
+          clientW: el.clientWidth,
+          scrollH: el.scrollHeight,
+          clientH: el.clientHeight,
+          box: box(el),
+          glyphs,
+        }
+      }
+      const hit = (a, b) => a.x < b.right && a.right > b.x && a.y < b.bottom && a.bottom > b.y
+      const overlap = (ga, gb) => ga.some((a) => gb.some((b) => hit(a, b)))
+      const paths = ['far', 'strong']
+      const rows = paths.map((path) => {
+        const el = document.querySelector(`.defend-tower-card[data-strip='yes'] .defend-path[data-path='${path}'] .defend-path-buy`)
+        const before = glyphRects(el, '::before')
+        const cost = lineOf(el)
+        const center = el ? { x: el.getBoundingClientRect().left + el.getBoundingClientRect().width / 2, y: el.getBoundingClientRect().top + el.getBoundingClientRect().height / 2 } : null
+        let hitTarget = 'missing'
+        if (center) {
+          const node = document.elementFromPoint(center.x, center.y)
+          hitTarget = node === el || el?.contains(node) ? 'ok' : `${node?.tagName}.${node?.getAttribute('class') || ''}`.slice(0, 60)
+        }
+        const labelOverlap = cost && before.glyphs.length ? overlap(before.glyphs, cost.glyphs) : false
+        return { path, el: box(el), before, cost, hitTarget, labelOverlap }
+      })
+      return { rows }
+    })
+
+    const tag = `${label} mid-wave`
+    const baseline = NW_STRIP_TAP_BASELINE[label]
+    let clipped = 0
+    let minFont = Infinity
+    const stripGold = await page.evaluate(() => {
+      const goldish = (value) => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+        let match
+        while ((match = re.exec(value || ''))) {
+          const r = +match[1]
+          const g = +match[2]
+          const b = +match[3]
+          const a = match[4] === undefined ? 1 : +match[4]
+          if (a > 0.05 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
+      const names = []
+      const sels =
+        '.defend-go, .defend-continue, .defend-raider.is-easy-cue .defend-raider-face, .defend-path-buy, .defend-bright-buy, .defend-tower-card, .lamp-upgrade-glyph .is-stroke, .lamp-upgrade-glyph .is-gap, .lamp-upgrade-glyph .is-dot'
+      for (const el of document.querySelectorAll(sels)) {
+        const style = getComputedStyle(el)
+        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+        const rect = el.getBoundingClientRect()
+        if (rect.width <= 0 || rect.height <= 0) continue
+        let why = false
+        if (el instanceof SVGElement) {
+          if (style.stroke !== 'none' && parseFloat(style.strokeWidth) > 0 && goldish(style.stroke)) why = true
+          if (style.fill !== 'none' && goldish(style.fill)) why = true
+          if (goldish(style.filter)) why = true
+        } else if (
+          goldish(style.backgroundImage) ||
+          goldish(style.backgroundColor) ||
+          goldish(style.boxShadow) ||
+          goldish(style.borderTopColor) ||
+          goldish(style.filter)
+        )
+          why = true
+        if (why) names.push(String(el.getAttribute('class') || el.tagName).split(/\s+/).slice(0, 3).join('.'))
+      }
+      return names.length
+    })
+    for (const row of read.rows) {
+      const word = row.path === 'far' ? 'Far' : 'Strong'
+      const wantCost = '3 sparks'
+      if (!row.before.source || row.before.source !== word) {
+        fail(`checkNwStripWords fail ${tag} ${row.path} label=${JSON.stringify(row.before.source)} want=${word}`)
+      }
+      if (row.before.rendered !== row.before.source) {
+        fail(`checkNwStripWords fail ${tag} ${row.path} label rendered=${JSON.stringify(row.before.rendered)} source=${JSON.stringify(row.before.source)}`)
+      }
+      if (row.before.source === 'F' || row.before.source === 'S') {
+        fail(`checkNwStripWords fail ${tag} ${row.path} lone-letter label=${JSON.stringify(row.before.source)}`)
+      }
+      if (!row.cost) fail(`checkNwStripWords fail ${tag} ${row.path} cost=missing`)
+      else {
+        if (row.cost.rendered !== row.cost.source) {
+          fail(`checkNwStripWords fail ${tag} ${row.path} cost rendered=${JSON.stringify(row.cost.rendered)} source=${JSON.stringify(row.cost.source)}`)
+        }
+        if (row.cost.source !== wantCost) fail(`checkNwStripWords fail ${tag} ${row.path} cost=${JSON.stringify(row.cost.source)} want=${wantCost}`)
+        if (row.cost.scrollW > row.cost.clientW + 1 || row.cost.scrollH > row.cost.clientH + 1) clipped += 1
+        minFont = Math.min(minFont, row.cost.font)
+      }
+      if (row.labelOverlap) fail(`checkNwStripWords fail ${tag} ${row.path} label-cost overlap`)
+      if (row.hitTarget !== 'ok') fail(`checkNwStripWords fail ${tag} ${row.path} hit=${row.hitTarget}`)
+      if (baseline && row.el) {
+        const plan = baseline[row.path]
+        const delta = rawDelta(
+          { x: Math.round(row.el.x * 10) / 10, y: Math.round(row.el.y * 10) / 10, w: Math.round(row.el.w * 10) / 10, h: Math.round(row.el.h * 10) / 10 },
+          plan,
+        )
+        if (delta == null || delta > 0.5) {
+          fail(`checkNwStripWords fail ${tag} ${row.path} tapDelta=${delta == null ? 'missing' : delta.toFixed(2)} want<=0.5`)
+        }
+      }
+    }
+    if (clipped !== 0) fail(`checkNwStripWords fail ${tag} clipped=${clipped}`)
+    if (!(minFont >= 13)) fail(`checkNwStripWords fail ${tag} font=${minFont}`)
+    if (stripGold !== 1) fail(`checkNwStripWords fail ${tag} gold=${stripGold}`)
+    if (!problems.some((line) => line.includes(` ${tag} `))) {
+      console.log(`checkNwStripWords ok ${tag} far=Far strong=Strong cost="3 sparks" clipped=0 font=${minFont}px gold=1 tapDelta<=0.5`)
+    }
+    await context.close()
+  }
+
+  if (!only) {
+    const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }
+    const hard = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 390, height: 844 },
+      deviceScaleFactor: 1,
+    })
+    await hard.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: hardSave },
+    )
+    const hardPage = await hard.newPage()
+    hardPage.on('pageerror', (error) => errors.push(`strip-words hard ${error}`))
+    await hardPage.goto('/?playtest=1')
+    await hardPage.getByRole('button', { name: 'Hold the night' }).click()
+    await hardPage.locator('.defend-board').waitFor()
+    await hardPage.waitForTimeout(300)
+    const hardRead = await hardPage.evaluate(() => ({
+      easy: document.querySelectorAll('.defend-page.is-easy-watch').length,
+      strip: document.querySelectorAll('.defend-tower-card[data-strip="yes"]').length,
+    }))
+    if (hardRead.easy !== 0) fail(`checkNwStripWords fail hard easy=${hardRead.easy}`)
+    else console.log(`checkNwStripWords ok hard unchanged easy=0 strip=${hardRead.strip}`)
+    await hard.close()
+  }
+
+  for (const err of errors.slice(errorMark)) fail(`checkNwStripWords error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 /** #967 Easy first plant must not open the upgrade card. A touch tap does, on the parent. */
 const PLANT_NO_CARD_SIZES = [
   [375, 667],
@@ -9473,6 +9771,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'plant ring once nights stay free of console errors')
       return
     }
+    if (process.env.NW_STRIP_WORDS_ONLY === '1') {
+      await checkNwStripWords(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'strip words nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
@@ -9493,6 +9796,7 @@ export async function checkPhoneFixes() {
     await checkNwLampMoveHop(browser, port, errors)
     await checkNwCandleName(browser, port, errors)
     await checkNwPlantRingOnce(browser, port, errors)
+    await checkNwStripWords(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({

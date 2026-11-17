@@ -1251,7 +1251,7 @@ export function DefendTowerCard({
                     if (!broke) onUpgradePath(path, true)
                   }}
                 >
-                  {broke ? `Need ${buy.cost}` : `${buy.cost}✦`}
+                  {broke ? `Need ${buy.cost}` : strip ? `${buy.cost} sparks` : `${buy.cost}✦`}
                 </button>
               ) : lessonLocked && !midWave ? (
                 <div className="defend-lesson-cue" data-lesson-cue={ability} data-pillar={label}>

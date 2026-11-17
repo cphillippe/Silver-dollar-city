@@ -6359,7 +6359,21 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   pointer-events: auto;
 }
 
-/* Placeholder letters. Swap --nw-icon-far and --nw-icon-strong when art lands. */
+/* Mid-wave strip only: plain Far / Strong words (not the single-letter placeholders). */
+.defend-page.is-easy-watch.is-easy-tap .defend-tower-card[data-strip='yes'] {
+  --nw-icon-far: "Far";
+  --nw-icon-strong: "Strong";
+}
+
+.defend-page.is-easy-watch.is-easy-tap .defend-tower-card[data-strip='yes'] .defend-path-buy {
+  font-size: 13px;
+  justify-content: flex-start;
+  gap: 2px;
+  padding: 0 4px 0 2px;
+  box-sizing: border-box;
+}
+
+/* Placeholder letters on the full card; the strip overrides with full words above. */
 .defend-page.is-easy-watch.is-easy-tap .defend-tower-card .defend-path[data-path='far'] .defend-path-buy::before,
 .defend-page.is-easy-watch.is-easy-tap .defend-tower-card .defend-path[data-path='strong'] .defend-path-buy::before {
   font-size: 13px;
