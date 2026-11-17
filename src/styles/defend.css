@@ -6367,10 +6367,6 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
 
 .defend-page.is-easy-watch.is-easy-tap .defend-tower-card[data-strip='yes'] .defend-path-buy {
   font-size: 13px;
-  justify-content: flex-start;
-  gap: 2px;
-  padding: 0 4px 0 2px;
-  box-sizing: border-box;
 }
 
 /* Placeholder letters on the full card; the strip overrides with full words above. */
