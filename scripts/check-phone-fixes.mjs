@@ -3,7 +3,7 @@
  * The map sheet, the clear-bar buttons, and a walker beside a lamp.
  */
 import assert from 'node:assert/strict'
-import { mkdirSync } from 'node:fs'
+import { mkdirSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -8081,6 +8081,184 @@ async function checkNwRoundCheer(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #970 Easy clear screen: the Candle dock gets a plain name line (source: candle.ts). */
+const NW_CANDLE_NAME_SIZES = [
+  [375, 812],
+  [390, 844],
+]
+
+function nwCandleNameSource() {
+  const src = readFileSync(new URL('../src/nightWatch/candle.ts', import.meta.url), 'utf8')
+  const intro = src.match(/export const CANDLE_INTRO = '([^']+)'/)?.[1]
+  const cost = src.match(/export const CANDLE_COST = (\d+)/)?.[1]
+  assert.ok(intro && cost, 'checkNwCandleName reads CANDLE_INTRO and CANDLE_COST')
+  return `${intro} · ${cost} sparks`
+}
+
+async function checkNwCandleName(browser, port, errors) {
+  const only = process.env.NW_CANDLE_NAME_SIZE
+  const want = nwCandleNameSource()
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+  const snap = {
+    phase: 'boost',
+    waveIndex: 2,
+    plants: { 'at:490:1000': 'love' },
+    paths: {
+      love: { far: 0, strong: 0 },
+      logic: { far: 0, strong: 0 },
+      reason: { far: 0, strong: 0 },
+      science: { far: 0, strong: 0 },
+    },
+    sparks: 13,
+    hearts: 3,
+    paid: [],
+  }
+  for (const [width, height] of NW_CANDLE_NAME_SIZES) {
+    const label = `${width}x${height}`
+    if (only && only !== label) continue
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      reducedMotion: 'reduce',
+    })
+    await context.addInitScript(
+      (payload) => {
+        localStorage.setItem(payload.key, JSON.stringify(payload.save))
+        sessionStorage.setItem('nw-night-return', JSON.stringify(payload.snap))
+      },
+      { key: STORAGE_KEY, save: SAVE, snap },
+    )
+    const page = await context.newPage()
+    page.on('pageerror', (error) => errors.push(`candle-name ${label} ${error}`))
+    await page.goto('/?playtest=1&nwCam=0')
+    await page.getByRole('button', { name: 'Settings' }).click()
+    await page.locator('summary', { hasText: 'Developer' }).click()
+    await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
+    await page.locator('.defend-board').waitFor()
+    if (await page.locator('[data-map-overlay]').count()) {
+      await page.locator('[data-map="a2"]').click()
+      await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+    }
+    await page.locator('.defend-page.is-boost').waitFor({ timeout: 15_000 })
+    await page.locator('button.defend-candle-lamp').waitFor({ timeout: 5000 })
+    await page.waitForTimeout(300)
+    const read = await page.evaluate((source) => {
+      const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+      const rectOf = (el) => {
+        const r = el.getBoundingClientRect()
+        return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom }
+      }
+      const painters = [...document.querySelectorAll('body *')].filter((el) => {
+        const directs = [...el.childNodes].filter((child) => child.nodeType === 3)
+        return norm(directs.map((child) => child.textContent).join('')).includes('Candle') && norm(el.textContent).includes('sparks')
+      })
+      const nodes = painters.map((el) => {
+        const style = getComputedStyle(el)
+        const r = rectOf(el)
+        const range = document.createRange()
+        range.selectNodeContents(el)
+        const glyph = [...range.getClientRects()].filter((b) => b.width > 0 && b.height > 0)
+        return {
+          text: norm(el.textContent),
+          scrollW: el.scrollWidth,
+          clientW: el.clientWidth,
+          scrollH: el.scrollHeight,
+          clientH: el.clientHeight,
+          font: parseFloat(style.fontSize),
+          box: r,
+          glyph: glyph.map((b) => ({ x: b.x, y: b.y, right: b.right, bottom: b.bottom })),
+          inView: r.x >= 0 && r.y >= 0 && r.right <= innerWidth && r.bottom <= innerHeight,
+        }
+      })
+      const hit = (a, b) => a.x < b.right && a.right > b.x && a.y < b.bottom && a.bottom > b.y
+      const docks = [...document.querySelectorAll('button.defend-new-lamp')].map((el) => ({
+        key: el.getAttribute('data-candle-lamp') ? 'candle' : el.getAttribute('data-new-lamp') ? 'sparkle' : 'other',
+        box: rectOf(el),
+      }))
+      let overlap = 0
+      for (const node of nodes) {
+        for (const dock of docks) {
+          if (node.glyph.some((g) => hit(g, dock.box))) overlap += 1
+        }
+      }
+      return {
+        nodes: nodes.map(({ glyph, ...rest }) => rest),
+        overlap,
+        docks: docks.map((d) => d.key),
+        source,
+      }
+    }, want)
+    const sampled = await readNwDockGold(page)
+    const golds = [...new Set(sampled.frames.map((frame) => frame.gold))]
+    const names = [...new Set(sampled.frames.flatMap((frame) => frame.names))]
+    const state = 'clear-r3'
+    let clipped = 0
+    let minFont = Infinity
+    const texts = new Set()
+    for (const node of read.nodes) {
+      texts.add(node.text)
+      if (node.scrollW > node.clientW + 1 || node.scrollH > node.clientH + 1) clipped += 1
+      if (!node.inView) clipped += 1
+      minFont = Math.min(minFont, node.font)
+    }
+    const tag = `${label} ${state}`
+    if (!read.nodes.length) {
+      fail(`checkNwCandleName fail ${tag} text=missing want=${JSON.stringify(want)} docks=${read.docks.join(',')} gold=${golds.join('|')}`)
+    } else {
+      if (![...texts].every((text) => text === want)) fail(`checkNwCandleName fail ${tag} text=${JSON.stringify([...texts])} want=${JSON.stringify(want)}`)
+      if (clipped !== 0) fail(`checkNwCandleName fail ${tag} clipped=${clipped}`)
+      if (!(minFont >= 13)) fail(`checkNwCandleName fail ${tag} font=${minFont}`)
+      if (read.overlap !== 0) fail(`checkNwCandleName fail ${tag} overlap=${read.overlap}`)
+    }
+    if (golds.length !== 1 || golds[0] !== 1) fail(`checkNwCandleName fail ${tag} gold=${golds.join('|')} names=${names.join(' | ')}`)
+    if (!problems.some((line) => line.includes(` ${tag} `))) {
+      console.log(
+        `checkNwCandleName ok ${tag} text=${JSON.stringify(want)} nodes=${read.nodes.length} clipped=0 font=${minFont}px gold=1 overlap=0`,
+      )
+    }
+    await context.close()
+  }
+
+  if (!only) {
+    const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }
+    const hard = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 390, height: 844 },
+      deviceScaleFactor: 1,
+    })
+    await hard.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: hardSave },
+    )
+    const hardPage = await hard.newPage()
+    hardPage.on('pageerror', (error) => errors.push(`candle-name hard ${error}`))
+    await hardPage.goto('/?playtest=1')
+    await hardPage.getByRole('button', { name: 'Hold the night' }).click()
+    await hardPage.locator('.defend-board').waitFor()
+    await hardPage.waitForTimeout(300)
+    const hardRead = await hardPage.evaluate(() => ({
+      easy: document.querySelectorAll('.defend-page.is-easy-watch').length,
+      name: document.querySelectorAll('[data-candle-name]').length,
+      dock: document.querySelectorAll('button.defend-candle-lamp').length,
+    }))
+    if (hardRead.easy !== 0 || hardRead.name !== 0) fail(`checkNwCandleName fail hard easy=${hardRead.easy} name=${hardRead.name} candleDock=${hardRead.dock}`)
+    else console.log(`checkNwCandleName ok hard unchanged easy=0 name=0 candleDock=${hardRead.dock}`)
+    await hard.close()
+  }
+
+  for (const err of errors.slice(errorMark)) fail(`checkNwCandleName error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 /** #967 Easy first plant must not open the upgrade card. A touch tap does, on the parent. */
 const PLANT_NO_CARD_SIZES = [
   [375, 667],
@@ -9038,6 +9216,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'lamp move hop nights stay free of console errors')
       return
     }
+    if (process.env.NW_CANDLE_NAME_ONLY === '1') {
+      await checkNwCandleName(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'candle name nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
@@ -9056,6 +9239,7 @@ export async function checkPhoneFixes() {
     await checkNwRoundCheer(browser, port, errors)
     await checkNwPlantNoCard(browser, port, errors)
     await checkNwLampMoveHop(browser, port, errors)
+    await checkNwCandleName(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -9232,7 +9416,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')

@@ -81,6 +81,9 @@ export const CANDLE_LABEL = 'Candle'
 
 export const CANDLE_INTRO = 'New lamp · Candle'
 
+/** One line beside the Easy clear-screen Candle dock until the first candle is planted. */
+export const CANDLE_DOCK_NAME = `${CANDLE_INTRO} · ${CANDLE_COST} sparks`
+
 /** Biblical Scholar card line. */
 export const CANDLE_CARD = 'A small candle is a sign of a prayer for someone.'
 

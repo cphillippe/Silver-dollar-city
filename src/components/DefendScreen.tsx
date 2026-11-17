@@ -195,6 +195,7 @@ import {
   CANDLE_COST,
   CANDLE_ID,
   CANDLE_INTRO,
+  CANDLE_DOCK_NAME,
   candleFarBonus,
   candleRowSize,
   candlePathKey,
@@ -4455,6 +4456,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               >
                 {`New lamp ${EASY_LAMP_COST}✦`}
               </button>
+              {candleOpen && !Object.values(plants).some((type) => isCandle(type)) ? (
+                <p className="defend-candle-name" data-candle-name="yes">
+                  {CANDLE_DOCK_NAME}
+                </p>
+              ) : null}
               {candleOpen ? (
                 <button
                   type="button"
