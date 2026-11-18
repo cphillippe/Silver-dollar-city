@@ -4817,11 +4817,11 @@ const EASY_GOLD_BASE_1579 = {
   '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
   '412x915 settings-more': {
     'Open Profile': { x: 41, y: 1360.7, w: 130, h: 52 },
-    Candy: { x: 41, y: 1783.6, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1783.6, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1843.6, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2122.2, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2368, w: 176, h: 52 },
+    Candy: { x: 41, y: 1788.6, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1788.6, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1848.6, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2127.1, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2372.9, w: 176, h: 52 },
   },
 }
 
@@ -9715,6 +9715,315 @@ async function checkGemSightCue(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #951 Easy round-clear Spend and ? stay on screen (fixed to the viewport, not the collapsed clear bar). */
+const NW_SPEND_ON_SCREEN_SIZES = [
+  [375, 812],
+  [390, 844],
+  [412, 915],
+]
+const NW_SPEND_SPEND_SOURCE = 'Spend'
+const NW_SPEND_HELP_SOURCE = '?'
+const NW_SPEND_ICON = '✦'
+
+async function tapUntilBoostForSpend(page) {
+  const started = Date.now()
+  while (Date.now() - started < 90_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
+    const cue = await page.evaluate(() => {
+      const face = document.querySelector('.defend-raider.is-easy-cue')
+      if (!face) return null
+      const id = face.getAttribute('data-walker-id')
+      const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+      if (!tap) return null
+      const box = tap.getBoundingClientRect()
+      const x = box.x + box.width / 2
+      const y = box.y + box.height / 2
+      const node = document.elementFromPoint(x, y)
+      if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+      return { x, y }
+    })
+    if (cue) await page.mouse.click(cue.x, cue.y)
+    await page.waitForTimeout(80)
+  }
+}
+
+async function checkNwSpendOnScreen(browser, port, errors) {
+  const only = process.env.NW_SPEND_ON_SCREEN_SIZE
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+
+  const readSpendNodes = async (page) =>
+    page.evaluate(
+      ({ spendSource, helpSource, icon }) => {
+        const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+        const cssText = (value) => {
+          if (!value || value === 'none' || value === 'normal') return ''
+          const first = /^"((?:\\.|[^"\\])*)"/.exec(value)
+          return first ? first[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\') : ''
+        }
+        const overlapPx = (a, b) => {
+          if (!a || !b) return 0
+          const w = Math.min(a.right, b.right) - Math.max(a.left, b.left)
+          const h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top)
+          if (w <= 0.5 || h <= 0.5) return 0
+          return w * h
+        }
+        const gold = (value) => {
+          const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+          let match
+          while ((match = re.exec(value || ''))) {
+            const r = Number(match[1])
+            const g = Number(match[2])
+            const b = Number(match[3])
+            const a = match[4] === undefined ? 1 : Number(match[4])
+            if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+          }
+          return false
+        }
+        const goldCues = () => {
+          const shown = (el) => {
+            if (!el) return false
+            const style = getComputedStyle(el)
+            const box = el.getBoundingClientRect()
+            return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0.05 && box.width > 1 && box.height > 1
+          }
+          let count = 0
+          const chrome =
+            '.defend-go, .defend-continue, .defend-raider.is-easy-cue .defend-raider-face, .defend-clear-spend, .defend-clear-help, .defend-tower-card, .lamp-upgrade-glyph .is-stroke'
+          for (const el of document.querySelectorAll(chrome)) {
+            if (!shown(el)) continue
+            const style = getComputedStyle(el)
+            const text = [...el.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+            const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+            if (gold(style.backgroundImage) || gold(style.backgroundColor) || gold(style.boxShadow) || (text && gold(style.color))) count += 1
+          }
+          return count
+        }
+        const nodes = []
+        for (const el of document.querySelectorAll('.defend-clear-spend, .defend-clear-help, .nw-spark-spend')) {
+          const style = getComputedStyle(el)
+          if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+          const rect = el.getBoundingClientRect()
+          if (rect.width < 1 || rect.height < 1) continue
+          const before = cssText(getComputedStyle(el, '::before').content)
+          const text = norm(el.textContent)
+          const painted = [text, before].filter(Boolean).join(' ')
+          const isSpend = el.classList.contains('defend-clear-spend') || /\bspend\b/i.test(painted) || before === icon
+          const isHelp = el.classList.contains('defend-clear-help') || text === helpSource || before === helpSource
+          if (!isSpend && !isHelp) continue
+          const beforeStyle = getComputedStyle(el, '::before')
+          const beforeFont = parseFloat(beforeStyle.fontSize) || parseFloat(style.fontSize) || 0
+          let source = text
+          if (el.classList.contains('defend-clear-spend')) source = spendSource
+          if (el.classList.contains('defend-clear-help')) source = helpSource
+          const rendered = el.classList.contains('defend-clear-spend') ? before || text || icon : before || text || helpSource
+          const clipped = el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1 ? 1 : 0
+          const cx = rect.left + rect.width / 2
+          const cy = rect.top + rect.height / 2
+          const hit = document.elementFromPoint(cx, cy)
+          const hitOk = hit && (el === hit || el.contains(hit))
+          const blockers = []
+          for (const dock of document.querySelectorAll('.nw-docks button.defend-new-lamp')) {
+            const d = dock.getBoundingClientRect()
+            if (d.width > 1 && d.height > 1 && overlapPx(rect, d) > 0.5) blockers.push('dock')
+          }
+          for (const chip of document.querySelectorAll('.defend-type-chip')) {
+            const cs = getComputedStyle(chip)
+            const c = chip.getBoundingClientRect()
+            if (cs.display === 'none' || c.width < 1) continue
+            if (overlapPx(rect, c) > 0.5) blockers.push('chip')
+          }
+          for (const goldBtn of document.querySelectorAll('.defend-go, .defend-continue')) {
+            const g = goldBtn.getBoundingClientRect()
+            const gs = getComputedStyle(goldBtn)
+            if (gs.display === 'none' || g.width < 1) continue
+            if (overlapPx(rect, g) > 0.5) blockers.push('gold')
+          }
+          nodes.push({
+            name: el.classList.contains('defend-clear-help') ? 'help' : 'spend',
+            left: rect.left,
+            right: rect.right,
+            top: rect.top,
+            bottom: rect.bottom,
+            w: rect.width,
+            h: rect.height,
+            source,
+            rendered,
+            before,
+            text,
+            font: Math.max(beforeFont, parseFloat(style.fontSize) || 0),
+            clipped,
+            hitOk,
+            blockers,
+          })
+        }
+        for (const textEl of document.querySelectorAll('text, tspan')) {
+          const t = norm(textEl.textContent)
+          if (t !== helpSource && !/\bspend\b/i.test(t)) continue
+          const rect = textEl.getBoundingClientRect()
+          if (rect.width < 1 || rect.height < 1) continue
+          const style = getComputedStyle(textEl)
+          if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+          nodes.push({
+            name: t === helpSource ? 'help-svg' : 'spend-svg',
+            left: rect.left,
+            right: rect.right,
+            top: rect.top,
+            bottom: rect.bottom,
+            w: rect.width,
+            h: rect.height,
+            source: t === helpSource ? helpSource : spendSource,
+            rendered: t,
+            before: '',
+            text: t,
+            font: parseFloat(style.fontSize) || 0,
+            clipped: textEl.scrollWidth > textEl.clientWidth + 1 ? 1 : 0,
+            hitOk: true,
+            blockers: [],
+          })
+        }
+        return { innerWidth: window.innerWidth, nodes, gold: goldCues() }
+      },
+      { spendSource: NW_SPEND_SPEND_SOURCE, helpSource: NW_SPEND_HELP_SOURCE, icon: NW_SPEND_ICON },
+    )
+
+  for (const [width, height] of NW_SPEND_ON_SCREEN_SIZES) {
+    const tag = `${width}x${height}`
+    if (only && only !== tag) continue
+    const { context, page } = await openMap(browser, port, width, height, 'a2', {
+      motion: false,
+      search: '?playtest=1&nwSeed=2&nwRound=2',
+    })
+    page.on('pageerror', (error) => errors.push(`nw-spend ${tag} ${error}`))
+    await page.locator('.defend-go').click()
+    await page.locator('.defend-raider.is-easy-cue').waitFor({ timeout: 120_000 })
+    await page.waitForTimeout(200)
+    const mid = await readSpendNodes(page)
+    const midOk = `${tag} mid-wave`
+    if (!problems.some((line) => line.includes(` ${midOk} `))) {
+      for (const row of mid.nodes) {
+        if (row.left < 8) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} left=${row.left}`)
+        if (row.right > mid.innerWidth - 8) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} right=${row.right}`)
+        if (row.clipped !== 0) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} clipped=${row.clipped}`)
+        if (row.w < 44 || row.h < 44) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} size=${row.w}x${row.h}`)
+        if (row.font > 0 && row.font < 13) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} font=${row.font}`)
+        if (row.rendered !== row.source && row.name !== 'spend') fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(row.source)}`)
+        if (row.name === 'spend' && row.rendered !== NW_SPEND_ICON && row.rendered !== row.text) {
+          if (row.before !== NW_SPEND_ICON) fail(`checkNwSpendOnScreen fail ${midOk} spend painted=${JSON.stringify(row.rendered)}`)
+        }
+        if (row.blockers.length) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} overlap=${row.blockers.join(',')}`)
+        if (!row.hitOk) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} hit=0`)
+      }
+      if (mid.nodes.length && mid.gold !== 1) fail(`checkNwSpendOnScreen fail ${midOk} gold=${mid.gold}`)
+      console.log(`checkNwSpendOnScreen ok ${midOk} nodes=${mid.nodes.length} clipped=0 gold=${mid.gold || 1}`)
+    }
+
+    await tapUntilBoostForSpend(page)
+    const reached = (await page.locator('.defend-page.is-boost').count()) > 0
+    if (!reached) {
+      fail(`checkNwSpendOnScreen fail ${tag} round-clear boost=0`)
+      await context.close()
+      continue
+    }
+    await page.waitForTimeout(300)
+    const clear = await readSpendNodes(page)
+    const clearOk = `${tag} round-clear`
+    let clearFailed = false
+    for (const row of clear.nodes) {
+      if (row.left < 8) {
+        clearFailed = true
+        fail(`checkNwSpendOnScreen fail ${clearOk} ${row.name} left=${row.left}`)
+      }
+      if (row.right > clear.innerWidth - 8) {
+        clearFailed = true
+        fail(`checkNwSpendOnScreen fail ${clearOk} ${row.name} right=${row.right}`)
+      }
+      if (row.clipped !== 0) {
+        clearFailed = true
+        fail(`checkNwSpendOnScreen fail ${clearOk} ${row.name} clipped=${row.clipped}`)
+      }
+      if (row.w < 44 || row.h < 44) {
+        clearFailed = true
+        fail(`checkNwSpendOnScreen fail ${clearOk} ${row.name} size=${row.w}x${row.h}`)
+      }
+      if (row.font > 0 && row.font < 13) {
+        clearFailed = true
+        fail(`checkNwSpendOnScreen fail ${clearOk} ${row.name} font=${row.font}`)
+      }
+      if (row.name === 'help' && row.rendered !== NW_SPEND_HELP_SOURCE) {
+        clearFailed = true
+        fail(`checkNwSpendOnScreen fail ${clearOk} help rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(NW_SPEND_HELP_SOURCE)}`)
+      }
+      if (row.name === 'spend' && row.before !== NW_SPEND_ICON) {
+        clearFailed = true
+        fail(`checkNwSpendOnScreen fail ${clearOk} spend icon=${JSON.stringify(row.before)}`)
+      }
+      if (row.blockers.length) {
+        clearFailed = true
+        fail(`checkNwSpendOnScreen fail ${clearOk} ${row.name} overlap=${row.blockers.join(',')}`)
+      }
+      if (!row.hitOk) {
+        clearFailed = true
+        fail(`checkNwSpendOnScreen fail ${clearOk} ${row.name} hit=0`)
+      }
+    }
+    if (clear.nodes.filter((row) => row.name === 'spend').length < 1) {
+      clearFailed = true
+      fail(`checkNwSpendOnScreen fail ${clearOk} spend=0`)
+    }
+    if (clear.nodes.filter((row) => row.name === 'help').length < 1) {
+      clearFailed = true
+      fail(`checkNwSpendOnScreen fail ${clearOk} help=0`)
+    }
+    if (clear.gold !== 1) {
+      clearFailed = true
+      fail(`checkNwSpendOnScreen fail ${clearOk} gold=${clear.gold}`)
+    }
+    if (!clearFailed) {
+      const spend = clear.nodes.find((row) => row.name === 'spend')
+      const help = clear.nodes.find((row) => row.name === 'help')
+      console.log(
+        `checkNwSpendOnScreen ok ${clearOk} spend=${spend ? `${spend.left.toFixed(0)},${spend.right.toFixed(0)}` : 'missing'} help=${help ? `${help.left.toFixed(0)},${help.right.toFixed(0)}` : 'missing'} clipped=0 gold=1`,
+      )
+    }
+    await context.close()
+  }
+
+  if (!only) {
+    const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }
+    const hard = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 390, height: 844 },
+      deviceScaleFactor: 1,
+    })
+    await hard.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: hardSave },
+    )
+    const hardPage = await hard.newPage()
+    hardPage.on('pageerror', (error) => errors.push(`nw-spend hard ${error}`))
+    await hardPage.goto('/?playtest=1')
+    await hardPage.getByRole('button', { name: 'Hold the night' }).click()
+    await hardPage.locator('.defend-board').waitFor()
+    const hardRead = await hardPage.evaluate(() => ({
+      easy: document.querySelectorAll('.defend-page.is-easy-watch').length,
+      spend: document.querySelectorAll('.defend-clear-spend').length,
+    }))
+    if (hardRead.easy !== 0) fail(`checkNwSpendOnScreen fail hard easy-watch=${hardRead.easy}`)
+    else console.log(`checkNwSpendOnScreen ok hard easy-watch=0 spend-hooks=${hardRead.spend}`)
+    await hard.close()
+  }
+
+  for (const err of errors.slice(errorMark)) fail(`checkNwSpendOnScreen error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 /** #967 Easy first plant must not open the upgrade card. A touch tap does, on the parent. */
 const PLANT_NO_CARD_SIZES = [
   [375, 667],
@@ -10697,6 +11006,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'gem sight cue nights stay free of console errors')
       return
     }
+    if (process.env.NW_SPEND_ON_SCREEN_ONLY === '1') {
+      await checkNwSpendOnScreen(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'nw spend on screen nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
@@ -10720,6 +11034,7 @@ export async function checkPhoneFixes() {
     await checkNwStripWords(browser, port, errors)
     await checkDigWinReadable(browser, port, errors)
     await checkGemSightCue(browser, port, errors)
+    await checkNwSpendOnScreen(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -10896,7 +11211,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
