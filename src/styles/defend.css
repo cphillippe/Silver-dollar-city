@@ -6691,8 +6691,9 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
 }
 
 @media (max-width: 480px) {
-  .defend-page.is-easy-watch.is-boost .defend-clear-row .defend-candle-name {
-    position: absolute;
+  /* Fixed to the viewport: clear-row is 0×0 static, so absolute would not track the Candle dock. */
+  .defend-page.is-easy-watch.is-boost .defend-candle-name {
+    position: fixed;
     left: 64px;
     bottom: 250px;
     display: block;

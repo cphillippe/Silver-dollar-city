@@ -8085,6 +8085,7 @@ async function checkNwRoundCheer(browser, port, errors) {
 const NW_CANDLE_NAME_SIZES = [
   [375, 812],
   [390, 844],
+  [412, 915],
 ]
 
 function nwCandleNameSource() {
@@ -8154,46 +8155,85 @@ async function checkNwCandleName(browser, port, errors) {
     const read = await page.evaluate((source) => {
       const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
       const rectOf = (el) => {
+        if (!el) return null
         const r = el.getBoundingClientRect()
+        if (r.width < 1 || r.height < 1) return null
         return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom }
       }
-      const painters = [...document.querySelectorAll('body *')].filter((el) => {
-        const directs = [...el.childNodes].filter((child) => child.nodeType === 3)
-        return norm(directs.map((child) => child.textContent).join('')).includes('Candle') && norm(el.textContent).includes('sparks')
-      })
-      const nodes = painters.map((el) => {
-        const style = getComputedStyle(el)
-        const r = rectOf(el)
-        const range = document.createRange()
-        range.selectNodeContents(el)
-        const glyph = [...range.getClientRects()].filter((b) => b.width > 0 && b.height > 0)
-        return {
-          text: norm(el.textContent),
-          scrollW: el.scrollWidth,
-          clientW: el.clientWidth,
-          scrollH: el.scrollHeight,
-          clientH: el.clientHeight,
-          font: parseFloat(style.fontSize),
-          box: r,
-          glyph: glyph.map((b) => ({ x: b.x, y: b.y, right: b.right, bottom: b.bottom })),
-          inView: r.x >= 0 && r.y >= 0 && r.right <= innerWidth && r.bottom <= innerHeight,
-        }
-      })
-      const hit = (a, b) => a.x < b.right && a.right > b.x && a.y < b.bottom && a.bottom > b.y
-      const docks = [...document.querySelectorAll('button.defend-new-lamp')].map((el) => ({
-        key: el.getAttribute('data-candle-lamp') ? 'candle' : el.getAttribute('data-new-lamp') ? 'sparkle' : 'other',
-        box: rectOf(el),
-      }))
-      let overlap = 0
-      for (const node of nodes) {
-        for (const dock of docks) {
-          if (node.glyph.some((g) => hit(g, dock.box))) overlap += 1
-        }
+      const overlapPx2 = (a, b) => {
+        if (!a || !b) return 0
+        const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.x, b.x))
+        const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y))
+        return w * h
       }
+      const goldish = (value) => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+        let match
+        while ((match = re.exec(value || ''))) {
+          const r = Number(match[1])
+          const g = Number(match[2])
+          const b = Number(match[3])
+          const a = match[4] === undefined ? 1 : Number(match[4])
+          if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
+      const nameEl = document.querySelector('[data-candle-name="yes"]')
+      const candleDock = document.querySelector('button.defend-candle-lamp')
+      const dockBox = rectOf(candleDock)
+      const nameBox = rectOf(nameEl)
+      const style = nameEl ? getComputedStyle(nameEl) : null
+      const name = nameEl
+        ? {
+            text: norm(nameEl.textContent),
+            scrollW: nameEl.scrollWidth,
+            clientW: nameEl.clientWidth,
+            scrollH: nameEl.scrollHeight,
+            clientH: nameEl.clientHeight,
+            font: style ? parseFloat(style.fontSize) : 0,
+            box: nameBox,
+            inView:
+              nameBox &&
+              nameBox.x >= 0 &&
+              nameBox.y >= 0 &&
+              nameBox.right <= innerWidth &&
+              nameBox.bottom <= innerHeight,
+            gold:
+              style &&
+              (goldish(style.backgroundColor) ||
+                goldish(style.backgroundImage) ||
+                goldish(style.borderColor) ||
+                goldish(style.boxShadow)),
+            beside:
+              dockBox &&
+              nameBox &&
+              nameBox.x >= dockBox.right - 4 &&
+              Math.abs(nameBox.y + nameBox.h / 2 - (dockBox.y + dockBox.h / 2)) <= dockBox.h,
+          }
+        : null
+      const nodes = name ? [name] : []
+      const chrome = {
+        continue: overlapPx2(nameBox, rectOf(document.querySelector('.defend-continue'))),
+        rail: overlapPx2(nameBox, rectOf(document.querySelector('.nw-rail'))),
+        hud: overlapPx2(nameBox, rectOf(document.querySelector('.nw-hud'))),
+        dock: overlapPx2(nameBox, dockBox),
+      }
+      let chips = 0
+      for (const chip of document.querySelectorAll('.defend-type-label, .defend-tower-card[data-strip="yes"]')) {
+        chips += overlapPx2(nameBox, rectOf(chip))
+      }
+      const overlap = chrome.continue + chrome.rail + chrome.hud + chrome.dock + chips
+      const docks = [...document.querySelectorAll('button.defend-new-lamp')].map((el) =>
+        el.getAttribute('data-candle-lamp') ? 'candle' : el.getAttribute('data-new-lamp') ? 'sparkle' : 'other',
+      )
       return {
-        nodes: nodes.map(({ glyph, ...rest }) => rest),
+        nodes,
         overlap,
-        docks: docks.map((d) => d.key),
+        chrome,
+        chips,
+        beside: name?.beside === true,
+        nameGold: name?.gold === true,
+        docks,
         source,
       }
     }, want)
@@ -8217,12 +8257,18 @@ async function checkNwCandleName(browser, port, errors) {
       if (![...texts].every((text) => text === want)) fail(`checkNwCandleName fail ${tag} text=${JSON.stringify([...texts])} want=${JSON.stringify(want)}`)
       if (clipped !== 0) fail(`checkNwCandleName fail ${tag} clipped=${clipped}`)
       if (!(minFont >= 13)) fail(`checkNwCandleName fail ${tag} font=${minFont}`)
-      if (read.overlap !== 0) fail(`checkNwCandleName fail ${tag} overlap=${read.overlap}`)
+      if (read.overlap !== 0) {
+        fail(
+          `checkNwCandleName fail ${tag} overlap=${read.overlap} continue=${read.chrome?.continue ?? '?'} rail=${read.chrome?.rail ?? '?'} hud=${read.chrome?.hud ?? '?'} dock=${read.chrome?.dock ?? '?'} chips=${read.chips ?? '?'}`,
+        )
+      }
+      if (!read.beside) fail(`checkNwCandleName fail ${tag} beside=candle-dock`)
+      if (read.nameGold) fail(`checkNwCandleName fail ${tag} nameGold=1`)
     }
     if (golds.length !== 1 || golds[0] !== 1) fail(`checkNwCandleName fail ${tag} gold=${golds.join('|')} names=${names.join(' | ')}`)
     if (!problems.some((line) => line.includes(` ${tag} `))) {
       console.log(
-        `checkNwCandleName ok ${tag} text=${JSON.stringify(want)} nodes=${read.nodes.length} clipped=0 font=${minFont}px gold=1 overlap=0`,
+        `checkNwCandleName ok ${tag} text=${JSON.stringify(want)} nodes=${read.nodes.length} clipped=0 font=${minFont}px gold=1 overlap=0 beside=1 continue=0 rail=0 hud=0 chips=0 nameGold=0`,
       )
     }
     await context.close()
