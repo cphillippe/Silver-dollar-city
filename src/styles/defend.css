@@ -6371,6 +6371,15 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   gap: 2px;
   padding: 0 4px 0 2px;
   box-sizing: border-box;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.defend-page.is-easy-watch.is-easy-tap .defend-tower-card[data-strip='yes'] .defend-path-buy::before {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Placeholder letters on the full card; the strip overrides with full words above. */
@@ -6705,8 +6714,9 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
 }
 
 @media (max-width: 480px) {
-  .defend-page.is-easy-watch.is-boost .defend-clear-row .defend-candle-name {
-    position: absolute;
+  /* Fixed to the viewport: clear-row is 0×0 static, so absolute would not track the Candle dock. */
+  .defend-page.is-easy-watch.is-boost .defend-candle-name {
+    position: fixed;
     left: 64px;
     bottom: 250px;
     display: block;
