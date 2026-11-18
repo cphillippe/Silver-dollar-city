@@ -1958,6 +1958,8 @@ assert.doesNotMatch(
   const phone593 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
   assert.match(screen593, /plantIgniteRunDone/, '1.4.593 DefendScreen gates the plant ring per run')
   assert.match(screen593, /if \(plantIgniteRunDone\.current\) return/, '1.4.593 later plants do not re-fire the ring')
+  assert.match(screen593, /resetPlantIgniteForRun/, '1.4.593 a new Easy run clears the plant ring gate')
+  assert.match(screen593, /if \(easy\) resetPlantIgniteForRun\(\)/, '1.4.593 Try again starts a fresh plant ring')
   assert.match(phone593, /async function checkNwPlantRingOnce/, '1.4.593 checkNwPlantRingOnce is defined')
   assert.match(
     phone593,
@@ -1965,6 +1967,8 @@ assert.doesNotMatch(
     '1.4.593 the full path runs checkNwPlantRingOnce after checkNwCandleName',
   )
   assert.match(phone593, /checkNwPlantRingOnce ok \$\{label\} rings=1/, '1.4.593 the ok line logs rings=1')
+  assert.match(phone593, /checkNwPlantRingOnce run2 rings=\$\{tally2\.rings\}/, '1.4.593 the scan logs the second Home run ring count')
+  assert.match(phone593, /checkNwPlantRingOnce ok jump-in lamps rings=0/, '1.4.593 jump-in with lamps does not ring')
 }
 
 // 1.4.592: Easy Night Watch the Candle gets a name on the clear screen (#970).
