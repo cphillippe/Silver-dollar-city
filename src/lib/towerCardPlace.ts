@@ -305,10 +305,12 @@ export function placeTowerCard(
   const ownLampHit = (card: { left: number; top: number }) =>
     strip && upgradeControlsHitLamp(card, point, scale, cardHeight, true) ? 1 : 0
   const stripLampHits = (card: { left: number; top: number }) => lampHits(card) + ownLampHit(card)
-  const stripAboveLamp = (card: { left: number; top: number }) => card.top + cardHeight <= point.top + TAP_EPS
+  const sc = scale > 0 ? scale : 1
+  const stripPadTop = point.top - STRIP_PAD_CLEAR.up * sc
+  const stripAboveLamp = (card: { left: number; top: number }) => card.top + cardHeight <= stripPadTop + TAP_EPS
+  const stripClearsRoad = (card: { left: number; top: number }) => tapHits(card) === 0
   if (strip) {
-    const topAbove = clampCardTop(point.top - cardHeight - GAP, board.h, boundH, reserveBottom)
-    const sc = scale > 0 ? scale : 1
+    const topAbove = clampCardTop(stripPadTop - cardHeight - GAP, board.h, boundH, reserveBottom)
     const clearX = LAMP_HIT.x * sc + GLYPH_CLEAR
     const offRoadLeft = stripLeftOfLamp
       ? [
@@ -330,19 +332,26 @@ export function placeTowerCard(
         Math.max(MARGIN, topAbove - 16),
         Math.max(MARGIN, topAbove - 32),
         Math.max(MARGIN, topAbove - 48),
+        Math.max(MARGIN, topAbove - 64),
+        Math.max(MARGIN, topAbove - 80),
       ]) {
         const card = { left, top: topTry }
         if (
           stripAboveLamp(card) &&
-          stripLampHits(card) + tapHits(card) + ownHits(card) + softHits(card) === 0
+          stripClearsRoad(card) &&
+          stripLampHits(card) + ownHits(card) + softHits(card) === 0
         ) {
           return { ...card, side: 'above', markClear: true }
         }
       }
     }
   }
-  if (stripLampHits(legacy) + glyphHits(legacy) + tapHits(legacy) + ownHits(legacy) + softHits(legacy) === 0)
+  if (
+    stripLampHits(legacy) + glyphHits(legacy) + tapHits(legacy) + ownHits(legacy) + softHits(legacy) === 0 &&
+    (!strip || (stripAboveLamp(legacy) && stripClearsRoad(legacy)))
+  ) {
     return { ...legacy, markClear: strip ? stripAboveLamp(legacy) : true }
+  }
   const maxLeft = Math.max(MARGIN, board.w - W - RAIL)
   const rowFloor = taps?.row != null ? taps.row - BEGIN_REACH : Infinity
   const maxTop = Math.max(MARGIN, Math.min(board.h - boundH - MARGIN - reserveBottom, rowFloor - boundH))
@@ -392,7 +401,7 @@ export function placeTowerCard(
         const dist = Math.hypot(left + W / 2 - point.left, top + cardHeight / 2 - point.top)
         const stripBelow = strip && !stripAboveLamp(card) ? 1e8 : 0
         const stripRoad =
-          strip && stripLeftOfLamp === card.left + W > point.left - 8
+          strip && stripLeftOfLamp && card.left + W > point.left - 8
             ? 5e8
             : strip && !stripLeftOfLamp && card.left < point.left + 8
               ? 5e8
@@ -421,13 +430,38 @@ export function placeTowerCard(
   const wide = search(1, wideLeft, wideTop, EDGE)
   if (glyphHits(wide) + tapHits(wide) + ownHits(wide) + softHits(wide) === 0) return { ...wide, markClear: true }
   if (strip) {
-    const fallback = search(0, wideLeft, wideTop, EDGE)
+    let fallback: { left: number; top: number } = search(1, wideLeft, wideTop, EDGE)
+    const clearX = LAMP_HIT.x * sc + GLYPH_CLEAR
+    const forcedLeft = stripLeftOfLamp
+      ? Math.max(MARGIN, point.left - W - clearX - 16)
+      : Math.max(MARGIN, Math.min(point.left + clearX + 16, board.w - W - RAIL))
+    const forcedTop = Math.max(MARGIN, stripPadTop - cardHeight - GAP)
+    const forced = { left: forcedLeft, top: clampCardTop(forcedTop, board.h, boundH, reserveBottom) }
+    const acceptStrip = (card: { left: number; top: number }) =>
+      stripAboveLamp(card) &&
+      stripClearsRoad(card) &&
+      stripLampHits(card) + ownHits(card) + softHits(card) === 0
+    if (!acceptStrip(fallback)) fallback = forced
+    if (!acceptStrip(fallback)) {
+      const railLeft = Math.max(MARGIN, board.w - W - RAIL)
+      for (const left of [forcedLeft, railLeft, MARGIN, forcedLeft - 12]) {
+        for (let lift = 0; lift <= 96; lift += 12) {
+          const card = {
+            left: Math.max(MARGIN, Math.min(left, wideLeft)),
+            top: clampCardTop(forcedTop - lift, board.h, boundH, reserveBottom),
+          }
+          if (acceptStrip(card)) {
+            fallback = card
+            break
+          }
+        }
+        if (acceptStrip(fallback)) break
+      }
+    }
     return {
       ...fallback,
-      side: stripAboveLamp(fallback) ? 'above' : cardSide(fallback.top, point.top, cardHeight),
-      markClear:
-        stripAboveLamp(fallback) &&
-        stripLampHits(fallback) + tapHits(fallback) + ownHits(fallback) + softHits(fallback) === 0,
+      side: 'above',
+      markClear: acceptStrip(fallback),
     }
   }
   // No spot clears the mark, the taps and the lamps around it: the header copy carries the mark and the card
