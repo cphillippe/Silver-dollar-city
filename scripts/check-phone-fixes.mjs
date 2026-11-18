@@ -8512,9 +8512,7 @@ const NW_STRIP_WORDS_SIZES = [
   [390, 844],
 ]
 const NW_STRIP_WORDS_SEARCH = '?playtest=1&nwSeed=2&nwRound=24&nwLamps=0&nwCam=1'
-/** Parent 1.4.593 strip buy button boxes (mid-wave love lamp). Tap geometry must not move.
- * 375×812 sometimes places the strip flush left (`near`) or over the road (`road`); pin both. */
-/** Parent 1.4.593 tap boxes relative to the strip card (same card → same offsets). */
+/** Parent 1.4.593 tap boxes relative to the strip card (mid-wave love lamp; tap geometry must not move). */
 const NW_STRIP_TAP_BASELINE = {
   '375x812': {
     far: { x: 4, y: 2, w: 104, h: 44 },
@@ -8688,10 +8686,14 @@ async function checkNwStripWords(browser, port, errors) {
         const labelOverlap = cost && before.glyphs.length ? overlap(before.glyphs, cost.glyphs) : false
         return { path, el: box(el), before, cost, hitTarget, labelOverlap }
       })
-      const cardBox = box(document.querySelector('.defend-tower-card[data-strip="yes"]'))
+      const cardEl = document.querySelector('.defend-tower-card[data-strip="yes"]')
+      const cardBox = box(cardEl)
       if (cardBox) {
         for (const row of rows) {
-          if (!row.el) continue
+          if (!row.el) {
+            row.tap = null
+            continue
+          }
           row.tap = {
             x: row.el.x - cardBox.x,
             y: row.el.y - cardBox.y,
@@ -8700,7 +8702,53 @@ async function checkNwStripWords(browser, port, errors) {
           }
         }
       }
-      return { rows, cardLeft: cardBox?.x ?? null }
+      return {
+        rows,
+        cardLeft: cardBox?.x ?? null,
+        card: cardBox
+          ? {
+              x: cardBox.x,
+              y: cardBox.y,
+              w: cardBox.w,
+              h: cardBox.h,
+              right: cardBox.right,
+              bottom: cardBox.bottom,
+            }
+          : null,
+      }
+    })
+
+    const onScreen = await page.evaluate(async () => {
+      const inView = (r) => r.x >= 0 && r.y >= 0 && r.right <= innerWidth && r.bottom <= innerHeight
+      const round = (n) => Math.round(n * 10) / 10
+      const bad = []
+      let cardSnap = null
+      let frames = 0
+      const start = performance.now()
+      while (performance.now() - start < 400) {
+        const card = document.querySelector('.defend-tower-card[data-strip="yes"]')
+        if (!card) {
+          bad.push('card-missing')
+        } else {
+          const cr = card.getBoundingClientRect()
+          cardSnap = { x: round(cr.x), y: round(cr.y), w: round(cr.width), h: round(cr.height) }
+          if (!inView(cr)) bad.push(`card-offscreen x=${cardSnap.x} y=${cardSnap.y} w=${cardSnap.w} h=${cardSnap.h}`)
+        }
+        for (const path of ['far', 'strong']) {
+          const el = document.querySelector(
+            `.defend-tower-card[data-strip='yes'] .defend-path[data-path='${path}'] .defend-path-buy`,
+          )
+          if (!el) bad.push(`${path}-missing`)
+          else {
+            const br = el.getBoundingClientRect()
+            if (br.height < 44) bad.push(`${path}-h=${round(br.height)}`)
+            if (!inView(br)) bad.push(`${path}-offscreen x=${round(br.x)} y=${round(br.y)} w=${round(br.width)} h=${round(br.height)}`)
+          }
+        }
+        frames += 1
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+      }
+      return { bad, card: cardSnap, frames }
     })
 
     const tag = `${label} mid-wave`
@@ -8745,6 +8793,9 @@ async function checkNwStripWords(browser, port, errors) {
       }
       return names.length
     })
+    if (!read.card) fail(`checkNwStripWords fail ${tag} strip card=missing`)
+    if (onScreen.frames < 8) fail(`checkNwStripWords fail ${tag} onScreenFrames=${onScreen.frames}`)
+    if (onScreen.bad.length) fail(`checkNwStripWords fail ${tag} onScreen=${onScreen.bad.join('|')}`)
     for (const row of read.rows) {
       const word = row.path === 'far' ? 'Far' : 'Strong'
       const wantCost = '3 sparks'
@@ -8769,27 +8820,33 @@ async function checkNwStripWords(browser, port, errors) {
       if (row.labelOverlap) fail(`checkNwStripWords fail ${tag} ${row.path} label-cost overlap`)
       if (row.hitTarget !== 'ok') fail(`checkNwStripWords fail ${tag} ${row.path} hit=${row.hitTarget}`)
       if (!baseline) fail(`checkNwStripWords fail ${tag} tapPlan=missing cardLeft=${read.cardLeft}`)
-      if (baseline && row.tap) {
-        const plan = baseline[row.path]
-        const delta = rawDelta(
-          {
-            x: Math.round(row.tap.x * 10) / 10,
-            y: Math.round(row.tap.y * 10) / 10,
-            w: Math.round(row.tap.w * 10) / 10,
-            h: Math.round(row.tap.h * 10) / 10,
-          },
-          plan,
-        )
-        if (delta == null || delta > 0.5) {
-          fail(`checkNwStripWords fail ${tag} ${row.path} tapDelta=${delta == null ? 'missing' : delta.toFixed(2)} want<=0.5`)
-        }
+      if (!row.tap) fail(`checkNwStripWords fail ${tag} ${row.path} tap=missing`)
+      const plan = baseline[row.path]
+      const delta = rawDelta(
+        {
+          x: Math.round(row.tap.x * 10) / 10,
+          y: Math.round(row.tap.y * 10) / 10,
+          w: Math.round(row.tap.w * 10) / 10,
+          h: Math.round(row.tap.h * 10) / 10,
+        },
+        plan,
+      )
+      if (delta == null || delta > 0.5) {
+        fail(`checkNwStripWords fail ${tag} ${row.path} tapDelta=${delta == null ? 'missing' : delta.toFixed(2)} want<=0.5`)
       }
     }
     if (clipped !== 0) fail(`checkNwStripWords fail ${tag} clipped=${clipped}`)
     if (!(minFont >= 13)) fail(`checkNwStripWords fail ${tag} font=${minFont}`)
     if (stripGold !== 1) fail(`checkNwStripWords fail ${tag} gold=${stripGold}`)
     if (!problems.some((line) => line.includes(` ${tag} `))) {
-      console.log(`checkNwStripWords ok ${tag} far=Far strong=Strong cost="3 sparks" clipped=0 font=${minFont}px gold=1 tapDelta<=0.5`)
+      const c = read.card
+      const cardLine =
+        c != null
+          ? `card=${Math.round(c.x * 10) / 10},${Math.round(c.y * 10) / 10},${Math.round(c.w * 10) / 10},${Math.round(c.h * 10) / 10}`
+          : 'card=missing'
+      console.log(
+        `checkNwStripWords ok ${tag} far=Far strong=Strong cost="3 sparks" clipped=0 font=${minFont}px gold=1 tapDelta<=0.5 onScreen=${onScreen.frames}frames ${cardLine}`,
+      )
     }
     await context.close()
   }
