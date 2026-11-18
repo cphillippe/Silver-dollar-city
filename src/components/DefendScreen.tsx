@@ -2389,6 +2389,15 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }, 0)
   }
 
+  function resetPlantIgniteForRun() {
+    plantIgniteRunDone.current = false
+    setPlantIgniteIds(new Set())
+    for (const id of Object.keys(plantIgniteTimers.current)) {
+      window.clearTimeout(plantIgniteTimers.current[id as CityPlotId]!)
+    }
+    plantIgniteTimers.current = {}
+  }
+
   function flashPlantIgnite(spot: CityPlotId) {
     if (!easy) return
     if (plantIgniteRunDone.current) return
@@ -3440,6 +3449,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   }
 
   function retry() {
+    if (easy) resetPlantIgniteForRun()
     setPhase('plant')
     setWon(false)
     walkInRef.current?.reset()
