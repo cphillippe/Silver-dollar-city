@@ -1941,16 +1941,16 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-// @@594@@: Easy Dig DUG! win readability (#964).
-assert.equal(CHANGELOG[2].version, '@@594@@', '@@594@@ follows the newest row')
-assert.match(latestChange('@@594@@').items.join('\n'), /Refs #964/, '@@594@@ changelog refs #964')
-assert.match(latestChange('@@594@@').items.join('\n'), /One more dig/)
-assert.match(latestChange('@@594@@').items.join('\n'), /Hard stays the same\./)
-assert.doesNotMatch(latestChange('@@594@@').items.join('\n'), /Fixes #|Closes #|Resolves #/, '@@594@@ changelog avoids GitHub close keywords')
+// 1.4.594: Easy Dig DUG! win readability (#964).
+assert.equal(CHANGELOG[2].version, '1.4.594', '1.4.594 follows the newest row')
+assert.match(latestChange('1.4.594').items.join('\n'), /Refs #964/, '1.4.594 changelog refs #964')
+assert.match(latestChange('1.4.594').items.join('\n'), /One more dig/)
+assert.match(latestChange('1.4.594').items.join('\n'), /Hard stays the same\./)
+assert.doesNotMatch(latestChange('1.4.594').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.594 changelog avoids GitHub close keywords')
 assert.doesNotMatch(
-  playerVisibleChangeItems(latestChange('@@594@@').items).join('\n'),
+  playerVisibleChangeItems(latestChange('1.4.594').items).join('\n'),
   /\bHard\b|\bMedium\b/,
-  '@@594@@ the player note does not name other tiers',
+  '1.4.594 the player note does not name other tiers',
 )
 {
   const win595 = readFileSync(new URL('../src/styles/matchWin.css', import.meta.url), 'utf8')
@@ -1958,20 +1958,20 @@ assert.doesNotMatch(
   assert.doesNotMatch(
     win595,
     /html\[data-easy='on'\] \.play\.is-claim-merge\.is-win \.cta-dock \.btn:not\(\.primary\),\s*\nhtml\[data-easy='on'\] \.play\.is-source-dig\.is-win \.cta-dock \.btn:not\(\.primary\),\s*\nhtml\[data-easy='on'\] \.play\.is-road-maze/,
-    '@@594@@ Dig win leaves the shared ink secondary rule',
+    '1.4.594 Dig win leaves the shared ink secondary rule',
   )
   assert.match(
     win595,
     /html\[data-easy='on'\] \.play\.is-source-dig\.is-win \.cta-dock \.btn:not\(\.primary\) \{[\s\S]*#fff6e8/,
-    '@@594@@ Dig secondaries use cream on the purple plate',
+    '1.4.594 Dig secondaries use cream on the purple plate',
   )
-  assert.match(phone595, /async function checkDigWinReadable/, '@@594@@ checkDigWinReadable is defined')
+  assert.match(phone595, /async function checkDigWinReadable/, '1.4.594 checkDigWinReadable is defined')
   assert.match(
     phone595,
     /await checkNwStripWords\(browser, port, errors\)\n    await checkDigWinReadable\(browser, port, errors\)/,
-    '@@594@@ the full path runs checkDigWinReadable after checkNwStripWords',
+    '1.4.594 the full path runs checkDigWinReadable after checkNwStripWords',
   )
-  assert.match(phone595, /checkDigWinReadable ok \$\{tag\}/, '@@594@@ the ok line logs per viewport')
+  assert.match(phone595, /checkDigWinReadable ok \$\{tag\}/, '1.4.594 the ok line logs per viewport')
 }
 
 
