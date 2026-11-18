@@ -270,7 +270,12 @@ export function placeTowerCard(
   }
   const lampHits = (card: { left: number; top: number }) =>
     others.reduce((n, lamp) => n + (upgradeControlsHitLamp(card, lamp, scale, cardHeight, strip) ? 1 : 0), 0)
-  if (lampHits(legacy) + glyphHits(legacy) + tapHits(legacy) + ownHits(legacy) + softHits(legacy) === 0) return { ...legacy, markClear: true }
+  /** Mid-wave strip buys sit on their own lamp; clearOf only lists neighbours. */
+  const ownLampHit = (card: { left: number; top: number }) =>
+    strip && upgradeControlsHitLamp(card, point, scale, cardHeight, true) ? 1 : 0
+  const stripLampHits = (card: { left: number; top: number }) => lampHits(card) + ownLampHit(card)
+  if (stripLampHits(legacy) + glyphHits(legacy) + tapHits(legacy) + ownHits(legacy) + softHits(legacy) === 0)
+    return { ...legacy, markClear: true }
   const maxLeft = Math.max(MARGIN, board.w - W - RAIL)
   const rowFloor = taps?.row != null ? taps.row - BEGIN_REACH : Infinity
   const maxTop = Math.max(MARGIN, Math.min(board.h - boundH - MARGIN - reserveBottom, rowFloor - boundH))
@@ -324,7 +329,7 @@ export function placeTowerCard(
           ownHits(card) * 5e5 +
           softHits(card) * 1e5 +
           softArea(card) * 0.5 +
-          lampHits(card) * 2000 +
+          stripLampHits(card) * 2000 +
           (railIn + barIn) * 50 +
           dist
         if (key < bestKey) {
