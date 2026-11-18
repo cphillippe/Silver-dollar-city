@@ -478,9 +478,20 @@ export function DefendTowerCard({
     setPaintH((prev) => (Math.abs(prev - painted) < 0.5 ? prev : painted))
     if (markOnMap && !strip && cardRef.current) parkNeighbourLabels()
     else restoreParkedLabels()
-    const next = markOnMap && cardRef.current ? measureTaps(cardRef.current, plotId) : null
+    const measure = () => (markOnMap && cardRef.current ? measureTaps(cardRef.current, plotId) : null)
+    const next = measure()
     setTaps((prev) => (sameTaps(prev, next) ? prev : next))
-    return () => restoreParkedLabels()
+    let frame = 0
+    if (strip && cardRef.current) {
+      frame = requestAnimationFrame(() => {
+        const again = measure()
+        setTaps((prev) => (sameTaps(prev, again) ? prev : again))
+      })
+    }
+    return () => {
+      restoreParkedLabels()
+      if (frame) cancelAnimationFrame(frame)
+    }
   })
 
   useEffect(() => {
