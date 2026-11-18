@@ -2264,7 +2264,8 @@ assert.doesNotMatch(
   assert.match(phone587, /rail=\$\{railHit\}/, '1.4.587 the scan logs rail centre hits')
   assert.match(defend587, /\.defend-page\.is-easy-watch:has\(\.defend-type-chip\) text\.defend-type-label/, '1.4.587 Easy hides SVG words when chips mount')
   assert.match(defend587, /\.defend-type-chip\[data-chrome-hide='yes'\]/, '1.4.587 chips can chrome-hide')
-  assert.match(board587, /for \(const chip of page\.querySelectorAll\('\.defend-type-chip'\)\)/, '1.4.587 hideTypeLabelsOnChrome flags chips')
+  assert.match(board587, /const chipNodes = \[\.\.\.page\.querySelectorAll\('\.defend-type-chip'\)\)/, '1.4.587 hideTypeLabelsOnChrome flags chips')
+  assert.match(board587, /for \(const chip of chipNodes\)/, '1.4.587 hideTypeLabelsOnChrome walks every chip')
 }
 
 // 1.4.586: Easy first plant shockwave (#957).
