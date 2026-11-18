@@ -2016,6 +2016,9 @@ assert.doesNotMatch(
 {
   const defend594 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   const phone594 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  const place594 = readFileSync(new URL('../src/lib/towerCardPlace.ts', import.meta.url), 'utf8')
+  assert.match(place594, /ownLampHit/, '1.4.594 mid-wave strip clears the open lamp hit')
+  assert.match(place594, /stripLampHits/, '1.4.594 strip placement penalizes neighbour and own lamp overlap')
   assert.match(defend594, /--nw-icon-far: "Far"/, '1.4.594 strip sets Far on the mid-wave card')
   assert.match(defend594, /--nw-icon-strong: "Strong"/, '1.4.594 strip sets Strong on the mid-wave card')
   assert.match(defend594, /data-strip='yes'\] \.defend-path-buy[\s\S]*white-space: nowrap/, '1.4.594 strip buy keeps Far/Strong/3 sparks on one line')
