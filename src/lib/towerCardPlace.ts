@@ -181,6 +181,39 @@ export const TAP_EPS = 0.5
 const BEGIN_BOB = 2
 export const BEGIN_REACH = BEGIN_GAP + TAP_EPS + BEGIN_BOB
 
+/** Road path samples in defend-frame coords. Matches DefendTowerCard roadTapBoxes for check-live-prove 1.4.500. */
+function stripRoadBlocks(): TowerRect[] {
+  if (typeof document === 'undefined') return []
+  const frame = document.querySelector('.defend-frame')
+  if (!(frame instanceof HTMLElement)) return []
+  const origin = frame.getBoundingClientRect()
+  const ox = origin.left + frame.clientLeft
+  const oy = origin.top + frame.clientTop
+  const road = document.querySelector('.defend-road')
+  if (!(road instanceof SVGGeometryElement)) return []
+  const svg = road.ownerSVGElement
+  const ctm = svg?.getScreenCTM()
+  if (!svg || !ctm) return []
+  const length = road.getTotalLength()
+  const step = length / 393
+  const half = 0.75
+  const out: TowerRect[] = []
+  for (let i = 0; i < 394; i += 1) {
+    const at = road.getPointAtLength(Math.min(length, i * step))
+    const point = svg.createSVGPoint()
+    point.x = at.x
+    point.y = at.y
+    const s = point.matrixTransform(ctm)
+    out.push({
+      left: s.x - half - ox,
+      top: s.y - half - oy,
+      right: s.x + half - ox,
+      bottom: s.y + half - oy,
+    })
+  }
+  return out
+}
+
 function tapBlocks(taps: TowerTaps | null): TowerRect[] {
   if (!taps) return []
   const out: TowerRect[] = []
@@ -259,16 +292,15 @@ export function placeTowerCard(
   const glyphHits = (card: { left: number; top: number }) =>
     glyph && cardHitsGlyph(card, point, cardHeight, paintHeight, glyph) ? 1 : 0
   const markH = paintHeight > 0 ? paintHeight : cardHeight
+  const roadRects = strip ? (taps?.road?.length ? taps.road : stripRoadBlocks()) : []
   const blocks = [
     ...tapBlocks(taps),
-    ...(strip && taps?.road
-      ? taps.road.map((r) => ({
-          left: r.left - TAP_EPS,
-          top: r.top - TAP_EPS,
-          right: r.right + TAP_EPS,
-          bottom: r.bottom + TAP_EPS,
-        }))
-      : []),
+    ...roadRects.map((r) => ({
+      left: r.left - TAP_EPS,
+      top: r.top - TAP_EPS,
+      right: r.right + TAP_EPS,
+      bottom: r.bottom + TAP_EPS,
+    })),
   ]
   const soft = softBlocks(taps)
   const own = ownBlocks(taps)
