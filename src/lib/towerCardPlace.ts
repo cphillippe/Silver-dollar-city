@@ -226,6 +226,122 @@ function hitsRect(card: { left: number; top: number }, height: number, r: TowerR
  * (`markClear` false), so it can show its own copy of the mark.
  * `strip` is the mid-wave buy strip: 112 wide, and all of it takes taps.
  */
+function placeFullTowerCard(
+  point: TowerCardPoint,
+  board: { w: number; h: number },
+  others: readonly TowerCardPoint[],
+  scale: number,
+  reserveBottom: number,
+  cardHeight: number,
+  glyph: TowerGlyphBox | null,
+  paintHeight: number,
+  taps: TowerTaps | null,
+): { left: number; top: number; side: 'above' | 'below'; markClear: boolean } {
+  const W = TOWER_CARD_W
+  const centered = Math.max(MARGIN, Math.min(point.left - W / 2, board.w - W - RAIL))
+  const glyphHits = (card: { left: number; top: number }) =>
+    glyph && cardHitsGlyph(card, point, cardHeight, paintHeight, glyph) ? 1 : 0
+  const markH = paintHeight > 0 ? paintHeight : cardHeight
+  const blocks = tapBlocks(taps)
+  const soft = softBlocks(taps)
+  const own = ownBlocks(taps)
+  const ownHits = (card: { left: number; top: number }) =>
+    own.reduce((n, block) => n + (hitsRect(card, markH, block, W) ? 1 : 0), 0)
+  const softArea = (card: { left: number; top: number }) =>
+    soft.reduce((sum, block) => {
+      const w = Math.min(card.left + W, block.right) - Math.max(card.left, block.left)
+      const h = Math.min(card.top + markH, block.bottom) - Math.max(card.top, block.top)
+      return sum + (w > 0 && h > 0 ? w * h : 0)
+    }, 0)
+  const tapHits = (card: { left: number; top: number }) =>
+    blocks.reduce((n, block) => n + (hitsRect(card, markH, block, W) ? 1 : 0), 0)
+  const softHits = (card: { left: number; top: number }) =>
+    soft.reduce((n, block) => n + (hitsRect(card, markH, block, W) ? 1 : 0), 0)
+  let above = point.top - cardHeight - GAP
+  if (glyph && glyphHits({ left: centered, top: above })) above = Math.min(above, glyph.top - GLYPH_CLEAR - STEM_H - markH)
+  const below = point.top + GAP
+  const legacyTop = above < MARGIN ? below : above
+  const boundH = glyph || taps ? markH : cardHeight
+  const top = clampCardTop(legacyTop, board.h, boundH, reserveBottom)
+  const legacy = {
+    left: centered,
+    top,
+    side: cardSide(top, point.top, cardHeight),
+  }
+  const lampHits = (card: { left: number; top: number }) =>
+    others.reduce((n, lamp) => n + (upgradeControlsHitLamp(card, lamp, scale, cardHeight, false) ? 1 : 0), 0)
+  const stripLampHits = (card: { left: number; top: number }) => lampHits(card)
+  if (stripLampHits(legacy) + glyphHits(legacy) + tapHits(legacy) + ownHits(legacy) + softHits(legacy) === 0)
+    return { ...legacy, markClear: true }
+  const maxLeft = Math.max(MARGIN, board.w - W - RAIL)
+  const rowFloor = taps?.row != null ? taps.row - BEGIN_REACH : Infinity
+  const maxTop = Math.max(MARGIN, Math.min(board.h - boundH - MARGIN - reserveBottom, rowFloor - boundH))
+  const wideLeft = taps?.rail ? Math.max(maxLeft, board.w - W - EDGE) : maxLeft
+  const wideTop = maxTop
+  const search = (markWeight: number, farLeft: number, farTop: number, near = MARGIN) => {
+    let best = legacy
+    let bestKey = Infinity
+    const lefts: number[] = []
+    const tops: number[] = []
+    for (let left = near; left <= farLeft + 0.1; left += 8) lefts.push(left)
+    for (let top = near; top <= farTop + 0.1; top += 8) tops.push(top)
+    lefts.push(farLeft)
+    tops.push(farTop)
+    const addLeft = (left: number) => {
+      if (left >= near && left <= farLeft + 0.1) lefts.push(left)
+    }
+    const addTop = (top: number) => {
+      if (top >= near && top <= farTop + 0.1) tops.push(top)
+    }
+    if (glyph) {
+      addLeft(glyph.right + GLYPH_CLEAR + 1)
+      addLeft(Math.max(near, glyph.left - GLYPH_CLEAR - 1 - W))
+      for (const glyphTop of [
+        glyph.bottom + GLYPH_CLEAR + STEM_H + 1,
+        glyph.bottom + GLYPH_CLEAR + 1,
+        glyph.top - GLYPH_CLEAR - STEM_H - 1 - markH,
+        glyph.top - GLYPH_CLEAR - 1 - markH,
+      ]) {
+        addTop(glyphTop)
+        addTop(Math.max(near, glyphTop))
+      }
+    }
+    for (const block of [...blocks, ...own, ...soft]) {
+      addLeft(block.right)
+      addLeft(block.left - W)
+      addTop(block.bottom)
+      addTop(block.top - markH)
+    }
+    for (const left of lefts) {
+      for (const topTry of tops) {
+        const card = { left, top: topTry }
+        const railIn = Math.max(0, left - maxLeft)
+        const barIn = Math.max(0, topTry - maxTop)
+        const dist = Math.hypot(left + W / 2 - point.left, topTry + cardHeight / 2 - point.top)
+        const key =
+          markWeight * glyphHits(card) * 1e7 +
+          tapHits(card) * 1e6 +
+          ownHits(card) * 5e5 +
+          softHits(card) * 1e5 +
+          softArea(card) * 0.5 +
+          stripLampHits(card) * 2000 +
+          (railIn + barIn) * 50 +
+          dist
+        if (key < bestKey) {
+          bestKey = key
+          best = { left, top: topTry, side: cardSide(topTry, point.top, cardHeight) }
+        }
+      }
+    }
+    return best
+  }
+  const snug = search(1, maxLeft, maxTop)
+  if (glyphHits(snug) + tapHits(snug) + ownHits(snug) + softHits(snug) === 0) return { ...snug, markClear: true }
+  const wide = search(1, wideLeft, wideTop, EDGE)
+  if (glyphHits(wide) + tapHits(wide) + ownHits(wide) + softHits(wide) === 0) return { ...wide, markClear: true }
+  return { ...search(0, wideLeft, wideTop, EDGE), markClear: false }
+}
+
 export function placeTowerCard(
   point: TowerCardPoint,
   board: { w: number; h: number },
@@ -239,6 +355,9 @@ export function placeTowerCard(
   taps: TowerTaps | null = null,
   strip = false,
 ): { left: number; top: number; side: 'above' | 'below'; markClear: boolean } {
+  if (!strip) {
+    return placeFullTowerCard(point, board, others, scale, reserveBottom, cardHeight, glyph, paintHeight, taps)
+  }
   const W = strip ? STRIP_W : TOWER_CARD_W
   const stripLeftOfLamp = point.left < board.w * 0.52
   const centered = strip
