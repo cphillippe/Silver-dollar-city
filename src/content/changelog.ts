@@ -49,7 +49,7 @@ export const CHANGELOG: ChangeNote[] = [
     ],
   },
   {
-    version: '1.4.593',
+    version: '1.4.594',
     title: 'Dig win: readable One more dig and Home',
     when: '2026-11-17',
     items: [
@@ -59,6 +59,7 @@ export const CHANGELOG: ChangeNote[] = [
       'Refs #964.',
     ],
   },
+
   {
     version: '1.4.593',
     title: 'Night Watch: one plant ring per run and Far / Strong on the buy strip',
@@ -71,6 +72,7 @@ export const CHANGELOG: ChangeNote[] = [
       'Refs #950.',
     ],
   },
+
   {
     version: '1.4.592',
     title: 'Night Watch: the Candle gets a name on the clear screen',
