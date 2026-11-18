@@ -101,6 +101,33 @@ function PathMark({ path }: { path: TreePath }) {
 }
 
 /** Boxes the card must keep off, in the card's own offset parent (the frame). Null when the card is not placed yet. */
+/** Screen boxes along the road path. Only the mid-wave strip must stay clear. */
+function roadTapBoxes(ox: number, oy: number): TowerRect[] {
+  const road = document.querySelector('.defend-road')
+  if (!(road instanceof SVGGeometryElement)) return []
+  const svg = road.ownerSVGElement
+  const ctm = svg?.getScreenCTM()
+  if (!svg || !ctm) return []
+  const length = road.getTotalLength()
+  const step = Math.max(6, length / 52)
+  const half = 11
+  const out: TowerRect[] = []
+  for (let d = 0; d <= length; d += step) {
+    const at = road.getPointAtLength(Math.min(length, d))
+    const point = svg.createSVGPoint()
+    point.x = at.x
+    point.y = at.y
+    const s = point.matrixTransform(ctm)
+    out.push({
+      left: s.x - half - ox,
+      top: s.y - half - oy,
+      right: s.x + half - ox,
+      bottom: s.y + half - oy,
+    })
+  }
+  return out
+}
+
 function measureTaps(card: HTMLElement, plotId: string): TowerTaps | null {
   const parent = card.offsetParent
   if (!(parent instanceof HTMLElement)) return null
@@ -161,6 +188,7 @@ function measureTaps(card: HTMLElement, plotId: string): TowerTaps | null {
       ...pads.flatMap((pad) => [...pad.querySelectorAll('text.defend-type-label')].map(rect)),
       ...chips.filter((chip) => chip.getAttribute('data-chip-plot') !== plotId).map(rect),
     ].filter((box): box is TowerRect => box !== null),
+  ...(card.getAttribute('data-strip') === 'yes' ? { road: roadTapBoxes(ox, oy) } : {}),
   }
 }
 
@@ -187,7 +215,8 @@ function sameTaps(a: TowerTaps | null, b: TowerTaps | null): boolean {
     (a.row ?? null) === (b.row ?? null) &&
     sameRects(a.own, b.own) &&
     sameRects(a.lamps, b.lamps) &&
-    sameRects(a.labels, b.labels)
+    sameRects(a.labels, b.labels) &&
+    sameRects(a.road, b.road)
   )
 }
 
