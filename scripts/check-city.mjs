@@ -1958,7 +1958,15 @@ assert.doesNotMatch(
   const phone594 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
   assert.match(defend594, /--nw-icon-far: "Far"/, '1.4.594 strip sets Far on the mid-wave card')
   assert.match(defend594, /--nw-icon-strong: "Strong"/, '1.4.594 strip sets Strong on the mid-wave card')
+  assert.match(defend594, /data-strip='yes'\] \.defend-path-buy[\s\S]*white-space: nowrap/, '1.4.594 strip buy keeps Far/Strong/3 sparks on one line')
   assert.match(phone594, /async function checkNwStripWords/, '1.4.594 checkNwStripWords is defined')
+  assert.match(phone594, /NW_STRIP_WORDS_LAMPS/, '1.4.594 strip words sweep all four lamp types')
+  assert.match(phone594, /NW_STRIP_TAP_PLAN/, '1.4.594 strip tap baselines stay card-relative')
+  assert.match(
+    phone594,
+    /NW_STRIP_WORDS_SIZES = \[\s*\[375, 812\],\s*\[390, 844\],\s*\[412, 915\],\s*\]/,
+    '1.4.594 strip words covers 375, 390 and 412',
+  )
   assert.match(
     phone594,
     /await checkNwPlantRingOnce\(browser, port, errors\)\n    await checkNwStripWords\(browser, port, errors\)/,

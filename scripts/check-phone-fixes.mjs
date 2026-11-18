@@ -8674,22 +8674,27 @@ async function checkNwPlantRingOnce(browser, port, errors) {
 const NW_STRIP_WORDS_SIZES = [
   [375, 812],
   [390, 844],
+  [412, 915],
+]
+const NW_STRIP_WORDS_LAMPS = [
+  { tool: 'love', cx: 464, cy: 360 },
+  { tool: 'logic', cx: 600, cy: 88 },
+  { tool: 'reason', cx: 464, cy: 224 },
+  { tool: 'science', cx: 464, cy: 768 },
 ]
 const NW_STRIP_WORDS_SEARCH = '?playtest=1&nwSeed=2&nwRound=24&nwLamps=0&nwCam=1'
-/** Parent 1.4.593 tap boxes relative to the strip card (mid-wave love lamp; tap geometry must not move). */
-const NW_STRIP_TAP_BASELINE = {
-  '375x812': {
-    far: { x: 4, y: 2, w: 104, h: 44 },
-    strong: { x: 4, y: 50, w: 104, h: 44 },
-  },
-  '390x844': {
-    far: { x: 4, y: 2, w: 104, h: 44 },
-    strong: { x: 4, y: 50, w: 104, h: 44 },
-  },
+/** Parent 1.4.593 tap boxes relative to the strip card (mid-wave lamp; tap geometry must not move). */
+const NW_STRIP_TAP_PLAN = {
+  far: { x: 4, y: 2, w: 104, h: 44 },
+  strong: { x: 4, y: 50, w: 104, h: 44 },
 }
+const NW_STRIP_TAP_BASELINE = Object.fromEntries(
+  NW_STRIP_WORDS_SIZES.map(([w, h]) => [`${w}x${h}`, NW_STRIP_TAP_PLAN]),
+)
 
 async function checkNwStripWords(browser, port, errors) {
   const only = process.env.NW_STRIP_WORDS_SIZE
+  const onlyTool = process.env.NW_STRIP_WORDS_TOOL
   const problems = []
   const seen = new Set()
   const fail = (line) => {
@@ -8714,35 +8719,37 @@ async function checkNwStripWords(browser, port, errors) {
   for (const [width, height] of NW_STRIP_WORDS_SIZES) {
     const label = `${width}x${height}`
     if (only && only !== label) continue
-    const { context, page } = await openMap(browser, port, width, height, 'a2', {
-      motion: true,
-      search: NW_STRIP_WORDS_SEARCH,
-    })
-    page.on('pageerror', (error) => errors.push(`strip-words ${label} ${error}`))
-    await glyphSetup(page)
-    await assertGlyphCamera(page, `${label} strip`)
-    const rings = await page.evaluate(() =>
-      [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({
-        cx: Number(ring.getAttribute('cx')),
-        cy: Number(ring.getAttribute('cy')),
-      })),
-    )
-    const ring = rings.find((entry) => entry.cx === FAILING_SEAT.cx && entry.cy === FAILING_SEAT.cy) ?? rings[rings.length - 1]
-    assert.ok(ring, `${label} has a live seat for the strip check`)
-    await glyphPlantAt(page, 'love', ring, `${label} strip`)
-    const sparks = await page.evaluate(() => Number((document.body.innerText.match(/(\d+)\s*\n?\s*Sparks/) || [])[1] || 0))
-    assert.ok(sparks >= 3, `${label} strip has sparks to buy (${sparks})`)
-    await page.locator('.defend-go').click()
-    await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
-    for (let attempt = 0; attempt < 6 && (await page.locator('.defend-tower-card[data-strip="yes"]').count()) < 1; attempt += 1) {
-      await page.locator('.defend-pad[data-tower-type="love"]').click({ force: true })
-      await page.waitForTimeout(350)
-    }
-    await page.locator('.defend-tower-card[data-strip="yes"]').waitFor({ timeout: 5000 })
-    await page.locator('.defend-raider.is-easy-cue').waitFor({ timeout: 60_000 })
-    await page.waitForTimeout(300)
+    for (const lamp of NW_STRIP_WORDS_LAMPS) {
+      if (onlyTool && onlyTool !== lamp.tool) continue
+      const { context, page } = await openMap(browser, port, width, height, 'a2', {
+        motion: true,
+        search: NW_STRIP_WORDS_SEARCH,
+      })
+      page.on('pageerror', (error) => errors.push(`strip-words ${label} ${lamp.tool} ${error}`))
+      await glyphSetup(page)
+      await assertGlyphCamera(page, `${label} ${lamp.tool} strip`)
+      const rings = await page.evaluate(() =>
+        [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({
+          cx: Number(ring.getAttribute('cx')),
+          cy: Number(ring.getAttribute('cy')),
+        })),
+      )
+      const ring = rings.find((entry) => entry.cx === lamp.cx && entry.cy === lamp.cy)
+      assert.ok(ring, `${label} ${lamp.tool} has a live seat ${lamp.cx},${lamp.cy}`)
+      await glyphPlantAt(page, lamp.tool, ring, `${label} ${lamp.tool} strip`)
+      const sparks = await page.evaluate(() => Number((document.body.innerText.match(/(\d+)\s*\n?\s*Sparks/) || [])[1] || 0))
+      assert.ok(sparks >= 3, `${label} ${lamp.tool} strip has sparks to buy (${sparks})`)
+      await page.locator('.defend-go').click()
+      await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
+      for (let attempt = 0; attempt < 6 && (await page.locator('.defend-tower-card[data-strip="yes"]').count()) < 1; attempt += 1) {
+        await page.locator(`.defend-pad[data-tower-type="${lamp.tool}"]`).click({ force: true })
+        await page.waitForTimeout(350)
+      }
+      await page.locator('.defend-tower-card[data-strip="yes"]').waitFor({ timeout: 5000 })
+      await page.locator('.defend-raider.is-easy-cue').waitFor({ timeout: 60_000 })
+      await page.waitForTimeout(300)
 
-    const read = await page.evaluate(() => {
+      const read = await page.evaluate((tool) => {
       const normLocal = (value) => String(value || '').replace(/\s+/g, ' ').trim()
       const cssTextLocal = (value) => {
         if (!value || value === 'none' || value === 'normal') return ''
@@ -8866,6 +8873,20 @@ async function checkNwStripWords(browser, port, errors) {
           }
         }
       }
+      const overlapPx2 = (a, b) => {
+        if (!a || !b) return 0
+        const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.x, b.x))
+        const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y))
+        return w * h
+      }
+      const chrome = {
+        begin: overlapPx2(cardBox, box(document.querySelector('.defend-go'))),
+        continue: overlapPx2(cardBox, box(document.querySelector('.defend-continue'))),
+        rail: overlapPx2(cardBox, box(document.querySelector('.nw-rail'))),
+        hud: overlapPx2(cardBox, box(document.querySelector('.nw-hud'))),
+        lamp: overlapPx2(cardBox, box(document.querySelector(`.defend-pad[data-tower-type="${tool}"]`))),
+      }
+      const chromeOverlap = chrome.begin + chrome.continue + chrome.rail + chrome.hud + chrome.lamp
       return {
         rows,
         cardLeft: cardBox?.x ?? null,
@@ -8879,10 +8900,12 @@ async function checkNwStripWords(browser, port, errors) {
               bottom: cardBox.bottom,
             }
           : null,
+        chromeOverlap,
+        chrome,
       }
-    })
+    }, lamp.tool)
 
-    const onScreen = await page.evaluate(async () => {
+      const onScreen = await page.evaluate(async () => {
       const inView = (r) => r.x >= 0 && r.y >= 0 && r.right <= innerWidth && r.bottom <= innerHeight
       const round = (n) => Math.round(n * 10) / 10
       const bad = []
@@ -8915,11 +8938,11 @@ async function checkNwStripWords(browser, port, errors) {
       return { bad, card: cardSnap, frames }
     })
 
-    const tag = `${label} mid-wave`
-    const baseline = NW_STRIP_TAP_BASELINE[label]
-    let clipped = 0
-    let minFont = Infinity
-    const stripGold = await page.evaluate(() => {
+      const tag = `${label} ${lamp.tool} mid-wave`
+      const baseline = NW_STRIP_TAP_BASELINE[label]
+      let clipped = 0
+      let minFont = Infinity
+      const stripGold = await page.evaluate(() => {
       const goldish = (value) => {
         const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
         let match
@@ -8957,10 +8980,15 @@ async function checkNwStripWords(browser, port, errors) {
       }
       return names.length
     })
-    if (!read.card) fail(`checkNwStripWords fail ${tag} strip card=missing`)
-    if (onScreen.frames < 8) fail(`checkNwStripWords fail ${tag} onScreenFrames=${onScreen.frames}`)
-    if (onScreen.bad.length) fail(`checkNwStripWords fail ${tag} onScreen=${onScreen.bad.join('|')}`)
-    for (const row of read.rows) {
+      if (!read.card) fail(`checkNwStripWords fail ${tag} strip card=missing`)
+      if (onScreen.frames < 8) fail(`checkNwStripWords fail ${tag} onScreenFrames=${onScreen.frames}`)
+      if (onScreen.bad.length) fail(`checkNwStripWords fail ${tag} onScreen=${onScreen.bad.join('|')}`)
+      if (read.chromeOverlap !== 0) {
+        fail(
+          `checkNwStripWords fail ${tag} overlap=${read.chromeOverlap} begin=${read.chrome?.begin ?? '?'} continue=${read.chrome?.continue ?? '?'} rail=${read.chrome?.rail ?? '?'} hud=${read.chrome?.hud ?? '?'} lamp=${read.chrome?.lamp ?? '?'}`,
+        )
+      }
+      for (const row of read.rows) {
       const word = row.path === 'far' ? 'Far' : 'Strong'
       const wantCost = '3 sparks'
       if (!row.before.source || row.before.source !== word) {
@@ -8999,23 +9027,24 @@ async function checkNwStripWords(browser, port, errors) {
         fail(`checkNwStripWords fail ${tag} ${row.path} tapDelta=${delta == null ? 'missing' : delta.toFixed(2)} want<=0.5`)
       }
     }
-    if (clipped !== 0) fail(`checkNwStripWords fail ${tag} clipped=${clipped}`)
-    if (!(minFont >= 13)) fail(`checkNwStripWords fail ${tag} font=${minFont}`)
-    if (stripGold !== 1) fail(`checkNwStripWords fail ${tag} gold=${stripGold}`)
-    if (!problems.some((line) => line.includes(` ${tag} `))) {
-      const c = read.card
-      const cardLine =
-        c != null
-          ? `card=${Math.round(c.x * 10) / 10},${Math.round(c.y * 10) / 10},${Math.round(c.w * 10) / 10},${Math.round(c.h * 10) / 10}`
-          : 'card=missing'
-      console.log(
-        `checkNwStripWords ok ${tag} far=Far strong=Strong cost="3 sparks" clipped=0 font=${minFont}px gold=1 tapDelta<=0.5 onScreen=${onScreen.frames}frames ${cardLine}`,
-      )
+      if (clipped !== 0) fail(`checkNwStripWords fail ${tag} clipped=${clipped}`)
+      if (!(minFont >= 13)) fail(`checkNwStripWords fail ${tag} font=${minFont}`)
+      if (stripGold !== 1) fail(`checkNwStripWords fail ${tag} gold=${stripGold}`)
+      if (!problems.some((line) => line.includes(` ${tag} `))) {
+        const c = read.card
+        const cardLine =
+          c != null
+            ? `card=${Math.round(c.x * 10) / 10},${Math.round(c.y * 10) / 10},${Math.round(c.w * 10) / 10},${Math.round(c.h * 10) / 10}`
+            : 'card=missing'
+        console.log(
+          `checkNwStripWords ok ${tag} far=Far strong=Strong cost="3 sparks" clipped=0 font=${minFont}px gold=1 overlap=0 tapDelta<=0.5 onScreen=${onScreen.frames}frames ${cardLine}`,
+        )
+      }
+      await context.close()
     }
-    await context.close()
   }
 
-  if (!only) {
+  if (!only && !onlyTool) {
     const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }
     const hard = await browser.newContext({
       baseURL: `http://127.0.0.1:${port}/`,
