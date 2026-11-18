@@ -109,11 +109,12 @@ function roadTapBoxes(ox: number, oy: number): TowerRect[] {
   const ctm = svg?.getScreenCTM()
   if (!svg || !ctm) return []
   const length = road.getTotalLength()
-  const step = Math.max(6, length / 52)
-  const half = 11
+  // Match check-live-prove 1.4.500: 394 samples along the path, point-in-card.
+  const step = length / 393
+  const half = 0.75
   const out: TowerRect[] = []
-  for (let d = 0; d <= length; d += step) {
-    const at = road.getPointAtLength(Math.min(length, d))
+  for (let i = 0; i < 394; i += 1) {
+    const at = road.getPointAtLength(Math.min(length, i * step))
     const point = svg.createSVGPoint()
     point.x = at.x
     point.y = at.y
