@@ -426,7 +426,7 @@ export function DefendTowerCard({
   const cardH = strip ? STRIP_H : easy && paths ? (lessonCue ? TOWER_TREE_LESSON_H : TOWER_TREE_H) : TOWER_CARD_H
   // A wave hides the map mark, so only a lamp card outside a wave has a mark to keep clear.
   const glyph =
-    markOnMap && !midWave
+    markOnMap && (!midWave || strip)
       ? mapGlyphRect(point.left, point.top, cameraScale, { left: 0, top: 0, right: board.w, bottom: board.h })
       : null
   const [paintH, setPaintH] = useState(0)
