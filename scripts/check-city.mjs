@@ -1771,7 +1771,7 @@ assert.match(
   assert.deepEqual(whyBlastExtras('daily-cosmos'), ['Luck is enough for a livable world.'])
   const cosmos = packLesson('daily-cosmos')
   assert.ok(cosmos.easy.hold.whyMisses.includes('Luck is enough for a livable world.'), '#792 Easy daily-cosmos miss says Luck')
-  assert.ok(!cosmos.easy.hold.whyMisses.includes('Chance is enough for a livable world.'))
+  assert.ok(!cosmos.easy.hold.whyMisses.includes('Chance is enough for a livable world.')
   assert.ok(cosmos.medium.hold.whyMisses.includes('Chance is enough for a livable world.'), '#792 Medium keeps Chance')
   assert.ok(cosmos.hard.hold.whyMisses.includes('Chance is enough for a livable world.'), '#792 Hard keeps Chance')
   assert.equal(
@@ -1863,7 +1863,7 @@ assert.match(
     '#818 hidden Heaven sign CSS',
   )
   const mapSrc792 = readFileSync(new URL('../src/components/CityMap.tsx', import.meta.url), 'utf8')
-  const easyLegend = mapSrc792.slice(mapSrc792.indexOf('isEasy(progress) ? ('), mapSrc792.indexOf('<p className="eyebrow">Eden'))
+  const easyLegend = mapSrc792.slice(mapSrc792.indexOf('isEasy(progress) ? ('), mapSrc792.indexOf('<p className="eyebrow">Eden')
   assert.doesNotMatch(easyLegend, /city-gift/, '#792 Easy Home drops the hidden town legend gift')
   assert.equal(HEAVEN_POINT_792.x, 572)
   assert.equal(HEAVEN_POINT_792.y, 36)
@@ -1918,7 +1918,7 @@ assert.match(
   )
 
   const defendCss792b = read792b('src/styles/defend.css')
-  const tail792b = defendCss792b.slice(defendCss792b.indexOf('792b B6'))
+  const tail792b = defendCss792b.slice(defendCss792b.indexOf('792b B6')
   for (const selector of tail792b.match(/^[.\w][^{}\n]*\{/gm) ?? []) {
     assert.match(selector, /is-easy-watch|^@|^\.defend-page/, `#792b every new Night Watch rule is scoped to Easy: ${selector}`)
   }
@@ -2107,7 +2107,7 @@ assert.doesNotMatch(
 }
 
 // 1.4.591: Easy Night Watch one lamp hops to the next seat (#968).
-assert.equal(CHANGELOG[3].version, '1.4.591', '1.4.591 follows 1.4.592'))
+assert.equal(CHANGELOG[3].version, '1.4.591', '1.4.591 follows 1.4.592')
 assert.match(latestChange('1.4.591').items.join('\n'), /Refs #968/, '1.4.591 changelog refs #968')
 assert.match(latestChange('1.4.591').items.join('\n'), /hops your one lamp/, '1.4.591 changelog names the hop')
 assert.match(latestChange('1.4.591').items.join('\n'), /Hard stays the same\./)
@@ -2148,7 +2148,7 @@ assert.doesNotMatch(
 }
 
 // 1.4.590: Easy Night Watch plant does not open the upgrade card (#967).
-assert.equal(CHANGELOG[4].version, '1.4.590', '1.4.590 follows 1.4.591'))
+assert.equal(CHANGELOG[4].version, '1.4.590', '1.4.590 follows 1.4.591')
 assert.match(latestChange('1.4.590').items.join('\n'), /Refs #967/, '1.4.590 changelog refs #967')
 assert.match(latestChange('1.4.590').items.join('\n'), /leaves the road in view/, '1.4.590 changelog names the clear road')
 assert.match(latestChange('1.4.590').items.join('\n'), /Hard stays the same\./)
@@ -2192,7 +2192,7 @@ assert.doesNotMatch(
     phone589.indexOf("if (process.env.NW_ROUND_CHEER_ONLY === '1')"),
   )
   assert.doesNotMatch(igniteOnly589, /checkNwRoundCheer/, '1.4.589 the plant-ignite-only branch does not run the cheer scan')
-  const fullRun589 = phone589.slice(phone589.lastIndexOf('await checkNwPlantIgnite(browser, port, errors)'))
+  const fullRun589 = phone589.slice(phone589.lastIndexOf('await checkNwPlantIgnite(browser, port, errors)')
   assert.match(
     fullRun589,
     /^await checkNwPlantIgnite\(browser, port, errors\)\n\s*await checkNwRoundCheer\(browser, port, errors\)/,
@@ -2514,11 +2514,11 @@ assert.doesNotMatch(
 {
   const defend577 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   const phone577 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
-  const tablet577 = defend577.slice(defend577.indexOf('1.4.577: tablets use the same pre-plant grey'), defend577.indexOf('1.4.585:'))
+  const tablet577 = defend577.slice(defend577.indexOf('1.4.577: tablets use the same pre-plant grey'), defend577.indexOf('1.4.585:')
   assert.match(tablet577, /@media \(min-width: 481px\)/, '1.4.577 the grey Begin rule covers tablet widths')
   assert.match(tablet577, /is-awaiting-plant[\s\S]*?#c8c0d2/, '1.4.577 tablet awaiting Begin uses the phone grey')
   assert.doesNotMatch(tablet577, /is-after-plant/, '1.4.577 the tablet rule does not restyle after-plant Begin')
-  const phoneGrey = defend577.slice(defend577.indexOf('1.4.389: Begin follows the planted count'), defend577.indexOf('1.4.577: tablets use the same pre-plant grey'))
+  const phoneGrey = defend577.slice(defend577.indexOf('1.4.389: Begin follows the planted count'), defend577.indexOf('1.4.577: tablets use the same pre-plant grey')
   assert.match(phoneGrey, /@media \(max-width: 480px\)/, '1.4.577 the phone grey rule stays at 480px')
   assert.match(phoneGrey, /#c8c0d2/, '1.4.577 the phone grey fill is unchanged')
   assert.match(phone577, /async function checkTabletBeginGold/, '1.4.577 checkTabletBeginGold runs from the phone scan')
@@ -2539,10 +2539,10 @@ assert.doesNotMatch(
 {
   const defend576 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   const phone576 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
-  const compact576 = defend576.slice(defend576.indexOf('1.4.574 Easy phone lamp card'), defend576.indexOf('1.4.464: the map list'))
+  const compact576 = defend576.slice(defend576.indexOf('1.4.574 Easy phone lamp card'), defend576.indexOf('1.4.464: the map list')
   assert.match(compact576, /1\.4\.576 Easy phone lamp reason/, '1.4.576 the reason wrap is in the phone card rules')
   assert.match(compact576, /font-size:\s*13px/, '1.4.576 the phone card keeps the 13px floor')
-  const reason576 = compact576.slice(compact576.indexOf('1.4.576 Easy phone lamp reason'))
+  const reason576 = compact576.slice(compact576.indexOf('1.4.576 Easy phone lamp reason')
   assert.match(reason576, /white-space:\s*normal/, '1.4.576 the reason lines wrap')
   assert.doesNotMatch(reason576, /text-overflow:\s*ellipsis/, '1.4.576 the reason lines do not ellipsize')
   assert.match(phone576, /clipped=0/, '1.4.576 the scan logs clipped=0')
@@ -2619,11 +2619,11 @@ assert.doesNotMatch(
   assert.match(nr905, /if\(!r\.gone&&Math\.abs\(r\.sx-S\.x\)\+Math\.abs\(r\.sy-S\.y\)<2\)r\.gone=\.5;/, '1.4.572 Night Run a robber waits while you stand by its hideout')
 }
 assert.equal(CHANGELOG[23].version, '1.4.571', '1.4.571 follows the newest row')
-assert.equal(CHANGELOG[24].version, '1.4.570', '1.4.570 follows the 1.4.571 row'))
-assert.equal(CHANGELOG[25].version, '1.4.569', '1.4.569 follows the 1.4.570 row'))
-assert.equal(CHANGELOG[26].version, '1.4.568', '1.4.568 follows the 1.4.569 row'))
-assert.equal(CHANGELOG[27].version, '1.4.567', '1.4.567 follows the 1.4.568 row'))
-assert.equal(CHANGELOG[28].version, '1.4.566', '1.4.566 follows the 1.4.567 row'))
+assert.equal(CHANGELOG[24].version, '1.4.570', '1.4.570 follows the 1.4.571 row')
+assert.equal(CHANGELOG[25].version, '1.4.569', '1.4.569 follows the 1.4.570 row')
+assert.equal(CHANGELOG[26].version, '1.4.568', '1.4.568 follows the 1.4.569 row')
+assert.equal(CHANGELOG[27].version, '1.4.567', '1.4.567 follows the 1.4.568 row')
+assert.equal(CHANGELOG[28].version, '1.4.566', '1.4.566 follows the 1.4.567 row')
 assert.match(latestChange('1.4.571').items.join('\n'), /Refs #923\./, '1.4.571 changelog refs #923')
 assert.doesNotMatch(latestChange('1.4.571').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.571 changelog avoids GitHub close keywords')
 assert.doesNotMatch(
@@ -2785,7 +2785,7 @@ assert.doesNotMatch(
             for (let left = 2; left <= w - TOWER_CARD_W - 2 && !spot; left += 2) {
               for (let top = 2; top <= h - paint - MARGIN_FLOOR - reserve && !spot; top += 2) {
                 const at = { left, top }
-                spot = !cardHitsGlyph(at, point, TOWER_TREE_H, paint, mark, GLYPH_CLEAR) && !blocks.some((block) => hitsBlock(at, paint, block))
+                spot = !cardHitsGlyph(at, point, TOWER_TREE_H, paint, mark, GLYPH_CLEAR) && !blocks.some((block) => hitsBlock(at, paint, block)
               }
             }
             assert.equal(spot, false, `1.4.570 the card at ${where} gave up on the mark though the frame has a clear spot`)
@@ -2828,7 +2828,7 @@ assert.doesNotMatch(
     const W = 375
     const H = 574
     const base = tapsFor(W, H)
-    const newLamp = [0, 1, 2].map((i) => ({ left: 6, top: 120 + i * 56, right: 56, bottom: 120 + i * 56 + 50 }))
+    const newLamp = [0, 1, 2].map((i) => ({ left: 6, top: 120 + i * 56, right: 56, bottom: 120 + i * 56 + 50 })
     const neighbours = [
       { body: { left: 150, top: 110, right: 200, bottom: 170 }, label: { left: 152, top: 172, right: 198, bottom: 190 } },
       { body: { left: 110, top: 330, right: 160, bottom: 390 }, label: { left: 112, top: 392, right: 158, bottom: 410 } },
@@ -2868,7 +2868,7 @@ assert.doesNotMatch(
               for (let left = 2; left <= W - TOWER_CARD_W - 2 && !spot; left += 2) {
                 for (let top = 2; top <= H - paint - 8 - reserve && !spot; top += 2) {
                   const at = { left, top }
-                  spot = !cardHitsGlyph(at, point, TOWER_TREE_H, paint, mark, GLYPH_CLEAR) && ![...hard, ...softAll].some((box) => hitsBlock(at, paint, box))
+                  spot = !cardHitsGlyph(at, point, TOWER_TREE_H, paint, mark, GLYPH_CLEAR) && ![...hard, ...softAll].some((box) => hitsBlock(at, paint, box)
                 }
               }
               assert.equal(spot, false, `1.4.571 the card at ${where} gave up on the mark though a spot clears it, the taps and every neighbour`)
@@ -3001,7 +3001,7 @@ assert.doesNotMatch(
   /\bHard\b|\bMedium\b/,
   '1.4.564 the player note does not name other tiers',
 )
-assert.equal(CHANGELOG[31].version, '1.4.563', '1.4.563 follows the word-search row'))
+assert.equal(CHANGELOG[31].version, '1.4.563', '1.4.563 follows the word-search row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.563'), '1.4.563 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.563').items.join('\n'),
@@ -3049,7 +3049,7 @@ assert.doesNotMatch(
   /\bHard\b|\bMedium\b/,
   '1.4.562 the player note does not name other tiers',
 )
-assert.equal(CHANGELOG[33].version, '1.4.561', '1.4.561 follows the map-note row'))
+assert.equal(CHANGELOG[33].version, '1.4.561', '1.4.561 follows the map-note row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.561'), '1.4.561 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.561').items.join('\n'),
@@ -3091,7 +3091,7 @@ assert.doesNotMatch(
   assert.match(maze561, /proveOvershootFollowsFinger/, '#883 overshoot recheck follows the finger')
   assert.doesNotMatch(maze561, /trace\.push\(want\)/, '#883 the inn trace is not synthesized')
 }
-assert.equal(CHANGELOG[34].version, '1.4.560', '1.4.560 follows the word-search row'))
+assert.equal(CHANGELOG[34].version, '1.4.560', '1.4.560 follows the word-search row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.560'), '1.4.560 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.560').items.join('\n'),
@@ -3121,7 +3121,7 @@ assert.equal(
   playerVisibleChangeTitle(latestChange('1.4.560').title),
   'Easy Home: the porch fits, and Build this shows a house',
 )
-assert.equal(CHANGELOG[35].version, '1.4.559', '1.4.559 follows the porch row'))
+assert.equal(CHANGELOG[35].version, '1.4.559', '1.4.559 follows the porch row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.559'), '1.4.559 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.559').items.join('\n'),
@@ -3144,7 +3144,7 @@ assert.match(
   /\.city-next-halo\.is-easy-ground \{[^}]*animation:\s*none/,
   '1.4.559 the ground ring does not pulse under reduced motion',
 )
-assert.equal(CHANGELOG[36].version, '1.4.558', '1.4.558 follows the ground ring row'))
+assert.equal(CHANGELOG[36].version, '1.4.558', '1.4.558 follows the ground ring row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.558'), '1.4.558 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.558').items.join('\n'),
@@ -3172,7 +3172,7 @@ assert.doesNotMatch(
   /\bHard\b|\bMedium\b/,
   '1.4.558 the player note does not name other tiers',
 )
-assert.equal(CHANGELOG[37].version, '1.4.557', '1.4.557 follows the round 8 row'))
+assert.equal(CHANGELOG[37].version, '1.4.557', '1.4.557 follows the round 8 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.557'), '1.4.557 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.557').items.join('\n'),
@@ -3196,7 +3196,7 @@ assert.equal(
   null,
   '1.4.557 Behind the scenes title stays out of What’s new',
 )
-assert.equal(CHANGELOG[38].version, '1.4.556', '1.4.556 follows the grade row'))
+assert.equal(CHANGELOG[38].version, '1.4.556', '1.4.556 follows the grade row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.556'), '1.4.556 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.556').items.join('\n'),
@@ -3217,7 +3217,7 @@ assert.deepEqual(playerVisibleChangeItems(latestChange('1.4.556').items), [
   'The debt line now says: God forgives us a huge debt. So we forgive others.',
   'The order line now says: Christ made all things, and he holds them together.',
 ])
-assert.equal(CHANGELOG[39].version, '1.4.555', '1.4.555 follows the Easy claims row'))
+assert.equal(CHANGELOG[39].version, '1.4.555', '1.4.555 follows the Easy claims row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.555'), '1.4.555 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.555').items.join('\n'),
@@ -3227,7 +3227,7 @@ assert.doesNotMatch(
 assert.match(latestChange('1.4.555').items.join('\n'), /Refs #756/, '1.4.555 changelog refs #756')
 assert.match(latestChange('1.4.555').items.join('\n'), /Refs #768/, '1.4.555 changelog refs #768')
 assert.match(latestChange('1.4.555').items.join('\n'), /pace chip sits in the top HUD/, '1.4.555 changelog names the HUD pace chip')
-assert.equal(CHANGELOG[40].version, '1.4.554', '1.4.554 follows the Night Watch row'))
+assert.equal(CHANGELOG[40].version, '1.4.554', '1.4.554 follows the Night Watch row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.554'), '1.4.554 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.554').items.join('\n'),
@@ -3251,10 +3251,10 @@ assert.equal(
   null,
   '1.4.554 Behind the scenes title stays out of What’s new',
 )
-assert.equal(CHANGELOG[41].version, '1.4.553', '1.4.553 follows the Home Read row'))
+assert.equal(CHANGELOG[41].version, '1.4.553', '1.4.553 follows the Home Read row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.553'), '1.4.553 changelog row')
 assert.match(latestChange('1.4.553').items.join('\n'), /Refs #793/)
-assert.equal(CHANGELOG[42].version, '1.4.552', '1.4.552 follows the 1.4.553 row'))
+assert.equal(CHANGELOG[42].version, '1.4.552', '1.4.552 follows the 1.4.553 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.552'), '1.4.552 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.552').items.join('\n'),
@@ -3272,7 +3272,7 @@ assert.match(
   /above the letter grid/,
   '1.4.552 changelog names the Match banner layout fix',
 )
-assert.equal(CHANGELOG[43].version, '1.4.551', '1.4.551 follows the #871 row'))
+assert.equal(CHANGELOG[43].version, '1.4.551', '1.4.551 follows the #871 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.551'), '1.4.551 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.551').items.join('\n'),
@@ -3288,7 +3288,7 @@ assert.match(
 assert.match(latestChange('1.4.551').items.join('\n'), /Drag or tap the road/, '1.4.551 changelog names the maze hint')
 assert.match(latestChange('1.4.551').items.join('\n'), /Refs #877/, '1.4.551 changelog refs #877')
 assert.match(latestChange('1.4.551').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[44].version, '1.4.550', '1.4.550 follows the 1.4.551 row'))
+assert.equal(CHANGELOG[44].version, '1.4.550', '1.4.550 follows the 1.4.551 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.550'), '1.4.550 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.550').items.join('\n'),
@@ -3304,7 +3304,7 @@ assert.match(
 assert.match(latestChange('1.4.550').items.join('\n'), /Story word! \+100/, '1.4.550 changelog keeps the story payoff')
 assert.match(latestChange('1.4.550').items.join('\n'), /Refs #870/, '1.4.550 changelog refs #870')
 assert.match(latestChange('1.4.550').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[45].version, '1.4.549', '1.4.549 follows the 1.4.550 row'))
+assert.equal(CHANGELOG[45].version, '1.4.549', '1.4.549 follows the 1.4.550 row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.549'), '1.4.549 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.549').items.join('\n'),
@@ -3318,7 +3318,7 @@ assert.doesNotMatch(
   /\?playtest=1|Night Watch debug/,
   '1.4.549 changelog stays player-facing',
 )
-assert.equal(CHANGELOG[46].version, '1.4.548', '1.4.548 follows the maze drag row'))
+assert.equal(CHANGELOG[46].version, '1.4.548', '1.4.548 follows the maze drag row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.548'), '1.4.548 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.548').items.join('\n'),
@@ -3371,8 +3371,8 @@ for (const script of [
   const live871 = readFileSync(new URL(`./${script}`, import.meta.url), 'utf8')
   assert.match(live871, /dev-ui-playtest\.mjs/, `#871 ${script} opens developer UI via playtest helper`)
 }
-await import('./check-type-floor-baseline.mjs').then((mod) => mod.assertTypeFloorCss())
-assert.equal(CHANGELOG[47].version, '1.4.547', '1.4.547 follows QuickReview row'))
+await import('./check-type-floor-baseline.mjs').then((mod) => mod.assertTypeFloorCss()
+assert.equal(CHANGELOG[47].version, '1.4.547', '1.4.547 follows QuickReview row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.547'), '1.4.547 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.547').items.join('\n'),
@@ -3385,7 +3385,7 @@ assert.doesNotMatch(
   '1.4.547 changelog avoids box paths',
 )
 assert.match(latestChange('1.4.547').items.join('\n'), /Refs #858/, '1.4.547 changelog refs #858')
-assert.equal(CHANGELOG[48].version, '1.4.546', '1.4.546 stays under 1.4.547'))
+assert.equal(CHANGELOG[48].version, '1.4.546', '1.4.546 stays under 1.4.547')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.546'), '1.4.546 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.546').items.join('\n'),
@@ -3398,7 +3398,7 @@ assert.doesNotMatch(
   '1.4.546 changelog drops box paths',
 )
 assert.match(latestChange('1.4.546').items.join('\n'), /Refs #753/, '1.4.546 changelog refs #753')
-assert.equal(CHANGELOG[49].version, '1.4.545', '1.4.545 stays under 1.4.546'))
+assert.equal(CHANGELOG[49].version, '1.4.545', '1.4.545 stays under 1.4.546')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.545'), '1.4.545 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.545').items.join('\n'),
@@ -3407,7 +3407,7 @@ assert.doesNotMatch(
 )
 assert.match(latestChange('1.4.545').items.join('\n'), /Refs #855/, '1.4.545 changelog refs #855')
 assert.match(latestChange('1.4.545').items.join('\n'), /Hard stays the same\./)
-assert.equal(CHANGELOG[50].version, '1.4.544', '1.4.544 stays under 1.4.545'))
+assert.equal(CHANGELOG[50].version, '1.4.544', '1.4.544 stays under 1.4.545')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.544'), '1.4.544 changelog row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.543'), '1.4.543 changelog row')
 assert.doesNotMatch(
@@ -3506,7 +3506,7 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Refs #818, Refs #834/, '
   assert.match(body533, /background:\s*#2a0f5c/, '#834 the Candle button waits in the Recenter purple')
   assert.match(body533, /border:\s*2px solid #fffce8/, '#834 with the Recenter cream border')
   assert.doesNotMatch(body533, /#ffcc33|#e09412|#ff9f1a|#fff6b8|gradient/i, '#834 no gold in the need-lamp Candle rules')
-  const hex533 = new Set(css533.match(/#[0-9a-f]{3,8}\b/gi)?.map((c) => c.toLowerCase()))
+  const hex533 = new Set(css533.match(/#[0-9a-f]{3,8}\b/gi)?.map((c) => c.toLowerCase())
   for (const color of body533.match(/#[0-9a-f]{3,8}\b/gi) ?? []) assert.ok(hex533.has(color.toLowerCase()), '#834 reuses an existing color')
   assert.match(css533, /button\.defend-new-lamp \{[^}]*#ffcc33/, '#834 the after-plant gold look stays')
   const goldHtml = readFileSync(new URL('./check-golden-live.mjs', import.meta.url), 'utf8')
@@ -3679,7 +3679,7 @@ assert.match(latestChange('1.4.532').items.join('\n'), /Hard stays the same\./)
     '#834 the heaven wall is not gold before the first lamp (Easy only, Hard keeps its art)',
   )
   assert.match(screen834, /onPointerUp=\{beginUp\}/, '#834 the Begin fallback is generic: no map id in beginUp')
-  const beginUp834 = screen834.slice(screen834.indexOf('function beginUp'), screen834.indexOf('function camFocus'))
+  const beginUp834 = screen834.slice(screen834.indexOf('function beginUp'), screen834.indexOf('function camFocus')
   assert.doesNotMatch(beginUp834, /mapId|far-hills|map0\d|a2/, '#834 the Begin fallback has no map-specific branch')
 }
 assert.doesNotMatch(
@@ -3827,7 +3827,7 @@ assert.match(latestChange('1.4.527').items.join('\n'), /Hard/)
   assert.match(mapSrc, /svgSelector="\.city-coming-layer"|svgSelector='\.city-coming-layer'|svgSelector=\{?['"]\.city-coming-layer/)
   assert.match(mapSrc, /stageCam\(/, 'stageCam stays for Hard and wide frames')
   assert.match(plotArtSrc, /EASY_HIDE_ART/)
-  const panCss = cssSrc.slice(cssSrc.indexOf('.city-pan-viewport'))
+  const panCss = cssSrc.slice(cssSrc.indexOf('.city-pan-viewport')
   assert.match(panCss, /touch-action:\s*pan-y pinch-zoom/)
   assert.doesNotMatch(
     panCss.slice(panCss.indexOf('.city-pan-layer {')).split('}')[0],
@@ -4071,7 +4071,7 @@ assert.doesNotMatch(
 assert.match(latestChange('1.4.502').items.join('\n'), /tap a house/i)
 assert.match(latestChange('1.4.502').items.join('\n'), /neighbors/)
 assert.match(latestChange('1.4.502').items.join('\n'), /Hard/)
-const gold503 = CHANGELOG.find((note) => note.version === '1.4.503' && /gold|step/i.test(note.title))
+const gold503 = CHANGELOG.find((note) => note.version === '1.4.503' && /gold|step/i.test(note.title)
 assert.ok(gold503, '1.4.503 gold changelog row')
 assert.doesNotMatch(
   gold503.items.join('\n'),
@@ -4352,7 +4352,7 @@ assert.match(
   const early496 = []
   let hearts496 = 3
   for (let index = 0; index < 6; index += 1) {
-    const owned = easyJumpLoad(index).lamps.map((lamp) => ({ far: lamp.far, strong: lamp.strong }))
+    const owned = easyJumpLoad(index).lamps.map((lamp) => ({ far: lamp.far, strong: lamp.strong })
     while (owned.length < 4) owned.push({ far: 0, strong: 0 })
     const round = paceEasyLive(index, owned, hearts496, false, LIVE_TAP_EVERY, 'road', undefined, [], 2)
     early496.push(round.taps)
@@ -4381,7 +4381,7 @@ assert.match(
   const early490 = []
   let hearts = 3
   for (let index = 0; index < 6; index += 1) {
-    const owned = easyJumpLoad(index).lamps.map((lamp) => ({ far: lamp.far, strong: lamp.strong }))
+    const owned = easyJumpLoad(index).lamps.map((lamp) => ({ far: lamp.far, strong: lamp.strong })
     while (owned.length < 4) owned.push({ far: 0, strong: 0 })
     const round = paceEasyLive(index, owned, hearts, false, LIVE_TAP_EVERY, 'road', undefined, [], 2)
     early490.push(round.taps)
@@ -5327,7 +5327,7 @@ assert.doesNotMatch(
   assert.equal(pickWalkerFace(4, 1, [live[0]]), live[1], '1.4.419 3× sees the same head as 1×')
   const again = []
   for (let spawn = 0; spawn < 8; spawn++) {
-    again.push(pickWalkerFace(4, spawn, again))
+    again.push(pickWalkerFace(4, spawn, again)
   }
   assert.deepEqual(again, live, '1.4.419 1× and 3× walk the same heads')
   const cast = raidForWave(0, 0, 4, true)
@@ -5468,9 +5468,9 @@ assert.equal(
 )
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
-assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
-assert.ok(CONTENT_PACKS[0]?.areaIds.includes('ink-court'))
-assert.ok(CHANGELOG.some((note) => note.title === 'TS peels for cheap hops'))
+assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory')
+assert.ok(CONTENT_PACKS[0]?.areaIds.includes('ink-court')
+assert.ok(CHANGELOG.some((note) => note.title === 'TS peels for cheap hops')
 assert.match(
   readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8'),
   /is-inhabited/,
@@ -5683,7 +5683,7 @@ assert.doesNotMatch(linkPlaySrc, /Those don/)
   assert.match(linkClue('silas-bench', 'place'), /square/)
   assert.match(linkClue('juniper-porch', 'person'), /Juniper|porch/)
   assert.equal(easyWrongTap('Neighbor is the one who shows mercy.'), 'Wrong. Tap this one: Neighbor is the one who shows mercy.')
-  assert.equal(linkMiss('mercy-hollow', 'idea'), easyWrongTap('Neighbor is the one who shows mercy.'))
+  assert.equal(linkMiss('mercy-hollow', 'idea'), easyWrongTap('Neighbor is the one who shows mercy.')
   assert.equal(easyMatchMiss('A light is meant to be seen'), 'Not that one. Try this line: A light is meant to be seen.')
   assert.doesNotMatch(linkMiss('mercy-hollow', 'idea'), /Tap This one\. Tap:/)
   assert.doesNotMatch(linkMiss('mercy-hollow', 'idea'), /neighbor-line/)
@@ -5864,49 +5864,49 @@ for (const id of allEvidenceIds()) {
 const creed = deeperLinksFor('wb-creed')
 assert.match(creed[0]?.href ?? '', /Corinthians/)
 assert.match(creed[0]?.label ?? '', /1 Corinthians 15:3/)
-assert.ok(creed.some((link) => /Ignatius|Smyrnaeans/.test(link.label)))
-assert.ok(creed.some((link) => /Habermas/.test(link.label)))
+assert.ok(creed.some((link) => /Ignatius|Smyrnaeans/.test(link.label))
+assert.ok(creed.some((link) => /Habermas/.test(link.label))
 assert.ok(
   creed.findIndex((link) => /Habermas/.test(link.label)) >
     creed.findIndex((link) => /Ignatius/.test(link.label)),
 )
 
 const stars = deeperLinksFor('daily-stars')
-assert.ok(stars.every((link) => !/Collins|Rees|Feser|Craig|rintintin|reasonablefaith/i.test(`${link.label} ${link.href}`)))
-assert.ok(stars.some((link) => /Psalm/.test(link.href)))
-assert.ok(stars.some((link) => /Athanasius/.test(link.label)))
+assert.ok(stars.every((link) => !/Collins|Rees|Feser|Craig|rintintin|reasonablefaith/i.test(`${link.label} ${link.href}`))
+assert.ok(stars.some((link) => /Psalm/.test(link.href))
+assert.ok(stars.some((link) => /Athanasius/.test(link.label))
 
 const tuning = deeperLinksFor('ob-tuning')
-assert.ok(tuning.some((link) => /summa\/1002/.test(link.href)))
-assert.ok(tuning.some((link) => /Collins/.test(link.label)))
-assert.ok(tuning.every((link) => !/Rees|Penrose/i.test(`${link.label} ${link.href}`)))
+assert.ok(tuning.some((link) => /summa\/1002/.test(link.href))
+assert.ok(tuning.some((link) => /Collins/.test(link.label))
+assert.ok(tuning.every((link) => !/Rees|Penrose/i.test(`${link.label} ${link.href}`))
 
 const firstWay = deeperLinksFor('fg-mover')
-assert.ok(firstWay.some((link) => /Aristotle/.test(link.label)))
-assert.ok(firstWay.some((link) => /Feser/.test(link.label)))
+assert.ok(firstWay.some((link) => /Aristotle/.test(link.label))
+assert.ok(firstWay.some((link) => /Feser/.test(link.label))
 assert.ok(
   firstWay.findIndex((link) => /Feser/.test(link.label)) >
     firstWay.findIndex((link) => /Aquinas/.test(link.label)),
 )
 
 const kalam = deeperLinksFor('fg-kalam')
-assert.ok(kalam.some((link) => /Philoponus/.test(link.label)))
-assert.ok(kalam.some((link) => /Ghaz/.test(link.label)))
-assert.ok(kalam.some((link) => /Craig/.test(link.label)))
+assert.ok(kalam.some((link) => /Philoponus/.test(link.label))
+assert.ok(kalam.some((link) => /Ghaz/.test(link.label))
+assert.ok(kalam.some((link) => /Craig/.test(link.label))
 assert.ok(
   kalam.findIndex((link) => /Craig/.test(link.label)) >
     kalam.findIndex((link) => /Ghaz/.test(link.label)),
 )
 
 const womenHold = deeperLinksFor('wb-women', 'hold')
-assert.ok(womenHold.every((link) => !/Tacitus|Josephus/i.test(link.label)))
+assert.ok(womenHold.every((link) => !/Tacitus|Josephus/i.test(link.label))
 const womenJournal = deeperLinksFor('wb-women', 'journal')
-assert.ok(womenJournal.some((link) => /Tacitus/.test(link.label)))
-assert.ok(womenJournal.some((link) => /Josephus/.test(link.label)))
+assert.ok(womenJournal.some((link) => /Tacitus/.test(link.label))
+assert.ok(womenJournal.some((link) => /Josephus/.test(link.label))
 
 const isaiah = deeperLinksFor('daily-isaiah')
-assert.ok(isaiah.some((link) => /Isaiah/.test(link.href)))
-assert.ok(isaiah.some((link) => /City of God XVIII/.test(link.label)))
+assert.ok(isaiah.some((link) => /Isaiah/.test(link.href))
+assert.ok(isaiah.some((link) => /City of God XVIII/.test(link.label))
 
 assert.doesNotMatch(
   readFileSync(new URL('../src/components/DigDeeper.tsx', import.meta.url), 'utf8'),
@@ -5952,10 +5952,10 @@ const inv = profileInventory({
   theme: 'candy',
   easyMode: false,
 })
-assert.ok(inv.ideas.some((item) => item.id === 'ph-road'))
+assert.ok(inv.ideas.some((item) => item.id === 'ph-road')
 assert.equal(inv.streetLinked, true)
 assert.ok(inv.links.length >= 3)
-assert.ok(inv.places.some((plot) => plot.id === 'porch'))
+assert.ok(inv.places.some((plot) => plot.id === 'porch')
 
 assert.match(
   readFileSync(new URL('../src/content/plain.ts', import.meta.url), 'utf8'),
@@ -6140,7 +6140,7 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
     'Easy home order is the play step before Hold',
   )
   {
-    const coach = easyHome.slice(easyHome.indexOf('easy-home-steps'), easyHome.indexOf('Night Watch'))
+    const coach = easyHome.slice(easyHome.indexOf('easy-home-steps'), easyHome.indexOf('Night Watch')
     const iRead = coach.search(/>\s*Read\s*</)
     const iMatch = coach.indexOf('EASY.findWords')
     const iLearn = coach.search(/>\s*Learn\s*</)
@@ -6311,9 +6311,9 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.equal(EASY_LINE_ORDER.length, 54)
   assert.equal(EASY_LINE_ORDER[0], 'ph-road')
   assert.equal(EASY_LINE_ORDER[1], 'ph-father')
-  assert.ok(EASY_LINE_ORDER.indexOf('ph-father') < EASY_LINE_ORDER.indexOf('wb-creed'))
-  assert.ok(EASY_LINE_ORDER.includes('ph-debt'))
-  assert.ok(EASY_LINE_ORDER.includes('hl-moral'))
+  assert.ok(EASY_LINE_ORDER.indexOf('ph-father') < EASY_LINE_ORDER.indexOf('wb-creed')
+  assert.ok(EASY_LINE_ORDER.includes('ph-debt')
+  assert.ok(EASY_LINE_ORDER.includes('hl-moral')
   assert.deepEqual([...DIG_ARC], ['wb-creed', 'wb-women', 'wb-early', 'wb-method'])
   assert.deepEqual([...NAMES_ARC], ['daily-names', 'daily-creed', 'daily-empty'])
   assert.deepEqual([...STONE_ARC], ['sc-tacitus', 'sc-james', 'sc-pliny'])
@@ -6365,8 +6365,8 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
       const home = easyWhoWhere(id)
       assert.equal(home.who, homes[id].who, `${id} who`)
       assert.equal(home.place, homes[id].place, `${id} place`)
-      assert.match(easyWhoWhereLine(id), new RegExp(homes[id].place))
-      assert.match(easyWhoWhereLine(id), new RegExp(homes[id].who))
+      assert.match(easyWhoWhereLine(id), new RegExp(homes[id].place)
+      assert.match(easyWhoWhereLine(id), new RegExp(homes[id].who)
     }
     assert.ok(plainFor(id)?.teach, `${id} Learn teach`)
     assert.ok(evidenceFor(id), `${id} evidence`)
@@ -6396,17 +6396,17 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.equal(STREET_CHALLENGE.nodes.length, STREET_TRIPLES.length + 15)
   {
     const walks = streetWalks()
-    const covered = walks.flatMap((walk) => walk.triples.map((item) => item.id))
+    const covered = walks.flatMap((walk) => walk.triples.map((item) => item.id)
     assert.equal(covered.length, 45)
     assert.equal(new Set(covered).size, 45)
-    assert.ok(walks.every((walk) => walk.triples.length >= 3 && walk.triples.length <= 5))
+    assert.ok(walks.every((walk) => walk.triples.length >= 3 && walk.triples.length <= 5)
     const first = nextStreetWalk([])
     assert.ok(first)
     assert.match(first.placeTitle, /Story Creek/)
     assert.ok(first.triples.length <= 5)
     assert.equal(hardStreetChallenge([]).triples.length, first.triples.length)
     assert.ok(hardStreetChallenge([]).triples.length < STREET_TRIPLES.length)
-    const afterFirst = appendStreetLinks([], first.triples.map((item) => item.id))
+    const afterFirst = appendStreetLinks([], first.triples.map((item) => item.id)
     assert.equal(streetFactsLeft(afterFirst), 45 - first.triples.length)
     assert.equal(streetIsComplete({ streetLinked: afterFirst }), false)
     assert.equal(streetIsComplete({ completed: ['ln-street'] }), true)
@@ -6422,8 +6422,8 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
       streetDecoyNodes(ideas, 'idea-mercy').some((node) => node.evidenceId === 'ph-road'),
       false,
     )
-    assert.notEqual(linkClue('mercy-hollow', 'place'), linkClue('father-hollow', 'place'))
-    assert.notEqual(linkClue('mercy-hollow', 'person'), linkClue('debt-hollow', 'person'))
+    assert.notEqual(linkClue('mercy-hollow', 'place'), linkClue('father-hollow', 'place')
+    assert.notEqual(linkClue('mercy-hollow', 'person'), linkClue('debt-hollow', 'person')
     assert.match(linkClue('mercy-hollow', 'place'), /Story Creek|neighbor-road/)
     assert.match(linkClue('father-hollow', 'place'), /Story Creek|father-run/)
     assert.match(linkClue('debt-hollow', 'place'), /Story Creek|debt/)
@@ -6710,7 +6710,7 @@ assert.ok(easyWhyWordCount(easyWhyLine('The servant forgiven an unpayable debt t
   for (const id of allEvidenceIds()) {
     const brief = evidenceFor(id)
     assert.ok(brief, id)
-    const whyFaces = brief.reasonChoices.map((line) => easyWhyLine(line))
+    const whyFaces = brief.reasonChoices.map((line) => easyWhyLine(line)
     assert.equal(new Set(whyFaces).size, whyFaces.length, `${id} duplicate Easy why faces`)
     for (const face of whyFaces) {
       const words = easyWhyWordCount(face)
@@ -7512,7 +7512,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     sameFace.map((line) => easyFacingLine(watch.id, line)),
     [...new Set(sameFace.map((line) => easyFacingLine(watch.id, line)))],
   )
-  assert.ok(sameFace.includes(watch.claim))
+  assert.ok(sameFace.includes(watch.claim)
   assert.equal(sameFace.length, 2)
 
   const ident = uniqueHoldChoices(['Keep the line.', 'Keep the line.', 'A miss.'], (line) => line, 'Keep the line.')
@@ -7523,7 +7523,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     (line) => line,
     watch.reason,
   )
-  assert.ok(reasons.includes(watch.reason))
+  assert.ok(reasons.includes(watch.reason)
   assert.equal(reasons.length, 2)
   assert.equal(new Set(reasons).size, reasons.length)
 
@@ -8059,8 +8059,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(spec364, /Say this tomorrow/)
   assert.match(spec364, /Find the hurt man/)
   assert.match(spec364, /Helped!/)
-  assert.ok(existsSync(new URL('../playwright.config.ts', import.meta.url)))
-  assert.ok(existsSync(new URL('./test-e2e.mjs', import.meta.url)))
+  assert.ok(existsSync(new URL('../playwright.config.ts', import.meta.url))
+  assert.ok(existsSync(new URL('./test-e2e.mjs', import.meta.url))
   assert.doesNotMatch(
     readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8'),
     /1\.4\.364/,
@@ -8443,7 +8443,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
       let best = null
       let bestD = benchRange
       for (const raider of live) {
-        const point = pathPoint(Math.min(1, raider.t))
+        const point = pathPoint(Math.min(1, raider.t)
         const dist = Math.hypot(at.x - point.x, at.y - point.y)
         if (dist <= bestD) {
           best = raider
@@ -8944,8 +8944,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
 
   function offsetPoint(t, dist, sign) {
-    const a = pathPoint(Math.max(0, t - 0.004))
-    const b = pathPoint(Math.min(1, t + 0.004))
+    const a = pathPoint(Math.max(0, t - 0.004)
+    const b = pathPoint(Math.min(1, t + 0.004)
     const dx = b.x - a.x
     const dy = b.y - a.y
     const len = Math.hypot(dx, dy) || 1
@@ -9047,7 +9047,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(applyBoost('logic', { logic: 1 }, 1).ok, true, '1.4.400 Hard still buys II for one spark')
   assert.equal(buyExtraLamp(4).ok, false)
   assert.equal(buyExtraLamp(5).sparks, 0)
-  const income = [0, 1, 2, 3, 4].map((wave) => wavePackSize(wave))
+  const income = [0, 1, 2, 3, 4].map((wave) => wavePackSize(wave)
   assert.deepEqual(income, [4, 4, 5, 5, 8])
   const bothMax = easyTierCost(1) * 2 + easyTierCost(2) * 2
   assert.equal(bothMax, 18)
@@ -9061,7 +9061,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     sparks += pay
     let spent = false
     const cheap = tiers
-      .map((tier, index) => ({ index, cost: easyTierCost(tier) }))
+      .map((tier, index) => ({ index, cost: easyTierCost(tier) })
       .filter((step) => step.cost > 0 && step.cost <= sparks)
       .sort((a, b) => a.cost - b.cost)[0]
     if (cheap) {
@@ -9141,7 +9141,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
       const dy = b.y - a.y
       const len2 = dx * dx + dy * dy || 1
       let u = ((at.x - a.x) * dx + (at.y - a.y) * dy) / len2
-      u = Math.max(0, Math.min(1, u))
+      u = Math.max(0, Math.min(1, u)
       const p = { x: a.x + u * dx, y: a.y + u * dy }
       const d = Math.hypot(at.x - p.x, at.y - p.y)
       if (d < bestD) {
@@ -9172,8 +9172,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   }
   let checked = 0
   for (let t = 0.12; t <= 0.88; t += 0.08) {
-    const a = pathPoint(Math.max(0, t - 0.004))
-    const b = pathPoint(Math.min(1, t + 0.004))
+    const a = pathPoint(Math.max(0, t - 0.004)
+    const b = pathPoint(Math.min(1, t + 0.004)
     const dx = b.x - a.x
     const dy = b.y - a.y
     const len = Math.hypot(dx, dy) || 1
@@ -9211,7 +9211,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
           const combat = nightTowersMod.range(hard.spot, 'love', progress, tier, 0)
           const hits = nightTowersMod.inRange(hard.spot, 'love', progress, closestRoad(hard.at), tier, 0)
           assert.equal(hard.reaches, hits, '1.4.418 Hard reaches matches combat')
-          assert.equal(hard.note, expectNote(hard.spot, hard.at, tier, 0, false))
+          assert.equal(hard.note, expectNote(hard.spot, hard.at, tier, 0, false)
           if (hits) assert.equal(hard.note, '')
           if (hard.note === 'Reaches at Level III') {
             assert.equal(
@@ -9315,9 +9315,9 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     }
     return { rows, dead: null }
   }
-  const quiet421 = seeds421.map((base) => night421(() => fourI421, 0, 8, base))
-  const light421 = seeds421.map((base) => night421(() => oneII421, 4, 12, base))
-  const active421 = seeds421.map((base) => night421(() => fourI421, 3, 12, base))
+  const quiet421 = seeds421.map((base) => night421(() => fourI421, 0, 8, base)
+  const light421 = seeds421.map((base) => night421(() => oneII421, 4, 12, base)
+  const active421 = seeds421.map((base) => night421(() => fourI421, 3, 12, base)
   assert.ok(
     quiet421.every((run) => run.dead === 5 && run.rows[4].hearts === 0 && run.rows[4].taps === 0),
     '1.4.421 zero taps on four Level I lamps lose round 5',
@@ -9420,7 +9420,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     }
     return { rows, dead: null }
   })
-  const quiet426 = seeds426.map(() => night426(0))
+  const quiet426 = seeds426.map(() => night426(0)
   assert.ok(
     quiet426.every((run) => run.dead === 5 && run.rows[4].taps === 0),
     '1.4.427 zero taps still lose round 5, so later bosses are not free',
@@ -9516,10 +9516,10 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     }
     return { rows, dead: null }
   }
-  const quiet429 = seeds429.map((base) => night429(() => fourI429, 0, 8, false, base))
-  const light429 = seeds429.map((base) => night429(() => oneII429, 4, 12, false, base))
-  const steady429 = seeds429.map((base) => night429(() => fourI429, 3, 12, false, base))
-  const burstBare = seeds429.map((base) => night429(() => fourI429, 3, 16, true, base))
+  const quiet429 = seeds429.map((base) => night429(() => fourI429, 0, 8, false, base)
+  const light429 = seeds429.map((base) => night429(() => oneII429, 4, 12, false, base)
+  const steady429 = seeds429.map((base) => night429(() => fourI429, 3, 12, false, base)
+  const burstBare = seeds429.map((base) => night429(() => fourI429, 3, 16, true, base)
   const burstSpend = seeds429.map((base) =>
     night429((index) => (index === 0 ? fourI429 : spent429.rows[index - 1].lamps), 3, 25, true, base),
   )
@@ -9723,7 +9723,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     gaits: gaitPlan(round),
     boss: easyBossRound(index),
     bossHp: easyBossHp(index),
-  }))
+  })
   assert.deepEqual(live435, snap435.rounds, '1.4.435 R1–R6 count, HP, gaits, and boss HP match 1.4.424')
   assert.equal(cueTapStrike(true, false), snap435.glow.easyOffCue)
   assert.equal(cueTapStrike(true, true), snap435.glow.easyOnCue)
@@ -9898,7 +9898,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     const w = Math.min(width, 780)
     const h = Math.round((w * 1134) / 798)
     const box = { w, h }
-    const points = EASY_PLANT_PADS.map((id) => boardFillPoint(box, DEFEND_ANCHOR[id]))
+    const points = EASY_PLANT_PADS.map((id) => boardFillPoint(box, DEFEND_ANCHOR[id])
     const scale = boardFill(box).scale
     for (const point of points) {
       const others = points.filter((item) => item !== point)
@@ -9940,7 +9940,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     assert.ok(row.frozenDamage - row.hp <= 4, `1.4.437 round ${row.round} is not a one-shot`)
   }
   const jump15 = easyJumpLoad(14)
-  assert.equal(jump15.sparks, easyJumpSparkBank(14))
+  assert.equal(jump15.sparks, easyJumpSparkBank(14)
   assert.ok(Object.values(jump15.plants).includes('love'), '1.4.437 the jump plants Love')
   assert.equal(jump15.paths.love.strong, 3, '1.4.437 the jump brings Love to Strong 3')
   assert.equal(jump15.paths.love.far, 1)
@@ -9984,7 +9984,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.ok(showdown.bossTap >= 25, '1.4.487 the round 25 crown takes a long run of taps')
   assert.ok(showdown.bossLamp + showdown.bossTap <= showdown.bossMax + 8)
   assert.equal(short.boss, 'kill', '1.4.487 taps still fell the round 25 crown when the lamps are Strong 2')
-  const bosses = [5, 10, 15, 20, 25].map((round) => easyBossHp(round - 1))
+  const bosses = [5, 10, 15, 20, 25].map((round) => easyBossHp(round - 1)
   assert.deepEqual(bosses, [12, 14, 120, 64, 72], '1.4.493 round 10 is 14 and round 25 stays 72')
   assert.ok(bosses[1] > bosses[0] && bosses[2] > bosses[1], '1.4.487 rounds 5, 10, and 15 still rise')
   assert.ok(bosses[4] > bosses[3], '1.4.487 round 25 is a longer tap bar than round 20')
@@ -10000,7 +10000,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(pathSparkSpend({ far: 1, strong: 3 }), 24, '1.4.438 pull returns the steps')
   assert.equal(pathSparkSpend({ far: 0, strong: 0 }), 0)
   assert.equal(EASY_LATE_BULK, 140)
-  assert.equal(easyWalkerHp(2, 16, 'tough', 4), walkerHp(2, 16, 'tough'))
+  assert.equal(easyWalkerHp(2, 16, 'tough', 4), walkerHp(2, 16, 'tough')
   assert.equal(easyWalkerHp(2, 0, 'plain', 16), walkerHp(2, 0, 'plain') + EASY_LATE_BULK)
   const screen438 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   assert.match(screen438, /pathSparkSpend\(/)
@@ -10008,7 +10008,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const good = seats[0]
   const look = previewLamp({ x: good.x, y: good.y }, 'love', emptyProgress(), {}, {}, false, true, 0)
   if (!look.blocked) {
-    assert.equal(look.cover, roadCoverRank(roadCoverLength(look.at, look.range)))
+    assert.equal(look.cover, roadCoverRank(roadCoverLength(look.at, look.range))
     assert.equal(ROAD_COVER_WORD[look.cover || 'far'], look.cover === 'good' ? 'Good' : look.cover === 'some' ? 'Some' : 'Too far')
   }
 }
@@ -10169,7 +10169,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(hills.hpMul, 1.23)
   assert.equal(hills.houses.length, 7)
   assert.ok(hills.path.length >= 2)
-  assert.ok(existsSync(new URL('../src/assets/night-watch/maps/far-hills.webp', import.meta.url)))
+  assert.ok(existsSync(new URL('../src/assets/night-watch/maps/far-hills.webp', import.meta.url))
   const rated = rateMapSeats(hills.seats, hills.path)
   assert.ok(rated.filter((seat) => seat.rank === 'good').length >= 8, '1.4.441 at least eight Good seats')
   const seats = spreadGoodSeats(rated, 4)
@@ -10233,7 +10233,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(easyTapArmored(5, 'tough', false), false, '1.4.442 A2 round 6 toughs still take taps')
   assert.equal(easyTapArmored(4, 'tough', false), false, '1.4.442 round 5 aim still matters')
   assert.equal(easyTapArmored(5, 'tough', false, MAZE_V1_TUNE.armorFrom), true)
-  assert.equal(easyWalkerHp(2, 0, 'tough', 5), walkerHp(2, 0, 'tough'))
+  assert.equal(easyWalkerHp(2, 0, 'tough', 5), walkerHp(2, 0, 'tough')
   assert.equal(easyWalkerHp(2, 0, 'tough', 5, MAZE_V1_TUNE), EASY_TOUGH_WINDOW)
   assert.equal(easyWalkerHp(2, 0, 'plain', 10, MAZE_V1_TUNE), walkerHp(2, 0, 'plain') + MAZE_V1_TUNE.bulk)
   assert.equal(easyWalkerHp(2, 0, 'plain', 15), walkerHp(2, 0, 'plain') + EASY_LATE_BULK)
@@ -10248,7 +10248,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const want = { map02: 13.67, map03: 13.17, map04: 12.33, map05: 11.92, map06: 10.5 }
   const noneWant = { map02: 8, map03: 8, map04: 7, map05: 8, map06: 7 }
   for (const [file, sets] of Object.entries(orders)) {
-    const raw = JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}.json`, import.meta.url), 'utf8'))
+    const raw = JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}.json`, import.meta.url), 'utf8')
     const pack = nightMapFromPack(raw)
     assert.equal(pack.rules, 'maze-v1')
     assert.ok(pack.roads.length >= 1)
@@ -10310,7 +10310,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     /Beat round \$\{EASY_MAP_UNLOCK_ROUND\} on \$\{NIGHT_MAP_NAME\[prev\]\} to unlock/,
   )
   for (const id of ['a2', 'far-hills', 'map03', 'map04', 'map05', 'map06']) {
-    assert.match(picker, new RegExp(`data-map=\\{id\\}|NIGHT_MAP_IDS`))
+    assert.match(picker, new RegExp(`data-map=\\{id\\}|NIGHT_MAP_IDS`)
   }
   assert.match(readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8'), /recordMazeBeat/)
   assert.equal(paceEasyRoadCampaign('none', 'live').dead, 9, '1.4.472 A2 with no upgrades walls on round 9')
@@ -10324,10 +10324,10 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(easyWalkerHp(2, 0, 'plain', 15), walkerHp(2, 0, 'plain') + EASY_LATE_BULK, '1.4.443 A2 bulk is still +140 at round 16')
   assert.equal(easyHoldSpawn(3), true, '1.4.443 A2 still holds at three walkers')
   assert.equal(easyHoldSpawn(2), false)
-  assert.equal(waveWalkerHp(2, 0, 'plain', 15, undefined, 1, null), easyWalkerHp(2, 0, 'plain', 15))
+  assert.equal(waveWalkerHp(2, 0, 'plain', 15, undefined, 1, null), easyWalkerHp(2, 0, 'plain', 15)
   const packs = {}
   for (const file of ['map02', 'map03', 'map04', 'map05', 'map06']) {
-    const raw = JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}.json`, import.meta.url), 'utf8'))
+    const raw = JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}.json`, import.meta.url), 'utf8')
     packs[file] = nightMapFromPack(raw)
     assert.equal(packs[file].rules, 'maze-v1', `${file} keeps maze-v1`)
     assert.ok(packs[file].wave, `${file} has a wave`)
@@ -10408,8 +10408,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(paceEasyRoadCampaign('natural', 'live').dead, 9, '1.4.485 an A2 spender meets the round 9 crowd')
   const bestDead = {}
   for (const file of ['map02', 'map03', 'map04', 'map05', 'map06']) {
-    const raw = JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}.json`, import.meta.url), 'utf8'))
-    const seats = raw._simV2.bestSeats.map(([x, y]) => ({ x: x * packs[file].width, y: y * packs[file].height }))
+    const raw = JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}.json`, import.meta.url), 'utf8')
+    const seats = raw._simV2.bestSeats.map(([x, y]) => ({ x: x * packs[file].width, y: y * packs[file].height })
     bestDead[file] = paceMazeSpender({
       path: packs[file].path,
       roads: packs[file].roads,
@@ -10474,7 +10474,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.ok(fogCover / fogRoad <= 1 / 3, `1.4.447 Licorice fog covers at most a third of the road (${(fogCover / fogRoad).toFixed(2)})`)
   assert.ok(fogCover / fogRoad > 0.05, '1.4.447 Licorice still has fog on the road')
   const miniSrc = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
-  const releaseMinis = miniSrc.slice(miniSrc.indexOf('function releaseMinis'), miniSrc.indexOf('function fire'))
+  const releaseMinis = miniSrc.slice(miniSrc.indexOf('function releaseMinis'), miniSrc.indexOf('function fire')
   assert.match(releaseMinis, /spark: 0/, '1.4.447 a mini pop pays no sparks')
   assert.match(
     readFileSync(new URL('../src/nightWatch/livePace.ts', import.meta.url), 'utf8'),
@@ -10666,8 +10666,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(minisOnKill(split, 4, 'plain', false, false), 2, '1.4.468 ?nwMap=map06 round 5 pops two berries')
   assert.equal(minisOnKill(split, 3, 'plain', false, false), 0, '1.4.468 round 4 does not pop')
   assert.equal(minisOnKill(split, 4, 'fast', false, false), 0, '1.4.468 a fast berry does not pop')
-  const rawBog = JSON.parse(readFileSync(new URL('../src/nightWatch/maps/maze/map06.json', import.meta.url), 'utf8'))
-  const bogSeats = rawBog._simV2.bestSeats.map(([x, y]) => ({ x: x * bog.width, y: y * bog.height }))
+  const rawBog = JSON.parse(readFileSync(new URL('../src/nightWatch/maps/maze/map06.json', import.meta.url), 'utf8')
+  const bogSeats = rawBog._simV2.bestSeats.map(([x, y]) => ({ x: x * bog.width, y: y * bog.height })
   const bogMap = {
     path: bog.path,
     roads: bog.roads,
@@ -10711,7 +10711,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(screen424, /noteFaceTap\(true, damage\)/)
   assert.equal(easyBossHp(4), 12, '1.4.424 round 5 boss stays 12')
   assert.equal(cueTapStrike(false, false), 'hit', '1.4.424 Hard still does not use the glow rule')
-  assert.ok(CHANGELOG.some((note) => note.version === '1.4.424'))
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.424')
   assert.match(latestChange('1.4.424').title, /glowing taps/i)
   assert.doesNotMatch(latestChange('1.4.424').items.join('\n'), /Fixes #|Closes #|Resolves #/)
   assert.match(latestChange('1.4.423').title, /wins fit/i)
@@ -10766,7 +10766,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     sparks += income
     let spent = false
     const cheap = tiers
-      .map((tier, index) => ({ index, cost: easyTierCost(tier) }))
+      .map((tier, index) => ({ index, cost: easyTierCost(tier) })
       .filter((step) => step.cost > 0 && step.cost <= sparks)
       .sort((a, b) => a.cost - b.cost)[0]
     if (cheap) {
@@ -10806,7 +10806,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(nightLength(false), DEFEND_NIGHT_WAVES, '1.4.404 Hard stays five waves')
   assert.equal(roundMark(11, 25, true), 'Round 12 of 25')
   assert.equal(roundMark(24, 25, true), 'Round 25 of 25')
-  assert.ok(EASY_ROUNDS.every((round) => round.speed <= EASY_ROUND_SPEED_CAP))
+  assert.ok(EASY_ROUNDS.every((round) => round.speed <= EASY_ROUND_SPEED_CAP)
   assert.equal(EASY_ROUNDS[24].speed, EASY_ROUND_SPEED_CAP)
   for (const index of [7, 11, 15, 23]) {
     const prev = EASY_ROUNDS[index - 1]
@@ -10845,7 +10845,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   for (let index = 0; index < 12; index += 1) {
     sparks += EASY_ROUNDS[index].count
     const cheap = tiers
-      .map((tier, lamp) => ({ lamp, cost: easyTierCost(tier) }))
+      .map((tier, lamp) => ({ lamp, cost: easyTierCost(tier) })
       .filter((step) => step.cost > 0 && step.cost <= sparks)
       .sort((a, b) => a.cost - b.cost)[0]
     if (cheap) {
@@ -11161,7 +11161,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const bar465 = readFileSync(new URL('../src/components/DefendAbilityBar.tsx', import.meta.url), 'utf8')
   const board465 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
   const sky465 = readFileSync(new URL('../src/components/DefendNightSky.tsx', import.meta.url), 'utf8')
-  const liveTap465 = screen465.slice(screen465.indexOf('function fireAtRaider'), screen465.indexOf('function fireBest'))
+  const liveTap465 = screen465.slice(screen465.indexOf('function fireAtRaider'), screen465.indexOf('function fireBest')
   assert.match(
     liveTap465,
     /const gate = easyPointerTapGate\(easy, raider, live\.current\.raiders, waveIndexRef\.current, tuneRef\.current\.armorFrom\)\s*if \(gate === 'miss'\)/,
@@ -11378,7 +11378,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
       `1.4.475 round ${round + 1} still misses a face that is not glowing`,
     )
   }
-  const liveTap475 = screen475.slice(screen475.indexOf('function fireAtRaider'), screen475.indexOf('function fireBest'))
+  const liveTap475 = screen475.slice(screen475.indexOf('function fireAtRaider'), screen475.indexOf('function fireBest')
   const missAt = liveTap475.indexOf("gate === 'miss'")
   const bonusAt = liveTap475.indexOf('incenseBonusFor')
   assert.ok(missAt >= 0 && bonusAt > missAt, '1.4.475 the cloud bonus waits until the glow gate passes')
@@ -11393,7 +11393,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     '1.4.475 the cloud is not green',
   )
   function ownedLamps(index) {
-    const owned = easyJumpLoad(index).lamps.map((lamp) => ({ far: lamp.far, strong: lamp.strong }))
+    const owned = easyJumpLoad(index).lamps.map((lamp) => ({ far: lamp.far, strong: lamp.strong })
     while (owned.length < 4) owned.push({ far: 0, strong: 0 })
     return owned
   }
@@ -11788,7 +11788,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(r10ShrugCue(6, false, 0, true), false, '1.4.472 a thick walker does not say Shrugs')
   const breathers = new Set([8, 12, 16, 20, 24])
   function builtLamps(index) {
-    const owned = easyJumpLoad(index).lamps.map((lamp) => ({ far: lamp.far, strong: lamp.strong }))
+    const owned = easyJumpLoad(index).lamps.map((lamp) => ({ far: lamp.far, strong: lamp.strong })
     while (owned.length < 4) owned.push({ far: 0, strong: 0 })
     return owned
   }
@@ -11883,7 +11883,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(r10ShrugCue(9, true, 0, true), true, '1.4.473 Shrugs stays on the round 10 boss')
   assert.equal(r10ShrugCue(14, true, 0, true), false, '1.4.473 a later boss does not say Shrugs')
   function builtLamps473(index) {
-    const owned = easyJumpLoad(index).lamps.map((lamp) => ({ far: lamp.far, strong: lamp.strong }))
+    const owned = easyJumpLoad(index).lamps.map((lamp) => ({ far: lamp.far, strong: lamp.strong })
     while (owned.length < 4) owned.push({ far: 0, strong: 0 })
     return owned
   }
@@ -12117,10 +12117,10 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     return { rows, furthest: rows.length, dead: false }
   }
   const seeds = Array.from({ length: 8 }, (_, seed) => 1 + seed * 97)
-  const quiet = seeds.map((base) => night410(() => [zero410, zero410], 0, base))
-  const clumsy = seeds.map((base) => night410(() => [zero410, zero410], 3, base))
-  const stepped = seeds.map((base) => night410(() => [step1, step1], 3, base))
-  const held = seeds.map((base) => night410(() => [step2, zero410], 3, base))
+  const quiet = seeds.map((base) => night410(() => [zero410, zero410], 0, base)
+  const clumsy = seeds.map((base) => night410(() => [zero410, zero410], 3, base)
+  const stepped = seeds.map((base) => night410(() => [step1, step1], 3, base)
+  const held = seeds.map((base) => night410(() => [step2, zero410], 3, base)
   const spender = seeds.map((base) =>
     night410((index) => (index === 0 ? [zero410, zero410] : spent410.rows[index - 1].lamps), 3, base),
   )
@@ -12186,7 +12186,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(EASY_ROUNDS[5].tough, 1, '1.4.412 round 6 keeps one tough walker')
   assert.equal(EASY_ROUNDS[6].tough, 4, '1.4.411 round 7 is mostly tough')
   assert.equal(EASY_ROUNDS[7].tough, 3, '1.4.472 round 8 still has fewer thick walkers than round 7')
-  assert.ok(EASY_ROUNDS.slice(6).every((round) => round.tough >= 1))
+  assert.ok(EASY_ROUNDS.slice(6).every((round) => round.tough >= 1)
   assert.equal(roundSparkPay(EASY_ROUNDS[6]), EASY_ROUNDS[6].count + 4)
   assert.equal(gaitPlan(EASY_ROUNDS[3]).filter((gait) => gait === 'fast').length, 1)
   assert.equal(gaitPlan(EASY_ROUNDS[0]).every((gait) => gait === 'plain'), true)
@@ -12221,15 +12221,15 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     return { rows, furthest: rows.length, dead: false, lamp, tap }
   }
   const seeds411 = Array.from({ length: 8 }, (_, seed) => 1 + seed * 97)
-  const active411 = seeds411.map((base) => night411(() => [zero411, zero411], 1, 0.9, 0, base))
-  const quiet411 = seeds411.map((base) => night411(() => [zero411, zero411], 0, 0.9, 0, base))
+  const active411 = seeds411.map((base) => night411(() => [zero411, zero411], 1, 0.9, 0, base)
+  const quiet411 = seeds411.map((base) => night411(() => [zero411, zero411], 0, 0.9, 0, base)
   const spendActive = seeds411.map((base) =>
     night411((index) => (index === 0 ? [zero411, zero411] : spent411.rows[index - 1].lamps), 1, 0.9, 0, base),
   )
   const spendModest = seeds411.map((base) =>
     night411((index) => (index === 0 ? [zero411, zero411] : spent411.rows[index - 1].lamps), 3, 0.9, 0, base),
   )
-  const share = (run) => (run.lamp + run.tap === 0 ? 0 : run.lamp / (run.lamp + run.tap))
+  const share = (run) => (run.lamp + run.tap === 0 ? 0 : run.lamp / (run.lamp + run.tap)
   assert.ok(
     quiet411.every((run) => run.rows.slice(0, 4).every((round) => round.result === 'clear' && round.hearts === 3)),
     '1.4.411 rounds 1–4 stay full with no taps',
@@ -12340,10 +12340,10 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     }
     return { rows, dead: null }
   }
-  const quiet413 = seeds413.map((base) => night413(() => fourI, 0, 5, 1, base))
-  const light413 = seeds413.map((base) => night413(() => oneII, 4, 9, 1, base))
-  const active413 = seeds413.map((base) => night413(() => fourI, 3, 8, 1, base))
-  const heavy413 = seeds413.map((base) => night413(() => fourI, 0.7, 10, 1, base))
+  const quiet413 = seeds413.map((base) => night413(() => fourI, 0, 5, 1, base)
+  const light413 = seeds413.map((base) => night413(() => oneII, 4, 9, 1, base)
+  const active413 = seeds413.map((base) => night413(() => fourI, 3, 8, 1, base)
+  const heavy413 = seeds413.map((base) => night413(() => fourI, 0.7, 10, 1, base)
   const spend413 = seeds413.map((base) =>
     night413(
       (index) => (index === 0 ? fourI : spent413.rows[index - 1].lamps),
@@ -12430,7 +12430,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     '1.4.415 the New lamp button stays on the folded panel',
   )
   assert.match(css415, /\.defend-heart-slot \{[^}]*font-variant-emoji:\s*text/)
-  const finish = screen415.slice(screen415.indexOf('function finishPlace'), screen415.indexOf('function togglePad'))
+  const finish = screen415.slice(screen415.indexOf('function finishPlace'), screen415.indexOf('function togglePad')
   assert.doesNotMatch(finish, /setPhase\(/, '1.4.415 planting does not start the round')
   assert.match(finish, /buyExtraLamp\(sparksRef\.current\)/, '1.4.415 a planted lamp still spends sparks')
   assert.doesNotMatch(ability415, /continueFromBoost|setPhase\(/, '1.4.415 a card tap does not advance')
@@ -12515,10 +12515,10 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     }
     return { rows, dead: null }
   }
-  const quiet417 = seeds417.map((base) => night417(() => fourI, 0, 8, 1, base))
-  const light417 = seeds417.map((base) => night417(() => oneII, 4, 12, 1, base))
-  const active417 = seeds417.map((base) => night417(() => fourI, 3, 12, 1, base))
-  const heavy417 = seeds417.map((base) => night417(() => fourI, 0.7, 16, 1, base))
+  const quiet417 = seeds417.map((base) => night417(() => fourI, 0, 8, 1, base)
+  const light417 = seeds417.map((base) => night417(() => oneII, 4, 12, 1, base)
+  const active417 = seeds417.map((base) => night417(() => fourI, 3, 12, 1, base)
+  const heavy417 = seeds417.map((base) => night417(() => fourI, 0.7, 16, 1, base)
   const spend417 = seeds417.map((base) =>
     night417((index) => (index === 0 ? fourI : spent417.rows[index - 1].lamps), 3, 25, 1, base),
   )
@@ -12607,8 +12607,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(LAMP_TOO_FAR, 'Too far from the road')
 
   function offsetPoint(t, dist, sign) {
-    const a = pathPoint(Math.max(0, t - 0.004))
-    const b = pathPoint(Math.min(1, t + 0.004))
+    const a = pathPoint(Math.max(0, t - 0.004)
+    const b = pathPoint(Math.min(1, t + 0.004)
     const dx = b.x - a.x
     const dy = b.y - a.y
     const len = Math.hypot(dx, dy) || 1
@@ -13062,7 +13062,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
 // gate; the lead is still ahead because it spawned earlier.
 {
   const step = 0.01 * 3.8
-  const at = [0, 1, 2].map((index) => easySpawnT(index) + step * (2 - index))
+  const at = [0, 1, 2].map((index) => easySpawnT(index) + step * (2 - index)
   assert.equal(easySpawnT(0), 0)
   assert.equal(easySpawnT(1), 0)
   assert.equal(easySpawnT(2), 0)
@@ -16434,7 +16434,7 @@ console.log('check-city: ok')
   )
   assert.match(gem270, /goldButtonClass\('gem-win', 'lockInNext'/)
   {
-    const gemDock = gem270.slice(gem270.indexOf("status === 'ok'"))
+    const gemDock = gem270.slice(gem270.indexOf("status === 'ok'")
     assert.equal(gemDock.split("goldButtonClass('gem-win', 'lockInNext'").length - 1, 1, 'Lock In next is the only gem-win gold')
     assert.doesNotMatch(gemDock, /btn gold/, 'gem win dock has no .btn.gold')
     assert.match(gemDock, /more-match/)
@@ -17412,7 +17412,7 @@ console.log('check-city: ok')
   assert.deepEqual(nightPathMod.points, DEFEND_PATH)
   assert.deepEqual(nightPathMod.pointAt(0), DEFEND_PATH[0])
   assert.deepEqual(nightPathMod.pointAt(1), DEFEND_PATH[DEFEND_PATH.length - 1])
-  assert.deepEqual(nightEnemiesMod.at({ id: 0, t: 0.5, text: '', kind: 'skeptic' }), pathPoint(0.5))
+  assert.deepEqual(nightEnemiesMod.at({ id: 0, t: 0.5, text: '', kind: 'skeptic' }), pathPoint(0.5)
   assert.equal(nightEnemiesMod.waveSize, DEFEND_WAVE_SIZE)
   assert.equal(
     nightTowersMod.range('porch', 'love', empty),
@@ -17471,7 +17471,7 @@ console.log('check-city: ok')
 {
   const parts306 = readFileSync(new URL('../src/nightWatch/parts/index.ts', import.meta.url), 'utf8')
   const defendAsset = (name) =>
-    existsSync(new URL(`../src/assets/defend/${name}`, import.meta.url))
+    existsSync(new URL(`../src/assets/defend/${name}`, import.meta.url)
   assert.ok(defendAsset('nw-lot-empty.png'), 'missing nw-lot-empty.png')
   assert.ok(defendAsset('nw-tower-lamp-idle.png'), 'missing nw-tower-lamp-idle.png')
   assert.ok(defendAsset('nw-tower-lamp-firing.png'), 'missing nw-tower-lamp-firing.png')
@@ -17483,11 +17483,11 @@ console.log('check-city: ok')
   assert.doesNotMatch(parts306, /nw-dark-face\.png/, '1.4.322 faces are per-kind portraits')
   assert.match(parts306, /lot:[\s\S]*empty: lotEmpty/)
   assert.match(parts306, /lamp:[\s\S]*firing: lampFiring/)
-  assert.equal(nightPartsMod.src('lot', 'empty'), nightPartsMod.src('lot', 'default'))
-  assert.ok(nightPartsMod.src('lamp', 'idle'))
-  assert.ok(nightPartsMod.src('lamp', 'firing'))
-  assert.ok(nightPartsMod.src('face', 'skeptic'))
-  assert.ok(nightPartsMod.src('face', 'image-bearer'))
+  assert.equal(nightPartsMod.src('lot', 'empty'), nightPartsMod.src('lot', 'default')
+  assert.ok(nightPartsMod.src('lamp', 'idle')
+  assert.ok(nightPartsMod.src('lamp', 'firing')
+  assert.ok(nightPartsMod.src('face', 'skeptic')
+  assert.ok(nightPartsMod.src('face', 'image-bearer')
   assert.doesNotMatch(parts306, /from 'react'|components\//, 'Parts registry stays React-free')
   assert.match(latestChange('1.4.306').title, /Night Watch|PARTS|parts|sprite/i)
   assert.match(latestChange('1.4.306').items.join('\n'), /PartsModule|lot|lamp|face|#418/i)
@@ -17520,8 +17520,8 @@ console.log('check-city: ok')
     existsSync(new URL('../src/assets/night-watch/nw-tower-lamp-firing-cut.png', import.meta.url)),
     'firing lamp sprite must ship in src/assets',
   )
-  assert.equal(nightTowersMod.lampSrc('idle'), nightPartsMod.src('lamp', 'idle'))
-  assert.equal(nightTowersMod.lampSrc('firing'), nightPartsMod.src('lamp', 'firing'))
+  assert.equal(nightTowersMod.lampSrc('idle'), nightPartsMod.src('lamp', 'idle')
+  assert.equal(nightTowersMod.lampSrc('firing'), nightPartsMod.src('lamp', 'firing')
   assert.equal(nightTowersMod.lampPose(true), 'firing')
   assert.equal(nightTowersMod.lampPose(false), 'idle')
   assert.match(latestChange('1.4.307').title, /Night Watch|tower|lamp/i)
@@ -17543,8 +17543,8 @@ console.log('check-city: ok')
   assert.match(enemies308, /nightParts\.src\('face'/)
   assert.match(enemies308, /nw-dark-face-cut/)
   assert.equal(nightEnemiesMod.taunts.length, RAID_CAST.length)
-  assert.equal(nightEnemiesMod.faceSrc('skeptic', true), nightPartsMod.src('face', 'skeptic'))
-  assert.equal(nightEnemiesMod.faceSrc('pagan', true), nightPartsMod.src('face', 'pagan'))
+  assert.equal(nightEnemiesMod.faceSrc('skeptic', true), nightPartsMod.src('face', 'skeptic')
+  assert.equal(nightEnemiesMod.faceSrc('pagan', true), nightPartsMod.src('face', 'pagan')
   assert.match(defendNightSrc, /nightEnemies\.faceSrc/)
   assert.doesNotMatch(defendNightSrc, /nightParts\.src\('face'/)
   assert.doesNotMatch(defendNightSrc, /easy-walker is-easy-walker is-cue/)
@@ -17575,7 +17575,7 @@ console.log('check-city: ok')
   assert.doesNotMatch(nw309('map/MapPlate.tsx'), /slice/)
   assert.equal(nightPathMod.roadD, '', '1.4.309 plate paints the road; neon overlay stays empty')
   assert.ok(DEFEND_PATH.length >= 30, '1.4.309 enough points to hug the S-curve')
-  const segs = DEFEND_PATH.slice(1).map((p, i) => Math.hypot(p.x - DEFEND_PATH[i].x, p.y - DEFEND_PATH[i].y))
+  const segs = DEFEND_PATH.slice(1).map((p, i) => Math.hypot(p.x - DEFEND_PATH[i].x, p.y - DEFEND_PATH[i].y)
   assert.ok(Math.max(...segs) < 1.5 * Math.min(...segs), '1.4.309 even spacing keeps pathPoint speed steady')
   assert.match(latestChange('1.4.309').title, /Night Watch|Map|Path|yellow road/i)
   assert.match(latestChange('1.4.309').items.join('\n'), /yellow road|centerline|#418/i)
@@ -17691,7 +17691,7 @@ console.log('check-city: ok')
     assert.match(docksBlock313, new RegExp(part), `1.4.313 ${part} lives in the overlay docks`)
   }
   assert.doesNotMatch(docksBlock313, /DefendAbilityBar/, '1.4.313 right C&C rail stays out of the docks')
-  const shellTail313 = defendScreenOnlySrc.slice(defendScreenOnlySrc.indexOf('</UiShell>'))
+  const shellTail313 = defendScreenOnlySrc.slice(defendScreenOnlySrc.indexOf('</UiShell>')
   assert.doesNotMatch(shellTail313, /defend-tip|defend-lost/, '1.4.313 nothing stacks under the shell')
   assert.doesNotMatch(defendScreenOnlySrc, /defend-tip">\{EASY\.nightTap\}/, '1.4.313 Easy tip does not duplicate the on-map cue')
   assert.match(defendScreenOnlySrc, /nw-sr-only">\{EASY\.nightLead\}/, '1.4.313 Easy title stays for screen readers only')
@@ -17779,8 +17779,8 @@ console.log('check-city: ok')
         const a = DEFEND_PATH[i]
         const dx = b.x - a.x
         const dy = b.y - a.y
-        const t = Math.max(0, Math.min(1, ((q.x - a.x) * dx + (q.y - a.y) * dy) / (dx * dx + dy * dy)))
-        return Math.hypot(q.x - (a.x + dx * t), q.y - (a.y + dy * t))
+        const t = Math.max(0, Math.min(1, ((q.x - a.x) * dx + (q.y - a.y) * dy) / (dx * dx + dy * dy))
+        return Math.hypot(q.x - (a.x + dx * t), q.y - (a.y + dy * t)
       }),
     )
   const seats315 = Object.entries(DEFEND_ANCHOR)
@@ -17816,8 +17816,8 @@ console.log('check-city: ok')
   const hpSrc316 = readFileSync(new URL('../src/nightWatch/enemies/hp.ts', import.meta.url), 'utf8')
   assert.doesNotMatch(hpSrc316, /from 'react'|components\//, '1.4.316 HP seam stays React-free')
   const kinds316 = ['image-bearer', 'skeptic', 'pagan', 'physical', 'metaphysical', 'spiritual']
-  const hard316 = kinds316.map((kind) => nightEnemiesMod.maxHp(kind, false))
-  const easy316 = kinds316.map((kind) => nightEnemiesMod.maxHp(kind, true))
+  const hard316 = kinds316.map((kind) => nightEnemiesMod.maxHp(kind, false)
+  const easy316 = kinds316.map((kind) => nightEnemiesMod.maxHp(kind, true)
   assert.deepEqual([...new Set(hard316)].sort(), [2, 3, 4], '1.4.316 Hard swarm 2 / mid 3 / tank 4')
   assert.ok(easy316.every((hp) => hp >= 2 && hp <= 3), '1.4.316 Easy walkers take 2–3 hits')
   assert.equal(easy316.filter((hp) => hp === 3).length, 1, '1.4.316 one Easy tank kind at 3')
@@ -17887,7 +17887,7 @@ console.log('check-city: ok')
   assert.match(PH_ROAD_SHOW_IT.clip, /assets\/show-it\/ph-road-showit\.webm$/)
   assert.match(PH_ROAD_SHOW_IT.poster, /assets\/show-it\/ph-road-showit-poster\.jpg$/)
   for (const choice of PH_ROAD_SHOW_IT.choices) {
-    assert.match(choice.src, new RegExp(`assets/panel-blast/ph-road/${choice.id}@1024\\.webp$`))
+    assert.match(choice.src, new RegExp(`assets/panel-blast/ph-road/${choice.id}@1024\\.webp$`)
   }
   for (const rel of [
     'public/assets/show-it/ph-road-showit.webm',
@@ -18014,14 +18014,14 @@ console.log('check-city: ok')
 {
   const parts322 = readFileSync(new URL('../src/nightWatch/parts/index.ts', import.meta.url), 'utf8')
   const kinds = ['image-bearer', 'skeptic', 'pagan', 'physical', 'metaphysical', 'spiritual']
-  const faces = kinds.map((kind) => nightPartsMod.src('face', kind))
+  const faces = kinds.map((kind) => nightPartsMod.src('face', kind)
   assert.equal(new Set(faces).size, kinds.length, '1.4.322 each walker kind has its own face')
   for (const kind of kinds) {
     const file = `walker-${kind}.png`
-    assert.match(parts322, new RegExp(`assets/walkers/${file.replace('.', '\\.')}`))
-    assert.match(String(nightPartsMod.src('face', kind)), new RegExp(file.replace('.', '\\.')))
-    assert.equal(nightEnemiesMod.faceSrc(kind, true), nightPartsMod.src('face', kind))
-    assert.equal(nightEnemiesMod.faceSrc(kind, false), nightPartsMod.src('face', kind))
+    assert.match(parts322, new RegExp(`assets/walkers/${file.replace('.', '\\.')}`)
+    assert.match(String(nightPartsMod.src('face', kind)), new RegExp(file.replace('.', '\\.'))
+    assert.equal(nightEnemiesMod.faceSrc(kind, true), nightPartsMod.src('face', kind)
+    assert.equal(nightEnemiesMod.faceSrc(kind, false), nightPartsMod.src('face', kind)
     assert.doesNotMatch(String(nightPartsMod.src('face', kind)), /nw-dark-face/)
   }
   assert.doesNotMatch(parts322, /nw-dark-face\.png/)
@@ -18261,9 +18261,9 @@ console.log('check-city: ok')
     assert.equal(guy.id, NIGHT_CAST[0].id, '1.4.328 night 0 only spawns guy 1')
     assert.equal(guy.kind, 'skeptic')
   }
-  const level2 = new Set(Array.from({ length: 6 }, (_, index) => raidForWave(1, index).id))
+  const level2 = new Set(Array.from({ length: 6 }, (_, index) => raidForWave(1, index).id)
   assert.deepEqual([...level2].sort(), ['accuser', 'cold-heart'])
-  const reached = new Set(Array.from({ length: 13 }, (_, index) => raidForWave(12, index).id))
+  const reached = new Set(Array.from({ length: 13 }, (_, index) => raidForWave(12, index).id)
   assert.equal(reached.size, 13, '1.4.328 a cleared-12 night can reach all 13 guys')
   assert.equal(raidForWave(12, 12).id, 'doubt')
   assert.equal(raidForWave(12, 0, 4).kind, 'physical', '1.4.328 wave 5 biases tanks inside the unlocked pool')
@@ -18668,8 +18668,8 @@ console.log('check-city: ok')
   assert.doesNotMatch(src333('App.tsx'), /FatherRunPlay|name === 'father/, '1.4.333 App has no Father route')
   const srcRoot333 = new URL('../src/', import.meta.url)
   const fatherMounts333 = readdirSync(srcRoot333, { recursive: true })
-    .map((rel) => String(rel).replaceAll('\\', '/'))
-    .filter((rel) => rel.endsWith('.tsx') && /<FatherRunPlay\b/.test(readFileSync(new URL(rel, srcRoot333), 'utf8')))
+    .map((rel) => String(rel).replaceAll('\\', '/')
+    .filter((rel) => rel.endsWith('.tsx') && /<FatherRunPlay\b/.test(readFileSync(new URL(rel, srcRoot333), 'utf8'))
   assert.deepEqual(fatherMounts333, ['easyTrail/match/registry.tsx'], '1.4.333 FatherRunPlay mounts only from Match')
 
   assert.match(
@@ -18757,8 +18757,8 @@ console.log('check-city: ok')
   const code334 = (src) =>
     src
       .split('\n')
-      .map((line) => line.trim())
-      .filter((line) => line && !/^(\/\*\*|\*|\/\/)/.test(line))
+      .map((line) => line.trim()
+      .filter((line) => line && !/^(\/\*\*|\*|\/\/)/.test(line)
   assert.deepEqual(
     code334(src334('components/challenges/FatherRunPlay.tsx')),
     ["export { FatherRunPlay } from '../../easyTrail/father/FatherRunPlay'"],
@@ -18777,7 +18777,7 @@ console.log('check-city: ok')
   assert.match(shelf334, /^export \{ FatherRunPlay \} from '\.\/FatherRunPlay'$/m)
   const shelfTiming334 = (shelf334.match(/^export \{\n([\s\S]*?)\n\} from '\.\/fatherRun\.ts'$/m)?.[1] ?? '')
     .split(',')
-    .map((name) => name.trim())
+    .map((name) => name.trim()
     .filter(Boolean)
   assert.deepEqual(
     shelfTiming334,
@@ -18797,8 +18797,8 @@ console.log('check-city: ok')
   )
 
   const srcFiles334 = readdirSync(srcRoot334, { recursive: true })
-    .map((rel) => String(rel).replaceAll('\\', '/'))
-    .filter((rel) => /\.tsx?$/.test(rel))
+    .map((rel) => String(rel).replaceAll('\\', '/')
+    .filter((rel) => /\.tsx?$/.test(rel)
   const filesWith334 = (pattern) =>
     srcFiles334.filter((rel) => pattern.test(readFileSync(new URL(rel, srcRoot334), 'utf8'))).sort()
   assert.deepEqual(filesWith334(/export function FatherRunPlay\b/), ['easyTrail/father/FatherRunPlay.tsx'], '1.4.334 one FatherRunPlay')
@@ -18985,8 +18985,8 @@ console.log('check-city: ok')
   )
 
   const srcFiles335 = readdirSync(srcRoot335, { recursive: true })
-    .map((rel) => String(rel).replaceAll('\\', '/'))
-    .filter((rel) => /\.tsx?$/.test(rel))
+    .map((rel) => String(rel).replaceAll('\\', '/')
+    .filter((rel) => /\.tsx?$/.test(rel)
   const filesWith335 = (pattern) =>
     srcFiles335.filter((rel) => pattern.test(readFileSync(new URL(rel, srcRoot335), 'utf8'))).sort()
   assert.deepEqual(filesWith335(/export function HoldPractice\b/), ['easyTrail/lockIn/HoldPractice.tsx'], '1.4.335 one HoldPractice')
@@ -19147,8 +19147,8 @@ console.log('check-city: ok')
   assert.match(easy336, /^export \{\n {2}DIG_ARC,[\s\S]*?\n\} from '\.\/sourceDig\.ts'$/m, '1.4.336 Source Dig arcs still re-export from sourceDig')
 
   const srcFiles336 = readdirSync(srcRoot336, { recursive: true })
-    .map((rel) => String(rel).replaceAll('\\', '/'))
-    .filter((rel) => /\.tsx?$/.test(rel))
+    .map((rel) => String(rel).replaceAll('\\', '/')
+    .filter((rel) => /\.tsx?$/.test(rel)
   const filesWith336 = (pattern) =>
     srcFiles336.filter((rel) => pattern.test(readFileSync(new URL(rel, srcRoot336), 'utf8'))).sort()
   for (const name of TRAIL336) {
@@ -19492,7 +19492,7 @@ console.log('check-city: ok')
 }
 
 function DEFEND_WAVE_PACK_CHECK() {
-  return [0, 1, 2, 3, 4].map((index) => wavePackSize(index))
+  return [0, 1, 2, 3, 4].map((index) => wavePackSize(index)
 }
 
 /** Starter-porch taps: one shot per cooldown, focused on the front walker. */
@@ -19553,7 +19553,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
 
 // Night Watch 1.4.445: candle stand, and the maze chain stays one map at a time.
 {
-  const freshOpen = NIGHT_MAP_IDS.filter((id) => mapIsOpen(id, {}))
+  const freshOpen = NIGHT_MAP_IDS.filter((id) => mapIsOpen(id, {})
   assert.deepEqual(freshOpen, ['a2'], '1.4.445 a fresh profile opens only A2')
   let beat = []
   const chain = [
@@ -19565,7 +19565,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   ]
   for (const [won, expectOpen] of chain) {
     beat = [...beat, won]
-    const open = NIGHT_MAP_IDS.filter((id) => mapIsOpen(id, { mazeBeat: beat }))
+    const open = NIGHT_MAP_IDS.filter((id) => mapIsOpen(id, { mazeBeat: beat })
     assert.deepEqual(open, expectOpen, `1.4.445 beating ${won} opens only the next map`)
   }
   assert.equal(mapIsOpen('map05', { mazeBeat: ['a2'] }), false, '1.4.445 Licorice stays locked after A2')
@@ -19883,8 +19883,8 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const lightSpreadDealt = []
   const lightX2Dead = []
   const lightX2Dealt = []
-  const x2Shots = candleShots(rowSeats.slice(0, 2))
-  const tightShots = candleShots(candlePlantRow(3))
+  const x2Shots = candleShots(rowSeats.slice(0, 2)
+  const tightShots = candleShots(candlePlantRow(3)
   for (const seed of seeds) {
     const zero = paceExtraNight('none', rowShots, 1e9, seed)
     const zeroX2 = paceExtraNight('none', x2Shots, 1e9, seed)
@@ -19909,10 +19909,10 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     zeroDead.push(zero.dead)
     lightRowDead.push(light.dead)
     lightSpreadDead.push(lightSpread.dead)
-    lightRowDealt.push(Math.round(light.dealt))
-    lightSpreadDealt.push(Math.round(lightSpread.dealt))
+    lightRowDealt.push(Math.round(light.dealt)
+    lightSpreadDealt.push(Math.round(lightSpread.dealt)
     lightX2Dead.push(lightX2.dead)
-    lightX2Dealt.push(Math.round(lightX2.dealt))
+    lightX2Dealt.push(Math.round(lightX2.dealt)
   }
   const mid = (values) => [...values].sort((a, b) => a - b)[2]
   assert.deepEqual(zeroDead, [5, 5, 5, 5, 5], '1.4.456 every zero-tap seed loses round 5')
@@ -20029,7 +20029,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(leadQuietBoss.bossTap, 0, '1.4.493 a night with no taps does not chip the boss')
   assert.equal(leadQuietBoss.hearts, 0, '1.4.493 a night with no taps loses the round')
   assert.ok(leadQuietBoss.bossSec >= 14 && leadQuietBoss.bossSec <= 16, '1.4.493 the no-tap boss is on the road about 15s')
-  const leadBy = Object.fromEntries((leadRound.byLamp ?? []).map((lamp) => [lamp.id, lamp]))
+  const leadBy = Object.fromEntries((leadRound.byLamp ?? []).map((lamp) => [lamp.id, lamp])
   assert.equal(leadBy.journal.boss, 1, '1.4.492 Journal now nicks the boss')
   assert.equal(leadBy.bench.boss, 2, '1.4.492 Bench now nicks the boss')
   assert.ok(leadBy.journal.trash > 0, '1.4.492 Journal shoots the road')
@@ -20059,7 +20059,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const facesFor = (seed) => {
     const shift = nightSeedFaceShift(seed, WALKER_FACE_POOL.length)
     const faces = []
-    for (let spawn = 0; spawn < 4; spawn += 1) faces.push(pickWalkerFace(0, spawn, faces, shift))
+    for (let spawn = 0; spawn < 4; spawn += 1) faces.push(pickWalkerFace(0, spawn, faces, shift)
     return faces
   }
   assert.notDeepEqual(facesFor(2), facesFor(4), '1.4.457 seeds 2 and 4 open on different heads')
@@ -20068,7 +20068,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(WALKER_FACE_POOL.length % WALKER_FACE_WAVE_STEP !== 0, true, '1.4.459 the step shares no factor with the pool')
   const openings = []
   for (let wave = 0; wave < WALKER_FACE_POOL.length; wave += 1) {
-    openings.push(pickWalkerFace(wave, 0, [], 0))
+    openings.push(pickWalkerFace(wave, 0, [], 0)
   }
   assert.equal(new Set(openings).size, WALKER_FACE_POOL.length, '1.4.459 a night opens on every head before it repeats')
   const roundOne = []
@@ -20127,7 +20127,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     }
   }
   const screen459 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
-  const minis459 = screen459.slice(screen459.indexOf('function releaseMinis'), screen459.indexOf('function fire'))
+  const minis459 = screen459.slice(screen459.indexOf('function releaseMinis'), screen459.indexOf('function fire')
   assert.match(minis459, /pickWalkerFace\(/, '1.4.459 a split takes a free head')
   assert.match(screen459, /defend-boss-crown|easyBossRound/)
   const actors459 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
@@ -20327,7 +20327,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   }
   const houseMiss = {}
   for (const [id, file] of Object.entries(greyPacks)) {
-    const pack = nightMapFromPack(JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8')))
+    const pack = nightMapFromPack(JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8'))
     bindLampGround(pack)
     bindNightFeatures(pack.mapFeatures)
     const grey = armedSeatMarks('love', progress, {}, {})
@@ -20354,7 +20354,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
       assert.equal(commitLamp({}, seat, 'love', progress, {}, false, true, 0).ok, false, `1.4.503 ${id} ${seat.id} was already refused`)
       quiet.push(seat.id)
     }
-    const raw = JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8'))
+    const raw = JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8')
     for (const [x, y] of raw._simV2?.bestSeats ?? []) {
       const at = { x: x * pack.width, y: y * pack.height }
       const look = previewLamp(at, 'love', progress, {}, {}, false, true, 0)
@@ -20413,7 +20413,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     ['far-hills', '../src/nightWatch/maps/maze/map02.json', [], [[600, 224]]],
   ]
   for (const [id, file, greys, greens] of disagree) {
-    const pack = nightMapFromPack(JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8')))
+    const pack = nightMapFromPack(JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8'))
     bindLampGround(pack)
     bindNightFeatures(pack.mapFeatures)
     for (const type of ['love', 'logic']) {
@@ -20557,7 +20557,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     screen515,
     /'\.nw-miss-toast',\s*'\.nw-balloon',\s*'\.defend-wave',\s*'\.nw-pace',\s*'\.nw-skill-hint',\s*'\.nw-skill-toast',/,
   )
-  const best515 = screen515.slice(screen515.indexOf('function fireBest'), screen515.indexOf('function retry'))
+  const best515 = screen515.slice(screen515.indexOf('function fireBest'), screen515.indexOf('function retry')
   assert.match(best515, /faceTapStrike\(easy, false, false\) === 'miss' && easy/)
   assert.match(best515, /easyBoardTapKind\(/)
   assert.match(best515, /noteFaceTap\(false, 0, 'late'\)|noteFaceTap\(false, 0, 'board-near'\)/)
@@ -20578,8 +20578,8 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     }
     return { rows, dead: null }
   }
-  const quiet515 = seeds515.map((base) => night515(0, 8, base))
-  const active515 = seeds515.map((base) => night515(3, 12, base))
+  const quiet515 = seeds515.map((base) => night515(0, 8, base)
+  const active515 = seeds515.map((base) => night515(3, 12, base)
   assert.ok(
     quiet515.every((run) => run.dead === 5 && run.rows[4].hearts === 0 && run.rows[4].taps === 0),
     '1.4.515 zero taps still lose round 5',
@@ -20669,7 +20669,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
 
   function pack525(id) {
     const file = id === 'far-hills' ? 'map02.json' : `${id}.json`
-    return nightMapFromPack(JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}`, import.meta.url), 'utf8')))
+    return nightMapFromPack(JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}`, import.meta.url), 'utf8'))
   }
   function roads525(id) {
     if (id === 'a2') return [{ id: 'main', points: DEFEND_PATH }]
@@ -20687,7 +20687,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   }
   let starts = 0
   for (const id of NIGHT_MAP_IDS) {
-    const groups = starts525(roads525(id))
+    const groups = starts525(roads525(id)
     starts += groups.length
     const rows = spawnMarkersFor(id)
     assert.equal(rows.length, groups.length, `1.4.525 ${id} has one arch per distinct road start`)
@@ -20733,7 +20733,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
       else if (type === 'IEND') break
       offset += 12 + len
     }
-    const inflated = inflateSync(Buffer.concat(idat))
+    const inflated = inflateSync(Buffer.concat(idat)
     const stride = width * 4
     const rgba = Buffer.alloc(height * stride)
     let src = 0
@@ -20785,7 +20785,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
       box.left >= 29 && box.right <= 769,
       `1.4.525 ${marker.mapId}:${marker.roadId} stays inside the 375 view (${box.left.toFixed(1)}–${box.right.toFixed(1)})`,
     )
-    const buf = readFileSync(new URL(`../src/assets/night-watch/maps/overlays/${marker.asset}`, import.meta.url))
+    const buf = readFileSync(new URL(`../src/assets/night-watch/maps/overlays/${marker.asset}`, import.meta.url)
     assert.equal(
       createHash('sha256').update(buf).digest('hex'),
       pngSha525[marker.asset],
@@ -20883,14 +20883,14 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const roads526 = (id) => {
     if (id === 'a2') return [{ id: 'main', points: path526 }]
     const file = id === 'far-hills' ? 'map02.json' : `${id}.json`
-    const pack = pack526(JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}`, import.meta.url), 'utf8')))
+    const pack = pack526(JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}`, import.meta.url), 'utf8'))
     assert.equal(pack.width, plate526.width, `1.4.526 ${id} plate width`)
     assert.equal(pack.height, plate526.height, `1.4.526 ${id} plate height`)
     return pack.roads
   }
-  const r1T526 = defend526.easyLiveSpawnT(defend526.waveCombat(0, true).speedScale * walkers526.walkerPace('plain'))
+  const r1T526 = defend526.easyLiveSpawnT(defend526.waveCombat(0, true).speedScale * walkers526.walkerPace('plain')
   assert.equal(r1T526, 0.5, '1.4.526 round 1 walkers step out at t 0.5')
-  const ms526 = (entry, points, t) => walk526.walkInMs(walk526.walkInLength(entry, points, t))
+  const ms526 = (entry, points, t) => walk526.walkInMs(walk526.walkInLength(entry, points, t)
   // map, road, side, edge x/y, start x/y, run ms at t 0, round 1, and the 0.55 cap.
   const table526 = [
     ['a2', 'main', 'right', 798.0, 1097.0, 892.1, 1115.8, 600, 1111, 1212],
@@ -20949,8 +20949,8 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
           const a = trail[i]
           const dx = b.x - a.x
           const dy = b.y - a.y
-          const k = Math.max(0, Math.min(1, ((arch.x - a.x) * dx + (arch.y - a.y) * dy) / (dx * dx + dy * dy || 1)))
-          return Math.hypot(arch.x - (a.x + k * dx), arch.y - (a.y + k * dy))
+          const k = Math.max(0, Math.min(1, ((arch.x - a.x) * dx + (arch.y - a.y) * dy) / (dx * dx + dy * dy || 1))
+          return Math.hypot(arch.x - (a.x + k * dx), arch.y - (a.y + k * dy)
         }),
       )
       assert.ok(archGap <= SPAWN_BOX_U, `1.4.526 ${id}:${road.id} trail passes its arch (${archGap.toFixed(1)} u)`)
@@ -20965,7 +20965,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const r1Lock547 = seen526.map((row) => {
     const road = roads526(row[0]).find((item) => item.id === row[1])
     const entry = walk526.walkInEntry(road.points, plate526)
-    return walk526.walkInTapLockMs(row[8], walk526.walkInLength(entry, road.points, r1T526))
+    return walk526.walkInTapLockMs(row[8], walk526.walkInLength(entry, road.points, r1T526)
   })
   assert.equal(Math.min(...r1Lock547), 202, '1.4.555 the shortest round 1 tap lock is geometry-based')
   assert.equal(Math.max(...r1Lock547), 280, '1.4.555 the longest round 1 tap lock stays under the 0.84 s cap')
@@ -20974,7 +20974,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   for (let wave = 0; wave < 40; wave += 1) {
     const scale = defend526.waveCombat(wave, true).speedScale
     for (const pace of [walkers526.walkerPace('plain'), walkers526.walkerPace('fast'), walkers526.walkerPace('tough'), walkers526.BOSS_PACE]) {
-      ts526.add(defend526.easyLiveSpawnT(scale * pace))
+      ts526.add(defend526.easyLiveSpawnT(scale * pace)
     }
   }
   assert.ok(rounds526.EASY_ROUNDS.length <= 40, '1.4.526 the sweep covers every Easy round')
@@ -21022,7 +21022,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const sim526 = point526(0.3, path526)
   const run526 = ms526(a2Entry526, path526, 0.3)
   assert.deepEqual(clock526.drawAt(walker526, sim526, 1000), a2Entry526.start, '1.4.526 first frame is the start')
-  const lock526 = walk526.walkInTapLockMs(run526, walk526.walkInLength(a2Entry526, path526, 0.3))
+  const lock526 = walk526.walkInTapLockMs(run526, walk526.walkInLength(a2Entry526, path526, 0.3)
   assert.equal(lock526, 194, '1.4.555 a2 t 0.3 unlocks when the walker reaches the plate')
   assert.equal(clock526.entering(walker526, 1000 + run526 - 1), true)
   assert.equal(clock526.tapLocked(walker526, 1000 + lock526 - 1), true)
@@ -21058,7 +21058,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const board526 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
   const css526 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   const prove526 = readFileSync(new URL('./check-live-prove.mjs', import.meta.url), 'utf8')
-  const fire526 = screen526.slice(screen526.indexOf('function fireAtRaider'), screen526.indexOf('function fireBest'))
+  const fire526 = screen526.slice(screen526.indexOf('function fireAtRaider'), screen526.indexOf('function fireBest')
   assert.match(
     fire526,
     /const raider = live\.current\.raiders\.find\(\(item\) => item\.id === raiderId && !item\.turned\)\s*if \(raider && walkInHeld\(raider\)\) return\s*if \(!claimTap\(\)\) return\s*if \(!raider\) return\s*const gate = easyPointerTapGate\(easy, raider, live\.current\.raiders, waveIndexRef\.current, tuneRef\.current\.armorFrom\)/,
@@ -21068,17 +21068,17 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     fire526.indexOf('walkInHeld(raider)') < fire526.indexOf('claimTap()'),
     '1.4.526 the hold check runs before claimTap',
   )
-  const shot526 = screen526.slice(screen526.indexOf('if (!best) return false'), screen526.indexOf('const fit = nightEnemies.fit(easy, using, best.kind)'))
+  const shot526 = screen526.slice(screen526.indexOf('if (!best) return false'), screen526.indexOf('const fit = nightEnemies.fit(easy, using, best.kind)')
   assert.match(
     shot526,
     /const to = raiderAt\(best\)\s*const drawn = walkerDrawAt\(best\)\s*const aim = \{ x: drawn\.x, y: drawn\.y \+ PATH_WALKER_FACE_DY \}/,
     '1.4.526 the beam end is the drawn walker; the sim point stays for range',
   )
-  const blast526 = screen526.slice(screen526.indexOf('const blast: Blast = {'), screen526.indexOf('combo: nextCombo,', screen526.indexOf('const blast: Blast = {')))
+  const blast526 = screen526.slice(screen526.indexOf('const blast: Blast = {'), screen526.indexOf('combo: nextCombo,', screen526.indexOf('const blast: Blast = {'))
   assert.match(blast526, /x: drawn\.x,\s*y: drawn\.y,/, '1.4.526 the + blast sits on the drawn walker')
   assert.match(screen526, /incenseBonusFor\(plantsRef\.current, runPathsRef\.current, to\)/, '1.4.526 the incense bonus still reads the sim point')
   assert.match(screen526, /const d = dist\(at, raiderAt\(raider\)\)\s*if \(d <= bestD\)/, '1.4.526 lamp target choice still reads the sim point')
-  const best526 = screen526.slice(screen526.indexOf('function fireBest'), screen526.indexOf('function retry'))
+  const best526 = screen526.slice(screen526.indexOf('function fireBest'), screen526.indexOf('function retry')
   assert.match(
     best526,
     /const faces = live\.current\.raiders\s*\.filter\(\(raider\) => !raider\.turned && !walkInHeld\(raider\)\)\s*\.map\(\(raider\) => \{\s*const at = walkerDrawAt\(raider\)/,
@@ -21093,7 +21093,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.match(screen526, /function walkerDrawAt\(raider: Raider, now = live\.current\.clock\) \{\s*return easy \? walkInClock\(\)\.drawAt\(raider, raiderAt\(raider\), now\) : raiderAt\(raider\)/, '1.4.526 the drawn spot is its own helper')
   assert.match(screen526, /const walkNow = live\.current\.clock\n/, '1.4.526 the run-in reads the game clock')
   assert.match(screen526, /function raiderAt\(raider: Raider\) \{\n    return nightEnemies\.at\(raider\)\n  \}/, '1.4.526 raiderAt still drives lamp aim, range, and the spawn log')
-  const walkCode526 = screen526.slice(screen526.indexOf('function walkInClock'), screen526.indexOf('function lampCombat'))
+  const walkCode526 = screen526.slice(screen526.indexOf('function walkInClock'), screen526.indexOf('function lampCombat')
   assert.doesNotMatch(walkCode526, /performance\.now/, '1.4.526 the walk-in helpers never read the wall clock')
   assert.doesNotMatch(readFileSync(new URL('../src/nightWatch/maps/walkIn.ts', import.meta.url), 'utf8'), /performance\.now|Date\.now/, '1.4.526 the run-in module takes its clock from the caller')
   assert.doesNotMatch(screen526, /useWalkInFrame/, '1.4.526 the game loop repaints the run-in')
@@ -21168,7 +21168,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   }
   assert.doesNotMatch(readFileSync(new URL('../src/nightWatch/maps/walkIn.ts', import.meta.url), 'utf8'), /from 'react'|livePace|nightEnemies/, '1.4.526 the run-in is a pure draw module')
 
-  const walkBody526 = prove526.slice(prove526.indexOf('const WALK_STEP_MS'), prove526.indexOf('export async function hardDrawSha'))
+  const walkBody526 = prove526.slice(prove526.indexOf('const WALK_STEP_MS'), prove526.indexOf('export async function hardDrawSha')
   assert.ok(walkBody526.includes('async function checkWalkIn('), '1.4.526 the live prove walks every map in')
   assert.doesNotMatch(walkBody526, /\.click\(/, '1.4.526 the walk-in prove uses real pointer events')
   assert.match(walkBody526, /pointerTap\(/)
@@ -21190,7 +21190,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.match(walkBody526, /window\.requestAnimationFrame = \(callback\) => raf\(\(\) => callback\(performance\.now\(\)\)\)/, '1.4.526 the prove steps the real game loop')
   assert.match(walkBody526, /3 s of wall clock under the debug freeze leave the walker walking in/, '1.4.526 the debug freeze holds the run-in')
   assert.match(walkBody526, /tap button sits on the drawn face/, '1.4.526 a long run-in takes taps at its drawn spot')
-  const live526 = prove526.slice(prove526.indexOf('export async function checkLiveProve'))
+  const live526 = prove526.slice(prove526.indexOf('export async function checkLiveProve')
   assert.match(live526, /await checkHardDraw\(\)\s*await checkWalkIn\(browser, port, errors\)\s*assert\.equal\(errors\.join/, '1.4.526 the full prove runs the walk-in before the error check')
   assert.match(prove526, /Hard draw is byte-identical to 1\.4\.525/)
 }
@@ -21201,17 +21201,17 @@ assert.match(
   /a glowing tap on the round 5 boss deals more than 0 damage/,
   '1.4.460 the city scan taps the live round 5 boss and requires damage',
 )
-await import('./check-seed-fire.mjs').then((mod) => mod.checkSeedFire())
-await import('./check-night-jump.mjs').then((mod) => mod.checkNightJump())
-await import('./check-story-win.mjs').then((mod) => mod.checkStoryWins())
-await import('./check-easy-face.mjs').then((mod) => mod.checkEasyFace())
+await import('./check-seed-fire.mjs').then((mod) => mod.checkSeedFire()
+await import('./check-night-jump.mjs').then((mod) => mod.checkNightJump()
+await import('./check-story-win.mjs').then((mod) => mod.checkStoryWins()
+await import('./check-easy-face.mjs').then((mod) => mod.checkEasyFace()
 const snapHoldScan = readFileSync(new URL('./check-story-snap.mjs', import.meta.url), 'utf8')
 assert.match(snapHoldScan, /win card stays at least 5s/, '1.4.481 the city scan holds STORY OPEN')
 assert.match(snapHoldScan, /replay is locked on the win/, '1.4.481 a second tap does not restart')
-await import('./check-story-snap.mjs').then((mod) => mod.checkSnapHold())
-await import('./check-live-prove.mjs').then((mod) => mod.checkLiveProve())
+await import('./check-story-snap.mjs').then((mod) => mod.checkSnapHold()
+await import('./check-live-prove.mjs').then((mod) => mod.checkLiveProve()
 await import('./check-hide-hard-labels.mjs')
-await import('./check-home-porch.mjs').then((mod) => mod.checkHomePorch())
-await import('./check-golden-live.mjs').then((mod) => mod.checkGoldenLive())
-await import('./check-gem-tap-live.mjs').then((mod) => mod.checkGemTapLive())
-await import('./check-gem-pop-live.mjs').then((mod) => mod.checkGemPopLive())
+await import('./check-home-porch.mjs').then((mod) => mod.checkHomePorch()
+await import('./check-golden-live.mjs').then((mod) => mod.checkGoldenLive()
+await import('./check-gem-tap-live.mjs').then((mod) => mod.checkGemTapLive()
+await import('./check-gem-pop-live.mjs').then((mod) => mod.checkGemPopLive()
