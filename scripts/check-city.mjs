@@ -1941,11 +1941,12 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-// 1.4.597: Easy Night Watch Spend / ? on screen at round clear (#951).
+
+// 1.4.597: Easy Night Watch Love lamp type chip stays visible (#949).
 assert.equal(APP_VERSION, '1.4.597')
 assert.equal(CHANGELOG[0].version, '1.4.597', '1.4.597 is the newest row')
-assert.match(latestChange('1.4.597').items.join('\n'), /Refs #951/, '1.4.597 changelog refs #951')
-assert.match(latestChange('1.4.597').items.join('\n'), /Spend/)
+assert.match(latestChange('1.4.597').items.join('\n'), /Refs #949/, '1.4.597 changelog refs #949')
+assert.match(latestChange('1.4.597').items.join('\n'), /Love/)
 assert.match(latestChange('1.4.597').items.join('\n'), /Hard stays the same\./)
 assert.doesNotMatch(latestChange('1.4.597').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.597 changelog avoids GitHub close keywords')
 assert.doesNotMatch(
@@ -1954,14 +1955,42 @@ assert.doesNotMatch(
   '1.4.597 the player note does not name other tiers',
 )
 {
+  const board598 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
+  const phone598 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  assert.match(board598, /function slideTypeChip/, '1.4.597 Easy nudges type chips off chrome before hiding')
+  assert.match(board598, /slideTypeChip\(chip, blocks, true\)/, '1.4.597 chips flip above the lamp when Begin still blocks them')
+  assert.match(phone598, /async function checkNwLoveChip/, '1.4.597 checkNwLoveChip is defined')
+  assert.match(
+    phone598,
+    /await checkNwSpendOnScreen\(browser, port, errors\)\n    await checkNwLoveChip\(browser, port, errors\)/,
+    '1.4.597 the full path runs checkNwLoveChip after checkNwSpendOnScreen',
+  )
+  assert.match(phone598, /checkNwLoveChip ok \$\{tag\}/, '1.4.597 the ok line logs per viewport')
+  assert.match(phone598, /1\.4\.598 What's new row \(Love chip\): re-pinned from CI run 44206941958/, '1.4.597 EASY_GOLD_BASE settings-more shifted from the new changelog row')
+}
+
+
+
+// 1.4.596: Easy Night Watch Spend / ? on screen at round clear (#951).
+assert.equal(CHANGELOG[1].version, '1.4.596', '1.4.597 is the newest row')
+assert.match(latestChange('1.4.596').items.join('\n'), /Refs #951/, '1.4.596 changelog refs #951')
+assert.match(latestChange('1.4.596').items.join('\n'), /Spend/)
+assert.match(latestChange('1.4.596').items.join('\n'), /Hard stays the same\./)
+assert.doesNotMatch(latestChange('1.4.596').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.596 changelog avoids GitHub close keywords')
+assert.doesNotMatch(
+  playerVisibleChangeItems(latestChange('1.4.596').items).join('\n'),
+  /\bHard\b|\bMedium\b/,
+  '1.4.596 the player note does not name other tiers',
+)
+{
   const defend597 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   const phone597 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
-  assert.match(defend597, /1\.4\.597: fixed to the viewport[\s\S]*position: fixed/, '1.4.597 Spend and help use fixed positioning on phone')
-  assert.match(phone597, /async function checkNwSpendOnScreen/, '1.4.597 checkNwSpendOnScreen is defined')
+  assert.match(defend597, /1\.4\.597: fixed to the viewport[\s\S]*position: fixed/, '1.4.596 Spend and help use fixed positioning on phone')
+  assert.match(phone597, /async function checkNwSpendOnScreen/, '1.4.596 checkNwSpendOnScreen is defined')
   assert.match(
     phone597,
     /await checkGemSightCue\(browser, port, errors\)\n    await checkNwSpendOnScreen\(browser, port, errors\)/,
-    '1.4.597 the full path runs checkNwSpendOnScreen after checkGemSightCue',
+    '1.4.596 the full path runs checkNwSpendOnScreen after checkGemSightCue',
   )
   assert.match(phone597, /checkNwSpendOnScreen ok \$\{clearOk\}/, '1.4.597 the ok line logs per viewport and state')
 }

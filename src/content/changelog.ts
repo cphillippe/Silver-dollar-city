@@ -29,6 +29,17 @@ export function playerVisibleChangeTitle(title: string): string | null {
 export const CHANGELOG: ChangeNote[] = [
   {
     version: '1.4.597',
+    title: 'Night Watch: Love lamp name on screen',
+    when: '2026-11-17',
+    items: [
+      'On Easy, every planted pillar lamp keeps its type name chip on screen, including Love at the upper seats.',
+      'Chips slide off docks and Begin instead of vanishing when chrome would cover them.',
+      'Hard stays the same.',
+      'Refs #949.',
+    ],
+  },
+  {
+    version: '1.4.596',
     title: 'Night Watch: Spend and help on screen',
     when: '2026-11-17',
     items: [
@@ -38,7 +49,7 @@ export const CHANGELOG: ChangeNote[] = [
     ],
   },
   {
-    version: '1.4.596',
+    version: '1.4.595',
     title: 'Match: Bonus Sight hint line',
     when: '2026-11-17',
     items: [
@@ -49,7 +60,7 @@ export const CHANGELOG: ChangeNote[] = [
     ],
   },
   {
-    version: '1.4.595',
+    version: '1.4.594',
     title: 'Dig win: readable One more dig and Home',
     when: '2026-11-17',
     items: [
@@ -59,6 +70,7 @@ export const CHANGELOG: ChangeNote[] = [
       'Refs #964.',
     ],
   },
+
   {
     version: '1.4.593',
     title: 'Night Watch: one plant ring per run and Far / Strong on the buy strip',
@@ -71,6 +83,7 @@ export const CHANGELOG: ChangeNote[] = [
       'Refs #950.',
     ],
   },
+
   {
     version: '1.4.592',
     title: 'Night Watch: the Candle gets a name on the clear screen',
