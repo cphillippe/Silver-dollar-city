@@ -1972,7 +1972,7 @@ assert.doesNotMatch(
 
 
 // 1.4.596: Easy Night Watch Spend / ? on screen at round clear (#951).
-assert.equal(CHANGELOG[1].version, '1.4.596', '1.4.597 is the newest row')
+assert.equal(CHANGELOG[1].version, '1.4.596', '1.4.596 follows the newest row')
 assert.match(latestChange('1.4.596').items.join('\n'), /Refs #951/, '1.4.596 changelog refs #951')
 assert.match(latestChange('1.4.596').items.join('\n'), /Spend/)
 assert.match(latestChange('1.4.596').items.join('\n'), /Hard stays the same\./)
@@ -1995,37 +1995,10 @@ assert.doesNotMatch(
   assert.match(phone597, /checkNwSpendOnScreen ok \$\{clearOk\}/, '1.4.597 the ok line logs per viewport and state')
 }
 
-// 1.4.596: Easy Bonus Sight one-time hint line (#965).
-assert.equal(CHANGELOG[1].version, '1.4.596', '1.4.596 follows the newest row')
-assert.match(latestChange('1.4.596').items.join('\n'), /Refs #965/, '1.4.596 changelog refs #965')
-assert.match(latestChange('1.4.596').items.join('\n'), /Bonus Sight/)
-assert.match(latestChange('1.4.596').items.join('\n'), /Hard stays the same\./)
-assert.doesNotMatch(latestChange('1.4.596').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.596 changelog avoids GitHub close keywords')
-assert.doesNotMatch(
-  playerVisibleChangeItems(latestChange('1.4.596').items).join('\n'),
-  /\bHard\b|\bMedium\b/,
-  '1.4.596 the player note does not name other tiers',
-)
-{
-  const gem596 = readFileSync(new URL('../src/lib/gemJar.ts', import.meta.url), 'utf8')
-  const play596 = readFileSync(new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url), 'utf8')
-  const phone596 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
-  assert.match(gem596, /export const GEM_SIGHT_CUE/, '1.4.596 exports the sight cue source string')
-  assert.match(play596, /data-gem-sight-cue/, '1.4.596 GemSearchPlay renders the sight cue hook')
-  assert.match(play596, /markMatchSightCueSeen/, '1.4.596 the cue marks itself seen in the save')
-  assert.match(phone596, /async function checkGemSightCue/, '1.4.596 checkGemSightCue is defined')
-  assert.match(
-    phone596,
-    /await checkDigWinReadable\(browser, port, errors\)\n    await checkGemSightCue\(browser, port, errors\)/,
-    '1.4.596 the full path runs checkGemSightCue after checkDigWinReadable',
-  )
-  assert.match(phone596, /checkGemSightCue ok \$\{tag\}/, '1.4.596 the ok line logs per viewport')
-}
-
-// 1.4.595: Easy Dig DUG! win readability (#964).
+// 1.4.595: Easy Bonus Sight one-time hint line (#965).
 assert.equal(CHANGELOG[2].version, '1.4.595', '1.4.595 follows the newest row')
-assert.match(latestChange('1.4.595').items.join('\n'), /Refs #964/, '1.4.595 changelog refs #964')
-assert.match(latestChange('1.4.595').items.join('\n'), /One more dig/)
+assert.match(latestChange('1.4.595').items.join('\n'), /Refs #965/, '1.4.595 changelog refs #965')
+assert.match(latestChange('1.4.595').items.join('\n'), /Bonus Sight/)
 assert.match(latestChange('1.4.595').items.join('\n'), /Hard stays the same\./)
 assert.doesNotMatch(latestChange('1.4.595').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.595 changelog avoids GitHub close keywords')
 assert.doesNotMatch(
@@ -2034,25 +2007,52 @@ assert.doesNotMatch(
   '1.4.595 the player note does not name other tiers',
 )
 {
+  const gem596 = readFileSync(new URL('../src/lib/gemJar.ts', import.meta.url), 'utf8')
+  const play596 = readFileSync(new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url), 'utf8')
+  const phone596 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  assert.match(gem596, /export const GEM_SIGHT_CUE/, '1.4.595 exports the sight cue source string')
+  assert.match(play596, /data-gem-sight-cue/, '1.4.595 GemSearchPlay renders the sight cue hook')
+  assert.match(play596, /markMatchSightCueSeen/, '1.4.595 the cue marks itself seen in the save')
+  assert.match(phone596, /async function checkGemSightCue/, '1.4.595 checkGemSightCue is defined')
+  assert.match(
+    phone596,
+    /await checkDigWinReadable\(browser, port, errors\)\n    await checkGemSightCue\(browser, port, errors\)/,
+    '1.4.595 the full path runs checkGemSightCue after checkDigWinReadable',
+  )
+  assert.match(phone596, /checkGemSightCue ok \$\{tag\}/, '1.4.595 the ok line logs per viewport')
+}
+
+// 1.4.594: Easy Dig DUG! win readability (#964).
+assert.equal(CHANGELOG[3].version, '1.4.594', '1.4.594 follows the newest row')
+assert.match(latestChange('1.4.594').items.join('\n'), /Refs #964/, '1.4.594 changelog refs #964')
+assert.match(latestChange('1.4.594').items.join('\n'), /One more dig/)
+assert.match(latestChange('1.4.594').items.join('\n'), /Hard stays the same\./)
+assert.doesNotMatch(latestChange('1.4.594').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.594 changelog avoids GitHub close keywords')
+assert.doesNotMatch(
+  playerVisibleChangeItems(latestChange('1.4.594').items).join('\n'),
+  /\bHard\b|\bMedium\b/,
+  '1.4.594 the player note does not name other tiers',
+)
+{
   const win595 = readFileSync(new URL('../src/styles/matchWin.css', import.meta.url), 'utf8')
   const phone595 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
   assert.doesNotMatch(
     win595,
     /html\[data-easy='on'\] \.play\.is-claim-merge\.is-win \.cta-dock \.btn:not\(\.primary\),\s*\nhtml\[data-easy='on'\] \.play\.is-source-dig\.is-win \.cta-dock \.btn:not\(\.primary\),\s*\nhtml\[data-easy='on'\] \.play\.is-road-maze/,
-    '1.4.595 Dig win leaves the shared ink secondary rule',
+    '1.4.594 Dig win leaves the shared ink secondary rule',
   )
   assert.match(
     win595,
     /html\[data-easy='on'\] \.play\.is-source-dig\.is-win \.cta-dock \.btn:not\(\.primary\) \{[\s\S]*#fff6e8/,
-    '1.4.595 Dig secondaries use cream on the purple plate',
+    '1.4.594 Dig secondaries use cream on the purple plate',
   )
-  assert.match(phone595, /async function checkDigWinReadable/, '1.4.595 checkDigWinReadable is defined')
+  assert.match(phone595, /async function checkDigWinReadable/, '1.4.594 checkDigWinReadable is defined')
   assert.match(
     phone595,
     /await checkNwStripWords\(browser, port, errors\)\n    await checkDigWinReadable\(browser, port, errors\)/,
-    '1.4.595 the full path runs checkDigWinReadable after checkNwStripWords',
+    '1.4.594 the full path runs checkDigWinReadable after checkNwStripWords',
   )
-  assert.match(phone595, /checkDigWinReadable ok \$\{tag\}/, '1.4.595 the ok line logs per viewport')
+  assert.match(phone595, /checkDigWinReadable ok \$\{tag\}/, '1.4.594 the ok line logs per viewport')
 }
 
 
@@ -2280,7 +2280,8 @@ assert.doesNotMatch(
   assert.match(phone587, /rail=\$\{railHit\}/, '1.4.587 the scan logs rail centre hits')
   assert.match(defend587, /\.defend-page\.is-easy-watch:has\(\.defend-type-chip\) text\.defend-type-label/, '1.4.587 Easy hides SVG words when chips mount')
   assert.match(defend587, /\.defend-type-chip\[data-chrome-hide='yes'\]/, '1.4.587 chips can chrome-hide')
-  assert.match(board587, /for \(const chip of page\.querySelectorAll\('\.defend-type-chip'\)\)/, '1.4.587 hideTypeLabelsOnChrome flags chips')
+  assert.match(board587, /const chipNodes = \[\.\.\.page\.querySelectorAll\('\.defend-type-chip'\)\]/, '1.4.587 hideTypeLabelsOnChrome flags chips')
+  assert.match(board587, /for \(const chip of chipNodes\)/, '1.4.587 hideTypeLabelsOnChrome walks every chip')
 }
 
 // 1.4.586: Easy first plant shockwave (#957).
