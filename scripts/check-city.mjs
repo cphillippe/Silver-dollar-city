@@ -1965,6 +1965,7 @@ assert.doesNotMatch(
     '1.4.598 the full path runs checkNwLoveChip after checkNwSpendOnScreen',
   )
   assert.match(phone598, /checkNwLoveChip ok \$\{tag\}/, '1.4.598 the ok line logs per viewport')
+  assert.match(phone598, /1\.4\.598 What's new row \(Love chip\): re-pinned from CI run 44206941958/, '1.4.598 EASY_GOLD_BASE settings-more shifted from the new changelog row')
 }
 
 // 1.4.597: Easy Night Watch Spend / ? on screen at round clear (#951).
