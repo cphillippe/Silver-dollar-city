@@ -8721,6 +8721,9 @@ async function checkNwStripWords(browser, port, errors) {
   for (const [width, height] of NW_STRIP_WORDS_SIZES) {
     const label = `${width}x${height}`
     if (only && only !== label) continue
+    let sizeRoadFrames = 0
+    let sizeRoadOverlap = 0
+    let sizeRoadCard = null
     for (const lamp of NW_STRIP_WORDS_LAMPS) {
       if (onlyTool && onlyTool !== lamp.tool) continue
       const { context, page } = await openMap(browser, port, width, height, 'a2', {
@@ -8910,9 +8913,45 @@ async function checkNwStripWords(browser, port, errors) {
       const onScreen = await page.evaluate(async () => {
       const inView = (r) => r.x >= 0 && r.y >= 0 && r.right <= innerWidth && r.bottom <= innerHeight
       const round = (n) => Math.round(n * 10) / 10
+      const roadHalf = 11
+      const roadSamples = () => {
+        const road = document.querySelector('.defend-road')
+        if (!(road instanceof SVGGeometryElement)) return []
+        const svg = road.ownerSVGElement
+        const ctm = svg?.getScreenCTM()
+        if (!svg || !ctm) return []
+        const length = road.getTotalLength()
+        const step = Math.max(6, length / 52)
+        const spots = []
+        for (let d = 0; d <= length; d += step) {
+          const at = road.getPointAtLength(Math.min(length, d))
+          const point = svg.createSVGPoint()
+          point.x = at.x
+          point.y = at.y
+          const s = point.matrixTransform(ctm)
+          spots.push({ x: s.x, y: s.y })
+        }
+        return spots
+      }
+      const roadOverlapPx2 = (card, spots) => {
+        let sum = 0
+        for (const spot of spots) {
+          const left = spot.x - roadHalf
+          const top = spot.y - roadHalf
+          const right = spot.x + roadHalf
+          const bottom = spot.y + roadHalf
+          const w = Math.max(0, Math.min(card.right, right) - Math.max(card.left, left))
+          const h = Math.max(0, Math.min(card.bottom, bottom) - Math.max(card.top, top))
+          sum += w * h
+        }
+        return sum
+      }
+      const spots = roadSamples()
       const bad = []
       let cardSnap = null
       let frames = 0
+      let stripFrames = 0
+      let maxRoadOverlap = 0
       const start = performance.now()
       while (performance.now() - start < 400) {
         const card = document.querySelector('.defend-tower-card[data-strip="yes"]')
@@ -8921,6 +8960,8 @@ async function checkNwStripWords(browser, port, errors) {
         } else {
           const cr = card.getBoundingClientRect()
           cardSnap = { x: round(cr.x), y: round(cr.y), w: round(cr.width), h: round(cr.height) }
+          stripFrames += 1
+          if (spots.length) maxRoadOverlap = Math.max(maxRoadOverlap, roadOverlapPx2(cr, spots))
           if (!inView(cr)) bad.push(`card-offscreen x=${cardSnap.x} y=${cardSnap.y} w=${cardSnap.w} h=${cardSnap.h}`)
         }
         for (const path of ['far', 'strong']) {
@@ -8937,7 +8978,7 @@ async function checkNwStripWords(browser, port, errors) {
         frames += 1
         await new Promise((resolve) => requestAnimationFrame(resolve))
       }
-      return { bad, card: cardSnap, frames }
+      return { bad, card: cardSnap, frames, stripFrames, maxRoadOverlap }
     })
 
       const tag = `${label} ${lamp.tool} mid-wave`
@@ -8984,7 +9025,14 @@ async function checkNwStripWords(browser, port, errors) {
     })
       if (!read.card) fail(`checkNwStripWords fail ${tag} strip card=missing`)
       if (onScreen.frames < 8) fail(`checkNwStripWords fail ${tag} onScreenFrames=${onScreen.frames}`)
+      if (onScreen.stripFrames < 1) fail(`checkNwStripWords fail ${tag} stripFrames=0`)
+      if (onScreen.maxRoadOverlap > 0) {
+        fail(`checkNwStripWords fail ${tag} roadOverlap=${onScreen.maxRoadOverlap.toFixed(2)}px2`)
+      }
       if (onScreen.bad.length) fail(`checkNwStripWords fail ${tag} onScreen=${onScreen.bad.join('|')}`)
+      sizeRoadFrames += onScreen.stripFrames
+      sizeRoadOverlap = Math.max(sizeRoadOverlap, onScreen.maxRoadOverlap)
+      if (onScreen.card) sizeRoadCard = onScreen.card
       if (read.chromeOverlap !== 0) {
         fail(
           `checkNwStripWords fail ${tag} overlap=${read.chromeOverlap} begin=${read.chrome?.begin ?? '?'} continue=${read.chrome?.continue ?? '?'} rail=${read.chrome?.rail ?? '?'} hud=${read.chrome?.hud ?? '?'} lamp=${read.chrome?.lamp ?? '?'}`,
@@ -9043,6 +9091,16 @@ async function checkNwStripWords(browser, port, errors) {
         )
       }
       await context.close()
+    }
+    if (!onlyTool) {
+      if (sizeRoadFrames < 1) fail(`checkNwStripWords fail ${label} stripFrames=0`)
+      else if (sizeRoadOverlap > 0) fail(`checkNwStripWords fail ${label} roadOverlap=${sizeRoadOverlap.toFixed(2)}px2`)
+      else if (!problems.some((line) => line.includes(` ${label} `) && line.includes('fail'))) {
+        const cardLine = sizeRoadCard
+          ? `card=${sizeRoadCard.x},${sizeRoadCard.y},${sizeRoadCard.w},${sizeRoadCard.h}`
+          : 'card=missing'
+        console.log(`checkNwStripWords road ok ${label} frames=${sizeRoadFrames} roadOverlap=0 ${cardLine}`)
+      }
     }
   }
 

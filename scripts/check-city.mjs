@@ -2013,6 +2013,8 @@ assert.doesNotMatch(
     '1.4.594 the full path runs checkNwStripWords after checkNwPlantRingOnce',
   )
   assert.match(phone594, /checkNwStripWords ok \$\{tag\}/, '1.4.594 the ok line logs per viewport')
+  assert.match(phone594, /checkNwStripWords road ok \$\{label\}/, '1.4.594 strip words logs road clearance per size')
+  assert.match(phone594, /roadHalf = 11/, '1.4.594 strip road overlap uses the same 11px half-width as placement')
 }
 
 // 1.4.593: Easy Night Watch plant shockwave only on first plant (#959).
