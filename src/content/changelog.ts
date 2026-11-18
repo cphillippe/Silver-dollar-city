@@ -38,7 +38,7 @@ export const CHANGELOG: ChangeNote[] = [
     ],
   },
   {
-    version: '1.4.596',
+    version: '1.4.595',
     title: 'Match: Bonus Sight hint line',
     when: '2026-11-17',
     items: [
@@ -49,7 +49,7 @@ export const CHANGELOG: ChangeNote[] = [
     ],
   },
   {
-    version: '1.4.595',
+    version: '1.4.593',
     title: 'Dig win: readable One more dig and Home',
     when: '2026-11-17',
     items: [
