@@ -2068,7 +2068,15 @@ assert.doesNotMatch(
   const phone594 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
   assert.match(defend594, /--nw-icon-far: "Far"/, '1.4.594 strip sets Far on the mid-wave card')
   assert.match(defend594, /--nw-icon-strong: "Strong"/, '1.4.594 strip sets Strong on the mid-wave card')
+  assert.match(defend594, /data-strip='yes'\] \.defend-path-buy[\s\S]*white-space: nowrap/, '1.4.594 strip buy keeps Far/Strong/3 sparks on one line')
   assert.match(phone594, /async function checkNwStripWords/, '1.4.594 checkNwStripWords is defined')
+  assert.match(phone594, /NW_STRIP_WORDS_LAMPS/, '1.4.594 strip words sweep all four lamp types')
+  assert.match(phone594, /NW_STRIP_TAP_PLAN/, '1.4.594 strip tap baselines stay card-relative')
+  assert.match(
+    phone594,
+    /NW_STRIP_WORDS_SIZES = \[\s*\[375, 812\],\s*\[390, 844\],\s*\[412, 915\],\s*\]/,
+    '1.4.594 strip words covers 375, 390 and 412',
+  )
   assert.match(
     phone594,
     /await checkNwPlantRingOnce\(browser, port, errors\)\n    await checkNwStripWords\(browser, port, errors\)/,
@@ -2093,6 +2101,8 @@ assert.doesNotMatch(
   const phone593 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
   assert.match(screen593, /plantIgniteRunDone/, '1.4.593 DefendScreen gates the plant ring per run')
   assert.match(screen593, /if \(plantIgniteRunDone\.current\) return/, '1.4.593 later plants do not re-fire the ring')
+  assert.match(screen593, /resetPlantIgniteForRun/, '1.4.593 a new Easy run clears the plant ring gate')
+  assert.match(screen593, /if \(easy\) resetPlantIgniteForRun\(\)/, '1.4.593 Try again starts a fresh plant ring')
   assert.match(phone593, /async function checkNwPlantRingOnce/, '1.4.593 checkNwPlantRingOnce is defined')
   assert.match(
     phone593,
@@ -2100,6 +2110,8 @@ assert.doesNotMatch(
     '1.4.593 the full path runs checkNwPlantRingOnce after checkNwCandleName',
   )
   assert.match(phone593, /checkNwPlantRingOnce ok \$\{label\} rings=1/, '1.4.593 the ok line logs rings=1')
+  assert.match(phone593, /checkNwPlantRingOnce run2 rings=\$\{tally2\.rings\}/, '1.4.593 the scan logs the second Home run ring count')
+  assert.match(phone593, /checkNwPlantRingOnce ok jump-in lamps rings=0/, '1.4.593 jump-in with lamps does not ring')
 }
 
 // 1.4.592: Easy Night Watch the Candle gets a name on the clear screen (#970).
@@ -2117,7 +2129,9 @@ assert.doesNotMatch(
   const phone592 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
   assert.match(phone592, /async function checkNwCandleName/, '1.4.592 checkNwCandleName is defined')
   assert.match(phone592, /await checkNwLampMoveHop\(browser, port, errors\)\n    await checkNwCandleName\(browser, port, errors\)/, '1.4.592 the full path runs checkNwCandleName after checkNwLampMoveHop')
+  assert.match(phone592, /NW_CANDLE_NAME_SIZES = \[\s*\[375, 812\],\s*\[390, 844\],\s*\[412, 915\],\s*\]/, '1.4.592 the candle name scan covers 375, 390 and 412')
   assert.match(phone592, /checkNwCandleName ok \$\{tag\}/, '1.4.592 the ok line logs per viewport')
+  assert.match(phone592, /beside=1 continue=0 rail=0 hud=0 chips=0 nameGold=0/, '1.4.592 the ok line logs chrome beside the Candle dock')
 }
 
 // 1.4.591: Easy Night Watch one lamp hops to the next seat (#968).
