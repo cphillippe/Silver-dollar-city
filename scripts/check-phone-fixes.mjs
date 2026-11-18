@@ -4816,21 +4816,12 @@ const EASY_GOLD_BASE_1579 = {
   '412x915 home-first': { '2 Help': { x: 143.3, y: 809, w: 125.3, h: 48 } },
   '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
   '412x915 settings-more': {
-<<<<<<< HEAD
     'Open Profile': { x: 41, y: 1360.7, w: 130, h: 52 },
     Candy: { x: 41, y: 1788.6, w: 84, h: 52 },
     'Dusk town': { x: 133, y: 1788.6, w: 112, h: 52 },
     'Clean parchment': { x: 41, y: 1848.6, w: 162, h: 52 },
     'Export JSON': { x: 41, y: 2127.1, w: 132, h: 52 },
     'Import pasted save': { x: 41, y: 2372.9, w: 176, h: 52 },
-=======
-    'Open Profile': { x: 41, y: 1360.7, w: 129.4, h: 52 },
-    Candy: { x: 41, y: 1873, w: 84.4, h: 52 },
-    'Dusk town': { x: 133.4, y: 1873, w: 111.5, h: 52 },
-    'Clean parchment': { x: 41, y: 1933, w: 160.8, h: 52 },
-    'Export JSON': { x: 41, y: 2211.5, w: 132.7, h: 52 },
-    'Import pasted save': { x: 41, y: 2457.3, w: 178.5, h: 52 },
->>>>>>> origin/cursor/easy-nw-plant-ring-once-61f4
   },
 }
 
