@@ -1941,29 +1941,29 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
-// 1.4.597: Easy Night Watch Spend / ? on screen at round clear (#951).
+// 1.4.596: Easy Night Watch Spend / ? on screen at round clear (#951).
 assert.equal(APP_VERSION, '1.4.597')
-assert.equal(CHANGELOG[0].version, '1.4.597', '1.4.597 is the newest row')
-assert.match(latestChange('1.4.597').items.join('\n'), /Refs #951/, '1.4.597 changelog refs #951')
-assert.match(latestChange('1.4.597').items.join('\n'), /Spend/)
-assert.match(latestChange('1.4.597').items.join('\n'), /Hard stays the same\./)
-assert.doesNotMatch(latestChange('1.4.597').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.597 changelog avoids GitHub close keywords')
+assert.equal(CHANGELOG[0].version, '1.4.596', '1.4.596 is the newest row')
+assert.match(latestChange('1.4.596').items.join('\n'), /Refs #951/, '1.4.596 changelog refs #951')
+assert.match(latestChange('1.4.596').items.join('\n'), /Spend/)
+assert.match(latestChange('1.4.596').items.join('\n'), /Hard stays the same\./)
+assert.doesNotMatch(latestChange('1.4.596').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.596 changelog avoids GitHub close keywords')
 assert.doesNotMatch(
-  playerVisibleChangeItems(latestChange('1.4.597').items).join('\n'),
+  playerVisibleChangeItems(latestChange('1.4.596').items).join('\n'),
   /\bHard\b|\bMedium\b/,
-  '1.4.597 the player note does not name other tiers',
+  '1.4.596 the player note does not name other tiers',
 )
 {
   const defend597 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   const phone597 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
-  assert.match(defend597, /1\.4\.597: fixed to the viewport[\s\S]*position: fixed/, '1.4.597 Spend and help use fixed positioning on phone')
-  assert.match(phone597, /async function checkNwSpendOnScreen/, '1.4.597 checkNwSpendOnScreen is defined')
+  assert.match(defend597, /1\.4\.597: fixed to the viewport[\s\S]*position: fixed/, '1.4.596 Spend and help use fixed positioning on phone')
+  assert.match(phone597, /async function checkNwSpendOnScreen/, '1.4.596 checkNwSpendOnScreen is defined')
   assert.match(
     phone597,
     /await checkGemSightCue\(browser, port, errors\)\n    await checkNwSpendOnScreen\(browser, port, errors\)/,
-    '1.4.597 the full path runs checkNwSpendOnScreen after checkGemSightCue',
+    '1.4.596 the full path runs checkNwSpendOnScreen after checkGemSightCue',
   )
-  assert.match(phone597, /checkNwSpendOnScreen ok \$\{clearOk\}/, '1.4.597 the ok line logs per viewport and state')
+  assert.match(phone597, /checkNwSpendOnScreen ok \$\{clearOk\}/, '1.4.596 the ok line logs per viewport and state')
 }
 
 // 1.4.596: Easy Bonus Sight one-time hint line (#965).
@@ -2027,7 +2027,7 @@ assert.doesNotMatch(
 }
 
 
-// 1.4.593:// 1.4.593: Easy Night Watch plant ring once per run (#959) and mid-wave Far / Strong strip (#950).
+// 1.4.593: Easy Night Watch plant ring once per run (#959) and mid-wave Far / Strong strip (#950).
 assert.equal(APP_VERSION, '1.4.593')
 assert.equal(CHANGELOG[0].version, '1.4.593', '1.4.593 is the newest row')
 assert.match(latestChange('1.4.593').items.join('\n'), /Refs #959/, '1.4.593 changelog refs #959')
