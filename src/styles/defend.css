@@ -4742,6 +4742,92 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   }
 }
 
+/* 1.4.589 Easy round-clear lamp cheer (#962).
+   The hop selector is longer than .defend-pad.is-up .defend-lamp-sprite, so this hop wins.
+   .is-reach-miss is the same length and comes later, so a reach-miss still wins if both are set.
+   --cheer-i is 0..4 from the left. Lamps after the fifth share 4. */
+.defend-page.is-easy-watch .defend-clear-cheer {
+  pointer-events: none;
+}
+
+.defend-page.is-easy-watch .defend-pad.is-clear-cheer .defend-lamp-sprite {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: defend-clear-cheer-hop 520ms ease both;
+  animation-delay: calc(var(--cheer-i, 0) * 80ms);
+}
+
+@keyframes defend-clear-cheer-hop {
+  0% {
+    transform: none;
+  }
+  30% {
+    transform: translateY(-14px) scale(0.96, 1.1);
+  }
+  60% {
+    transform: translateY(0) scale(1.1, 0.88);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+.defend-page.is-easy-watch .defend-clear-cheer circle {
+  fill: #fff;
+  stroke: rgba(20, 10, 60, 0.45);
+  stroke-width: 1.5;
+  pointer-events: none;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: defend-clear-cheer-dot 700ms ease both;
+}
+
+.defend-page.is-easy-watch .defend-pad.is-clear-cheer .defend-clear-cheer circle:nth-child(1) {
+  animation-delay: calc(var(--cheer-i, 0) * 80ms);
+}
+
+.defend-page.is-easy-watch .defend-pad.is-clear-cheer .defend-clear-cheer circle:nth-child(2) {
+  animation-delay: calc(var(--cheer-i, 0) * 80ms + 70ms);
+}
+
+.defend-page.is-easy-watch .defend-pad.is-clear-cheer .defend-clear-cheer circle:nth-child(3) {
+  animation-delay: calc(var(--cheer-i, 0) * 80ms + 140ms);
+}
+
+.defend-page.is-easy-watch .defend-pad.is-clear-cheer .defend-clear-cheer circle:nth-child(4) {
+  animation-delay: calc(var(--cheer-i, 0) * 80ms + 210ms);
+}
+
+.defend-page.is-easy-watch .defend-pad.is-clear-cheer .defend-clear-cheer circle:nth-child(5) {
+  animation-delay: calc(var(--cheer-i, 0) * 80ms + 280ms);
+}
+
+@keyframes defend-clear-cheer-dot {
+  0% {
+    transform: none;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-40px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .defend-page.is-easy-watch .defend-pad.is-clear-cheer .defend-lamp-sprite {
+    animation: none;
+  }
+
+  .defend-page.is-easy-watch .defend-pad.is-clear-cheer .defend-clear-cheer circle {
+    animation: none;
+    transform: translateY(-26px);
+    opacity: 0.85;
+  }
+}
+
 .defend-plant-first {
   margin: 0;
   padding: 3px 8px;

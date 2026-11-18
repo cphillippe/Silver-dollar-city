@@ -7392,6 +7392,695 @@ async function checkNwPlantIgnite(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #962 Easy round-clear lamp cheer. Parent (no hook) fails only cheer=0 visibleFrames=0. */
+const ROUND_CHEER_SIZES = [
+  [375, 667],
+  [390, 844],
+  [412, 915],
+  [768, 1024],
+]
+const ROUND_CHEER_TRACK_MS = 1600
+
+async function checkNwRoundCheer(browser, port, errors) {
+  const only = process.env.NW_ROUND_CHEER_SIZE
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+
+  const installSampler = (page) =>
+    page.evaluate((trackMs) => {
+      const state = {
+        frames: [],
+        names: [],
+        firstSeen: null,
+        lastSeen: null,
+        dots: {},
+        order: null,
+        boostAt: null,
+        done: false,
+        running: true,
+        dotR: null,
+      }
+      window.__nwRoundCheer = state
+      const gold = (value) => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+        let match
+        while ((match = re.exec(value || ''))) {
+          const r = Number(match[1])
+          const g = Number(match[2])
+          const b = Number(match[3])
+          const a = match[4] === undefined ? 1 : Number(match[4])
+          if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
+      const box = (el) => {
+        if (!el) return null
+        const r = el.getBoundingClientRect()
+        if (r.width < 1 && r.height < 1) return null
+        return { x: r.x, y: r.y, w: r.width, h: r.height, left: r.left, top: r.top, right: r.right, bottom: r.bottom }
+      }
+      const hitOf = (el, loose) => {
+        if (!el) return 'missing'
+        const rect = el.getBoundingClientRect()
+        if (rect.width < 1 || rect.height < 1) return 'missing'
+        const node = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
+        if (!node) return 'none'
+        if (node === el || el.contains(node)) return 'ok'
+        if (loose && node.closest?.(loose)) return 'ok'
+        const pad = el.closest?.('.defend-pad')
+        if (pad && (node === pad || pad.contains(node) || node.closest?.('.defend-clear-lamp'))) return 'ok'
+        return `${node.tagName || 'none'}.${node.getAttribute?.('class') || ''}`.replace(/\s+/g, ' ').trim().slice(0, 70)
+      }
+      const worstHit = (nodes, loose) => {
+        if (!nodes.length) return 'missing'
+        let bad = ''
+        for (const node of nodes) {
+          const hit = hitOf(node, loose)
+          if (hit !== 'ok') bad = hit
+        }
+        return bad || 'ok'
+      }
+      const overlapPx = (a, b) => {
+        const w = Math.min(a.right, b.right) - Math.max(a.left, b.left)
+        const h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top)
+        if (w <= 0.5 || h <= 0.5) return 0
+        return Math.min(w, h)
+      }
+      const translateY = (el) => {
+        const tr = getComputedStyle(el).transform
+        if (!tr || tr === 'none') return 0
+        const m = tr.match(/matrix\(([^)]+)\)/)
+        if (!m) return 0
+        const parts = m[1].split(',').map((v) => Number(v.trim()))
+        return parts.length >= 6 ? parts[5] : 0
+      }
+      const identity = (el) => {
+        const tr = getComputedStyle(el).transform
+        if (!tr || tr === 'none') return true
+        const m = tr.match(/matrix\(([^)]+)\)/)
+        if (!m) return false
+        const p = m[1].split(',').map((v) => Number(v.trim()))
+        if (p.length < 6) return false
+        return Math.abs(p[0] - 1) < 0.02 && Math.abs(p[1]) < 0.02 && Math.abs(p[2]) < 0.02 && Math.abs(p[3] - 1) < 0.02 && Math.abs(p[4]) < 0.5 && Math.abs(p[5]) < 0.5
+      }
+      const readFrame = () => {
+        const root = document.querySelector('.defend-page')
+        const chrome =
+          'button, .defend-abilities, .defend-boost, .defend-tower-card, .defend-path-pip, .nw-balloon-orb, .defend-wave, .defend-ability-stock'
+        const names = !root
+          ? []
+          : [...root.querySelectorAll(chrome)]
+              .filter((node) => !node.closest('.defend-nw-debug'))
+              .filter((node) => {
+                const rect = node.getBoundingClientRect()
+                const style = getComputedStyle(node)
+                return rect.width > 1 && rect.height > 1 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0
+              })
+              .filter((node) => {
+                const style = getComputedStyle(node)
+                const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+                const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+                return gold(style.backgroundImage) || gold(style.backgroundColor) || border || gold(style.boxShadow) || (text && gold(style.color))
+              })
+              .map((node) => `${node.tagName}.${node.getAttribute('class') || ''}`.replace(/\s+/g, ' ').trim().slice(0, 80))
+        const rings = [...document.querySelectorAll('.defend-plant-ground circle')].filter((node) => {
+          const rect = node.getBoundingClientRect()
+          const style = getComputedStyle(node)
+          if (rect.width <= 1 || rect.height <= 1 || style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+          return gold(style.stroke) || gold(style.fill) || gold(style.filter)
+        })
+        let cheerGold = 0
+        for (const node of document.querySelectorAll('.defend-clear-cheer, .defend-clear-cheer *')) {
+          const style = getComputedStyle(node)
+          if (
+            gold(style.stroke) ||
+            gold(style.fill) ||
+            gold(style.filter) ||
+            gold(style.color) ||
+            gold(style.backgroundColor) ||
+            gold(style.boxShadow)
+          ) cheerGold += 1
+        }
+        for (const name of names) {
+          if (!state.names.includes(name)) state.names.push(name)
+        }
+        const planted = [...document.querySelectorAll('.defend-pad.is-planted')]
+        const hits = planted.map((pad) => pad.querySelector('.defend-hit')).filter(Boolean)
+        const rails = [...document.querySelectorAll('.nw-rail button.defend-ability')]
+        const docks = [...document.querySelectorAll('button.defend-new-lamp')]
+        const candle = document.querySelector('button.defend-new-lamp.defend-candle-lamp')
+        const cont = document.querySelector('.defend-continue')
+        const begin = document.querySelector('.defend-go')
+        const beginBox = box(begin)
+        const circles = [...document.querySelectorAll('.defend-clear-cheer circle')]
+        let litDots = 0
+        let dotMin = 1
+        let dotMax = 0
+        const litBoxes = []
+        for (const circle of circles) {
+          const style = getComputedStyle(circle)
+          const opacity = Number(style.opacity)
+          const shown =
+            style.display !== 'none' &&
+            style.visibility !== 'hidden' &&
+            opacity > 0.05 &&
+            circle.getClientRects().length > 0
+          if (!shown) continue
+          litDots += 1
+          dotMin = Math.min(dotMin, opacity)
+          dotMax = Math.max(dotMax, opacity)
+          const b = box(circle)
+          if (b) litBoxes.push({ el: circle, box: b, ty: translateY(circle) })
+          if (state.dotR == null && b) state.dotR = b.w / 2
+        }
+        const groups = document.querySelectorAll('.defend-clear-cheer').length
+        const cheerNodes = [...document.querySelectorAll('.defend-clear-cheer, .defend-clear-cheer *')]
+        const ptr = cheerNodes.length === 0 || cheerNodes.every((node) => getComputedStyle(node).pointerEvents === 'none')
+        const sprites = [...document.querySelectorAll('.defend-pad.is-clear-cheer .defend-lamp-sprite')]
+        let hopped = false
+        let anim = sprites.length ? getComputedStyle(sprites[0]).animationName : ''
+        for (const sprite of sprites) {
+          if (!identity(sprite)) hopped = true
+          const name = getComputedStyle(sprite).animationName
+          if (name && name !== 'none') anim = name
+        }
+        const frameEl = document.querySelector('.defend-frame')
+        const frameBox = frameEl ? frameEl.getBoundingClientRect() : null
+        const frame = frameBox
+          ? { left: frameBox.left, right: frameBox.right, top: frameBox.top, bottom: frameBox.bottom }
+          : null
+        const insideOf = (b) =>
+          !frame ||
+          (b.left >= frame.left - 1 && b.right <= frame.right + 1 && b.top >= frame.top - 1 && b.bottom <= frame.bottom + 1)
+        let inside = true
+        for (const dot of litBoxes) {
+          if (!insideOf(dot.box)) inside = false
+          const extra = Math.max(0, 40 + dot.ty)
+          if (extra > 0 && !insideOf({ ...dot.box, top: dot.box.top - extra })) inside = false
+        }
+        for (const sprite of sprites) {
+          const b = box(sprite)
+          if (b && !insideOf(b)) inside = false
+        }
+        const chromeBoxes = []
+        const pushChrome = (el) => {
+          const b = box(el)
+          if (b) chromeBoxes.push(b)
+        }
+        pushChrome(cont)
+        rails.forEach(pushChrome)
+        docks.forEach(pushChrome)
+        if (beginBox) pushChrome(begin)
+        const hitBoxes = hits.map((el) => ({ el, box: box(el) })).filter((row) => row.box)
+        let cover = 0
+        for (const pad of document.querySelectorAll('.defend-pad.is-clear-cheer')) {
+          const own = pad.querySelector('.defend-hit')
+          const pieces = []
+          for (const circle of pad.querySelectorAll('.defend-clear-cheer circle')) {
+            const style = getComputedStyle(circle)
+            if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) <= 0.05) continue
+            const b = box(circle)
+            if (b) pieces.push(b)
+          }
+          const sprite = pad.querySelector('.defend-lamp-sprite')
+          if (sprite) {
+            const b = box(sprite)
+            const ty = translateY(sprite)
+            if (b && ty < -0.5) pieces.push({ left: b.left, right: b.right, top: b.top, bottom: Math.min(b.bottom, b.top - ty) })
+          }
+          for (const piece of pieces) {
+            for (const target of chromeBoxes) cover = Math.max(cover, overlapPx(piece, target))
+            for (const hit of hitBoxes) {
+              // The sparkle sits on its own lamp. That lamp's hit is the tap, not a cover.
+              if (own && hit.el === own) continue
+              cover = Math.max(cover, overlapPx(piece, hit.box))
+            }
+          }
+        }
+        if (!state.order && groups > 0) {
+          state.order = [...document.querySelectorAll('.defend-pad.is-clear-cheer')].map((pad) => ({
+            x: pad.getBoundingClientRect().x,
+            i: Number(getComputedStyle(pad).getPropertyValue('--cheer-i')) || 0,
+          }))
+        }
+        const slim = (b) => (b ? { x: b.x, y: b.y, w: b.w, h: b.h } : null)
+        return {
+          gold: names.length + rings.length + cheerGold,
+          cheerGold,
+          litDots,
+          groups,
+          pads: planted.length,
+          ptr,
+          hopped,
+          anim,
+          dotMin: litDots ? dotMin : 0,
+          dotMax: litDots ? dotMax : 0,
+          inside,
+          cover,
+          hits: {
+            continue: hitOf(cont, '.defend-continue'),
+            rail: worstHit(rails, '.defend-ability'),
+            candle: candle ? hitOf(candle, 'button.defend-candle-lamp') : 'absent',
+            dock: worstHit(docks, 'button.defend-new-lamp'),
+            begin: beginBox ? hitOf(begin, '.defend-go') : 'absent',
+            pad: worstHit(hits, '.defend-pad'),
+          },
+          rects: {
+            continue: slim(box(cont)),
+            rail: rails.map((el) => slim(box(el))).filter(Boolean),
+            candle: slim(box(candle)),
+            dock: docks.map((el) => slim(box(el))).filter(Boolean),
+            begin: slim(beginBox),
+            pad: hits.map((el) => slim(box(el))).filter(Boolean),
+          },
+        }
+      }
+      const stampDots = (now) => {
+        const circles = [...document.querySelectorAll('.defend-clear-cheer circle')]
+        circles.forEach((circle, index) => {
+          const style = getComputedStyle(circle)
+          const on =
+            style.display !== 'none' &&
+            style.visibility !== 'hidden' &&
+            Number(style.opacity) > 0.05 &&
+            circle.getClientRects().length > 0
+          if (!on) return
+          const rec = state.dots[index] || (state.dots[index] = { first: now, last: now })
+          rec.last = now
+          if (state.firstSeen == null) state.firstSeen = now
+          state.lastSeen = now
+        })
+      }
+      const obs = new MutationObserver(() => stampDots(performance.now()))
+      obs.observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'style'] })
+      const tick = () => {
+        const now = performance.now()
+        const boost = document.querySelector('.defend-page.is-boost')
+        if (boost && state.boostAt == null) state.boostAt = now
+        if (state.boostAt != null) {
+          stampDots(now)
+          state.frames.push(readFrame())
+          if (now - state.boostAt >= trackMs) {
+            state.done = true
+            state.running = false
+            obs.disconnect()
+            return
+          }
+        }
+        if (state.running) requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    }, ROUND_CHEER_TRACK_MS)
+
+  const lineRecords = async (page) =>
+    page.evaluate(() => {
+      const cssText = (value) => {
+        if (!value || value === 'none' || value === 'normal') return ''
+        const first = /^"((?:\\.|[^"\\])*)"/.exec(value)
+        return first ? first[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\') : ''
+      }
+      const selectorOf = (el) => {
+        const tag = el.tagName.toLowerCase()
+        const cls = (el.getAttribute('class') || '').trim().split(/\s+/).filter(Boolean).slice(0, 4).join('.')
+        return cls ? `${tag}.${cls}` : tag
+      }
+      const lineOf = (el) => {
+        const style = getComputedStyle(el)
+        const directs = [...el.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+        const source = directs.map((child) => child.textContent).join('').replace(/\s+/g, ' ').trim()
+        const range = document.createRange()
+        const host = el.getBoundingClientRect()
+        let rendered = ''
+        for (const child of directs) {
+          const raw = child.textContent
+          for (let i = 0; i < raw.length; i += 1) {
+            const ch = raw[i]
+            if (!ch.trim()) {
+              rendered += ch
+              continue
+            }
+            range.setStart(child, i)
+            range.setEnd(child, i + 1)
+            let painted = false
+            for (const bit of range.getClientRects()) {
+              if (bit.width <= 0 || bit.height <= 0) continue
+              if (bit.right > host.left - 1 && bit.left < host.right + 1 && bit.bottom > host.top - 1 && bit.top < host.bottom + 1) {
+                painted = true
+                break
+              }
+            }
+            if (painted) rendered += ch
+          }
+        }
+        return {
+          name: selectorOf(el),
+          overflow: style.overflow,
+          scroll: el.scrollWidth,
+          client: el.clientWidth,
+          scrollH: el.scrollHeight,
+          clientH: el.clientHeight,
+          rendered: rendered.replace(/\s+/g, ' ').trim(),
+          source,
+        }
+      }
+      const pseudoParts = (el) => {
+        const host = el.getBoundingClientRect()
+        const hostStyle = getComputedStyle(el)
+        return ['::before', '::after']
+          .map((pseudo) => {
+            const style = getComputedStyle(el, pseudo)
+            const source = cssText(style.content).replace(/\s+/g, ' ').trim()
+            if (!source) return null
+            const painted =
+              style.display !== 'none' &&
+              style.visibility !== 'hidden' &&
+              Number(style.opacity) > 0 &&
+              parseFloat(style.fontSize) > 0 &&
+              host.width > 1 &&
+              host.height > 1
+            return {
+              name: `${selectorOf(el)}${pseudo}`,
+              overflow: hostStyle.overflow,
+              scroll: el.scrollWidth,
+              client: el.clientWidth,
+              scrollH: el.scrollHeight,
+              clientH: el.clientHeight,
+              rendered: painted ? source : '',
+              source,
+            }
+          })
+          .filter(Boolean)
+      }
+      const linesFor = (el) => {
+        if (!el) return []
+        const pseudos = pseudoParts(el)
+        if (pseudos.length) return pseudos
+        const text = lineOf(el)
+        return text ? [text] : []
+      }
+      const cont = document.querySelector('.defend-continue')
+      const candle = document.querySelector('button.defend-candle-lamp')
+      return [...linesFor(cont), ...linesFor(candle)]
+    })
+
+  const tapUntilBoost = async (page) => {
+    const started = Date.now()
+    while (Date.now() - started < 90_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
+      const cue = await page.evaluate(() => {
+        const face = document.querySelector('.defend-raider.is-easy-cue')
+        if (!face) return null
+        const id = face.getAttribute('data-walker-id')
+        const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+        if (!tap) return null
+        const box = tap.getBoundingClientRect()
+        const x = box.x + box.width / 2
+        const y = box.y + box.height / 2
+        const node = document.elementFromPoint(x, y)
+        if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+        return { x, y }
+      })
+      if (cue) await page.mouse.click(cue.x, cue.y)
+      await page.waitForTimeout(80)
+    }
+  }
+
+  const rectDelta = (a, b) => {
+    if (!a || !b) return 0
+    return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y), Math.abs(a.w - b.w), Math.abs(a.h - b.h))
+  }
+  const listDelta = (a, b) => {
+    if (!a || !b) return 0
+    let worst = 0
+    const n = Math.min(a.length, b.length)
+    for (let i = 0; i < n; i += 1) worst = Math.max(worst, rectDelta(a[i], b[i]))
+    return worst
+  }
+
+  const runClear = async (width, height, motion) => {
+    const label = `${width}x${height}${motion ? ' motion' : ''}`
+    if (only && only !== label) return
+    const { context, page } = await openMap(browser, port, width, height, 'a2', {
+      motion,
+      search: '?playtest=1&nwSeed=2&nwRound=2',
+    })
+    page.on('pageerror', (error) => errors.push(`round-cheer ${label} ${error}`))
+    await page.locator('.defend-go').waitFor()
+    await installSampler(page)
+    await page.locator('.defend-go').click()
+    await tapUntilBoost(page)
+    const reached = (await page.locator('.defend-page.is-boost').count()) > 0
+    if (!reached) {
+      fail(`checkNwRoundCheer fail ${label} boost=0`)
+      await context.close()
+      return
+    }
+    await page.waitForFunction(() => window.__nwRoundCheer && window.__nwRoundCheer.done, undefined, { timeout: 8000 })
+    const sample = await page.evaluate(() => window.__nwRoundCheer)
+    const frames = sample.frames
+    const visibleFrames = frames.filter((frame) => frame.litDots > 0).length
+    const holdMs = sample.firstSeen != null && sample.lastSeen != null ? Math.round(sample.lastSeen - sample.firstSeen) : 0
+    const dotHold = Math.max(0, ...Object.values(sample.dots).map((dot) => dot.last - dot.first), 0)
+    const nameLabel = sample.names.join(' | ') || '(none)'
+    const fmt = (n) => n.toFixed(1)
+    const bundleDelta = (a, b) =>
+      Math.max(
+        rectDelta(a?.rects.continue, b?.rects.continue),
+        listDelta(a?.rects.rail, b?.rects.rail),
+        rectDelta(a?.rects.candle, b?.rects.candle),
+        listDelta(a?.rects.dock, b?.rects.dock),
+        rectDelta(a?.rects.begin, b?.rects.begin),
+        listDelta(a?.rects.pad, b?.rects.pad),
+      )
+    // The clear bar's first paint still settles the board for a few frames under motion.
+    // That shift is present with no cheer. The 0.5px cutoff applies once the rects hold still.
+    let settle = 0
+    for (let i = 0; i < frames.length - 2; i += 1) {
+      if (bundleDelta(frames[i], frames[i + 1]) <= 0.5 && bundleDelta(frames[i], frames[i + 2]) <= 0.5) {
+        settle = i
+        break
+      }
+    }
+    const base = frames[settle] || frames[0]
+    const rawBase = frames[0]
+    const worst = { continue: 0, rail: 0, candle: 0, dock: 0, begin: 0, pad: 0 }
+    const raw = { continue: 0, rail: 0, candle: 0, dock: 0, begin: 0, pad: 0 }
+    let cover = 0
+    let inside = true
+    let hopped = false
+    let anim = ''
+    let dotMin = 1
+    let dotMax = 0
+    let cheerGroups = 0
+    let pads = 0
+    if (!frames.length) fail(`checkNwRoundCheer fail ${label} frames=0`)
+    for (const row of frames) {
+      if (!base || !rawBase) break
+      const use = frames.indexOf(row) >= settle
+      if (use) {
+        worst.continue = Math.max(worst.continue, rectDelta(base.rects.continue, row.rects.continue))
+        worst.rail = Math.max(worst.rail, listDelta(base.rects.rail, row.rects.rail))
+        worst.candle = Math.max(worst.candle, rectDelta(base.rects.candle, row.rects.candle))
+        worst.dock = Math.max(worst.dock, listDelta(base.rects.dock, row.rects.dock))
+        worst.begin = Math.max(worst.begin, rectDelta(base.rects.begin, row.rects.begin))
+        worst.pad = Math.max(worst.pad, listDelta(base.rects.pad, row.rects.pad))
+      }
+      raw.continue = Math.max(raw.continue, rectDelta(rawBase.rects.continue, row.rects.continue))
+      raw.rail = Math.max(raw.rail, listDelta(rawBase.rects.rail, row.rects.rail))
+      raw.candle = Math.max(raw.candle, rectDelta(rawBase.rects.candle, row.rects.candle))
+      raw.dock = Math.max(raw.dock, listDelta(rawBase.rects.dock, row.rects.dock))
+      raw.begin = Math.max(raw.begin, rectDelta(rawBase.rects.begin, row.rects.begin))
+      raw.pad = Math.max(raw.pad, listDelta(rawBase.rects.pad, row.rects.pad))
+      cover = Math.max(cover, row.cover)
+      if (!row.inside) inside = false
+      if (row.hopped) hopped = true
+      if (row.anim) anim = row.anim
+      if (row.litDots > 0) {
+        cheerGroups = row.groups
+        pads = row.pads
+        dotMin = Math.min(dotMin, row.dotMin)
+        dotMax = Math.max(dotMax, row.dotMax)
+        if (row.groups !== row.pads) fail(`checkNwRoundCheer fail ${label} cheer=${row.groups} pads=${row.pads}`)
+        if (!row.ptr) fail(`checkNwRoundCheer fail ${label} pointer-events`)
+      }
+      if (row.gold !== 1) fail(`checkNwRoundCheer fail ${label} gold=${row.gold} names=${nameLabel}`)
+      const hit = row.hits
+      const hitBad =
+        hit.continue !== 'ok' ||
+        hit.rail !== 'ok' ||
+        hit.dock !== 'ok' ||
+        hit.pad !== 'ok' ||
+        (hit.candle !== 'ok' && hit.candle !== 'absent') ||
+        (hit.begin !== 'ok' && hit.begin !== 'absent')
+      if (hitBad) fail(`checkNwRoundCheer hit ${label} continue=${hit.continue} rail=${hit.rail} candle=${hit.candle} dock=${hit.dock} begin=${hit.begin} pad=${hit.pad}`)
+    }
+    const golds = [...new Set(frames.map((frame) => frame.gold))]
+    console.log(`checkNwRoundCheer gold ${label} gold=${golds.join('|') || 'none'} names=${nameLabel}`)
+    const hit = frames.at(-1)?.hits
+    if (hit) console.log(`checkNwRoundCheer hit ${label} continue=${hit.continue} rail=${hit.rail} candle=${hit.candle} dock=${hit.dock} begin=${hit.begin} pad=${hit.pad}`)
+    console.log(
+      `checkNwRoundCheer delta ${label} continue=${fmt(worst.continue)} rail=${fmt(worst.rail)} candle=${fmt(worst.candle)} dock=${fmt(worst.dock)} begin=${fmt(worst.begin)} pad=${fmt(worst.pad)} rawPad=${fmt(raw.pad)} settle=${settle}`,
+    )
+    if (worst.continue > 0.5 || worst.rail > 0.5 || worst.candle > 0.5 || worst.dock > 0.5 || worst.begin > 0.5 || worst.pad > 0.5) {
+      fail(
+        `checkNwRoundCheer delta ${label} continue=${fmt(worst.continue)} rail=${fmt(worst.rail)} candle=${fmt(worst.candle)} dock=${fmt(worst.dock)} begin=${fmt(worst.begin)} pad=${fmt(worst.pad)}`,
+      )
+    }
+    console.log(`checkNwRoundCheer cover ${label} overlap=${fmt(cover)}`)
+    if (cover > 0.5) fail(`checkNwRoundCheer cover ${label} overlap=${fmt(cover)}`)
+    const lines = await lineRecords(page)
+    let clipped = 0
+    for (const row of lines) {
+      console.log(
+        `checkNwRoundCheer line ${label} ${row.name} overflow=${row.overflow} scroll=${row.scroll} client=${row.client} scrollH=${row.scrollH} clientH=${row.clientH} rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(row.source)}`,
+      )
+      if (row.rendered !== row.source) fail(`checkNwRoundCheer line ${label} ${row.name}`)
+      if (row.scroll > row.client + 1 || row.scrollH > row.clientH + 1) clipped += 1
+    }
+    if (clipped !== 0) fail(`checkNwRoundCheer clip ${label} clipped=${clipped}`)
+    else console.log(`checkNwRoundCheer clip ${label} clipped=0`)
+    if (visibleFrames === 0) fail(`checkNwRoundCheer fail ${label} cheer=0 visibleFrames=0`)
+    else if (holdMs < 500 || dotHold < 500) fail(`checkNwRoundCheer fail ${label} cheer=${visibleFrames} visibleFrames=${visibleFrames} holdMs=${holdMs} dotHold=${Math.round(dotHold)}`)
+    if (visibleFrames > 0 && !inside) fail(`checkNwRoundCheer bbox ${label} inside=0`)
+    else if (visibleFrames > 0) console.log(`checkNwRoundCheer bbox ${label} inside=1 holdMs=${holdMs}`)
+    if (visibleFrames > 0 && motion && !hopped) fail(`checkNwRoundCheer motion ${label} transform=identity`)
+    if (visibleFrames > 0 && !motion) {
+      if (anim && anim !== 'none') fail(`checkNwRoundCheer reduce ${label} animation=${anim}`)
+      if (dotMin < 0.8 || dotMax > 0.95) fail(`checkNwRoundCheer reduce ${label} opacity=${dotMin.toFixed(2)}..${dotMax.toFixed(2)}`)
+    }
+    if (sample.order && visibleFrames > 0) {
+      const order = [...sample.order].sort((a, b) => a.x - b.x)
+      for (let i = 1; i < order.length; i += 1) {
+        if (order[i].i < order[i - 1].i) fail(`checkNwRoundCheer order ${label} x=${order.map((row) => row.i).join(',')}`)
+      }
+      if (order.some((row) => row.i > 4)) fail(`checkNwRoundCheer order ${label} cap`)
+    }
+    if (width === 375 && sample.dotR != null) console.log(`checkNwRoundCheer radius 375 r=${sample.dotR.toFixed(2)}`)
+    const localFail = problems.some((line) => line.includes(` ${label} `) || line.endsWith(` ${label}`))
+    if (visibleFrames > 0 && !localFail) {
+      console.log(`checkNwRoundCheer ok ${label} cheer=${cheerGroups} pads=${pads} gold=1 names=${nameLabel} visibleFrames=${visibleFrames} holdMs=${holdMs}`)
+    }
+    await context.close()
+  }
+
+  for (const [width, height] of ROUND_CHEER_SIZES) await runClear(width, height, false)
+  await runClear(375, 667, true)
+  await runClear(768, 1024, true)
+
+  if (!only) {
+    const jumpSearch = '?playtest=1&nwSeed=2&nwMap=a2&nwRound=18&nwLamps=2'
+    {
+      const { context, page } = await openMap(browser, port, 375, 667, 'a2', { search: jumpSearch })
+      page.on('pageerror', (error) => errors.push(`round-cheer jump ${error}`))
+      await page.waitForTimeout(100)
+      const jumpSample = await page.evaluate(async () => {
+        const frames = []
+        const start = performance.now()
+        while (performance.now() - start < 950) {
+          await new Promise((resolve) => requestAnimationFrame(resolve))
+          frames.push(document.querySelectorAll('.defend-clear-cheer').length)
+        }
+        return { max: Math.max(0, ...frames), ms: Math.round(performance.now() - start), boost: document.querySelector('.defend-page.is-boost') ? 1 : 0 }
+      })
+      if (jumpSample.max !== 0) fail(`checkNwRoundCheer no-fire jump cheer=${jumpSample.max}`)
+      else console.log(`checkNwRoundCheer no-fire jump cheer=0 ms=${jumpSample.ms} boost=${jumpSample.boost}`)
+      await context.close()
+    }
+
+    const snap = {
+      phase: 'boost',
+      waveIndex: 1,
+      plants: { 'at:490:1000': 'love' },
+      paths: {
+        love: { far: 0, strong: 0 },
+        logic: { far: 0, strong: 0 },
+        reason: { far: 0, strong: 0 },
+        science: { far: 0, strong: 0 },
+      },
+      sparks: 2,
+      hearts: 3,
+      paid: [],
+    }
+    const snapCtx = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 375, height: 667 },
+      deviceScaleFactor: 1,
+      reducedMotion: 'reduce',
+    })
+    await snapCtx.addInitScript(
+      (payload) => {
+        localStorage.setItem(payload.key, JSON.stringify(payload.save))
+        sessionStorage.setItem('nw-night-return', JSON.stringify(payload.snap))
+      },
+      { key: STORAGE_KEY, save: SAVE, snap },
+    )
+    const snapPage = await snapCtx.newPage()
+    snapPage.on('pageerror', (error) => errors.push(`round-cheer snap ${error}`))
+    await snapPage.goto('/?playtest=1&nwCam=0')
+    await snapPage.getByRole('button', { name: 'Settings' }).click()
+    await snapPage.locator('summary', { hasText: 'Developer' }).click()
+    await snapPage.getByRole('button', { name: 'Jump · Night Watch' }).click()
+    await snapPage.locator('.defend-board').waitFor()
+    if (await snapPage.locator('[data-map-overlay]').count()) {
+      await snapPage.locator('[data-map="a2"]').click()
+      await snapPage.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+    }
+    await snapPage.locator('.defend-page.is-boost').waitFor({ timeout: 15_000 })
+    const planted = await snapPage.locator('.defend-pad.is-planted').count()
+    if (planted < 1) fail('checkNwRoundCheer no-fire snap planted=0')
+    const snapSample = await snapPage.evaluate(async () => {
+      const frames = []
+      const start = performance.now()
+      while (performance.now() - start < 950) {
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+        frames.push(document.querySelectorAll('.defend-clear-cheer').length)
+      }
+      return { max: Math.max(0, ...frames), ms: Math.round(performance.now() - start) }
+    })
+    if (snapSample.max !== 0) fail(`checkNwRoundCheer no-fire snap cheer=${snapSample.max}`)
+    else console.log(`checkNwRoundCheer no-fire snap cheer=0 ms=${snapSample.ms} phase=boost planted=${planted}`)
+    await snapCtx.close()
+
+    const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }
+    const hard = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 375, height: 667 },
+      deviceScaleFactor: 1,
+    })
+    await hard.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: hardSave },
+    )
+    const hardPage = await hard.newPage()
+    hardPage.on('pageerror', (error) => errors.push(`round-cheer hard ${error}`))
+    await hardPage.goto('/?playtest=1')
+    await hardPage.getByRole('button', { name: 'Hold the night' }).click()
+    await hardPage.locator('.defend-board').waitFor()
+    if ((await hardPage.locator('.defend-page.is-easy-watch').count()) !== 0) fail('checkNwRoundCheer no-fire hard easy-watch')
+    const hardSample = await hardPage.evaluate(async () => {
+      const frames = []
+      const start = performance.now()
+      while (performance.now() - start < 950) {
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+        frames.push(document.querySelectorAll('.defend-clear-cheer').length)
+      }
+      return { max: Math.max(0, ...frames), ms: Math.round(performance.now() - start) }
+    })
+    if (hardSample.max !== 0) fail(`checkNwRoundCheer no-fire hard cheer=${hardSample.max}`)
+    else console.log(`checkNwRoundCheer no-fire hard cheer=0 ms=${hardSample.ms}`)
+    await hard.close()
+  }
+
+  for (const err of errors.slice(errorMark)) fail(`checkNwRoundCheer error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 export async function checkPhoneFixes() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -7455,6 +8144,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'plant ignite nights stay free of console errors')
       return
     }
+    if (process.env.NW_ROUND_CHEER_ONLY === '1') {
+      await checkNwRoundCheer(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'round cheer nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
@@ -7470,6 +8164,7 @@ export async function checkPhoneFixes() {
     await checkNwTypeLabelChrome(browser, port, errors)
     await checkMap05CamOffRing(browser, port, errors)
     await checkNwPlantIgnite(browser, port, errors)
+    await checkNwRoundCheer(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -7646,7 +8341,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')

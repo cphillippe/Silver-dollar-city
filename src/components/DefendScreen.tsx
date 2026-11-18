@@ -315,6 +315,8 @@ interface DefendScreenProps {
 
 /** 1.4.375: how long the lamp level-up burst, roman bump, and −1✦ stay readable. */
 const LEVEL_BURST_MS = 1100
+/** Last lamp waits 4×80ms, its last dot 4×70ms, then the 700ms fade. 1400ms keeps that tail. */
+const CLEAR_CHEER_MS = 1400
 /** Easy: drop grey seat rings the frame cuts in half. Flip to false to bring them back. */
 const NW_HIDE_EDGE_SEATS = true
 /** Easy: the Wave survived! banner stays up long enough to read. Only the hide timer reads this. */
@@ -600,6 +602,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const [upFlash, setUpFlash] = useState<CityPlotId | null>(null)
   const [plantIgniteIds, setPlantIgniteIds] = useState<ReadonlySet<CityPlotId>>(() => new Set())
   const plantIgniteTimers = useRef<Partial<Record<CityPlotId, number>>>({})
+  const [clearCheer, setClearCheer] = useState(false)
+  const clearCheerPending = useRef(false)
+  const clearCheerTimer = useRef(0)
   const [levelBurst, setLevelBurst] = useState<{ plotId: CityPlotId; from: number; to: number } | null>(null)
   const [sparkSpend, setSparkSpend] = useState(false)
   const [sparkSpent, setSparkSpent] = useState(1)
@@ -852,7 +857,24 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }
     plantIgniteTimers.current = {}
     window.clearTimeout(burstTimer.current)
+    if (!(phase === 'boost' && clearCheerPending.current)) {
+      setClearCheer(false)
+      window.clearTimeout(clearCheerTimer.current)
+      clearCheerTimer.current = 0
+    }
+    if (phase !== 'boost') clearCheerPending.current = false
   }, [phase])
+
+  useEffect(() => {
+    if (phase !== 'boost' || !easy || !clearCheerPending.current) return
+    setClearCheer(true)
+    window.clearTimeout(clearCheerTimer.current)
+    clearCheerTimer.current = window.setTimeout(() => {
+      clearCheerPending.current = false
+      setClearCheer(false)
+      clearCheerTimer.current = 0
+    }, CLEAR_CHEER_MS)
+  }, [phase, easy])
 
   useEffect(() => {
     if (!returnPlot) return
@@ -1471,6 +1493,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       for (const id of Object.keys(plantIgniteTimers.current)) {
         window.clearTimeout(plantIgniteTimers.current[id as CityPlotId]!)
       }
+      window.clearTimeout(clearCheerTimer.current)
     },
     [],
   )
@@ -1974,6 +1997,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         grantClearSpark()
         live.current.playing = false
         setToolLock(null)
+        if (easy) clearCheerPending.current = true
         setPhase('boost')
         return
       }
@@ -4749,6 +4773,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                   spawnLog={easy && debugPanel}
                   upFlashId={upFlash}
                   plantIgniteIds={plantIgniteIds}
+                  clearCheer={clearCheer}
                   levelBurst={
                     levelBurst && upgradeAt === levelBurst.plotId
                       ? { from: levelBurst.from, to: levelBurst.to }
