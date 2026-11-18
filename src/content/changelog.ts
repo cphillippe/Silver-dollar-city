@@ -28,7 +28,7 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.594',
+    version: '1.4.593',
     title: 'Dig win: readable One more dig and Home',
     when: '2026-11-17',
     items: [
