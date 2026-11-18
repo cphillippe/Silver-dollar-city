@@ -2026,52 +2026,14 @@ assert.doesNotMatch(
   assert.match(phone595, /checkDigWinReadable ok \$\{tag\}/, '1.4.595 the ok line logs per viewport')
 }
 
-// 1.4.594: Easy Night Watch mid-wave strip Far / Strong words (#950).
-assert.equal(CHANGELOG[3].version, '1.4.594', '1.4.594 follows the newest row')
-assert.match(latestChange('1.4.594').items.join('\n'), /Refs #950/, '1.4.594 changelog refs #950')
-assert.match(latestChange('1.4.594').items.join('\n'), /Far and Strong/, '1.4.594 changelog names the strip words')
-assert.match(latestChange('1.4.594').items.join('\n'), /Hard stays the same\./)
-assert.doesNotMatch(latestChange('1.4.594').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.594 changelog avoids GitHub close keywords')
-assert.doesNotMatch(
-  playerVisibleChangeItems(latestChange('1.4.594').items).join('\n'),
-  /\bHard\b|\bMedium\b/,
-  '1.4.594 the player note does not name other tiers',
-)
-{
-  const defend594 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
-  const phone594 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
-  const place594 = readFileSync(new URL('../src/lib/towerCardPlace.ts', import.meta.url), 'utf8')
-  const card594 = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
-  assert.match(place594, /ownLampHit/, '1.4.594 mid-wave strip clears the open lamp hit')
-  assert.match(place594, /stripLampHits/, '1.4.594 strip placement penalizes neighbour and own lamp overlap')
-  assert.match(place594, /road\?:/, '1.4.594 TowerTaps carries road boxes for the strip')
-  assert.match(place594, /stripAboveLamp/, '1.4.594 mid-wave strip stays above the lamp')
-  assert.match(card594, /function roadTapBoxes/, '1.4.594 mid-wave strip samples the road for placement')
-  assert.match(defend594, /--nw-icon-far: "Far"/, '1.4.594 strip sets Far on the mid-wave card')
-  assert.match(defend594, /--nw-icon-strong: "Strong"/, '1.4.594 strip sets Strong on the mid-wave card')
-  assert.match(defend594, /data-strip='yes'\] \.defend-path-buy[\s\S]*white-space: nowrap/, '1.4.594 strip buy keeps Far/Strong/3 sparks on one line')
-  assert.match(phone594, /async function checkNwStripWords/, '1.4.594 checkNwStripWords is defined')
-  assert.match(phone594, /NW_STRIP_WORDS_LAMPS/, '1.4.594 strip words sweep all four lamp types')
-  assert.match(phone594, /NW_STRIP_TAP_PLAN/, '1.4.594 strip tap baselines stay card-relative')
-  assert.match(
-    phone594,
-    /NW_STRIP_WORDS_SIZES = \[\s*\[375, 812\],\s*\[390, 844\],\s*\[412, 915\],\s*\]/,
-    '1.4.594 strip words covers 375, 390 and 412',
-  )
-  assert.match(
-    phone594,
-    /await checkNwPlantRingOnce\(browser, port, errors\)\n    await checkNwStripWords\(browser, port, errors\)/,
-    '1.4.594 the full path runs checkNwStripWords after checkNwPlantRingOnce',
-  )
-  assert.match(phone594, /checkNwStripWords ok \$\{tag\}/, '1.4.594 the ok line logs per viewport')
-  assert.match(phone594, /checkNwStripWords road ok \$\{label\}/, '1.4.594 strip words logs road clearance per size')
-  assert.match(phone594, /roadHalf = 11/, '1.4.594 strip road overlap uses the same 11px half-width as placement')
-}
 
-// 1.4.593: Easy Night Watch plant shockwave only on first plant (#959).
-assert.equal(CHANGELOG[4].version, '1.4.593', '1.4.593 follows the newest row')
+// 1.4.593:// 1.4.593: Easy Night Watch plant ring once per run (#959) and mid-wave Far / Strong strip (#950).
+assert.equal(APP_VERSION, '1.4.593')
+assert.equal(CHANGELOG[0].version, '1.4.593', '1.4.593 is the newest row')
 assert.match(latestChange('1.4.593').items.join('\n'), /Refs #959/, '1.4.593 changelog refs #959')
+assert.match(latestChange('1.4.593').items.join('\n'), /Refs #950/, '1.4.593 changelog refs #950')
 assert.match(latestChange('1.4.593').items.join('\n'), /first time you plant/, '1.4.593 changelog names the once-only ring')
+assert.match(latestChange('1.4.593').items.join('\n'), /Far and Strong/, '1.4.593 changelog names the strip words')
 assert.match(latestChange('1.4.593').items.join('\n'), /Hard stays the same\./)
 assert.doesNotMatch(latestChange('1.4.593').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.593 changelog avoids GitHub close keywords')
 assert.doesNotMatch(
@@ -2082,6 +2044,9 @@ assert.doesNotMatch(
 {
   const screen593 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   const phone593 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  const defend593 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const place593 = readFileSync(new URL('../src/lib/towerCardPlace.ts', import.meta.url), 'utf8')
+  const card593 = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
   assert.match(screen593, /plantIgniteRunDone/, '1.4.593 DefendScreen gates the plant ring per run')
   assert.match(screen593, /if \(plantIgniteRunDone\.current\) return/, '1.4.593 later plants do not re-fire the ring')
   assert.match(screen593, /resetPlantIgniteForRun/, '1.4.593 a new Easy run clears the plant ring gate')
@@ -2095,6 +2060,31 @@ assert.doesNotMatch(
   assert.match(phone593, /checkNwPlantRingOnce ok \$\{label\} rings=1/, '1.4.593 the ok line logs rings=1')
   assert.match(phone593, /checkNwPlantRingOnce run2 rings=\$\{tally2\.rings\}/, '1.4.593 the scan logs the second Home run ring count')
   assert.match(phone593, /checkNwPlantRingOnce ok jump-in lamps rings=0/, '1.4.593 jump-in with lamps does not ring')
+  assert.match(place593, /STRIP_PAD_CLEAR/, '1.4.593 mid-wave strip clears the open pad')
+  assert.match(place593, /ownLampHit/, '1.4.593 mid-wave strip clears the open lamp hit')
+  assert.match(place593, /stripLampHits/, '1.4.593 strip placement penalizes neighbour and own lamp overlap')
+  assert.match(place593, /road\?:/, '1.4.593 TowerTaps carries road boxes for the strip')
+  assert.match(place593, /stripAboveLamp/, '1.4.593 mid-wave strip stays above the lamp')
+  assert.match(card593, /function roadTapBoxes/, '1.4.593 mid-wave strip samples the road for placement')
+  assert.match(defend593, /--nw-icon-far: "Far"/, '1.4.593 strip sets Far on the mid-wave card')
+  assert.match(defend593, /--nw-icon-strong: "Strong"/, '1.4.593 strip sets Strong on the mid-wave card')
+  assert.match(defend593, /data-strip='yes'\] \.defend-path-buy[\s\S]*white-space: nowrap/, '1.4.593 strip buy keeps Far/Strong/3 sparks on one line')
+  assert.match(phone593, /async function checkNwStripWords/, '1.4.593 checkNwStripWords is defined')
+  assert.match(phone593, /NW_STRIP_WORDS_LAMPS/, '1.4.593 strip words sweep all four lamp types')
+  assert.match(phone593, /NW_STRIP_TAP_PLAN/, '1.4.593 strip tap baselines stay card-relative')
+  assert.match(
+    phone593,
+    /NW_STRIP_WORDS_SIZES = \[\s*\[375, 812\],\s*\[390, 844\],\s*\[412, 915\],\s*\]/,
+    '1.4.593 strip words covers 375, 390 and 412',
+  )
+  assert.match(
+    phone593,
+    /await checkNwPlantRingOnce\(browser, port, errors\)\n    await checkNwStripWords\(browser, port, errors\)/,
+    '1.4.593 the full path runs checkNwStripWords after checkNwPlantRingOnce',
+  )
+  assert.match(phone593, /checkNwStripWords ok \$\{tag\}/, '1.4.593 the ok line logs per viewport')
+  assert.match(phone593, /checkNwStripWords road ok \$\{label\}/, '1.4.593 strip words logs road clearance per size')
+  assert.match(phone593, /roadHalf = 11/, '1.4.593 strip road overlap uses the same 11px half-width as placement')
 }
 
 // 1.4.592: Easy Night Watch the Candle gets a name on the clear screen (#970).
