@@ -5247,6 +5247,7 @@ const NW_DOCK_GOLD_SEARCH = '?playtest=1&nwSeed=2&nwMap=a2&nwRound=18&nwLamps=0'
  * measured on unmodified 1.4.581 (the live fail). Rounded to 0.1px.
  * The pressed Candle dock sits 1px lower; that shift is the existing press, not this hop.
  */
+// 1.4.588: 13px Easy chip moves the open card <=1.1px (placement avoids the chip rect)
 const NW_DOCK_GOLD_BASE = {
   '375x667': {
     plant: {
@@ -5292,11 +5293,11 @@ const NW_DOCK_GOLD_BASE = {
         'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 },
       },
       card: {
-        pull: { x: 194.5, y: 167.7, w: 32, h: 32 },
-        'pip-far': { x: 66.5, y: 202.1, w: 18, h: 16 },
-        'buy-far': { x: 146.5, y: 177.3, w: 46, h: 44 },
-        'pip-strong': { x: 66.5, y: 247.1, w: 18, h: 16 },
-        'buy-strong': { x: 146.5, y: 222.3, w: 46, h: 44 },
+        pull: { x: 194.5, y: 168.4, w: 32, h: 32 },
+        'pip-far': { x: 66.5, y: 202.8, w: 18, h: 16 },
+        'buy-far': { x: 146.5, y: 178.1, w: 46, h: 44 },
+        'pip-strong': { x: 66.5, y: 247.8, w: 18, h: 16 },
+        'buy-strong': { x: 146.5, y: 223.1, w: 46, h: 44 },
       },
     },
   },
@@ -5344,11 +5345,11 @@ const NW_DOCK_GOLD_BASE = {
         'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 },
       },
       card: {
-        pull: { x: 272.2, y: 130, w: 32, h: 32 },
-        'pip-far': { x: 144.2, y: 164.4, w: 18, h: 16 },
-        'buy-far': { x: 224.2, y: 139.6, w: 46, h: 44 },
-        'pip-strong': { x: 144.2, y: 209.4, w: 18, h: 16 },
-        'buy-strong': { x: 224.2, y: 184.6, w: 46, h: 44 },
+        pull: { x: 273.3, y: 130, w: 32, h: 32 },
+        'pip-far': { x: 145.3, y: 164.4, w: 18, h: 16 },
+        'buy-far': { x: 225.3, y: 139.6, w: 46, h: 44 },
+        'pip-strong': { x: 145.3, y: 209.4, w: 18, h: 16 },
+        'buy-strong': { x: 225.3, y: 184.6, w: 46, h: 44 },
       },
     },
   },
@@ -5396,11 +5397,11 @@ const NW_DOCK_GOLD_BASE = {
         'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 },
       },
       card: {
-        pull: { x: 274.8, y: 130, w: 32, h: 32 },
-        'pip-far': { x: 146.8, y: 164.4, w: 18, h: 16 },
-        'buy-far': { x: 226.8, y: 139.6, w: 46, h: 44 },
-        'pip-strong': { x: 146.8, y: 209.4, w: 18, h: 16 },
-        'buy-strong': { x: 226.8, y: 184.6, w: 46, h: 44 },
+        pull: { x: 275.9, y: 130, w: 32, h: 32 },
+        'pip-far': { x: 147.9, y: 164.4, w: 18, h: 16 },
+        'buy-far': { x: 227.9, y: 139.6, w: 46, h: 44 },
+        'pip-strong': { x: 147.9, y: 209.4, w: 18, h: 16 },
+        'buy-strong': { x: 227.9, y: 184.6, w: 46, h: 44 },
       },
     },
   },
@@ -5448,11 +5449,11 @@ const NW_DOCK_GOLD_BASE = {
         'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 },
       },
       card: {
-        pull: { x: 480.6, y: 121, w: 32, h: 32 },
-        'pip-far': { x: 354.6, y: 170.8, w: 20, h: 20 },
-        'buy-far': { x: 354.6, y: 196.8, w: 148, h: 52 },
-        'pip-strong': { x: 354.6, y: 282.8, w: 20, h: 20 },
-        'buy-strong': { x: 354.6, y: 308.8, w: 148, h: 52 },
+        pull: { x: 479.8, y: 121, w: 32, h: 32 },
+        'pip-far': { x: 353.8, y: 170.8, w: 20, h: 20 },
+        'buy-far': { x: 353.8, y: 196.8, w: 148, h: 52 },
+        'pip-strong': { x: 353.8, y: 282.8, w: 20, h: 20 },
+        'buy-strong': { x: 353.8, y: 308.8, w: 148, h: 52 },
       },
     },
   },
@@ -5879,7 +5880,7 @@ const TYPE_LABEL_SEATS = [
 const TYPE_LABEL_PINS = {
   '375x667': {
     planted: { begin: { x: 67.5, y: 602.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: {} },
-    card: { begin: { x: 67.5, y: 602.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 216, y: 397.3, w: 32, h: 32 }, 'pip-far': { x: 88, y: 431.7, w: 18, h: 16 }, 'buy-far': { x: 168, y: 406.9, w: 46, h: 44 }, 'pip-strong': { x: 88, y: 476.7, w: 18, h: 16 }, 'buy-strong': { x: 168, y: 451.9, w: 46, h: 44 } } },
+    card: { begin: { x: 67.5, y: 602.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 216, y: 398, w: 32, h: 32 }, 'pip-far': { x: 88, y: 432.4, w: 18, h: 16 }, 'buy-far': { x: 168, y: 407.7, w: 46, h: 44 }, 'pip-strong': { x: 88, y: 477.4, w: 18, h: 16 }, 'buy-strong': { x: 168, y: 452.7, w: 46, h: 44 } } },
     r5: { begin: null, continue: { x: 125, y: 603, w: 125, h: 56 }, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 321.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 377.9, w: 52, h: 53.1 } }, card: {} },
     r1: { begin: null, continue: { x: 125, y: 603, w: 125, h: 56 }, rail: { 'rail-love': { x: 316, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 316, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 316, y: 208, w: 48, h: 48 }, 'rail-science': { x: 316, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 321.9, w: 52, h: 53.1 } }, card: {} },
   },
@@ -5897,7 +5898,7 @@ const TYPE_LABEL_PINS = {
   },
   '768x1024': {
     planted: { begin: { x: 77.8, y: 710, w: 162, h: 56 }, continue: null, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-candle': { x: 77.8, y: 770, w: 162, h: 52 }, 'dock-bell': { x: 77.8, y: 826, w: 162, h: 52 }, 'dock-incense': { x: 77.8, y: 882, w: 162, h: 52 }, 'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 } }, card: {} },
-    card: { begin: { x: 77.8, y: 710, w: 162, h: 56 }, continue: null, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-candle': { x: 77.8, y: 770, w: 162, h: 52 }, 'dock-bell': { x: 77.8, y: 826, w: 162, h: 52 }, 'dock-incense': { x: 77.8, y: 882, w: 162, h: 52 }, 'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 } }, card: { pull: { x: 373.5, y: 305, w: 32, h: 32 }, 'pip-far': { x: 247.5, y: 354.8, w: 20, h: 20 }, 'buy-far': { x: 247.5, y: 380.8, w: 148, h: 52 }, 'pip-strong': { x: 247.5, y: 466.8, w: 20, h: 20 }, 'buy-strong': { x: 247.5, y: 492.8, w: 148, h: 52 } } },
+    card: { begin: { x: 77.8, y: 710, w: 162, h: 56 }, continue: null, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-candle': { x: 77.8, y: 770, w: 162, h: 52 }, 'dock-bell': { x: 77.8, y: 826, w: 162, h: 52 }, 'dock-incense': { x: 77.8, y: 882, w: 162, h: 52 }, 'dock-cross': { x: 77.8, y: 938, w: 162, h: 52 } }, card: { pull: { x: 372.7, y: 305, w: 32, h: 32 }, 'pip-far': { x: 246.7, y: 354.8, w: 20, h: 20 }, 'buy-far': { x: 246.7, y: 380.8, w: 148, h: 52 }, 'pip-strong': { x: 246.7, y: 466.8, w: 20, h: 20 }, 'buy-strong': { x: 246.7, y: 492.8, w: 148, h: 52 } } },
     r5: { begin: null, continue: { x: 86.8, y: 937, w: 70, h: 40 }, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-new': { x: 160.8, y: 937, w: 95.5, h: 40 }, 'dock-candle': { x: 260.3, y: 937, w: 79.5, h: 40 } }, card: {} },
     r1: { begin: null, continue: { x: 86.8, y: 937, w: 70, h: 40 }, rail: { 'rail-love': { x: 682, y: 121, w: 60, h: 69.3 }, 'rail-logic': { x: 682, y: 196.3, w: 60, h: 69.3 }, 'rail-reason': { x: 682, y: 271.6, w: 60, h: 69.3 }, 'rail-science': { x: 682, y: 346.9, w: 60, h: 69.3 } }, docks: { 'dock-new': { x: 160.8, y: 937, w: 95.5, h: 40 } }, card: {} },
   },
@@ -6131,7 +6132,11 @@ async function sampleTypeLabelChrome(page) {
         if (el.closest('.defend-nw-debug, [hidden]')) continue
         take(tapKey(el), el)
       }
-      const lines = nodes.map(lineOf).filter(Boolean)
+      const labelNodes = [...document.querySelectorAll('text.defend-type-label, .defend-type-chip')]
+      const fonts = labelNodes
+        .filter(shown)
+        .map((el) => ({ name: nameOf(el), px: parseFloat(getComputedStyle(el).fontSize) }))
+      const lines = labelNodes.map(lineOf).filter(Boolean)
       const pan = document.querySelector('.nw-pan')?.style?.transform || ''
       return {
         begin: sum('begin'),
@@ -6146,6 +6151,7 @@ async function sampleTypeLabelChrome(page) {
         rects,
         hits,
         lines,
+        fonts,
         pan,
       }
     }
@@ -6277,6 +6283,14 @@ async function checkNwTypeLabelChrome(browser, port, errors) {
         let lineMismatch = 0
         const logged = new Set()
         for (const frame of frames) {
+          const fontMin =
+            frame.fonts?.length > 0 ? Math.min(...frame.fonts.map((row) => row.px)) : 0
+          console.log(`checkNwTypeLabelChrome font ${size} ${state} min=${fontMin}`)
+          for (const row of frame.fonts || []) {
+            if (row.px < 13) {
+              fail(`checkNwTypeLabelChrome font ${size} ${state} ${row.name}=${row.px} min=13`)
+            }
+          }
           const line = `checkNwTypeLabelChrome ov ${size} ${state} begin=${frame.begin} continue=${frame.continue} rail=${frame.rail} clearRow=${frame.clearRow} hud=${frame.hud} visibleLabels=${frame.visibleLabels}`
           console.log(line)
           if (frame.begin !== 0 || frame.continue !== 0 || frame.rail !== 0 || frame.clearRow !== 0 || frame.hud !== 0) fail(line)
