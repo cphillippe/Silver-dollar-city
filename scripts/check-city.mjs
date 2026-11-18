@@ -2003,9 +2003,8 @@ assert.doesNotMatch(
 }
 
 
-// 1.4.593:// 1.4.593: Easy Night Watch plant ring once per run (#959) and mid-wave Far / Strong strip (#950).
-assert.equal(APP_VERSION, '1.4.593')
-assert.equal(CHANGELOG[0].version, '1.4.593', '1.4.593 is the newest row')
+// 1.4.593: Easy Night Watch plant ring once per run (#959) and mid-wave Far / Strong strip (#950).
+assert.equal(CHANGELOG[2].version, '1.4.593', '1.4.593 follows the newest row')
 assert.match(latestChange('1.4.593').items.join('\n'), /Refs #959/, '1.4.593 changelog refs #959')
 assert.match(latestChange('1.4.593').items.join('\n'), /Refs #950/, '1.4.593 changelog refs #950')
 assert.match(latestChange('1.4.593').items.join('\n'), /first time you plant/, '1.4.593 changelog names the once-only ring')
