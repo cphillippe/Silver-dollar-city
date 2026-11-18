@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { isFreeSpot } from '../lib/lampPlace'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
@@ -127,6 +127,26 @@ function roadTapBoxes(ox: number, oy: number): TowerRect[] {
     })
   }
   return out
+}
+
+/** Road sample boxes in the card frame before the strip card mounts, so placement clears the path on first paint. */
+function stripRoadBootstrap(): TowerTaps | null {
+  if (typeof document === 'undefined') return null
+  const frame = document.querySelector('.defend-frame')
+  if (!(frame instanceof HTMLElement)) return null
+  const origin = frame.getBoundingClientRect()
+  const ox = origin.left + frame.clientLeft
+  const oy = origin.top + frame.clientTop
+  return {
+    begin: null,
+    rail: null,
+    buttons: [],
+    row: null,
+    own: [],
+    lamps: [],
+    labels: [],
+    road: roadTapBoxes(ox, oy),
+  }
 }
 
 function measureTaps(card: HTMLElement, plotId: string): TowerTaps | null {
@@ -461,7 +481,9 @@ export function DefendTowerCard({
       : null
   const [paintH, setPaintH] = useState(0)
   const [taps, setTaps] = useState<TowerTaps | null>(null)
-  const placedRaw = placeTowerCard(point, board, clearOf, cameraScale, reserveBottom, cardH, glyph, paintH, markOnMap ? taps : null, strip)
+  const roadBootstrap = useMemo(() => (strip ? stripRoadBootstrap() : null), [strip])
+  const placeTaps = markOnMap ? taps ?? roadBootstrap : null
+  const placedRaw = placeTowerCard(point, board, clearOf, cameraScale, reserveBottom, cardH, glyph, paintH, placeTaps, strip)
   const covered = labelOverGlyph(
     glyph,
     markOnMap ? taps : null,
