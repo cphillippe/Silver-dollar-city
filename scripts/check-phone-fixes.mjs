@@ -8085,6 +8085,7 @@ async function checkNwRoundCheer(browser, port, errors) {
 const NW_CANDLE_NAME_SIZES = [
   [375, 812],
   [390, 844],
+  [412, 915],
 ]
 
 function nwCandleNameSource() {
@@ -8154,46 +8155,85 @@ async function checkNwCandleName(browser, port, errors) {
     const read = await page.evaluate((source) => {
       const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
       const rectOf = (el) => {
+        if (!el) return null
         const r = el.getBoundingClientRect()
+        if (r.width < 1 || r.height < 1) return null
         return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom }
       }
-      const painters = [...document.querySelectorAll('body *')].filter((el) => {
-        const directs = [...el.childNodes].filter((child) => child.nodeType === 3)
-        return norm(directs.map((child) => child.textContent).join('')).includes('Candle') && norm(el.textContent).includes('sparks')
-      })
-      const nodes = painters.map((el) => {
-        const style = getComputedStyle(el)
-        const r = rectOf(el)
-        const range = document.createRange()
-        range.selectNodeContents(el)
-        const glyph = [...range.getClientRects()].filter((b) => b.width > 0 && b.height > 0)
-        return {
-          text: norm(el.textContent),
-          scrollW: el.scrollWidth,
-          clientW: el.clientWidth,
-          scrollH: el.scrollHeight,
-          clientH: el.clientHeight,
-          font: parseFloat(style.fontSize),
-          box: r,
-          glyph: glyph.map((b) => ({ x: b.x, y: b.y, right: b.right, bottom: b.bottom })),
-          inView: r.x >= 0 && r.y >= 0 && r.right <= innerWidth && r.bottom <= innerHeight,
-        }
-      })
-      const hit = (a, b) => a.x < b.right && a.right > b.x && a.y < b.bottom && a.bottom > b.y
-      const docks = [...document.querySelectorAll('button.defend-new-lamp')].map((el) => ({
-        key: el.getAttribute('data-candle-lamp') ? 'candle' : el.getAttribute('data-new-lamp') ? 'sparkle' : 'other',
-        box: rectOf(el),
-      }))
-      let overlap = 0
-      for (const node of nodes) {
-        for (const dock of docks) {
-          if (node.glyph.some((g) => hit(g, dock.box))) overlap += 1
-        }
+      const overlapPx2 = (a, b) => {
+        if (!a || !b) return 0
+        const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.x, b.x))
+        const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y))
+        return w * h
       }
+      const goldish = (value) => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+        let match
+        while ((match = re.exec(value || ''))) {
+          const r = Number(match[1])
+          const g = Number(match[2])
+          const b = Number(match[3])
+          const a = match[4] === undefined ? 1 : Number(match[4])
+          if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
+      const nameEl = document.querySelector('[data-candle-name="yes"]')
+      const candleDock = document.querySelector('button.defend-candle-lamp')
+      const dockBox = rectOf(candleDock)
+      const nameBox = rectOf(nameEl)
+      const style = nameEl ? getComputedStyle(nameEl) : null
+      const name = nameEl
+        ? {
+            text: norm(nameEl.textContent),
+            scrollW: nameEl.scrollWidth,
+            clientW: nameEl.clientWidth,
+            scrollH: nameEl.scrollHeight,
+            clientH: nameEl.clientHeight,
+            font: style ? parseFloat(style.fontSize) : 0,
+            box: nameBox,
+            inView:
+              nameBox &&
+              nameBox.x >= 0 &&
+              nameBox.y >= 0 &&
+              nameBox.right <= innerWidth &&
+              nameBox.bottom <= innerHeight,
+            gold:
+              style &&
+              (goldish(style.backgroundColor) ||
+                goldish(style.backgroundImage) ||
+                goldish(style.borderColor) ||
+                goldish(style.boxShadow)),
+            beside:
+              dockBox &&
+              nameBox &&
+              nameBox.x >= dockBox.right - 4 &&
+              Math.abs(nameBox.y + nameBox.h / 2 - (dockBox.y + dockBox.h / 2)) <= dockBox.h,
+          }
+        : null
+      const nodes = name ? [name] : []
+      const chrome = {
+        continue: overlapPx2(nameBox, rectOf(document.querySelector('.defend-continue'))),
+        rail: overlapPx2(nameBox, rectOf(document.querySelector('.nw-rail'))),
+        hud: overlapPx2(nameBox, rectOf(document.querySelector('.nw-hud'))),
+        dock: overlapPx2(nameBox, dockBox),
+      }
+      let chips = 0
+      for (const chip of document.querySelectorAll('.defend-type-label, .defend-tower-card[data-strip="yes"]')) {
+        chips += overlapPx2(nameBox, rectOf(chip))
+      }
+      const overlap = chrome.continue + chrome.rail + chrome.hud + chrome.dock + chips
+      const docks = [...document.querySelectorAll('button.defend-new-lamp')].map((el) =>
+        el.getAttribute('data-candle-lamp') ? 'candle' : el.getAttribute('data-new-lamp') ? 'sparkle' : 'other',
+      )
       return {
-        nodes: nodes.map(({ glyph, ...rest }) => rest),
+        nodes,
         overlap,
-        docks: docks.map((d) => d.key),
+        chrome,
+        chips,
+        beside: name?.beside === true,
+        nameGold: name?.gold === true,
+        docks,
         source,
       }
     }, want)
@@ -8217,12 +8257,18 @@ async function checkNwCandleName(browser, port, errors) {
       if (![...texts].every((text) => text === want)) fail(`checkNwCandleName fail ${tag} text=${JSON.stringify([...texts])} want=${JSON.stringify(want)}`)
       if (clipped !== 0) fail(`checkNwCandleName fail ${tag} clipped=${clipped}`)
       if (!(minFont >= 13)) fail(`checkNwCandleName fail ${tag} font=${minFont}`)
-      if (read.overlap !== 0) fail(`checkNwCandleName fail ${tag} overlap=${read.overlap}`)
+      if (read.overlap !== 0) {
+        fail(
+          `checkNwCandleName fail ${tag} overlap=${read.overlap} continue=${read.chrome?.continue ?? '?'} rail=${read.chrome?.rail ?? '?'} hud=${read.chrome?.hud ?? '?'} dock=${read.chrome?.dock ?? '?'} chips=${read.chips ?? '?'}`,
+        )
+      }
+      if (!read.beside) fail(`checkNwCandleName fail ${tag} beside=candle-dock`)
+      if (read.nameGold) fail(`checkNwCandleName fail ${tag} nameGold=1`)
     }
     if (golds.length !== 1 || golds[0] !== 1) fail(`checkNwCandleName fail ${tag} gold=${golds.join('|')} names=${names.join(' | ')}`)
     if (!problems.some((line) => line.includes(` ${tag} `))) {
       console.log(
-        `checkNwCandleName ok ${tag} text=${JSON.stringify(want)} nodes=${read.nodes.length} clipped=0 font=${minFont}px gold=1 overlap=0`,
+        `checkNwCandleName ok ${tag} text=${JSON.stringify(want)} nodes=${read.nodes.length} clipped=0 font=${minFont}px gold=1 overlap=0 beside=1 continue=0 rail=0 hud=0 chips=0 nameGold=0`,
       )
     }
     await context.close()
@@ -8472,6 +8518,124 @@ async function checkNwPlantRingOnce(browser, port, errors) {
       console.log(`checkNwPlantRingOnce ok ${label} rings=1 firstPlant=1 gold=1`)
     }
     await context.close()
+  }
+
+  const plantRingPlaythrough = async (page, label, fromJump = true) => {
+    if (fromJump) {
+      await page.goto(PLANT_NO_CARD_SEARCH)
+      await page.getByRole('button', { name: 'Settings' }).click()
+      await page.locator('summary', { hasText: 'Developer' }).click()
+      await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
+      await page.locator('.defend-board').waitFor()
+      if (await page.locator('[data-map-overlay]').count()) {
+        await page.locator('[data-map="a2"]').click()
+        await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+      }
+    }
+    await page.locator('.defend-go').waitFor()
+    await installRingCounter(page)
+    await page.locator('[data-type="love"]').click()
+    const first = await seatPoint(page, 'first')
+    assert.ok(first, `${label} first gold seat`)
+    await page.touchscreen.tap(first.x, first.y)
+    await waitIgniteClear(page)
+    const second = await seatPoint(page, 'next')
+    assert.ok(second, `${label} second seat`)
+    await page.touchscreen.tap(second.x, second.y)
+    await waitIgniteClear(page)
+    await page.locator('.defend-go').click()
+    await tapUntilBoost(page)
+    const reached = (await page.locator('.defend-page.is-boost').count()) > 0
+    if (reached) {
+      await page.locator('.defend-continue').click()
+      await page.locator('.defend-page:not(.is-boost)').waitFor({ timeout: 20_000 }).catch(() => {})
+      const third = await seatPoint(page, 'next')
+      if (third && (await page.locator('.defend-go').count()) > 0) {
+        if ((await page.locator('[data-type="love"]').count()) > 0) await page.locator('[data-type="love"]').click()
+        await page.touchscreen.tap(third.x, third.y)
+        await waitIgniteClear(page)
+      }
+    }
+    return page.evaluate(() => {
+      const out = window.__nwPlantRingOnce
+      if (out) out.running = false
+      return out
+    })
+  }
+
+  if (!only) {
+    const run2Label = '375x812 run2'
+    const homeSave = {
+      ...SAVE,
+      progress: { ...SAVE.progress, easyHeld: ['ph-road'], defense: { cleared: 0, met: [] } },
+    }
+    const run2 = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 375, height: 812 },
+      deviceScaleFactor: 1,
+      reducedMotion: 'no-preference',
+      hasTouch: true,
+      isMobile: true,
+    })
+    await run2.addInitScript(
+      (payload) => {
+        localStorage.setItem(payload.key, JSON.stringify(payload.save))
+        localStorage.setItem('silver-city-easy-open-v1', '2026-10-13')
+      },
+      { key: STORAGE_KEY, save: homeSave },
+    )
+    const run2Page = await run2.newPage()
+    run2Page.on('pageerror', (error) => errors.push(`plant-ring-once run2 ${error}`))
+    const tally1 = await plantRingPlaythrough(run2Page, run2Label)
+    if (tally1.rings !== 1) fail(`checkNwPlantRingOnce fail ${run2Label} run1 rings=${tally1.rings} want=1`)
+    await run2Page.goto('/?playtest=1')
+    await run2Page.getByRole('button', { name: 'Begin the watch' }).click()
+    await run2Page.locator('.defend-board').waitFor({ timeout: 20_000 })
+    if (await run2Page.locator('[data-map-overlay]').count()) {
+      await run2Page.locator('[data-map="a2"]').click()
+      await run2Page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+    }
+    const tally2 = await plantRingPlaythrough(run2Page, `${run2Label} home`, false)
+    console.log(`checkNwPlantRingOnce run2 rings=${tally2.rings}`)
+    if (tally2.rings !== 1) fail(`checkNwPlantRingOnce fail ${run2Label} rings=${tally2.rings} want=1`)
+    const jumpSnap = {
+      phase: 'plant',
+      waveIndex: 2,
+      plants: { 'at:490:1000': 'love', 'at:250:300': 'logic' },
+      paths: {
+        love: { far: 0, strong: 0 },
+        logic: { far: 0, strong: 0 },
+        reason: { far: 0, strong: 0 },
+        science: { far: 0, strong: 0 },
+      },
+      sparks: 8,
+      hearts: 3,
+      paid: [],
+    }
+    await run2.addInitScript(
+      (payload) => {
+        localStorage.setItem(payload.key, JSON.stringify(payload.save))
+        sessionStorage.setItem('nw-night-return', JSON.stringify(payload.snap))
+      },
+      { key: STORAGE_KEY, save: homeSave, snap: jumpSnap },
+    )
+    const jumpPage = await run2.newPage()
+    jumpPage.on('pageerror', (error) => errors.push(`plant-ring-once jump ${error}`))
+    await jumpPage.goto('/?playtest=1&nwCam=0')
+    await jumpPage.getByRole('button', { name: 'Settings' }).click()
+    await jumpPage.locator('summary', { hasText: 'Developer' }).click()
+    await jumpPage.getByRole('button', { name: 'Jump · Night Watch' }).click()
+    await jumpPage.locator('.defend-board').waitFor()
+    await installRingCounter(jumpPage)
+    await jumpPage.waitForTimeout(400)
+    const jumpTally = await jumpPage.evaluate(() => {
+      const out = window.__nwPlantRingOnce
+      if (out) out.running = false
+      return out
+    })
+    if (jumpTally.rings !== 0) fail(`checkNwPlantRingOnce fail jump-in lamps rings=${jumpTally.rings} want=0`)
+    else console.log(`checkNwPlantRingOnce ok jump-in lamps rings=0`)
+    await run2.close()
   }
 
   if (!only) {
