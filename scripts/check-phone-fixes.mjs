@@ -4814,11 +4814,11 @@ const EASY_GOLD_BASE_1579 = {
   '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
   '412x915 settings-more': {
     'Open Profile': { x: 41, y: 1360.7, w: 129.4, h: 52 },
-    Candy: { x: 41, y: 1874.1, w: 84.4, h: 52 },
-    'Dusk town': { x: 133.4, y: 1874.1, w: 111.5, h: 52 },
-    'Clean parchment': { x: 41, y: 1934.1, w: 160.8, h: 52 },
-    'Export JSON': { x: 41, y: 2237.5, w: 132.7, h: 52 },
-    'Import pasted save': { x: 41, y: 2483.3, w: 178.5, h: 52 },
+    Candy: { x: 41, y: 1873, w: 84.4, h: 52 },
+    'Dusk town': { x: 133.4, y: 1873, w: 111.5, h: 52 },
+    'Clean parchment': { x: 41, y: 1933, w: 160.8, h: 52 },
+    'Export JSON': { x: 41, y: 2211.5, w: 132.7, h: 52 },
+    'Import pasted save': { x: 41, y: 2457.3, w: 178.5, h: 52 },
   },
 }
 
