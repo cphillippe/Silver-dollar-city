@@ -148,23 +148,33 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
   const chipNodes = [...page.querySelectorAll('.defend-type-chip')]
     .filter((node): node is HTMLElement => node instanceof HTMLElement)
     .sort((a, b) => (parseFloat(b.style.top) || 0) - (parseFloat(a.style.top) || 0))
+  const cardOpen = Boolean(page.querySelector('.defend-tower-card'))
   const glyphBoxes = [
     ...page.querySelectorAll('.defend-pad .defend-lamp-sprite, .defend-pad image.defend-type-mark'),
   ]
     .filter(chromeBoxShown)
     .map((el) => el.getBoundingClientRect())
+  const cardBox = page.querySelector('.defend-tower-card')?.getBoundingClientRect()
+  const cardBlocks =
+    cardBox && cardBox.width > 1 && cardBox.height > 1 ? [cardBox] : []
   for (const chip of chipNodes) {
     const style = getComputedStyle(chip)
     if (style.display === 'none' || Number(style.opacity) === 0) {
       chip.removeAttribute('data-chrome-hide')
       continue
     }
-    if (!chip.getAttribute('data-label-park')) chip.style.transform = ''
+    if (cardOpen || chip.getAttribute('data-label-park')) {
+      const box = chip.getBoundingClientRect()
+      if (box.width < 1 || box.height < 1 || !chrome.some((other) => boxesHit(box, other))) chip.removeAttribute('data-chrome-hide')
+      else chip.setAttribute('data-chrome-hide', 'yes')
+      continue
+    }
+    chip.style.transform = ''
     chip.removeAttribute('data-chrome-hide')
     const otherChips = chipNodes
       .filter((node) => node !== chip && chromeBoxShown(node))
       .map((node) => node.getBoundingClientRect())
-    const blocks = [...chrome, ...glyphBoxes, ...otherChips]
+    const blocks = [...chrome, ...glyphBoxes, ...otherChips, ...cardBlocks]
     let box = slideTypeChip(chip, blocks, false)
     if (box.width > 1 && box.height > 1 && chrome.some((other) => boxesHit(box, other))) {
       box = slideTypeChip(chip, blocks, true)
