@@ -1982,7 +1982,9 @@ assert.doesNotMatch(
   const phone592 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
   assert.match(phone592, /async function checkNwCandleName/, '1.4.592 checkNwCandleName is defined')
   assert.match(phone592, /await checkNwLampMoveHop\(browser, port, errors\)\n    await checkNwCandleName\(browser, port, errors\)/, '1.4.592 the full path runs checkNwCandleName after checkNwLampMoveHop')
+  assert.match(phone592, /NW_CANDLE_NAME_SIZES = \[\s*\[375, 812\],\s*\[390, 844\],\s*\[412, 915\],\s*\]/, '1.4.592 the candle name scan covers 375, 390 and 412')
   assert.match(phone592, /checkNwCandleName ok \$\{tag\}/, '1.4.592 the ok line logs per viewport')
+  assert.match(phone592, /beside=1 continue=0 rail=0 hud=0 chips=0 nameGold=0/, '1.4.592 the ok line logs chrome beside the Candle dock')
 }
 
 // 1.4.591: Easy Night Watch one lamp hops to the next seat (#968).
