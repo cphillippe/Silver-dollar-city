@@ -444,7 +444,7 @@ export function placeTowerCard(
           ownHits(card) * 5e5 +
           softHits(card) * 1e5 +
           softArea(card) * 0.5 +
-          stripLampHits(card) * 1e8 +
+          (strip ? stripLampHits(card) * 1e8 : lampHits(card) * 2000) +
           stripBelow +
           stripRoad +
           (railIn + barIn) * 50 +
