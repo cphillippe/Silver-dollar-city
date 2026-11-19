@@ -4,6 +4,7 @@ import { isFreeSpot } from '../lib/lampPlace'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
 import {
   placeTowerCard,
+  STRIP_ROAD_HALF,
   STRIP_H,
   STRIP_W,
   TOWER_CARD_H,
@@ -111,7 +112,7 @@ function roadTapBoxes(ox: number, oy: number): TowerRect[] {
   const length = road.getTotalLength()
   // Match check-live-prove 1.4.500: 394 samples along the path, point-in-card.
   const step = length / 393
-  const half = 0.75
+  const half = STRIP_ROAD_HALF
   const out: TowerRect[] = []
   for (let i = 0; i < 394; i += 1) {
     const at = road.getPointAtLength(Math.min(length, i * step))
@@ -169,7 +170,7 @@ function measureTaps(card: HTMLElement, plotId: string): TowerTaps | null {
     })
   }
   const chips = [...document.querySelectorAll('.defend-type-chip')]
-  if (card.getAttribute('data-strip') === 'yes') void roadTapBoxes(ox, oy)
+  const isStrip = card.getAttribute('data-strip') === 'yes'
   return {
     begin,
     rail: one('.nw-rail'),
@@ -190,6 +191,7 @@ function measureTaps(card: HTMLElement, plotId: string): TowerTaps | null {
       ...pads.flatMap((pad) => [...pad.querySelectorAll('text.defend-type-label')].map(rect)),
       ...chips.filter((chip) => chip.getAttribute('data-chip-plot') !== plotId).map(rect),
     ].filter((box): box is TowerRect => box !== null),
+    ...(isStrip ? { road: roadTapBoxes(ox, oy) } : {}),
   }
 }
 
@@ -216,7 +218,8 @@ function sameTaps(a: TowerTaps | null, b: TowerTaps | null): boolean {
     (a.row ?? null) === (b.row ?? null) &&
     sameRects(a.own, b.own) &&
     sameRects(a.lamps, b.lamps) &&
-    sameRects(a.labels, b.labels)
+    sameRects(a.labels, b.labels) &&
+    sameRects(a.road, b.road)
   )
 }
 
@@ -478,9 +481,37 @@ export function DefendTowerCard({
     setPaintH((prev) => (Math.abs(prev - painted) < 0.5 ? prev : painted))
     if (markOnMap && !strip && cardRef.current) parkNeighbourLabels()
     else restoreParkedLabels()
-    const next = markOnMap && cardRef.current ? measureTaps(cardRef.current, plotId) : null
+    const measure = () => (markOnMap && cardRef.current ? measureTaps(cardRef.current, plotId) : null)
+    const next = measure()
     setTaps((prev) => (sameTaps(prev, next) ? prev : next))
-    return () => restoreParkedLabels()
+    let frame = 0
+    let stop = false
+    const bumpStripRoad = () => {
+      if (stop || !strip || !cardRef.current) return
+      const parent = cardRef.current.offsetParent
+      if (parent instanceof HTMLElement) {
+        const origin = parent.getBoundingClientRect()
+        const road = roadTapBoxes(origin.left + parent.clientLeft, origin.top + parent.clientTop)
+        setTaps((prev) => {
+          if (!prev) return prev
+          if (sameRects(prev.road, road)) return prev
+          return { ...prev, road }
+        })
+      }
+      frame = requestAnimationFrame(bumpStripRoad)
+    }
+    if (strip && cardRef.current) {
+      frame = requestAnimationFrame(() => {
+        const again = measure()
+        if (again) setTaps((prev) => (sameTaps(prev, again) ? prev : again))
+        bumpStripRoad()
+      })
+    }
+    return () => {
+      stop = true
+      if (frame) cancelAnimationFrame(frame)
+      restoreParkedLabels()
+    }
   })
 
   useEffect(() => {

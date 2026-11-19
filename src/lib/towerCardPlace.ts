@@ -181,6 +181,9 @@ export const TAP_EPS = 0.5
 const BEGIN_BOB = 2
 export const BEGIN_REACH = BEGIN_GAP + TAP_EPS + BEGIN_BOB
 
+/** Half-width for mid-wave strip road clearance; matches checkNwStripWords roadHalf. */
+export const STRIP_ROAD_HALF = 11
+
 /** Road path samples in defend-frame coords. Matches DefendTowerCard roadTapBoxes for check-live-prove 1.4.500. */
 export function stripRoadBlocks(): TowerRect[] {
   if (typeof document === 'undefined') return []
@@ -196,7 +199,7 @@ export function stripRoadBlocks(): TowerRect[] {
   if (!svg || !ctm) return []
   const length = road.getTotalLength()
   const step = length / 393
-  const half = 0.75
+  const half = STRIP_ROAD_HALF
   const out: TowerRect[] = []
   for (let i = 0; i < 394; i += 1) {
     const at = road.getPointAtLength(Math.min(length, i * step))
@@ -292,6 +295,7 @@ export function placeTowerCard(
   const glyphHits = (card: { left: number; top: number }) =>
     glyph && cardHitsGlyph(card, point, cardHeight, paintHeight, glyph) ? 1 : 0
   const markH = paintHeight > 0 ? paintHeight : cardHeight
+  // Strip road clearance uses measured taps.road (rAF after pan); fall back once before first measure.
   const roadRects = strip ? (taps?.road?.length ? taps.road : stripRoadBlocks()) : []
   const roadBlocks = roadRects.map((r) => ({
     left: r.left - TAP_EPS,
@@ -359,14 +363,11 @@ export function placeTowerCard(
         ]
     const lefts = [...new Set([...offRoadLeft, Math.max(MARGIN, Math.min(point.left - W / 2, board.w - W - RAIL))])]
     for (const left of [...new Set(lefts.map((v) => Math.round(v)))]) {
-      for (const topTry of [
-        topAbove,
-        Math.max(MARGIN, topAbove - 16),
-        Math.max(MARGIN, topAbove - 32),
-        Math.max(MARGIN, topAbove - 48),
-        Math.max(MARGIN, topAbove - 64),
-        Math.max(MARGIN, topAbove - 80),
-      ]) {
+      const stripTops = [topAbove]
+      for (let lift = 16; lift <= 160; lift += 16) {
+        stripTops.push(Math.max(MARGIN, topAbove - lift))
+      }
+      for (const topTry of stripTops) {
         const card = { left, top: topTry }
         if (
           stripAboveLamp(card) &&
