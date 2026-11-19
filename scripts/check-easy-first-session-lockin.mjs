@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict'
 import { chromium } from '@playwright/test'
 import { createServer } from 'vite'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dirname, join } from 'node:path'
 import { APP_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 import { EASY_OPEN_DAY_KEY } from '../src/content/goldenPath.ts'
@@ -21,7 +21,6 @@ import {
 import { localDateKey } from '../src/lib/dates.ts'
 import { easyWhyLine } from '../src/lib/easy.ts'
 import { findStraightSpelling, gemWordsFor } from '../src/lib/gemSearch.ts'
-import { needsTierHold } from '../src/lib/tiers.ts'
 import { storyPlayFor } from '../src/lib/storyPlay.ts'
 import { SAVE_KIND, SAVE_SCHEMA_VERSION } from '../src/lib/save.ts'
 import { goldCues, probeInitSource } from './lockin843-probe.mjs'
@@ -43,26 +42,22 @@ const KID8_ANCHORS = {
   dig: 'wb-women',
 }
 
-/** Main 428a83d3: after hold, needsTierHold still true with empty lessonScore → a second win replays the full encode. */
-function main428a83d3WouldReplayEncode(id) {
-  const afterHoldNoScore = { held: [id], easyHeld: [id], lessonScore: {}, lessonTier: {} }
-  return needsTierHold(afterHoldNoScore, id)
+async function importAtViteRoot(viteRoot, rel) {
+  return import(pathToFileURL(join(viteRoot, rel)).href)
 }
-assert.equal(main428a83d3WouldReplayEncode('ph-road'), true, 'main 428a83d3 replays encode when held without score')
-/** Issue #963 Kid 8 first session on main 428a83d3: ~8 duplicate full Lock In screens in one sit (local repro note). */
-const BEFORE_MAIN_ISSUE963_DUPES = 8
-console.log(
-  `checkEasyFirstSessionLockInOnce beforeMain428a83d3 kid8DuplicateFullLockIn≈${BEFORE_MAIN_ISSUE963_DUPES} (issue #963 / main 428a83d3 held+needsTierHold)`,
-)
 
-function save(progress) {
+function saveBundle({ APP_VERSION: version, SAVE_KIND: kind, SAVE_SCHEMA_VERSION: schema }, progress) {
   return {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: APP_VERSION,
+    appVersion: version,
     savedAt: new Date().toISOString(),
     progress: { started: true, easyMode: true, theme: 'candy', ...progress },
   }
+}
+
+function save(progress) {
+  return saveBundle({ APP_VERSION, SAVE_KIND, SAVE_SCHEMA_VERSION }, progress)
 }
 
 assert.equal(easyFirstSessionDay('2099-12-31'), true)
@@ -358,23 +353,85 @@ async function playLessonBeat(page, lineId, counts) {
   }
 }
 
-async function driveKid8Session(page) {
+async function driveKid8Session(page, { measureOnly = false, loopLine = easyLoopLine } = {}) {
   const counts = {}
   const played = []
   let guard = 0
-  while (guard++ < KID8_ROUTE.length + 2) {
+  const maxSteps = measureOnly ? KID8_ROUTE.length + 12 : KID8_ROUTE.length + 2
+  while (guard++ < maxSteps) {
     const progress = await readProgress(page)
-    assert.ok(progress, 'save progress')
-    const held = progress.easyHeld ?? []
+    if (measureOnly) {
+      if (!progress) break
+    } else {
+      assert.ok(progress, 'save progress')
+    }
+    const held = progress?.easyHeld ?? []
     if (held.includes(KID8_END_LINE) && played.includes(KID8_END_LINE)) break
-    const lineId = easyLoopLine(progress)
-    assert.ok(KID8_ROUTE.includes(lineId), `golden path line ${lineId}`)
-    assert.ok(!played.includes(lineId), `did not replay lesson ${lineId} before holding`)
-    played.push(lineId)
+    const lineId = loopLine(progress)
+    if (measureOnly) {
+      if (!KID8_ROUTE.includes(lineId)) break
+    } else {
+      assert.ok(KID8_ROUTE.includes(lineId), `golden path line ${lineId}`)
+      assert.ok(!played.includes(lineId), `did not replay lesson ${lineId} before holding`)
+    }
+    if (!played.includes(lineId)) played.push(lineId)
     await playLessonBeat(page, lineId, counts)
   }
-  assert.ok((await readProgress(page))?.easyHeld?.includes(KID8_END_LINE), 'dig lesson held')
-  return { played, counts }
+  if (!measureOnly) {
+    assert.ok((await readProgress(page))?.easyHeld?.includes(KID8_END_LINE), 'dig lesson held')
+  }
+  const total = Object.values(counts).reduce((sum, n) => sum + n, 0)
+  return { played, counts, total }
+}
+
+/** Same Kid 8 driver against an arbitrary vite root (e.g. main 428a83d3); no encode asserts. */
+export async function measureKid8LockInEncodes(viteRoot = root, viewport = [375, 667]) {
+  const [{ localDateKey: dayKey }, { APP_VERSION: appVer, STORAGE_KEY: storageKey }, { EASY_OPEN_DAY_KEY: openKey }, saveMod, { easyLoopLine: loopLine }] =
+    await Promise.all([
+      importAtViteRoot(viteRoot, 'src/lib/dates.ts'),
+      importAtViteRoot(viteRoot, 'src/config/app.ts'),
+      importAtViteRoot(viteRoot, 'src/content/goldenPath.ts'),
+      importAtViteRoot(viteRoot, 'src/lib/save.ts'),
+      importAtViteRoot(viteRoot, 'src/easyTrail/trail/loop.ts'),
+    ])
+  const today = dayKey()
+  const rawSave = JSON.stringify(
+    saveBundle({ APP_VERSION: appVer, SAVE_KIND: saveMod.SAVE_KIND, SAVE_SCHEMA_VERSION: saveMod.SAVE_SCHEMA_VERSION }, {}),
+  )
+
+  const server = await createServer({ root: viteRoot, server: { host: '127.0.0.1', port: 0 }, logLevel: 'error' })
+  await server.listen()
+  const address = server.httpServer?.address()
+  const port = address && typeof address === 'object' ? address.port : 0
+  assert.ok(port > 0)
+  const origin = `http://127.0.0.1:${port}`
+  const browser = await launch()
+  try {
+    const context = await browser.newContext({ viewport: { width: viewport[0], height: viewport[1] } })
+    await context.addInitScript(
+      ({ key, raw, openKey: ok, day }) => {
+        localStorage.setItem(key, raw)
+        localStorage.setItem(ok, day)
+      },
+      { key: storageKey, raw: rawSave, openKey: openKey, day: today },
+    )
+    const page = await context.newPage()
+    await page.goto(`${origin}/?playtest=1`, { waitUntil: 'networkidle' })
+    const startEasy = page.getByRole('button', { name: 'Start Easy' })
+    if (await startEasy.count()) await startEasy.click()
+    await page.locator('header').getByRole('button', { name: 'Settings', exact: true }).waitFor({ timeout: 30_000 })
+
+    const result = await driveKid8Session(page, { measureOnly: true, loopLine })
+    await context.close()
+    const label = viteRoot === root ? 'branch' : viteRoot
+    console.log(
+      `kid8LockInMeasure viteRoot=${label} viewport=${viewport[0]}x${viewport[1]} played=[${result.played.join(',')}] counts=${JSON.stringify(result.counts)} total=${result.total}`,
+    )
+    return result
+  } finally {
+    await browser.close()
+    await server.close()
+  }
 }
 
 export async function checkEasyFirstSessionLockInOnce() {
@@ -443,7 +500,7 @@ export async function checkEasyFirstSessionLockInOnce() {
 
       await context.close()
       console.log(
-        `checkEasyFirstSessionLockInOnce ok ${viewport[0]}x${viewport[1]} played=[${played.join(',')}] counts=${JSON.stringify(counts)} total=${total} beforeMain≈${BEFORE_MAIN_ISSUE963_DUPES} gold=1`,
+        `checkEasyFirstSessionLockInOnce ok ${viewport[0]}x${viewport[1]} played=[${played.join(',')}] counts=${JSON.stringify(counts)} total=${total} gold=1`,
       )
     }
   } finally {
@@ -454,5 +511,11 @@ export async function checkEasyFirstSessionLockInOnce() {
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  await checkEasyFirstSessionLockInOnce()
+  if (process.argv.includes('--measure')) {
+    const rootArg = process.argv[process.argv.indexOf('--measure') + 1]
+    const viteRoot = rootArg && !rootArg.startsWith('-') ? rootArg : root
+    await measureKid8LockInEncodes(viteRoot)
+  } else {
+    await checkEasyFirstSessionLockInOnce()
+  }
 }
