@@ -8081,6 +8081,447 @@ async function checkNwRoundCheer(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #967 Easy first plant must not open the upgrade card. A touch tap does, on the parent. */
+const PLANT_NO_CARD_SIZES = [
+  [375, 667],
+  [390, 844],
+  [412, 915],
+  [768, 1024],
+]
+const PLANT_NO_CARD_SEARCH = '?playtest=1&nwSeed=2&nwMap=a2&nwRound=1&nwLamps=0&nwCam=1'
+
+function plantNoCardRound(n) {
+  return Math.round(n * 10) / 10
+}
+
+async function checkNwPlantNoCard(browser, port, errors) {
+  const only = process.env.NW_PLANT_NO_CARD_SIZE
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+
+  const openEasy = async (width, height) => {
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      reducedMotion: 'reduce',
+      hasTouch: true,
+      isMobile: width < 768,
+    })
+    await context.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: SAVE },
+    )
+    const page = await context.newPage()
+    const label = `${width}x${height}`
+    page.on('pageerror', (error) => errors.push(`plant-no-card ${label} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() !== 'error') return
+      const text = msg.text()
+      if (text.includes('Encountered two children with the same key')) return
+      errors.push(`plant-no-card ${label} ${text}`)
+    })
+    await page.goto(PLANT_NO_CARD_SEARCH)
+    await page.getByRole('button', { name: 'Settings' }).click()
+    await page.locator('summary', { hasText: 'Developer' }).click()
+    await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
+    await page.locator('.defend-board').waitFor()
+    if (await page.locator('[data-map-overlay]').count()) {
+      await page.locator('[data-map="a2"]').click()
+      await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+    }
+    await page.locator('.defend-go').waitFor()
+    await page.locator('.defend-plant-ground circle.is-first-seat').waitFor()
+    return { context, page, label }
+  }
+
+  for (const [width, height] of PLANT_NO_CARD_SIZES) {
+    const size = `${width}x${height}`
+    if (only && only !== size) continue
+    const { context, page, label } = await openEasy(width, height)
+    await page.locator('[data-type="love"]').click()
+    const before = await page.evaluate(() => {
+      const round = (n) => n
+      const box = (el) => {
+        if (!el) return null
+        const r = el.getBoundingClientRect()
+        if (r.width < 1 && r.height < 1) return null
+        return { x: round(r.x), y: round(r.y), w: round(r.width), h: round(r.height), left: r.left, top: r.top, right: r.right, bottom: r.bottom }
+      }
+      const seats = [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((el) => ({
+        at: `${el.getAttribute('cx')},${el.getAttribute('cy')}`,
+        ...box(el),
+      }))
+      return {
+        begin: box(document.querySelector('.defend-go')),
+        rail: box(document.querySelector('.nw-rail .defend-ability[data-type="love"]')),
+        candle: box(document.querySelector('button.defend-candle-lamp')),
+        seats,
+      }
+    })
+    const seat = await page.evaluate(() => {
+      const svg = document.querySelector('.defend-board')
+      const ring = document.querySelector('.defend-plant-ground circle.is-first-seat')
+      const ctm = svg?.getScreenCTM()
+      if (!svg || !ring || !ctm) return null
+      const p = svg.createSVGPoint()
+      p.x = Number(ring.getAttribute('cx'))
+      p.y = Number(ring.getAttribute('cy')) - 26
+      const q = p.matrixTransform(ctm)
+      return { x: q.x, y: q.y }
+    })
+    assert.ok(seat, `${label} first gold seat`)
+    await page.touchscreen.tap(seat.x, seat.y)
+    const sampled = await page.evaluate(async (pre) => {
+      const gold = (value) => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+        let match
+        while ((match = re.exec(value || ''))) {
+          const r = Number(match[1])
+          const g = Number(match[2])
+          const b = Number(match[3])
+          const a = match[4] === undefined ? 1 : Number(match[4])
+          if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
+      const box = (el) => {
+        if (!el) return null
+        const r = el.getBoundingClientRect()
+        if (r.width < 1 && r.height < 1) return null
+        return { x: r.x, y: r.y, w: r.width, h: r.height, left: r.left, top: r.top, right: r.right, bottom: r.bottom }
+      }
+      const nameOf = (el) => `${el?.tagName || 'none'}.${el?.getAttribute?.('class') || ''}`.replace(/\s+/g, ' ').trim().slice(0, 80)
+      const overlap = (a, b) => {
+        if (!a || !b) return 0
+        const w = Math.min(a.right, b.right) - Math.max(a.left, b.left)
+        const h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top)
+        return w > 0 && h > 0 ? w * h : 0
+      }
+      const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+      const cssText = (value) => {
+        if (!value || value === 'none' || value === 'normal') return ''
+        const first = /^"((?:\\.|[^"\\])*)"/.exec(value)
+        return first ? first[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\') : ''
+      }
+      const selectorOf = (el) => {
+        const tag = el.tagName.toLowerCase()
+        const cls = (el.getAttribute('class') || '').trim().split(/\s+/).filter(Boolean).slice(0, 4).join('.')
+        return cls ? `${tag}.${cls}` : tag
+      }
+      const lineOf = (el) => {
+        if (!el) return null
+        const style = getComputedStyle(el)
+        const directs = [...el.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+        if (!directs.length) return null
+        const source = norm(directs.map((child) => child.textContent).join(''))
+        const range = document.createRange()
+        const host = el.getBoundingClientRect()
+        let rendered = ''
+        for (const child of directs) {
+          const raw = child.textContent
+          for (let i = 0; i < raw.length; i += 1) {
+            const ch = raw[i]
+            if (!ch.trim()) {
+              rendered += ch
+              continue
+            }
+            range.setStart(child, i)
+            range.setEnd(child, i + 1)
+            let painted = false
+            for (const bit of range.getClientRects()) {
+              if (bit.width <= 0 || bit.height <= 0) continue
+              if (bit.right > host.left - 1 && bit.left < host.right + 1 && bit.bottom > host.top - 1 && bit.top < host.bottom + 1) {
+                painted = true
+                break
+              }
+            }
+            if (painted) rendered += ch
+          }
+        }
+        return {
+          name: selectorOf(el),
+          overflow: style.overflow,
+          scroll: el.scrollWidth,
+          client: el.clientWidth,
+          scrollH: el.scrollHeight,
+          clientH: el.clientHeight,
+          rendered: norm(rendered),
+          source,
+        }
+      }
+      const linesFor = (el) => {
+        if (!el) return []
+        const host = el.getBoundingClientRect()
+        const hostStyle = getComputedStyle(el)
+        const pseudos = ['::before', '::after']
+          .map((pseudo) => {
+            const style = getComputedStyle(el, pseudo)
+            const source = cssText(style.content).replace(/\s+/g, ' ').trim()
+            if (!source) return null
+            const painted =
+              style.display !== 'none' &&
+              style.visibility !== 'hidden' &&
+              Number(style.opacity) > 0 &&
+              parseFloat(style.fontSize) > 0 &&
+              host.width > 1 &&
+              host.height > 1
+            return {
+              name: `${selectorOf(el)}${pseudo}`,
+              overflow: hostStyle.overflow,
+              scroll: el.scrollWidth,
+              client: el.clientWidth,
+              scrollH: el.scrollHeight,
+              clientH: el.clientHeight,
+              rendered: painted ? source : '',
+              source,
+            }
+          })
+          .filter(Boolean)
+        if (pseudos.length) return pseudos
+        const text = lineOf(el)
+        return text ? [text] : []
+      }
+      const hitOf = (el) => {
+        if (!el) return 'missing'
+        const rect = el.getBoundingClientRect()
+        if (rect.width < 1 || rect.height < 1) return 'missing'
+        const node = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
+        if (!node) return 'none'
+        if (node === el || el.contains(node)) return 'ok'
+        return nameOf(node)
+      }
+      const read = () => {
+        const root = document.querySelector('.defend-page')
+        const chrome = 'button, .defend-abilities, .defend-boost, .defend-tower-card, .defend-path-pip, .nw-balloon-orb, .defend-wave, .defend-ability-stock'
+        const names = !root
+          ? []
+          : [...root.querySelectorAll(chrome)]
+              .filter((node) => !node.closest('.defend-nw-debug'))
+              .filter((node) => {
+                const rect = node.getBoundingClientRect()
+                const style = getComputedStyle(node)
+                return rect.width > 1 && rect.height > 1 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0
+              })
+              .filter((node) => {
+                const style = getComputedStyle(node)
+                const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+                const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+                return gold(style.backgroundImage) || gold(style.backgroundColor) || border || gold(style.boxShadow) || (text && gold(style.color))
+              })
+              .map((node) => nameOf(node))
+        const rings = [...document.querySelectorAll('.defend-plant-ground circle')].filter((node) => {
+          const rect = node.getBoundingClientRect()
+          const style = getComputedStyle(node)
+          if (rect.width <= 1 || rect.height <= 1 || style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+          return gold(style.stroke) || gold(style.fill) || gold(style.filter)
+        })
+        const cardEl = document.querySelector('.defend-tower-card')
+        const card = box(cardEl)
+        const beginEl = document.querySelector('.defend-go')
+        const railEl = document.querySelector('.nw-rail .defend-ability[data-type="love"]')
+        const candleEl = document.querySelector('button.defend-candle-lamp')
+        const lampEl = document.querySelector('.defend-clear-lamp')
+        const seats = [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((el) => ({
+          at: `${el.getAttribute('cx')},${el.getAttribute('cy')}`,
+          ...box(el),
+        }))
+        let roadHits = 0
+        let roadSamples = 0
+        const road = document.querySelector('.defend-road')
+        if (road?.getTotalLength && card) {
+          const len = road.getTotalLength()
+          const svg = road.ownerSVGElement
+          const ctm = svg?.getScreenCTM()
+          if (ctm) {
+            const point = svg.createSVGPoint()
+            for (let i = 0; i <= 24; i += 1) {
+              const at = road.getPointAtLength((len * i) / 24)
+              point.x = at.x
+              point.y = at.y
+              const q = point.matrixTransform(ctm)
+              if (q.x < 1 || q.y < 1 || q.x > innerWidth - 1 || q.y > innerHeight - 1) continue
+              roadSamples += 1
+              const inside = q.x >= card.left && q.x <= card.right && q.y >= card.top && q.y <= card.bottom
+              const top = document.elementFromPoint(q.x, q.y)
+              if (inside || top?.closest?.('.defend-tower-card')) roadHits += 1
+            }
+          }
+        }
+        const seatCover = seats.reduce((sum, seat) => sum + (overlap(seat, card) > 0 ? 1 : 0), 0)
+        const lines = [beginEl, ...document.querySelectorAll('button.defend-new-lamp')].flatMap((el) => linesFor(el))
+        return {
+          card: card ? 1 : 0,
+          gold: names.length + rings.length,
+          names,
+          ignite: document.querySelectorAll('.defend-plant-ignite').length,
+          sprites: document.querySelectorAll('.defend-lamp-sprite').length,
+          begin: box(beginEl),
+          rail: box(railEl),
+          candle: box(candleEl),
+          seats,
+          hits: {
+            begin: hitOf(beginEl),
+            rail: hitOf(railEl),
+            candle: hitOf(candleEl),
+            lamp: hitOf(lampEl),
+          },
+          cover: {
+            roadHits,
+            roadSamples,
+            seatCover,
+            begin: overlap(box(beginEl), card),
+            rail: overlap(box(railEl), card),
+            candle: overlap(box(candleEl), card),
+            lamp: overlap(box(lampEl), card),
+          },
+          lines,
+        }
+      }
+      const frames = []
+      const start = performance.now()
+      await new Promise((resolve) => {
+        const tick = () => {
+          frames.push(read())
+          if (performance.now() - start < 400) requestAnimationFrame(tick)
+          else resolve()
+        }
+        requestAnimationFrame(tick)
+      })
+      return { frames, pre }
+    }, before)
+    const frames = sampled.frames
+    assert.ok(frames.length >= 8, `${label} sampled ${frames.length} frames`)
+    const planted = frames.every((frame) => frame.sprites >= 1)
+    if (!planted) fail(`checkNwPlantNoCard fail ${label} sprites=0`)
+    const cardCounts = [...new Set(frames.map((frame) => frame.card))]
+    if (frames.some((frame) => frame.card !== 0)) fail(`checkNwPlantNoCard fail ${label} card=${cardCounts.join('|')}`)
+    const goldCounts = [...new Set(frames.map((frame) => frame.gold))]
+    const nameLabel = [...new Set(frames.flatMap((frame) => frame.names))].join(' | ') || '(none)'
+    if (frames.some((frame) => frame.gold !== 1)) fail(`checkNwPlantNoCard fail ${label} gold=${goldCounts.join('|')} names=${nameLabel}`)
+    if (!frames.some((frame) => frame.ignite > 0)) fail(`checkNwPlantNoCard fail ${label} ignite=0`)
+    const rawDelta = (now, was) => {
+      if (!now && !was) return 0
+      if (!now || !was) return null
+      return Math.max(Math.abs(now.x - was.x), Math.abs(now.y - was.y), Math.abs(now.w - was.w), Math.abs(now.h - was.h))
+    }
+    const worst = { begin: 0, rail: 0, candle: 0, seat: 0 }
+    for (const frame of frames) {
+      for (const key of ['begin', 'rail', 'candle']) {
+        const delta = rawDelta(frame[key], before[key])
+        if (delta == null) fail(`checkNwPlantNoCard delta ${label} missing ${key}`)
+        else worst[key] = Math.max(worst[key], delta)
+      }
+      for (const seatBox of before.seats) {
+        const now = frame.seats.find((item) => item.at === seatBox.at)
+        if (!now) continue
+        const delta = rawDelta(now, seatBox)
+        if (delta != null) worst.seat = Math.max(worst.seat, delta)
+      }
+      const hit = frame.hits
+      if (hit.begin !== 'ok' || hit.rail !== 'ok' || (before.candle && hit.candle !== 'ok') || hit.lamp !== 'ok') {
+        fail(`checkNwPlantNoCard hit ${label} begin=${hit.begin} rail=${hit.rail} candle=${hit.candle} lamp=${hit.lamp}`)
+      }
+      const cover = frame.cover
+      if (cover.roadHits > 0 || cover.seatCover > 0 || cover.begin > 0 || cover.rail > 0 || cover.candle > 0) {
+        fail(
+          `checkNwPlantNoCard cover ${label} road=${cover.roadHits}/${cover.roadSamples} seats=${cover.seatCover} begin=${cover.begin.toFixed(1)} rail=${cover.rail.toFixed(1)} candle=${cover.candle.toFixed(1)}`,
+        )
+      }
+    }
+    const fmt = (n) => (n === 0 ? '0' : plantNoCardRound(n).toFixed(1))
+    const deltaLine = `checkNwPlantNoCard delta ${label} begin=${fmt(worst.begin)} rail=${fmt(worst.rail)} candle=${fmt(worst.candle)} seat=${fmt(worst.seat)}`
+    console.log(deltaLine)
+    if (worst.begin > 0.5 || worst.rail > 0.5 || worst.candle > 0.5 || worst.seat > 0.5) fail(deltaLine)
+    const logged = new Set()
+    let clipped = 0
+    const last = frames[frames.length - 1]
+    if (!last.lines.length) fail(`checkNwPlantNoCard line ${label} rendered="" source=""`)
+    for (const frame of frames) {
+      for (const row of frame.lines) {
+        const note = `${row.name}|${row.rendered}|${row.source}|${row.scroll}|${row.client}|${row.scrollH}|${row.clientH}`
+        if (!logged.has(note)) {
+          logged.add(note)
+          console.log(
+            `checkNwPlantNoCard line ${label} ${row.name} overflow=${row.overflow} scroll=${row.scroll} client=${row.client} scrollH=${row.scrollH} clientH=${row.clientH} rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(row.source)}`,
+          )
+        }
+        if (row.rendered !== row.source) fail(`checkNwPlantNoCard line ${label} ${row.name} rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(row.source)}`)
+        if (row.scroll > row.client + 1 || row.scrollH > row.clientH + 1) clipped += 1
+      }
+    }
+    if (clipped !== 0) fail(`checkNwPlantNoCard clip ${label} clipped=${clipped}`)
+    else if (logged.size) console.log(`checkNwPlantNoCard clip ${label} clipped=0`)
+    const localFail = problems.some((line) => line.includes(label))
+    if (!localFail) {
+      await page.waitForTimeout(200)
+      const lamp = page.locator('.defend-clear-lamp').first()
+      const lampBox = await lamp.boundingBox()
+      assert.ok(lampBox, `${label} planted lamp has a tap box`)
+      await page.touchscreen.tap(lampBox.x + lampBox.width / 2, lampBox.y + lampBox.height / 2)
+      await page.locator('.defend-tower-card').waitFor({ timeout: 3000 })
+      const opened = await page.locator('.defend-tower-card').count()
+      if (opened !== 1) fail(`checkNwPlantNoCard fail ${label} tap card=${opened}`)
+      else console.log(`checkNwPlantNoCard ok ${label} card=0 gold=1`)
+    }
+    await context.close()
+  }
+
+  if (!only) {
+    const hardSave = {
+      ...SAVE,
+      progress: { ...SAVE.progress, easyMode: false, completed: ['ph-road'], dailyDates: ['2026-10-14'] },
+    }
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 390, height: 844 },
+      deviceScaleFactor: 1,
+      reducedMotion: 'reduce',
+      hasTouch: true,
+      isMobile: true,
+    })
+    await context.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: hardSave },
+    )
+    const page = await context.newPage()
+    page.on('pageerror', (error) => errors.push(`plant-no-card hard ${error}`))
+    await page.goto('/?playtest=1')
+    await page.getByRole('button', { name: 'Hold the night' }).click()
+    await page.locator('.defend-board').waitFor()
+    const empty = page.locator('.defend-pad:not(.is-planted)').first()
+    assert.equal(await empty.count(), 1, 'Hard has an empty pad to plant')
+    const box = await empty.boundingBox()
+    assert.ok(box, 'Hard empty pad has a box')
+    await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2)
+    await page.waitForTimeout(200)
+    const planted = await page.locator('.defend-pad.is-planted').count()
+    const card = await page.locator('.defend-tower-card').count()
+    if (planted < 1) fail('checkNwPlantNoCard fail hard plant sprites=0')
+    // Hard has no clear-lamp button, so the plant click stays on the pad and the card stays shut.
+    if (card !== 0) fail(`checkNwPlantNoCard fail hard plant card=${card}`)
+    else console.log('checkNwPlantNoCard hard plant card=0')
+    const pad = page.locator('.defend-pad.is-planted').last()
+    const padBox = await pad.boundingBox()
+    assert.ok(padBox, 'Hard planted lamp has a tap box')
+    await page.waitForTimeout(200)
+    await page.touchscreen.tap(padBox.x + padBox.width / 2, padBox.y + padBox.height / 2)
+    await page.waitForTimeout(200)
+    const tapped = await page.locator('.defend-tower-card').count()
+    if (tapped !== 1) fail(`checkNwPlantNoCard fail hard tap card=${tapped}`)
+    else console.log('checkNwPlantNoCard hard tap card=1')
+    await context.close()
+  }
+
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 export async function checkPhoneFixes() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -8149,6 +8590,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'round cheer nights stay free of console errors')
       return
     }
+    if (process.env.NW_PLANT_NO_CARD_ONLY === '1') {
+      await checkNwPlantNoCard(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'plant no-card nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
@@ -8165,6 +8611,7 @@ export async function checkPhoneFixes() {
     await checkMap05CamOffRing(browser, port, errors)
     await checkNwPlantIgnite(browser, port, errors)
     await checkNwRoundCheer(browser, port, errors)
+    await checkNwPlantNoCard(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -8341,7 +8788,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
