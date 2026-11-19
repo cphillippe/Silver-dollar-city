@@ -28,6 +28,17 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.598',
+    title: 'Easy first session: Lock In once per lesson',
+    when: '2026-11-19',
+    items: [
+      'On your first Easy day, after you keep a lesson’s main idea once, later wins on that same lesson go straight Home instead of running the full Lock In quiz again.',
+      'Other lessons on the trail still get their one Lock In the first time you keep that line.',
+      'Medium and Hard are unchanged.',
+      'Refs #963.',
+    ],
+  },
+  {
     version: '1.4.592',
     title: 'Night Watch: the Candle gets a name on the clear screen',
     when: '2026-11-17',

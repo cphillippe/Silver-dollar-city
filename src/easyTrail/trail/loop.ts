@@ -5,6 +5,8 @@
  */
 import type { ProgressState, View } from '../../types.ts'
 import { packEasyOrder } from '../../content/packCatalog.ts'
+import { EASY_OPEN_DAY_KEY } from '../../content/goldenPath.ts'
+import { localDateKey } from '../../lib/dates.ts'
 import { ROAD_MAZE_LINE } from '../../lib/roadMaze.ts'
 import { currentLessonTier, needsTierHold, tierRank } from '../../lib/tiers.ts'
 import { digPrior, inkPrior, namesPrior, stonePrior } from '../../lib/sourceDig.ts'
@@ -148,6 +150,35 @@ export function easyMatchReady(progress: EasyLoopProgress): boolean {
   return true
 }
 
+function easyOpenDayKey(): string {
+  try {
+    return globalThis.localStorage?.getItem(EASY_OPEN_DAY_KEY) ?? ''
+  } catch {
+    return ''
+  }
+}
+
+/** Calendar day of the first Easy Home — the kid's first Easy session on this save. */
+export function easyFirstSessionDay(today: string): boolean {
+  const open = easyOpenDayKey()
+  return open === '' || open === today
+}
+
+/**
+ * First Easy session only: this lesson's claim is already kept — do not run the full
+ * encode Lock In again on another win (replay, second match, tier hold nudge).
+ */
+export function easySkipRepeatLockIn(
+  progress: Pick<ProgressState, 'easyHeld'> & { held?: readonly string[] },
+  lineId: string,
+  today = localDateKey(),
+): boolean {
+  if (!easyFirstSessionDay(today)) return false
+  return (
+    (progress.held ?? []).includes(lineId) || (progress.easyHeld ?? []).includes(lineId)
+  )
+}
+
 /**
  * Gold home focus for the open triad. Match teaches through the lesson play.
  * After the board is cleared (taught), Hold is next. After Hold, the next
@@ -156,28 +187,34 @@ export function easyMatchReady(progress: EasyLoopProgress): boolean {
  */
 export type EasyHomeFocus = 'learn' | 'match' | 'hold'
 
-export function easyHomeFocus(progress: EasyLoopProgress): EasyHomeFocus {
+export function easyHomeFocus(progress: EasyLoopProgress, today = localDateKey()): EasyHomeFocus {
   const id = easyLoopLine(progress)
   if (!easyLineTaught(progress, id)) return 'match'
-  if (!easyLineHeld(progress, id) || needsTierHold(progress, id)) return 'hold'
+  if (!easyLineHeld(progress, id)) return 'hold'
+  if (needsTierHold(progress, id) && !easySkipRepeatLockIn(progress, id, today)) return 'hold'
   return 'match'
 }
 
 /** Hold practice for the open triad — hide the saved-line filing cabinet. */
-export function easyHoldPractice(progress: EasyLoopProgress): boolean {
+export function easyHoldPractice(progress: EasyLoopProgress, today = localDateKey()): boolean {
   const id = easyLoopLine(progress)
   if (!easyLineTaught(progress, id)) return false
   if (!easyLineHeld(progress, id)) return true
+  if (easySkipRepeatLockIn(progress, id, today)) return false
   return needsTierHold(progress, id)
 }
 
-export function easyHoldView(progress: EasyLoopProgress): {
-  name: 'journal'
-  focusId?: string
-  autoQuiz?: boolean
-} {
-  if (easyHoldPractice(progress)) {
-    return { name: 'journal', focusId: easyHoldLine(progress), autoQuiz: true }
+export function easyHoldView(
+  progress: EasyLoopProgress,
+  today = localDateKey(),
+  /** Match win line — may differ from the open loop line on replay. */
+  matchLineId?: string,
+): View {
+  const winLine = matchLineId ?? easyHoldLine(progress)
+  if (winLine && easySkipRepeatLockIn(progress, winLine, today)) return { name: 'hub' }
+  if (easyHoldPractice(progress, today)) {
+    const id = easyHoldLine(progress)
+    return { name: 'journal', focusId: id, autoQuiz: true }
   }
   return { name: 'journal' }
 }
