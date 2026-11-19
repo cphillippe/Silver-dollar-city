@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.591',
+    title: 'Night Watch: your one lamp hops to the next seat',
+    when: '2026-11-16',
+    items: [
+      'On Easy, tapping another seat hops your one lamp over to it, and the empty lamp slot shakes.',
+      'Hard stays the same.',
+      'Refs #968.',
+    ],
+  },
+  {
     version: '1.4.590',
     title: 'Night Watch: planting a lamp leaves the road clear',
     when: '2026-11-16',

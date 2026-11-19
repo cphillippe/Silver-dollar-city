@@ -20,9 +20,9 @@ import {
   WATCH_TITLE,
 } from '../content/defend'
 import { EASY, isEasy, loveHowTo } from '../lib/easy'
-import { boundNightPath, roadById, walkerRoadId } from '../nightWatch/path/data'
+import { boundNightPath, lampAnchor, roadById, walkerRoadId } from '../nightWatch/path/data'
 import { createWalkInClock, type WalkInClock, type WalkInPlate } from '../nightWatch/maps/walkIn'
-import type { DefendWalkIn } from './DefendNightActors'
+import { LAMP_MOVE_HOP_MS, type DefendWalkIn, type LampMoveHopState } from './DefendNightActors'
 import { roundMark, easyRound } from '../nightWatch/rounds'
 import { pickWalkerFace, WALKER_FACE_POOL } from '../nightWatch/enemies/faces'
 import {
@@ -180,6 +180,7 @@ import {
   lampUpgradeTool,
   nightPlantTypes,
   plantType,
+  isTowerType,
   lampPullRefund,
   pullPlant,
   selectUpgradeLamp,
@@ -606,6 +607,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const boostPathRef = useRef<(plotId: CityPlotId, path: TreePath, fromPip: boolean) => void>(() => {})
   const [upFlash, setUpFlash] = useState<CityPlotId | null>(null)
   const [plantIgniteIds, setPlantIgniteIds] = useState<ReadonlySet<CityPlotId>>(() => new Set())
+  const [lampHop, setLampHop] = useState<LampMoveHopState | null>(null)
+  const [emptyShake, setEmptyShake] = useState<string | null>(null)
+  const lampHopTimer = useRef(0)
   const plantIgniteTimers = useRef<Partial<Record<CityPlotId, number>>>({})
   const [clearCheer, setClearCheer] = useState(false)
   const clearCheerPending = useRef(false)
@@ -2050,6 +2054,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   useEffect(() => () => newLampStop.current?.(), [])
 
+  useEffect(() => () => window.clearTimeout(lampHopTimer.current), [])
+
   useLayoutEffect(() => {
     const node = camOn ? camRef.current : boardRef.current
     if (!node) return
@@ -2395,6 +2401,36 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }, PLANT_IGNITE_MS)
   }
 
+  /**
+   * Easy only. A type already on the road moves when it is planted again.
+   * Hard keeps plantType's own move, with no hop.
+   */
+  function easyLampMove(
+    plantsNow: Record<string, string>,
+    using: string,
+    spot: string,
+  ): { from: { x: number; y: number }; to: { x: number; y: number } } | null {
+    if (!easy || !isTowerType(using)) return null
+    let fromId = ''
+    for (const [id, type] of Object.entries(plantsNow)) {
+      if (type !== using) continue
+      fromId = id
+      break
+    }
+    if (!fromId || fromId === spot) return null
+    return { from: lampAnchor(fromId), to: lampAnchor(spot) }
+  }
+
+  function scheduleLampHop(key: number, ability: string, spot: CityPlotId, reduced: boolean) {
+    window.clearTimeout(lampHopTimer.current)
+    if (reduced) flashPlantIgnite(spot)
+    lampHopTimer.current = window.setTimeout(() => {
+      setLampHop((cur) => (cur && cur.key === key ? null : cur))
+      setEmptyShake((cur) => (cur === ability ? null : cur))
+      if (!reduced) flashPlantIgnite(spot)
+    }, LAMP_MOVE_HOP_MS + 40)
+  }
+
   /** Free before Begin. After Begin, a new type spends EASY_LAMP_COST. */
   function finishPlace(
     plantsNow: Record<string, string>,
@@ -2450,6 +2486,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       placeArmRef.current = null
       setPlaceArm(null)
     }
+    const move = easyLampMove(plantsNow, using, next.preview.spot)
+    const hopKey = move ? performance.now() : 0
+    const hopReduced = move ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false
     window.clearTimeout(placeToastTimer.current)
     flushSync(() => {
       setPlants(next.plants)
@@ -2457,12 +2496,23 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       setPlaceToast(null)
       setReachMiss([])
       setGhost(null)
+      if (move) {
+        setLampHop({
+          key: hopKey,
+          from: move.from,
+          to: move.to,
+          spot: next.preview.spot,
+          reduced: hopReduced,
+        })
+        setEmptyShake(using)
+      }
     })
     if (paid) {
       if (bell || incense || candle || cross) paidTypes.current.add(next.preview.spot)
       else paidTypes.current.add(using)
     }
-    flashPlantIgnite(next.preview.spot as CityPlotId)
+    if (move) scheduleLampHop(hopKey, using, next.preview.spot as CityPlotId, hopReduced)
+    else flashPlantIgnite(next.preview.spot as CityPlotId)
     notePlantCardEcho(next.preview.spot as CityPlotId)
     closeUpgrade(true)
     return true
@@ -2502,6 +2552,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     if (phase !== 'plant') return
     if (plants[id]) return
     const using = unlocked.includes(ability) ? ability : 'love'
+    const move = easyLampMove(plantsRef.current, using, id)
+    const hopKey = move ? performance.now() : 0
+    const hopReduced = move ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false
     let plantedNew = false
     flushSync(() => {
       setPlants((current) => {
@@ -2509,10 +2562,18 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         plantedNew = true
         return plantType(current, id, using)
       })
+      if (move) {
+        setLampHop({ key: hopKey, from: move.from, to: move.to, spot: id, reduced: hopReduced })
+        setEmptyShake(using)
+      }
     })
     if (plantedNew) {
-      flashPlantIgnite(id)
+      if (move) scheduleLampHop(hopKey, using, id, hopReduced)
+      else flashPlantIgnite(id)
       notePlantCardEcho(id)
+    } else if (move) {
+      setLampHop(null)
+      setEmptyShake(null)
     }
     closeUpgrade(true)
   }
@@ -4655,6 +4716,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       roundIndex={waveIndex}
       onBoost={boostTool}
       onOpenTree={openPlantedTree}
+      emptyShake={emptyShake}
     />
   )
 
@@ -4797,6 +4859,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                   spawnLog={easy && debugPanel}
                   upFlashId={upFlash}
                   plantIgniteIds={plantIgniteIds}
+                  lampHop={lampHop}
                   clearCheer={clearCheer}
                   levelBurst={
                     levelBurst && upgradeAt === levelBurst.plotId

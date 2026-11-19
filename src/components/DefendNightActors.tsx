@@ -130,6 +130,8 @@ export interface DefendNightActorsProps {
   upFlashId?: CityPlotId | null
   /** Easy plant (#957). Brief shockwave on a new lamp. */
   plantIgniteIds?: ReadonlySet<CityPlotId>
+  /** Easy (#968). The only lamp of its type hops from one seat to another. */
+  lampHop?: LampMoveHopState | null
   /** Easy round clear (#962). Planted lamps hop once, left to right. */
   clearCheer?: boolean
   /** playtest=1 or nwDebug. Logs each walker's first draw. A normal night stays quiet. */
@@ -181,6 +183,76 @@ const LEVEL_SPARKS = [
   { dx: 40, dy: -4, r: 14, delay: '0.1s' },
   { dx: 10, dy: -20, r: 12, delay: '0.12s' },
 ] as const
+/** One planted type changing seats. The mark's center is the seat point. */
+export interface LampMoveHopState {
+  key: number
+  from: { x: number; y: number }
+  to: { x: number; y: number }
+  spot: string
+  reduced: boolean
+}
+
+export const LAMP_MOVE_HOP_MS = 350
+const LAMP_MOVE_ARC = 28
+
+function LampMoveHop({
+  from,
+  to,
+  reduced,
+}: {
+  from: { x: number; y: number }
+  to: { x: number; y: number }
+  reduced: boolean
+}) {
+  const flyer = useRef<SVGGElement>(null)
+  useLayoutEffect(() => {
+    const node = flyer.current
+    if (!node) return
+    const place = (x: number, y: number) => {
+      node.setAttribute('transform', `translate(${x} ${y})`)
+    }
+    if (reduced) {
+      place(to.x, to.y)
+      return
+    }
+    place(from.x, from.y)
+    const start = performance.now()
+    let frame = 0
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / LAMP_MOVE_HOP_MS)
+      const s = t * t * (3 - 2 * t)
+      const x = from.x + (to.x - from.x) * s
+      const y = from.y + (to.y - from.y) * s - Math.sin(Math.PI * t) * LAMP_MOVE_ARC
+      place(x, y)
+      if (t < 1) frame = requestAnimationFrame(tick)
+    }
+    frame = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(frame)
+  }, [from.x, from.y, to.x, to.y, reduced])
+  const box = nightTowers.lampImageBox()
+  const at = reduced ? to : from
+  return (
+    <g className="defend-lamp-hop" pointerEvents="none" aria-hidden="true">
+      <g className="defend-lamp-hop-puff" transform={`translate(${from.x} ${from.y})`}>
+        <circle r="12" />
+      </g>
+      <g ref={flyer} className="defend-lamp-hop-flyer" transform={`translate(${at.x} ${at.y})`}>
+        <circle className="defend-lamp-hop-mark" data-lamp-hop="yes" r="8" />
+        {reduced ? null : (
+          <image
+            className="defend-lamp-hop-art"
+            href={nightTowers.lampSrc('idle')}
+            x={box.x}
+            y={box.y}
+            width={box.w}
+            height={box.h}
+          />
+        )}
+      </g>
+    </g>
+  )
+}
+
 const FACE_HALF = PATH_WALKER_FACE_U / 2
 const FACE_TOP = -PATH_WALKER_FACE_U * (24 / 36)
 /** Ring sits on the clipped face (clip radius is 0.36 of the chip). */
@@ -216,6 +288,7 @@ export function DefendNightActorsSvg({
   onOpenUpgrade,
   upFlashId = null,
   plantIgniteIds,
+  lampHop = null,
   clearCheer = false,
   ghost = null,
   groundHints = [],
@@ -628,7 +701,7 @@ export function DefendNightActorsSvg({
                   <g
                     key={id}
                     data-person-node={scenery ? undefined : 'pad'}
-                    className={`defend-pad is-${stage} ${on ? `is-planted is-${using}` : ''} ${hot ? 'is-hot' : ''} ${firing ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''} ${boostPad ? 'is-boost-pick' : ''} ${upgrading ? 'is-upgrade-open' : ''} ${justUp ? 'is-up' : ''} ${plantIgniteIds?.has(id) ? 'is-plant-ignite' : ''} ${clearCheer && on ? 'is-clear-cheer' : ''} ${reachMiss.includes(id) ? 'is-reach-miss' : ''}`}
+                    className={`defend-pad is-${stage} ${on ? `is-planted is-${using}` : ''} ${hot ? 'is-hot' : ''} ${firing ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''} ${boostPad ? 'is-boost-pick' : ''} ${upgrading ? 'is-upgrade-open' : ''} ${justUp ? 'is-up' : ''} ${plantIgniteIds?.has(id) ? 'is-plant-ignite' : ''} ${lampHop && !lampHop.reduced && lampHop.spot === id ? 'is-hop-away' : ''} ${clearCheer && on ? 'is-clear-cheer' : ''} ${reachMiss.includes(id) ? 'is-reach-miss' : ''}`}
                     style={clearCheer && on ? ({ '--cheer-i': cheerRank.get(id) ?? 0 } as CSSProperties) : undefined}
                     data-reach-miss={reachMiss.includes(id) ? 'yes' : undefined}
                     data-tower-type={on ? using : undefined}
@@ -856,6 +929,9 @@ export function DefendNightActorsSvg({
                   </g>
                 )
               })}
+              {lampHop ? (
+                <LampMoveHop key={lampHop.key} from={lampHop.from} to={lampHop.to} reduced={lampHop.reduced} />
+              ) : null}
               {ghost?.road ? (
                 <path
                   className={`defend-road-cover${ghost.cover ? ` is-${ghost.cover}` : ''}`}
