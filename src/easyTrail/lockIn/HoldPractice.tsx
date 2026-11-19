@@ -2,7 +2,7 @@ import { useState, type Dispatch, type SetStateAction } from 'react'
 import { pillarFor } from '../../content'
 import type { EvidenceBrief } from '../../content/evidence'
 import { STORY } from '../../content/story'
-import { EASY, isEasy } from '../../lib/easy'
+import { EASY, easySkipRepeatLockIn, isEasy } from '../../lib/easy'
 import { isDue } from '../../lib/memory'
 import { markLater, type RecallLaterState } from '../../lib/recall'
 import { needsTierHold } from '../../lib/tiers'
@@ -29,8 +29,10 @@ export function HoldPractice({ quizBrief, focusedEntry, today, setLater, onNavig
   const { progress, recordHeld, recordReview, recordLessonHold, snoozeReviews } = useProgress()
   const easy = isEasy(progress)
   const pillar = focusedEntry?.areaId ?? pillarFor(quizBrief.id)
+  const skipRepeat =
+    easy && easySkipRepeatLockIn(progress, quizBrief.id, today)
   const firstHold = !progress.held.includes(quizBrief.id)
-  const advancing = firstHold || needsTierHold(progress, quizBrief.id)
+  const advancing = !skipRepeat && (firstHold || needsTierHold(progress, quizBrief.id))
   const [sitting, setSitting] = useState<{ bUsed?: boolean; streak?: number }>({})
   const trace = progress.memory[quizBrief.id]
   const keptReview = easy && !advancing

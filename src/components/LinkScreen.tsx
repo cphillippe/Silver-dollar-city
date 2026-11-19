@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { STREET_BEATS, STREET_PLACE_WHYS, STREET_TRIPLES, appendStreetLinks, easyStreetChallenge, hardStreetChallenge, nextStreetWalk, streetFactsLeft, streetWalkTakeaway } from '../content/links'
 import { STORY } from '../content/story'
+import { localDateKey } from '../lib/dates'
 import { EASY, easyHoldView, easyMatchLine, isEasy, progressAfterMatchTaught } from '../lib/easy'
 import { EASY_HOME } from '../lib/easyNav'
 import { EasyBack } from './EasyBack'
@@ -88,16 +89,19 @@ export function LinkScreen({ onNavigate, debugLine }: LinkScreenProps) {
 
   function easyStop(dest: 'hold' | 'home') {
     if (debugLine) {
-      onNavigate(
-        dest === 'hold'
-          ? { name: 'journal', focusId: lineId, autoQuiz: true }
-          : { name: 'settings' },
-      )
+      if (dest === 'hold') {
+        const taughtNow = progressAfterMatchTaught(progress, lineId)
+        onNavigate(easyHoldView({ ...progress, ...taughtNow }, localDateKey(), lineId))
+        return
+      }
+      onNavigate({ name: 'settings' })
       return
     }
     markStreet()
     const taughtNow = progressAfterMatchTaught(progress, lineId)
-    onNavigate(dest === 'hold' ? easyHoldView(taughtNow) : EASY_HOME)
+    const merged = { ...progress, ...taughtNow }
+    const today = localDateKey()
+    onNavigate(dest === 'hold' ? easyHoldView(merged, today, lineId) : EASY_HOME)
   }
 
   return (

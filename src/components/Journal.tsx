@@ -3,7 +3,15 @@ import { areas, journalEntries } from '../content'
 import { evidenceFor, evidenceForJournal, evidenceForTier } from '../content/evidence'
 import { guideForArea, STORY } from '../content/story'
 import { localDateKey } from '../lib/dates'
-import { EASY, easyFacingLine, easyJournalMeta, easyLineTaught, easyLoopLine, isEasy } from '../lib/easy'
+import {
+  EASY,
+  easyFacingLine,
+  easyJournalMeta,
+  easyLineTaught,
+  easyLoopLine,
+  easySkipRepeatLockIn,
+  isEasy,
+} from '../lib/easy'
 import { HoldPractice } from '../easyTrail/lockIn/HoldPractice'
 import { LockInEmpty } from '../easyTrail/lockIn/LockInEmpty'
 import { EasyBack } from './EasyBack'
@@ -102,6 +110,16 @@ export function Journal({ focusId, autoQuiz, lockInEmpty, debugLockIn, onNavigat
 
   if (easy && lockInEmpty) {
     return <LockInEmpty onNavigate={onNavigate} />
+  }
+
+  if (
+    holdPractice &&
+    quizBrief &&
+    easy &&
+    easySkipRepeatLockIn(progress, quizBrief.id, today)
+  ) {
+    onNavigate({ name: 'hub' })
+    return null
   }
 
   if (holdPractice && quizBrief) {

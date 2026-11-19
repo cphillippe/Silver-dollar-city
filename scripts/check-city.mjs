@@ -1941,8 +1941,13 @@ assert.match(
   assert.match(dig792b, /role="timer"/, '#792b B9 Hard keeps the timer')
 }
 
+// 1.4.598: Easy first session runs Lock In once per kept lesson (#963).
+assert.equal(APP_VERSION, '1.4.598')
+assert.equal(CHANGELOG[0].version, '1.4.598', '1.4.598 is the newest row')
+assert.match(latestChange('1.4.598').items.join('\n'), /Refs #963/)
+assert.match(latestChange('1.4.598').title, /Lock In once per lesson/i)
+
 // 1.4.592: Easy Night Watch the Candle gets a name on the clear screen (#970).
-assert.equal(APP_VERSION, '1.4.592')
 assert.equal(CHANGELOG[0].version, '1.4.592', '1.4.592 is the newest row')
 assert.match(latestChange('1.4.592').items.join('\n'), /Refs #970/, '1.4.592 changelog refs #970')
 assert.match(latestChange('1.4.592').items.join('\n'), /names it and says it costs 3 sparks/, '1.4.592 changelog names the Candle line')
@@ -21071,3 +21076,4 @@ await import('./check-home-porch.mjs').then((mod) => mod.checkHomePorch())
 await import('./check-golden-live.mjs').then((mod) => mod.checkGoldenLive())
 await import('./check-gem-tap-live.mjs').then((mod) => mod.checkGemTapLive())
 await import('./check-gem-pop-live.mjs').then((mod) => mod.checkGemPopLive())
+await import('./check-easy-first-session-lockin.mjs').then((mod) => mod.checkEasyFirstSessionLockInOnce())

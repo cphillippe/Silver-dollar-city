@@ -95,7 +95,7 @@ const debtClaim = easyFacingLine('ph-debt', easyBrief('ph-debt').claim)
 assert.ok(debtClaim.length > 10, 'ph-debt Easy claim is live (D2)')
 
 // Version, changelog.
-assert.equal(APP_VERSION, '1.4.592')
+assert.equal(APP_VERSION, '1.4.598')
 assert.equal(JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version, APP_VERSION)
 const lockInRow = CHANGELOG.find((note) => note.version === '1.4.567')
 assert.ok(lockInRow, 'the 1.4.567 Lock In row is shipped')
@@ -812,6 +812,8 @@ await session(
 )
 assert.match(recallSrc, /phase === 'claim'[\s\S]*?recall-choices/, 'Hard RecallGate still asks the claim first')
 assert.match(recallSrc, /setPhase\('teach'\)/, 'Hard RecallGate still teaches')
+
+await import('./check-easy-first-session-lockin.mjs').then((mod) => mod.checkEasyFirstSessionLockInOnce())
 
 assert.deepEqual(consoleErrors, [], `console errors: ${consoleErrors.join(' | ')}`)
 await browser.close()
