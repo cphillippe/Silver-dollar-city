@@ -182,7 +182,7 @@ const BEGIN_BOB = 2
 export const BEGIN_REACH = BEGIN_GAP + TAP_EPS + BEGIN_BOB
 
 /** Road path samples in defend-frame coords. Matches DefendTowerCard roadTapBoxes for check-live-prove 1.4.500. */
-function stripRoadBlocks(): TowerRect[] {
+export function stripRoadBlocks(): TowerRect[] {
   if (typeof document === 'undefined') return []
   const frame = document.querySelector('.defend-frame')
   if (!(frame instanceof HTMLElement)) return []
@@ -293,15 +293,13 @@ export function placeTowerCard(
     glyph && cardHitsGlyph(card, point, cardHeight, paintHeight, glyph) ? 1 : 0
   const markH = paintHeight > 0 ? paintHeight : cardHeight
   const roadRects = strip ? (taps?.road?.length ? taps.road : stripRoadBlocks()) : []
-  const blocks = [
-    ...tapBlocks(taps),
-    ...roadRects.map((r) => ({
-      left: r.left - TAP_EPS,
-      top: r.top - TAP_EPS,
-      right: r.right + TAP_EPS,
-      bottom: r.bottom + TAP_EPS,
-    })),
-  ]
+  const roadBlocks = roadRects.map((r) => ({
+    left: r.left - TAP_EPS,
+    top: r.top - TAP_EPS,
+    right: r.right + TAP_EPS,
+    bottom: r.bottom + TAP_EPS,
+  }))
+  const blocks = tapBlocks(taps)
   const soft = softBlocks(taps)
   const own = ownBlocks(taps)
   const ownHits = (card: { left: number; top: number }) =>
@@ -314,6 +312,8 @@ export function placeTowerCard(
     }, 0)
   const tapHits = (card: { left: number; top: number }) =>
     blocks.reduce((n, block) => n + (hitsRect(card, markH, block, W) ? 1 : 0), 0)
+  const roadHits = (card: { left: number; top: number }) =>
+    roadBlocks.reduce((n, block) => n + (hitsRect(card, markH, block, W) ? 1 : 0), 0)
   const softHits = (card: { left: number; top: number }) =>
     soft.reduce((n, block) => n + (hitsRect(card, markH, block, W) ? 1 : 0), 0)
   const boundH = glyph || taps ? markH : cardHeight
@@ -340,7 +340,7 @@ export function placeTowerCard(
   const sc = scale > 0 ? scale : 1
   const stripPadTop = point.top - STRIP_PAD_CLEAR.up * sc
   const stripAboveLamp = (card: { left: number; top: number }) => card.top + cardHeight <= stripPadTop + TAP_EPS
-  const stripClearsRoad = (card: { left: number; top: number }) => tapHits(card) === 0
+  const stripClearsRoad = (card: { left: number; top: number }) => tapHits(card) === 0 && roadHits(card) === 0
   if (strip) {
     const topAbove = clampCardTop(stripPadTop - cardHeight - GAP, board.h, boundH, reserveBottom)
     const clearX = LAMP_HIT.x * sc + GLYPH_CLEAR
@@ -379,7 +379,7 @@ export function placeTowerCard(
     }
   }
   if (
-    stripLampHits(legacy) + glyphHits(legacy) + tapHits(legacy) + ownHits(legacy) + softHits(legacy) === 0 &&
+    stripLampHits(legacy) + glyphHits(legacy) + tapHits(legacy) + roadHits(legacy) + ownHits(legacy) + softHits(legacy) === 0 &&
     (!strip || (stripAboveLamp(legacy) && stripClearsRoad(legacy)))
   ) {
     return { ...legacy, markClear: strip ? stripAboveLamp(legacy) : true }
@@ -441,6 +441,7 @@ export function placeTowerCard(
         const key =
           markWeight * glyphHits(card) * 1e7 +
           tapHits(card) * 1e6 +
+          roadHits(card) * 1e6 +
           ownHits(card) * 5e5 +
           softHits(card) * 1e5 +
           softArea(card) * 0.5 +
@@ -458,9 +459,9 @@ export function placeTowerCard(
     return best
   }
   const snug = search(1, maxLeft, maxTop)
-  if (glyphHits(snug) + tapHits(snug) + ownHits(snug) + softHits(snug) === 0) return { ...snug, markClear: true }
+  if (glyphHits(snug) + tapHits(snug) + roadHits(snug) + ownHits(snug) + softHits(snug) === 0) return { ...snug, markClear: true }
   const wide = search(1, wideLeft, wideTop, EDGE)
-  if (glyphHits(wide) + tapHits(wide) + ownHits(wide) + softHits(wide) === 0) return { ...wide, markClear: true }
+  if (glyphHits(wide) + tapHits(wide) + roadHits(wide) + ownHits(wide) + softHits(wide) === 0) return { ...wide, markClear: true }
   if (strip) {
     let fallback: { left: number; top: number } = search(1, wideLeft, wideTop, EDGE)
     const clearX = LAMP_HIT.x * sc + GLYPH_CLEAR

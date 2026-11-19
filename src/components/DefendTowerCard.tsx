@@ -169,6 +169,7 @@ function measureTaps(card: HTMLElement, plotId: string): TowerTaps | null {
     })
   }
   const chips = [...document.querySelectorAll('.defend-type-chip')]
+  if (card.getAttribute('data-strip') === 'yes') void roadTapBoxes(ox, oy)
   return {
     begin,
     rail: one('.nw-rail'),
@@ -189,7 +190,6 @@ function measureTaps(card: HTMLElement, plotId: string): TowerTaps | null {
       ...pads.flatMap((pad) => [...pad.querySelectorAll('text.defend-type-label')].map(rect)),
       ...chips.filter((chip) => chip.getAttribute('data-chip-plot') !== plotId).map(rect),
     ].filter((box): box is TowerRect => box !== null),
-  ...(card.getAttribute('data-strip') === 'yes' ? { road: roadTapBoxes(ox, oy) } : {}),
   }
 }
 
@@ -216,8 +216,7 @@ function sameTaps(a: TowerTaps | null, b: TowerTaps | null): boolean {
     (a.row ?? null) === (b.row ?? null) &&
     sameRects(a.own, b.own) &&
     sameRects(a.lamps, b.lamps) &&
-    sameRects(a.labels, b.labels) &&
-    sameRects(a.road, b.road)
+    sameRects(a.labels, b.labels)
   )
 }
 
@@ -479,20 +478,9 @@ export function DefendTowerCard({
     setPaintH((prev) => (Math.abs(prev - painted) < 0.5 ? prev : painted))
     if (markOnMap && !strip && cardRef.current) parkNeighbourLabels()
     else restoreParkedLabels()
-    const measure = () => (markOnMap && cardRef.current ? measureTaps(cardRef.current, plotId) : null)
-    const next = measure()
+    const next = markOnMap && cardRef.current ? measureTaps(cardRef.current, plotId) : null
     setTaps((prev) => (sameTaps(prev, next) ? prev : next))
-    let frame = 0
-    if (strip && cardRef.current) {
-      frame = requestAnimationFrame(() => {
-        const again = measure()
-        setTaps((prev) => (sameTaps(prev, again) ? prev : again))
-      })
-    }
-    return () => {
-      restoreParkedLabels()
-      if (frame) cancelAnimationFrame(frame)
-    }
+    return () => restoreParkedLabels()
   })
 
   useEffect(() => {
