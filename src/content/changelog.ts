@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.592',
+    title: 'Night Watch: the Candle gets a name on the clear screen',
+    when: '2026-11-17',
+    items: [
+      'On Easy, when the Candle first shows on the clear screen, one line names it and says it costs 3 sparks.',
+      'Hard stays the same.',
+      'Refs #970.',
+    ],
+  },
+  {
     version: '1.4.591',
     title: 'Night Watch: your one lamp hops to the next seat',
     when: '2026-11-16',

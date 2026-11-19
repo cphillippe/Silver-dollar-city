@@ -6685,6 +6685,32 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   font-weight: 800;
 }
 
+/* 1.4.592 Easy clear screen: the Candle dock gets a plain name line. Hard never has .is-easy-watch. */
+.defend-page.is-easy-watch .defend-candle-name {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  /* Fixed to the viewport: clear-row is 0×0 static, so absolute would not track the Candle dock. */
+  .defend-page.is-easy-watch.is-boost .defend-candle-name {
+    position: fixed;
+    left: 64px;
+    bottom: 250px;
+    display: block;
+    margin: 0;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(20, 24, 40, 0.88);
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 18px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 3;
+  }
+}
+
 /* 792b B6: Easy plant step. Grey seat rings wait until the kid picks a lamp (data-lamp-picked). Draw only. */
 .defend-page.is-easy-watch:not([data-lamp-picked='yes']) .defend-plant-ground circle.is-dead {
   display: none;
