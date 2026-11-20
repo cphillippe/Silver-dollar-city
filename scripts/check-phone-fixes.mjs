@@ -4793,14 +4793,14 @@ const EASY_ONE_GOLD_MS = 1500
 const EASY_GOLD_BASE_1579 = {
   '375x667 home-first': { '2 Help': { x: 131, y: 561, w: 113, h: 48 } },
   '375x667 home-after-l1': { '3 Lock In': { x: 250, y: 584.1, w: 113, h: 48 } },
-  // 1.4.593: y shifted by the What's new row (CI 44489882255); x/w from main CI pins.
+  // 1.4.594: y re-pinned from CI 44731435677 after the What's new row; x/w from main CI pins.
   '375x667 settings-more': {
     'Open Profile': { x: 41, y: 1406.5, w: 130, h: 52 },
-    Candy: { x: 41, y: 1918.8, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1918.8, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1978.8, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2282.1, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2528, w: 176, h: 52 },
+    Candy: { x: 41, y: 1894, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1894, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1954, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2257.3, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2503.1, w: 176, h: 52 },
   },
   '390x844 home-first': { '2 Help': { x: 136, y: 738, w: 118, h: 48 } },
   '390x844 home-after-l1': { '3 Lock In': { x: 260, y: 761.1, w: 118, h: 48 } },
