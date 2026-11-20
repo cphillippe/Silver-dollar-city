@@ -627,7 +627,7 @@ html[data-easy='on'] .play.is-road-maze.is-win .cta-dock .btn:not(.primary) {
   font-weight: 700;
 }
 
-/* 1.4.595: Easy Dig DUG! — cream secondaries on the purple plate; unsticky dock so takeaway clears Lock In (#964). */
+/* 1.4.594: Easy Dig DUG! — cream secondaries on the purple plate; unsticky dock so takeaway clears Lock In (#964). */
 html[data-easy='on'] .play.is-source-dig.is-win .match-yes,
 html[data-easy='on'] .play.is-source-dig.is-win .cta-dock {
   position: relative;

@@ -4572,7 +4572,7 @@ const TABLET_BEGIN_MAIN = {
     ],
   },
   '768x1024': {
-    begin: { x: 77.8, y: 935.9, w: 162, h: 56 },
+    begin: { x: 77.8, y: 934, w: 162, h: 56 },
     rail: { x: 674, y: 113, w: 76, h: 311.3 },
     seats: [
       { x: 505.3, y: 140.7, w: 72, h: 72 },
@@ -4793,34 +4793,34 @@ const EASY_ONE_GOLD_MS = 1500
 const EASY_GOLD_BASE_1579 = {
   '375x667 home-first': { '2 Help': { x: 131, y: 561, w: 113, h: 48 } },
   '375x667 home-after-l1': { '3 Lock In': { x: 250, y: 584.1, w: 113, h: 48 } },
-  // 1.4.593 What's new row (plant ring + strip words): re-pinned from local proof 2026-11-18.
+  // 1.4.593: y shifted by the What's new row (CI 44489882255); x/w from main CI pins.
   '375x667 settings-more': {
-    'Open Profile': { x: 41, y: 1406.5, w: 129.4, h: 52 },
-    Candy: { x: 41, y: 1918.8, w: 84.4, h: 52 },
-    'Dusk town': { x: 133.4, y: 1918.8, w: 111.5, h: 52 },
-    'Clean parchment': { x: 41, y: 1978.8, w: 160.8, h: 52 },
-    'Export JSON': { x: 41, y: 2282.1, w: 132.7, h: 52 },
-    'Import pasted save': { x: 41, y: 2528, w: 178.5, h: 52 },
+    'Open Profile': { x: 41, y: 1406.5, w: 130, h: 52 },
+    Candy: { x: 41, y: 1918.8, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1918.8, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1978.8, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2282.1, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2528, w: 176, h: 52 },
   },
   '390x844 home-first': { '2 Help': { x: 136, y: 738, w: 118, h: 48 } },
   '390x844 home-after-l1': { '3 Lock In': { x: 260, y: 761.1, w: 118, h: 48 } },
   '390x844 settings-more': {
-    'Open Profile': { x: 41, y: 1407.9, w: 129.4, h: 52 },
-    Candy: { x: 41, y: 1920.2, w: 84.4, h: 52 },
-    'Dusk town': { x: 133.4, y: 1920.2, w: 111.5, h: 52 },
-    'Clean parchment': { x: 41, y: 1980.2, w: 160.8, h: 52 },
-    'Export JSON': { x: 41, y: 2258.7, w: 132.7, h: 52 },
-    'Import pasted save': { x: 41, y: 2504.5, w: 178.5, h: 52 },
+    'Open Profile': { x: 41, y: 1407.9, w: 130, h: 52 },
+    Candy: { x: 41, y: 1920.2, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1920.2, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1980.2, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2258.7, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2504.5, w: 176, h: 52 },
   },
   '412x915 home-first': { '2 Help': { x: 143.3, y: 809, w: 125.3, h: 48 } },
   '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
   '412x915 settings-more': {
-    'Open Profile': { x: 41, y: 1360.7, w: 129.4, h: 52 },
-    Candy: { x: 41, y: 1873, w: 84.4, h: 52 },
-    'Dusk town': { x: 133.4, y: 1873, w: 111.5, h: 52 },
-    'Clean parchment': { x: 41, y: 1933, w: 160.8, h: 52 },
-    'Export JSON': { x: 41, y: 2211.5, w: 132.7, h: 52 },
-    'Import pasted save': { x: 41, y: 2457.3, w: 178.5, h: 52 },
+    'Open Profile': { x: 41, y: 1360.7, w: 130, h: 52 },
+    Candy: { x: 41, y: 1873, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1873, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1933, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2211.5, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2457.3, w: 176, h: 52 },
   },
 }
 
@@ -9400,7 +9400,7 @@ async function checkDigWinReadable(browser, port, errors) {
     const hardSave = {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.595',
+      appVersion: '1.4.594',
       savedAt: new Date().toISOString(),
       progress: { ...SAVE.progress, easyMode: false, started: true },
     }
