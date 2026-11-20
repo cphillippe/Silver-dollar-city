@@ -5083,21 +5083,31 @@ async function finishEasyLessonOne(page) {
     await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
   }
   const walk = async (target) => {
-    for (let guard = 0; guard < 6; guard += 1) {
+    for (let guard = 0; guard < 40; guard += 1) {
       if ((await page.locator('[data-maze-cell].is-here').count()) === 0) return
       const at = await read('[data-maze-cell].is-here')
       if (at.r === target.r && at.c === target.c) return
+      const path = shortestMazePath(at, target)
+      if (!path || path.length < 2) throw new Error(`no road from ${at.r},${at.c} to ${target.r},${target.c}`)
       await tap(target)
-      await page.waitForFunction(
-        ({ r, c }) => {
-          const here = document.querySelector('[data-maze-cell].is-here')
-          return here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)
-        },
-        target,
-        { timeout: 12_000 },
-      ).catch(async () => {
-        await page.locator('.play.is-road-maze.is-helped, .play.is-road-maze.is-win, [data-maze-dock]').first().waitFor({ timeout: 4000 })
-      })
+      if (path.length === 2) {
+        await page.locator('.play.is-road-maze.is-helped, .play.is-road-maze.is-win, [data-maze-dock]').first().waitFor({ timeout: 4000 }).catch(() => {})
+        const here = await read('[data-maze-cell].is-here').catch(() => null)
+        if (here && here.r === target.r && here.c === target.c) return
+      }
+      await page
+        .waitForFunction(
+          ({ r, c }) => {
+            if (document.querySelector('.play.is-road-maze')?.getAttribute('data-maze-walking') === 'yes') return false
+            const here = document.querySelector('[data-maze-cell].is-here')
+            return here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)
+          },
+          target,
+          { timeout: 4000 },
+        )
+        .catch(async () => {
+          await page.locator('.play.is-road-maze.is-helped, .play.is-road-maze.is-win, [data-maze-dock]').first().waitFor({ timeout: 4000 })
+        })
       const landed = await read('[data-maze-cell].is-here').catch(() => target)
       if (landed.r === target.r && landed.c === target.c) return
     }
@@ -5162,6 +5172,36 @@ async function checkMazeFarTap(browser, port, errors) {
   ]
   const key = (cell) => `${cell.r}:${cell.c}`
 
+  const countPlayGold = async (page) =>
+    page.evaluate(() => {
+      const goldish = (value) => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g
+        let match
+        while ((match = re.exec(value || ''))) {
+          const r = Number(match[1])
+          const g = Number(match[2])
+          const b = Number(match[3])
+          if (r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
+      const goldCells = [...document.querySelectorAll('[data-maze-cell]')].filter((el) => {
+        const style = getComputedStyle(el)
+        return goldish(style.boxShadow) || goldish(style.outlineColor) || goldish(style.borderColor)
+      }).length
+      const filled = [...document.querySelectorAll('button, a.btn')].filter((el) => {
+        if (!(el instanceof HTMLElement)) return false
+        if (el.closest('[hidden], .easy-core, [data-maze-dock]')) return false
+        const style = getComputedStyle(el)
+        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+        const box = el.getBoundingClientRect()
+        if (box.width <= 0 || box.height <= 0) return false
+        return el.classList.contains('primary')
+      }).length
+      if (filled > 0) return filled
+      return goldCells
+    })
+
   for (const [width, height] of MAZE_FAR_TAP_SIZES) {
     const label = `${width}x${height}`
     const context = await browser.newContext({
@@ -5176,11 +5216,14 @@ async function checkMazeFarTap(browser, port, errors) {
     page.on('console', (msg) => {
       if (msg.type() === 'error') errors.push(`maze-far-tap ${label} ${msg.text()}`)
     })
-    await page.goto('/?playtest=1')
-    await page.getByRole('button', { name: 'Start Easy' }).click()
-    await page.locator('main.hub.is-easy-home').waitFor()
-    await page.locator('.easy-home-steps li.is-now .easy-coach-step').click()
-    await page.locator('[data-maze-cell].is-here').waitFor()
+    const openRoadMaze = async () => {
+      await page.goto('/?playtest=1')
+      await page.getByRole('button', { name: 'Start Easy' }).click()
+      await page.locator('main.hub.is-easy-home').waitFor()
+      await page.locator('.easy-home-steps li.is-now .easy-coach-step').click()
+      await page.locator('[data-maze-cell].is-here').waitFor()
+    }
+    await openRoadMaze()
 
     const boardY = () =>
       page.locator('.maze-board').evaluate((el) => el.getBoundingClientRect().y)
@@ -5192,27 +5235,52 @@ async function checkMazeFarTap(browser, port, errors) {
     const tapCell = async (cell) => {
       const loc = page.locator(`[data-maze-cell][data-r="${cell.r}"][data-c="${cell.c}"]`)
       const box = await loc.boundingBox()
-      if (!box) fail(`checkMazeFarTap fail ${label} missing cell ${key(cell)}`)
+      if (!box) {
+        fail(`checkMazeFarTap fail ${label} missing cell ${key(cell)}`)
+        return false
+      }
       await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+      return true
     }
     const waitHere = async (target) => {
-      await page.waitForFunction(
-        ({ r, c }) => {
-          const here = document.querySelector('[data-maze-cell].is-here')
-          return here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)
-        },
-        target,
-        { timeout: 12_000 },
-      )
+      try {
+        await page.waitForFunction(
+          ({ r, c }) => {
+            if (document.querySelector('.play.is-road-maze')?.getAttribute('data-maze-walking') === 'yes') return false
+            const here = document.querySelector('[data-maze-cell].is-here')
+            return here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)
+          },
+          target,
+          { timeout: 4000 },
+        )
+        return true
+      } catch {
+        fail(`checkMazeFarTap fail ${label} walk did not reach ${key(target)}`)
+        return false
+      }
     }
 
     await page.locator('[data-maze-how]').waitFor()
+    const rulePx = await page
+      .locator('[data-maze-how]')
+      .evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
+    if (rulePx < 13) fail(`checkMazeFarTap fail ${label} rule=${rulePx}px`)
+    const cellMin = await page.locator('[data-maze-cell].is-road').evaluateAll((nodes) => {
+      let min = Infinity
+      for (const node of nodes) {
+        const box = node.getBoundingClientRect()
+        if (box.width > 0 && box.height > 0) min = Math.min(min, box.width, box.height)
+      }
+      return Number.isFinite(min) ? min : 0
+    })
+    if (cellMin < 44) fail(`checkMazeFarTap fail ${label} cell=${cellMin}px`)
+
     const yRuleOn = await boardY()
     const at0 = await readHere()
-    const open = await page.locator('[data-maze-cell].is-road').evaluateAll((nodes) =>
+    const openKeys = await page.locator('[data-maze-cell].is-road').evaluateAll((nodes) =>
       nodes.map((node) => `${node.getAttribute('data-r')}:${node.getAttribute('data-c')}`),
     )
-    const openSet = new Set(open)
+    const openSet = new Set(openKeys)
     const near = STEP_DIRS.map((dir) => ({ r: at0.r + dir.r, c: at0.c + dir.c })).find((cell) => openSet.has(key(cell)))
     if (!near) fail(`checkMazeFarTap fail ${label} no near road tile`)
     else {
@@ -5222,6 +5290,26 @@ async function checkMazeFarTap(browser, port, errors) {
     const yRuleOff = await boardY()
     const gridDy = Math.abs(yRuleOff - yRuleOn)
     if (gridDy > 0.5) fail(`checkMazeFarTap fail ${label} gridDy=${gridDy.toFixed(2)}`)
+
+    const across = { r: 4, c: 2 }
+    const past = { r: 6, c: 2 }
+    if (openSet.has(key(across)) && openSet.has(key(past))) {
+      await openRoadMaze()
+      if (await tapCell(across)) await waitHere(across)
+      if (
+        !(await page.locator('.play.is-road-maze.is-helped').count()) &&
+        (await tapCell(past))
+      ) {
+        await waitHere(past)
+      }
+      if (await page.locator('.play.is-road-maze.is-helped').count()) {
+        fail(`checkMazeFarTap fail ${label} pass-by helped`)
+      }
+    } else fail(`checkMazeFarTap fail ${label} pass-by path missing`)
+
+    await openRoadMaze()
+    const goldStart = await countPlayGold(page)
+    if (goldStart !== 1) fail(`checkMazeFarTap fail ${label} gold=${goldStart} at start`)
 
     const hurt = {
       r: Number(await page.locator('[data-maze-cell].is-hurt').getAttribute('data-r')),
@@ -5236,53 +5324,47 @@ async function checkMazeFarTap(browser, port, errors) {
     let here = await readHere()
     while (here.r !== hurt.r || here.c !== hurt.c) {
       tapsHurt += 1
-      await tapCell(hurt)
-      await waitHere(hurt)
+      if (!(await tapCell(hurt))) break
+      if (!(await waitHere(hurt))) break
       here = await readHere()
       if (tapsHurt > 3) break
     }
     if (tapsHurt > 3) fail(`checkMazeFarTap fail ${label} hurt taps=${tapsHurt}`)
+    const goldAtHurt = await countPlayGold(page)
+    if (goldAtHurt !== 1) fail(`checkMazeFarTap fail ${label} gold=${goldAtHurt} at hurt`)
     await page.locator('.play.is-road-maze.is-helped').waitFor({ timeout: 8000 })
 
     let tapsInn = 0
-    here = await readHere()
     while ((await page.locator('[data-maze-dock]').count()) === 0) {
       tapsInn += 1
-      await tapCell(inn)
-      await page.waitForFunction(
-        ({ r, c }) => {
-          const here = document.querySelector('[data-maze-cell].is-here')
-          if (here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)) return true
-          return Boolean(document.querySelector('[data-maze-dock]'))
-        },
-        inn,
-        { timeout: 12_000 },
-      )
+      if (!(await tapCell(inn))) break
+      try {
+        await page.waitForFunction(
+          ({ r, c }) => {
+            if (document.querySelector('.play.is-road-maze')?.getAttribute('data-maze-walking') === 'yes') return false
+            const here = document.querySelector('[data-maze-cell].is-here')
+            if (here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)) return true
+            return Boolean(document.querySelector('[data-maze-dock]'))
+          },
+          inn,
+          { timeout: 4000 },
+        )
+      } catch {
+        fail(`checkMazeFarTap fail ${label} walk did not reach ${key(inn)}`)
+        break
+      }
       if (tapsInn > 3) break
     }
     if (tapsInn > 3) fail(`checkMazeFarTap fail ${label} inn taps=${tapsInn}`)
 
-    const gold = await page.evaluate(() => {
-      let count = 0
-      for (const el of document.querySelectorAll('button, a.btn')) {
-        if (!(el instanceof HTMLElement)) continue
-        if (el.closest('[hidden], .easy-core')) continue
-        const style = getComputedStyle(el)
-        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
-        const box = el.getBoundingClientRect()
-        if (box.width <= 0 || box.height <= 0) continue
-        const primary = el.classList.contains('primary')
-        const coach = el.classList.contains('easy-coach-step') && Boolean(el.closest('li.is-now'))
-        if (!primary && !coach) continue
-        count += 1
-      }
-      return count
-    })
-    if (gold !== 1) fail(`checkMazeFarTap fail ${label} gold=${gold}`)
-
     const taps = tapsHurt + tapsInn
+    const goldPlay = Math.max(goldStart, goldAtHurt)
+    const cellPx = Math.round(cellMin * 10) / 10
+    const ruleRounded = Math.round(rulePx * 10) / 10
     if (!fails.some((line) => line.includes(label))) {
-      console.log(`checkMazeFarTap ok ${label} taps=${taps} gridDy=${gridDy.toFixed(1)} gold=1`)
+      console.log(
+        `checkMazeFarTap ok ${label} taps=${taps} gridDy=${gridDy.toFixed(1)} gold=${goldPlay} cell=${cellPx}px rule=${ruleRounded}px`,
+      )
     }
     await context.close()
   }

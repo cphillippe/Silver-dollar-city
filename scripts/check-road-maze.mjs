@@ -192,9 +192,19 @@ assert.match(playSrc, /is-road-maze/)
 assert.doesNotMatch(
   playSrc,
   /shortestMazePath\(/,
-  'play must not call shortestMazePath directly',
+  'play must not auto-path / teleport on tap',
 )
 assert.match(playSrc, /mazeEasyTapPath/)
+assert.match(
+  playSrc,
+  /const stop = i >= steps\.length - 1[\s\S]*?landOn\(next, stop\)/,
+  'multi-step tap walk only treats the landing tile as a stop beside the hurt man',
+)
+assert.match(
+  playSrc,
+  /!walkingRef\.current[\s\S]*?!dragWalking\.current[\s\S]*?isNextToHurt\(atRef\.current\)/,
+  'pointer-up beside the hurt man waits until the tap walk finishes',
+)
 assert.match(playSrc, /mazeStepToward/)
 assert.match(playSrc, /mazeDragStepsToward/)
 assert.match(playSrc, /extendDragToward/)

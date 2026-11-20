@@ -1966,7 +1966,11 @@ assert.doesNotMatch(
   assert.match(maze599, /\.maze-how-slot/, '1.4.599 maze-how slot reserves height')
   assert.match(phone599, /async function checkMazeFarTap/, '1.4.599 checkMazeFarTap is defined')
   assert.match(phone599, /await checkMazeFarTap\(browser, port, errors\)/, '1.4.599 the full path runs checkMazeFarTap')
-  assert.match(phone599, /checkMazeFarTap ok \$\{label\} taps=\$\{taps\} gridDy=/, '1.4.599 the scan logs the ok line')
+  assert.match(
+    phone599,
+    /checkMazeFarTap ok \$\{label\} taps=\$\{taps\} gridDy=\$\{gridDy\.toFixed\(1\)\} gold=\$\{goldPlay\} cell=/,
+    '1.4.599 the scan logs the ok line',
+  )
   assert.match(phone599, /MAZE_FAR_TAP_SIZES = \[/, '1.4.599 the far tap scan lists viewport sizes')
   assert.match(phone599, /\[375, 667\]/, '1.4.599 the far tap scan includes 375×667')
   assert.match(phone599, /\[390, 844\]/, '1.4.599 the far tap scan includes 390×844')

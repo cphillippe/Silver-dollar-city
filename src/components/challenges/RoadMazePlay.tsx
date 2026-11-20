@@ -371,22 +371,30 @@ export function RoadMazePlay({
     window.clearTimeout(walkRef.current)
     let i = 0
     const pace = reduced ? 30 : stepMs
+    const markWalking = (on: boolean) => {
+      playRef.current?.setAttribute('data-maze-walking', on ? 'yes' : 'no')
+    }
     const tick = () => {
       const next = steps[i]
       if (!next) {
         walkingRef.current = false
+        markWalking(false)
         return
       }
-      landOn(next, true)
+      const stop = i >= steps.length - 1
+      landOn(next, stop)
       i += 1
       if (i >= steps.length) {
         walkingRef.current = false
+        markWalking(false)
         return
       }
       walkingRef.current = true
+      markWalking(true)
       walkRef.current = window.setTimeout(tick, pace)
     }
     walkingRef.current = true
+    markWalking(true)
     tick()
   }
 
@@ -524,6 +532,8 @@ export function RoadMazePlay({
       document.documentElement.dataset.easy === 'on' &&
       !foundRef.current &&
       dragQueue.current.length === 0 &&
+      !walkingRef.current &&
+      !dragWalking.current &&
       isNextToHurt(atRef.current)
     ) {
       markFound(MAZE_HURT)
