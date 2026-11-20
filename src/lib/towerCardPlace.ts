@@ -184,37 +184,113 @@ export const BEGIN_REACH = BEGIN_GAP + TAP_EPS + BEGIN_BOB
 /** Half-width for mid-wave strip road clearance; matches checkNwStripWords roadHalf. */
 export const STRIP_ROAD_HALF = 11
 
+const STRIP_ROAD_SAMPLES = 394
+
+type StripRoadPathPt = { x: number; y: number }
+
+let stripRoadPathKey = ''
+let stripRoadPathPts: StripRoadPathPt[] = []
+
+type StripRoadFramePt = { x: number; y: number }
+
+let stripRoadLiveKey = ''
+let stripRoadFramePts: StripRoadFramePt[] = []
+
+function defendFrameOrigin(): [number, number] {
+  const frame = document.querySelector('.defend-frame')
+  if (!(frame instanceof HTMLElement)) return [0, 0]
+  const origin = frame.getBoundingClientRect()
+  return [origin.left + frame.clientLeft, origin.top + frame.clientTop]
+}
+
+/** Keep frame-space road sample centres in sync with pan/zoom (no per-frame DOM path walks). */
+export function syncStripRoadFrame(ox?: number, oy?: number): void {
+  if (typeof document === 'undefined') return
+  const key = stripRoadCamKey()
+  if (key === stripRoadLiveKey && stripRoadFramePts.length) return
+  const [fx, fy] = ox != null && oy != null ? [ox, oy] : defendFrameOrigin()
+  const road = document.querySelector('.defend-road')
+  if (!(road instanceof SVGGeometryElement)) {
+    stripRoadLiveKey = key
+    stripRoadFramePts = []
+    return
+  }
+  const svg = road.ownerSVGElement
+  const ctm = svg?.getScreenCTM()
+  if (!svg || !ctm) {
+    stripRoadLiveKey = key
+    stripRoadFramePts = []
+    return
+  }
+  const pts = stripRoadPathCache(road)
+  const point = svg.createSVGPoint()
+  const centres: StripRoadFramePt[] = []
+  for (const pt of pts) {
+    point.x = pt.x
+    point.y = pt.y
+    const s = point.matrixTransform(ctm)
+    centres.push({ x: s.x - fx, y: s.y - fy })
+  }
+  stripRoadLiveKey = key
+  stripRoadFramePts = centres
+}
+
+export function stripRoadFramePoints(): readonly StripRoadFramePt[] {
+  syncStripRoadFrame()
+  return stripRoadFramePts
+}
+
+function stripRoadPathCache(road: SVGGeometryElement): StripRoadPathPt[] {
+  const key = `${road.getAttribute('d') ?? ''}|${road.getTotalLength().toFixed(3)}`
+  if (key === stripRoadPathKey && stripRoadPathPts.length === STRIP_ROAD_SAMPLES) return stripRoadPathPts
+  const length = road.getTotalLength()
+  const step = length / 393
+  const pts: StripRoadPathPt[] = []
+  for (let i = 0; i < STRIP_ROAD_SAMPLES; i += 1) {
+    const at = road.getPointAtLength(Math.min(length, i * step))
+    pts.push({ x: at.x, y: at.y })
+  }
+  stripRoadPathKey = key
+  stripRoadPathPts = pts
+  return pts
+}
+
+/** Pan/zoom key for the night map; used to skip strip road reprojection when the camera is still. */
+export function stripRoadCamKey(): string {
+  if (typeof document === 'undefined') return ''
+  const pan = document.querySelector('.nw-pan')
+  const zoom = document.querySelector('.nw-zoom')
+  const panT = pan instanceof HTMLElement ? pan.style.transform : ''
+  const zoomT = zoom instanceof HTMLElement ? zoom.style.transform : ''
+  const on = document.querySelector('.nw-cam')?.getAttribute('data-nw-cam') ?? 'off'
+  return `${on}|${panT}|${zoomT}`
+}
+
+/** Project cached road path points through the current screen matrix into defend-frame coords. */
+export function stripRoadTapBoxes(ox: number, oy: number): TowerRect[] {
+  if (typeof document === 'undefined') return []
+  syncStripRoadFrame(ox, oy)
+  if (!stripRoadFramePts.length) return []
+  const half = STRIP_ROAD_HALF
+  const out: TowerRect[] = []
+  for (const centre of stripRoadFramePts) {
+    out.push({
+      left: centre.x - half,
+      top: centre.y - half,
+      right: centre.x + half,
+      bottom: centre.y + half,
+    })
+  }
+  return out
+}
+
 /** Road path samples in defend-frame coords. Matches DefendTowerCard roadTapBoxes for check-live-prove 1.4.500. */
 export function stripRoadBlocks(): TowerRect[] {
   if (typeof document === 'undefined') return []
   const frame = document.querySelector('.defend-frame')
   if (!(frame instanceof HTMLElement)) return []
   const origin = frame.getBoundingClientRect()
-  const ox = origin.left + frame.clientLeft
-  const oy = origin.top + frame.clientTop
-  const road = document.querySelector('.defend-road')
-  if (!(road instanceof SVGGeometryElement)) return []
-  const svg = road.ownerSVGElement
-  const ctm = svg?.getScreenCTM()
-  if (!svg || !ctm) return []
-  const length = road.getTotalLength()
-  const step = length / 393
-  const half = STRIP_ROAD_HALF
-  const out: TowerRect[] = []
-  for (let i = 0; i < 394; i += 1) {
-    const at = road.getPointAtLength(Math.min(length, i * step))
-    const point = svg.createSVGPoint()
-    point.x = at.x
-    point.y = at.y
-    const s = point.matrixTransform(ctm)
-    out.push({
-      left: s.x - half - ox,
-      top: s.y - half - oy,
-      right: s.x + half - ox,
-      bottom: s.y + half - oy,
-    })
-  }
-  return out
+  return stripRoadTapBoxes(origin.left + frame.clientLeft, origin.top + frame.clientTop)
 }
 
 function tapBlocks(taps: TowerTaps | null): TowerRect[] {
@@ -295,14 +371,8 @@ export function placeTowerCard(
   const glyphHits = (card: { left: number; top: number }) =>
     glyph && cardHitsGlyph(card, point, cardHeight, paintHeight, glyph) ? 1 : 0
   const markH = paintHeight > 0 ? paintHeight : cardHeight
-  // Strip road clearance uses measured taps.road (rAF after pan); fall back once before first measure.
-  const roadRects = strip ? (taps?.road?.length ? taps.road : stripRoadBlocks()) : []
-  const roadBlocks = roadRects.map((r) => ({
-    left: r.left - TAP_EPS,
-    top: r.top - TAP_EPS,
-    right: r.right + TAP_EPS,
-    bottom: r.bottom + TAP_EPS,
-  }))
+  const roadCentres = strip ? stripRoadFramePoints() : []
+  const roadPad = STRIP_ROAD_HALF + TAP_EPS
   const blocks = tapBlocks(taps)
   const soft = softBlocks(taps)
   const own = ownBlocks(taps)
@@ -316,8 +386,17 @@ export function placeTowerCard(
     }, 0)
   const tapHits = (card: { left: number; top: number }) =>
     blocks.reduce((n, block) => n + (hitsRect(card, markH, block, W) ? 1 : 0), 0)
-  const roadHits = (card: { left: number; top: number }) =>
-    roadBlocks.reduce((n, block) => n + (hitsRect(card, markH, block, W) ? 1 : 0), 0)
+  const roadHits = (card: { left: number; top: number }) => {
+    if (!roadCentres.length) return 0
+    const left = card.left - roadPad
+    const right = card.left + W + roadPad
+    const top = card.top - roadPad
+    const bottom = card.top + markH + roadPad
+    for (const spot of roadCentres) {
+      if (spot.x >= left && spot.x <= right && spot.y >= top && spot.y <= bottom) return 1
+    }
+    return 0
+  }
   const softHits = (card: { left: number; top: number }) =>
     soft.reduce((n, block) => n + (hitsRect(card, markH, block, W) ? 1 : 0), 0)
   const boundH = glyph || taps ? markH : cardHeight

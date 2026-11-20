@@ -4,7 +4,8 @@ import { isFreeSpot } from '../lib/lampPlace'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
 import {
   placeTowerCard,
-  STRIP_ROAD_HALF,
+  stripRoadCamKey,
+  syncStripRoadFrame,
   STRIP_H,
   STRIP_W,
   TOWER_CARD_H,
@@ -102,34 +103,6 @@ function PathMark({ path }: { path: TreePath }) {
 }
 
 /** Boxes the card must keep off, in the card's own offset parent (the frame). Null when the card is not placed yet. */
-/** Screen boxes along the road path. Only the mid-wave strip must stay clear. */
-function roadTapBoxes(ox: number, oy: number): TowerRect[] {
-  const road = document.querySelector('.defend-road')
-  if (!(road instanceof SVGGeometryElement)) return []
-  const svg = road.ownerSVGElement
-  const ctm = svg?.getScreenCTM()
-  if (!svg || !ctm) return []
-  const length = road.getTotalLength()
-  // Match check-live-prove 1.4.500: 394 samples along the path, point-in-card.
-  const step = length / 393
-  const half = STRIP_ROAD_HALF
-  const out: TowerRect[] = []
-  for (let i = 0; i < 394; i += 1) {
-    const at = road.getPointAtLength(Math.min(length, i * step))
-    const point = svg.createSVGPoint()
-    point.x = at.x
-    point.y = at.y
-    const s = point.matrixTransform(ctm)
-    out.push({
-      left: s.x - half - ox,
-      top: s.y - half - oy,
-      right: s.x + half - ox,
-      bottom: s.y + half - oy,
-    })
-  }
-  return out
-}
-
 function measureTaps(card: HTMLElement, plotId: string): TowerTaps | null {
   const parent = card.offsetParent
   if (!(parent instanceof HTMLElement)) return null
@@ -170,7 +143,6 @@ function measureTaps(card: HTMLElement, plotId: string): TowerTaps | null {
     })
   }
   const chips = [...document.querySelectorAll('.defend-type-chip')]
-  const isStrip = card.getAttribute('data-strip') === 'yes'
   return {
     begin,
     rail: one('.nw-rail'),
@@ -191,7 +163,6 @@ function measureTaps(card: HTMLElement, plotId: string): TowerTaps | null {
       ...pads.flatMap((pad) => [...pad.querySelectorAll('text.defend-type-label')].map(rect)),
       ...chips.filter((chip) => chip.getAttribute('data-chip-plot') !== plotId).map(rect),
     ].filter((box): box is TowerRect => box !== null),
-    ...(isStrip ? { road: roadTapBoxes(ox, oy) } : {}),
   }
 }
 
@@ -218,8 +189,7 @@ function sameTaps(a: TowerTaps | null, b: TowerTaps | null): boolean {
     (a.row ?? null) === (b.row ?? null) &&
     sameRects(a.own, b.own) &&
     sameRects(a.lamps, b.lamps) &&
-    sameRects(a.labels, b.labels) &&
-    sameRects(a.road, b.road)
+    sameRects(a.labels, b.labels)
   )
 }
 
@@ -463,6 +433,8 @@ export function DefendTowerCard({
       : null
   const [paintH, setPaintH] = useState(0)
   const [taps, setTaps] = useState<TowerTaps | null>(null)
+  const [roadRev, setRoadRev] = useState(0)
+  void roadRev
   const placedRaw = placeTowerCard(point, board, clearOf, cameraScale, reserveBottom, cardH, glyph, paintH, markOnMap ? taps : null, strip)
   const covered = labelOverGlyph(
     glyph,
@@ -486,26 +458,29 @@ export function DefendTowerCard({
     setTaps((prev) => (sameTaps(prev, next) ? prev : next))
     let frame = 0
     let stop = false
+    let roadCamKey = ''
     const bumpStripRoad = () => {
       if (stop || !strip || !cardRef.current) return
-      const parent = cardRef.current.offsetParent
-      if (parent instanceof HTMLElement) {
-        const origin = parent.getBoundingClientRect()
-        const road = roadTapBoxes(origin.left + parent.clientLeft, origin.top + parent.clientTop)
-        setTaps((prev) => {
-          if (!prev) return prev
-          if (sameRects(prev.road, road)) return prev
-          return { ...prev, road }
-        })
+      const camKey = stripRoadCamKey()
+      if (camKey !== roadCamKey) {
+        roadCamKey = camKey
+        const parent = cardRef.current.offsetParent
+        if (parent instanceof HTMLElement) {
+          const origin = parent.getBoundingClientRect()
+          syncStripRoadFrame(origin.left + parent.clientLeft, origin.top + parent.clientTop)
+          setRoadRev((v) => v + 1)
+        }
       }
       frame = requestAnimationFrame(bumpStripRoad)
     }
     if (strip && cardRef.current) {
-      frame = requestAnimationFrame(() => {
-        const again = measure()
-        if (again) setTaps((prev) => (sameTaps(prev, again) ? prev : again))
-        bumpStripRoad()
-      })
+      const parent = cardRef.current.offsetParent
+      if (parent instanceof HTMLElement) {
+        const origin = parent.getBoundingClientRect()
+        roadCamKey = stripRoadCamKey()
+        syncStripRoadFrame(origin.left + parent.clientLeft, origin.top + parent.clientTop)
+      }
+      bumpStripRoad()
     }
     return () => {
       stop = true
