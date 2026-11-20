@@ -34,6 +34,7 @@ import {
   isMazeRoad,
   mazeNeighbors,
   mazeDragStepsToward,
+  mazeEasyTapPath,
   mazeStepToward,
   roadCtaLabel,
 } from '../src/lib/roadMaze.ts'
@@ -99,6 +100,11 @@ assert.equal(isAdjacentRoadStep(MAZE_START, MAZE_HURT), false)
 assert.equal(isAdjacentRoadStep(MAZE_START, MAZE_INN), false)
 const stepA = mazeStepToward(MAZE_START, MAZE_HURT)
 assert.ok(stepA && isAdjacentRoadStep(MAZE_START, stepA))
+const easyTapA = mazeEasyTapPath(MAZE_START, MAZE_HURT)
+assert.ok(easyTapA && easyTapA.length >= 4, 'Easy far tap walks the full shortest path')
+assert.deepEqual(easyTapA, shortestMazePath(MAZE_START, MAZE_HURT))
+const easyNear = mazeEasyTapPath(MAZE_START, stepA)
+assert.deepEqual(easyNear, [MAZE_START, stepA])
 
 setMazePreset(0)
 const lLeg = mazeDragStepsToward(MAZE_START, { r: 0, c: 1 })
@@ -187,6 +193,17 @@ assert.doesNotMatch(
   playSrc,
   /shortestMazePath\(/,
   'play must not auto-path / teleport on tap',
+)
+assert.match(playSrc, /mazeEasyTapPath/)
+assert.match(
+  playSrc,
+  /const stop = i >= steps\.length - 1[\s\S]*?landOn\(next, stop\)/,
+  'multi-step tap walk only treats the landing tile as a stop beside the hurt man',
+)
+assert.match(
+  playSrc,
+  /!walkingRef\.current[\s\S]*?!dragWalking\.current[\s\S]*?isNextToHurt\(atRef\.current\)/,
+  'pointer-up beside the hurt man waits until the tap walk finishes',
 )
 assert.match(playSrc, /mazeStepToward/)
 assert.match(playSrc, /mazeDragStepsToward/)

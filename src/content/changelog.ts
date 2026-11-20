@@ -28,6 +28,17 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.599',
+    title: 'Road map: tap far and walk the whole way',
+    when: '2026-11-20',
+    items: [
+      'Tap far on the road map and you walk all the way there.',
+      'The how-to line above the map stays put when you take your first step.',
+      'Hard stays the same.',
+      'Refs #886.',
+    ],
+  },
+  {
     version: '1.4.593',
     title: 'Night Watch: one plant ring per run and Far / Strong on the buy strip',
     when: '2026-11-17',

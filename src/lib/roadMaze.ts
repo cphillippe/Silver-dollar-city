@@ -168,6 +168,14 @@ export function mazeStepToward(from: MazeCoord, to: MazeCoord): MazeCoord | null
   return path && path.length >= 2 ? (path[1] ?? null) : null
 }
 
+/** Easy tap: one step when adjacent; otherwise the shortest open-road path (step-animated). */
+export function mazeEasyTapPath(from: MazeCoord, to: MazeCoord): MazeCoord[] | null {
+  if (!isMazeRoad(from) || !isMazeRoad(to)) return null
+  if (mazeSame(from, to)) return [from]
+  if (isAdjacentRoadStep(from, to)) return [from, to]
+  return shortestMazePath(from, to)
+}
+
 /** Open-road steps from `from` to `target` along the maze graph (Easy drag queue). */
 export function mazeDragStepsToward(from: MazeCoord, target: MazeCoord): MazeCoord[] {
   if (!isMazeRoad(from) || !isMazeRoad(target)) return []
