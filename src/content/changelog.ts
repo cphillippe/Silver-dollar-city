@@ -28,6 +28,18 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.593',
+    title: 'Night Watch: one plant ring per run and Far / Strong on the buy strip',
+    when: '2026-11-17',
+    items: [
+      'On Easy, the white shockwave when you plant a lamp shows only the first time you plant on that run.',
+      'On Easy, the short mid-wave buy strip next to your lamp says Far and Strong with the spark cost in plain words.',
+      'Hard stays the same.',
+      'Refs #959.',
+      'Refs #950.',
+    ],
+  },
+  {
     version: '1.4.592',
     title: 'Night Watch: the Candle gets a name on the clear screen',
     when: '2026-11-17',

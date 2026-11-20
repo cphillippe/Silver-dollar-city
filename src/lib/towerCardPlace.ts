@@ -22,6 +22,8 @@ const GAP = 28
 
 /** SVG hit rect on a planted lamp, in viewBox units. Matches lampIconBox('tower'). */
 const LAMP_HIT = { x: 38, up: 64, down: 12 }
+/** Pad footprint the mid-wave strip must clear (matches `.defend-pad` in checkNwStripWords). */
+const STRIP_PAD_CLEAR = { x: 72, up: 108, down: 36 }
 /** Bottom band of the card: the Upgrade button. */
 const SPEND_H = 64
 /** Top-right trash control. */
@@ -74,7 +76,15 @@ export function upgradeControlsHitLamp(
     b: lamp.top + LAMP_HIT.down * s,
   }
   if (strip) {
-    return overlaps({ l: card.left, r: card.left + STRIP_W, t: card.top, b: card.top + cardHeight }, hit)
+    const pad = {
+      l: lamp.left - STRIP_PAD_CLEAR.x * s,
+      r: lamp.left + STRIP_PAD_CLEAR.x * s,
+      t: lamp.top - STRIP_PAD_CLEAR.up * s,
+      b: lamp.top + STRIP_PAD_CLEAR.down * s,
+    }
+    const box = { l: card.left, r: card.left + STRIP_W, t: card.top, b: card.top + cardHeight }
+    if (box.b <= pad.t + TAP_EPS || box.t >= pad.b - TAP_EPS) return false
+    return overlaps(box, pad) || overlaps(box, hit)
   }
   const spend = {
     l: card.left,
@@ -159,6 +169,8 @@ export interface TowerTaps {
   lamps?: readonly TowerRect[]
   /** Other planted lamps' names. Soft. */
   labels?: readonly TowerRect[]
+  /** Mid-wave buy strip only: short boxes along the night road so the strip stays beside it. */
+  road?: readonly TowerRect[]
 }
 
 /** The card bottom stays this far above Begin the watch. */
@@ -168,6 +180,118 @@ export const TAP_EPS = 0.5
 /** Begin bobs up 2px on a wide screen (the defend-go keyframes), wherever it was measured. The gap carries that bob. */
 const BEGIN_BOB = 2
 export const BEGIN_REACH = BEGIN_GAP + TAP_EPS + BEGIN_BOB
+
+/** Half-width for mid-wave strip road clearance; matches checkNwStripWords roadHalf. */
+export const STRIP_ROAD_HALF = 11
+
+const STRIP_ROAD_SAMPLES = 394
+
+type StripRoadPathPt = { x: number; y: number }
+
+let stripRoadPathKey = ''
+let stripRoadPathPts: StripRoadPathPt[] = []
+
+type StripRoadFramePt = { x: number; y: number }
+
+let stripRoadLiveKey = ''
+let stripRoadFramePts: StripRoadFramePt[] = []
+
+function defendFrameOrigin(): [number, number] {
+  const frame = document.querySelector('.defend-frame')
+  if (!(frame instanceof HTMLElement)) return [0, 0]
+  const origin = frame.getBoundingClientRect()
+  return [origin.left + frame.clientLeft, origin.top + frame.clientTop]
+}
+
+/** Keep frame-space road sample centres in sync with pan/zoom (no per-frame DOM path walks). */
+export function syncStripRoadFrame(ox?: number, oy?: number): void {
+  if (typeof document === 'undefined') return
+  const key = stripRoadCamKey()
+  if (key === stripRoadLiveKey && stripRoadFramePts.length) return
+  const [fx, fy] = ox != null && oy != null ? [ox, oy] : defendFrameOrigin()
+  const road = document.querySelector('.defend-road')
+  if (!(road instanceof SVGGeometryElement)) {
+    stripRoadLiveKey = key
+    stripRoadFramePts = []
+    return
+  }
+  const svg = road.ownerSVGElement
+  const ctm = svg?.getScreenCTM()
+  if (!svg || !ctm) {
+    stripRoadLiveKey = key
+    stripRoadFramePts = []
+    return
+  }
+  const pts = stripRoadPathCache(road)
+  const point = svg.createSVGPoint()
+  const centres: StripRoadFramePt[] = []
+  for (const pt of pts) {
+    point.x = pt.x
+    point.y = pt.y
+    const s = point.matrixTransform(ctm)
+    centres.push({ x: s.x - fx, y: s.y - fy })
+  }
+  stripRoadLiveKey = key
+  stripRoadFramePts = centres
+}
+
+export function stripRoadFramePoints(): readonly StripRoadFramePt[] {
+  syncStripRoadFrame()
+  return stripRoadFramePts
+}
+
+function stripRoadPathCache(road: SVGGeometryElement): StripRoadPathPt[] {
+  const key = `${road.getAttribute('d') ?? ''}|${road.getTotalLength().toFixed(3)}`
+  if (key === stripRoadPathKey && stripRoadPathPts.length === STRIP_ROAD_SAMPLES) return stripRoadPathPts
+  const length = road.getTotalLength()
+  const step = length / 393
+  const pts: StripRoadPathPt[] = []
+  for (let i = 0; i < STRIP_ROAD_SAMPLES; i += 1) {
+    const at = road.getPointAtLength(Math.min(length, i * step))
+    pts.push({ x: at.x, y: at.y })
+  }
+  stripRoadPathKey = key
+  stripRoadPathPts = pts
+  return pts
+}
+
+/** Pan/zoom key for the night map; used to skip strip road reprojection when the camera is still. */
+export function stripRoadCamKey(): string {
+  if (typeof document === 'undefined') return ''
+  const pan = document.querySelector('.nw-pan')
+  const zoom = document.querySelector('.nw-zoom')
+  const panT = pan instanceof HTMLElement ? pan.style.transform : ''
+  const zoomT = zoom instanceof HTMLElement ? zoom.style.transform : ''
+  const on = document.querySelector('.nw-cam')?.getAttribute('data-nw-cam') ?? 'off'
+  return `${on}|${panT}|${zoomT}`
+}
+
+/** Project cached road path points through the current screen matrix into defend-frame coords. */
+export function stripRoadTapBoxes(ox: number, oy: number): TowerRect[] {
+  if (typeof document === 'undefined') return []
+  syncStripRoadFrame(ox, oy)
+  if (!stripRoadFramePts.length) return []
+  const half = STRIP_ROAD_HALF
+  const out: TowerRect[] = []
+  for (const centre of stripRoadFramePts) {
+    out.push({
+      left: centre.x - half,
+      top: centre.y - half,
+      right: centre.x + half,
+      bottom: centre.y + half,
+    })
+  }
+  return out
+}
+
+/** Road path samples in defend-frame coords. Matches DefendTowerCard roadTapBoxes for check-live-prove 1.4.500. */
+export function stripRoadBlocks(): TowerRect[] {
+  if (typeof document === 'undefined') return []
+  const frame = document.querySelector('.defend-frame')
+  if (!(frame instanceof HTMLElement)) return []
+  const origin = frame.getBoundingClientRect()
+  return stripRoadTapBoxes(origin.left + frame.clientLeft, origin.top + frame.clientTop)
+}
 
 function tapBlocks(taps: TowerTaps | null): TowerRect[] {
   if (!taps) return []
@@ -238,10 +362,17 @@ export function placeTowerCard(
   strip = false,
 ): { left: number; top: number; side: 'above' | 'below'; markClear: boolean } {
   const W = strip ? STRIP_W : TOWER_CARD_W
-  const centered = Math.max(MARGIN, Math.min(point.left - W / 2, board.w - W - RAIL))
+  const stripLeftOfLamp = point.left < board.w * 0.52
+  const centered = strip
+    ? stripLeftOfLamp
+      ? Math.max(MARGIN, point.left - W - 16)
+      : Math.max(MARGIN, Math.min(point.left + 24, board.w - W - RAIL))
+    : Math.max(MARGIN, Math.min(point.left - W / 2, board.w - W - RAIL))
   const glyphHits = (card: { left: number; top: number }) =>
     glyph && cardHitsGlyph(card, point, cardHeight, paintHeight, glyph) ? 1 : 0
   const markH = paintHeight > 0 ? paintHeight : cardHeight
+  const roadCentres = strip ? stripRoadFramePoints() : []
+  const roadPad = STRIP_ROAD_HALF + TAP_EPS
   const blocks = tapBlocks(taps)
   const soft = softBlocks(taps)
   const own = ownBlocks(taps)
@@ -255,13 +386,28 @@ export function placeTowerCard(
     }, 0)
   const tapHits = (card: { left: number; top: number }) =>
     blocks.reduce((n, block) => n + (hitsRect(card, markH, block, W) ? 1 : 0), 0)
+  const roadHits = (card: { left: number; top: number }) => {
+    if (!roadCentres.length) return 0
+    const left = card.left - roadPad
+    const right = card.left + W + roadPad
+    const top = card.top - roadPad
+    const bottom = card.top + markH + roadPad
+    for (const spot of roadCentres) {
+      if (spot.x >= left && spot.x <= right && spot.y >= top && spot.y <= bottom) return 1
+    }
+    return 0
+  }
   const softHits = (card: { left: number; top: number }) =>
     soft.reduce((n, block) => n + (hitsRect(card, markH, block, W) ? 1 : 0), 0)
+  const boundH = glyph || taps ? markH : cardHeight
   let above = point.top - cardHeight - GAP
   if (glyph && glyphHits({ left: centered, top: above })) above = Math.min(above, glyph.top - GLYPH_CLEAR - STEM_H - markH)
   const below = point.top + GAP
-  const legacyTop = above < MARGIN ? below : above
-  const boundH = glyph || taps ? markH : cardHeight
+  const legacyTop = strip
+    ? clampCardTop(point.top - cardHeight - GAP, board.h, boundH, reserveBottom)
+    : above < MARGIN
+      ? below
+      : above
   const top = clampCardTop(legacyTop, board.h, boundH, reserveBottom)
   const legacy = {
     left: centered,
@@ -270,7 +416,54 @@ export function placeTowerCard(
   }
   const lampHits = (card: { left: number; top: number }) =>
     others.reduce((n, lamp) => n + (upgradeControlsHitLamp(card, lamp, scale, cardHeight, strip) ? 1 : 0), 0)
-  if (lampHits(legacy) + glyphHits(legacy) + tapHits(legacy) + ownHits(legacy) + softHits(legacy) === 0) return { ...legacy, markClear: true }
+  /** Mid-wave strip buys sit on their own lamp; clearOf only lists neighbours. */
+  const ownLampHit = (card: { left: number; top: number }) =>
+    strip && upgradeControlsHitLamp(card, point, scale, cardHeight, true) ? 1 : 0
+  const stripLampHits = (card: { left: number; top: number }) => lampHits(card) + ownLampHit(card)
+  const sc = scale > 0 ? scale : 1
+  const stripPadTop = point.top - STRIP_PAD_CLEAR.up * sc
+  const stripAboveLamp = (card: { left: number; top: number }) => card.top + cardHeight <= stripPadTop + TAP_EPS
+  const stripClearsRoad = (card: { left: number; top: number }) => tapHits(card) === 0 && roadHits(card) === 0
+  if (strip) {
+    const topAbove = clampCardTop(stripPadTop - cardHeight - GAP, board.h, boundH, reserveBottom)
+    const clearX = LAMP_HIT.x * sc + GLYPH_CLEAR
+    const offRoadLeft = stripLeftOfLamp
+      ? [
+          Math.max(MARGIN, point.left - W - clearX - 12),
+          Math.max(MARGIN, point.left - W - 8),
+          centered,
+          Math.max(MARGIN, point.left - W - clearX),
+        ]
+      : [
+          Math.max(MARGIN, Math.min(point.left + clearX + 12, board.w - W - RAIL)),
+          Math.max(MARGIN, Math.min(point.left + 24, board.w - W - RAIL)),
+          centered,
+          Math.max(MARGIN, Math.min(point.left + clearX, board.w - W - RAIL)),
+        ]
+    const lefts = [...new Set([...offRoadLeft, Math.max(MARGIN, Math.min(point.left - W / 2, board.w - W - RAIL))])]
+    for (const left of [...new Set(lefts.map((v) => Math.round(v)))]) {
+      const stripTops = [topAbove]
+      for (let lift = 16; lift <= 160; lift += 16) {
+        stripTops.push(Math.max(MARGIN, topAbove - lift))
+      }
+      for (const topTry of stripTops) {
+        const card = { left, top: topTry }
+        if (
+          stripAboveLamp(card) &&
+          stripClearsRoad(card) &&
+          stripLampHits(card) + ownHits(card) + softHits(card) === 0
+        ) {
+          return { ...card, side: 'above', markClear: true }
+        }
+      }
+    }
+  }
+  if (
+    stripLampHits(legacy) + glyphHits(legacy) + tapHits(legacy) + roadHits(legacy) + ownHits(legacy) + softHits(legacy) === 0 &&
+    (!strip || (stripAboveLamp(legacy) && stripClearsRoad(legacy)))
+  ) {
+    return { ...legacy, markClear: strip ? stripAboveLamp(legacy) : true }
+  }
   const maxLeft = Math.max(MARGIN, board.w - W - RAIL)
   const rowFloor = taps?.row != null ? taps.row - BEGIN_REACH : Infinity
   const maxTop = Math.max(MARGIN, Math.min(board.h - boundH - MARGIN - reserveBottom, rowFloor - boundH))
@@ -318,13 +511,23 @@ export function placeTowerCard(
         const railIn = Math.max(0, left - maxLeft)
         const barIn = Math.max(0, top - maxTop)
         const dist = Math.hypot(left + W / 2 - point.left, top + cardHeight / 2 - point.top)
+        const stripBelow = strip && !stripAboveLamp(card) ? 1e8 : 0
+        const stripRoad =
+          strip && stripLeftOfLamp && card.left + W > point.left - 8
+            ? 5e8
+            : strip && !stripLeftOfLamp && card.left < point.left + 8
+              ? 5e8
+              : 0
         const key =
           markWeight * glyphHits(card) * 1e7 +
           tapHits(card) * 1e6 +
+          roadHits(card) * 1e6 +
           ownHits(card) * 5e5 +
           softHits(card) * 1e5 +
           softArea(card) * 0.5 +
-          lampHits(card) * 2000 +
+          (strip ? stripLampHits(card) * 1e8 : lampHits(card) * 2000) +
+          stripBelow +
+          stripRoad +
           (railIn + barIn) * 50 +
           dist
         if (key < bestKey) {
@@ -336,9 +539,44 @@ export function placeTowerCard(
     return best
   }
   const snug = search(1, maxLeft, maxTop)
-  if (glyphHits(snug) + tapHits(snug) + ownHits(snug) + softHits(snug) === 0) return { ...snug, markClear: true }
+  if (glyphHits(snug) + tapHits(snug) + roadHits(snug) + ownHits(snug) + softHits(snug) === 0) return { ...snug, markClear: true }
   const wide = search(1, wideLeft, wideTop, EDGE)
-  if (glyphHits(wide) + tapHits(wide) + ownHits(wide) + softHits(wide) === 0) return { ...wide, markClear: true }
+  if (glyphHits(wide) + tapHits(wide) + roadHits(wide) + ownHits(wide) + softHits(wide) === 0) return { ...wide, markClear: true }
+  if (strip) {
+    let fallback: { left: number; top: number } = search(1, wideLeft, wideTop, EDGE)
+    const clearX = LAMP_HIT.x * sc + GLYPH_CLEAR
+    const forcedLeft = stripLeftOfLamp
+      ? Math.max(MARGIN, point.left - W - clearX - 16)
+      : Math.max(MARGIN, Math.min(point.left + clearX + 16, board.w - W - RAIL))
+    const forcedTop = Math.max(MARGIN, stripPadTop - cardHeight - GAP)
+    const forced = { left: forcedLeft, top: clampCardTop(forcedTop, board.h, boundH, reserveBottom) }
+    const acceptStrip = (card: { left: number; top: number }) =>
+      stripAboveLamp(card) &&
+      stripClearsRoad(card) &&
+      stripLampHits(card) + ownHits(card) + softHits(card) === 0
+    if (!acceptStrip(fallback)) fallback = forced
+    if (!acceptStrip(fallback)) {
+      const railLeft = Math.max(MARGIN, board.w - W - RAIL)
+      for (const left of [forcedLeft, railLeft, MARGIN, forcedLeft - 12]) {
+        for (let lift = 0; lift <= 96; lift += 12) {
+          const card = {
+            left: Math.max(MARGIN, Math.min(left, wideLeft)),
+            top: clampCardTop(forcedTop - lift, board.h, boundH, reserveBottom),
+          }
+          if (acceptStrip(card)) {
+            fallback = card
+            break
+          }
+        }
+        if (acceptStrip(fallback)) break
+      }
+    }
+    return {
+      ...fallback,
+      side: 'above',
+      markClear: acceptStrip(fallback),
+    }
+  }
   // No spot clears the mark, the taps and the lamps around it: the header copy carries the mark and the card
   // keeps the spot that covers the fewest of them. Taps first, then neighbour lamps.
   return { ...search(0, wideLeft, wideTop, EDGE), markClear: false }

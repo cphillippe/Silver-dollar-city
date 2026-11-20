@@ -612,6 +612,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const [emptyShake, setEmptyShake] = useState<string | null>(null)
   const lampHopTimer = useRef(0)
   const plantIgniteTimers = useRef<Partial<Record<CityPlotId, number>>>({})
+  /** Easy #957: one shockwave ring for the whole run, on the first plant only. */
+  const plantIgniteRunDone = useRef(false)
   const [clearCheer, setClearCheer] = useState(false)
   const clearCheerPending = useRef(false)
   const clearCheerTimer = useRef(0)
@@ -1496,6 +1498,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setRunPaths(shown.paths)
     plantsRef.current = shown.plants
     setPlants(shown.plants)
+    if (Object.keys(shown.plants).length > 0) plantIgniteRunDone.current = true
+  }, [easy])
+
+  useEffect(() => {
+    if (easy && Object.keys(plantsRef.current).length > 0) plantIgniteRunDone.current = true
   }, [easy])
 
   useEffect(
@@ -2382,8 +2389,19 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }, 0)
   }
 
+  function resetPlantIgniteForRun() {
+    plantIgniteRunDone.current = false
+    setPlantIgniteIds(new Set())
+    for (const id of Object.keys(plantIgniteTimers.current)) {
+      window.clearTimeout(plantIgniteTimers.current[id as CityPlotId]!)
+    }
+    plantIgniteTimers.current = {}
+  }
+
   function flashPlantIgnite(spot: CityPlotId) {
     if (!easy) return
+    if (plantIgniteRunDone.current) return
+    plantIgniteRunDone.current = true
     setPlantIgniteIds((current) => {
       if (current.has(spot)) return current
       const next = new Set(current)
@@ -3431,6 +3449,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   }
 
   function retry() {
+    if (easy) resetPlantIgniteForRun()
     setPhase('plant')
     setWon(false)
     walkInRef.current?.reset()
