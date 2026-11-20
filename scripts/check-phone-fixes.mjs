@@ -5092,24 +5092,17 @@ async function finishEasyLessonOne(page) {
       await tap(target)
       if (path.length === 2) {
         await page.locator('.play.is-road-maze.is-helped, .play.is-road-maze.is-win, [data-maze-dock]').first().waitFor({ timeout: 4000 }).catch(() => {})
-        const here = await read('[data-maze-cell].is-here').catch(() => null)
-        if (here && here.r === target.r && here.c === target.c) return
+        return
       }
-      await page
-        .waitForFunction(
-          ({ r, c }) => {
-            if (document.querySelector('.play.is-road-maze')?.getAttribute('data-maze-walking') === 'yes') return false
-            const here = document.querySelector('[data-maze-cell].is-here')
-            return here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)
-          },
-          target,
-          { timeout: 4000 },
-        )
-        .catch(async () => {
-          await page.locator('.play.is-road-maze.is-helped, .play.is-road-maze.is-win, [data-maze-dock]').first().waitFor({ timeout: 4000 })
-        })
-      const landed = await read('[data-maze-cell].is-here').catch(() => target)
-      if (landed.r === target.r && landed.c === target.c) return
+      await page.waitForFunction(
+        ({ r, c }) => {
+          if (document.querySelector('.play.is-road-maze')?.getAttribute('data-maze-walking') === 'yes') return false
+          const here = document.querySelector('[data-maze-cell].is-here')
+          return here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)
+        },
+        target,
+        { timeout: 4000 },
+      )
     }
     throw new Error(`maze walk did not reach ${target.r},${target.c}`)
   }
