@@ -9143,23 +9143,23 @@ const DIG_WIN_READABLE_SIZES = [
   [412, 915],
 ]
 const DIG_WIN_LINE = 'wb-women'
-/** Tap boxes at scroll 0 — re-pinned from CI (run id in commit + below). */
+/** Tap boxes at scroll 0 — CI run 44791015323. */
 const DIG_WIN_TAP_BASELINE = {
   '375x667': {
-    again: null,
-    home: null,
+    again: { x: 22, y: 564.2, w: 161.5, h: 54.8 },
+    home: { x: 191.5, y: 564.2, w: 161.5, h: 54.8 },
   },
   '375x812': {
-    again: null,
-    home: null,
+    again: { x: 22, y: 709.2, w: 161.5, h: 54.8 },
+    home: { x: 191.5, y: 709.2, w: 161.5, h: 54.8 },
   },
   '390x844': {
-    again: null,
-    home: null,
+    again: { x: 22, y: 741.2, w: 169, h: 54.8 },
+    home: { x: 199, y: 741.2, w: 169, h: 54.8 },
   },
   '412x915': {
-    again: null,
-    home: null,
+    again: { x: 23, y: 812.2, w: 179, h: 54.8 },
+    home: { x: 210, y: 812.2, w: 179, h: 54.8 },
   },
 }
 
