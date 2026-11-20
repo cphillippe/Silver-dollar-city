@@ -615,7 +615,6 @@ html[data-easy='on'] .play.is-road-maze.is-win .cta-dock .btn {
 /* 1.4.503: Easy win replays and Home are ink, not a second filled gold. */
 html[data-easy='on'] .play.is-father-run.is-win .cta-dock .btn:not(.primary),
 html[data-easy='on'] .play.is-claim-merge.is-win .cta-dock .btn:not(.primary),
-html[data-easy='on'] .play.is-source-dig.is-win .cta-dock .btn:not(.primary),
 html[data-easy='on'] .play.is-road-maze.is-win .cta-dock .btn:not(.primary) {
   background: transparent;
   background-image: none;
@@ -626,6 +625,72 @@ html[data-easy='on'] .play.is-road-maze.is-win .cta-dock .btn:not(.primary) {
   min-height: 48px;
   font-size: 1rem;
   font-weight: 700;
+}
+
+/* 1.4.594: Easy Dig DUG! — cream secondaries; sticky dock fits above the fold on every phone (#964). */
+html[data-easy='on'] .play.is-source-dig.is-win {
+  gap: 6px;
+  padding-bottom: 8px;
+}
+
+html[data-easy='on'] .play.is-source-dig.is-win .story-kicker {
+  margin: 0;
+}
+
+html[data-easy='on'] .play.is-source-dig.is-win .dig-hint.quiet,
+html[data-easy='on'] .play.is-source-dig.is-win .match-score {
+  display: none;
+}
+
+html[data-easy='on'] .play.is-source-dig.is-win .dig-board {
+  max-height: min(34svh, 260px);
+  overflow: hidden;
+  padding: 8px 8px 10px;
+  gap: 6px;
+}
+
+html[data-easy='on'] .play.is-source-dig.is-win .dig-tablet.is-open {
+  min-height: 0;
+  padding: 6px 8px;
+}
+
+html[data-easy='on'] .play.is-source-dig.is-win .match-yes {
+  position: relative;
+  z-index: 4;
+  flex: 0 0 auto;
+  margin-bottom: 8px;
+}
+
+html[data-easy='on'] .play.is-source-dig.is-win .cta-dock {
+  z-index: 4;
+  flex: 0 0 auto;
+  margin-top: auto;
+  padding-top: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+html[data-easy='on'] .play.is-source-dig.is-win .cta-dock .btn.primary {
+  grid-column: 1 / -1;
+}
+
+html[data-easy='on'] .play.is-source-dig.is-win .cta-dock .btn.xl:not(.primary) {
+  min-height: 44px;
+  padding-inline: 8px;
+}
+
+html[data-easy='on'] .play.is-source-dig.is-win .cta-dock .btn:not(.primary) {
+  background: transparent;
+  background-image: none;
+  color: #fff6e8;
+  -webkit-text-fill-color: #fff6e8;
+  border: 1.5px solid rgba(255, 246, 232, 0.45);
+  box-shadow: none;
+  min-height: 48px;
+  font-size: 1rem;
+  font-weight: 700;
+  opacity: 1;
 }
 
 /* Easy fail 2: the plain Run again sits on the cream dock. */

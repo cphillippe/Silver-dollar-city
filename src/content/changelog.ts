@@ -28,6 +28,17 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.594',
+    title: 'Dig win: readable One more dig and Home',
+    when: '2026-11-17',
+    items: [
+      'On Easy, after you uncover the tablets at Witness Square, the One more dig and Home buttons on the DUG! screen use light lettering you can read on the purple plate.',
+      'The result lines sit with clear space above Lock In next.',
+      'Hard stays the same.',
+      'Refs #964.',
+    ],
+  },
+  {
     version: '1.4.593',
     title: 'Night Watch: one plant ring per run and Far / Strong on the buy strip',
     when: '2026-11-17',
