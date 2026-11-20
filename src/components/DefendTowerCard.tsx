@@ -5,7 +5,7 @@ import { WATCH_ABILITY_LABEL } from '../lib/defend'
 import {
   placeTowerCard,
   stripRoadCamKey,
-  syncStripRoadFrame,
+  stripRoadTapBoxes,
   STRIP_H,
   STRIP_W,
   TOWER_CARD_H,
@@ -102,6 +102,11 @@ function PathMark({ path }: { path: TreePath }) {
   )
 }
 
+/** Screen boxes along the road path. Only the mid-wave strip must stay clear. */
+function roadTapBoxes(ox: number, oy: number): TowerRect[] {
+  return stripRoadTapBoxes(ox, oy)
+}
+
 /** Boxes the card must keep off, in the card's own offset parent (the frame). Null when the card is not placed yet. */
 function measureTaps(card: HTMLElement, plotId: string): TowerTaps | null {
   const parent = card.offsetParent
@@ -143,6 +148,7 @@ function measureTaps(card: HTMLElement, plotId: string): TowerTaps | null {
     })
   }
   const chips = [...document.querySelectorAll('.defend-type-chip')]
+  const isStrip = card.getAttribute('data-strip') === 'yes'
   return {
     begin,
     rail: one('.nw-rail'),
@@ -163,6 +169,7 @@ function measureTaps(card: HTMLElement, plotId: string): TowerTaps | null {
       ...pads.flatMap((pad) => [...pad.querySelectorAll('text.defend-type-label')].map(rect)),
       ...chips.filter((chip) => chip.getAttribute('data-chip-plot') !== plotId).map(rect),
     ].filter((box): box is TowerRect => box !== null),
+    ...(isStrip ? { road: roadTapBoxes(ox, oy) } : {}),
   }
 }
 
@@ -189,7 +196,8 @@ function sameTaps(a: TowerTaps | null, b: TowerTaps | null): boolean {
     (a.row ?? null) === (b.row ?? null) &&
     sameRects(a.own, b.own) &&
     sameRects(a.lamps, b.lamps) &&
-    sameRects(a.labels, b.labels)
+    sameRects(a.labels, b.labels) &&
+    sameRects(a.road, b.road)
   )
 }
 
@@ -467,7 +475,7 @@ export function DefendTowerCard({
         const parent = cardRef.current.offsetParent
         if (parent instanceof HTMLElement) {
           const origin = parent.getBoundingClientRect()
-          syncStripRoadFrame(origin.left + parent.clientLeft, origin.top + parent.clientTop)
+          roadTapBoxes(origin.left + parent.clientLeft, origin.top + parent.clientTop)
           setRoadRev((v) => v + 1)
         }
       }
@@ -478,7 +486,7 @@ export function DefendTowerCard({
       if (parent instanceof HTMLElement) {
         const origin = parent.getBoundingClientRect()
         roadCamKey = stripRoadCamKey()
-        syncStripRoadFrame(origin.left + parent.clientLeft, origin.top + parent.clientTop)
+        roadTapBoxes(origin.left + parent.clientLeft, origin.top + parent.clientTop)
       }
       bumpStripRoad()
     }
