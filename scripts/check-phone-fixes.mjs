@@ -5076,6 +5076,12 @@ async function finishEasyLessonOne(page) {
       c: Number(await loc.getAttribute('data-c')),
     }
   }
+  const readHereNow = () =>
+    page.evaluate(() => {
+      const here = document.querySelector('[data-maze-cell].is-here')
+      if (!here) return null
+      return { r: Number(here.getAttribute('data-r')), c: Number(here.getAttribute('data-c')) }
+    })
   const tap = async (cell) => {
     const loc = page.locator(`[data-maze-cell][data-r="${cell.r}"][data-c="${cell.c}"]`)
     const box = await loc.boundingBox()
@@ -5089,18 +5095,32 @@ async function finishEasyLessonOne(page) {
       if (at.r === target.r && at.c === target.c) return
       const path = shortestMazePath(at, target)
       if (!path || path.length < 2) throw new Error(`no road from ${at.r},${at.c} to ${target.r},${target.c}`)
-      await tap(target)
-      if (path.length === 2) {
+      const step = path.length > 2 ? target : path[1]
+      await tap(step)
+      if (path.length > 2) {
+        for (let wait = 0; wait < 40; wait += 1) {
+          const here = await readHereNow()
+          if (here && here.r === target.r && here.c === target.c) return
+          const walking = await page.evaluate(
+            () => document.querySelector('.play.is-road-maze')?.getAttribute('data-maze-walking') === 'yes',
+          )
+          if (!walking) break
+          await page.waitForTimeout(125)
+        }
+        const landed = await readHereNow()
+        if (landed && landed.r === target.r && landed.c === target.c) return
+        continue
+      }
+      if (step.r === target.r && step.c === target.c) {
         await page.locator('.play.is-road-maze.is-helped, .play.is-road-maze.is-win, [data-maze-dock]').first().waitFor({ timeout: 4000 }).catch(() => {})
         return
       }
       await page.waitForFunction(
         ({ r, c }) => {
-          if (document.querySelector('.play.is-road-maze')?.getAttribute('data-maze-walking') === 'yes') return false
           const here = document.querySelector('[data-maze-cell].is-here')
           return here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)
         },
-        target,
+        step,
         { timeout: 4000 },
       )
     }
