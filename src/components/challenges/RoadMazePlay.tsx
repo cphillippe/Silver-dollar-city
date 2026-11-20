@@ -37,6 +37,7 @@ import {
   roadCtaLabel,
   isMazePathSwipe,
   mazeDragStepsToward,
+  mazeEasyTapPath,
   mazeStepToward,
   setMazePreset,
   swipeStep,
@@ -59,6 +60,7 @@ interface RoadMazePlayProps {
 }
 
 const STEP_MS = 64
+const EASY_FAR_STEP_MS = 105
 const POP_SHARDS = [0, 1, 2, 3, 4]
 
 export function RoadMazePlay({
@@ -362,12 +364,13 @@ export function RoadMazePlay({
     finishIfWon(cell, helpedRef.current)
   }
 
-  function walkPath(path: MazeCoord[]) {
+  function walkPath(path: MazeCoord[], stepMs = STEP_MS) {
     if (walkingRef.current || wonRef.current) return
     const steps = path.slice(1)
     if (!steps.length) return
     window.clearTimeout(walkRef.current)
     let i = 0
+    const pace = reduced ? 30 : stepMs
     const tick = () => {
       const next = steps[i]
       if (!next) {
@@ -381,8 +384,9 @@ export function RoadMazePlay({
         return
       }
       walkingRef.current = true
-      walkRef.current = window.setTimeout(tick, reduced ? 30 : STEP_MS)
+      walkRef.current = window.setTimeout(tick, pace)
     }
+    walkingRef.current = true
     tick()
   }
 
@@ -476,6 +480,17 @@ export function RoadMazePlay({
     }
     if (!isMazeRoad(target)) {
       blocked(mazeBlockedHint(target, foundRef.current, helpedRef.current))
+      return
+    }
+    if (document.documentElement.dataset.easy === 'on') {
+      const path = mazeEasyTapPath(here, target)
+      if (!path || path.length < 2) {
+        blocked('One step on the open road.')
+        return
+      }
+      const farSteps = path.length - 1
+      const pace = farSteps > 1 ? EASY_FAR_STEP_MS : STEP_MS
+      walkPath(path, pace)
       return
     }
     const step = mazeStepToward(here, target)
@@ -686,11 +701,14 @@ export function RoadMazePlay({
         <>
       {document.documentElement.dataset.easy === 'on' && !won ? (
         <div className="maze-how-slot">
-          {helped || !stepped ? (
-            <p className="maze-how" data-maze-how>
-              {helped ? EASY.mazeInnCue : EASY.mazeHow}
-            </p>
-          ) : null}
+          <p
+            className="maze-how"
+            data-maze-how={helped || !stepped ? '' : undefined}
+            aria-hidden={!helped && stepped}
+            style={!helped && stepped ? { visibility: 'hidden' } : undefined}
+          >
+            {helped ? EASY.mazeInnCue : EASY.mazeHow}
+          </p>
         </div>
       ) : null}
       {toast ? (

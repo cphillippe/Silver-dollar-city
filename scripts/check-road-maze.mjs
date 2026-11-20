@@ -34,6 +34,7 @@ import {
   isMazeRoad,
   mazeNeighbors,
   mazeDragStepsToward,
+  mazeEasyTapPath,
   mazeStepToward,
   roadCtaLabel,
 } from '../src/lib/roadMaze.ts'
@@ -99,6 +100,11 @@ assert.equal(isAdjacentRoadStep(MAZE_START, MAZE_HURT), false)
 assert.equal(isAdjacentRoadStep(MAZE_START, MAZE_INN), false)
 const stepA = mazeStepToward(MAZE_START, MAZE_HURT)
 assert.ok(stepA && isAdjacentRoadStep(MAZE_START, stepA))
+const easyTapA = mazeEasyTapPath(MAZE_START, MAZE_HURT)
+assert.ok(easyTapA && easyTapA.length >= 4, 'Easy far tap walks the full shortest path')
+assert.deepEqual(easyTapA, shortestMazePath(MAZE_START, MAZE_HURT))
+const easyNear = mazeEasyTapPath(MAZE_START, stepA)
+assert.deepEqual(easyNear, [MAZE_START, stepA])
 
 setMazePreset(0)
 const lLeg = mazeDragStepsToward(MAZE_START, { r: 0, c: 1 })
@@ -186,8 +192,9 @@ assert.match(playSrc, /is-road-maze/)
 assert.doesNotMatch(
   playSrc,
   /shortestMazePath\(/,
-  'play must not auto-path / teleport on tap',
+  'play must not call shortestMazePath directly',
 )
+assert.match(playSrc, /mazeEasyTapPath/)
 assert.match(playSrc, /mazeStepToward/)
 assert.match(playSrc, /mazeDragStepsToward/)
 assert.match(playSrc, /extendDragToward/)

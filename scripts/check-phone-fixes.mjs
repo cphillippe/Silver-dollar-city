@@ -5083,25 +5083,23 @@ async function finishEasyLessonOne(page) {
     await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
   }
   const walk = async (target) => {
-    for (let guard = 0; guard < 40; guard += 1) {
+    for (let guard = 0; guard < 6; guard += 1) {
       if ((await page.locator('[data-maze-cell].is-here').count()) === 0) return
       const at = await read('[data-maze-cell].is-here')
       if (at.r === target.r && at.c === target.c) return
-      const path = shortestMazePath(at, target)
-      if (!path || path.length < 2) throw new Error(`no road from ${at.r},${at.c} to ${target.r},${target.c}`)
-      await tap(path[1])
-      if (path[1].r === target.r && path[1].c === target.c) {
-        await page.locator('.play.is-road-maze.is-helped, .play.is-road-maze.is-win, [data-maze-dock]').first().waitFor({ timeout: 4000 }).catch(() => {})
-        return
-      }
+      await tap(target)
       await page.waitForFunction(
         ({ r, c }) => {
           const here = document.querySelector('[data-maze-cell].is-here')
           return here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)
         },
-        path[1],
-        { timeout: 4000 },
-      )
+        target,
+        { timeout: 12_000 },
+      ).catch(async () => {
+        await page.locator('.play.is-road-maze.is-helped, .play.is-road-maze.is-win, [data-maze-dock]').first().waitFor({ timeout: 4000 })
+      })
+      const landed = await read('[data-maze-cell].is-here').catch(() => target)
+      if (landed.r === target.r && landed.c === target.c) return
     }
     throw new Error(`maze walk did not reach ${target.r},${target.c}`)
   }
@@ -5144,6 +5142,151 @@ async function sampleEasyScreen(page, size, screen, fails) {
   assert.ok(report.frames.length >= 20, `${size} ${screen} sampled ${report.frames.length} frames`)
   assertEasyGoldRects(size, screen, rects)
   if (!report.ok) fails.push(report.line)
+}
+
+const MAZE_FAR_TAP_SIZES = [
+  [375, 667],
+  [390, 844],
+  [412, 915],
+]
+
+/** Easy L1 road maze: one far tap walks the shortest path; the rule line does not shift the grid (#886). */
+async function checkMazeFarTap(browser, port, errors) {
+  const fails = []
+  const fail = (line) => fails.push(line)
+  const STEP_DIRS = [
+    { r: -1, c: 0 },
+    { r: 1, c: 0 },
+    { r: 0, c: -1 },
+    { r: 0, c: 1 },
+  ]
+  const key = (cell) => `${cell.r}:${cell.c}`
+
+  for (const [width, height] of MAZE_FAR_TAP_SIZES) {
+    const label = `${width}x${height}`
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      reducedMotion: 'reduce',
+    })
+    await context.addInitScript(() => localStorage.clear())
+    const page = await context.newPage()
+    page.on('pageerror', (error) => errors.push(`maze-far-tap ${label} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(`maze-far-tap ${label} ${msg.text()}`)
+    })
+    await page.goto('/?playtest=1')
+    await page.getByRole('button', { name: 'Start Easy' }).click()
+    await page.locator('main.hub.is-easy-home').waitFor()
+    await page.locator('.easy-home-steps li.is-now .easy-coach-step').click()
+    await page.locator('[data-maze-cell].is-here').waitFor()
+
+    const boardY = () =>
+      page.locator('.maze-board').evaluate((el) => el.getBoundingClientRect().y)
+
+    const readHere = async () => {
+      const loc = page.locator('[data-maze-cell].is-here')
+      return { r: Number(await loc.getAttribute('data-r')), c: Number(await loc.getAttribute('data-c')) }
+    }
+    const tapCell = async (cell) => {
+      const loc = page.locator(`[data-maze-cell][data-r="${cell.r}"][data-c="${cell.c}"]`)
+      const box = await loc.boundingBox()
+      if (!box) fail(`checkMazeFarTap fail ${label} missing cell ${key(cell)}`)
+      await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+    }
+    const waitHere = async (target) => {
+      await page.waitForFunction(
+        ({ r, c }) => {
+          const here = document.querySelector('[data-maze-cell].is-here')
+          return here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)
+        },
+        target,
+        { timeout: 12_000 },
+      )
+    }
+
+    await page.locator('[data-maze-how]').waitFor()
+    const yRuleOn = await boardY()
+    const at0 = await readHere()
+    const open = await page.locator('[data-maze-cell].is-road').evaluateAll((nodes) =>
+      nodes.map((node) => `${node.getAttribute('data-r')}:${node.getAttribute('data-c')}`),
+    )
+    const openSet = new Set(open)
+    const near = STEP_DIRS.map((dir) => ({ r: at0.r + dir.r, c: at0.c + dir.c })).find((cell) => openSet.has(key(cell)))
+    if (!near) fail(`checkMazeFarTap fail ${label} no near road tile`)
+    else {
+      await tapCell(near)
+      await waitHere(near)
+    }
+    const yRuleOff = await boardY()
+    const gridDy = Math.abs(yRuleOff - yRuleOn)
+    if (gridDy > 0.5) fail(`checkMazeFarTap fail ${label} gridDy=${gridDy.toFixed(2)}`)
+
+    const hurt = {
+      r: Number(await page.locator('[data-maze-cell].is-hurt').getAttribute('data-r')),
+      c: Number(await page.locator('[data-maze-cell].is-hurt').getAttribute('data-c')),
+    }
+    const inn = {
+      r: Number(await page.locator('[data-maze-cell].is-inn').getAttribute('data-r')),
+      c: Number(await page.locator('[data-maze-cell].is-inn').getAttribute('data-c')),
+    }
+
+    let tapsHurt = 0
+    let here = await readHere()
+    while (here.r !== hurt.r || here.c !== hurt.c) {
+      tapsHurt += 1
+      await tapCell(hurt)
+      await waitHere(hurt)
+      here = await readHere()
+      if (tapsHurt > 3) break
+    }
+    if (tapsHurt > 3) fail(`checkMazeFarTap fail ${label} hurt taps=${tapsHurt}`)
+    await page.locator('.play.is-road-maze.is-helped').waitFor({ timeout: 8000 })
+
+    let tapsInn = 0
+    here = await readHere()
+    while ((await page.locator('[data-maze-dock]').count()) === 0) {
+      tapsInn += 1
+      await tapCell(inn)
+      await page.waitForFunction(
+        ({ r, c }) => {
+          const here = document.querySelector('[data-maze-cell].is-here')
+          if (here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)) return true
+          return Boolean(document.querySelector('[data-maze-dock]'))
+        },
+        inn,
+        { timeout: 12_000 },
+      )
+      if (tapsInn > 3) break
+    }
+    if (tapsInn > 3) fail(`checkMazeFarTap fail ${label} inn taps=${tapsInn}`)
+
+    const gold = await page.evaluate(() => {
+      let count = 0
+      for (const el of document.querySelectorAll('button, a.btn')) {
+        if (!(el instanceof HTMLElement)) continue
+        if (el.closest('[hidden], .easy-core')) continue
+        const style = getComputedStyle(el)
+        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+        const box = el.getBoundingClientRect()
+        if (box.width <= 0 || box.height <= 0) continue
+        const primary = el.classList.contains('primary')
+        const coach = el.classList.contains('easy-coach-step') && Boolean(el.closest('li.is-now'))
+        if (!primary && !coach) continue
+        count += 1
+      }
+      return count
+    })
+    if (gold !== 1) fail(`checkMazeFarTap fail ${label} gold=${gold}`)
+
+    const taps = tapsHurt + tapsInn
+    if (!fails.some((line) => line.includes(label))) {
+      console.log(`checkMazeFarTap ok ${label} taps=${taps} gridDy=${gridDy.toFixed(1)} gold=1`)
+    }
+    await context.close()
+  }
+  assert.equal(fails.length, 0, fails.join('\n'))
 }
 
 /**
@@ -10050,6 +10193,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', '1.4.578 off-top glyph nights stay free of console errors')
       return
     }
+    if (process.env.MAZE_FAR_TAP_ONLY === '1') {
+      await checkMazeFarTap(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'maze far tap nights stay free of console errors')
+      return
+    }
     if (process.env.EASY_ONE_GOLD_ONLY === '1') {
       await checkEasyOneGold(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'easy one-gold screens stay free of console errors')
@@ -10110,6 +10258,7 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
       return
     }
+    await checkMazeFarTap(browser, port, errors)
     await checkEasyOneGold(browser, port, errors)
     await checkGemHintSlot(browser, port, errors)
     await checkTabletBeginGold(browser, port, errors)
