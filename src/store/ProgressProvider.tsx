@@ -344,6 +344,13 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     })
   }, [write])
 
+  const markMatchSightCueSeen = useCallback(() => {
+    setProgress((current) => {
+      if (current.matchSightCueSeen === true) return current
+      return write({ ...current, matchSightCueSeen: true })
+    })
+  }, [write])
+
   const recordTaught = useCallback((evidenceId: string, fromMatch = false) => {
     setProgress((current) => {
       const taught = current.taught ?? []
@@ -490,6 +497,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       setEasyMode,
       setLampStyle,
       markFoundersGiftSeen,
+      markMatchSightCueSeen,
       recordTaught,
       recordStreetLinks,
       upgradeBuilding,
@@ -526,6 +534,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       setEasyMode,
       setLampStyle,
       markFoundersGiftSeen,
+      markMatchSightCueSeen,
       setTheme,
       start,
       upgradeBuilding,

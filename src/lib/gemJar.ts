@@ -33,6 +33,9 @@ export const RESERVED_LADDER_STEPS = [
   { step: 5, id: 'helper', name: 'Dove helper' },
 ] as const
 
+/** One plain Easy line the first time Bonus Sight rings a word on the board. */
+export const GEM_SIGHT_CUE = `${SKILL_LADDER[0]!.name}: a hint ring on one word. Find it!`
+
 export const JAR_RUNGS: readonly number[] = SKILL_LADDER.map((skill) => skill.at)
 export const JAR_LADDER_STEPS = JAR_RUNGS.length
 export const JAR_REFILL = 5000
