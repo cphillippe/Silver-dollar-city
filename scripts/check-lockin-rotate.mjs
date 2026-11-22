@@ -61,7 +61,17 @@ const LOCKIN_ROTATE_SIZES = [
   [412, 915],
 ]
 
-const readFormatSource = `(() => {
+/** Branch / CI: format must come from data-encode-format on the recall gate (no DOM-shape guess). */
+const readFormatStrictSource = `(() => {
+  const gate = document.querySelector('.recall-gate.is-lockin-recall')
+  if (!gate) return { format: null, source: 'no-gate' }
+  const onGate = gate.getAttribute('data-encode-format')
+  if (onGate) return { format: onGate, source: 'gate' }
+  return { format: null, source: 'missing-data-encode-format' }
+})()`
+
+/** Main-fail proof only (EXPECT_ROTATE_FAIL=1): infer A/B/C when main has no attribute. */
+const readFormatLegacySource = `(() => {
   const gate = document.querySelector('.recall-gate.is-lockin-recall')
   if (!gate) return { format: null, source: 'no-gate' }
   const onGate = gate.getAttribute('data-encode-format')
@@ -102,6 +112,8 @@ async function launchBrowser() {
 }
 
 export async function runLockInRotateCheck(browser, port, errors = []) {
+  const legacyFormatRead = process.env.EXPECT_ROTATE_FAIL === '1'
+  const readFormatSource = legacyFormatRead ? readFormatLegacySource : readFormatStrictSource
   let sawFailLine = false
   for (const [width, height] of LOCKIN_ROTATE_SIZES) {
     const size = `${width}x${height}`

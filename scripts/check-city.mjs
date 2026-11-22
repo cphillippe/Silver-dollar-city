@@ -1976,7 +1976,11 @@ assert.doesNotMatch(
     '1.4.601 the check logs format per lesson from the DOM',
   )
   assert.match(phone601, /runLockInRotateCheck/, '1.4.601 check-lockin-rotate owns the runtime driver')
-  assert.match(readFileSync(new URL('../scripts/check-lockin-rotate.mjs', import.meta.url), 'utf8'), /data-encode-format/, '1.4.601 the runtime check reads data-encode-format from the DOM')
+  assert.match(
+    readFileSync(new URL('../scripts/check-lockin-rotate.mjs', import.meta.url), 'utf8'),
+    /readFormatStrictSource[\s\S]*missing-data-encode-format/,
+    '1.4.601 the runtime check requires data-encode-format on the gate unless main-fail legacy mode',
+  )
   assert.match(lock843, /encodeFormatForLine/, '1.4.601 check-lockin-843 knows encode rotation')
   assert.equal(lock843.match(/assert\.equal\(APP_VERSION, '([^']+)'\)/)?.[1], '1.4.601', '1.4.601 check-lockin-843 pins version')
 }
