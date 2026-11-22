@@ -4796,13 +4796,14 @@ const EASY_GOLD_BASE_1579 = {
   '375x667 home-first': { '2 Help': { x: 131, y: 561, w: 113, h: 48 } },
   '375x667 home-after-l1': { '3 Lock In': { x: 250, y: 584.1, w: 113, h: 48 } },
   // 1.4.596: y re-pinned from CI run 45026157592 (checkEasyOneGold rect lines); x/w unchanged.
+  // 1.4.597 What's new row (Love chip): re-pinned from CI run 45048191343.
   '375x667 settings-more': {
     'Open Profile': { x: 41, y: 1406.5, w: 130, h: 52 },
-    Candy: { x: 41, y: 1854.3, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1854.3, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1914.3, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2217.6, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2463.4, w: 176, h: 52 },
+    Candy: { x: 41, y: 1874.1, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1874.1, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1934.1, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2237.5, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2483.3, w: 176, h: 52 },
   },
   '390x844 home-first': { '2 Help': { x: 136, y: 738, w: 118, h: 48 } },
   '390x844 home-after-l1': { '3 Lock In': { x: 260, y: 761.1, w: 118, h: 48 } },
