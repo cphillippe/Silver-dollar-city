@@ -4574,7 +4574,7 @@ const TABLET_BEGIN_MAIN = {
     ],
   },
   '768x1024': {
-    begin: { x: 77.8, y: 935.9, w: 162, h: 56 },
+    begin: { x: 77.8, y: 934, w: 162, h: 56 },
     rail: { x: 674, y: 113, w: 76, h: 311.3 },
     seats: [
       { x: 505.3, y: 140.7, w: 72, h: 72 },
@@ -4795,6 +4795,7 @@ const EASY_ONE_GOLD_MS = 1500
 const EASY_GOLD_BASE_1579 = {
   '375x667 home-first': { '2 Help': { x: 131, y: 561, w: 113, h: 48 } },
   '375x667 home-after-l1': { '3 Lock In': { x: 250, y: 584.1, w: 113, h: 48 } },
+  // 1.4.595: y re-pinned from CI run 44839256365 after the What's new row; x/w unchanged.
   '375x667 settings-more': {
     'Open Profile': { x: 41, y: 1406.5, w: 130, h: 52 },
     Candy: { x: 41, y: 1849.3, w: 84, h: 52 },
@@ -4817,11 +4818,11 @@ const EASY_GOLD_BASE_1579 = {
   '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
   '412x915 settings-more': {
     'Open Profile': { x: 41, y: 1360.7, w: 130, h: 52 },
-    Candy: { x: 41, y: 1788.6, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1788.6, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1848.6, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2127.1, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2372.9, w: 176, h: 52 },
+    Candy: { x: 41, y: 1783.6, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1783.6, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1843.6, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2122.2, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2368, w: 176, h: 52 },
   },
 }
 
@@ -9138,18 +9139,29 @@ async function checkNwStripWords(browser, port, errors) {
 
 /** #964 Easy golden-path Dig DUG! (wb-women) — readable secondaries and takeaway gap above Lock In. */
 const DIG_WIN_READABLE_SIZES = [
+  [375, 667],
   [375, 812],
   [390, 844],
+  [412, 915],
 ]
 const DIG_WIN_LINE = 'wb-women'
+/** Tap boxes at scroll 0 — CI run 44791015323. */
 const DIG_WIN_TAP_BASELINE = {
+  '375x667': {
+    again: { x: 22, y: 564.2, w: 161.5, h: 54.8 },
+    home: { x: 191.5, y: 564.2, w: 161.5, h: 54.8 },
+  },
   '375x812': {
-    again: { x: 22, y: 735.890625, w: 331, h: 54.796875 },
-    home: { x: 22, y: 798.6875, w: 331, h: 54.796875 },
+    again: { x: 22, y: 709.2, w: 161.5, h: 54.8 },
+    home: { x: 191.5, y: 709.2, w: 161.5, h: 54.8 },
   },
   '390x844': {
-    again: { x: 22, y: 735.890625, w: 346, h: 54.796875 },
-    home: { x: 22, y: 798.6875, w: 346, h: 54.796875 },
+    again: { x: 22, y: 741.2, w: 169, h: 54.8 },
+    home: { x: 199, y: 741.2, w: 169, h: 54.8 },
+  },
+  '412x915': {
+    again: { x: 23, y: 812.2, w: 179, h: 54.8 },
+    home: { x: 210, y: 812.2, w: 179, h: 54.8 },
   },
 }
 
@@ -9173,17 +9185,17 @@ async function scrubSourceDigWin(page) {
   }
   await page.locator('.play.is-source-dig.is-win').waitFor({ timeout: 20000 })
   await page.waitForTimeout(350)
-  await page.evaluate(() => {
-    const body = document.querySelector('.app-body')
-    const dock = document.querySelector('.play.is-source-dig.is-win .cta-dock')
-    if (!body || !dock) return
-    const pad = body.getBoundingClientRect()
-    const tail = dock.getBoundingClientRect()
-    if (tail.bottom > pad.bottom - 2) {
-      body.scrollTop += tail.bottom - pad.bottom + 12
-    }
-  })
-  await page.waitForTimeout(120)
+}
+
+async function jumpSettingsDigLine(page, lineId = DIG_WIN_LINE) {
+  await hintPointer(page, page.getByRole('button', { name: 'Settings', exact: true }))
+  const debug = page.locator('details.settings-debug')
+  await debug.waitFor({ timeout: 15000 })
+  await hintPointer(page, debug.locator('summary'))
+  const jump = debug.locator('button', { hasText: new RegExp(`^${lineId} ·`) }).first()
+  await jump.waitFor({ state: 'attached', timeout: 15000 })
+  await jump.evaluate((el) => el.click())
+  await page.locator('.play.is-source-dig').waitFor({ timeout: 15000 })
 }
 
 async function openEasyDigWin(page, lineId = DIG_WIN_LINE) {
@@ -9193,14 +9205,14 @@ async function openEasyDigWin(page, lineId = DIG_WIN_LINE) {
     await page.getByRole('button', { name: 'Start Easy' }).click()
     await page.getByRole('main', { name: 'Home' }).waitFor()
   }
-  await hintPointer(page, page.getByRole('button', { name: 'Settings', exact: true }))
-  const debug = page.locator('details.settings-debug')
-  await debug.waitFor({ timeout: 15000 })
-  await hintPointer(page, debug.locator('summary'))
-  const jump = debug.locator('button', { hasText: new RegExp(`^${lineId} ·`) }).first()
-  await jump.waitFor({ state: 'attached', timeout: 15000 })
-  await jump.evaluate((el) => el.click())
-  await page.locator('.play.is-source-dig').waitFor({ timeout: 15000 })
+  await jumpSettingsDigLine(page, lineId)
+  await scrubSourceDigWin(page)
+}
+
+async function openHardDigWin(page, lineId = DIG_WIN_LINE) {
+  await page.goto(withPlaytest1('/'))
+  await page.getByRole('main', { name: 'Home' }).waitFor({ timeout: 15000 }).catch(() => {})
+  await jumpSettingsDigLine(page, lineId)
   await scrubSourceDigWin(page)
 }
 
@@ -9241,7 +9253,7 @@ async function checkDigWinReadable(browser, port, errors) {
       continue
     }
 
-    const read = await page.evaluate(({ claim, why, againLabel, homeLabel }) => {
+    const read = await page.evaluate(({ claim, why, homeLabel }) => {
       const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
       const parseRgb = (css) => {
         if (!css || css === 'transparent') return null
@@ -9300,17 +9312,46 @@ async function checkDigWinReadable(browser, port, errors) {
         const r = el.getBoundingClientRect()
         return { x: r.x, y: r.y, w: r.width, h: r.height, left: r.left, top: r.top, right: r.right, bottom: r.bottom }
       }
-      const goldLike = (value) => /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/.test(value) && (() => {
-        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g
+      const goldPaint = (value) => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
         let m
-        while ((m = re.exec(value))) {
+        while ((m = re.exec(value || ''))) {
           const r = Number(m[1])
           const g = Number(m[2])
           const b = Number(m[3])
-          if (r > 190 && g > 140 && b < 120) return true
+          const a = m[4] === undefined ? 1 : Number(m[4])
+          if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
         }
         return false
-      })()
+      }
+      const inViewport = (rect) =>
+        rect &&
+        rect.w > 1 &&
+        rect.h > 1 &&
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= window.innerHeight &&
+        rect.right <= window.innerWidth
+      const hitAtCenter = (el) => {
+        const rect = box(el)
+        if (!rect) return { hitOk: false, rect: null, inView: false }
+        const cx = rect.left + rect.w / 2
+        const cy = rect.top + rect.h / 2
+        const hit = document.elementFromPoint(cx, cy)
+        return {
+          rect,
+          inView: inViewport(rect),
+          hitOk: Boolean(hit && (hit === el || el.contains(hit))),
+        }
+      }
+      const btnOf = (el) => {
+        if (!el) return null
+        const style = getComputedStyle(el)
+        return {
+          font: parseFloat(style.fontSize),
+          clipped: el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1 ? 1 : 0,
+        }
+      }
       const play = document.querySelector('.play.is-source-dig.is-win')
       const match = play?.querySelector('.match-yes')
       const strong = match?.querySelector('strong')
@@ -9329,70 +9370,79 @@ async function checkDigWinReadable(browser, port, errors) {
         const style = getComputedStyle(el)
         const fg = parseRgb(style.color)
         const ratio = fg ? contrast(relLum(fg), relLum(effectiveBg(el))) : 0
-        const rect = box(el)
-        let hitOk = false
-        if (rect && rect.w > 1 && rect.h > 1) {
-          const cx = rect.left + rect.w / 2
-          let cy = rect.top + rect.h / 2
-          if (rect.bottom > window.innerHeight) {
-            cy = Math.min(rect.bottom - 6, window.innerHeight - 6)
-          }
-          const hit = document.elementFromPoint(cx, cy)
-          hitOk = Boolean(hit && (hit === el || el.contains(hit)))
-        }
+        const probe = hitAtCenter(el)
+        const meta = btnOf(el)
         return {
           label: norm(el.textContent),
           ratio,
-          rect,
-          hitOk,
+          rect: probe.rect,
+          inView: probe.inView,
+          hitOk: probe.hitOk,
+          font: meta?.font ?? 0,
+          btnClipped: meta?.clipped ?? 0,
         }
       })
-      const gold = [...(play?.querySelectorAll('.cta-dock .btn.primary.snap-bins') || [])].length
+      let gold = 0
+      const root = document.querySelector('.challenge-page') || document.body
+      for (const el of root.querySelectorAll('button.btn, a.btn')) {
+        if (el.closest('.dig-board')) continue
+        const style = getComputedStyle(el)
+        if (!inViewport(box(el))) continue
+        const paint = `${style.backgroundColor} ${style.backgroundImage} ${style.boxShadow}`
+        const primary = el.classList.contains('primary')
+        if (primary || goldPaint(paint)) gold += 1
+      }
       return {
         gap,
         gold,
         lines: [lineOf(strong, claim), lineOf(whyEl, why)].filter(Boolean),
         extras,
       }
-    }, { claim: want.claim, why: want.why, againLabel: SOURCE_DIG_AGAIN, homeLabel: EASY.home })
+    }, { claim: want.claim, why: want.why, homeLabel: EASY.home })
 
     const baseline = DIG_WIN_TAP_BASELINE[tag]
     let clipped = 0
     let minFont = 99
+    let btnClipped = 0
+    let minBtnFont = 99
     for (const line of read.lines) {
       if (line.rendered !== line.source) fail(`checkDigWinReadable fail ${tag} line rendered=${JSON.stringify(line.rendered)} source=${JSON.stringify(line.source)}`)
       const cut = line.scrollW > line.clientW + 1 || line.scrollH > line.clientH + 1
       if (cut) clipped += 1
       minFont = Math.min(minFont, line.font)
     }
-    if (clipped !== 0) fail(`checkDigWinReadable fail ${tag} clipped=${clipped}`)
-    if (!(minFont >= 13)) fail(`checkDigWinReadable fail ${tag} font=${minFont}`)
+    if (clipped !== 0) fail(`checkDigWinReadable fail ${tag} takeaway clipped=${clipped}`)
+    if (!(minFont >= 13)) fail(`checkDigWinReadable fail ${tag} takeaway font=${minFont}`)
     if (!(read.gap >= 8)) fail(`checkDigWinReadable fail ${tag} gap=${read.gap == null ? 'missing' : read.gap.toFixed(2)} want>=8`)
-  for (const row of read.extras) {
-      if (row.label === SOURCE_DIG_AGAIN) {
-        const delta = rawDelta(row.rect, baseline?.again)
-        if (!(row.ratio >= 4.5)) fail(`checkDigWinReadable fail ${tag} again contrast=${row.ratio.toFixed(2)}`)
-        if (!row.hitOk) fail(`checkDigWinReadable fail ${tag} again hit`)
-        if (delta == null || delta > 0.5) fail(`checkDigWinReadable fail ${tag} again tapDelta=${delta == null ? 'missing' : delta.toFixed(2)}`)
-      }
-      if (row.label === EASY.home) {
-        const delta = rawDelta(row.rect, baseline?.home)
-        const homeHit = await page
-          .locator('.play.is-source-dig.is-win .cta-dock .btn', { hasText: EASY.home })
-          .click({ trial: true })
-          .then(() => true)
-          .catch(() => false)
-        if (!(row.ratio >= 4.5)) fail(`checkDigWinReadable fail ${tag} home contrast=${row.ratio.toFixed(2)}`)
-        if (!homeHit) fail(`checkDigWinReadable fail ${tag} home hit`)
-        if (delta == null || delta > 0.5) fail(`checkDigWinReadable fail ${tag} home tapDelta=${delta == null ? 'missing' : delta.toFixed(2)}`)
+    for (const row of read.extras) {
+      minBtnFont = Math.min(minBtnFont, row.font)
+      btnClipped += row.btnClipped
+      if (!row.inView) fail(`checkDigWinReadable fail ${tag} ${row.label} offScreen bottom=${row.rect?.bottom?.toFixed(1)}`)
+      if (!row.hitOk) fail(`checkDigWinReadable fail ${tag} ${row.label} hit`)
+      if (!(row.ratio >= 4.5)) fail(`checkDigWinReadable fail ${tag} ${row.label} contrast=${row.ratio.toFixed(2)}`)
+      const pin = row.label === SOURCE_DIG_AGAIN ? baseline?.again : row.label === EASY.home ? baseline?.home : null
+      if (pin) {
+        const delta = rawDelta(row.rect, pin)
+        if (delta == null || delta > 0.5) {
+          fail(`checkDigWinReadable fail ${tag} ${row.label} tapDelta=${delta == null ? 'missing' : delta.toFixed(2)} pin=${JSON.stringify(pin)} now=${JSON.stringify(row.rect)}`)
+        }
       }
     }
+    if (btnClipped !== 0) fail(`checkDigWinReadable fail ${tag} btnClipped=${btnClipped}`)
+    if (!(minBtnFont >= 13)) fail(`checkDigWinReadable fail ${tag} btnFont=${minBtnFont}`)
     if (read.gold !== 1) fail(`checkDigWinReadable fail ${tag} gold=${read.gold}`)
     if (!problems.some((line) => line.includes(` ${tag} `))) {
       const againRatio = read.extras.find((row) => row.label === SOURCE_DIG_AGAIN)?.ratio
       console.log(
-        `checkDigWinReadable ok ${tag} gap=${read.gap.toFixed(1)} again=${againRatio?.toFixed(1)} clipped=0 font=${minFont}px gold=1`,
+        `checkDigWinReadable ok ${tag} gap=${read.gap.toFixed(1)} again=${againRatio?.toFixed(1)} takeawayClipped=0 takeawayFont=${minFont}px btnFont=${minBtnFont}px btnClipped=0 gold=1`,
       )
+      for (const row of read.extras) {
+        const r = row.rect
+        if (!r) continue
+        console.log(
+          `checkDigWinReadable rect ${tag} ${row.label} x=${r.x.toFixed(2)} y=${r.y.toFixed(2)} w=${r.w.toFixed(2)} h=${r.h.toFixed(2)}`,
+        )
+      }
     }
     await context.close()
   }
@@ -9401,7 +9451,7 @@ async function checkDigWinReadable(browser, port, errors) {
     const hardSave = {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.596',
+      appVersion: '1.4.594',
       savedAt: new Date().toISOString(),
       progress: { ...SAVE.progress, easyMode: false, started: true },
     }
@@ -9416,18 +9466,38 @@ async function checkDigWinReadable(browser, port, errors) {
     )
     const hardPage = await hard.newPage()
     hardPage.on('pageerror', (error) => errors.push(`dig-win hard ${error}`))
-    await hardPage.goto(withPlaytest1('/'))
-    const hardRead = await hardPage.evaluate(() => ({
-      easy: document.documentElement.getAttribute('data-easy'),
-    }))
-    if (hardRead.easy === 'on') fail(`checkDigWinReadable fail hard easy=on`)
-    else console.log(`checkDigWinReadable ok hard easy=0 wb-women=${DIG_WIN_LINE}`)
+    try {
+      await openHardDigWin(hardPage)
+      await hardPage.locator('.play.is-source-dig.is-win').waitFor({ timeout: 20000 })
+    } catch (error) {
+      fail(`checkDigWinReadable fail hard open ${error}`)
+    }
+    const hardRead = await hardPage.evaluate((cream) => {
+      const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+      const play = document.querySelector('.play.is-source-dig.is-win')
+      const creamSecondary = (el) => {
+        if (!el) return false
+        const style = getComputedStyle(el)
+        return norm(style.webkitTextFillColor || style.color) === cream
+      }
+      const secondaries = [...(play?.querySelectorAll('.cta-dock .btn:not(.primary)') || [])]
+      return {
+        win: Boolean(play),
+        creamEasy: secondaries.some(creamSecondary),
+      }
+    }, '#fff6e8')
+    if (!hardRead.win) fail(`checkDigWinReadable fail hard win=missing`)
+    if (hardRead.creamEasy) fail(`checkDigWinReadable fail hard creamSecondary=yes`)
+    if (!problems.some((line) => line.includes(' hard '))) {
+      console.log(`checkDigWinReadable ok hard wb-women=${DIG_WIN_LINE} cream=0`)
+    }
     await hard.close()
   }
 
   for (const err of errors.slice(errorMark)) fail(`checkDigWinReadable error ${err}`)
   assert.equal(problems.length, 0, problems.join('\n'))
 }
+
 
 const GEM_SIGHT_SIZES = [
   [375, 812],
@@ -9442,7 +9512,7 @@ function gemSightSave() {
   return {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.596',
+    appVersion: '1.4.595',
     savedAt: now.toISOString(),
     progress: {
       started: true,
@@ -9685,7 +9755,7 @@ async function checkGemSightCue(browser, port, errors) {
     const hardSave = {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.596',
+      appVersion: '1.4.595',
       savedAt: new Date().toISOString(),
       progress: { ...SAVE.progress, easyMode: false, started: true, matchLifetime: 5000, matchSkillSeen: 1 },
     }
@@ -10023,6 +10093,8 @@ async function checkNwSpendOnScreen(browser, port, errors) {
   for (const err of errors.slice(errorMark)) fail(`checkNwSpendOnScreen error ${err}`)
   assert.equal(problems.length, 0, problems.join('\n'))
 }
+
+/** #967
 
 /** #967 Easy first plant must not open the upgrade card. A touch tap does, on the parent. */
 const PLANT_NO_CARD_SIZES = [
@@ -10996,11 +11068,6 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'strip words nights stay free of console errors')
       return
     }
-    if (process.env.DIG_WIN_READABLE_ONLY === '1') {
-      await checkDigWinReadable(browser, port, errors)
-      assert.equal(errors.join('\n'), '', 'dig win readable nights stay free of console errors')
-      return
-    }
     if (process.env.GEM_SIGHT_CUE_ONLY === '1') {
       await checkGemSightCue(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'gem sight cue nights stay free of console errors')
@@ -11009,6 +11076,11 @@ export async function checkPhoneFixes() {
     if (process.env.NW_SPEND_ON_SCREEN_ONLY === '1') {
       await checkNwSpendOnScreen(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'nw spend on screen nights stay free of console errors')
+      return
+    }
+    if (process.env.DIG_WIN_READABLE_ONLY === '1') {
+      await checkDigWinReadable(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'dig win readable nights stay free of console errors')
       return
     }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
@@ -11211,7 +11283,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')

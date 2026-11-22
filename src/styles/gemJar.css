@@ -196,7 +196,7 @@
   animation-delay: calc(var(--i) * 24ms);
 }
 
-/* 1.4.596: once-only plain line when Bonus Sight first rings a word (#965). */
+/* 1.4.595: once-only plain line when Bonus Sight first rings a word (#965). */
 html[data-easy='on'] .play.is-gem-search .gem-hint-slot .gem-sight-cue {
   margin: 0;
   padding: 7px 12px;

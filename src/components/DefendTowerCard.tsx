@@ -1,9 +1,11 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { isFreeSpot } from '../lib/lampPlace'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
 import {
   placeTowerCard,
+  stripRoadCamKey,
+  stripRoadTapBoxes,
   STRIP_H,
   STRIP_W,
   TOWER_CARD_H,
@@ -100,55 +102,12 @@ function PathMark({ path }: { path: TreePath }) {
   )
 }
 
-/** Boxes the card must keep off, in the card's own offset parent (the frame). Null when the card is not placed yet. */
 /** Screen boxes along the road path. Only the mid-wave strip must stay clear. */
 function roadTapBoxes(ox: number, oy: number): TowerRect[] {
-  const road = document.querySelector('.defend-road')
-  if (!(road instanceof SVGGeometryElement)) return []
-  const svg = road.ownerSVGElement
-  const ctm = svg?.getScreenCTM()
-  if (!svg || !ctm) return []
-  const length = road.getTotalLength()
-  // Match check-live-prove 1.4.500: 394 samples along the path, point-in-card.
-  const step = length / 393
-  const half = 0.75
-  const out: TowerRect[] = []
-  for (let i = 0; i < 394; i += 1) {
-    const at = road.getPointAtLength(Math.min(length, i * step))
-    const point = svg.createSVGPoint()
-    point.x = at.x
-    point.y = at.y
-    const s = point.matrixTransform(ctm)
-    out.push({
-      left: s.x - half - ox,
-      top: s.y - half - oy,
-      right: s.x + half - ox,
-      bottom: s.y + half - oy,
-    })
-  }
-  return out
+  return stripRoadTapBoxes(ox, oy)
 }
 
-/** Road sample boxes in the card frame before the strip card mounts, so placement clears the path on first paint. */
-function stripRoadBootstrap(): TowerTaps | null {
-  if (typeof document === 'undefined') return null
-  const frame = document.querySelector('.defend-frame')
-  if (!(frame instanceof HTMLElement)) return null
-  const origin = frame.getBoundingClientRect()
-  const ox = origin.left + frame.clientLeft
-  const oy = origin.top + frame.clientTop
-  return {
-    begin: null,
-    rail: null,
-    buttons: [],
-    row: null,
-    own: [],
-    lamps: [],
-    labels: [],
-    road: roadTapBoxes(ox, oy),
-  }
-}
-
+/** Boxes the card must keep off, in the card's own offset parent (the frame). Null when the card is not placed yet. */
 function measureTaps(card: HTMLElement, plotId: string): TowerTaps | null {
   const parent = card.offsetParent
   if (!(parent instanceof HTMLElement)) return null
@@ -189,6 +148,7 @@ function measureTaps(card: HTMLElement, plotId: string): TowerTaps | null {
     })
   }
   const chips = [...document.querySelectorAll('.defend-type-chip')]
+  const isStrip = card.getAttribute('data-strip') === 'yes'
   return {
     begin,
     rail: one('.nw-rail'),
@@ -209,7 +169,7 @@ function measureTaps(card: HTMLElement, plotId: string): TowerTaps | null {
       ...pads.flatMap((pad) => [...pad.querySelectorAll('text.defend-type-label')].map(rect)),
       ...chips.filter((chip) => chip.getAttribute('data-chip-plot') !== plotId).map(rect),
     ].filter((box): box is TowerRect => box !== null),
-  ...(card.getAttribute('data-strip') === 'yes' ? { road: roadTapBoxes(ox, oy) } : {}),
+    ...(isStrip ? { road: roadTapBoxes(ox, oy) } : {}),
   }
 }
 
@@ -481,9 +441,9 @@ export function DefendTowerCard({
       : null
   const [paintH, setPaintH] = useState(0)
   const [taps, setTaps] = useState<TowerTaps | null>(null)
-  const roadBootstrap = useMemo(() => (strip ? stripRoadBootstrap() : null), [strip])
-  const placeTaps = markOnMap ? taps ?? roadBootstrap : null
-  const placedRaw = placeTowerCard(point, board, clearOf, cameraScale, reserveBottom, cardH, glyph, paintH, placeTaps, strip)
+  const [roadRev, setRoadRev] = useState(0)
+  void roadRev
+  const placedRaw = placeTowerCard(point, board, clearOf, cameraScale, reserveBottom, cardH, glyph, paintH, markOnMap ? taps : null, strip)
   const covered = labelOverGlyph(
     glyph,
     markOnMap ? taps : null,
@@ -505,15 +465,35 @@ export function DefendTowerCard({
     const next = measure()
     setTaps((prev) => (sameTaps(prev, next) ? prev : next))
     let frame = 0
+    let stop = false
+    let roadCamKey = ''
+    const bumpStripRoad = () => {
+      if (stop || !strip || !cardRef.current) return
+      const camKey = stripRoadCamKey()
+      if (camKey !== roadCamKey) {
+        roadCamKey = camKey
+        const parent = cardRef.current.offsetParent
+        if (parent instanceof HTMLElement) {
+          const origin = parent.getBoundingClientRect()
+          roadTapBoxes(origin.left + parent.clientLeft, origin.top + parent.clientTop)
+          setRoadRev((v) => v + 1)
+        }
+      }
+      frame = requestAnimationFrame(bumpStripRoad)
+    }
     if (strip && cardRef.current) {
-      frame = requestAnimationFrame(() => {
-        const again = measure()
-        setTaps((prev) => (sameTaps(prev, again) ? prev : again))
-      })
+      const parent = cardRef.current.offsetParent
+      if (parent instanceof HTMLElement) {
+        const origin = parent.getBoundingClientRect()
+        roadCamKey = stripRoadCamKey()
+        roadTapBoxes(origin.left + parent.clientLeft, origin.top + parent.clientTop)
+      }
+      bumpStripRoad()
     }
     return () => {
-      restoreParkedLabels()
+      stop = true
       if (frame) cancelAnimationFrame(frame)
+      restoreParkedLabels()
     }
   })
 

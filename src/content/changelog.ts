@@ -30,7 +30,7 @@ export const CHANGELOG: ChangeNote[] = [
   {
     version: '1.4.596',
     title: 'Night Watch: Spend and help on screen',
-    when: '2026-11-17',
+    when: '2026-11-22',
     items: [
       'On Easy, after a wave clears, the Spend spark and ? help buttons stay on the right edge of the phone screen where you can tap them.',
       'Hard stays the same.',
