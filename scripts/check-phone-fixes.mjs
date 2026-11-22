@@ -21,6 +21,13 @@ import { lineTakeaway } from '../src/lib/successBeat.ts'
 import { SOURCE_DIG_AGAIN } from '../src/lib/sourceDig.ts'
 import { GEM_SIGHT_CUE } from '../src/lib/gemJar.ts'
 import { buildGemPuzzle } from '../src/lib/gemSearch.ts'
+import { APP_VERSION } from '../src/config/app.ts'
+import { EASY_LINE_ORDER } from '../src/easyTrail/trail/loop.ts'
+import {
+  encodeFormatForLine,
+  encodeFormatsThrough,
+  encodeRotationRepeats,
+} from '../src/easyTrail/review/encodeFormat.ts'
 
 const SAVE = {
   kind: SAVE_KIND,
@@ -9137,6 +9144,95 @@ async function checkNwStripWords(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** 1.4.601 Kid 8 golden path — Lock In encode format rotates by lesson (Refs #963). */
+const LOCKIN_ROTATE_LINES = 10
+const LOCKIN_ROTATE_SIZES = [
+  [375, 667],
+  [390, 844],
+  [412, 915],
+]
+
+function lockInRotateSeed(index) {
+  const ids = EASY_LINE_ORDER.slice(0, index + 1)
+  return {
+    kind: SAVE_KIND,
+    schemaVersion: SAVE_SCHEMA_VERSION,
+    appVersion: APP_VERSION,
+    savedAt: new Date().toISOString(),
+    progress: {
+      started: true,
+      easyMode: true,
+      theme: 'candy',
+      completed: ids,
+      easyTaught: ids,
+      easyHeld: ids.slice(0, index),
+      held: ids.slice(0, index),
+    },
+  }
+}
+
+export async function checkLockInRotate(browser, port, errors) {
+  if (process.env.LOCKIN_ROTATE_SKIP === '1') return
+  const expected = encodeFormatsThrough(LOCKIN_ROTATE_LINES)
+  for (const [width, height] of LOCKIN_ROTATE_SIZES) {
+    const size = `${width}x${height}`
+  const formats = []
+    for (let index = 0; index < LOCKIN_ROTATE_LINES; index += 1) {
+      const lineId = EASY_LINE_ORDER[index]
+      const raw = JSON.stringify(lockInRotateSeed(index))
+      const context = await browser.newContext({
+        baseURL: `http://127.0.0.1:${port}/`,
+        viewport: { width, height },
+        deviceScaleFactor: 1,
+        reducedMotion: 'reduce',
+      })
+      await context.addInitScript(
+        ({ key, value }) => {
+          localStorage.clear()
+          localStorage.setItem(key, value)
+        },
+        { key: STORAGE_KEY, value: raw },
+      )
+      const page = await context.newPage()
+      page.on('pageerror', (error) => errors.push(`lockin-rotate ${size} ${lineId} ${error}`))
+      await page.goto(withPlaytest1('/'), { waitUntil: 'networkidle' })
+      await page.locator('main.hub.is-easy-home').waitFor({ timeout: 30_000 })
+      await page.getByRole('button', { name: /Lock In/ }).last().click()
+      await page.locator('[data-lockin-format], .lockin-encode.is-ask, .lockin-recall.is-ask').first().waitFor({
+        timeout: 20_000,
+      })
+      const live = await page.evaluate(() => {
+        const el = document.querySelector('[data-lockin-format]')
+        return el?.getAttribute('data-lockin-format') ?? 'A'
+      })
+      formats.push(live)
+      const format = encodeFormatForLine(lineId)
+      const gold = await page.evaluate((fmt) => {
+        const visible = (el) => {
+          const st = getComputedStyle(el)
+          const box = el.getBoundingClientRect()
+          return st.display !== 'none' && st.visibility !== 'hidden' && box.width > 2 && box.height > 2
+        }
+        if (fmt === 'B') return []
+        if (fmt === 'C') {
+          const cue = document.querySelector('.quick-review-map-tap.is-now')
+          return cue && visible(cue) ? ['map-tap'] : []
+        }
+        const btn = document.querySelector('.lockin-recall-show')
+        return btn && visible(btn) ? ['show-me'] : []
+      }, format)
+      if (format === 'B') assert.equal(gold.length, 0, `${size} ${lineId} think has no gold button yet`)
+      else assert.equal(gold.length, 1, `${size} ${lineId} exactly one gold, got [${gold.join(' | ')}]`)
+      assert.equal(live, expected[index], `${size} ${lineId} format`)
+      await context.close()
+    }
+    const repeats = encodeRotationRepeats(formats)
+    assert.equal(repeats, 0, `${size} consecutive repeats=${repeats} formats=${formats.join(',')}`)
+    assert.deepEqual(formats, expected, `${size} golden-path formats`)
+    console.log(`checkLockInRotate ok ${size} formats=[${formats.join(',')}] repeats=${repeats} gold=1`)
+  }
+}
+
 /** #964 Easy golden-path Dig DUG! (wb-women) — readable secondaries and takeaway gap above Lock In. */
 const DIG_WIN_READABLE_SIZES = [
   [375, 667],
@@ -9512,7 +9608,7 @@ function gemSightSave() {
   return {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.595',
+    appVersion: '1.4.601',
     savedAt: now.toISOString(),
     progress: {
       started: true,
@@ -9755,7 +9851,7 @@ async function checkGemSightCue(browser, port, errors) {
     const hardSave = {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.595',
+      appVersion: '1.4.601',
       savedAt: new Date().toISOString(),
       progress: { ...SAVE.progress, easyMode: false, started: true, matchLifetime: 5000, matchSkillSeen: 1 },
     }
@@ -10707,6 +10803,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'easy one-gold screens stay free of console errors')
       return
     }
+    if (process.env.LOCKIN_ROTATE_ONLY === '1') {
+      await checkLockInRotate(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'lockin rotate nights stay free of console errors')
+      return
+    }
     if (process.env.NW_DOCK_GOLD_ONLY === '1') {
       await checkNwDockGold(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'dock gold nights stay free of console errors')
@@ -10773,6 +10874,7 @@ export async function checkPhoneFixes() {
       return
     }
     await checkEasyOneGold(browser, port, errors)
+    await checkLockInRotate(browser, port, errors)
     await checkGemHintSlot(browser, port, errors)
     await checkTabletBeginGold(browser, port, errors)
     await checkNightRun905(browser, port, errors)

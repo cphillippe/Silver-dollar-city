@@ -10,6 +10,7 @@ import { EasyBack } from '../../components/EasyBack'
 import { RecallGate } from '../../components/RecallGate'
 import { useProgress } from '../../store/progress'
 import { QuickReview } from '../review/QuickReview'
+import { encodeFormatForLine } from '../review/encodeFormat'
 import type { JournalEntry, View } from '../../types'
 
 interface HoldPracticeProps {
@@ -74,7 +75,7 @@ export function HoldPractice({ quizBrief, focusedEntry, today, setLater, onNavig
                   clean: result.clean,
                   peeked: false,
                   elaborated: false,
-                  format: 'A',
+                  format: encodeFormatForLine(quizBrief.id),
                 })
                 recordLessonHold(quizBrief.id, result.clean)
                 onNavigate({ name: 'hub' })
