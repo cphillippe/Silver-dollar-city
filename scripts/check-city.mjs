@@ -1943,9 +1943,29 @@ assert.match(
 
 
 
+// 1.4.600: Easy Night Watch Reason strip off road (#988).
+assert.equal(APP_VERSION, '1.4.600')
+assert.equal(CHANGELOG[0].version, '1.4.600', '1.4.600 is the newest row')
+assert.match(latestChange('1.4.600').items.join('\n'), /Refs #988/, '1.4.600 changelog refs #988')
+assert.match(latestChange('1.4.600').items.join('\n'), /Reason buy strips/)
+assert.match(latestChange('1.4.600').items.join('\n'), /Hard stays the same\./)
+assert.doesNotMatch(latestChange('1.4.600').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.600 changelog avoids GitHub close keywords')
+{
+  const place600 = readFileSync(new URL('../src/lib/towerCardPlace.ts', import.meta.url), 'utf8')
+  const phone600 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  assert.match(place600, /defendFrameWidth\(\)/, '1.4.600 reads the phone frame for mid-narrow strip buys')
+  assert.match(place600, /frameW >= 384 && frameW <= 392/, '1.4.600 pins mid-narrow strip buys')
+  assert.match(phone600, /async function checkNwReasonStripRoad/, '1.4.600 checkNwReasonStripRoad is defined')
+  assert.match(
+    phone600,
+    /await checkNwStripWords\(browser, port, errors\)\n    await checkNwReasonStripRoad\(browser, port, errors\)/,
+    '1.4.600 the full path runs checkNwReasonStripRoad after checkNwStripWords',
+  )
+  assert.match(phone600, /checkNwReasonStripRoad ok \$\{tag\}/, '1.4.600 the ok line logs per case')
+}
+
 // 1.4.595: Easy Bonus Sight one-time hint line (#965).
-assert.equal(APP_VERSION, '1.4.595')
-assert.equal(CHANGELOG[0].version, '1.4.595', '1.4.595 is the newest row')
+assert.equal(CHANGELOG[1].version, '1.4.595', '1.4.595 follows the newest row')
 assert.match(latestChange('1.4.595').items.join('\n'), /Refs #965/, '1.4.595 changelog refs #965')
 assert.match(latestChange('1.4.595').items.join('\n'), /Bonus Sight/)
 assert.match(latestChange('1.4.595').items.join('\n'), /Hard stays the same\./)

@@ -28,6 +28,17 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.600',
+    title: 'Easy Night Watch: Reason buy strip stays off the road',
+    when: '2026-11-22',
+    items: [
+      'On Easy, mid-wave Reason buy strips on narrow phones no longer graze the walking road at 384 and 390 width.',
+      'Far and Strong stay readable with the same tap targets.',
+      'Hard stays the same.',
+      'Refs #988.',
+    ],
+  },
+  {
     version: '1.4.595',
     title: 'Match: Bonus Sight hint line',
     when: '2026-11-17',
