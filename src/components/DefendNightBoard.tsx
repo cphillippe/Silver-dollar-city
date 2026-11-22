@@ -175,6 +175,22 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
       .filter((node) => node !== chip && chromeBoxShown(node))
       .map((node) => node.getBoundingClientRect())
     const blocks = [...chrome, ...glyphBoxes, ...otherChips, ...cardBlocks]
+    const win = page.ownerDocument?.defaultView
+    if (win) {
+      const pad = 4
+      const w = win.innerWidth
+      const h = win.innerHeight
+      if (w > 0 && h > 0) {
+        const edge = (left: number, right: number, top: number, bottom: number) =>
+          ({ left, right, top, bottom }) as DOMRect
+        blocks.push(
+          edge(-1e5, pad, -1e5, 1e5),
+          edge(w - pad, 1e5, -1e5, 1e5),
+          edge(-1e5, 1e5, -1e5, pad),
+          edge(-1e5, 1e5, h - pad, 1e5),
+        )
+      }
+    }
     let box = slideTypeChip(chip, blocks, false)
     if (box.width > 1 && box.height > 1 && chrome.some((other) => boxesHit(box, other))) {
       box = slideTypeChip(chip, blocks, true)
