@@ -205,6 +205,7 @@ export function RecallGate({
       <section
         className={`recall-gate is-encode is-easy-hold is-why-blast ${recalled ? '' : 'is-lockin-recall'}`}
         data-encode-format={recalled ? undefined : encodeFormatForLine(brief.id)}
+        data-line-id={brief.id}
         aria-label={STORY.takeaway}
       >
         <p className="eyebrow">{EASY.saved}</p>

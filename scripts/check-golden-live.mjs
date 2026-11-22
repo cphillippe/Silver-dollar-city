@@ -1484,20 +1484,19 @@ async function playGem(page, lineId = 'ob-tuning', { watchLast = false, checkSta
 }
 
 /** 1.4.567 (#843): Easy Lock In asks for the main idea first. Self-mark "I had it" to reach the why slide. */
-async function passRecall(page) {
-  await page.locator('.lockin-recall-show').waitFor({ timeout: 8000 })
-  await pointerClick(page, page.locator('.lockin-recall-show'))
-  await pointerClick(page, page.locator('.lockin-recall-had'))
+async function passRecall(page, lineId) {
+  const { advanceEncodeRecallAsk } = await import('./check-lockin-rotate.mjs')
+  await advanceEncodeRecallAsk(page, lineId)
 }
 
-async function waitBlast(page) {
-  await page.locator('.lockin-recall-show, .why-blast').first().waitFor()
-  if (await page.locator('.lockin-recall-show').count()) await passRecall(page)
+async function waitBlast(page, lineId) {
+  await page.locator('.recall-gate.is-lockin-recall, .why-blast').first().waitFor()
+  if (await page.locator('.recall-gate.is-lockin-recall').count()) await passRecall(page, lineId)
   await page.locator('.why-blast').waitFor()
 }
 
-async function lockInFace(page) {
-  if (await page.locator('.lockin-recall-show').count()) await passRecall(page)
+async function lockInFace(page, lineId) {
+  if (await page.locator('.recall-gate.is-lockin-recall').count()) await passRecall(page, lineId)
   await page.locator('.why-blast-hud .next-tap').waitFor({ timeout: 8000 })
   await page.locator('button.why-chip').first().waitFor()
   return page.evaluate(() => {
@@ -1558,7 +1557,7 @@ async function dragWhy(page, id) {
   const brief = evidenceForTier(id, 'easy')
   assert.ok(brief, `evidence for ${id}`)
   const why = easyWhyLine(brief.reason)
-  const face = await lockInFace(page)
+  const face = await lockInFace(page, id)
   assertSharedCards(face, id)
   assert.equal((await filledGolds(page)).length, 0, 'Lock In play has no gold button')
   const start = await lockInGoldCues(page)
@@ -1717,8 +1716,8 @@ async function finishRead(page, puzzle) {
   else throw new Error(`day-2 daily kind ${kind} is not in the early pool solver`)
   for (let guard = 0; guard < 10; guard += 1) {
     if ((await page.locator('.daily-page').count()) === 0 && (await screenId(page)) === 'home') return
-    if (await page.locator('.lockin-recall-show').count()) {
-      await passRecall(page)
+    if (await page.locator('.recall-gate.is-lockin-recall').count()) {
+      await passRecall(page, puzzle.challenge.id)
       continue
     }
     const quizOpen = await page.locator('.why-blast').count()
@@ -1850,7 +1849,7 @@ async function proveNotQuite(browser, origin) {
     const blast = await openSeeded(browser, origin, {}, viewport)
     try {
       await openRoadLockIn(blast.page, origin)
-      await passRecall(blast.page)
+      await passRecall(blast.page, 'ph-road')
       await blast.page.locator('button.why-chip').first().waitFor()
       const startCue = await lockInGoldCues(blast.page)
       assert.equal(startCue.length, 1, `Lock In start one gold ${JSON.stringify(startCue)}`)
@@ -4585,7 +4584,7 @@ export async function checkGoldenLive() {
       assert.match(shot.golds[0].text, /Lock In/)
       await tapFilledGold(page)
 
-      await waitBlast(page)
+      await waitBlast(page, 'ph-road')
       await stamp('quiz-road')
       await answerQuiz(page, 'ph-road')
       await page.locator('.why-blast.is-yes .btn.primary, .why-blast.is-win .btn.primary').first().waitFor()
@@ -4630,7 +4629,7 @@ export async function checkGoldenLive() {
       await tapFilledGold(page)
       await page.locator('.lockin-recall, .why-blast').first().waitFor()
       await stamp('quiz-father')
-      const fatherFace = await lockInFace(page)
+      const fatherFace = await lockInFace(page, 'ph-father')
       assertSharedCards(fatherFace, 'ph-father')
       if (width === 375) {
         assert.equal(fatherFace.descender, true, `ph-father keeps the g descender (${fatherFace.lineHeight})`)
@@ -4715,7 +4714,7 @@ export async function checkGoldenLive() {
         await page.screenshot({ path: `${SHOTS}/L3-wordsearch-matched-win-${width}.png` })
       }
       await tapFilledGold(page)
-      await waitBlast(page)
+      await waitBlast(page, 'ob-tuning')
       shot = await stamp('quiz-tuning')
       assert.equal(shot.id, 'quiz', 'word-search gold opens the Lock In quiz')
       assert.equal(await page.locator('.play.is-gem-search').count(), 0, 'the gold tap did not replay the word search')
@@ -4752,7 +4751,7 @@ export async function checkGoldenLive() {
         await assertGemWinFold(page, 'ph-debt')
         assertGemWinOneGold(page, 'ph-debt')
         await tapFilledGold(page)
-        await waitBlast(page)
+        await waitBlast(page, 'ph-debt')
         await dragWhy(page, 'ph-debt')
         await assertLocked(page, 'ph-debt')
         await tapFilledGold(page)
@@ -4771,7 +4770,7 @@ export async function checkGoldenLive() {
         await assertGemWinFold(page, 'fg-order')
         assertGemWinOneGold(page, 'fg-order')
         await tapFilledGold(page)
-        await waitBlast(page)
+        await waitBlast(page, 'fg-order')
         await dragWhy(page, 'fg-order')
         await assertLocked(page, 'fg-order')
         await tapFilledGold(page)
@@ -4921,7 +4920,7 @@ export async function checkGoldenLive() {
     await humanPage.locator('[data-maze-next]').waitFor()
     await humanStamp('maze-win')
     await tapFilledGold(humanPage)
-    await waitBlast(humanPage)
+    await waitBlast(humanPage, 'ph-road')
     await humanStamp('quiz-road')
     await answerQuiz(humanPage, 'ph-road')
     await humanPage.locator('.why-blast.is-yes .btn.primary').waitFor()
@@ -4936,7 +4935,7 @@ export async function checkGoldenLive() {
     await hugFatherHuman(humanPage)
     await humanStamp('run-win')
     await tapFilledGold(humanPage)
-    await waitBlast(humanPage)
+    await waitBlast(humanPage, 'ph-father')
     await humanStamp('quiz-father')
     await answerQuiz(humanPage, 'ph-father')
     await humanPage.locator('.why-got-it').waitFor()
@@ -4962,7 +4961,7 @@ export async function checkGoldenLive() {
     const humanGem = await humanStamp('gem-win')
     assert.match(humanGem.golds[0].text, /Lock In/)
     await tapFilledGold(humanPage)
-    await waitBlast(humanPage)
+    await waitBlast(humanPage, 'ob-tuning')
     const humanScience = await humanStamp('quiz-tuning')
     assert.equal(humanScience.id, 'quiz', 'human-like Run still reaches ob-tuning Lock In')
     assert.equal(await humanPage.locator('.play.is-gem-search').count(), 0)

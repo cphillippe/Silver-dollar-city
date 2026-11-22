@@ -10,6 +10,41 @@ import { SAVE_KIND } from '../src/lib/save.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 import { APP_VERSION } from '../src/config/app.ts'
 import { EASY_LINE_ORDER } from '../src/easyTrail/trail/loop.ts'
+import { lociStampFor } from '../src/lib/lociStamp.ts'
+
+/** Complete the Easy encode recall ask (any format) before the why slide. */
+export async function advanceEncodeRecallAsk(page, lineId) {
+  await page.locator('.recall-gate.is-lockin-recall').waitFor({ timeout: 20_000 })
+  const format = await page.evaluate(() => {
+    const gate = document.querySelector('.recall-gate.is-lockin-recall')
+    if (!gate) return null
+    const explicit =
+      gate.getAttribute('data-encode-format') ||
+      gate.querySelector('[data-encode-format]')?.getAttribute('data-encode-format')
+    if (explicit) return explicit
+    if (gate.querySelector('.lockin-encode-b')) return 'B'
+    if (gate.querySelector('.quick-review-map')) return 'C'
+    if (gate.querySelector('.lockin-recall.is-ask')) return 'A'
+    return 'A'
+  })
+  if (format === 'A') {
+    await page.locator('.lockin-recall-show').waitFor({ timeout: 8000 })
+    await page.getByRole('button', { name: 'Show me' }).click()
+  } else if (format === 'B') {
+    await page.locator('.lockin-recall-claim').waitFor({ timeout: 6000 })
+  } else {
+    const id =
+      lineId ||
+      (await page.evaluate(
+        () => document.querySelector('.recall-gate.is-lockin-recall')?.getAttribute('data-line-id') ?? '',
+      ))
+    const stamp = lociStampFor(id)
+    await page.locator(`.quick-review-plot-hit[data-plot-id="${stamp.plotId}"]`).click()
+    await page.locator('.lockin-recall-claim').waitFor({ timeout: 6000 })
+  }
+  await page.getByRole('button', { name: 'I had it' }).click()
+  await page.locator('.why-blast, .why-chip').first().waitFor({ timeout: 12_000 })
+}
 function encodeRotationRepeats(formats) {
   let repeats = 0
   for (let i = 1; i < formats.length; i++) {
