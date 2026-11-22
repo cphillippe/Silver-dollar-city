@@ -9141,7 +9141,7 @@ async function checkNwStripWords(browser, port, errors) {
 /** Live triage URL (nwDebug=1); the scan adds nwDebug via the same wave timing as strip words. */
 const NW_REASON_STRIP_ROAD_REPRO =
   '?playtest=1&nwDebug=1&nwSeed=2&nwMap=a2&nwRound=18&nwLamps=0&nwCam=1'
-const NW_REASON_STRIP_ROAD_SEARCH = '?playtest=1&nwSeed=2&nwMap=a2&nwRound=24&nwLamps=0&nwCam=1'
+const NW_REASON_STRIP_ROAD_SEARCH = NW_REASON_STRIP_ROAD_REPRO
 const NW_REASON_STRIP_ROAD_SIZES = [
   [375, 667],
   [384, 844],
@@ -9173,9 +9173,12 @@ async function checkNwReasonStripRoad(browser, port, errors) {
     if (only && only !== label) continue
     for (const lamp of NW_REASON_STRIP_ROAD_LAMPS) {
       if (onlyTool && onlyTool !== lamp.tool) continue
+      const live = process.env.NW_REASON_STRIP_ROAD_LIVE === '1' ? 'https://cphillippe.github.io/Silver-dollar-city/' : undefined
       const { context, page } = await openMap(browser, port, width, height, 'a2', {
         motion: true,
         search: NW_REASON_STRIP_ROAD_SEARCH,
+        deviceScaleFactor: 2,
+        baseURL: live,
       })
       page.on('pageerror', (error) => errors.push(`reason-strip-road ${label} ${lamp.tool} ${error}`))
       await glyphSetup(page)
@@ -9186,14 +9189,10 @@ async function checkNwReasonStripRoad(browser, port, errors) {
           cy: Number(ring.getAttribute('cy')),
         })),
       )
-      const plantSeats =
-        lamp.tool === 'reason' && (label === '384x844' || label === '390x844')
-          ? NW_REASON_STRIP_ROAD_LAMPS
-          : [lamp]
-      for (const seat of plantSeats) {
-        const ring = rings.find((entry) => entry.cx === seat.cx && entry.cy === seat.cy)
-        assert.ok(ring, `${label} reason-strip-road ${seat.tool} seat ${seat.cx},${seat.cy}`)
-        await glyphPlantAt(page, seat.tool, ring, `${label} reason-strip-road ${seat.tool}`)
+      for (const seat of NW_REASON_STRIP_ROAD_LAMPS) {
+        const seatRing = rings.find((entry) => entry.cx === seat.cx && entry.cy === seat.cy)
+        assert.ok(seatRing, `${label} reason-strip-road ${seat.tool} seat ${seat.cx},${seat.cy}`)
+        await glyphPlantAt(page, seat.tool, seatRing, `${label} reason-strip-road ${seat.tool}`)
         assert.equal(
           await page.locator(`.defend-pad[data-tower-type="${seat.tool}"]`).count(),
           1,
@@ -9206,6 +9205,10 @@ async function checkNwReasonStripRoad(browser, port, errors) {
       assert.ok(sparks >= 3, `${label} ${lamp.tool} reason-strip-road has sparks (${sparks})`)
       await page.locator('.defend-go').click()
       await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
+      if (await page.locator('.defend-page.is-nw-debug-freeze').count()) {
+        const resume = page.getByRole('button', { name: 'Resume walkers' })
+        if (await resume.count()) await resume.click()
+      }
       await page.locator('.defend-raider.is-easy-cue').waitFor({ timeout: 60_000 })
       await glyphPanToPad(page, lamp.tool)
       for (let attempt = 0; attempt < 6 && (await page.locator('.defend-tower-card[data-strip="yes"]').count()) < 1; attempt += 1) {
@@ -9215,46 +9218,54 @@ async function checkNwReasonStripRoad(browser, port, errors) {
       await page.locator('.defend-tower-card[data-strip="yes"]').waitFor({ timeout: 5000 })
       await page.waitForTimeout(300)
 
-      const read = await page.evaluate(() => {
+      const read = await page.evaluate(async () => {
         const round1 = (n) => Math.round(n * 10) / 10
         const roadHalf = 0.75
         const cardEl = document.querySelector('.defend-tower-card[data-strip="yes"]')
+        const frame = document.querySelector('.defend-frame')
         if (!cardEl) return null
         const card = cardEl.getBoundingClientRect()
+        const style = getComputedStyle(cardEl)
+        const paintLeft = parseFloat(style.left) || 0
+        const paintTop = parseFloat(style.top) || 0
         const road = document.querySelector('.defend-road')
-        if (!(road instanceof SVGGeometryElement)) return { overlap: -1, card: null, gold: -1, minFont: 0, tapShort: 0 }
+        if (!(road instanceof SVGGeometryElement) || !(frame instanceof HTMLElement)) {
+          return { overlap: -1, card: null, gold: -1, minFont: 0, tapShort: 0 }
+        }
         const svg = road.ownerSVGElement
         const ctm = svg?.getScreenCTM()
         if (!svg || !ctm) return { overlap: -1, card: null, gold: -1, minFont: 0, tapShort: 0 }
+        const origin = frame.getBoundingClientRect()
+        const ox = origin.left + frame.clientLeft
+        const oy = origin.top + frame.clientTop
         const length = road.getTotalLength()
         const step = length / 393
-        const uniquePx = new Set()
-        let overlapArea = 0
-        const point = svg.createSVGPoint()
-        for (let i = 0; i < 394; i += 1) {
-          const at = road.getPointAtLength(Math.min(length, i * step))
-          point.x = at.x
-          point.y = at.y
-          const spot = point.matrixTransform(ctm)
-          const left = spot.x - roadHalf
-          const right = spot.x + roadHalf
-          const top = spot.y - roadHalf
-          const bottom = spot.y + roadHalf
-          const w = Math.max(0, Math.min(card.right, right) - Math.max(card.left, left))
-          const h = Math.max(0, Math.min(card.bottom, bottom) - Math.max(card.top, top))
-          if (w <= 0 || h <= 0) continue
-          overlapArea += w * h
-          const x0 = Math.max(card.left, left)
-          const x1 = Math.min(card.right, right)
-          const y0 = Math.max(card.top, top)
-          const y1 = Math.min(card.bottom, bottom)
-          for (let x = Math.floor(x0); x < Math.ceil(x1); x += 1) {
-            for (let y = Math.floor(y0); y < Math.ceil(y1); y += 1) {
-              uniquePx.add(`${x},${y}`)
+        const measureScreenBox = (box, half = roadHalf) => {
+          let area = 0
+          const uniq = new Set()
+          const point = svg.createSVGPoint()
+          for (let i = 0; i < 394; i += 1) {
+            const at = road.getPointAtLength(Math.min(length, i * step))
+            point.x = at.x
+            point.y = at.y
+            const spot = point.matrixTransform(ctm)
+            const rl = spot.x - half
+            const rr = spot.x + half
+            const rt = spot.y - half
+            const rb = spot.y + half
+            const w = Math.max(0, Math.min(box.right, rr) - Math.max(box.left, rl))
+            const h = Math.max(0, Math.min(box.bottom, rb) - Math.max(box.top, rt))
+            if (w <= 0 || h <= 0) continue
+            area += w * h
+            for (let x = Math.floor(Math.max(box.left, rl)); x < Math.ceil(Math.min(box.right, rr)); x += 1) {
+              for (let y = Math.floor(Math.max(box.top, rt)); y < Math.ceil(Math.min(box.bottom, rb)); y += 1) {
+                uniq.add(`${x},${y}`)
+              }
             }
           }
+          return Math.round(Math.max(uniq.size, area) * 100) / 100
         }
-        const overlap = Math.round(uniquePx.size * 100) / 100
+        const overlap = measureScreenBox(card)
         let minFont = Infinity
         let tapShort = 0
         for (const path of ['far', 'strong']) {
@@ -9303,15 +9314,26 @@ async function checkNwReasonStripRoad(browser, port, errors) {
           }
           if (why) gold += 1
         }
+        const fx = origin.left ?? 0
+        const fy = origin.top ?? 0
         return {
           overlap,
-          overlapArea: Math.round(overlapArea * 100) / 100,
+          overlapArea: overlap,
           card: {
             l: round1(card.left),
             t: round1(card.top),
             r: round1(card.right),
             b: round1(card.bottom),
           },
+          frameCard: frame
+            ? {
+                l: round1(card.left - fx),
+                t: round1(card.top - fy),
+                r: round1(card.right - fx),
+                b: round1(card.bottom - fy),
+              }
+            : null,
+          paint: { l: round1(paintLeft), t: round1(paintTop) },
           gold,
           minFont: minFont === Infinity ? 0 : minFont,
           tapShort,
@@ -9319,9 +9341,15 @@ async function checkNwReasonStripRoad(browser, port, errors) {
       })
 
       const tag = `${label} type=${lamp.tool}`
+      const overlapPx2 = read ? Math.max(read.overlap, read.overlapArea || 0) : 0
+      if (process.env.NW_REASON_STRIP_ROAD_PROBE === '1') {
+        console.log(
+          `checkNwReasonStripRoad probe ${tag} overlap=${overlapPx2} paint=${read?.paint ? `${read.paint.l},${read.paint.t}` : 'n/a'}`,
+        )
+      }
       if (!read || !read.card) fail(`checkNwReasonStripRoad fail ${tag} card=missing`)
-      else if (read.overlap < 0) fail(`checkNwReasonStripRoad fail ${tag} road=missing`)
-      else if (read.overlap > 0) fail(`checkNwReasonStripRoad fail ${tag} overlap=${read.overlap}px2`)
+      else if (overlapPx2 < 0) fail(`checkNwReasonStripRoad fail ${tag} road=missing`)
+      else if (overlapPx2 > 0) fail(`checkNwReasonStripRoad fail ${tag} overlap=${overlapPx2}px2`)
       else if (read.tapShort) fail(`checkNwReasonStripRoad fail ${tag} tapH<44`)
       else if (!(read.minFont >= 13)) fail(`checkNwReasonStripRoad fail ${tag} font=${read.minFont}`)
       else if (read.gold !== 1) fail(`checkNwReasonStripRoad fail ${tag} gold=${read.gold}`)
