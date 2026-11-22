@@ -204,6 +204,7 @@ function defendFrameOrigin(): [number, number] {
 }
 
 function defendFrameWidth(): number {
+  if (typeof document === 'undefined') return 0
   const frame = document.querySelector('.defend-frame')
   return frame instanceof HTMLElement ? frame.clientWidth : 0
 }
