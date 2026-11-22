@@ -1962,7 +1962,7 @@ assert.doesNotMatch(latestChange('1.4.600').items.join('\n'), /Fixes #|Closes #|
     '1.4.600 the full path runs checkNwReasonStripRoad after checkNwStripWords',
   )
   assert.match(phone600, /checkNwReasonStripRoad ok \$\{tag\}/, '1.4.600 the ok line logs per case')
-  assert.match(phone600, /1\.4\.600: y re-pinned from CI run 45031547251/, '1.4.600 EasyOneGold settings y follows the new changelog row')
+  assert.match(phone600, /1\.4\.600: settings-more y from CI run 45037961848/, '1.4.600 EasyOneGold settings y follows the new changelog row')
 }
 
 // 1.4.595: Easy Bonus Sight one-time hint line (#965).
