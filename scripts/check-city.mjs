@@ -1958,14 +1958,32 @@ assert.doesNotMatch(
 {
   const defend596 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   const phone596 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
-  assert.match(defend596, /1\.4\.596: fixed to the viewport[\s\S]*position: fixed/, '1.4.596 Spend and help use fixed positioning on phone')
+  const spendHelp596 = defend596.match(
+    /\/\* 1\.4\.596: fixed to the viewport[\s\S]*?\.defend-page\.is-easy-watch\.is-boost \.defend-clear-spend,[\s\S]*?\.defend-page\.is-easy-watch\.is-boost\.is-clear-fold \.defend-clear-help \{[\s\S]*?z-index: 4;\n  \}/,
+  )?.[0]
+  assert.ok(spendHelp596, '1.4.596 Spend and help rule block is present in defend.css')
+  assert.match(
+    spendHelp596,
+    /position: fixed;[\s\S]*right: 8px;/,
+    '1.4.596 Spend and help rule block uses fixed positioning on phone',
+  )
+  assert.doesNotMatch(
+    spendHelp596,
+    /position: absolute;/,
+    '1.4.596 Spend and help rule block never falls back to absolute in the 596 hunk',
+  )
   assert.match(phone596, /async function checkNwSpendOnScreen/, '1.4.596 checkNwSpendOnScreen is defined')
   assert.match(
     phone596,
     /await checkGemSightCue\(browser, port, errors\)\n    await checkNwSpendOnScreen\(browser, port, errors\)/,
     '1.4.596 the full path runs checkNwSpendOnScreen after checkGemSightCue',
   )
-  assert.match(phone596, /checkNwSpendOnScreen ok \$\{clearOk\}/, '1.4.596 the ok line logs per viewport and state')
+  assert.match(
+    phone596,
+    /function assertNwSpendMidWaveNodes[\s\S]*?if \(mid\.nodes\.length < 1\) \{[\s\S]*?fail\(`checkNwSpendOnScreen fail \$\{midOk\} nodes=0`\)/,
+    '1.4.596 mid-wave fails when no Spend nodes are painted',
+  )
+  assert.match(phone596, /checkNwSpendOnScreen ok \$\{clearOk\} nodes=/, '1.4.596 the ok line logs node counts per viewport and state')
 }
 
 

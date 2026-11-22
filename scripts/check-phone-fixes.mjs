@@ -9795,6 +9795,30 @@ const NW_SPEND_SPEND_SOURCE = 'Spend'
 const NW_SPEND_HELP_SOURCE = '?'
 const NW_SPEND_ICON = '✦'
 
+function assertNwSpendMidWaveNodes(mid, midOk, innerWidth, fail, problems) {
+  if (mid.nodes.length < 1) {
+    fail(`checkNwSpendOnScreen fail ${midOk} nodes=0`)
+    return
+  }
+  if (problems.some((line) => line.includes(` ${midOk} `))) return
+  for (const row of mid.nodes) {
+    if (row.left < 8) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} left=${row.left}`)
+    if (row.right > innerWidth - 8) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} right=${row.right}`)
+    if (row.clipped !== 0) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} clipped=${row.clipped}`)
+    if (row.w < 44 || row.h < 44) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} size=${row.w}x${row.h}`)
+    if (row.font > 0 && row.font < 13) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} font=${row.font}`)
+    if (row.rendered !== row.source && row.name !== 'spend')
+      fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(row.source)}`)
+    if (row.name === 'spend' && row.rendered !== NW_SPEND_ICON && row.rendered !== row.text) {
+      if (row.before !== NW_SPEND_ICON) fail(`checkNwSpendOnScreen fail ${midOk} spend painted=${JSON.stringify(row.rendered)}`)
+    }
+    if (row.blockers.length) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} overlap=${row.blockers.join(',')}`)
+    if (!row.hitOk) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} hit=0`)
+  }
+  if (mid.gold !== 1) fail(`checkNwSpendOnScreen fail ${midOk} gold=${mid.gold}`)
+  console.log(`checkNwSpendOnScreen ok ${midOk} nodes=${mid.nodes.length} clipped=0 gold=${mid.gold || 1}`)
+}
+
 async function tapUntilBoostForSpend(page) {
   const started = Date.now()
   while (Date.now() - started < 90_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
@@ -9974,25 +9998,6 @@ async function checkNwSpendOnScreen(browser, port, errors) {
     await page.locator('.defend-go').click()
     await page.locator('.defend-raider.is-easy-cue').waitFor({ timeout: 120_000 })
     await page.waitForTimeout(200)
-    const mid = await readSpendNodes(page)
-    const midOk = `${tag} mid-wave`
-    if (!problems.some((line) => line.includes(` ${midOk} `))) {
-      for (const row of mid.nodes) {
-        if (row.left < 8) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} left=${row.left}`)
-        if (row.right > mid.innerWidth - 8) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} right=${row.right}`)
-        if (row.clipped !== 0) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} clipped=${row.clipped}`)
-        if (row.w < 44 || row.h < 44) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} size=${row.w}x${row.h}`)
-        if (row.font > 0 && row.font < 13) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} font=${row.font}`)
-        if (row.rendered !== row.source && row.name !== 'spend') fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(row.source)}`)
-        if (row.name === 'spend' && row.rendered !== NW_SPEND_ICON && row.rendered !== row.text) {
-          if (row.before !== NW_SPEND_ICON) fail(`checkNwSpendOnScreen fail ${midOk} spend painted=${JSON.stringify(row.rendered)}`)
-        }
-        if (row.blockers.length) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} overlap=${row.blockers.join(',')}`)
-        if (!row.hitOk) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} hit=0`)
-      }
-      if (mid.nodes.length && mid.gold !== 1) fail(`checkNwSpendOnScreen fail ${midOk} gold=${mid.gold}`)
-      console.log(`checkNwSpendOnScreen ok ${midOk} nodes=${mid.nodes.length} clipped=0 gold=${mid.gold || 1}`)
-    }
 
     await tapUntilBoostForSpend(page)
     const reached = (await page.locator('.defend-page.is-boost').count()) > 0
@@ -10059,7 +10064,7 @@ async function checkNwSpendOnScreen(browser, port, errors) {
       const spend = clear.nodes.find((row) => row.name === 'spend')
       const help = clear.nodes.find((row) => row.name === 'help')
       console.log(
-        `checkNwSpendOnScreen ok ${clearOk} spend=${spend ? `${spend.left.toFixed(0)},${spend.right.toFixed(0)}` : 'missing'} help=${help ? `${help.left.toFixed(0)},${help.right.toFixed(0)}` : 'missing'} clipped=0 gold=1`,
+        `checkNwSpendOnScreen ok ${clearOk} nodes=${clear.nodes.length} spend=${spend ? `${spend.left.toFixed(0)},${spend.right.toFixed(0)}` : 'missing'} help=${help ? `${help.left.toFixed(0)},${help.right.toFixed(0)}` : 'missing'} clipped=0 gold=1`,
       )
     }
     await context.close()
@@ -10086,15 +10091,13 @@ async function checkNwSpendOnScreen(browser, port, errors) {
       spend: document.querySelectorAll('.defend-clear-spend').length,
     }))
     if (hardRead.easy !== 0) fail(`checkNwSpendOnScreen fail hard easy-watch=${hardRead.easy}`)
-    else console.log(`checkNwSpendOnScreen ok hard easy-watch=0 spend-hooks=${hardRead.spend}`)
+    else console.log(`checkNwSpendOnScreen ok hard nodes=0 easy-watch=0 spend-hooks=${hardRead.spend}`)
     await hard.close()
   }
 
   for (const err of errors.slice(errorMark)) fail(`checkNwSpendOnScreen error ${err}`)
   assert.equal(problems.length, 0, problems.join('\n'))
 }
-
-/** #967
 
 /** #967 Easy first plant must not open the upgrade card. A touch tap does, on the parent. */
 const PLANT_NO_CARD_SIZES = [
@@ -11283,7 +11286,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
