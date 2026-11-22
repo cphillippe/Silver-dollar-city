@@ -372,7 +372,6 @@ export function placeTowerCard(
     glyph && cardHitsGlyph(card, point, cardHeight, paintHeight, glyph) ? 1 : 0
   const markH = paintHeight > 0 ? paintHeight : cardHeight
   const roadCentres = strip ? stripRoadFramePoints() : []
-  const roadPad = STRIP_ROAD_HALF + TAP_EPS
   const blocks = tapBlocks(taps)
   const soft = softBlocks(taps)
   const own = ownBlocks(taps)
@@ -388,12 +387,17 @@ export function placeTowerCard(
     blocks.reduce((n, block) => n + (hitsRect(card, markH, block, W) ? 1 : 0), 0)
   const roadHits = (card: { left: number; top: number }) => {
     if (!roadCentres.length) return 0
-    const left = card.left - roadPad
-    const right = card.left + W + roadPad
-    const top = card.top - roadPad
-    const bottom = card.top + markH + roadPad
+    const cardBox = { l: card.left, r: card.left + W, t: card.top, b: card.top + markH }
+    const half = STRIP_ROAD_HALF
     for (const spot of roadCentres) {
-      if (spot.x >= left && spot.x <= right && spot.y >= top && spot.y <= bottom) return 1
+      if (
+        overlaps(
+          { l: spot.x - half, r: spot.x + half, t: spot.y - half, b: spot.y + half },
+          cardBox,
+        )
+      ) {
+        return 1
+      }
     }
     return 0
   }
@@ -429,18 +433,22 @@ export function placeTowerCard(
     const clearX = LAMP_HIT.x * sc + GLYPH_CLEAR
     const offRoadLeft = stripLeftOfLamp
       ? [
-          Math.max(MARGIN, point.left - W - clearX - 12),
+          EDGE,
+          Math.max(EDGE, point.left - W - clearX - 12),
           Math.max(MARGIN, point.left - W - 8),
           centered,
           Math.max(MARGIN, point.left - W - clearX),
         ]
       : [
-          Math.max(MARGIN, Math.min(point.left + clearX + 12, board.w - W - RAIL)),
+          EDGE,
+          Math.max(EDGE, Math.min(point.left + clearX + 12, board.w - W - RAIL)),
           Math.max(MARGIN, Math.min(point.left + 24, board.w - W - RAIL)),
           centered,
           Math.max(MARGIN, Math.min(point.left + clearX, board.w - W - RAIL)),
         ]
-    const lefts = [...new Set([...offRoadLeft, Math.max(MARGIN, Math.min(point.left - W / 2, board.w - W - RAIL))])]
+    const lefts = [
+      ...new Set([...offRoadLeft, EDGE, Math.max(MARGIN, Math.min(point.left - W / 2, board.w - W - RAIL))]),
+    ]
     for (const left of [...new Set(lefts.map((v) => Math.round(v)))]) {
       const stripTops = [topAbove]
       for (let lift = 16; lift <= 160; lift += 16) {

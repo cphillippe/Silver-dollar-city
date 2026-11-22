@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.600',
+    title: 'Night Watch: buy strip clears the road',
+    when: '2026-11-22',
+    items: [
+      'On Easy, the short mid-wave buy strip beside your lamp no longer grazes the yellow night road on the narrowest phones.',
+      'Hard stays the same.',
+      'Refs #988.',
+    ],
+  },
+  {
     version: '1.4.595',
     title: 'Match: Bonus Sight hint line',
     when: '2026-11-17',
