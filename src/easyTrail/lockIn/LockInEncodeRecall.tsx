@@ -81,7 +81,7 @@ export function LockInEncodeRecall({ id, claim, format, onDone }: LockInEncodeRe
 
   if (phase === 'reveal') {
     return (
-      <div className="lockin-encode is-reveal" data-lockin-format={format}>
+      <div className="lockin-encode is-reveal" data-encode-format={format}>
         <p className="lockin-recall-claim" role="status">
           {faced}
         </p>
@@ -99,7 +99,7 @@ export function LockInEncodeRecall({ id, claim, format, onDone }: LockInEncodeRe
 
   if (format === 'B') {
     return (
-      <div className="lockin-encode is-ask lockin-encode-b quick-review" data-lockin-format="B">
+      <div className="lockin-encode is-ask lockin-encode-b quick-review" data-encode-format="B">
         <p className="quick-review-prompt">Think first…</p>
         <div className="quick-review-think-bar" aria-hidden>
           <div className="quick-review-think-fill" style={{ width: `${thinkPct}%` }} />
@@ -109,7 +109,7 @@ export function LockInEncodeRecall({ id, claim, format, onDone }: LockInEncodeRe
   }
 
   return (
-    <div className="lockin-encode is-ask lockin-encode-c quick-review" data-lockin-format="C">
+    <div className="lockin-encode is-ask lockin-encode-c quick-review" data-encode-format="C">
       <div className="quick-review-stage">
         <div className="quick-review-prompt-panel quick-review-prompt-panel--flat">
           <p className="quick-review-prompt quick-review-prompt-title">{prompt}</p>

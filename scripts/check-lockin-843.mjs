@@ -308,7 +308,7 @@ const progressOf = (page) =>
 
 async function openLockIn(page) {
   await page.getByRole('button', { name: /Lock In/ }).last().click()
-  await page.locator('[data-lockin-format], .lockin-encode.is-ask, .lockin-recall.is-ask').first().waitFor()
+  await page.locator('[data-encode-format], .lockin-encode.is-ask, .lockin-recall.is-ask').first().waitFor()
 }
 
 async function domHas(page, text) {
@@ -762,7 +762,7 @@ async function openDebugLockIn(page) {
 await session({ viewport: VIEWPORTS[0], seed: seedLine(0) }, async (page) => {
   const facts = lineFacts('ph-road')
   await openDebugLockIn(page)
-  await page.locator('[data-lockin-format], .lockin-encode.is-ask, .lockin-recall.is-ask').first().waitFor()
+  await page.locator('[data-encode-format], .lockin-encode.is-ask, .lockin-recall.is-ask').first().waitFor()
   await recallToSlide(page, VIEWPORTS[0], facts, { shots: false, frames: false, tag: 'debug-fresh-' })
   await page.locator('.why-chip', { hasText: easyWhyLine(facts.right) }).click()
   await page.locator('.recall-done').waitFor()
