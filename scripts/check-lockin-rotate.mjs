@@ -31,7 +31,7 @@ export async function advanceEncodeRecallAsk(page, lineId) {
     await page.locator('.lockin-recall-show').waitFor({ timeout: 8000 })
     await page.getByRole('button', { name: 'Show me' }).click()
   } else if (format === 'B') {
-    await page.locator('.lockin-recall-claim').waitFor({ timeout: 6000 })
+    await page.locator('.lockin-encode.is-reveal .lockin-recall-claim, .lockin-recall-claim').waitFor({ timeout: 8000 })
   } else {
     const id =
       lineId ||
