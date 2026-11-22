@@ -1942,6 +1942,8 @@ assert.match(
 }
 
 
+
+
 // 1.4.597: Easy Night Watch Love lamp type chip stays visible (#949).
 assert.equal(APP_VERSION, '1.4.597')
 assert.equal(CHANGELOG[0].version, '1.4.597', '1.4.597 is the newest row')
@@ -1955,20 +1957,20 @@ assert.doesNotMatch(
   '1.4.597 the player note does not name other tiers',
 )
 {
-  const board598 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
-  const phone598 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
-  assert.match(board598, /function slideTypeChip/, '1.4.597 Easy nudges type chips off chrome before hiding')
-  assert.match(board598, /slideTypeChip\(chip, blocks, true\)/, '1.4.597 chips flip above the lamp when Begin still blocks them')
-  assert.match(phone598, /async function checkNwLoveChip/, '1.4.597 checkNwLoveChip is defined')
+  const board597 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
+  const phone597 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  assert.match(board597, /function slideTypeChip/, '1.4.597 Easy nudges type chips off chrome before hiding')
+  assert.match(board597, /slideTypeChip\(chip, blocks, true\)/, '1.4.597 chips flip above the lamp when Begin still blocks them')
+  assert.match(board597, /const chipNodes = \[\.\.\.page\.querySelectorAll\('\.defend-type-chip'\)\]/, '1.4.587 hideTypeLabelsOnChrome flags chips')
+  assert.match(phone597, /async function checkNwLoveChip/, '1.4.597 checkNwLoveChip is defined')
   assert.match(
-    phone598,
+    phone597,
     /await checkNwSpendOnScreen\(browser, port, errors\)\n    await checkNwLoveChip\(browser, port, errors\)/,
     '1.4.597 the full path runs checkNwLoveChip after checkNwSpendOnScreen',
   )
-  assert.match(phone598, /checkNwLoveChip ok \$\{tag\}/, '1.4.597 the ok line logs per viewport')
-  assert.match(phone598, /1\.4\.598 What's new row \(Love chip\): re-pinned from CI run 44206941958/, '1.4.597 EASY_GOLD_BASE settings-more shifted from the new changelog row')
+  assert.match(phone597, /checkNwLoveChip ok r24 375x812/, '1.4.597 r24 Reason coverage logs its own ok line')
+  assert.match(phone597, /checkNwLoveChip ok \$\{tag\} slideTypeChip/, '1.4.597 slideTypeChip viewport logs box and clipped=0')
 }
-
 
 
 // 1.4.596: Easy Night Watch Spend / ? on screen at round clear (#951).
@@ -1983,17 +1985,37 @@ assert.doesNotMatch(
   '1.4.596 the player note does not name other tiers',
 )
 {
-  const defend597 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
-  const phone597 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
-  assert.match(defend597, /1\.4\.597: fixed to the viewport[\s\S]*position: fixed/, '1.4.596 Spend and help use fixed positioning on phone')
-  assert.match(phone597, /async function checkNwSpendOnScreen/, '1.4.596 checkNwSpendOnScreen is defined')
+  const defend596 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const phone596 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  const spendHelp596 = defend596.match(
+    /\/\* 1\.4\.596: fixed to the viewport[\s\S]*?\.defend-page\.is-easy-watch\.is-boost \.defend-clear-spend,[\s\S]*?\.defend-page\.is-easy-watch\.is-boost\.is-clear-fold \.defend-clear-help \{[\s\S]*?z-index: 4;\n  \}/,
+  )?.[0]
+  assert.ok(spendHelp596, '1.4.596 Spend and help rule block is present in defend.css')
   assert.match(
-    phone597,
+    spendHelp596,
+    /position: fixed;[\s\S]*right: 8px;/,
+    '1.4.596 Spend and help rule block uses fixed positioning on phone',
+  )
+  assert.doesNotMatch(
+    spendHelp596,
+    /position: absolute;/,
+    '1.4.596 Spend and help rule block never falls back to absolute in the 596 hunk',
+  )
+  assert.match(phone596, /async function checkNwSpendOnScreen/, '1.4.596 checkNwSpendOnScreen is defined')
+  assert.match(
+    phone596,
     /await checkGemSightCue\(browser, port, errors\)\n    await checkNwSpendOnScreen\(browser, port, errors\)/,
     '1.4.596 the full path runs checkNwSpendOnScreen after checkGemSightCue',
   )
-  assert.match(phone597, /checkNwSpendOnScreen ok \$\{clearOk\}/, '1.4.597 the ok line logs per viewport and state')
+  assert.match(
+    phone596,
+    /function assertNwSpendMidWaveNodes[\s\S]*?if \(mid\.nodes\.length < 1\) \{[\s\S]*?fail\(`checkNwSpendOnScreen fail \$\{midOk\} nodes=0`\)/,
+    '1.4.596 mid-wave fails when no Spend nodes are painted',
+  )
+  assert.match(phone596, /checkNwSpendOnScreen ok \$\{clearOk\} nodes=/, '1.4.596 the ok line logs node counts per viewport and state')
 }
+
+
 
 // 1.4.595: Easy Bonus Sight one-time hint line (#965).
 assert.equal(CHANGELOG[2].version, '1.4.595', '1.4.595 follows the newest row')
@@ -2007,19 +2029,19 @@ assert.doesNotMatch(
   '1.4.595 the player note does not name other tiers',
 )
 {
-  const gem596 = readFileSync(new URL('../src/lib/gemJar.ts', import.meta.url), 'utf8')
-  const play596 = readFileSync(new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url), 'utf8')
-  const phone596 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
-  assert.match(gem596, /export const GEM_SIGHT_CUE/, '1.4.595 exports the sight cue source string')
-  assert.match(play596, /data-gem-sight-cue/, '1.4.595 GemSearchPlay renders the sight cue hook')
-  assert.match(play596, /markMatchSightCueSeen/, '1.4.595 the cue marks itself seen in the save')
-  assert.match(phone596, /async function checkGemSightCue/, '1.4.595 checkGemSightCue is defined')
+  const gem595 = readFileSync(new URL('../src/lib/gemJar.ts', import.meta.url), 'utf8')
+  const play595 = readFileSync(new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url), 'utf8')
+  const phone595 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  assert.match(gem595, /export const GEM_SIGHT_CUE/, '1.4.595 exports the sight cue source string')
+  assert.match(play595, /data-gem-sight-cue/, '1.4.595 GemSearchPlay renders the sight cue hook')
+  assert.match(play595, /markMatchSightCueSeen/, '1.4.595 the cue marks itself seen in the save')
+  assert.match(phone595, /async function checkGemSightCue/, '1.4.595 checkGemSightCue is defined')
   assert.match(
-    phone596,
+    phone595,
     /await checkDigWinReadable\(browser, port, errors\)\n    await checkGemSightCue\(browser, port, errors\)/,
     '1.4.595 the full path runs checkGemSightCue after checkDigWinReadable',
   )
-  assert.match(phone596, /checkGemSightCue ok \$\{tag\}/, '1.4.595 the ok line logs per viewport')
+  assert.match(phone595, /checkGemSightCue ok \$\{tag\}/, '1.4.595 the ok line logs per viewport')
 }
 
 // 1.4.594: Easy Dig DUG! win readability (#964).
@@ -2034,27 +2056,26 @@ assert.doesNotMatch(
   '1.4.594 the player note does not name other tiers',
 )
 {
-  const win595 = readFileSync(new URL('../src/styles/matchWin.css', import.meta.url), 'utf8')
-  const phone595 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  const win594 = readFileSync(new URL('../src/styles/matchWin.css', import.meta.url), 'utf8')
+  const phone594 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
   assert.doesNotMatch(
-    win595,
+    win594,
     /html\[data-easy='on'\] \.play\.is-claim-merge\.is-win \.cta-dock \.btn:not\(\.primary\),\s*\nhtml\[data-easy='on'\] \.play\.is-source-dig\.is-win \.cta-dock \.btn:not\(\.primary\),\s*\nhtml\[data-easy='on'\] \.play\.is-road-maze/,
     '1.4.594 Dig win leaves the shared ink secondary rule',
   )
   assert.match(
-    win595,
+    win594,
     /html\[data-easy='on'\] \.play\.is-source-dig\.is-win \.cta-dock \.btn:not\(\.primary\) \{[\s\S]*#fff6e8/,
     '1.4.594 Dig secondaries use cream on the purple plate',
   )
-  assert.match(phone595, /async function checkDigWinReadable/, '1.4.594 checkDigWinReadable is defined')
+  assert.match(phone594, /async function checkDigWinReadable/, '1.4.594 checkDigWinReadable is defined')
   assert.match(
-    phone595,
+    phone594,
     /await checkNwStripWords\(browser, port, errors\)\n    await checkDigWinReadable\(browser, port, errors\)/,
     '1.4.594 the full path runs checkDigWinReadable after checkNwStripWords',
   )
-  assert.match(phone595, /checkDigWinReadable ok \$\{tag\}/, '1.4.594 the ok line logs per viewport')
+  assert.match(phone594, /checkDigWinReadable ok \$\{tag\}/, '1.4.594 the ok line logs per viewport')
 }
-
 
 // 1.4.593: Easy Night Watch plant ring once per run (#959) and mid-wave Far / Strong strip (#950).
 assert.equal(CHANGELOG[4].version, '1.4.593', '1.4.593 follows the newest row')
@@ -18707,7 +18728,7 @@ console.log('check-city: ok')
     /versionName appVersion/,
     '1.4.333 Android versionName follows package.json',
   )
-  assert.ok(CHANGELOG.some((note) => note.version === '1.4.333'), '1.4.333 row stays (no longer CHANGELOG[11] after 1.4.334)')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.333'), '1.4.333 row stays (no longer CHANGELOG[12] after 1.4.334)')
   const items333 = latestChange('1.4.333').items.join('\n')
   assert.match(latestChange('1.4.333').title, /Match/)
   assert.match(items333, /Fixes #476/)

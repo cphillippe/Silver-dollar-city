@@ -30,7 +30,7 @@ export const CHANGELOG: ChangeNote[] = [
   {
     version: '1.4.597',
     title: 'Night Watch: Love lamp name on screen',
-    when: '2026-11-17',
+    when: '2026-11-22',
     items: [
       'On Easy, every planted pillar lamp keeps its type name chip on screen, including Love at the upper seats.',
       'Chips slide off docks and Begin instead of vanishing when chrome would cover them.',
@@ -41,7 +41,7 @@ export const CHANGELOG: ChangeNote[] = [
   {
     version: '1.4.596',
     title: 'Night Watch: Spend and help on screen',
-    when: '2026-11-17',
+    when: '2026-11-22',
     items: [
       'On Easy, after a wave clears, the Spend spark and ? help buttons stay on the right edge of the phone screen where you can tap them.',
       'Hard stays the same.',
