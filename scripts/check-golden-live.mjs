@@ -4627,7 +4627,7 @@ export async function checkGoldenLive() {
       assert.equal(shot.id, 'run-win')
       assert.match(shot.golds[0].text, /Lock In/)
       await tapFilledGold(page)
-      await page.locator('.recall-gate.is-lockin-recall, .why-blast').first().waitFor()
+      await waitBlast(page, 'ph-father')
       await stamp('quiz-father')
       const fatherFace = await lockInFace(page, 'ph-father')
       assertSharedCards(fatherFace, 'ph-father')

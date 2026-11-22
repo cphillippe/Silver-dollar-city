@@ -1147,8 +1147,8 @@ assert.match(recallSrc, /easyWhyLine/)
 {
   const easyHold = recallSrc.match(/if \(easyEncode\) \{\s*return \(([\s\S]*?)\n  \}/)?.[1] ?? ''
   assert.match(easyHold, /WhyBlastPlay/)
-  // 1.4.567 (#843): the Easy encode branch recalls first (LockInRecall) and no longer offers a claim pick.
-  assert.match(easyHold, /LockInRecall/)
+  // 1.4.601 (#963): the Easy encode branch rotates LockInEncodeRecall (A/B/C).
+  assert.match(easyHold, /LockInEncodeRecall/)
   assert.doesNotMatch(easyHold, /EASY\.rememberSentence|recall-choices/)
   // Easy Clear 1.4.142: claim-pick is one next-tap — no stacked mainIdeaTeach chip.
   assert.doesNotMatch(easyHold, /className=\"teach-chip\"/)
@@ -1970,7 +1970,11 @@ assert.doesNotMatch(
     /await checkEasyOneGold\(browser, port, errors\)\n    await checkLockInRotate\(browser, port, errors\)/,
     '1.4.601 the full path runs checkLockInRotate after checkEasyOneGold',
   )
-  assert.match(phone601, /checkLockInRotate ok \$\{size\} \$\{lineId\} format=/, '1.4.601 the check logs format per lesson from the DOM')
+  assert.match(
+    readFileSync(new URL('../scripts/check-lockin-rotate.mjs', import.meta.url), 'utf8'),
+    /checkLockInRotate ok \$\{size\} \$\{lineId\} format=/,
+    '1.4.601 the check logs format per lesson from the DOM',
+  )
   assert.match(phone601, /runLockInRotateCheck/, '1.4.601 check-lockin-rotate owns the runtime driver')
   assert.match(readFileSync(new URL('../scripts/check-lockin-rotate.mjs', import.meta.url), 'utf8'), /data-encode-format/, '1.4.601 the runtime check reads data-encode-format from the DOM')
   assert.match(lock843, /encodeFormatForLine/, '1.4.601 check-lockin-843 knows encode rotation')
@@ -18549,7 +18553,9 @@ console.log('check-city: ok')
     const src = readFileSync(new URL(rel, import.meta.url), 'utf8')
     // 1.4.567 (#843): RecallGate mounts the Lock In recall step, its one easyTrail import.
     const own = rel.endsWith('RecallGate.tsx')
-      ? src.replace("import { LockInRecall } from '../easyTrail/lockIn/LockInRecall'\n", '')
+      ? src
+          .replace("import { LockInEncodeRecall } from '../easyTrail/lockIn/LockInEncodeRecall'\n", '')
+          .replace("import { encodeFormatForLine } from '../easyTrail/review/encodeFormat'\n", '')
       : src
     assert.doesNotMatch(own, /easyTrail/, `${rel} keeps its current imports`)
   }
@@ -18862,7 +18868,7 @@ console.log('check-city: ok')
 
   assert.deepEqual(
     readdirSync(new URL('easyTrail/lockIn/', srcRoot335)).sort(),
-    ['HoldPractice.tsx', 'LockInEmpty.tsx', 'LockInRecall.tsx', 'index.ts'],
+    ['HoldPractice.tsx', 'LockInEmpty.tsx', 'LockInEncodeRecall.tsx', 'LockInRecall.tsx', 'index.ts'],
     '1.4.335 Lock In home is HoldPractice + shelf only (no new stylesheet); 1.4.567 adds the recall step',
   )
   assert.match(
@@ -18898,6 +18904,7 @@ console.log('check-city: ok')
       'components/RecallGate',
       'store/progress',
       'easyTrail/review/QuickReview',
+      'easyTrail/review/encodeFormat',
       'types',
     ],
     '1.4.503 HoldPractice reads the same modules, and the tip box is not one of them',
@@ -18961,7 +18968,7 @@ console.log('check-city: ok')
   )
   assert.match(
     home335,
-    /if \(easy && advancing\) \{\n\s*recordHeld\(quizBrief\.id\)\n\s*recordReview\(\{\n\s*id: quizBrief\.id,\n\s*pillar,\n\s*kind: 'encode',\n\s*today,\n\s*clean: result\.clean,\n\s*peeked: false,\n\s*elaborated: false,\n\s*format: 'A',\n\s*\}\)\n\s*recordLessonHold\(quizBrief\.id, result\.clean\)\n\s*onNavigate\(\{ name: 'hub' \}\)\n\s*return\n\s*\}/,
+    /if \(easy && advancing\) \{\n\s*recordHeld\(quizBrief\.id\)\n\s*recordReview\(\{\n\s*id: quizBrief\.id,\n\s*pillar,\n\s*kind: 'encode',\n\s*today,\n\s*clean: result\.clean,\n\s*peeked: false,\n\s*elaborated: false,\n\s*format: encodeFormatForLine\(quizBrief\.id\),\n\s*\}\)\n\s*recordLessonHold\(quizBrief\.id, result\.clean\)\n\s*onNavigate\(\{ name: 'hub' \}\)\n\s*return\n\s*\}/,
     '1.4.503 Easy encode records held / review / lesson hold, then Home. The tip box stays off.',
   )
   assert.doesNotMatch(home335, /offerSupportToast/, '1.4.503 HoldPractice does not offer the tip box')
