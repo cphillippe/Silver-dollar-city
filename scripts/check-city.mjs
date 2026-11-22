@@ -1943,40 +1943,40 @@ assert.match(
 
 
 
-// 1.4.599: Easy L1 road maze far tap walks the shortest path; rule line keeps grid still (#886).
-assert.equal(APP_VERSION, '1.4.599')
-assert.equal(CHANGELOG[0].version, '1.4.599', '1.4.599 is the newest row')
-assert.match(latestChange('1.4.599').items.join('\n'), /Refs #886/, '1.4.599 changelog refs #886')
-assert.match(latestChange('1.4.599').items.join('\n'), /walk all the way there/, '1.4.599 changelog names the far tap walk')
-assert.match(latestChange('1.4.599').items.join('\n'), /stays put/, '1.4.599 changelog names the steady grid')
-assert.match(latestChange('1.4.599').items.join('\n'), /Hard stays the same\./)
-assert.doesNotMatch(latestChange('1.4.599').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.599 changelog avoids GitHub close keywords')
+// 1.4.598: Easy L1 road maze far tap walks the shortest path; rule line keeps grid still (#886).
+assert.equal(APP_VERSION, '1.4.598')
+assert.equal(CHANGELOG[0].version, '1.4.598', '1.4.598 is the newest row')
+assert.match(latestChange('1.4.598').items.join('\n'), /Refs #886/, '1.4.598 changelog refs #886')
+assert.match(latestChange('1.4.598').items.join('\n'), /walk all the way there/, '1.4.598 changelog names the far tap walk')
+assert.match(latestChange('1.4.598').items.join('\n'), /stays put/, '1.4.598 changelog names the steady grid')
+assert.match(latestChange('1.4.598').items.join('\n'), /Hard stays the same\./)
+assert.doesNotMatch(latestChange('1.4.598').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.598 changelog avoids GitHub close keywords')
 assert.doesNotMatch(
-  playerVisibleChangeItems(latestChange('1.4.599').items).join('\n'),
+  playerVisibleChangeItems(latestChange('1.4.598').items).join('\n'),
   /\bHard\b|\bMedium\b/,
-  '1.4.599 the player note does not name other tiers',
+  '1.4.598 the player note does not name other tiers',
 )
 {
-  const play599 = readFileSync(new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url), 'utf8')
-  const maze599 = readFileSync(new URL('../src/styles/maze.css', import.meta.url), 'utf8')
-  const road599 = readFileSync(new URL('../src/lib/roadMaze.ts', import.meta.url), 'utf8')
-  const phone599 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
-  assert.match(road599, /export function mazeEasyTapPath/, '1.4.599 mazeEasyTapPath is exported')
-  assert.match(play599, /mazeEasyTapPath\(here, target\)/, '1.4.599 Easy tap uses mazeEasyTapPath')
-  assert.match(play599, /EASY_FAR_STEP_MS/, '1.4.599 far tap step animation has its own pace')
-  assert.match(play599, /visibility: 'hidden'/, '1.4.599 the rule line keeps layout when hidden')
-  assert.match(maze599, /\.maze-how-slot/, '1.4.599 maze-how slot reserves height')
-  assert.match(phone599, /async function checkMazeFarTap/, '1.4.599 checkMazeFarTap is defined')
-  assert.match(phone599, /await checkMazeFarTap\(browser, port, errors\)/, '1.4.599 the full path runs checkMazeFarTap')
+  const play598 = readFileSync(new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url), 'utf8')
+  const maze598 = readFileSync(new URL('../src/styles/maze.css', import.meta.url), 'utf8')
+  const road598 = readFileSync(new URL('../src/lib/roadMaze.ts', import.meta.url), 'utf8')
+  const phone598 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  assert.match(road598, /export function mazeEasyTapPath/, '1.4.598 mazeEasyTapPath is exported')
+  assert.match(play598, /mazeEasyTapPath\(here, target\)/, '1.4.598 Easy tap uses mazeEasyTapPath')
+  assert.match(play598, /EASY_FAR_STEP_MS/, '1.4.598 far tap step animation has its own pace')
+  assert.match(play598, /visibility: 'hidden'/, '1.4.598 the rule line keeps layout when hidden')
+  assert.match(maze598, /\.maze-how-slot/, '1.4.598 maze-how slot reserves height')
+  assert.match(phone598, /async function checkMazeFarTap/, '1.4.598 checkMazeFarTap is defined')
+  assert.match(phone598, /await checkMazeFarTap\(browser, port, errors\)/, '1.4.598 the full path runs checkMazeFarTap')
   assert.match(
-    phone599,
+    phone598,
     /checkMazeFarTap ok \$\{label\} taps=\$\{taps\} gridDy=\$\{gridDy\.toFixed\(1\)\} gold=\$\{goldPlay\} cell=/,
-    '1.4.599 the scan logs the ok line',
+    '1.4.598 the scan logs the ok line',
   )
-  assert.match(phone599, /MAZE_FAR_TAP_SIZES = \[/, '1.4.599 the far tap scan lists viewport sizes')
-  assert.match(phone599, /\[375, 667\]/, '1.4.599 the far tap scan includes 375×667')
-  assert.match(phone599, /\[390, 844\]/, '1.4.599 the far tap scan includes 390×844')
-  assert.match(phone599, /\[412, 915\]/, '1.4.599 the far tap scan includes 412×915')
+  assert.match(phone598, /MAZE_FAR_TAP_SIZES = \[/, '1.4.598 the far tap scan lists viewport sizes')
+  assert.match(phone598, /\[375, 667\]/, '1.4.598 the far tap scan includes 375×667')
+  assert.match(phone598, /\[390, 844\]/, '1.4.598 the far tap scan includes 390×844')
+  assert.match(phone598, /\[412, 915\]/, '1.4.598 the far tap scan includes 412×915')
 }
 
 // 1.4.595: Easy Bonus Sight one-time hint line (#965).

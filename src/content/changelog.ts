@@ -28,7 +28,7 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.599',
+    version: '1.4.598',
     title: 'Road map: tap far and walk the whole way',
     when: '2026-11-20',
     items: [
