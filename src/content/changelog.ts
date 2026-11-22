@@ -39,6 +39,29 @@ export const CHANGELOG: ChangeNote[] = [
     ],
   },
   {
+    version: '1.4.595',
+    title: 'Match: Bonus Sight hint line',
+    when: '2026-11-17',
+    items: [
+      'On Easy, the first time Bonus Sight rings a bonus word, a short line tells you it is a gift hint to find.',
+      'The pine ring still shows on one unfound word and goes away on its own.',
+      'Hard stays the same.',
+      'Refs #965.',
+    ],
+  },
+  {
+    version: '1.4.594',
+    title: 'Dig win: readable One more dig and Home',
+    when: '2026-11-17',
+    items: [
+      'On Easy, after you uncover the tablets at Witness Square, the One more dig and Home buttons on the DUG! screen use light lettering you can read on the purple plate.',
+      'The result lines sit with clear space above Lock In next.',
+      'Hard stays the same.',
+      'Refs #964.',
+    ],
+  },
+
+  {
     version: '1.4.593',
     title: 'Night Watch: one plant ring per run and Far / Strong on the buy strip',
     when: '2026-11-17',
@@ -50,6 +73,7 @@ export const CHANGELOG: ChangeNote[] = [
       'Refs #950.',
     ],
   },
+
   {
     version: '1.4.592',
     title: 'Night Watch: the Candle gets a name on the clear screen',

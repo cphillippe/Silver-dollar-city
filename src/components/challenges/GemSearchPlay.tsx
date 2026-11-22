@@ -24,7 +24,7 @@ import {
   type GemPuzzle,
 } from '../../lib/gemSearch'
 import { MATCH_DOCK_JUICE_POINTS } from '../../lib/matchBonus'
-import { skillBonusPoints, skillsFor } from '../../lib/gemJar'
+import { GEM_SIGHT_CUE, skillBonusPoints, skillsFor } from '../../lib/gemJar'
 import { gemBonusBeat, matchClearBeat } from '../../lib/successBeat'
 import { MatchTakeaway } from '../HeldTriad'
 import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
@@ -84,8 +84,15 @@ function cellFromPoint(x: number, y: number): GemCoord | null {
 }
 
 export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: GemSearchPlayProps) {
-  const { progress, recordMatchBonus, recordMatchDockJuice, recordMatchFind, recordMatchMiss, markJarSeen } =
-    useProgress()
+  const {
+    progress,
+    recordMatchBonus,
+    recordMatchDockJuice,
+    recordMatchFind,
+    recordMatchMiss,
+    markJarSeen,
+    markMatchSightCueSeen,
+  } = useProgress()
   const easy = isEasy(progress)
   const [round, setRound] = useState(dealRound)
   const puzzle = useMemo(() => buildGemPuzzle(lineId, round), [lineId, round])
@@ -119,6 +126,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   lifetimeRef.current = lifetimeNow
   const [jarBefore, setJarBefore] = useState(lifetimeNow)
   const [sightKeys, setSightKeys] = useState<string[]>([])
+  const [sightCue, setSightCue] = useState(false)
   const boardPts = useRef(0)
   const jarSkills = useMemo(() => (easy ? skillsFor(jarBefore) : []), [easy, jarBefore])
   const [status, setStatus] = useState<'play' | 'ok'>('play')
@@ -192,6 +200,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     setBonusPts(0)
     setStoryFound(0)
     setSightKeys([])
+    setSightCue(false)
     setJarBefore(lifetimeRef.current)
     boardPts.current = 0
     comboRef.current = 0
@@ -254,6 +263,17 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       window.clearTimeout(clearId)
     }
   }, [puzzle, jarSkills])
+
+  useEffect(() => {
+    if (!easy || status !== 'play') return
+    if (sightKeys.length === 0) return
+    if (progress.matchSightCueSeen === true) return
+    setSightCue(true)
+    markMatchSightCueSeen()
+    const fadeMs = prefersReducedMotion() ? 1400 : 2600
+    const fadeId = window.setTimeout(() => setSightCue(false), fadeMs)
+    return () => window.clearTimeout(fadeId)
+  }, [easy, status, sightKeys, progress.matchSightCueSeen, markMatchSightCueSeen])
 
   // Art flash 1.4.101: first unlock may enter hero briefly; auto-dock within ≤1.2s.
   // First paint stays docked (board-first). Hero is only the brief big→tiny intro.
@@ -883,6 +903,11 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
                 : found.length === 0 && !popOverlayActive
                   ? EASY.gemHow
                   : '\u00a0'}
+            </p>
+          ) : null}
+          {sightCue ? (
+            <p className="gem-sight-cue" data-gem-sight-cue role="status">
+              {GEM_SIGHT_CUE}
             </p>
           ) : null}
           {plusFlash ? (

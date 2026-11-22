@@ -371,6 +371,11 @@ export interface ProgressState {
    * absent means not yet. Schema stays 1.
    */
   foundersGiftSeen?: boolean
+  /**
+   * The once-only Bonus Sight hint line on the Match board has played.
+   * Optional; absent means not yet. Schema stays 1.
+   */
+  matchSightCueSeen?: boolean
 }
 
 export type View =

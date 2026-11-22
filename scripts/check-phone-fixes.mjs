@@ -17,6 +17,10 @@ import { BRIGHT_LINE, LESSON_LOCK, PATH_LINE, TREE_LOCK } from '../src/nightWatc
 import { EASY } from '../src/lib/easyUi.ts'
 import { shortestMazePath } from '../src/lib/roadMaze.ts'
 import { withPlaytest1 } from './dev-ui-playtest.mjs'
+import { lineTakeaway } from '../src/lib/successBeat.ts'
+import { SOURCE_DIG_AGAIN } from '../src/lib/sourceDig.ts'
+import { GEM_SIGHT_CUE } from '../src/lib/gemJar.ts'
+import { buildGemPuzzle } from '../src/lib/gemSearch.ts'
 
 const SAVE = {
   kind: SAVE_KIND,
@@ -4791,34 +4795,34 @@ const EASY_ONE_GOLD_MS = 1500
 const EASY_GOLD_BASE_1579 = {
   '375x667 home-first': { '2 Help': { x: 131, y: 561, w: 113, h: 48 } },
   '375x667 home-after-l1': { '3 Lock In': { x: 250, y: 584.1, w: 113, h: 48 } },
-  // 1.4.599: y from CI 44771724685 (What's new row); x/w unchanged from 1.4.593 pins.
+  // 1.4.595: y re-pinned from CI run 44839256365 after the What's new row; x/w unchanged.
   '375x667 settings-more': {
     'Open Profile': { x: 41, y: 1406.5, w: 130, h: 52 },
-    Candy: { x: 41, y: 1854.3, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1854.3, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1914.3, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2217.6, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2463.4, w: 176, h: 52 },
+    Candy: { x: 41, y: 1849.3, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1849.3, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1909.3, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2212.6, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2458.4, w: 176, h: 52 },
   },
   '390x844 home-first': { '2 Help': { x: 136, y: 738, w: 118, h: 48 } },
   '390x844 home-after-l1': { '3 Lock In': { x: 260, y: 761.1, w: 118, h: 48 } },
   '390x844 settings-more': {
     'Open Profile': { x: 41, y: 1407.9, w: 130, h: 52 },
-    Candy: { x: 41, y: 1855.7, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1855.7, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1915.7, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2194.2, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2440, w: 176, h: 52 },
+    Candy: { x: 41, y: 1850.7, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1850.7, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1910.7, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2189.2, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2435, w: 176, h: 52 },
   },
   '412x915 home-first': { '2 Help': { x: 143.3, y: 809, w: 125.3, h: 48 } },
   '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
   '412x915 settings-more': {
     'Open Profile': { x: 41, y: 1360.7, w: 130, h: 52 },
-    Candy: { x: 41, y: 1808.5, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1808.5, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1868.5, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2147, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2392.8, w: 176, h: 52 },
+    Candy: { x: 41, y: 1783.6, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1783.6, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1843.6, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2122.2, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2368, w: 176, h: 52 },
   },
 }
 
@@ -5076,12 +5080,6 @@ async function finishEasyLessonOne(page) {
       c: Number(await loc.getAttribute('data-c')),
     }
   }
-  const readHereNow = () =>
-    page.evaluate(() => {
-      const here = document.querySelector('[data-maze-cell].is-here')
-      if (!here) return null
-      return { r: Number(here.getAttribute('data-r')), c: Number(here.getAttribute('data-c')) }
-    })
   const tap = async (cell) => {
     const loc = page.locator(`[data-maze-cell][data-r="${cell.r}"][data-c="${cell.c}"]`)
     const box = await loc.boundingBox()
@@ -5095,23 +5093,8 @@ async function finishEasyLessonOne(page) {
       if (at.r === target.r && at.c === target.c) return
       const path = shortestMazePath(at, target)
       if (!path || path.length < 2) throw new Error(`no road from ${at.r},${at.c} to ${target.r},${target.c}`)
-      const step = path.length > 2 ? target : path[1]
-      await tap(step)
-      if (path.length > 2) {
-        for (let wait = 0; wait < 40; wait += 1) {
-          const here = await readHereNow()
-          if (here && here.r === target.r && here.c === target.c) return
-          const walking = await page.evaluate(
-            () => document.querySelector('.play.is-road-maze')?.getAttribute('data-maze-walking') === 'yes',
-          )
-          if (!walking) break
-          await page.waitForTimeout(125)
-        }
-        const landed = await readHereNow()
-        if (landed && landed.r === target.r && landed.c === target.c) return
-        continue
-      }
-      if (step.r === target.r && step.c === target.c) {
+      await tap(path[1])
+      if (path[1].r === target.r && path[1].c === target.c) {
         await page.locator('.play.is-road-maze.is-helped, .play.is-road-maze.is-win, [data-maze-dock]').first().waitFor({ timeout: 4000 }).catch(() => {})
         return
       }
@@ -5120,7 +5103,7 @@ async function finishEasyLessonOne(page) {
           const here = document.querySelector('[data-maze-cell].is-here')
           return here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)
         },
-        step,
+        path[1],
         { timeout: 4000 },
       )
     }
@@ -5167,6 +5150,10 @@ async function sampleEasyScreen(page, size, screen, fails) {
   if (!report.ok) fails.push(report.line)
 }
 
+/**
+ * 1.4.581 (#916). Fresh Easy save. One gold cue on Home (first view and after lesson 1)
+ * and on Settings → More at every scroll stop that shows a gold cue or the Look row.
+ */
 const MAZE_FAR_TAP_SIZES = [
   [375, 667],
   [390, 844],
@@ -5384,10 +5371,6 @@ async function checkMazeFarTap(browser, port, errors) {
   assert.equal(fails.length, 0, fails.join('\n'))
 }
 
-/**
- * 1.4.581 (#916). Fresh Easy save. One gold cue on Home (first view and after lesson 1)
- * and on Settings → More at every scroll stop that shows a gold cue or the Look row.
- */
 async function checkEasyOneGold(browser, port, errors) {
   const only = process.env.EASY_ONE_GOLD_SIZE
   const fails = []
@@ -9371,6 +9354,654 @@ async function checkNwStripWords(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #964 Easy golden-path Dig DUG! (wb-women) — readable secondaries and takeaway gap above Lock In. */
+const DIG_WIN_READABLE_SIZES = [
+  [375, 667],
+  [375, 812],
+  [390, 844],
+  [412, 915],
+]
+const DIG_WIN_LINE = 'wb-women'
+/** Tap boxes at scroll 0 — CI run 44791015323. */
+const DIG_WIN_TAP_BASELINE = {
+  '375x667': {
+    again: { x: 22, y: 564.2, w: 161.5, h: 54.8 },
+    home: { x: 191.5, y: 564.2, w: 161.5, h: 54.8 },
+  },
+  '375x812': {
+    again: { x: 22, y: 709.2, w: 161.5, h: 54.8 },
+    home: { x: 191.5, y: 709.2, w: 161.5, h: 54.8 },
+  },
+  '390x844': {
+    again: { x: 22, y: 741.2, w: 169, h: 54.8 },
+    home: { x: 199, y: 741.2, w: 169, h: 54.8 },
+  },
+  '412x915': {
+    again: { x: 23, y: 812.2, w: 179, h: 54.8 },
+    home: { x: 210, y: 812.2, w: 179, h: 54.8 },
+  },
+}
+
+async function scrubSourceDigWin(page) {
+  for (let round = 0; round < 8; round += 1) {
+    if (await page.locator('.play.is-source-dig.is-win').count()) return
+    const dirt = page.locator('.dig-tablet.is-buried .dig-dirt').first()
+    if (!(await dirt.count())) break
+    const box = await dirt.boundingBox()
+    if (!box?.width) break
+    const y = box.y + box.height / 2
+    let x = box.x + 12
+    await page.mouse.move(x, y)
+    await page.mouse.down()
+    for (let i = 0; i < 45; i += 1) {
+      x += 7
+      await page.mouse.move(x, y + (i % 3) - 1)
+    }
+    await page.mouse.up()
+    await page.waitForTimeout(60)
+  }
+  await page.locator('.play.is-source-dig.is-win').waitFor({ timeout: 20000 })
+  await page.waitForTimeout(350)
+}
+
+async function jumpSettingsDigLine(page, lineId = DIG_WIN_LINE) {
+  await hintPointer(page, page.getByRole('button', { name: 'Settings', exact: true }))
+  const debug = page.locator('details.settings-debug')
+  await debug.waitFor({ timeout: 15000 })
+  await hintPointer(page, debug.locator('summary'))
+  const jump = debug.locator('button', { hasText: new RegExp(`^${lineId} ·`) }).first()
+  await jump.waitFor({ state: 'attached', timeout: 15000 })
+  await jump.evaluate((el) => el.click())
+  await page.locator('.play.is-source-dig').waitFor({ timeout: 15000 })
+}
+
+async function openEasyDigWin(page, lineId = DIG_WIN_LINE) {
+  await page.goto(withPlaytest1('/'))
+  await page.getByRole('main', { name: 'Home' }).waitFor({ timeout: 15000 }).catch(() => {})
+  if (await page.getByRole('button', { name: 'Start Easy' }).count()) {
+    await page.getByRole('button', { name: 'Start Easy' }).click()
+    await page.getByRole('main', { name: 'Home' }).waitFor()
+  }
+  await jumpSettingsDigLine(page, lineId)
+  await scrubSourceDigWin(page)
+}
+
+async function openHardDigWin(page, lineId = DIG_WIN_LINE) {
+  await page.goto(withPlaytest1('/'))
+  await page.getByRole('main', { name: 'Home' }).waitFor({ timeout: 15000 }).catch(() => {})
+  await jumpSettingsDigLine(page, lineId)
+  await scrubSourceDigWin(page)
+}
+
+async function checkDigWinReadable(browser, port, errors) {
+  const only = process.env.DIG_WIN_READABLE_ONLY === '1' ? null : process.env.DIG_WIN_READABLE_SIZE
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+  const want = lineTakeaway(DIG_WIN_LINE)
+  const rawDelta = (now, was) => {
+    if (!now && !was) return 0
+    if (!now || !was) return null
+    return Math.max(Math.abs(now.x - was.x), Math.abs(now.y - was.y), Math.abs(now.w - was.w), Math.abs(now.h - was.h))
+  }
+
+  for (const [width, height] of DIG_WIN_READABLE_SIZES) {
+    const tag = `${width}x${height}`
+    if (only && only !== tag) continue
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      reducedMotion: 'reduce',
+    })
+    const page = await context.newPage()
+    page.on('pageerror', (error) => errors.push(`dig-win ${tag} ${error}`))
+    try {
+      await openEasyDigWin(page)
+    } catch (error) {
+      fail(`checkDigWinReadable fail ${tag} open ${error}`)
+      await context.close()
+      continue
+    }
+
+    const read = await page.evaluate(({ claim, why, homeLabel }) => {
+      const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+      const parseRgb = (css) => {
+        if (!css || css === 'transparent') return null
+        const m = css.match(/rgba?\(([^)]+)\)/)
+        if (!m) return null
+        const parts = m[1].split(',').map((s) => parseFloat(s.trim()))
+        if (parts.length === 4 && parts[3] <= 0.02) return null
+        return parts.slice(0, 3)
+      }
+      const relLum = ([r, g, b]) => {
+        const f = (v) => {
+          const c = v / 255
+          return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+        }
+        return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b)
+      }
+      const contrast = (fg, bg) => (Math.max(fg, bg) + 0.05) / (Math.min(fg, bg) + 0.05)
+      const effectiveBg = (el) => {
+        let node = el
+        while (node && node !== document.documentElement) {
+          const style = getComputedStyle(node)
+          const solid = parseRgb(style.backgroundColor)
+          if (solid) return solid
+          const img = style.backgroundImage
+          if (img && img !== 'none') {
+            for (const m of img.matchAll(/#([0-9a-fA-F]{6})/g)) {
+              const n = m[1]
+              return [parseInt(n.slice(0, 2), 16), parseInt(n.slice(2, 4), 16), parseInt(n.slice(4, 6), 16)]
+            }
+            for (const m of img.matchAll(/rgba?\(([^)]+)\)/g)) {
+              const p = m[1].split(',').map((s) => parseFloat(s.trim()))
+              if (p.length >= 3 && (p[3] === undefined || p[3] > 0.08)) return p.slice(0, 3)
+            }
+          }
+          node = node.parentElement
+        }
+        return [42, 13, 88]
+      }
+      const lineOf = (el, source) => {
+        if (!el) return null
+        const style = getComputedStyle(el)
+        const rendered = norm(el.textContent)
+        return {
+          source,
+          rendered,
+          scrollW: el.scrollWidth,
+          clientW: el.clientWidth,
+          scrollH: el.scrollHeight,
+          clientH: el.clientHeight,
+          font: parseFloat(style.fontSize),
+          overflow: style.textOverflow,
+        }
+      }
+      const box = (el) => {
+        if (!el) return null
+        const r = el.getBoundingClientRect()
+        return { x: r.x, y: r.y, w: r.width, h: r.height, left: r.left, top: r.top, right: r.right, bottom: r.bottom }
+      }
+      const goldPaint = (value) => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+        let m
+        while ((m = re.exec(value || ''))) {
+          const r = Number(m[1])
+          const g = Number(m[2])
+          const b = Number(m[3])
+          const a = m[4] === undefined ? 1 : Number(m[4])
+          if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
+      const inViewport = (rect) =>
+        rect &&
+        rect.w > 1 &&
+        rect.h > 1 &&
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= window.innerHeight &&
+        rect.right <= window.innerWidth
+      const hitAtCenter = (el) => {
+        const rect = box(el)
+        if (!rect) return { hitOk: false, rect: null, inView: false }
+        const cx = rect.left + rect.w / 2
+        const cy = rect.top + rect.h / 2
+        const hit = document.elementFromPoint(cx, cy)
+        return {
+          rect,
+          inView: inViewport(rect),
+          hitOk: Boolean(hit && (hit === el || el.contains(hit))),
+        }
+      }
+      const btnOf = (el) => {
+        if (!el) return null
+        const style = getComputedStyle(el)
+        return {
+          font: parseFloat(style.fontSize),
+          clipped: el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1 ? 1 : 0,
+        }
+      }
+      const play = document.querySelector('.play.is-source-dig.is-win')
+      const match = play?.querySelector('.match-yes')
+      const strong = match?.querySelector('strong')
+      const whyEl = match?.querySelector('span:not(.held-from)')
+      const primary = play?.querySelector('.cta-dock .btn.primary')
+      const again = play?.querySelector('[data-dig-again]')
+      const home = [...(play?.querySelectorAll('.cta-dock .btn:not(.primary)') || [])].find(
+        (el) => norm(el.textContent) === homeLabel,
+      )
+      const gap =
+        strong && whyEl && primary
+          ? primary.getBoundingClientRect().top -
+            Math.max(strong.getBoundingClientRect().bottom, whyEl.getBoundingClientRect().bottom)
+          : null
+      const extras = [again, home].filter(Boolean).map((el) => {
+        const style = getComputedStyle(el)
+        const fg = parseRgb(style.color)
+        const ratio = fg ? contrast(relLum(fg), relLum(effectiveBg(el))) : 0
+        const probe = hitAtCenter(el)
+        const meta = btnOf(el)
+        return {
+          label: norm(el.textContent),
+          ratio,
+          rect: probe.rect,
+          inView: probe.inView,
+          hitOk: probe.hitOk,
+          font: meta?.font ?? 0,
+          btnClipped: meta?.clipped ?? 0,
+        }
+      })
+      let gold = 0
+      const root = document.querySelector('.challenge-page') || document.body
+      for (const el of root.querySelectorAll('button.btn, a.btn')) {
+        if (el.closest('.dig-board')) continue
+        const style = getComputedStyle(el)
+        if (!inViewport(box(el))) continue
+        const paint = `${style.backgroundColor} ${style.backgroundImage} ${style.boxShadow}`
+        const primary = el.classList.contains('primary')
+        if (primary || goldPaint(paint)) gold += 1
+      }
+      return {
+        gap,
+        gold,
+        lines: [lineOf(strong, claim), lineOf(whyEl, why)].filter(Boolean),
+        extras,
+      }
+    }, { claim: want.claim, why: want.why, homeLabel: EASY.home })
+
+    const baseline = DIG_WIN_TAP_BASELINE[tag]
+    let clipped = 0
+    let minFont = 99
+    let btnClipped = 0
+    let minBtnFont = 99
+    for (const line of read.lines) {
+      if (line.rendered !== line.source) fail(`checkDigWinReadable fail ${tag} line rendered=${JSON.stringify(line.rendered)} source=${JSON.stringify(line.source)}`)
+      const cut = line.scrollW > line.clientW + 1 || line.scrollH > line.clientH + 1
+      if (cut) clipped += 1
+      minFont = Math.min(minFont, line.font)
+    }
+    if (clipped !== 0) fail(`checkDigWinReadable fail ${tag} takeaway clipped=${clipped}`)
+    if (!(minFont >= 13)) fail(`checkDigWinReadable fail ${tag} takeaway font=${minFont}`)
+    if (!(read.gap >= 8)) fail(`checkDigWinReadable fail ${tag} gap=${read.gap == null ? 'missing' : read.gap.toFixed(2)} want>=8`)
+    for (const row of read.extras) {
+      minBtnFont = Math.min(minBtnFont, row.font)
+      btnClipped += row.btnClipped
+      if (!row.inView) fail(`checkDigWinReadable fail ${tag} ${row.label} offScreen bottom=${row.rect?.bottom?.toFixed(1)}`)
+      if (!row.hitOk) fail(`checkDigWinReadable fail ${tag} ${row.label} hit`)
+      if (!(row.ratio >= 4.5)) fail(`checkDigWinReadable fail ${tag} ${row.label} contrast=${row.ratio.toFixed(2)}`)
+      const pin = row.label === SOURCE_DIG_AGAIN ? baseline?.again : row.label === EASY.home ? baseline?.home : null
+      if (pin) {
+        const delta = rawDelta(row.rect, pin)
+        if (delta == null || delta > 0.5) {
+          fail(`checkDigWinReadable fail ${tag} ${row.label} tapDelta=${delta == null ? 'missing' : delta.toFixed(2)} pin=${JSON.stringify(pin)} now=${JSON.stringify(row.rect)}`)
+        }
+      }
+    }
+    if (btnClipped !== 0) fail(`checkDigWinReadable fail ${tag} btnClipped=${btnClipped}`)
+    if (!(minBtnFont >= 13)) fail(`checkDigWinReadable fail ${tag} btnFont=${minBtnFont}`)
+    if (read.gold !== 1) fail(`checkDigWinReadable fail ${tag} gold=${read.gold}`)
+    if (!problems.some((line) => line.includes(` ${tag} `))) {
+      const againRatio = read.extras.find((row) => row.label === SOURCE_DIG_AGAIN)?.ratio
+      console.log(
+        `checkDigWinReadable ok ${tag} gap=${read.gap.toFixed(1)} again=${againRatio?.toFixed(1)} takeawayClipped=0 takeawayFont=${minFont}px btnFont=${minBtnFont}px btnClipped=0 gold=1`,
+      )
+      for (const row of read.extras) {
+        const r = row.rect
+        if (!r) continue
+        console.log(
+          `checkDigWinReadable rect ${tag} ${row.label} x=${r.x.toFixed(2)} y=${r.y.toFixed(2)} w=${r.w.toFixed(2)} h=${r.h.toFixed(2)}`,
+        )
+      }
+    }
+    await context.close()
+  }
+
+  if (!only) {
+    const hardSave = {
+      kind: SAVE_KIND,
+      schemaVersion: SAVE_SCHEMA_VERSION,
+      appVersion: '1.4.594',
+      savedAt: new Date().toISOString(),
+      progress: { ...SAVE.progress, easyMode: false, started: true },
+    }
+    const hard = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 390, height: 844 },
+      deviceScaleFactor: 1,
+    })
+    await hard.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: hardSave },
+    )
+    const hardPage = await hard.newPage()
+    hardPage.on('pageerror', (error) => errors.push(`dig-win hard ${error}`))
+    try {
+      await openHardDigWin(hardPage)
+      await hardPage.locator('.play.is-source-dig.is-win').waitFor({ timeout: 20000 })
+    } catch (error) {
+      fail(`checkDigWinReadable fail hard open ${error}`)
+    }
+    const hardRead = await hardPage.evaluate((cream) => {
+      const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+      const play = document.querySelector('.play.is-source-dig.is-win')
+      const creamSecondary = (el) => {
+        if (!el) return false
+        const style = getComputedStyle(el)
+        return norm(style.webkitTextFillColor || style.color) === cream
+      }
+      const secondaries = [...(play?.querySelectorAll('.cta-dock .btn:not(.primary)') || [])]
+      return {
+        win: Boolean(play),
+        creamEasy: secondaries.some(creamSecondary),
+      }
+    }, '#fff6e8')
+    if (!hardRead.win) fail(`checkDigWinReadable fail hard win=missing`)
+    if (hardRead.creamEasy) fail(`checkDigWinReadable fail hard creamSecondary=yes`)
+    if (!problems.some((line) => line.includes(' hard '))) {
+      console.log(`checkDigWinReadable ok hard wb-women=${DIG_WIN_LINE} cream=0`)
+    }
+    await hard.close()
+  }
+
+  for (const err of errors.slice(errorMark)) fail(`checkDigWinReadable error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
+
+const GEM_SIGHT_SIZES = [
+  [375, 812],
+  [390, 844],
+]
+const GEM_SIGHT_LINE = 'ob-tuning'
+const GEM_SIGHT_SEED = 0
+
+function gemSightSave() {
+  const now = new Date()
+  const today = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-')
+  return {
+    kind: SAVE_KIND,
+    schemaVersion: SAVE_SCHEMA_VERSION,
+    appVersion: '1.4.595',
+    savedAt: now.toISOString(),
+    progress: {
+      started: true,
+      easyMode: true,
+      lastDailyDate: today,
+      dailyDates: [today],
+      completed: [],
+      held: [],
+      easyTaught: [],
+      easyHeld: [],
+      taught: [],
+      journal: [],
+      learnings: [],
+      memory: {},
+      matchLifetime: 5000,
+      matchSkillSeen: 1,
+    },
+  }
+}
+
+async function openGemSightBoard(page, lineId, seed) {
+  await page.goto(withPlaytest1(`/?gemSeed=${seed}`))
+  await page.getByRole('main', { name: 'Home' }).waitFor()
+  await hintPointer(page, page.getByRole('button', { name: 'Settings', exact: true }))
+  await hintPointer(page, page.locator('details.settings-debug summary'))
+  await hintPointer(page, page.locator('details.settings-debug').getByRole('button', { name: new RegExp(`^${lineId} ·`) }).first())
+  await page.locator('.gem-board').waitFor()
+}
+
+async function checkGemSightCue(browser, port, errors) {
+  const only = process.env.GEM_SIGHT_CUE_ONLY === '1' ? null : process.env.GEM_SIGHT_CUE_SIZE
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+  const puzzle = buildGemPuzzle(GEM_SIGHT_LINE, GEM_SIGHT_SEED)
+  const totalWords = puzzle.words.length
+
+  for (const [width, height] of GEM_SIGHT_SIZES) {
+    const tag = `${width}x${height}`
+    if (only && only !== tag) continue
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      isMobile: true,
+      reducedMotion: 'reduce',
+    })
+    await context.addInitScript(
+      ({ key, save }) => localStorage.setItem(key, JSON.stringify(save)),
+      { key: STORAGE_KEY, save: gemSightSave() },
+    )
+    const page = await context.newPage()
+    page.on('pageerror', (error) => errors.push(`gem-sight ${tag} ${error}`))
+    let goldBefore = 0
+    try {
+      await openGemSightBoard(page, GEM_SIGHT_LINE, GEM_SIGHT_SEED)
+      goldBefore = await page.evaluate(() => {
+        const shown = (el) => {
+          if (!el) return false
+          const style = getComputedStyle(el)
+          const box = el.getBoundingClientRect()
+          return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0.05 && box.width > 1 && box.height > 1
+        }
+        const gold = (value) => {
+          const text = String(value || '')
+          if (/#ffcc33|#ffb020|#ff9f1a|rgb\(255,\s*204,\s*51/i.test(text)) return true
+          const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+          let match
+          while ((match = re.exec(text))) {
+            const r = Number(match[1])
+            const g = Number(match[2])
+            const b = Number(match[3])
+            const a = match[4] === undefined ? 1 : Number(match[4])
+            if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+          }
+          return false
+        }
+        const root = document.querySelector('.challenge-page') || document.querySelector('.play.is-gem-search')
+        if (!root) return 0
+        const dockSealed = [...document.querySelectorAll('.story-strip.is-dock.is-sealed')].filter(shown)
+        if (dockSealed.length) return 1
+        let count = 0
+        for (const node of root.querySelectorAll('*')) {
+          if (node.closest('[data-gem-sight-cue]')) continue
+          if (!shown(node)) continue
+          const tile = node.classList.contains('gem-cell')
+          const sight = tile && node.classList.contains('is-sight')
+          if (tile || sight) continue
+          const style = getComputedStyle(node)
+          const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+          const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+          const fill = gold(style.backgroundImage) || gold(style.backgroundColor)
+          const glow = gold(style.boxShadow) || (text && gold(style.color))
+          if (fill || border || glow) count += 1
+        }
+        return count
+      })
+      await page.locator('.gem-cell.is-sight').first().waitFor({ timeout: 2000 })
+    } catch (error) {
+      fail(`checkGemSightCue fail ${tag} open ${error}`)
+      await context.close()
+      continue
+    }
+
+    const read = await page.evaluate((cueSource) => {
+      const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+      const shown = (el) => {
+        if (!el) return false
+        const style = getComputedStyle(el)
+        const box = el.getBoundingClientRect()
+        return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0.05 && box.width > 1 && box.height > 1
+      }
+      const gold = (value) => {
+        const text = String(value || '')
+        if (/#ffcc33|#ffb020|#ff9f1a|rgb\(255,\s*204,\s*51/i.test(text)) return true
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+        let match
+        while ((match = re.exec(text))) {
+          const r = Number(match[1])
+          const g = Number(match[2])
+          const b = Number(match[3])
+          const a = match[4] === undefined ? 1 : Number(match[4])
+          if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
+      const playGoldCues = () => {
+        const dockSealed = [...document.querySelectorAll('.story-strip.is-dock.is-sealed')].filter(shown)
+        if (dockSealed.length) return ['story-strip.is-dock.is-sealed']
+        const root = document.querySelector('.challenge-page') || document.querySelector('.play.is-gem-search')
+        if (!root) return []
+        const names = []
+        for (const node of root.querySelectorAll('*')) {
+          if (node.closest('[data-gem-sight-cue]')) continue
+          if (!shown(node)) continue
+          const style = getComputedStyle(node)
+          const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+          const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+          const tile = node.classList.contains('gem-cell')
+          const sight = tile && node.classList.contains('is-sight')
+          const fill = tile || sight ? false : gold(style.backgroundImage) || gold(style.backgroundColor)
+          const glow = gold(style.boxShadow) || (text && gold(style.color))
+          if (fill || border || glow) names.push(node.className)
+        }
+        return names
+      }
+      const cue = document.querySelector('[data-gem-sight-cue]')
+      const cueStyle = cue ? getComputedStyle(cue) : null
+      const sightCells = [...document.querySelectorAll('.gem-cell.is-sight')]
+      const found = document.querySelectorAll('.story-dock-word.is-found, .gem-word.is-found').length
+      const boardHits = []
+      for (const cell of document.querySelectorAll('[data-gem-cell]')) {
+        const rect = cell.getBoundingClientRect()
+        if (rect.width < 1 || rect.height < 1) continue
+        const cx = rect.left + rect.width / 2
+        const cy = rect.top + rect.height / 2
+        const hit = document.elementFromPoint(cx, cy)
+        if (!hit || (!cell.contains(hit) && hit !== cell)) boardHits.push(`${cell.dataset.r}:${cell.dataset.c}`)
+      }
+      return {
+        cueRendered: cue ? norm(cue.textContent) : '',
+        cueFont: cueStyle ? parseFloat(cueStyle.fontSize) : 0,
+        cueScrollW: cue?.scrollWidth ?? 0,
+        cueClientW: cue?.clientWidth ?? 0,
+        cueScrollH: cue?.scrollHeight ?? 0,
+        cueClientH: cue?.clientHeight ?? 0,
+        gold: playGoldCues().length,
+        sightCount: sightCells.length,
+        sightKeys: sightCells.map((n) => `${n.dataset.r}:${n.dataset.c}`),
+        found,
+        boardHits,
+        cueSource,
+      }
+    }, GEM_SIGHT_CUE)
+
+    const clipped =
+      read.cueScrollW > read.cueClientW + 1 || read.cueScrollH > read.cueClientH + 1 ? 1 : 0
+    if (!read.cueRendered) fail(`checkGemSightCue fail ${tag} cue missing`)
+    if (read.cueRendered !== GEM_SIGHT_CUE) {
+      fail(`checkGemSightCue fail ${tag} cue rendered=${JSON.stringify(read.cueRendered)} source=${JSON.stringify(GEM_SIGHT_CUE)}`)
+    }
+    if (clipped !== 0) fail(`checkGemSightCue fail ${tag} clipped=${clipped}`)
+    if (!(read.cueFont >= 13)) fail(`checkGemSightCue fail ${tag} font=${read.cueFont}`)
+    if (read.gold !== goldBefore) fail(`checkGemSightCue fail ${tag} gold=${read.gold} before=${goldBefore}`)
+    const goldLabel = read.gold
+    const cueGold = await page.locator('[data-gem-sight-cue]').evaluate((el) => {
+      const gold = (value) => /rgba?\(255,\s*204,\s*51/.test(String(value || ''))
+      const style = getComputedStyle(el)
+      return gold(style.backgroundColor) || gold(style.color) || gold(style.boxShadow)
+    })
+    if (cueGold) fail(`checkGemSightCue fail ${tag} cueGold=1`)
+    if (read.sightCount < 1) fail(`checkGemSightCue fail ${tag} sightCount=${read.sightCount}`)
+    if (read.found !== 0) fail(`checkGemSightCue fail ${tag} found=${read.found}/${totalWords}`)
+    if (read.boardHits.length) {
+      fail(`checkGemSightCue fail ${tag} cueCovers=${read.boardHits.join(',')}`)
+    }
+    const planted = puzzle.planted.map((word) => (puzzle.bonusPaths[word.id] ?? []).map((cell) => `${cell.r}:${cell.c}`))
+    const sightOnOne = planted.some((cells) => read.sightKeys.length > 0 && read.sightKeys.every((key) => cells.includes(key)))
+    if (!sightOnOne) {
+      fail(`checkGemSightCue fail ${tag} sightKeys=${read.sightKeys.join(',')} not one planted word`)
+    }
+
+    await context.close()
+
+    const seenSave = {
+      ...gemSightSave(),
+      progress: { ...gemSightSave().progress, matchSightCueSeen: true },
+    }
+    const second = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      isMobile: true,
+      reducedMotion: 'reduce',
+    })
+    await second.addInitScript(
+      ({ key, save }) => localStorage.setItem(key, JSON.stringify(save)),
+      { key: STORAGE_KEY, save: seenSave },
+    )
+    const secondPage = await second.newPage()
+    secondPage.on('pageerror', (error) => errors.push(`gem-sight ${tag}-2 ${error}`))
+    await openGemSightBoard(secondPage, GEM_SIGHT_LINE, GEM_SIGHT_SEED + 1)
+    await secondPage.locator('.gem-cell.is-sight').first().waitFor({ timeout: 2000 })
+    const secondCue = await secondPage.locator('[data-gem-sight-cue]').count()
+    if (secondCue !== 0) fail(`checkGemSightCue fail ${tag} secondCue=${secondCue}`)
+    await second.close()
+
+    if (!problems.some((line) => line.includes(` ${tag} `))) {
+      console.log(`checkGemSightCue ok ${tag} sight=${read.sightCount} clipped=0 font=${read.cueFont}px gold=${goldLabel} found=0/${totalWords} secondCue=0`)
+    }
+  }
+
+  if (!only) {
+    const hardSave = {
+      kind: SAVE_KIND,
+      schemaVersion: SAVE_SCHEMA_VERSION,
+      appVersion: '1.4.595',
+      savedAt: new Date().toISOString(),
+      progress: { ...SAVE.progress, easyMode: false, started: true, matchLifetime: 5000, matchSkillSeen: 1 },
+    }
+    const hard = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 390, height: 844 },
+      deviceScaleFactor: 1,
+    })
+    await hard.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: hardSave },
+    )
+    const hardPage = await hard.newPage()
+    hardPage.on('pageerror', (error) => errors.push(`gem-sight hard ${error}`))
+    await hardPage.goto(withPlaytest1('/'))
+    const hardRead = await hardPage.evaluate(() => ({
+      easy: document.documentElement.getAttribute('data-easy'),
+      cue: document.querySelectorAll('[data-gem-sight-cue]').length,
+    }))
+    if (hardRead.easy === 'on') fail(`checkGemSightCue fail hard easy=on`)
+    else if (hardRead.cue !== 0) fail(`checkGemSightCue fail hard cue=${hardRead.cue}`)
+    else console.log(`checkGemSightCue ok hard easy=0 cue=0`)
+    await hard.close()
+  }
+
+  for (const err of errors.slice(errorMark)) fail(`checkGemSightCue error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 /** #967 Easy first plant must not open the upgrade card. A touch tap does, on the parent. */
 const PLANT_NO_CARD_SIZES = [
   [375, 667],
@@ -10348,6 +10979,16 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'strip words nights stay free of console errors')
       return
     }
+    if (process.env.GEM_SIGHT_CUE_ONLY === '1') {
+      await checkGemSightCue(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'gem sight cue nights stay free of console errors')
+      return
+    }
+    if (process.env.DIG_WIN_READABLE_ONLY === '1') {
+      await checkDigWinReadable(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'dig win readable nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
@@ -10370,6 +11011,8 @@ export async function checkPhoneFixes() {
     await checkNwCandleName(browser, port, errors)
     await checkNwPlantRingOnce(browser, port, errors)
     await checkNwStripWords(browser, port, errors)
+    await checkDigWinReadable(browser, port, errors)
+    await checkGemSightCue(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -10546,7 +11189,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
