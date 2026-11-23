@@ -4812,7 +4812,7 @@ const EASY_GOLD_BASE_1579 = {
     'Dusk town': { x: 133, y: 1791.1, w: 112, h: 52 },
     'Clean parchment': { x: 41, y: 1851.1, w: 162, h: 52 },
     'Export JSON': { x: 41, y: 2129.6, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2375.4, w: 176, h: 52 },
+    'Import pasted save': { x: 41, y: 2375.5, w: 176, h: 52 },
   },
   '412x915 home-first': { '2 Help': { x: 143.3, y: 809, w: 125.3, h: 48 } },
   '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
