@@ -1968,7 +1968,9 @@ assert.doesNotMatch(
     /await checkNwSpendOnScreen\(browser, port, errors\)\n    await checkNwLoveChip\(browser, port, errors\)/,
     '1.4.597 the full path runs checkNwLoveChip after checkNwSpendOnScreen',
   )
-  assert.match(phone597, /checkNwLoveChip ok r24 375x812/, '1.4.597 r24 Reason coverage logs its own ok line')
+  assert.match(phone597, /NW_LOVE_CHIP_R24_SIZES/, '1.4.597 r24 coverage uses phone widths 375, 390 and 412')
+  assert.match(phone597, /checkNwLoveChip ok r24 375x812 reason visible=1 box=/, '1.4.597 r24 at 375 logs Reason visible and box')
+  assert.match(phone597, /checkNwLoveChip ok r24 412x915 love visible=1 box=/, '1.4.597 r24 at 412 logs Love visible and box')
   assert.match(phone597, /checkNwLoveChip ok \$\{tag\} slideTypeChip/, '1.4.597 slideTypeChip viewport logs box and clipped=0')
 }
 

@@ -10113,6 +10113,11 @@ const NW_LOVE_CHIP_TYPES = [
   { tool: 'reason', label: 'Reason' },
   { tool: 'science', label: 'Science' },
 ]
+const NW_LOVE_CHIP_R24_SIZES = [
+  [375, 812],
+  [390, 844],
+  [412, 915],
+]
 const NW_LOVE_CHIP_R24_TOOLS = [
   { tool: 'love', label: 'Love' },
   { tool: 'reason', label: 'Reason' },
@@ -10351,41 +10356,75 @@ async function checkNwLoveChip(browser, port, errors) {
 
   if (!only) {
     const r24Search = TYPE_LABEL_SEARCH.replace('nwRound=18', 'nwRound=24')
-    const { context, page } = await openMap(browser, port, 375, 812, 'a2', {
-      motion: false,
-      search: r24Search,
-    })
-    page.on('pageerror', (error) => errors.push('nw-love-chip 375x812 r24 ' + error))
-    await plantTypeLabelSeats(page, '375x812 r24')
-    await page.evaluate(() => document.fonts?.ready)
-    await page.waitForTimeout(250)
-    const r24 = await page.evaluate(() => {
-      const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
-      const shown = (el) => {
-        const style = getComputedStyle(el)
-        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
-        const box = el.getBoundingClientRect()
-        return box.width > 1 && box.height > 1
+    for (const [width, height] of NW_LOVE_CHIP_R24_SIZES) {
+      const tag = `${width}x${height}`
+      const { context, page } = await openMap(browser, port, width, height, 'a2', {
+        motion: false,
+        search: r24Search,
+      })
+      page.on('pageerror', (error) => errors.push(`nw-love-chip ${tag} r24 ${error}`))
+      await plantTypeLabelSeats(page, `${tag} r24`)
+      await page.evaluate(() => document.fonts?.ready)
+      await page.waitForTimeout(250)
+      const r24 = await page.evaluate(() => {
+        const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+        const shown = (el) => {
+          const style = getComputedStyle(el)
+          if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+          const box = el.getBoundingClientRect()
+          return box.width > 1 && box.height > 1
+        }
+        const boxOf = (el) => {
+          const r = el.getBoundingClientRect()
+          return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height }
+        }
+        const read = (tool, label) => {
+          const chips = [...document.querySelectorAll(`.defend-type-chip.is-${tool}`)].filter(shown)
+          const svgs = [...document.querySelectorAll('text.defend-type-label')].filter((node) => norm(node.textContent) === label && shown(node))
+          const chipEl = chips[0]
+          return {
+            visible: chips.length + svgs.length,
+            chip: chips.length,
+            svg: svgs.length,
+            chromeHide: chipEl?.getAttribute('data-chrome-hide'),
+            box: chipEl ? boxOf(chipEl) : null,
+          }
+        }
+        return {
+          viewW: window.innerWidth,
+          viewH: window.innerHeight,
+          love: read('love', 'Love'),
+          reason: read('reason', 'Reason'),
+        }
+      })
+      for (const { tool } of NW_LOVE_CHIP_R24_TOOLS) {
+        const row = r24[tool]
+        if (!row || row.visible !== 1 || (row.chip > 0 && row.svg > 0)) {
+          fail(`checkNwLoveChip fail r24 ${tag} ${tool} visible=${row?.visible ?? 0} chip=${row?.chip ?? 0} svg=${row?.svg ?? 0}`)
+          continue
+        }
+        const chipBox = row.box
+        if (!chipBox || chipBox.width < 1 || chipBox.height < 1) {
+          fail(`checkNwLoveChip fail r24 ${tag} ${tool} chip=0`)
+          continue
+        }
+        const inView =
+          chipBox.left >= -0.5 &&
+          chipBox.top >= -0.5 &&
+          chipBox.right <= r24.viewW + 0.5 &&
+          chipBox.bottom <= r24.viewH + 0.5
+        if (!inView) {
+          fail(
+            `checkNwLoveChip fail r24 ${tag} ${tool} box=${chipBox.left.toFixed(1)},${chipBox.top.toFixed(1)},${chipBox.width.toFixed(1)},${chipBox.height.toFixed(1)} viewport=${r24.viewW}x${r24.viewH}`,
+          )
+          continue
+        }
+        console.log(
+          `checkNwLoveChip ok r24 ${tag} ${tool} visible=1 box=${Math.round(chipBox.left)},${Math.round(chipBox.top)},${Math.round(chipBox.width)},${Math.round(chipBox.height)}`,
+        )
       }
-      const read = (tool, label) => {
-        const chips = [...document.querySelectorAll(`.defend-type-chip.is-${tool}`)].filter(shown)
-        const svgs = [...document.querySelectorAll('text.defend-type-label')].filter((node) => norm(node.textContent) === label && shown(node))
-        return { visible: chips.length + svgs.length, chip: chips.length, svg: svgs.length, chromeHide: chips[0]?.getAttribute('data-chrome-hide') }
-      }
-      return {
-        love: read('love', 'Love'),
-        reason: read('reason', 'Reason'),
-      }
-    })
-    for (const { tool } of NW_LOVE_CHIP_R24_TOOLS) {
-      const row = r24[tool]
-      if (!row || row.visible !== 1 || (row.chip > 0 && row.svg > 0)) {
-        fail(`checkNwLoveChip fail r24 375x812 ${tool} visible=${row?.visible ?? 0} chip=${row?.chip ?? 0} svg=${row?.svg ?? 0}`)
-      } else {
-        console.log(`checkNwLoveChip ok r24 375x812 ${tool} visible=1`)
-      }
+      await context.close()
     }
-    await context.close()
   }
 
   if (!only) {
