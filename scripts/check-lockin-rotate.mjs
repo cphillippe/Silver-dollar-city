@@ -11,21 +11,17 @@ import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 import { APP_VERSION } from '../src/config/app.ts'
 import { EASY_LINE_ORDER } from '../src/easyTrail/trail/loop.ts'
 import { lociStampFor } from '../src/lib/lociStamp.ts'
+import { keptGoldCues, probeInitSource } from './lockin843-probe.mjs'
 
 /** Complete the Easy encode recall ask (any format) before the why slide. */
 export async function advanceEncodeRecallAsk(page, lineId) {
   await page.locator('.recall-gate.is-lockin-recall').waitFor({ timeout: 20_000 })
   const format = await page.evaluate(() => {
     const gate = document.querySelector('.recall-gate.is-lockin-recall')
-    if (!gate) return null
-    const explicit =
-      gate.getAttribute('data-encode-format') ||
-      gate.querySelector('[data-encode-format]')?.getAttribute('data-encode-format')
-    if (explicit) return explicit
-    if (gate.querySelector('.lockin-encode-b')) return 'B'
-    if (gate.querySelector('.quick-review-map')) return 'C'
-    if (gate.querySelector('.lockin-recall.is-ask')) return 'A'
-    return 'A'
+    if (!gate) throw new Error('advanceEncodeRecallAsk: missing .recall-gate.is-lockin-recall')
+    const explicit = gate.getAttribute('data-encode-format')
+    if (!explicit) throw new Error('advanceEncodeRecallAsk: missing data-encode-format on recall gate')
+    return explicit
   })
   if (format === 'A') {
     await page.locator('.lockin-recall-show').waitFor({ timeout: 8000 })
@@ -35,9 +31,13 @@ export async function advanceEncodeRecallAsk(page, lineId) {
   } else {
     const id =
       lineId ||
-      (await page.evaluate(
-        () => document.querySelector('.recall-gate.is-lockin-recall')?.getAttribute('data-line-id') ?? '',
-      ))
+      (await page.evaluate(() => {
+        const gate = document.querySelector('.recall-gate.is-lockin-recall')
+        if (!gate) throw new Error('advanceEncodeRecallAsk: missing recall gate for map tap')
+        const line = gate.getAttribute('data-line-id')
+        if (!line) throw new Error('advanceEncodeRecallAsk: missing data-line-id on recall gate')
+        return line
+      }))
     const stamp = lociStampFor(id)
     await page.locator(`.quick-review-plot-hit[data-plot-id="${stamp.plotId}"]`).click()
     await page.locator('.lockin-recall-claim').waitFor({ timeout: 6000 })
@@ -127,6 +127,7 @@ export async function runLockInRotateCheck(browser, port, errors = []) {
         deviceScaleFactor: 1,
         reducedMotion: 'reduce',
       })
+      await context.addInitScript(probeInitSource())
       await context.addInitScript(
         ({ key, value }) => {
           localStorage.clear()
@@ -144,25 +145,17 @@ export async function runLockInRotateCheck(browser, port, errors = []) {
       assert.ok(read.format, `${size} ${lineId}: no encode format in DOM (${read.source})`)
       const live = read.format
       formats.push(live)
-      const gold = await page.evaluate(
-        (liveFmt) => {
-          const visible = (el) => {
-            if (!(el instanceof HTMLElement)) return false
-            const st = getComputedStyle(el)
-            const box = el.getBoundingClientRect()
-            return st.display !== 'none' && st.visibility !== 'hidden' && box.width > 2 && box.height > 2
-          }
-          if (liveFmt === 'B') return []
-          if (liveFmt === 'C') {
-            const cue = document.querySelector('.recall-gate.is-lockin-recall .quick-review-map-tap.is-now')
-            return cue && visible(cue) ? ['map-tap'] : []
-          }
-          const btn = document.querySelector('.recall-gate.is-lockin-recall .lockin-recall-show')
-          return btn && visible(btn) ? ['show-me'] : []
-        },
-        live,
-      )
-      const goldWant = live === 'B' ? 0 : 1
+      if (live === 'B') {
+        await page.waitForFunction(
+          () => {
+            const fill = document.querySelector('.recall-gate.is-lockin-recall .quick-review-think-fill')
+            return fill && fill.getBoundingClientRect().width > 2
+          },
+          { timeout: 2000 },
+        )
+      }
+      const gold = await page.evaluate(keptGoldCues)
+      const goldWant = 1
       assert.equal(gold.length, goldWant, `${size} ${lineId} format=${live} gold=${gold.length} want=${goldWant}`)
       console.log(`checkLockInRotate ok ${size} ${lineId} format=${live} gold=${goldWant}`)
       await context.close()

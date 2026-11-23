@@ -28,12 +28,20 @@ export function LockInEncodeRecall({ id, claim, format, onDone }: LockInEncodeRe
   if (format === 'A') {
     return <LockInRecall id={id} claim={claim} onDone={onDone} />
   }
+  return <LockInEncodeRecallBC id={id} claim={claim} format={format} onDone={onDone} />
+}
 
+function LockInEncodeRecallBC({
+  id,
+  claim,
+  format,
+  onDone,
+}: Omit<LockInEncodeRecallProps, 'format'> & { format: Exclude<EncodeFormatId, 'A'> }) {
   const stamp = lociStampFor(id)
   const prompt = reviewPrompt(0)
   const faced = easyFacingLine(id, claim)
 
-  const [phase, setPhase] = useState<Phase>(format === 'B' ? 'ask' : 'ask')
+  const [phase, setPhase] = useState<Phase>('ask')
   const [thinkPct, setThinkPct] = useState(0)
   const [wrongMapTaps, setWrongMapTaps] = useState(0)
   const thinkDone = useRef(false)

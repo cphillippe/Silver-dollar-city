@@ -1147,7 +1147,7 @@ assert.match(recallSrc, /easyWhyLine/)
 {
   const easyHold = recallSrc.match(/if \(easyEncode\) \{\s*return \(([\s\S]*?)\n  \}/)?.[1] ?? ''
   assert.match(easyHold, /WhyBlastPlay/)
-  // 1.4.601 (#963): the Easy encode branch rotates LockInEncodeRecall (A/B/C).
+  // #963: the Easy encode branch rotates LockInEncodeRecall (A/B/C).
   assert.match(easyHold, /LockInEncodeRecall/)
   assert.doesNotMatch(easyHold, /EASY\.rememberSentence|recall-choices/)
   // Easy Clear 1.4.142: claim-pick is one next-tap — no stacked mainIdeaTeach chip.
@@ -1944,48 +1944,76 @@ assert.match(
 
 
 
-// 1.4.601: Easy Lock In encode format rotation (Refs #963).
-assert.equal(APP_VERSION, '1.4.601')
-assert.equal(CHANGELOG[0].version, '1.4.601', '1.4.601 is the newest row')
-assert.match(latestChange('1.4.601').items.join('\n'), /Refs #963/, '1.4.601 changelog refs #963')
-assert.match(latestChange('1.4.601').items.join('\n'), /Quick Review/)
-assert.match(latestChange('1.4.601').items.join('\n'), /Medium and Hard/)
-assert.doesNotMatch(latestChange('1.4.601').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.601 changelog avoids GitHub close keywords')
+// 1.4.596: Easy Night Watch Spend / ? on screen at round clear (#951).
+assert.equal(APP_VERSION, '1.4.596')
+assert.equal(CHANGELOG[0].version, '1.4.596', '1.4.596 is the newest row')
+assert.match(latestChange('1.4.596').items.join('\n'), /Refs #951/, '1.4.596 changelog refs #951')
+assert.match(latestChange('1.4.596').items.join('\n'), /Spend/)
+assert.match(latestChange('1.4.596').items.join('\n'), /Hard stays the same\./)
+assert.doesNotMatch(latestChange('1.4.596').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.596 changelog avoids GitHub close keywords')
 assert.doesNotMatch(
-  playerVisibleChangeItems(latestChange('1.4.601').items).join('\n'),
+  playerVisibleChangeItems(latestChange('1.4.596').items).join('\n'),
   /\bHard\b|\bMedium\b/,
-  '1.4.601 the player note does not name other tiers',
+  '1.4.596 the player note does not name other tiers',
 )
 {
-  const encode601 = readFileSync(new URL('../src/easyTrail/review/encodeFormat.ts', import.meta.url), 'utf8')
-  const gate601 = readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8')
-  const phone601 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
-  const lock843 = readFileSync(new URL('../scripts/check-lockin-843.mjs', import.meta.url), 'utf8')
-  assert.match(encode601, /export function encodeFormatForLine/, '1.4.601 encodeFormatForLine is defined')
-  assert.match(encode601, /export function pickEncodeFormat/, '1.4.601 pickEncodeFormat is defined')
-  assert.match(gate601, /encodeFormatForLine\(brief\.id\)/, '1.4.601 RecallGate rotates encode format')
-  assert.match(phone601, /async function checkLockInRotate/, '1.4.601 checkLockInRotate is defined')
+  const defend596 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const phone596 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  const spendHelp596 = defend596.match(
+    /\/\* 1\.4\.596: fixed to the viewport[\s\S]*?\.defend-page\.is-easy-watch\.is-boost \.defend-clear-spend,[\s\S]*?\.defend-page\.is-easy-watch\.is-boost\.is-clear-fold \.defend-clear-help \{[\s\S]*?z-index: 4;\n  \}/,
+  )?.[0]
+  assert.ok(spendHelp596, '1.4.596 Spend and help rule block is present in defend.css')
   assert.match(
-    phone601,
-    /await checkEasyOneGold\(browser, port, errors\)\n    await checkLockInRotate\(browser, port, errors\)/,
-    '1.4.601 the full path runs checkLockInRotate after checkEasyOneGold',
+    spendHelp596,
+    /position: fixed;[\s\S]*right: 8px;/,
+    '1.4.596 Spend and help rule block uses fixed positioning on phone',
+  )
+  assert.doesNotMatch(
+    spendHelp596,
+    /position: absolute;/,
+    '1.4.596 Spend and help rule block never falls back to absolute in the 596 hunk',
+  )
+  assert.match(phone596, /async function checkNwSpendOnScreen/, '1.4.596 checkNwSpendOnScreen is defined')
+  assert.match(
+    phone596,
+    /await checkGemSightCue\(browser, port, errors\)\n    await checkNwSpendOnScreen\(browser, port, errors\)/,
+    '1.4.596 the full path runs checkNwSpendOnScreen after checkGemSightCue',
   )
   assert.match(
-    readFileSync(new URL('../scripts/check-lockin-rotate.mjs', import.meta.url), 'utf8'),
-    /checkLockInRotate ok \$\{size\} \$\{lineId\} format=/,
-    '1.4.601 the check logs format per lesson from the DOM',
+    phone596,
+    /function assertNwSpendMidWaveNodes[\s\S]*?if \(mid\.nodes\.length < 1\) \{[\s\S]*?fail\(`checkNwSpendOnScreen fail \$\{midOk\} nodes=0`\)/,
+    '1.4.596 mid-wave fails when no Spend nodes are painted',
   )
-  assert.match(phone601, /runLockInRotateCheck/, '1.4.601 check-lockin-rotate owns the runtime driver')
-  assert.match(
-    readFileSync(new URL('../scripts/check-lockin-rotate.mjs', import.meta.url), 'utf8'),
-    /readFormatStrictSource[\s\S]*missing-data-encode-format/,
-    '1.4.601 the runtime check requires data-encode-format on the gate unless main-fail legacy mode',
-  )
-  assert.match(lock843, /encodeFormatForLine/, '1.4.601 check-lockin-843 knows encode rotation')
-  assert.equal(lock843.match(/assert\.equal\(APP_VERSION, '([^']+)'\)/)?.[1], '1.4.601', '1.4.601 check-lockin-843 pins version')
+  assert.match(phone596, /checkNwSpendOnScreen ok \$\{clearOk\} nodes=/, '1.4.596 the ok line logs node counts per viewport and state')
 }
-assert.equal(encodeRotationRepeats(encodeFormatsThrough(10)), 0, '1.4.601 golden-path encode formats do not repeat back-to-back')
-assert.equal(encodeRotationRepeats(Array(10).fill('A')), 9, '1.4.601 main-fail proof: identical encode formats repeat 9 times in 10 lessons')
+
+// #963: Easy Lock In encode format rotation (version 1.4.600 at forward merge after #992).
+{
+  const encode963 = readFileSync(new URL('../src/easyTrail/review/encodeFormat.ts', import.meta.url), 'utf8')
+  const gate963 = readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8')
+  const phone963 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  const lock843 = readFileSync(new URL('../scripts/check-lockin-843.mjs', import.meta.url), 'utf8')
+  const rotate963 = readFileSync(new URL('../scripts/check-lockin-rotate.mjs', import.meta.url), 'utf8')
+  assert.match(encode963, /export function encodeFormatForLine/, '#963 encodeFormatForLine is defined')
+  assert.match(encode963, /export function pickEncodeFormat/, '#963 pickEncodeFormat is defined')
+  assert.match(gate963, /encodeFormatForLine\(brief\.id\)/, '#963 RecallGate rotates encode format')
+  assert.match(phone963, /async function checkLockInRotate/, '#963 checkLockInRotate is defined')
+  assert.match(
+    phone963,
+    /await checkEasyOneGold\(browser, port, errors\)\n    await checkLockInRotate\(browser, port, errors\)/,
+    '#963 the full path runs checkLockInRotate after checkEasyOneGold',
+  )
+  assert.match(rotate963, /checkLockInRotate ok \$\{size\} \$\{lineId\} format=/, '#963 the check logs format per lesson from the DOM')
+  assert.match(phone963, /runLockInRotateCheck/, '#963 check-lockin-rotate owns the runtime driver')
+  assert.match(rotate963, /readFormatStrictSource[\s\S]*missing-data-encode-format/, '#963 strict data-encode-format on gate unless EXPECT_ROTATE_FAIL')
+  assert.match(rotate963, /throw new Error\('advanceEncodeRecallAsk: missing data-encode-format/, '#963 advanceEncodeRecallAsk does not guess format')
+  assert.match(lock843, /encodeFormatForLine/, '#963 check-lockin-843 knows encode rotation')
+  assert.match(lock843, /await assertScreen\(page, `\$\{tag\}recall`, \/quick-review-think-fill\/\)/, '#963 format B ask uses assertScreen')
+  assert.match(lock843, /await assertScreen\(page, `\$\{tag\}recall`, \/quick-review-\(map-tap\|plot-hit\)\/\)/, '#963 format C ask uses assertScreen')
+  assert.equal(lock843.match(/assert\.equal\(APP_VERSION, '([^']+)'\)/)?.[1], '1.4.596', '#963 check-lockin-843 stays on main app version until forward merge')
+}
+assert.equal(encodeRotationRepeats(encodeFormatsThrough(10)), 0, '#963 golden-path encode formats do not repeat back-to-back')
+assert.equal(encodeRotationRepeats(Array(10).fill('A')), 9, '#963 main-fail proof: identical encode formats repeat 9 times in 10 lessons')
 
 // 1.4.595: Easy Bonus Sight one-time hint line (#965).
 assert.equal(CHANGELOG[1].version, '1.4.595', '1.4.595 follows the newest row')

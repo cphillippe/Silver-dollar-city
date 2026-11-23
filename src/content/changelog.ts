@@ -28,13 +28,13 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.601',
-    title: 'Easy Lock In: rotate the first-session encode',
+    version: '1.4.596',
+    title: 'Night Watch: Spend and help on screen',
     when: '2026-11-22',
     items: [
-      'Each Easy lesson’s first Lock In now uses a different recall shape — map spot, think-first, or flip card — so the golden path does not feel like the same screen on repeat.',
-      'Kept cards still use Quick Review only; Medium and Hard are unchanged.',
-      'Refs #963.',
+      'On Easy, after a wave clears, the Spend spark and ? help buttons stay on the right edge of the phone screen where you can tap them.',
+      'Hard stays the same.',
+      'Refs #951.',
     ],
   },
   {

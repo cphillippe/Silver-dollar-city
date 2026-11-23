@@ -96,7 +96,7 @@ const debtClaim = easyFacingLine('ph-debt', easyBrief('ph-debt').claim)
 assert.ok(debtClaim.length > 10, 'ph-debt Easy claim is live (D2)')
 
 // Version, changelog.
-assert.equal(APP_VERSION, '1.4.601')
+assert.equal(APP_VERSION, '1.4.596')
 assert.equal(JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version, APP_VERSION)
 const lockInRow = CHANGELOG.find((note) => note.version === '1.4.567')
 assert.ok(lockInRow, 'the 1.4.567 Lock In row is shipped')
@@ -320,7 +320,7 @@ async function domHas(page, text) {
 
 /** One screen: one gold cue (and which one), font floors, no sideways scroll, 44px taps. */
 async function assertScreen(page, label, goldMatch) {
-  const gold = await page.evaluate(goldCues)
+  const gold = await page.evaluate(keptGoldCues)
   assert.equal(gold.length, 1, `${label}: exactly one gold cue, got [${gold.join(' | ')}]`)
   assert.match(gold[0], goldMatch, `${label}: the gold cue is ${goldMatch}, got ${gold[0]}`)
   assert.deepEqual(await page.evaluate(fontViolations), [], `${label}: font floors`)
@@ -460,10 +460,17 @@ async function recallToSlide(page, viewport, facts, { notYet = false, shots = tr
     await assertScreen(page, `${tag}recall`, /lockin-recall-show/)
   } else if (format === 'B') {
     assert.equal((await page.locator('.lockin-encode-b .quick-review-prompt').innerText()).trim(), 'Think first…')
-    assert.equal((await page.evaluate(goldCues)).length, 0, `${tag}recall: think has no gold button yet`)
+    await page.waitForFunction(
+      () => {
+        const fill = document.querySelector('.lockin-encode-b .quick-review-think-fill')
+        return fill && fill.getBoundingClientRect().width > 2
+      },
+      { timeout: 2000 },
+    )
+    await assertScreen(page, `${tag}recall`, /quick-review-think-fill/)
   } else {
     assert.equal((await page.locator('.lockin-encode-c .quick-review-prompt-title').innerText()).trim(), "What's the main idea?")
-    assert.equal(await page.locator('.quick-review-map-tap.is-now').count(), 1, `${tag}recall: map tap is the one gold cue`)
+    await assertScreen(page, `${tag}recall`, /quick-review-(map-tap|plot-hit)/)
   }
   if (shots) await shot(page, viewport, `${tag}1-recall`)
   const before = JSON.stringify(await progressOf(page))
