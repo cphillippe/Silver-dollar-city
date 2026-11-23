@@ -6222,11 +6222,12 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
     content: attr(data-cross-cost) "✦";
   }
 
+  /* 1.4.596: fixed to the viewport — the clear bar box is 0×0 so absolute right would pin at x=−52 (Refs #951). */
   .defend-page.is-easy-watch.is-boost .defend-clear-spend,
   .defend-page.is-easy-watch.is-boost .defend-clear-help,
   .defend-page.is-easy-watch.is-boost.is-clear-fold .defend-clear-spend,
   .defend-page.is-easy-watch.is-boost.is-clear-fold .defend-clear-help {
-    position: absolute;
+    position: fixed;
     left: auto;
     right: 8px;
     width: 44px;

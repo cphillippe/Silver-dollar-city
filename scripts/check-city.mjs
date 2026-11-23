@@ -1955,6 +1955,8 @@ assert.doesNotMatch(latestChange('1.4.599').items.join('\n'), /Fixes #|Closes #|
   const phone988 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
   assert.match(place988, /defendFrameWidth\(\)/, '#988 reads the phone frame for mid-narrow strip buys')
   assert.match(place988, /frameW >= 384 && frameW <= 392/, '#988 pins mid-narrow strip buys')
+  assert.match(place988, /pinLefts = \[0, 2\]/, '#988 mid-narrow strip pin tries left 0 and 2')
+  assert.match(place988, /roadHits\(card\) === 0/, '#988 pin band requires roadHits clear')
   assert.match(phone988, /async function checkNwReasonStripRoad/, '#988 checkNwReasonStripRoad is defined')
   assert.match(
     phone988,
@@ -1964,15 +1966,20 @@ assert.doesNotMatch(latestChange('1.4.599').items.join('\n'), /Fixes #|Closes #|
   assert.match(phone988, /strokeW=\$\{read\.strokeW\}/, '#988 overlap logs rendered road stroke width')
   assert.match(phone988, /gold !== 1\) fail/, '#988 gold must equal 1 without a cue guard')
   assert.match(phone988, /easy-cue=missing/, '#988 fails when the easy-cue node is gone at measure')
+  assert.doesNotMatch(phone988, /NW_REASON_STRIP_SKIP_CUE/, '#988 easy-cue is never optional')
   assert.doesNotMatch(phone988, /is-easy-cue'\)\.waitFor\(\{ timeout: \d+ \}\)\.catch/, '#988 easy-cue wait has no swallow catch')
   assert.match(phone988, /roadPadHit/, '#988 checks placer roadPad clearance')
   assert.match(phone988, /async function nwReasonStripTapText/, '#988 audits Far/Strong tap and text')
-  assert.match(phone988, /Forward-merge drop: settings-more y from CI runs 45037961848/, '#988 EasyOneGold pins settings y from CI')
+  assert.match(phone988, /gold=\$\{gold\}/, '#988 ok line prints measured gold count')
+  assert.match(phone988, /\[412, 915\]/, '#988 includes 412x915 reason and love frames')
+  assert.match(phone988, /\[388, 844\]/, '#988 includes 388x844 reason frame')
+  assert.match(phone988, /async function nwReasonStripUnfreezeForCue/, '#988 unfreezes walkers before easy-cue')
+  assert.match(phone988, /1\.4\.596: y re-pinned from CI run 45026157592/, '#988 EasyOneGold settings y follows main 1.4.596 CI pin')
 }
 
 // 1.4.596: Easy Night Watch Spend / ? on screen at round clear (#951).
 assert.equal(APP_VERSION, '1.4.596')
-assert.equal(CHANGELOG[1].version, '1.4.596', '1.4.596 follows the queued changelog row')
+assert.equal(CHANGELOG[1].version, '1.4.596', '1.4.596 is the newest shipped row')
 assert.match(latestChange('1.4.596').items.join('\n'), /Refs #951/, '1.4.596 changelog refs #951')
 assert.match(latestChange('1.4.596').items.join('\n'), /Spend/)
 assert.match(latestChange('1.4.596').items.join('\n'), /Hard stays the same\./)
@@ -1982,6 +1989,38 @@ assert.doesNotMatch(
   /\bHard\b|\bMedium\b/,
   '1.4.596 the player note does not name other tiers',
 )
+{
+  const defend596 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const phone596 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  const spendHelp596 = defend596.match(
+    /\/\* 1\.4\.596: fixed to the viewport[\s\S]*?\.defend-page\.is-easy-watch\.is-boost \.defend-clear-spend,[\s\S]*?\.defend-page\.is-easy-watch\.is-boost\.is-clear-fold \.defend-clear-help \{[\s\S]*?z-index: 4;\n  \}/,
+  )?.[0]
+  assert.ok(spendHelp596, '1.4.596 Spend and help rule block is present in defend.css')
+  assert.match(
+    spendHelp596,
+    /position: fixed;[\s\S]*right: 8px;/,
+    '1.4.596 Spend and help rule block uses fixed positioning on phone',
+  )
+  assert.doesNotMatch(
+    spendHelp596,
+    /position: absolute;/,
+    '1.4.596 Spend and help rule block never falls back to absolute in the 596 hunk',
+  )
+  assert.match(phone596, /async function checkNwSpendOnScreen/, '1.4.596 checkNwSpendOnScreen is defined')
+  assert.match(
+    phone596,
+    /await checkGemSightCue\(browser, port, errors\)\n    await checkNwSpendOnScreen\(browser, port, errors\)/,
+    '1.4.596 the full path runs checkNwSpendOnScreen after checkGemSightCue',
+  )
+  assert.match(
+    phone596,
+    /function assertNwSpendMidWaveNodes[\s\S]*?if \(mid\.nodes\.length < 1\) \{[\s\S]*?fail\(`checkNwSpendOnScreen fail \$\{midOk\} nodes=0`\)/,
+    '1.4.596 mid-wave fails when no Spend nodes are painted',
+  )
+  assert.match(phone596, /checkNwSpendOnScreen ok \$\{clearOk\} nodes=/, '1.4.596 the ok line logs node counts per viewport and state')
+}
+
+
 
 // 1.4.595: Easy Bonus Sight one-time hint line (#965).
 assert.equal(CHANGELOG[2].version, '1.4.595', '1.4.595 follows the newest row')
@@ -18693,7 +18732,7 @@ console.log('check-city: ok')
     /versionName appVersion/,
     '1.4.333 Android versionName follows package.json',
   )
-  assert.ok(CHANGELOG.some((note) => note.version === '1.4.333'), '1.4.333 row stays (no longer CHANGELOG[12] after 1.4.334)')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.333'), '1.4.333 row stays (no longer CHANGELOG[11] after 1.4.334)')
   const items333 = latestChange('1.4.333').items.join('\n')
   assert.match(latestChange('1.4.333').title, /Match/)
   assert.match(items333, /Fixes #476/)

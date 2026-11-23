@@ -432,18 +432,24 @@ export function placeTowerCard(
   const stripClearsRoad = (card: { left: number; top: number }) => tapHits(card) === 0 && roadHits(card) === 0
   if (strip) {
     const topAbove = clampCardTop(stripPadTop - cardHeight - GAP, board.h, boundH, reserveBottom)
-  /** #988: 384–392 phones pin the Reason-style strip to the left edge like wider frames. */
+    /** #988: 384–392 phones pin the Reason-style strip to the left edge like wider frames. */
     const frameW = defendFrameWidth()
     if (stripLeftOfLamp && frameW >= 384 && frameW <= 392) {
-      const pinLeft = frameW <= 384 ? 0 : 2
+      const pinLefts = [0, 2]
       const pinTops = [topAbove]
       for (let lift = 16; lift <= 160; lift += 16) {
         pinTops.push(Math.max(MARGIN, topAbove - lift))
       }
-      for (const topTry of pinTops) {
-        const card = { left: pinLeft, top: topTry }
-        if (stripAboveLamp(card) && stripLampHits(card) + ownHits(card) + softHits(card) === 0) {
-          return { ...card, side: 'above', markClear: stripClearsRoad(card) }
+      for (const pinLeft of pinLefts) {
+        for (const topTry of pinTops) {
+          const card = { left: pinLeft, top: topTry }
+          if (
+            stripAboveLamp(card) &&
+            stripLampHits(card) + ownHits(card) + softHits(card) === 0 &&
+            roadHits(card) === 0
+          ) {
+            return { ...card, side: 'above', markClear: stripClearsRoad(card) }
+          }
         }
       }
     }

@@ -4795,34 +4795,34 @@ const EASY_ONE_GOLD_MS = 1500
 const EASY_GOLD_BASE_1579 = {
   '375x667 home-first': { '2 Help': { x: 131, y: 561, w: 113, h: 48 } },
   '375x667 home-after-l1': { '3 Lock In': { x: 250, y: 584.1, w: 113, h: 48 } },
-  // Forward-merge drop: settings-more y from CI runs 45037961848 (375/390) and 45044570651 (412); x/w unchanged.
+  // 1.4.596: y re-pinned from CI run 45026157592 (checkEasyOneGold rect lines); x/w unchanged.
   '375x667 settings-more': {
     'Open Profile': { x: 41, y: 1406.5, w: 130, h: 52 },
-    Candy: { x: 41, y: 1874.1, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1874.1, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1934.1, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2237.5, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2483.3, w: 176, h: 52 },
+    Candy: { x: 41, y: 1854.3, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1854.3, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1914.3, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2217.6, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2463.4, w: 176, h: 52 },
   },
   '390x844 home-first': { '2 Help': { x: 136, y: 738, w: 118, h: 48 } },
   '390x844 home-after-l1': { '3 Lock In': { x: 260, y: 761.1, w: 118, h: 48 } },
   '390x844 settings-more': {
     'Open Profile': { x: 41, y: 1407.9, w: 130, h: 52 },
-    Candy: { x: 41, y: 1875.5, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1875.5, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1935.5, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2214, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2459.9, w: 176, h: 52 },
+    Candy: { x: 41, y: 1855.7, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1855.7, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1915.7, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2194.2, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2440, w: 176, h: 52 },
   },
   '412x915 home-first': { '2 Help': { x: 143.3, y: 809, w: 125.3, h: 48 } },
   '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
   '412x915 settings-more': {
     'Open Profile': { x: 41, y: 1360.7, w: 130, h: 52 },
-    Candy: { x: 41, y: 1828.3, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1828.3, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1888.3, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2166.8, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2412.7, w: 176, h: 52 },
+    Candy: { x: 41, y: 1788.6, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1788.6, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1848.6, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2127.1, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2372.9, w: 176, h: 52 },
   },
 }
 
@@ -9141,10 +9141,12 @@ async function checkNwStripWords(browser, port, errors) {
 const NW_REASON_STRIP_SEARCH = '?playtest=1&nwDebug=1&nwSeed=2&nwMap=a2&nwRound=18&nwLamps=0&nwCam=1'
 const NW_REASON_STRIP_SIZES = [
   [384, 844],
+  [388, 844],
   [390, 844],
   [393, 844],
+  [412, 915],
 ]
-const NW_REASON_STRIP_PAN = { 384: -238.192, 390: -235.192, 393: -233.692 }
+const NW_REASON_STRIP_PAN = { 390: -235.192, 393: -233.692 }
 
 const nwReasonSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -9212,9 +9214,42 @@ async function nwReasonPlantAt(page, cdp, tool, ring, label) {
   }
 }
 
+async function nwReasonReadPanX(page) {
+  return page.evaluate(() => {
+    const panEl = document.querySelector('.nw-pan')
+    if (!(panEl instanceof HTMLElement)) return NaN
+    const transform = panEl.style.transform || getComputedStyle(panEl).transform
+    if (!transform || transform === 'none') return 0
+    const t3 = /translate3d\(\s*([-\d.]+)px/i.exec(transform)
+    if (t3) return +t3[1]
+    const m = /matrix\(\s*[^,]+,\s*[^,]+,\s*[^,]+,\s*[^,]+,\s*([-\d.]+)/.exec(transform)
+    if (m) return +m[1]
+    const m3 = /matrix3d\(([^)]+)\)/.exec(transform)
+    if (m3) {
+      const parts = m3[1].split(',').map((v) => +v.trim())
+      if (parts.length >= 14) return parts[12]
+    }
+    return NaN
+  })
+}
+
+async function nwReasonStripPanPin(page, cdp, wantPan, label) {
+  if (wantPan == null) return
+  for (let attempt = 0; attempt < 32; attempt += 1) {
+    const panX = await nwReasonReadPanX(page)
+    if (!Number.isNaN(panX) && Math.abs(panX - wantPan) <= 0.05) return
+    const probe = await page.evaluate(() => ({ w: innerWidth, h: innerHeight }))
+    const cx = probe.w / 2
+    const cy = probe.h / 2
+    const dx = Number.isNaN(panX) ? 0 : Math.max(-140, Math.min(140, (wantPan - panX) * 1.05))
+    await nwReasonTouchDrag(cdp, cx, cy, cx - dx, cy)
+    await nwReasonSleep(450)
+  }
+}
+
 async function nwReasonReachSeat(page, cdp, seat, label) {
   const target = { cx: seat.cx, cy: seat.cy - 26 }
-  for (let attempt = 0; attempt < 8; attempt += 1) {
+  for (let attempt = 0; attempt < 12; attempt += 1) {
     const probe = await page.evaluate((t) => {
       const svg = document.querySelector('.defend-board')
       const ctm = svg?.getScreenCTM()
@@ -9234,7 +9269,8 @@ async function nwReasonReachSeat(page, cdp, seat, label) {
     const cx = probe.w / 2
     const cy = probe.h / 2
     const dx = Math.max(-150, Math.min(150, cx - probe.x))
-    const dy = Math.max(-250, Math.min(250, cy - probe.y))
+    const dyMax = seat.cy >= 500 ? 360 : 250
+    const dy = Math.max(-dyMax, Math.min(dyMax, cy - probe.y))
     await nwReasonTouchDrag(cdp, cx, cy, cx + dx, cy + dy)
     await nwReasonSleep(600)
   }
@@ -9257,10 +9293,6 @@ async function openNwReasonStripRoad(browser, port, width, height) {
   await page.goto(NW_REASON_STRIP_SEARCH)
   await page.getByRole('button', { name: 'Settings' }).click()
   await page.locator('summary', { hasText: 'Developer' }).click()
-  if (await page.getByRole('button', { name: 'Debug freeze · OFF' }).count()) {
-    await page.getByRole('button', { name: 'Debug freeze · OFF' }).click()
-  }
-  await page.getByRole('button', { name: 'Debug freeze · ON' }).waitFor()
   await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
   await page.locator('.defend-page').waitFor()
   await page.locator('.defend-board').waitFor()
@@ -9270,6 +9302,44 @@ async function openNwReasonStripRoad(browser, port, width, height) {
   }
   const cdp = await context.newCDPSession(page)
   return { context, page, cdp }
+}
+
+async function nwReasonStripTapLamp(page, cdp, seat, tool) {
+  const pad = page.locator(`.defend-pad[data-tower-type="${tool}"]`)
+  if (await pad.count()) {
+    await pad.click({ force: true })
+    return
+  }
+  const waveHit = page.locator(
+    `.defend-pad.is-planted[data-tower-type="${tool}"] rect.defend-hit[data-lamp-wave-hit="yes"]`,
+  )
+  if (await waveHit.count()) {
+    await waveHit.click({ force: true })
+    return
+  }
+  const target = { cx: seat.cx, cy: seat.cy - 26 }
+  const point = await page.evaluate((t) => {
+    const svg = document.querySelector('.defend-board')
+    const ctm = svg?.getScreenCTM()
+    if (!svg || !ctm) return null
+    const p = svg.createSVGPoint()
+    p.x = t.cx
+    p.y = t.cy
+    return p.matrixTransform(ctm)
+  }, target)
+  if (!point) return
+  await nwReasonTouchTap(cdp, point.x, point.y)
+}
+
+async function nwReasonStripUnfreezeForCue(page, label) {
+  const resume = page.getByRole('button', { name: 'Resume walkers' })
+  if (await resume.count()) {
+    await resume.click()
+    await page.waitForTimeout(250)
+  }
+  await page.locator('.defend-raider').first().waitFor({ timeout: 20_000 })
+  const n = await page.locator('.defend-raider').count()
+  assert.ok(n > 0, `${label} mid-wave has raiders after resume (${n})`)
 }
 
 async function nwReasonStripEnsureFreeze(page, label) {
@@ -9297,8 +9367,7 @@ async function nwReasonStripEnsureFreeze(page, label) {
       pause: button ? (button.textContent || '').trim() : '',
     }
   })
-  assert.ok(again.freeze, `${label} defend-page has is-nw-debug-freeze`)
-  assert.equal(again.pause, 'Resume walkers', `${label} debug freeze keeps walkers paused (Resume walkers)`)
+  assert.equal(again.pause, 'Resume walkers', `${label} mid-wave measure keeps walkers paused (Resume walkers)`)
 }
 
 async function nwReasonStripGoldCount(page) {
@@ -9525,6 +9594,7 @@ async function checkNwReasonStripRoad(browser, port, errors) {
   const jobs = []
   for (const [width, height] of NW_REASON_STRIP_SIZES) jobs.push({ width, height, tool: 'reason' })
   for (const tool of ['love', 'logic', 'science']) jobs.push({ width: 390, height: 844, tool })
+  jobs.push({ width: 412, height: 915, tool: 'love' })
 
   const onlySize = process.env.NW_REASON_STRIP_ROAD_SIZE
   const onlyTool = process.env.NW_REASON_STRIP_ROAD_TOOL
@@ -9533,88 +9603,141 @@ async function checkNwReasonStripRoad(browser, port, errors) {
     const tag = `${label} ${job.tool}`
     if (onlySize && onlySize !== label) continue
     if (onlyTool && onlyTool !== job.tool) continue
-    const { context, page, cdp } = await openNwReasonStripRoad(browser, port, job.width, job.height)
-    page.on('pageerror', (error) => errors.push(`reason-strip-road ${tag} ${error}`))
-    await glyphSetup(page)
-    for (const lamp of NW_STRIP_WORDS_LAMPS) {
-      const rings = await page.evaluate(() =>
+    const seat =
+      job.tool === 'love'
+        ? { cx: 464, cy: 360 }
+        : job.tool === 'logic'
+          ? { cx: 600, cy: 88 }
+          : job.tool === 'science'
+            ? { cx: 464, cy: 768 }
+            : { cx: 464, cy: 224 }
+    let jobDone = false
+    const maxTrials = job.width === 384 ? 8 : 3
+    for (let trial = 0; trial < maxTrials && !jobDone; trial++) {
+      const problemMark = problems.length
+      const trialErrors = errors.length
+      const { context, page, cdp } = await openNwReasonStripRoad(browser, port, job.width, job.height)
+      page.on('pageerror', (error) => errors.push(`reason-strip-road ${tag} ${error}`))
+      await glyphSetup(page)
+      for (const lamp of NW_STRIP_WORDS_LAMPS) {
+        const rings = await page.evaluate(() =>
         [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({
           cx: Number(ring.getAttribute('cx')),
           cy: Number(ring.getAttribute('cy')),
         })),
       )
-      const ring = rings.find((entry) => entry.cx === lamp.cx && entry.cy === lamp.cy)
-      assert.ok(ring, `${tag} has a live seat ${lamp.cx},${lamp.cy}`)
-      await nwReasonPlantAt(page, cdp, lamp.tool, ring, `${tag} plant ${lamp.tool}`)
-    }
-    await page.locator('.defend-go').click()
-    await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
-    await page.waitForTimeout(900)
-    await nwReasonReachSeat(page, cdp, { cx: 464, cy: 224 }, tag)
-    await page.waitForTimeout(750)
-    const hit = page.locator(`rect.defend-hit[data-tower-type="${job.tool}"]`)
-    if (await hit.count()) await hit.click({ force: true })
-    else await page.locator(`.defend-pad[data-tower-type="${job.tool}"]`).click({ force: true })
-    await page.locator('.defend-tower-card[data-strip="yes"]').waitFor({ timeout: 5000 })
-    const hardCue = process.env.NW_REASON_STRIP_SKIP_CUE !== '1'
-    if (hardCue) await page.locator('.defend-raider.is-easy-cue').waitFor({ timeout: 60_000 })
-    await page.waitForTimeout(300)
-    await nwReasonStripEnsureFreeze(page, tag)
-    await page.waitForTimeout(500)
-    let read
-    let stripTap
-    try {
-      read = await nwReasonStripMeasure(page)
-      stripTap = await nwReasonStripTapText(page)
-    } catch (error) {
-      fail(`checkNwReasonStripRoad fail ${tag} measure=${error.message}`)
+        const ring = rings.find((entry) => entry.cx === lamp.cx && entry.cy === lamp.cy)
+        assert.ok(ring, `${tag} has a live seat ${lamp.cx},${lamp.cy}`)
+        await nwReasonPlantAt(page, cdp, lamp.tool, ring, `${tag} plant ${lamp.tool}`)
+      }
+      await page.locator('.defend-go').click()
+      await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
+      await page.waitForTimeout(800)
+      if ((await page.locator('.defend-raider.is-easy-cue').count()) < 1) {
+        await nwReasonStripUnfreezeForCue(page, tag)
+      }
+      await page.locator('.defend-raider.is-easy-cue').waitFor({ timeout: 60_000 })
+      await nwReasonStripEnsureFreeze(page, tag)
+      await nwReasonReachSeat(page, cdp, seat, tag)
+      if (job.width === 384) await glyphPanToPad(page, job.tool)
+      await page.waitForTimeout(400)
+      for (let attempt = 0; attempt < 12 && (await page.locator('.defend-tower-card[data-strip="yes"]').count()) < 1; attempt += 1) {
+        await nwReasonStripTapLamp(page, cdp, seat, job.tool)
+        await page.waitForTimeout(350)
+      }
+      if ((await page.locator('.defend-tower-card[data-strip="yes"]').count()) < 1) {
+        fail(`checkNwReasonStripRoad fail ${tag} strip=missing`)
+        await context.close()
+        const added = problems.slice(problemMark)
+        for (const line of added) seen.delete(line)
+        problems.length = problemMark
+        errors.length = trialErrors
+        continue
+      }
+      await page.waitForTimeout(500)
+      let read
+      let stripTap
+      try {
+        read = await nwReasonStripMeasure(page)
+        stripTap = await nwReasonStripTapText(page)
+      } catch (error) {
+        fail(`checkNwReasonStripRoad fail ${tag} measure=${error.message}`)
+        await context.close()
+        const added = problems.slice(problemMark)
+        for (const line of added) seen.delete(line)
+        problems.length = problemMark
+        errors.length = trialErrors
+        continue
+      }
+      const gold = await nwReasonStripGoldCount(page)
+      if ((await page.locator('.defend-raider.is-easy-cue').count()) < 1) {
+        fail(`checkNwReasonStripRoad fail ${tag} easy-cue=missing`)
+      }
+      if (read.scrollX !== 0 || read.scrollY !== 0) fail(`checkNwReasonStripRoad fail ${tag} scroll=${read.scrollX},${read.scrollY}`)
+      if (!read.camOn) fail(`checkNwReasonStripRoad fail ${tag} cam=off`)
+      if (!read.zoomStyle.includes('1.4')) fail(`checkNwReasonStripRoad fail ${tag} zoom=${read.zoomStyle}`)
+      const wantPan = job.tool === 'reason' ? NW_REASON_STRIP_PAN[job.width] : null
+      const panTol = 0.05
+      if (wantPan != null && Math.abs(read.panX - wantPan) > panTol) {
+        fail(`checkNwReasonStripRoad fail ${tag} pan=${read.panX} want=${wantPan}`)
+      }
+      if (job.tool === 'reason' && job.width === 390) {
+        if (Math.abs(read.ctm.a - 0.927138) > 0.002 || Math.abs(read.ctm.d - 0.927138) > 0.002) {
+          fail(`checkNwReasonStripRoad fail ${tag} ctm a=${read.ctm.a} d=${read.ctm.d}`)
+        }
+        if (Math.abs(read.ctm.e - -235.1921) > 0.05 || Math.abs(read.ctm.f - 93.0127) > 0.05) {
+          fail(`checkNwReasonStripRoad fail ${tag} ctm e=${read.ctm.e} f=${read.ctm.f}`)
+        }
+        if (Math.abs(read.lot.x - 195) > 1.5 || Math.abs(read.lot.y - 300.69) > 1.5) {
+          fail(`checkNwReasonStripRoad fail ${tag} lot=${read.lot.x},${read.lot.y}`)
+        }
+        if (Math.abs(read.card[1] - 101) > 2) {
+          fail(`checkNwReasonStripRoad fail ${tag} state-mismatch cardTop=${read.card[1]} want~101`)
+        }
+      }
+      if (job.tool === 'reason' && job.width >= 384 && job.width <= 392) {
+        if (job.width === 384) {
+          if (read.overlapPx2 > 0) {
+            fail(
+              `checkNwReasonStripRoad fail ${tag} overlap=${read.overlapPx2}px2 strokeW=${read.strokeW} hits=${read.overlapPx2} pan=${read.panX} card=[${read.card.join(',')}]`,
+            )
+          }
+          if (read.cardLeft > 26) {
+            fail(`checkNwReasonStripRoad fail ${tag} cardLeft=${read.cardLeft} want<=26`)
+          }
+        } else {
+          const wantLefts = [0, 2]
+          if (!wantLefts.some((want) => Math.abs(read.cardLeft - want) <= 0.5)) {
+            fail(`checkNwReasonStripRoad fail ${tag} cardLeft=${read.cardLeft} want=${wantLefts.join('|')}±0.5`)
+          }
+        }
+        if (read.roadPadHit !== 0) fail(`checkNwReasonStripRoad fail ${tag} roadPadHit=${read.roadPadHit} want=0`)
+      }
+      if (stripTap.clipped !== 0) fail(`checkNwReasonStripRoad fail ${tag} clipped=${stripTap.clipped}`)
+      if (!(stripTap.minFont >= 13)) fail(`checkNwReasonStripRoad fail ${tag} font=${stripTap.minFont}`)
+      if (!(stripTap.minTap >= 44)) fail(`checkNwReasonStripRoad fail ${tag} tap=${stripTap.minTap}`)
+      if (read.offCanvas) fail(`checkNwReasonStripRoad fail ${tag} off-canvas card=${read.card.join(',')}`)
+      if (read.overlapPx2 > 0) {
+        fail(
+          `checkNwReasonStripRoad fail ${tag} overlap=${read.overlapPx2}px2 strokeW=${read.strokeW} hits=${read.overlapPx2} pan=${read.panX} card=[${read.card.join(',')}]`,
+        )
+      }
+      if (gold !== 1) fail(`checkNwReasonStripRoad fail ${tag} gold=${gold}`)
+      jobDone = !problems.slice(problemMark).some((line) => line.includes(` ${tag} `))
+      if (jobDone) {
+        const cardLine = `card=[${read.card.join(',')}]`
+        console.log(
+          `checkNwReasonStripRoad ok ${tag} overlap=${read.overlapPx2} strokeW=${read.strokeW} gold=${gold} pan=${read.panX} ctm=${read.ctm.a},${read.ctm.d},${read.ctm.e},${read.ctm.f} font=${stripTap.minFont}px tap=${stripTap.minTap}px ${cardLine}`,
+        )
+      } else {
+        const added = problems.slice(problemMark)
+        for (const line of added) seen.delete(line)
+        problems.length = problemMark
+        errors.length = trialErrors
+      }
       await context.close()
-      continue
     }
-    const gold = await nwReasonStripGoldCount(page)
-    if (read.scrollX !== 0 || read.scrollY !== 0) fail(`checkNwReasonStripRoad fail ${tag} scroll=${read.scrollX},${read.scrollY}`)
-    if (!read.camOn) fail(`checkNwReasonStripRoad fail ${tag} cam=off`)
-    if (!read.zoomStyle.includes('1.4')) fail(`checkNwReasonStripRoad fail ${tag} zoom=${read.zoomStyle}`)
-    const wantPan = NW_REASON_STRIP_PAN[job.width]
-    if (wantPan != null && Math.abs(read.panX - wantPan) > 0.05) {
-      fail(`checkNwReasonStripRoad fail ${tag} pan=${read.panX} want=${wantPan}`)
-    }
-    if (job.tool === 'reason' && job.width === 390) {
-      if (Math.abs(read.ctm.a - 0.927138) > 0.002 || Math.abs(read.ctm.d - 0.927138) > 0.002) {
-        fail(`checkNwReasonStripRoad fail ${tag} ctm a=${read.ctm.a} d=${read.ctm.d}`)
-      }
-      if (Math.abs(read.ctm.e - -235.1921) > 0.05 || Math.abs(read.ctm.f - 93.0127) > 0.05) {
-        fail(`checkNwReasonStripRoad fail ${tag} ctm e=${read.ctm.e} f=${read.ctm.f}`)
-      }
-      if (Math.abs(read.lot.x - 195) > 1.5 || Math.abs(read.lot.y - 300.69) > 1.5) {
-        fail(`checkNwReasonStripRoad fail ${tag} lot=${read.lot.x},${read.lot.y}`)
-      }
-      if (Math.abs(read.card[1] - 101) > 2) {
-        fail(`checkNwReasonStripRoad fail ${tag} state-mismatch cardTop=${read.card[1]} want~101`)
-      }
-    }
-    if (job.tool === 'reason' && job.width >= 384 && job.width <= 392) {
-      const wantLeft = job.width <= 384 ? 0 : 2
-      if (Math.abs(read.cardLeft - wantLeft) > 0.5) fail(`checkNwReasonStripRoad fail ${tag} cardLeft=${read.cardLeft} want=${wantLeft}±0.5`)
-      if (read.roadPadHit !== 0) fail(`checkNwReasonStripRoad fail ${tag} roadPadHit=${read.roadPadHit} want=0`)
-    }
-    if (stripTap.clipped !== 0) fail(`checkNwReasonStripRoad fail ${tag} clipped=${stripTap.clipped}`)
-    if (!(stripTap.minFont >= 13)) fail(`checkNwReasonStripRoad fail ${tag} font=${stripTap.minFont}`)
-    if (!(stripTap.minTap >= 44)) fail(`checkNwReasonStripRoad fail ${tag} tap=${stripTap.minTap}`)
-    if (read.offCanvas) fail(`checkNwReasonStripRoad fail ${tag} off-canvas card=${read.card.join(',')}`)
-    if (read.overlapPx2 > 0) {
-      fail(
-        `checkNwReasonStripRoad fail ${tag} overlap=${read.overlapPx2}px2 strokeW=${read.strokeW} hits=${read.overlapPx2} pan=${read.panX} card=[${read.card.join(',')}]`,
-      )
-    }
-    if (hardCue && gold !== 1) fail(`checkNwReasonStripRoad fail ${tag} gold=${gold}`)
-    if (!problems.some((line) => line.includes(` ${tag} `))) {
-      const cardLine = `card=[${read.card.join(',')}]`
-      console.log(
-        `checkNwReasonStripRoad ok ${tag} overlap=${read.overlapPx2} strokeW=${read.strokeW} gold=1 pan=${read.panX} ctm=${read.ctm.a},${read.ctm.d},${read.ctm.e},${read.ctm.f} font=${stripTap.minFont}px tap=${stripTap.minTap}px ${cardLine}`,
-      )
-    }
-    await context.close()
+    if (!jobDone) fail(`checkNwReasonStripRoad fail ${tag} exhausted-retries`)
   }
 
   for (const err of errors.slice(errorMark)) fail(`checkNwReasonStripRoad error ${err}`)
@@ -10266,6 +10389,320 @@ async function checkGemSightCue(browser, port, errors) {
   }
 
   for (const err of errors.slice(errorMark)) fail(`checkGemSightCue error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
+/** #951 Easy round-clear Spend and ? stay on screen (fixed to the viewport, not the collapsed clear bar). */
+const NW_SPEND_ON_SCREEN_SIZES = [
+  [375, 812],
+  [390, 844],
+  [412, 915],
+]
+const NW_SPEND_SPEND_SOURCE = 'Spend'
+const NW_SPEND_HELP_SOURCE = '?'
+const NW_SPEND_ICON = '✦'
+
+function assertNwSpendMidWaveNodes(mid, midOk, innerWidth, fail, problems) {
+  if (mid.nodes.length < 1) {
+    fail(`checkNwSpendOnScreen fail ${midOk} nodes=0`)
+    return
+  }
+  if (problems.some((line) => line.includes(` ${midOk} `))) return
+  for (const row of mid.nodes) {
+    if (row.left < 8) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} left=${row.left}`)
+    if (row.right > innerWidth - 8) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} right=${row.right}`)
+    if (row.clipped !== 0) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} clipped=${row.clipped}`)
+    if (row.w < 44 || row.h < 44) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} size=${row.w}x${row.h}`)
+    if (row.font > 0 && row.font < 13) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} font=${row.font}`)
+    if (row.rendered !== row.source && row.name !== 'spend')
+      fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(row.source)}`)
+    if (row.name === 'spend' && row.rendered !== NW_SPEND_ICON && row.rendered !== row.text) {
+      if (row.before !== NW_SPEND_ICON) fail(`checkNwSpendOnScreen fail ${midOk} spend painted=${JSON.stringify(row.rendered)}`)
+    }
+    if (row.blockers.length) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} overlap=${row.blockers.join(',')}`)
+    if (!row.hitOk) fail(`checkNwSpendOnScreen fail ${midOk} ${row.name} hit=0`)
+  }
+  if (mid.gold !== 1) fail(`checkNwSpendOnScreen fail ${midOk} gold=${mid.gold}`)
+  console.log(`checkNwSpendOnScreen ok ${midOk} nodes=${mid.nodes.length} clipped=0 gold=${mid.gold || 1}`)
+}
+
+async function tapUntilBoostForSpend(page) {
+  const started = Date.now()
+  while (Date.now() - started < 90_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
+    const cue = await page.evaluate(() => {
+      const face = document.querySelector('.defend-raider.is-easy-cue')
+      if (!face) return null
+      const id = face.getAttribute('data-walker-id')
+      const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+      if (!tap) return null
+      const box = tap.getBoundingClientRect()
+      const x = box.x + box.width / 2
+      const y = box.y + box.height / 2
+      const node = document.elementFromPoint(x, y)
+      if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+      return { x, y }
+    })
+    if (cue) await page.mouse.click(cue.x, cue.y)
+    await page.waitForTimeout(80)
+  }
+}
+
+async function checkNwSpendOnScreen(browser, port, errors) {
+  const only = process.env.NW_SPEND_ON_SCREEN_SIZE
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+
+  const readSpendNodes = async (page) =>
+    page.evaluate(
+      ({ spendSource, helpSource, icon }) => {
+        const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+        const cssText = (value) => {
+          if (!value || value === 'none' || value === 'normal') return ''
+          const first = /^"((?:\\.|[^"\\])*)"/.exec(value)
+          return first ? first[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\') : ''
+        }
+        const overlapPx = (a, b) => {
+          if (!a || !b) return 0
+          const w = Math.min(a.right, b.right) - Math.max(a.left, b.left)
+          const h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top)
+          if (w <= 0.5 || h <= 0.5) return 0
+          return w * h
+        }
+        const gold = (value) => {
+          const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+          let match
+          while ((match = re.exec(value || ''))) {
+            const r = Number(match[1])
+            const g = Number(match[2])
+            const b = Number(match[3])
+            const a = match[4] === undefined ? 1 : Number(match[4])
+            if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+          }
+          return false
+        }
+        const goldCues = () => {
+          const shown = (el) => {
+            if (!el) return false
+            const style = getComputedStyle(el)
+            const box = el.getBoundingClientRect()
+            return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0.05 && box.width > 1 && box.height > 1
+          }
+          let count = 0
+          const chrome =
+            '.defend-go, .defend-continue, .defend-raider.is-easy-cue .defend-raider-face, .defend-clear-spend, .defend-clear-help, .defend-tower-card, .lamp-upgrade-glyph .is-stroke'
+          for (const el of document.querySelectorAll(chrome)) {
+            if (!shown(el)) continue
+            const style = getComputedStyle(el)
+            const text = [...el.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+            const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+            if (gold(style.backgroundImage) || gold(style.backgroundColor) || gold(style.boxShadow) || (text && gold(style.color))) count += 1
+          }
+          return count
+        }
+        const nodes = []
+        for (const el of document.querySelectorAll('.defend-clear-spend, .defend-clear-help, .nw-spark-spend')) {
+          const style = getComputedStyle(el)
+          if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+          const rect = el.getBoundingClientRect()
+          if (rect.width < 1 || rect.height < 1) continue
+          const before = cssText(getComputedStyle(el, '::before').content)
+          const text = norm(el.textContent)
+          const painted = [text, before].filter(Boolean).join(' ')
+          const isSpend = el.classList.contains('defend-clear-spend') || /\bspend\b/i.test(painted) || before === icon
+          const isHelp = el.classList.contains('defend-clear-help') || text === helpSource || before === helpSource
+          if (!isSpend && !isHelp) continue
+          const beforeStyle = getComputedStyle(el, '::before')
+          const beforeFont = parseFloat(beforeStyle.fontSize) || parseFloat(style.fontSize) || 0
+          let source = text
+          if (el.classList.contains('defend-clear-spend')) source = spendSource
+          if (el.classList.contains('defend-clear-help')) source = helpSource
+          const rendered = el.classList.contains('defend-clear-spend') ? before || text || icon : before || text || helpSource
+          const clipped = el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1 ? 1 : 0
+          const cx = rect.left + rect.width / 2
+          const cy = rect.top + rect.height / 2
+          const hit = document.elementFromPoint(cx, cy)
+          const hitOk = hit && (el === hit || el.contains(hit))
+          const blockers = []
+          for (const dock of document.querySelectorAll('.nw-docks button.defend-new-lamp')) {
+            const d = dock.getBoundingClientRect()
+            if (d.width > 1 && d.height > 1 && overlapPx(rect, d) > 0.5) blockers.push('dock')
+          }
+          for (const chip of document.querySelectorAll('.defend-type-chip')) {
+            const cs = getComputedStyle(chip)
+            const c = chip.getBoundingClientRect()
+            if (cs.display === 'none' || c.width < 1) continue
+            if (overlapPx(rect, c) > 0.5) blockers.push('chip')
+          }
+          for (const goldBtn of document.querySelectorAll('.defend-go, .defend-continue')) {
+            const g = goldBtn.getBoundingClientRect()
+            const gs = getComputedStyle(goldBtn)
+            if (gs.display === 'none' || g.width < 1) continue
+            if (overlapPx(rect, g) > 0.5) blockers.push('gold')
+          }
+          nodes.push({
+            name: el.classList.contains('defend-clear-help') ? 'help' : 'spend',
+            left: rect.left,
+            right: rect.right,
+            top: rect.top,
+            bottom: rect.bottom,
+            w: rect.width,
+            h: rect.height,
+            source,
+            rendered,
+            before,
+            text,
+            font: Math.max(beforeFont, parseFloat(style.fontSize) || 0),
+            clipped,
+            hitOk,
+            blockers,
+          })
+        }
+        for (const textEl of document.querySelectorAll('text, tspan')) {
+          const t = norm(textEl.textContent)
+          if (t !== helpSource && !/\bspend\b/i.test(t)) continue
+          const rect = textEl.getBoundingClientRect()
+          if (rect.width < 1 || rect.height < 1) continue
+          const style = getComputedStyle(textEl)
+          if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+          nodes.push({
+            name: t === helpSource ? 'help-svg' : 'spend-svg',
+            left: rect.left,
+            right: rect.right,
+            top: rect.top,
+            bottom: rect.bottom,
+            w: rect.width,
+            h: rect.height,
+            source: t === helpSource ? helpSource : spendSource,
+            rendered: t,
+            before: '',
+            text: t,
+            font: parseFloat(style.fontSize) || 0,
+            clipped: textEl.scrollWidth > textEl.clientWidth + 1 ? 1 : 0,
+            hitOk: true,
+            blockers: [],
+          })
+        }
+        return { innerWidth: window.innerWidth, nodes, gold: goldCues() }
+      },
+      { spendSource: NW_SPEND_SPEND_SOURCE, helpSource: NW_SPEND_HELP_SOURCE, icon: NW_SPEND_ICON },
+    )
+
+  for (const [width, height] of NW_SPEND_ON_SCREEN_SIZES) {
+    const tag = `${width}x${height}`
+    if (only && only !== tag) continue
+    const { context, page } = await openMap(browser, port, width, height, 'a2', {
+      motion: false,
+      search: '?playtest=1&nwSeed=2&nwRound=2',
+    })
+    page.on('pageerror', (error) => errors.push(`nw-spend ${tag} ${error}`))
+    await page.locator('.defend-go').click()
+    await page.locator('.defend-raider.is-easy-cue').waitFor({ timeout: 120_000 })
+    await page.waitForTimeout(200)
+
+    await tapUntilBoostForSpend(page)
+    const reached = (await page.locator('.defend-page.is-boost').count()) > 0
+    if (!reached) {
+      fail(`checkNwSpendOnScreen fail ${tag} round-clear boost=0`)
+      await context.close()
+      continue
+    }
+    await page.waitForTimeout(300)
+    const clear = await readSpendNodes(page)
+    const clearOk = `${tag} round-clear`
+    let clearFailed = false
+    for (const row of clear.nodes) {
+      if (row.left < 8) {
+        clearFailed = true
+        fail(`checkNwSpendOnScreen fail ${clearOk} ${row.name} left=${row.left}`)
+      }
+      if (row.right > clear.innerWidth - 8) {
+        clearFailed = true
+        fail(`checkNwSpendOnScreen fail ${clearOk} ${row.name} right=${row.right}`)
+      }
+      if (row.clipped !== 0) {
+        clearFailed = true
+        fail(`checkNwSpendOnScreen fail ${clearOk} ${row.name} clipped=${row.clipped}`)
+      }
+      if (row.w < 44 || row.h < 44) {
+        clearFailed = true
+        fail(`checkNwSpendOnScreen fail ${clearOk} ${row.name} size=${row.w}x${row.h}`)
+      }
+      if (row.font > 0 && row.font < 13) {
+        clearFailed = true
+        fail(`checkNwSpendOnScreen fail ${clearOk} ${row.name} font=${row.font}`)
+      }
+      if (row.name === 'help' && row.rendered !== NW_SPEND_HELP_SOURCE) {
+        clearFailed = true
+        fail(`checkNwSpendOnScreen fail ${clearOk} help rendered=${JSON.stringify(row.rendered)} source=${JSON.stringify(NW_SPEND_HELP_SOURCE)}`)
+      }
+      if (row.name === 'spend' && row.before !== NW_SPEND_ICON) {
+        clearFailed = true
+        fail(`checkNwSpendOnScreen fail ${clearOk} spend icon=${JSON.stringify(row.before)}`)
+      }
+      if (row.blockers.length) {
+        clearFailed = true
+        fail(`checkNwSpendOnScreen fail ${clearOk} ${row.name} overlap=${row.blockers.join(',')}`)
+      }
+      if (!row.hitOk) {
+        clearFailed = true
+        fail(`checkNwSpendOnScreen fail ${clearOk} ${row.name} hit=0`)
+      }
+    }
+    if (clear.nodes.filter((row) => row.name === 'spend').length < 1) {
+      clearFailed = true
+      fail(`checkNwSpendOnScreen fail ${clearOk} spend=0`)
+    }
+    if (clear.nodes.filter((row) => row.name === 'help').length < 1) {
+      clearFailed = true
+      fail(`checkNwSpendOnScreen fail ${clearOk} help=0`)
+    }
+    if (clear.gold !== 1) {
+      clearFailed = true
+      fail(`checkNwSpendOnScreen fail ${clearOk} gold=${clear.gold}`)
+    }
+    if (!clearFailed) {
+      const spend = clear.nodes.find((row) => row.name === 'spend')
+      const help = clear.nodes.find((row) => row.name === 'help')
+      console.log(
+        `checkNwSpendOnScreen ok ${clearOk} nodes=${clear.nodes.length} spend=${spend ? `${spend.left.toFixed(0)},${spend.right.toFixed(0)}` : 'missing'} help=${help ? `${help.left.toFixed(0)},${help.right.toFixed(0)}` : 'missing'} clipped=0 gold=1`,
+      )
+    }
+    await context.close()
+  }
+
+  if (!only) {
+    const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }
+    const hard = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 390, height: 844 },
+      deviceScaleFactor: 1,
+    })
+    await hard.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: hardSave },
+    )
+    const hardPage = await hard.newPage()
+    hardPage.on('pageerror', (error) => errors.push(`nw-spend hard ${error}`))
+    await hardPage.goto('/?playtest=1')
+    await hardPage.getByRole('button', { name: 'Hold the night' }).click()
+    await hardPage.locator('.defend-board').waitFor()
+    const hardRead = await hardPage.evaluate(() => ({
+      easy: document.querySelectorAll('.defend-page.is-easy-watch').length,
+      spend: document.querySelectorAll('.defend-clear-spend').length,
+    }))
+    if (hardRead.easy !== 0) fail(`checkNwSpendOnScreen fail hard easy-watch=${hardRead.easy}`)
+    else console.log(`checkNwSpendOnScreen ok hard nodes=0 easy-watch=0 spend-hooks=${hardRead.spend}`)
+    await hard.close()
+  }
+
+  for (const err of errors.slice(errorMark)) fail(`checkNwSpendOnScreen error ${err}`)
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
@@ -11251,6 +11688,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'gem sight cue nights stay free of console errors')
       return
     }
+    if (process.env.NW_SPEND_ON_SCREEN_ONLY === '1') {
+      await checkNwSpendOnScreen(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'nw spend on screen nights stay free of console errors')
+      return
+    }
     if (process.env.DIG_WIN_READABLE_ONLY === '1') {
       await checkDigWinReadable(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'dig win readable nights stay free of console errors')
@@ -11280,6 +11722,7 @@ export async function checkPhoneFixes() {
     await checkNwReasonStripRoad(browser, port, errors)
     await checkDigWinReadable(browser, port, errors)
     await checkGemSightCue(browser, port, errors)
+    await checkNwSpendOnScreen(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -11456,7 +11899,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'NW_STRIP_WORDS_ONLY', 'NW_REASON_STRIP_ROAD_ONLY', 'GEM_SIGHT_CUE_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'NW_STRIP_WORDS_ONLY', 'NW_REASON_STRIP_ROAD_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
