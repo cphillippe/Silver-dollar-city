@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.600',
+    title: 'Easy Lock In: rotate the first-session encode',
+    when: '2026-11-23',
+    items: [
+      'Each Easy lesson’s first Lock In now uses a different recall shape — map spot, think-first, or flip card — so the golden path does not feel like the same screen on repeat.',
+      'Kept cards still use Quick Review only; Medium and Hard are unchanged.',
+      'Refs #963.',
+    ],
+  },
+  {
     version: '1.4.596',
     title: 'Night Watch: Spend and help on screen',
     when: '2026-11-22',

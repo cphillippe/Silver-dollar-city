@@ -21,6 +21,8 @@ import { lineTakeaway } from '../src/lib/successBeat.ts'
 import { SOURCE_DIG_AGAIN } from '../src/lib/sourceDig.ts'
 import { GEM_SIGHT_CUE } from '../src/lib/gemJar.ts'
 import { buildGemPuzzle } from '../src/lib/gemSearch.ts'
+import { APP_VERSION } from '../src/config/app.ts'
+import { runLockInRotateCheck } from './check-lockin-rotate.mjs'
 
 const SAVE = {
   kind: SAVE_KIND,
@@ -9137,6 +9139,10 @@ async function checkNwStripWords(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+export async function checkLockInRotate(browser, port, errors) {
+  await runLockInRotateCheck(browser, port, errors)
+}
+
 /** #964 Easy golden-path Dig DUG! (wb-women) — readable secondaries and takeaway gap above Lock In. */
 const DIG_WIN_READABLE_SIZES = [
   [375, 667],
@@ -9512,7 +9518,7 @@ function gemSightSave() {
   return {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.595',
+    appVersion: '1.4.600',
     savedAt: now.toISOString(),
     progress: {
       started: true,
@@ -9755,7 +9761,7 @@ async function checkGemSightCue(browser, port, errors) {
     const hardSave = {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.595',
+      appVersion: '1.4.600',
       savedAt: new Date().toISOString(),
       progress: { ...SAVE.progress, easyMode: false, started: true, matchLifetime: 5000, matchSkillSeen: 1 },
     }
@@ -11021,6 +11027,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'easy one-gold screens stay free of console errors')
       return
     }
+    if (process.env.LOCKIN_ROTATE_ONLY === '1') {
+      await checkLockInRotate(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'lockin rotate nights stay free of console errors')
+      return
+    }
     if (process.env.NW_DOCK_GOLD_ONLY === '1') {
       await checkNwDockGold(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'dock gold nights stay free of console errors')
@@ -11092,6 +11103,7 @@ export async function checkPhoneFixes() {
       return
     }
     await checkEasyOneGold(browser, port, errors)
+    await checkLockInRotate(browser, port, errors)
     await checkGemHintSlot(browser, port, errors)
     await checkTabletBeginGold(browser, port, errors)
     await checkNightRun905(browser, port, errors)
@@ -11286,7 +11298,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'LOCKIN_ROTATE_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')

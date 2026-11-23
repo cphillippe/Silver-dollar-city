@@ -3,7 +3,8 @@ import { shuffle } from '../lib/shuffle'
 import { takeawayLines, type EvidenceBrief } from '../content/evidence'
 import { STORY } from '../content/story'
 import { EASY, easyFacingLine, easyReasonHint, easyWhyLine, isEasy, uniqueHoldChoices } from '../lib/easy'
-import { LockInRecall } from '../easyTrail/lockIn/LockInRecall'
+import { LockInEncodeRecall } from '../easyTrail/lockIn/LockInEncodeRecall'
+import { encodeFormatForLine } from '../easyTrail/review/encodeFormat'
 import { WhyBlastPlay } from './challenges/WhyBlastPlay'
 import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
@@ -203,6 +204,8 @@ export function RecallGate({
     return (
       <section
         className={`recall-gate is-encode is-easy-hold is-why-blast ${recalled ? '' : 'is-lockin-recall'}`}
+        data-encode-format={recalled ? undefined : encodeFormatForLine(brief.id)}
+        data-line-id={brief.id}
         aria-label={STORY.takeaway}
       >
         <p className="eyebrow">{EASY.saved}</p>
@@ -216,7 +219,12 @@ export function RecallGate({
             onDone={(result) => settle(result.clean)}
           />
         ) : (
-          <LockInRecall id={brief.id} claim={brief.claim} onDone={() => setRecalled(true)} />
+          <LockInEncodeRecall
+            id={brief.id}
+            claim={brief.claim}
+            format={encodeFormatForLine(brief.id)}
+            onDone={() => setRecalled(true)}
+          />
         )}
       </section>
     )

@@ -197,10 +197,8 @@ async function finishStrip(page, id) {
     await page.getByRole('button', { name: line, exact: true }).click()
   }
   await page.locator('.strip-verse blockquote').waitFor()
-  // 1.4.567 (#843): the Easy follow-up asks for the main idea before the why slide.
-  await page.getByRole('button', { name: 'Show me' }).click()
-  await page.getByRole('button', { name: 'I had it' }).click()
-  await page.locator('.why-chip').first().waitFor()
+  const { advanceEncodeRecallAsk } = await import('./check-lockin-rotate.mjs')
+  await advanceEncodeRecallAsk(page, id)
   await page.evaluate(() => {
     window.scrollTo(0, 0)
     document.querySelector('.app-body')?.scrollTo(0, 0)

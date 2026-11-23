@@ -18,7 +18,7 @@ export function LockInRecall({ id, claim, onDone }: LockInRecallProps) {
 
   if (!revealed) {
     return (
-      <div className="lockin-recall is-ask">
+      <div className="lockin-recall is-ask" data-encode-format="A">
         <p className="lockin-recall-prompt">What&apos;s the main idea?</p>
         <div className="lockin-recall-cover" aria-hidden="true" />
         <div className="cta-dock">
@@ -38,7 +38,7 @@ export function LockInRecall({ id, claim, onDone }: LockInRecallProps) {
   }
 
   return (
-    <div className="lockin-recall is-reveal">
+    <div className="lockin-recall is-reveal" data-encode-format="A">
       <p className="lockin-recall-claim" role="status">
         {easyFacingLine(id, claim)}
       </p>

@@ -18,6 +18,7 @@ import { evidenceForTier } from '../src/content/evidence.ts'
 import { QUIET_PAUSE_BLOCKED_VIEWS, lockInQuizBlocksPause, quietPauseAllowed } from '../src/config/ads.ts'
 import { scenePauseMountsOn } from '../src/config/ads.ts'
 import { EASY_LINE_ORDER } from '../src/easyTrail/trail/loop.ts'
+import { encodeFormatForLine } from '../src/easyTrail/review/encodeFormat.ts'
 import { pickFormat } from '../src/easyTrail/review/reviewFormat.ts'
 import { localDateKey } from '../src/lib/dates.ts'
 import { easyFacingLine, easyWhyLine } from '../src/lib/easy.ts'
@@ -95,7 +96,7 @@ const debtClaim = easyFacingLine('ph-debt', easyBrief('ph-debt').claim)
 assert.ok(debtClaim.length > 10, 'ph-debt Easy claim is live (D2)')
 
 // Version, changelog.
-assert.equal(APP_VERSION, '1.4.596')
+assert.equal(APP_VERSION, '1.4.600')
 assert.equal(JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version, APP_VERSION)
 const lockInRow = CHANGELOG.find((note) => note.version === '1.4.567')
 assert.ok(lockInRow, 'the 1.4.567 Lock In row is shipped')
@@ -151,10 +152,11 @@ assert.match(blastSrc, /if \(busyRef\.current/, 'picks are guarded by a ref lock
 
 // B1: no claim pick on Easy encode.
 assert.doesNotMatch(recallSrc, /easySortClaimPick/)
-assert.match(recallSrc, /<LockInRecall/)
+assert.match(recallSrc, /<LockInEncodeRecall/)
 
-// B11: encode write carries format A through the existing field.
-assert.match(holdSrc, /kind: 'encode'[\s\S]*?format: 'A'/)
+// B11: encode write carries the rotated format through the existing field.
+assert.match(holdSrc, /kind: 'encode'[\s\S]*?format: encodeFormatForLine\(quizBrief\.id\)/)
+assert.match(recallSrc, /encodeFormatForLine\(brief\.id\)/)
 
 // B10: kept card is the shipped QuickReview with the Home gates.
 assert.match(holdSrc, /<QuickReview[\s\S]*?formatsACOnly[\s\S]*?skipHonesty/)
@@ -306,7 +308,7 @@ const progressOf = (page) =>
 
 async function openLockIn(page) {
   await page.getByRole('button', { name: /Lock In/ }).last().click()
-  await page.locator('.lockin-recall.is-ask').waitFor()
+  await page.locator('[data-encode-format], .lockin-encode.is-ask, .lockin-recall.is-ask').first().waitFor()
 }
 
 async function domHas(page, text) {
@@ -318,7 +320,7 @@ async function domHas(page, text) {
 
 /** One screen: one gold cue (and which one), font floors, no sideways scroll, 44px taps. */
 async function assertScreen(page, label, goldMatch) {
-  const gold = await page.evaluate(goldCues)
+  const gold = await page.evaluate(keptGoldCues)
   assert.equal(gold.length, 1, `${label}: exactly one gold cue, got [${gold.join(' | ')}]`)
   assert.match(gold[0], goldMatch, `${label}: the gold cue is ${goldMatch}, got ${gold[0]}`)
   assert.deepEqual(await page.evaluate(fontViolations), [], `${label}: font floors`)
@@ -448,18 +450,45 @@ function countOf(haystack, needle) {
 async function recallToSlide(page, viewport, facts, { notYet = false, shots = true, frames = true, tag = '' } = {}) {
   const claimProbe = facts.claimBare.split(/[.!?]/)[0]
   assert.ok(claimProbe.length > 12)
+  const format = encodeFormatForLine(facts.id)
   // 1. recall
   assert.equal(await domHas(page, claimProbe), false, `${tag}recall: the claim is not in the DOM`)
   assert.equal(await page.locator('.recall-card, .recall-choices, .why-chip').count(), 0, `${tag}recall: no claim-pick cards`)
-  assert.equal((await page.locator('.lockin-recall-prompt').innerText()).trim(), "What's the main idea?")
-  assert.equal((await page.locator('.lockin-recall button').allInnerTexts()).join('|'), 'Show me')
-  await assertScreen(page, `${tag}recall`, /lockin-recall-show/)
+  if (format === 'A') {
+    assert.equal((await page.locator('.lockin-recall-prompt').innerText()).trim(), "What's the main idea?")
+    assert.equal((await page.locator('.lockin-recall button').allInnerTexts()).join('|'), 'Show me')
+    await assertScreen(page, `${tag}recall`, /lockin-recall-show/)
+  } else if (format === 'B') {
+    assert.equal((await page.locator('.lockin-encode-b .quick-review-prompt').innerText()).trim(), 'Think first…')
+    await page.waitForFunction(
+      () => {
+        const fill = document.querySelector('.lockin-encode-b .quick-review-think-fill')
+        return fill && fill.getBoundingClientRect().width > 2
+      },
+      { timeout: 2000 },
+    )
+    await assertScreen(page, `${tag}recall`, /quick-review-think-fill/)
+  } else {
+    assert.equal((await page.locator('.lockin-encode-c .quick-review-prompt-title').innerText()).trim(), "What's the main idea?")
+    await assertScreen(page, `${tag}recall`, /quick-review-(map-tap|plot-hit)/)
+  }
   if (shots) await shot(page, viewport, `${tag}1-recall`)
   const before = JSON.stringify(await progressOf(page))
 
   // 2. reveal
-  const reveal = () => page.getByRole('button', { name: 'Show me' }).click()
-  if (frames) {
+  const reveal = async () => {
+    if (format === 'A') {
+      await page.getByRole('button', { name: 'Show me' }).click()
+      return
+    }
+    if (format === 'B') {
+      await page.locator('.lockin-encode.is-reveal').waitFor({ timeout: 6000 })
+      return
+    }
+    const plotId = lociStampFor(facts.id).plotId
+    await page.locator(`[data-plot-id="${plotId}"]`).click()
+  }
+  if (frames && format === 'A') {
     await sample(
       page,
       `${tag}recall→reveal`,
@@ -468,17 +497,23 @@ async function recallToSlide(page, viewport, facts, { notYet = false, shots = tr
         had: { selector: '.lockin-recall-had', count: 1, windowMs: 600 },
         notYet: { selector: '.lockin-recall-not-yet', count: 1, windowMs: 600 },
       },
-      reveal,
+      () => reveal(),
       700,
     )
   } else {
     await reveal()
+    if (format === 'B') {
+      await page.locator('.lockin-encode.is-reveal .lockin-recall-claim').waitFor({ timeout: 6000 })
+    }
   }
   const text = (await page.locator('.lockin-recall-claim').innerText()).trim()
   assert.equal(text, facts.claim, `${tag}reveal: shows the live Easy claim`)
   const claimSize = await page.locator('.lockin-recall-claim').evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
   assert.ok(claimSize >= 14, `${tag}reveal: claim ${claimSize}px is 14px or more`)
-  assert.equal((await page.locator('.lockin-recall button').allInnerTexts()).join('|'), 'I had it|Not yet')
+  assert.equal(
+    (await page.locator('.lockin-recall-had, .lockin-recall-not-yet').allInnerTexts()).join('|'),
+    'I had it|Not yet',
+  )
   await assertScreen(page, `${tag}reveal`, /lockin-recall-had/)
   const notYetGold = await page.locator('.lockin-recall-not-yet').evaluate((el) => {
     const st = getComputedStyle(el)
@@ -625,7 +660,7 @@ async function flowA(viewport, reduced) {
     await page.waitForTimeout(400)
     assert.equal(await page.evaluate(() => window.__scrolls), 1, `${tag}Continue makes exactly one route change`)
     state = await progressOf(page)
-    assert.equal(state.memory['ph-road'].lastFormat, 'A', `${tag}encode write sets lastFormat A`)
+    assert.equal(state.memory['ph-road'].lastFormat, encodeFormatForLine('ph-road'), `${tag}encode write sets lastFormat`)
     assert.ok(state.held.includes('ph-road'))
     assert.deepEqual(state.lessonScore ?? {}, {}, `${tag}clean=false: no tier advance after Continue`)
     assert.notEqual(state.lessonTier?.['ph-road'], 'medium')
@@ -670,7 +705,7 @@ async function flowB(viewport) {
     const state = await progressOf(page)
     assert.deepEqual(state.lessonScore ?? {}, {}, 'miss 2: tier not advanced')
     assert.notEqual(state.lessonTier?.['ph-road'], 'medium')
-    assert.equal(state.memory['ph-road'].lastFormat, 'A')
+    assert.equal(state.memory['ph-road'].lastFormat, encodeFormatForLine('ph-road'))
   })
 }
 
@@ -699,7 +734,7 @@ async function flowC(viewport) {
     const state = await progressOf(page)
     assert.ok(state.lessonScore?.['ph-road'] > 0, 'a clean slide advances the tier score')
     assert.equal(state.lessonTier['ph-road'], 'medium')
-    assert.equal(state.memory['ph-road'].lastFormat, 'A')
+    assert.equal(state.memory['ph-road'].lastFormat, encodeFormatForLine('ph-road'))
   })
 }
 
@@ -734,7 +769,7 @@ async function openDebugLockIn(page) {
 await session({ viewport: VIEWPORTS[0], seed: seedLine(0) }, async (page) => {
   const facts = lineFacts('ph-road')
   await openDebugLockIn(page)
-  await page.locator('.lockin-recall.is-ask').waitFor()
+  await page.locator('[data-encode-format], .lockin-encode.is-ask, .lockin-recall.is-ask').first().waitFor()
   await recallToSlide(page, VIEWPORTS[0], facts, { shots: false, frames: false, tag: 'debug-fresh-' })
   await page.locator('.why-chip', { hasText: easyWhyLine(facts.right) }).click()
   await page.locator('.recall-done').waitFor()
