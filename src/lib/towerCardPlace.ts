@@ -435,7 +435,7 @@ export function placeTowerCard(
   /** #988: 384–392 phones pin the Reason-style strip to the left edge like wider frames. */
     const frameW = defendFrameWidth()
     if (stripLeftOfLamp && frameW >= 384 && frameW <= 392) {
-      const pinLeft = 2
+      const pinLeft = frameW <= 384 ? 0 : 2
       const pinTops = [topAbove]
       for (let lift = 16; lift <= 160; lift += 16) {
         pinTops.push(Math.max(MARGIN, topAbove - lift))

@@ -4795,7 +4795,7 @@ const EASY_ONE_GOLD_MS = 1500
 const EASY_GOLD_BASE_1579 = {
   '375x667 home-first': { '2 Help': { x: 131, y: 561, w: 113, h: 48 } },
   '375x667 home-after-l1': { '3 Lock In': { x: 250, y: 584.1, w: 113, h: 48 } },
-  // 1.4.600: settings-more y from CI runs 45037961848 (375/390) and 45044570651 (412); x/w unchanged.
+  // Forward-merge drop: settings-more y from CI runs 45037961848 (375/390) and 45044570651 (412); x/w unchanged.
   '375x667 settings-more': {
     'Open Profile': { x: 41, y: 1406.5, w: 130, h: 52 },
     Candy: { x: 41, y: 1874.1, w: 84, h: 52 },
@@ -9352,36 +9352,40 @@ async function nwReasonStripMeasure(page) {
     const panEl = document.querySelector('.nw-pan')
     const zoomEl = document.querySelector('.nw-zoom')
     const camEl = document.querySelector('.nw-cam')
-    if (!road || !cardEl || !svg) {
-      return { ok: false, reason: 'missing-dom' }
-    }
+    if (!(road instanceof SVGGeometryElement)) throw new Error('missing defend-road')
+    if (!(cardEl instanceof HTMLElement)) throw new Error('missing strip card')
+    if (!(svg instanceof SVGSVGElement)) throw new Error('missing defend-board')
+    if (!(panEl instanceof HTMLElement)) throw new Error('missing nw-pan')
+    if (!(zoomEl instanceof HTMLElement)) throw new Error('missing nw-zoom')
+    if (!(camEl instanceof HTMLElement)) throw new Error('missing nw-cam')
     const ctm = svg.getScreenCTM()
-    if (!ctm) return { ok: false, reason: 'no-ctm' }
-    const panStyle = panEl ? panEl.style.transform || getComputedStyle(panEl).transform : ''
-    const zoomStyle = zoomEl ? zoomEl.style.transform || getComputedStyle(zoomEl).transform : ''
-  const panParse = (transform) => {
-    if (!transform || transform === 'none') return 0
-    const t3 = /translate3d\(\s*([-\d.]+)px/i.exec(transform)
-    if (t3) return +t3[1]
-    const m = /matrix\(\s*[^,]+,\s*[^,]+,\s*[^,]+,\s*[^,]+,\s*([-\d.]+)/.exec(transform)
-    if (m) return +m[1]
-    const m3 = /matrix3d\(([^)]+)\)/.exec(transform)
-    if (m3) {
-      const parts = m3[1].split(',').map((v) => +v.trim())
-      if (parts.length >= 14) return parts[12]
+    if (!ctm) throw new Error('no screen ctm')
+    const panStyle = panEl.style.transform || getComputedStyle(panEl).transform
+    const zoomStyle = zoomEl.style.transform || getComputedStyle(zoomEl).transform
+    const panParse = (transform) => {
+      if (!transform || transform === 'none') return 0
+      const t3 = /translate3d\(\s*([-\d.]+)px/i.exec(transform)
+      if (t3) return +t3[1]
+      const m = /matrix\(\s*[^,]+,\s*[^,]+,\s*[^,]+,\s*[^,]+,\s*([-\d.]+)/.exec(transform)
+      if (m) return +m[1]
+      const m3 = /matrix3d\(([^)]+)\)/.exec(transform)
+      if (m3) {
+        const parts = m3[1].split(',').map((v) => +v.trim())
+        if (parts.length >= 14) return parts[12]
+      }
+      return NaN
     }
-    return NaN
-  }
     const lotPt = svg.createSVGPoint()
     lotPt.x = 464
     lotPt.y = 224
     const lot = lotPt.matrixTransform(ctm)
     const cr = cardEl.getBoundingClientRect()
-    const len = road.getTotalLength()
-    const half = 0.75
+    const strokeW = parseFloat(getComputedStyle(road).strokeWidth)
+    if (!Number.isFinite(strokeW) || strokeW <= 0) throw new Error(`bad road strokeW=${getComputedStyle(road).strokeWidth}`)
+  const half = strokeW / 2 + 0.75
     const cells = new Set()
     for (let i = 0; i <= 393; i += 1) {
-      const at = road.getPointAtLength((i * len) / 393)
+      const at = road.getPointAtLength((i * road.getTotalLength()) / 393)
       const p = svg.createSVGPoint()
       p.x = at.x
       p.y = at.y
@@ -9403,22 +9407,108 @@ async function nwReasonStripMeasure(page) {
         for (let y = y0; y <= y1; y += 1) cells.add(`${x},${y}`)
       }
     }
+    const STRIP_W = 112
+    const STRIP_ROAD_HALF = 11
+    const TAP_EPS = 0.5
+    const roadPad = STRIP_ROAD_HALF + TAP_EPS
+    const cardLeft = parseFloat(cardEl.style.left)
+    const cardTop = parseFloat(cardEl.style.top)
+    const cardH = cardEl.offsetHeight
+    const padLeft = cardLeft - roadPad
+    const padRight = cardLeft + STRIP_W + roadPad
+    const padTop = cardTop - roadPad
+    const padBottom = cardTop + cardH + roadPad
+    let roadPadHit = 0
+    const pathLen = road.getTotalLength()
+    for (let i = 0; i <= 393; i += 1) {
+      const at = road.getPointAtLength((i * pathLen) / 393)
+      if (at.x >= padLeft && at.x <= padRight && at.y >= padTop && at.y <= padBottom) {
+        roadPadHit = 1
+        break
+      }
+    }
     const inView =
       cr.left >= 0 && cr.top >= 0 && cr.right <= innerWidth + 0.5 && cr.bottom <= innerHeight + 0.5
     return {
-      ok: true,
       scrollX: round(scrollX),
       scrollY: round(scrollY),
-      camOn: camEl?.getAttribute('data-nw-cam') === 'on',
+      camOn: camEl.getAttribute('data-nw-cam') === 'on',
       zoomStyle,
       panStyle,
       panX: round(panParse(panStyle)),
       ctm: { a: round(ctm.a), d: round(ctm.d), e: round(ctm.e), f: round(ctm.f) },
       lot: { x: round(lot.x), y: round(lot.y) },
       card: [round(cr.x), round(cr.y), round(cr.right), round(cr.bottom)],
+      cardLeft: round(cardLeft),
       overlapPx2: cells.size,
+      strokeW: round(strokeW),
+      roadPadHit,
       offCanvas: !inView,
     }
+  })
+}
+
+async function nwReasonStripTapText(page) {
+  return page.evaluate(() => {
+    const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+    const lineOf = (el) => {
+      if (!el) return null
+      const style = getComputedStyle(el)
+      const directs = [...el.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+      if (!directs.length) return null
+      const source = norm(directs.map((child) => child.textContent).join(''))
+      const rect = el.getBoundingClientRect()
+      if (rect.width < 1 || rect.height < 1) return null
+      const range = document.createRange()
+      let rendered = ''
+      const host = { left: rect.left - 1, right: rect.right + 1, top: rect.top - 1, bottom: rect.bottom + 1 }
+      for (const child of directs) {
+        const raw = child.textContent
+        for (let i = 0; i < raw.length; i += 1) {
+          const ch = raw[i]
+          if (!ch.trim()) {
+            rendered += ch
+            continue
+          }
+          range.setStart(child, i)
+          range.setEnd(child, i + 1)
+          let painted = false
+          for (const bit of range.getClientRects()) {
+            if (bit.width <= 0 || bit.height <= 0) continue
+            if (bit.right > host.left && bit.left < host.right && bit.bottom > host.top && bit.top < host.bottom) {
+              painted = true
+              break
+            }
+          }
+          if (painted) rendered += ch
+        }
+      }
+      return {
+        source,
+        rendered: norm(rendered),
+        font: parseFloat(style.fontSize),
+        scrollW: el.scrollWidth,
+        clientW: el.clientWidth,
+        scrollH: el.scrollHeight,
+        clientH: el.clientHeight,
+      }
+    }
+    let clipped = 0
+    let minFont = 999
+    let minTap = 999
+    const rows = []
+    for (const path of ['far', 'strong']) {
+      const el = document.querySelector(`.defend-tower-card[data-strip='yes'] .defend-path[data-path='${path}'] .defend-path-buy`)
+      if (!(el instanceof HTMLElement)) throw new Error(`missing strip buy ${path}`)
+      const box = el.getBoundingClientRect()
+      minTap = Math.min(minTap, box.width, box.height)
+      const cost = lineOf(el)
+      if (!cost) throw new Error(`missing strip cost line ${path}`)
+      if (cost.scrollW > cost.clientW + 1 || cost.scrollH > cost.clientH + 1) clipped += 1
+      minFont = Math.min(minFont, cost.font)
+      rows.push({ path, w: box.width, h: box.height, cost })
+    }
+    return { clipped, minFont, minTap, rows }
   })
 }
 
@@ -9436,9 +9526,13 @@ async function checkNwReasonStripRoad(browser, port, errors) {
   for (const [width, height] of NW_REASON_STRIP_SIZES) jobs.push({ width, height, tool: 'reason' })
   for (const tool of ['love', 'logic', 'science']) jobs.push({ width: 390, height: 844, tool })
 
+  const onlySize = process.env.NW_REASON_STRIP_ROAD_SIZE
+  const onlyTool = process.env.NW_REASON_STRIP_ROAD_TOOL
   for (const job of jobs) {
     const label = `${job.width}x${job.height}`
     const tag = `${label} ${job.tool}`
+    if (onlySize && onlySize !== label) continue
+    if (onlyTool && onlyTool !== job.tool) continue
     const { context, page, cdp } = await openNwReasonStripRoad(browser, port, job.width, job.height)
     page.on('pageerror', (error) => errors.push(`reason-strip-road ${tag} ${error}`))
     await glyphSetup(page)
@@ -9456,55 +9550,69 @@ async function checkNwReasonStripRoad(browser, port, errors) {
     await page.locator('.defend-go').click()
     await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
     await page.waitForTimeout(900)
-    await nwReasonStripEnsureFreeze(page, tag)
     await nwReasonReachSeat(page, cdp, { cx: 464, cy: 224 }, tag)
     await page.waitForTimeout(750)
     const hit = page.locator(`rect.defend-hit[data-tower-type="${job.tool}"]`)
     if (await hit.count()) await hit.click({ force: true })
     else await page.locator(`.defend-pad[data-tower-type="${job.tool}"]`).click({ force: true })
     await page.locator('.defend-tower-card[data-strip="yes"]').waitFor({ timeout: 5000 })
-    await page.waitForTimeout(800)
-    await page.locator('.defend-raider.is-easy-cue').waitFor({ timeout: 5000 }).catch(() => {})
-    const read = await nwReasonStripMeasure(page)
+    const hardCue = process.env.NW_REASON_STRIP_SKIP_CUE !== '1'
+    if (hardCue) await page.locator('.defend-raider.is-easy-cue').waitFor({ timeout: 60_000 })
+    await page.waitForTimeout(300)
+    await nwReasonStripEnsureFreeze(page, tag)
+    await page.waitForTimeout(500)
+    let read
+    let stripTap
+    try {
+      read = await nwReasonStripMeasure(page)
+      stripTap = await nwReasonStripTapText(page)
+    } catch (error) {
+      fail(`checkNwReasonStripRoad fail ${tag} measure=${error.message}`)
+      await context.close()
+      continue
+    }
     const gold = await nwReasonStripGoldCount(page)
-    const hasCue = (await page.locator('.defend-raider.is-easy-cue').count()) > 0
-    if (!read?.ok) fail(`checkNwReasonStripRoad fail ${tag} measure=${read?.reason ?? 'bad'}`)
-    else {
-      if (read.scrollX !== 0 || read.scrollY !== 0) fail(`checkNwReasonStripRoad fail ${tag} scroll=${read.scrollX},${read.scrollY}`)
-      if (!read.camOn) fail(`checkNwReasonStripRoad fail ${tag} cam=off`)
-      if (!read.zoomStyle.includes('1.4')) fail(`checkNwReasonStripRoad fail ${tag} zoom=${read.zoomStyle}`)
-      const wantPan = NW_REASON_STRIP_PAN[job.width]
-      if (wantPan != null && Math.abs(read.panX - wantPan) > 0.05) {
-        fail(`checkNwReasonStripRoad fail ${tag} pan=${read.panX} want=${wantPan}`)
+    if (read.scrollX !== 0 || read.scrollY !== 0) fail(`checkNwReasonStripRoad fail ${tag} scroll=${read.scrollX},${read.scrollY}`)
+    if (!read.camOn) fail(`checkNwReasonStripRoad fail ${tag} cam=off`)
+    if (!read.zoomStyle.includes('1.4')) fail(`checkNwReasonStripRoad fail ${tag} zoom=${read.zoomStyle}`)
+    const wantPan = NW_REASON_STRIP_PAN[job.width]
+    if (wantPan != null && Math.abs(read.panX - wantPan) > 0.05) {
+      fail(`checkNwReasonStripRoad fail ${tag} pan=${read.panX} want=${wantPan}`)
+    }
+    if (job.tool === 'reason' && job.width === 390) {
+      if (Math.abs(read.ctm.a - 0.927138) > 0.002 || Math.abs(read.ctm.d - 0.927138) > 0.002) {
+        fail(`checkNwReasonStripRoad fail ${tag} ctm a=${read.ctm.a} d=${read.ctm.d}`)
       }
-      if (job.tool === 'reason' && job.width === 390) {
-        if (Math.abs(read.ctm.a - 0.927138) > 0.002 || Math.abs(read.ctm.d - 0.927138) > 0.002) {
-          fail(`checkNwReasonStripRoad fail ${tag} ctm a=${read.ctm.a} d=${read.ctm.d}`)
-        }
-        if (Math.abs(read.ctm.e - -235.1921) > 0.05 || Math.abs(read.ctm.f - 93.0127) > 0.05) {
-          fail(`checkNwReasonStripRoad fail ${tag} ctm e=${read.ctm.e} f=${read.ctm.f}`)
-        }
-        if (Math.abs(read.lot.x - 195) > 1.5 || Math.abs(read.lot.y - 300.69) > 1.5) {
-          fail(`checkNwReasonStripRoad fail ${tag} lot=${read.lot.x},${read.lot.y}`)
-        }
-        if (Math.abs(read.card[1] - 101) > 2) {
-          fail(`checkNwReasonStripRoad fail ${tag} state-mismatch cardTop=${read.card[1]} want~101`)
-        }
+      if (Math.abs(read.ctm.e - -235.1921) > 0.05 || Math.abs(read.ctm.f - 93.0127) > 0.05) {
+        fail(`checkNwReasonStripRoad fail ${tag} ctm e=${read.ctm.e} f=${read.ctm.f}`)
       }
-      if (read.offCanvas) fail(`checkNwReasonStripRoad fail ${tag} off-canvas card=${read.card.join(',')}`)
-      if (read.overlapPx2 > 0) {
-        fail(
-          `checkNwReasonStripRoad fail ${tag} overlap=${read.overlapPx2}px2 hits=${read.overlapPx2} pan=${read.panX} card=[${read.card.join(',')}]`,
-        )
+      if (Math.abs(read.lot.x - 195) > 1.5 || Math.abs(read.lot.y - 300.69) > 1.5) {
+        fail(`checkNwReasonStripRoad fail ${tag} lot=${read.lot.x},${read.lot.y}`)
       }
-      if (hasCue && gold !== 1) fail(`checkNwReasonStripRoad fail ${tag} gold=${gold}`)
-      if (!problems.some((line) => line.includes(` ${tag} `))) {
-        const cardLine = `card=[${read.card.join(',')}]`
-        const goldLine = hasCue ? 'gold=1' : `gold=${gold}`
-        console.log(
-          `checkNwReasonStripRoad ok ${tag} overlap=0 ${goldLine} pan=${read.panX} ctm=${read.ctm.a},${read.ctm.d},${read.ctm.e},${read.ctm.f} ${cardLine}`,
-        )
+      if (Math.abs(read.card[1] - 101) > 2) {
+        fail(`checkNwReasonStripRoad fail ${tag} state-mismatch cardTop=${read.card[1]} want~101`)
       }
+    }
+    if (job.tool === 'reason' && job.width >= 384 && job.width <= 392) {
+      const wantLeft = job.width <= 384 ? 0 : 2
+      if (Math.abs(read.cardLeft - wantLeft) > 0.5) fail(`checkNwReasonStripRoad fail ${tag} cardLeft=${read.cardLeft} want=${wantLeft}±0.5`)
+      if (read.roadPadHit !== 0) fail(`checkNwReasonStripRoad fail ${tag} roadPadHit=${read.roadPadHit} want=0`)
+    }
+    if (stripTap.clipped !== 0) fail(`checkNwReasonStripRoad fail ${tag} clipped=${stripTap.clipped}`)
+    if (!(stripTap.minFont >= 13)) fail(`checkNwReasonStripRoad fail ${tag} font=${stripTap.minFont}`)
+    if (!(stripTap.minTap >= 44)) fail(`checkNwReasonStripRoad fail ${tag} tap=${stripTap.minTap}`)
+    if (read.offCanvas) fail(`checkNwReasonStripRoad fail ${tag} off-canvas card=${read.card.join(',')}`)
+    if (read.overlapPx2 > 0) {
+      fail(
+        `checkNwReasonStripRoad fail ${tag} overlap=${read.overlapPx2}px2 strokeW=${read.strokeW} hits=${read.overlapPx2} pan=${read.panX} card=[${read.card.join(',')}]`,
+      )
+    }
+    if (hardCue && gold !== 1) fail(`checkNwReasonStripRoad fail ${tag} gold=${gold}`)
+    if (!problems.some((line) => line.includes(` ${tag} `))) {
+      const cardLine = `card=[${read.card.join(',')}]`
+      console.log(
+        `checkNwReasonStripRoad ok ${tag} overlap=${read.overlapPx2} strokeW=${read.strokeW} gold=1 pan=${read.panX} ctm=${read.ctm.a},${read.ctm.d},${read.ctm.e},${read.ctm.f} font=${stripTap.minFont}px tap=${stripTap.minTap}px ${cardLine}`,
+      )
     }
     await context.close()
   }
