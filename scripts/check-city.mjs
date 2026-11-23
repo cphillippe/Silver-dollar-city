@@ -1969,15 +1969,21 @@ assert.doesNotMatch(
       /^\.nw-wave-survived \{\n  top: 72px;\n  left: 12px;[\s\S]*?animation: nw-wave-survived-pop 1\.2s ease-out both;\n\}/m,
     )?.[0] ?? null
   assert.ok(readBaseNwWaveSurvived(defend597), '1.4.597 the standalone base .nw-wave-survived block is present')
-  assert.throws(
-    () =>
-      assert.ok(
-        readBaseNwWaveSurvived(defend597.replace(/^\.nw-wave-survived \{\n  top: 72px;/m, '.nw-wave-survived {\n  top: 60px;')),
-      ),
+  const assertBasePinMisses = (css, label) => {
+    let threw = false
+    try {
+      assert.ok(readBaseNwWaveSurvived(css))
+    } catch {
+      threw = true
+    }
+    assert.equal(threw, true, label)
+  }
+  assertBasePinMisses(
+    defend597.replace(/^\.nw-wave-survived \{\n  top: 72px;/m, '.nw-wave-survived {\n  top: 60px;'),
     '1.4.597 mutating base wave-survived top to 60px fails the pin',
   )
-  assert.throws(
-    () => assert.ok(readBaseNwWaveSurvived(defend597.replace(/^\.nw-wave-survived \{\n  top: 72px;\n/m, '.nw-wave-survived {\n'))),
+  assertBasePinMisses(
+    defend597.replace(/^\.nw-wave-survived \{\n  top: 72px;\n/m, '.nw-wave-survived {\n'),
     '1.4.597 deleting base wave-survived top fails the pin',
   )
   assert.match(
