@@ -1987,7 +1987,7 @@ assert.doesNotMatch(
     /await checkNwRoundCheer\(browser, port, errors\)\n    await checkNwWaveSurvivedClear\(browser, port, errors\)/,
     '1.4.597 the full path runs checkNwWaveSurvivedClear right after checkNwRoundCheer',
   )
-  assert.match(phone597, /checkNwWaveSurvivedClear ok \$\{size\} vsLabel=/, '1.4.597 the ok line logs overlap and banner box')
+  assert.match(phone597, /checkNwWaveSurvivedClear ok \$\{size\} vsLabel=.*vsChip=/, '1.4.597 the ok line logs overlap, chips, and banner box')
 }
 
 // 1.4.596: Easy Night Watch Spend / ? on screen at round clear (#951).

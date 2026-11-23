@@ -9870,6 +9870,38 @@ async function sampleWaveSurvivedHold(page) {
       }
       return max
     }
+    const paintOfLabel = (el) => {
+      const rect = el.getBoundingClientRect()
+      let left = rect.left
+      let right = rect.right
+      let top = rect.top
+      let bottom = rect.bottom
+      const range = document.createRange()
+      for (const child of el.childNodes) {
+        if (child.nodeType !== 3 || !(child.textContent || '').trim()) continue
+        range.selectNodeContents(child)
+        for (const bit of range.getClientRects()) {
+          if (bit.width <= 0 || bit.height <= 0) continue
+          left = Math.min(left, bit.left)
+          right = Math.max(right, bit.right)
+          top = Math.min(top, bit.top)
+          bottom = Math.max(bottom, bit.bottom)
+        }
+      }
+      return { left, top, right, bottom }
+    }
+    const chipOverlap = (bannerBox) => {
+      let max = 0
+      let visible = 0
+      for (const el of document.querySelectorAll('.defend-type-chip, text.defend-type-label')) {
+        if (el.getAttribute('data-chrome-hide') === 'yes') continue
+        if (!shown(el)) continue
+        visible += 1
+        const box = el.matches('.defend-type-chip') ? boxOf(el) : paintOfLabel(el)
+        max = Math.max(max, area(bannerBox, box))
+      }
+      return { max, visible }
+    }
     const banner = document.querySelector('.nw-wave-survived')
     const label = document.querySelector('.nw-balloon-label')
     const countNode = document.querySelector('.nw-balloon-count')
@@ -9906,6 +9938,8 @@ async function sampleWaveSurvivedHold(page) {
         bannerBox,
         'button.defend-new-lamp, .defend-clear-row button:not(.defend-continue)',
       )
+      const chip = chipOverlap(bannerBox)
+      ov.chip = chip.visible > 0 ? chip.max : 0
       const style = getComputedStyle(banner)
       const inside =
         bannerBox.left >= -1 &&
@@ -9970,6 +10004,7 @@ async function sampleWaveSurvivedHold(page) {
         clipped,
         gold: goldCues(),
         opacity: Number(style.opacity),
+        chipsVisible: chip.visible,
       })
       await new Promise((resolve) => requestAnimationFrame(resolve))
     }
@@ -10043,12 +10078,15 @@ async function checkNwWaveSurvivedClear(browser, port, errors) {
     const holdSamples = (sample.samples || []).filter((row) => row.opacity > 0.4)
     if (holdSamples.length < 10) fail(`checkNwWaveSurvivedClear fail ${size} samples=${holdSamples.length}`)
     if (holdSamples.some((row) => row.ov.count === null)) fail(`checkNwWaveSurvivedClear fail ${size} count=0`)
-    const maxOv = { label: 0, count: 0, continue: 0, go: 0, rail: 0, dock: 0 }
+    const maxOv = { label: 0, count: 0, continue: 0, go: 0, rail: 0, dock: 0, chip: 0 }
+    let maxChipsVisible = 0
     let worst = holdSamples[0]
     for (const row of holdSamples) {
+      maxChipsVisible = Math.max(maxChipsVisible, row.chipsVisible || 0)
       for (const key of Object.keys(maxOv)) {
         const val = row.ov[key]
         if (val == null) continue
+        if (key === 'chip' && (row.chipsVisible || 0) < 1) continue
         maxOv[key] = Math.max(maxOv[key], val)
       }
       if ((row.ov.label || 0) >= (worst?.ov.label || 0)) worst = row
@@ -10059,6 +10097,7 @@ async function checkNwWaveSurvivedClear(browser, port, errors) {
     if (maxOv.go > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsGo=${maxOv.go.toFixed(1)}`)
     if (maxOv.rail > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsRail=${maxOv.rail.toFixed(1)}`)
     if (maxOv.dock > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsDock=${maxOv.dock.toFixed(1)}`)
+    if (maxChipsVisible > 0 && maxOv.chip > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsChip=${maxOv.chip.toFixed(1)} chips=${maxChipsVisible}`)
     if (!holdSamples.every((row) => row.inside)) fail(`checkNwWaveSurvivedClear fail ${size} viewport`)
     if (holdSamples.some((row) => row.fontMin < 13)) fail(`checkNwWaveSurvivedClear fail ${size} fontMin`)
     if (holdSamples.some((row) => row.clipped !== 0)) fail(`checkNwWaveSurvivedClear fail ${size} clipped`)
@@ -10066,8 +10105,9 @@ async function checkNwWaveSurvivedClear(browser, port, errors) {
     const b = worst.banner
     const localFail = problems.some((line) => line.includes(` ${size} `))
     if (!localFail) {
+      const vsChip = maxChipsVisible > 0 ? maxOv.chip.toFixed(1) : '0.0'
       console.log(
-        `checkNwWaveSurvivedClear ok ${size} vsLabel=${maxOv.label.toFixed(1)} vsCount=${maxOv.count.toFixed(1)} banner=${b.left},${b.top},${b.right},${b.bottom} samples=${holdSamples.length} gold=1`,
+        `checkNwWaveSurvivedClear ok ${size} vsLabel=${maxOv.label.toFixed(1)} vsCount=${maxOv.count.toFixed(1)} vsChip=${vsChip} chips=${maxChipsVisible} banner=${b.left},${b.top},${b.right},${b.bottom} samples=${holdSamples.length} gold=1`,
       )
     }
     await context.close()
