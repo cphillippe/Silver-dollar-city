@@ -9852,10 +9852,30 @@ async function sampleWaveSurvivedHold(page) {
       if (banner && shown(banner)) break
       await new Promise((resolve) => requestAnimationFrame(resolve))
     }
+    const chromeUnion = (selector) => {
+      const boxes = [...document.querySelectorAll(selector)].filter(shown).map(boxOf)
+      if (!boxes.length) return null
+      return boxes.reduce((acc, b) => ({
+        left: Math.min(acc.left, b.left),
+        top: Math.min(acc.top, b.top),
+        right: Math.max(acc.right, b.right),
+        bottom: Math.max(acc.bottom, b.bottom),
+      }))
+    }
+    const maxChromeOverlap = (bannerBox, selector) => {
+      let max = 0
+      for (const node of document.querySelectorAll(selector)) {
+        if (!shown(node)) continue
+        max = Math.max(max, area(bannerBox, boxOf(node)))
+      }
+      return max
+    }
     const banner = document.querySelector('.nw-wave-survived')
     const label = document.querySelector('.nw-balloon-label')
+    const countNode = document.querySelector('.nw-balloon-count')
     if (!banner) return { missing: 'banner' }
     if (!label) return { missing: 'label' }
+    if (!countNode) return { missing: 'count' }
     const samples = []
     const holdStart = performance.now()
     while (performance.now() - holdStart < 2200) {
@@ -9865,16 +9885,27 @@ async function sampleWaveSurvivedHold(page) {
       }
       const bannerBox = boxOf(banner)
       const count = document.querySelector('.nw-balloon-count')
+      if (!count) return { missing: 'count' }
       const cont = document.querySelector('.defend-continue')
       const go = document.querySelector('.defend-go')
+      const rail = chromeUnion('.nw-rail')
       const targets = {
         label: boxOf(label),
-        count: count ? boxOf(count) : null,
+        count: shown(count) ? boxOf(count) : null,
         continue: cont && shown(cont) ? boxOf(cont) : null,
         go: go && shown(go) ? boxOf(go) : null,
+        rail,
       }
       const ov = {}
-      for (const [key, box] of Object.entries(targets)) ov[key] = box ? area(bannerBox, box) : 0
+      for (const [key, box] of Object.entries(targets)) {
+        if (key === 'rail' || key === 'dock') continue
+        ov[key] = box ? area(bannerBox, box) : null
+      }
+      ov.rail = rail ? area(bannerBox, rail) : null
+      ov.dock = maxChromeOverlap(
+        bannerBox,
+        'button.defend-new-lamp, .defend-clear-row button:not(.defend-continue)',
+      )
       const style = getComputedStyle(banner)
       const inside =
         bannerBox.left >= -1 &&
@@ -10008,18 +10039,26 @@ async function checkNwWaveSurvivedClear(browser, port, errors) {
     const sample = await sampleWaveSurvivedHold(page)
     if (sample.missing === 'banner') fail(`checkNwWaveSurvivedClear fail ${size} banner=0`)
     if (sample.missing === 'label') fail(`checkNwWaveSurvivedClear fail ${size} label=0`)
+    if (sample.missing === 'count') fail(`checkNwWaveSurvivedClear fail ${size} count=0`)
     const holdSamples = (sample.samples || []).filter((row) => row.opacity > 0.4)
     if (holdSamples.length < 10) fail(`checkNwWaveSurvivedClear fail ${size} samples=${holdSamples.length}`)
-    const maxOv = { label: 0, count: 0, continue: 0, go: 0 }
+    if (holdSamples.some((row) => row.ov.count === null)) fail(`checkNwWaveSurvivedClear fail ${size} count=0`)
+    const maxOv = { label: 0, count: 0, continue: 0, go: 0, rail: 0, dock: 0 }
     let worst = holdSamples[0]
     for (const row of holdSamples) {
-      for (const key of Object.keys(maxOv)) maxOv[key] = Math.max(maxOv[key], row.ov[key] || 0)
+      for (const key of Object.keys(maxOv)) {
+        const val = row.ov[key]
+        if (val == null) continue
+        maxOv[key] = Math.max(maxOv[key], val)
+      }
       if ((row.ov.label || 0) >= (worst?.ov.label || 0)) worst = row
     }
     if (maxOv.label > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsLabel=${maxOv.label.toFixed(1)}`)
     if (maxOv.count > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsCount=${maxOv.count.toFixed(1)}`)
     if (maxOv.continue > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsContinue=${maxOv.continue.toFixed(1)}`)
     if (maxOv.go > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsGo=${maxOv.go.toFixed(1)}`)
+    if (maxOv.rail > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsRail=${maxOv.rail.toFixed(1)}`)
+    if (maxOv.dock > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsDock=${maxOv.dock.toFixed(1)}`)
     if (!holdSamples.every((row) => row.inside)) fail(`checkNwWaveSurvivedClear fail ${size} viewport`)
     if (holdSamples.some((row) => row.fontMin < 13)) fail(`checkNwWaveSurvivedClear fail ${size} fontMin`)
     if (holdSamples.some((row) => row.clipped !== 0)) fail(`checkNwWaveSurvivedClear fail ${size} clipped`)

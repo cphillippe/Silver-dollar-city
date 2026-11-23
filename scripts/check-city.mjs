@@ -1967,11 +1967,10 @@ assert.doesNotMatch(
     /\.defend-page\.is-easy-watch \.nw-wave-survived \{[\s\S]*?top: 98px;/,
     '1.4.597 Easy wave-survived top is raised',
   )
-  assert.doesNotMatch(
-    defend597.match(/\.nw-wave-survived \{[\s\S]*?\}/)?.[0] || '',
-    /top: 98px/,
-    '1.4.597 the base wave-survived rule keeps top 72px for Hard',
-  )
+  const baseWaveSurvived597 = defend597.match(/^\.nw-wave-survived \{[\s\S]*?top: 72px;/m)?.[0]
+  assert.ok(baseWaveSurvived597, '1.4.597 the base .nw-wave-survived rule block is present at top 72px')
+  assert.match(baseWaveSurvived597, /top: 72px;/, '1.4.597 the base wave-survived rule pins top 72px for Hard')
+  assert.doesNotMatch(baseWaveSurvived597, /top: 98px/, '1.4.597 the base wave-survived rule does not use the Easy offset')
   assert.match(phone597, /async function checkNwWaveSurvivedClear/, '1.4.597 checkNwWaveSurvivedClear is defined')
   const cheerOnly597 = phone597.slice(
     phone597.indexOf("if (process.env.NW_ROUND_CHEER_ONLY === '1')"),
