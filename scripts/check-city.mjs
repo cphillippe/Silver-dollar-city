@@ -1960,6 +1960,7 @@ assert.doesNotMatch(
   const board597 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
   const phone597 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
   assert.match(board597, /function slideTypeChip/, '1.4.597 Easy nudges type chips off chrome before hiding')
+  assert.match(board597, /function parkTypeChipBelowHud/, '1.4.597 short phones park chips under the hearts HUD')
   assert.match(board597, /slideTypeChip\(chip, blocks, true\)/, '1.4.597 chips flip above the lamp when Begin still blocks them')
   assert.match(board597, /const chipNodes = \[\.\.\.page\.querySelectorAll\('\.defend-type-chip'\)\]/, '1.4.587 hideTypeLabelsOnChrome flags chips')
   assert.match(phone597, /async function checkNwLoveChip/, '1.4.597 checkNwLoveChip is defined')
@@ -1968,10 +1969,15 @@ assert.doesNotMatch(
     /await checkNwSpendOnScreen\(browser, port, errors\)\n    await checkNwLoveChip\(browser, port, errors\)/,
     '1.4.597 the full path runs checkNwLoveChip after checkNwSpendOnScreen',
   )
-  assert.match(phone597, /NW_LOVE_CHIP_R24_SIZES/, '1.4.597 r24 coverage uses phone widths 375, 390 and 412')
-  assert.match(phone597, /checkNwLoveChip ok r24 375x812 reason visible=1 box=/, '1.4.597 r24 at 375 logs Reason visible and box')
-  assert.match(phone597, /checkNwLoveChip ok r24 412x915 love visible=1 box=/, '1.4.597 r24 at 412 logs Love visible and box')
-  assert.match(phone597, /checkNwLoveChip ok \$\{tag\} slideTypeChip/, '1.4.597 slideTypeChip viewport logs box and clipped=0')
+  assert.match(phone597, /NW_LOVE_CHIP_FRAME_SIZES/, '1.4.597 love-chip gate covers 375×667 and tall phones')
+  assert.match(phone597, /\[375, 667\]/, '1.4.597 375×667 is in the love-chip frame list')
+  assert.match(phone597, /NW_LOVE_CHIP_ROUNDS = \[18, 24\]/, '1.4.597 love-chip runs rounds 18 and 24')
+  assert.match(
+    phone597,
+    /checkNwLoveChip ok r\$\{round\} \$\{tag\} frame reason visible=1 box=/,
+    '1.4.597 each frame logs Reason box and HUD overlap',
+  )
+  assert.match(phone597, /waitNwLoveChipCamReady/, '1.4.597 official cam waits for Recenter and Begin')
 }
 
 

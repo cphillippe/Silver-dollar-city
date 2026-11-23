@@ -10101,27 +10101,31 @@ async function checkNwSpendOnScreen(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
-/** #949 Easy R18 planted: every pillar lamp keeps one on-screen type chip (Love included). */
-const NW_LOVE_CHIP_SIZES = [
+/** #949 Easy NW: type chips stay visible on official cam (375×667 gate + tall phones). */
+const NW_LOVE_CHIP_FRAME_SIZES = [
+  [375, 667],
   [375, 812],
   [390, 844],
   [412, 915],
 ]
+const NW_LOVE_CHIP_ROUNDS = [18, 24]
 const NW_LOVE_CHIP_TYPES = [
   { tool: 'love', label: 'Love' },
   { tool: 'logic', label: 'Logic' },
   { tool: 'reason', label: 'Reason' },
   { tool: 'science', label: 'Science' },
 ]
-const NW_LOVE_CHIP_R24_SIZES = [
-  [375, 812],
-  [390, 844],
-  [412, 915],
-]
-const NW_LOVE_CHIP_R24_TOOLS = [
-  { tool: 'love', label: 'Love' },
-  { tool: 'reason', label: 'Reason' },
-]
+
+/** After jump, official cam shows Recenter and Begin (no tap yet). */
+async function waitNwLoveChipCamReady(page, tag, round) {
+  await assertGlyphCamera(page, `${tag} r${round} love-chip`)
+  await page.locator('.nw-cam-recenter').waitFor({ timeout: 20_000 })
+  await page.waitForFunction(() => {
+    const go = document.querySelector('.defend-go')
+    return go instanceof HTMLElement && go.getClientRects().length > 0
+  })
+  await page.waitForTimeout(250)
+}
 
 async function checkNwLoveChip(browser, port, errors) {
   const only = process.env.NW_LOVE_CHIP_SIZE
@@ -10134,19 +10138,24 @@ async function checkNwLoveChip(browser, port, errors) {
     console.log(line)
   }
   const errorMark = errors.length
+  const onlyRound = process.env.NW_LOVE_CHIP_ROUND
 
-  for (const [width, height] of NW_LOVE_CHIP_SIZES) {
-    const tag = `${width}x${height}`
-    if (only && only !== tag) continue
-    const { context, page } = await openMap(browser, port, width, height, 'a2', {
-      motion: false,
-      search: TYPE_LABEL_SEARCH,
-    })
-    page.on('pageerror', (error) => errors.push(`nw-love-chip ${tag} ${error}`))
-    await plantTypeLabelSeats(page, tag)
-    await page.evaluate(() => document.fonts?.ready)
-    await page.waitForTimeout(250)
-    const snap = await page.evaluate(() => {
+  for (const round of NW_LOVE_CHIP_ROUNDS) {
+    if (onlyRound && onlyRound !== String(round)) continue
+    const search = TYPE_LABEL_SEARCH.replace('nwRound=18', `nwRound=${round}`)
+    for (const [width, height] of NW_LOVE_CHIP_FRAME_SIZES) {
+      const tag = `${width}x${height}`
+      if (only && only !== tag) continue
+      const { context, page } = await openMap(browser, port, width, height, 'a2', {
+        motion: false,
+        search,
+      })
+      page.on('pageerror', (error) => errors.push(`nw-love-chip r${round} ${tag} ${error}`))
+      await waitNwLoveChipCamReady(page, tag, round)
+      await plantTypeLabelSeats(page, `${tag} r${round}`)
+      await page.evaluate(() => document.fonts?.ready)
+      await page.waitForTimeout(250)
+      const snap = await page.evaluate(() => {
       const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
       const overlapPx = (a, b) => {
         const w = Math.min(a.right, b.right) - Math.max(a.left, b.left)
@@ -10233,12 +10242,46 @@ async function checkNwLoveChip(browser, port, errors) {
         }
         const hudEl = document.querySelector('.nw-hud')
         const hudBox = hudEl ? boxOf(hudEl) : null
+        const loveChip = document.querySelector('.defend-type-chip.is-love')
+        const loveBox = loveChip && shown(loveChip) ? boxOf(loveChip) : null
+        const navBtns = [...document.querySelectorAll('button')].filter((node) =>
+          /^(Home|Lock In|Settings)$/.test(norm(node.textContent)),
+        )
+        const chromeRects = [
+          document.querySelector('.defend-go'),
+          document.querySelector('.defend-continue'),
+          ...document.querySelectorAll('.nw-rail .defend-ability, .nw-rail button'),
+          ...document.querySelectorAll('button.defend-new-lamp'),
+          ...document.querySelectorAll('.defend-clear-row button:not(.defend-continue)'),
+        ]
+          .filter((el) => el instanceof Element && shown(el))
+          .map(boxOf)
         let hudOverlap = 0
+        let chromeOverlap = 0
+        let loveOverlap = 0
+        let navOverlap = 0
         for (const chip of visChips) {
           const chipBox = boxOf(chip)
           if (hudBox) hudOverlap = Math.max(hudOverlap, overlapPx(chipBox, hudBox))
+          for (const rect of chromeRects) {
+            chromeOverlap = Math.max(chromeOverlap, overlapPx(chipBox, rect))
+          }
+          if (tool !== 'love' && loveBox) loveOverlap = Math.max(loveOverlap, overlapPx(chipBox, loveBox))
+          for (const btn of navBtns) {
+            navOverlap = Math.max(navOverlap, overlapPx(chipBox, boxOf(btn)))
+          }
         }
-        byType[tool] = { label, visible: visChips.length + visSvgs.length, chip: visChips.length, svg: visSvgs.length, hudOverlap, rows }
+        byType[tool] = {
+          label,
+          visible: visChips.length + visSvgs.length,
+          chip: visChips.length,
+          svg: visSvgs.length,
+          hudOverlap,
+          chromeOverlap,
+          loveOverlap,
+          navOverlap,
+          rows,
+        }
       }
       const chipBoxes = [...document.querySelectorAll('.defend-type-chip')].filter(labelVisible).map((el) => ({ type: chipType(el), box: boxOf(el) }))
       const dockBoxes = [...document.querySelectorAll('.nw-docks button.defend-new-lamp, button.defend-new-lamp')].filter(shown).map(boxOf)
@@ -10282,47 +10325,68 @@ async function checkNwLoveChip(browser, port, errors) {
       }
       return { byType, blockers, gold: goldCues(), viewW, viewH }
     })
+    const gate667 = width === 375 && height === 667
+    const frameMark = problems.length
     for (const { tool, label } of NW_LOVE_CHIP_TYPES) {
       const row = snap.byType[tool]
       if (!row) {
-        fail(`checkNwLoveChip fail ${tag} ${tool} missing row`)
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} missing row`)
         continue
       }
       if (row.visible !== 1) {
-        fail(`checkNwLoveChip fail ${tag} ${tool} visible=${row.visible} chip=${row.chip} svg=${row.svg}`)
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} visible=${row.visible} chip=${row.chip} svg=${row.svg}`)
         continue
       }
       if (row.chip > 0 && row.svg > 0) {
-        fail(`checkNwLoveChip fail ${tag} ${tool} double chip=${row.chip} svg=${row.svg}`)
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} double chip=${row.chip} svg=${row.svg}`)
         continue
       }
       const painted = row.rows[0]
       if (!painted) {
-        fail(`checkNwLoveChip fail ${tag} ${tool} painted=0`)
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} painted=0`)
         continue
       }
       if (painted.rendered !== label) {
-        fail(`checkNwLoveChip fail ${tag} ${tool} rendered=${JSON.stringify(painted.rendered)} source=${JSON.stringify(label)}`)
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} rendered=${JSON.stringify(painted.rendered)} source=${JSON.stringify(label)}`)
         continue
       }
       if (painted.clipped !== 0) {
-        fail(`checkNwLoveChip fail ${tag} ${tool} clipped=${painted.clipped}`)
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} clipped=${painted.clipped}`)
         continue
       }
       if (painted.kind === 'chip' && painted.font > 0 && painted.font < 13) {
-        fail(`checkNwLoveChip fail ${tag} ${tool} font=${painted.font}`)
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} font=${painted.font}`)
         continue
       }
       if (row.hudOverlap > 0.5) {
-        fail(`checkNwLoveChip fail ${tag} ${tool} hudOverlap=${row.hudOverlap}`)
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} hudOverlap=${row.hudOverlap}`)
         continue
       }
-      console.log(`checkNwLoveChip ok ${tag} ${tool} visible=1 hudOverlap=0 clipped=0 gold=1`)
       const chipRow = row.rows.find((r) => r.kind === 'chip')
       const chipBox = chipRow?.box
       if (!chipBox) {
-        fail(`checkNwLoveChip fail ${tag} slideTypeChip ${tool} chip=0`)
+        fail(`checkNwLoveChip fail r${round} ${tag} slideTypeChip ${tool} chip=0`)
         continue
+      }
+      if (gate667) {
+        if (chipRow.chromeHide === 'yes') {
+          fail(`checkNwLoveChip fail r${round} ${tag} ${tool} chromeHide=yes`)
+          continue
+        }
+        if (row.chromeOverlap > 0.5) {
+          fail(`checkNwLoveChip fail r${round} ${tag} ${tool} chromeOverlap=${row.chromeOverlap}`)
+          continue
+        }
+        if (tool === 'reason') {
+          if (row.navOverlap > 0.5) {
+            fail(`checkNwLoveChip fail r${round} ${tag} ${tool} navOverlap=${row.navOverlap}`)
+            continue
+          }
+          if (row.loveOverlap > 0.5) {
+            fail(`checkNwLoveChip fail r${round} ${tag} ${tool} loveOverlap=${row.loveOverlap}`)
+            continue
+          }
+        }
       }
       const inView =
         chipBox.left >= -0.5 &&
@@ -10333,97 +10397,31 @@ async function checkNwLoveChip(browser, port, errors) {
         chipBox.height > 1
       if (!inView) {
         fail(
-          `checkNwLoveChip fail ${tag} slideTypeChip ${tool} box=${chipBox.left.toFixed(1)},${chipBox.top.toFixed(1)},${chipBox.width.toFixed(1)},${chipBox.height.toFixed(1)} viewport=${snap.viewW}x${snap.viewH}`,
+          `checkNwLoveChip fail r${round} ${tag} slideTypeChip ${tool} box=${chipBox.left.toFixed(1)},${chipBox.top.toFixed(1)},${chipBox.width.toFixed(1)},${chipBox.height.toFixed(1)} viewport=${snap.viewW}x${snap.viewH}`,
         )
         continue
       }
       if (chipRow.clipped !== 0) {
-        fail(`checkNwLoveChip fail ${tag} slideTypeChip ${tool} clipped=${chipRow.clipped}`)
+        fail(`checkNwLoveChip fail r${round} ${tag} slideTypeChip ${tool} clipped=${chipRow.clipped}`)
         continue
       }
-      console.log(
-        `checkNwLoveChip ok ${tag} slideTypeChip ${tool} box=${Math.round(chipBox.left)},${Math.round(chipBox.top)},${Math.round(chipBox.width)},${Math.round(chipBox.height)} clipped=0`,
-      )
     }
     if (snap.blockers.length) {
-      fail(`checkNwLoveChip fail ${tag} overlap=${snap.blockers.join(',')}`)
+      fail(`checkNwLoveChip fail r${round} ${tag} overlap=${snap.blockers.join(',')}`)
     }
     if (snap.gold !== 1) {
-      fail(`checkNwLoveChip fail ${tag} gold=${snap.gold}`)
+      fail(`checkNwLoveChip fail r${round} ${tag} gold=${snap.gold}`)
     }
-    await context.close()
-  }
-
-  if (!only) {
-    const r24Search = TYPE_LABEL_SEARCH.replace('nwRound=18', 'nwRound=24')
-    for (const [width, height] of NW_LOVE_CHIP_R24_SIZES) {
-      const tag = `${width}x${height}`
-      const { context, page } = await openMap(browser, port, width, height, 'a2', {
-        motion: false,
-        search: r24Search,
-      })
-      page.on('pageerror', (error) => errors.push(`nw-love-chip ${tag} r24 ${error}`))
-      await plantTypeLabelSeats(page, `${tag} r24`)
-      await page.evaluate(() => document.fonts?.ready)
-      await page.waitForTimeout(250)
-      const r24 = await page.evaluate(() => {
-        const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
-        const shown = (el) => {
-          const style = getComputedStyle(el)
-          if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
-          const box = el.getBoundingClientRect()
-          return box.width > 1 && box.height > 1
-        }
-        const boxOf = (el) => {
-          const r = el.getBoundingClientRect()
-          return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height }
-        }
-        const read = (tool, label) => {
-          const chips = [...document.querySelectorAll(`.defend-type-chip.is-${tool}`)].filter(shown)
-          const svgs = [...document.querySelectorAll('text.defend-type-label')].filter((node) => norm(node.textContent) === label && shown(node))
-          const chipEl = chips[0]
-          return {
-            visible: chips.length + svgs.length,
-            chip: chips.length,
-            svg: svgs.length,
-            chromeHide: chipEl?.getAttribute('data-chrome-hide'),
-            box: chipEl ? boxOf(chipEl) : null,
-          }
-        }
-        return {
-          viewW: window.innerWidth,
-          viewH: window.innerHeight,
-          love: read('love', 'Love'),
-          reason: read('reason', 'Reason'),
-        }
-      })
-      for (const { tool } of NW_LOVE_CHIP_R24_TOOLS) {
-        const row = r24[tool]
-        if (!row || row.visible !== 1 || (row.chip > 0 && row.svg > 0)) {
-          fail(`checkNwLoveChip fail r24 ${tag} ${tool} visible=${row?.visible ?? 0} chip=${row?.chip ?? 0} svg=${row?.svg ?? 0}`)
-          continue
-        }
-        const chipBox = row.box
-        if (!chipBox || chipBox.width < 1 || chipBox.height < 1) {
-          fail(`checkNwLoveChip fail r24 ${tag} ${tool} chip=0`)
-          continue
-        }
-        const inView =
-          chipBox.left >= -0.5 &&
-          chipBox.top >= -0.5 &&
-          chipBox.right <= r24.viewW + 0.5 &&
-          chipBox.bottom <= r24.viewH + 0.5
-        if (!inView) {
-          fail(
-            `checkNwLoveChip fail r24 ${tag} ${tool} box=${chipBox.left.toFixed(1)},${chipBox.top.toFixed(1)},${chipBox.width.toFixed(1)},${chipBox.height.toFixed(1)} viewport=${r24.viewW}x${r24.viewH}`,
-          )
-          continue
-        }
+    if (problems.length === frameMark) {
+      const reasonRow = snap.byType.reason
+      const reasonBox = reasonRow?.rows.find((r) => r.kind === 'chip')?.box
+      if (reasonBox) {
         console.log(
-          `checkNwLoveChip ok r24 ${tag} ${tool} visible=1 box=${Math.round(chipBox.left)},${Math.round(chipBox.top)},${Math.round(chipBox.width)},${Math.round(chipBox.height)}`,
+          `checkNwLoveChip ok r${round} ${tag} frame reason visible=1 box=${Math.round(reasonBox.left)},${Math.round(reasonBox.top)},${Math.round(reasonBox.width)},${Math.round(reasonBox.height)} hudOverlap=${Math.round(reasonRow.hudOverlap || 0)} gold=1`,
         )
       }
-      await context.close()
+    }
+    await context.close()
     }
   }
 
