@@ -1974,7 +1974,7 @@ assert.doesNotMatch(
   assert.match(phone597, /NW_LOVE_CHIP_ROUNDS = \[18, 24\]/, '1.4.597 love-chip runs rounds 18 and 24')
   assert.match(
     phone597,
-    /checkNwLoveChip ok r\$\{round\} \$\{tag\} frame reason visible=1 box=/,
+    /checkNwLoveChip ok r\$\{round\} \$\{tag\} frame reason visible=1 box=.* inViewport=1/,
     '1.4.597 each frame logs Reason box and HUD overlap',
   )
   assert.match(
@@ -1983,6 +1983,10 @@ assert.doesNotMatch(
     '1.4.597 slideTypeChip logs in-viewport box per chip per frame',
   )
   assert.match(phone597, /lampAnchorDy/, '1.4.597 love-chip snap measures chip distance from lamp anchor')
+  assert.match(phone597, /fail r\$\{round\} \$\{tag\} nw-hud=0/, '1.4.597 love-chip fails when the hearts HUD is missing')
+  assert.match(phone597, /reason headerOverlap/, '1.4.597 Reason stays off the app header at every size')
+  assert.match(phone597, /hdr=\$\{Math\.round\(reasonRow\.headerOverlap/, '1.4.597 frame ok logs header overlap for Reason')
+  assert.match(phone597, /checkNwLoveChip fail hard slideTypeChip/, '1.4.597 Hard rejects Easy chip slide transforms')
   assert.match(phone597, /waitNwLoveChipCamReady/, '1.4.597 official cam waits for Recenter and Begin')
 }
 
