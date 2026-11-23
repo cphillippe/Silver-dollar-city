@@ -1977,6 +1977,12 @@ assert.doesNotMatch(
     /checkNwLoveChip ok r\$\{round\} \$\{tag\} frame reason visible=1 box=/,
     '1.4.597 each frame logs Reason box and HUD overlap',
   )
+  assert.match(
+    phone597,
+    /checkNwLoveChip ok slideTypeChip \$\{tag\} r\$\{round\} \$\{tool\} box=.* inViewport=1/,
+    '1.4.597 slideTypeChip logs in-viewport box per chip per frame',
+  )
+  assert.match(phone597, /lampAnchorDy/, '1.4.597 love-chip snap measures chip distance from lamp anchor')
   assert.match(phone597, /waitNwLoveChipCamReady/, '1.4.597 official cam waits for Recenter and Begin')
 }
 

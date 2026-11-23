@@ -4818,13 +4818,14 @@ const EASY_GOLD_BASE_1579 = {
   },
   '412x915 home-first': { '2 Help': { x: 143.3, y: 809, w: 125.3, h: 48 } },
   '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
+  // 1.4.597 What's new row (Love chip): re-pinned from CI run 45211502352.
   '412x915 settings-more': {
     'Open Profile': { x: 41, y: 1360.7, w: 130, h: 52 },
-    Candy: { x: 41, y: 1788.6, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1788.6, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1848.6, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2127.1, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2372.9, w: 176, h: 52 },
+    Candy: { x: 41, y: 1828.3, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1828.3, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1888.3, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2166.8, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2412.7, w: 176, h: 52 },
   },
 }
 
@@ -10260,6 +10261,7 @@ async function checkNwLoveChip(browser, port, errors) {
         let chromeOverlap = 0
         let loveOverlap = 0
         let navOverlap = 0
+        let lampAnchorDy = null
         for (const chip of visChips) {
           const chipBox = boxOf(chip)
           if (hudBox) hudOverlap = Math.max(hudOverlap, overlapPx(chipBox, hudBox))
@@ -10269,6 +10271,14 @@ async function checkNwLoveChip(browser, port, errors) {
           if (tool !== 'love' && loveBox) loveOverlap = Math.max(loveOverlap, overlapPx(chipBox, loveBox))
           for (const btn of navBtns) {
             navOverlap = Math.max(navOverlap, overlapPx(chipBox, boxOf(btn)))
+          }
+          const plotId = chip.getAttribute('data-chip-plot')
+          const lampEl = plotId ? document.querySelector(`[data-clear-lamp="${plotId}"]`) : null
+          if (lampEl && shown(lampEl)) {
+            const lampBox = boxOf(lampEl)
+            const chipCy = (chipBox.top + chipBox.bottom) / 2
+            const lampCy = (lampBox.top + lampBox.bottom) / 2
+            lampAnchorDy = Math.round((chipCy - lampCy) * 10) / 10
           }
         }
         byType[tool] = {
@@ -10280,6 +10290,7 @@ async function checkNwLoveChip(browser, port, errors) {
           chromeOverlap,
           loveOverlap,
           navOverlap,
+          lampAnchorDy,
           rows,
         }
       }
@@ -10405,6 +10416,9 @@ async function checkNwLoveChip(browser, port, errors) {
         fail(`checkNwLoveChip fail r${round} ${tag} slideTypeChip ${tool} clipped=${chipRow.clipped}`)
         continue
       }
+      console.log(
+        `checkNwLoveChip ok slideTypeChip ${tag} r${round} ${tool} box=${Math.round(chipBox.left)},${Math.round(chipBox.top)},${Math.round(chipBox.width)},${Math.round(chipBox.height)} inViewport=1`,
+      )
     }
     if (snap.blockers.length) {
       fail(`checkNwLoveChip fail r${round} ${tag} overlap=${snap.blockers.join(',')}`)
@@ -10416,8 +10430,12 @@ async function checkNwLoveChip(browser, port, errors) {
       const reasonRow = snap.byType.reason
       const reasonBox = reasonRow?.rows.find((r) => r.kind === 'chip')?.box
       if (reasonBox) {
+        const lampDy =
+          reasonRow.lampAnchorDy === null || reasonRow.lampAnchorDy === undefined
+            ? ''
+            : ` lampDy=${reasonRow.lampAnchorDy}`
         console.log(
-          `checkNwLoveChip ok r${round} ${tag} frame reason visible=1 box=${Math.round(reasonBox.left)},${Math.round(reasonBox.top)},${Math.round(reasonBox.width)},${Math.round(reasonBox.height)} hudOverlap=${Math.round(reasonRow.hudOverlap || 0)} gold=1`,
+          `checkNwLoveChip ok r${round} ${tag} frame reason visible=1 box=${Math.round(reasonBox.left)},${Math.round(reasonBox.top)},${Math.round(reasonBox.width)},${Math.round(reasonBox.height)} hudOverlap=${Math.round(reasonRow.hudOverlap || 0)} gold=1${lampDy}`,
         )
       }
     }
