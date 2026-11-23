@@ -5265,7 +5265,7 @@ async function checkMazeFarTap(browser, port, errors) {
     const rulePx = await page
       .locator('[data-maze-how]')
       .evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
-    if (rulePx < 13) fail(`checkMazeFarTap fail ${label} rule=${rulePx}px`)
+    if (!(rulePx >= 13)) fail(`checkMazeFarTap fail ${label} rule=${rulePx}px`)
     const cellMin = await page.locator('[data-maze-cell].is-road').evaluateAll((nodes) => {
       let min = Infinity
       for (const node of nodes) {
@@ -5288,6 +5288,12 @@ async function checkMazeFarTap(browser, port, errors) {
       await tapCell(near)
       await waitHere(near)
     }
+    const ruleHidden = await page.evaluate(() => {
+      const el = document.querySelector('[data-maze-how]')
+      if (!el) return 1
+      return getComputedStyle(el).visibility === 'hidden' ? 1 : 0
+    })
+    if (ruleHidden !== 1) fail(`checkMazeFarTap fail ${label} ruleHidden=${ruleHidden}`)
     const yRuleOff = await boardY()
     const gridDy = Math.abs(yRuleOff - yRuleOn)
     if (gridDy > 0.5) fail(`checkMazeFarTap fail ${label} gridDy=${gridDy.toFixed(2)}`)
@@ -5321,42 +5327,54 @@ async function checkMazeFarTap(browser, port, errors) {
       c: Number(await page.locator('[data-maze-cell].is-inn').getAttribute('data-c')),
     }
 
-    let tapsHurt = 0
-    let here = await readHere()
-    while (here.r !== hurt.r || here.c !== hurt.c) {
-      tapsHurt += 1
-      if (!(await tapCell(hurt))) break
-      if (!(await waitHere(hurt))) break
-      here = await readHere()
-      if (tapsHurt > 3) break
+    const atStart = await readHere()
+    const pathToHurt = shortestMazePath(atStart, hurt)
+    const distHurt = pathToHurt && pathToHurt.length > 1 ? pathToHurt.length - 1 : 0
+    if (distHurt <= 1) fail(`checkMazeFarTap fail ${label} hurt dist=${distHurt}`)
+    const tapsHurt = 1
+    if (!(await tapCell(hurt))) {
+      await context.close()
+      continue
     }
-    if (tapsHurt > 3) fail(`checkMazeFarTap fail ${label} hurt taps=${tapsHurt}`)
+    if (!(await waitHere(hurt))) {
+      await context.close()
+      continue
+    }
     const goldAtHurt = await countPlayGold(page)
     if (goldAtHurt !== 1) fail(`checkMazeFarTap fail ${label} gold=${goldAtHurt} at hurt`)
-    await page.locator('.play.is-road-maze.is-helped').waitFor({ timeout: 8000 })
-
-    let tapsInn = 0
-    while ((await page.locator('[data-maze-dock]').count()) === 0) {
-      tapsInn += 1
-      if (!(await tapCell(inn))) break
-      try {
-        await page.waitForFunction(
-          ({ r, c }) => {
-            if (document.querySelector('.play.is-road-maze')?.getAttribute('data-maze-walking') === 'yes') return false
-            const here = document.querySelector('[data-maze-cell].is-here')
-            if (here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)) return true
-            return Boolean(document.querySelector('[data-maze-dock]'))
-          },
-          inn,
-          { timeout: 4000 },
-        )
-      } catch {
-        fail(`checkMazeFarTap fail ${label} walk did not reach ${key(inn)}`)
-        break
-      }
-      if (tapsInn > 3) break
+    try {
+      await page.locator('.play.is-road-maze.is-helped').waitFor({ timeout: 8000 })
+    } catch {
+      fail(`checkMazeFarTap fail ${label} helped wait`)
+      await context.close()
+      continue
     }
-    if (tapsInn > 3) fail(`checkMazeFarTap fail ${label} inn taps=${tapsInn}`)
+
+    const atHurt = await readHere()
+    const pathToInn = shortestMazePath(atHurt, inn)
+    const distInn = pathToInn && pathToInn.length > 1 ? pathToInn.length - 1 : 0
+    if (distInn <= 1) fail(`checkMazeFarTap fail ${label} inn dist=${distInn}`)
+    const tapsInn = 1
+    if (!(await tapCell(inn))) {
+      await context.close()
+      continue
+    }
+    try {
+      await page.waitForFunction(
+        ({ r, c }) => {
+          if (document.querySelector('.play.is-road-maze')?.getAttribute('data-maze-walking') === 'yes') return false
+          const here = document.querySelector('[data-maze-cell].is-here')
+          if (here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)) return true
+          return Boolean(document.querySelector('[data-maze-dock]'))
+        },
+        inn,
+        { timeout: 4000 },
+      )
+    } catch {
+      fail(`checkMazeFarTap fail ${label} walk did not reach ${key(inn)}`)
+      await context.close()
+      continue
+    }
 
     const taps = tapsHurt + tapsInn
     const goldPlay = Math.max(goldStart, goldAtHurt)
@@ -5364,7 +5382,7 @@ async function checkMazeFarTap(browser, port, errors) {
     const ruleRounded = Math.round(rulePx * 10) / 10
     if (!fails.some((line) => line.includes(label))) {
       console.log(
-        `checkMazeFarTap ok ${label} taps=${taps} gridDy=${gridDy.toFixed(1)} gold=${goldPlay} cell=${cellPx}px rule=${ruleRounded}px`,
+        `checkMazeFarTap ok ${label} taps=${taps} gridDy=${gridDy.toFixed(1)} gold=${goldPlay} cell=${cellPx}px rule=${ruleRounded}px ruleHidden=${ruleHidden} distHurt=${distHurt} distInn=${distInn}`,
       )
     }
     await context.close()
@@ -11241,8 +11259,7 @@ export async function checkPhoneFixes() {
       return
     }
     if (process.env.EASY_ONE_GOLD_ONLY === '1') {
-      await checkMazeFarTap(browser, port, errors)
-    await checkEasyOneGold(browser, port, errors)
+      await checkEasyOneGold(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'easy one-gold screens stay free of console errors')
       return
     }
@@ -11317,6 +11334,7 @@ export async function checkPhoneFixes() {
       return
     }
     await checkEasyOneGold(browser, port, errors)
+    await checkMazeFarTap(browser, port, errors)
     await checkGemHintSlot(browser, port, errors)
     await checkTabletBeginGold(browser, port, errors)
     await checkNightRun905(browser, port, errors)

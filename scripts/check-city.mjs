@@ -1967,7 +1967,16 @@ assert.doesNotMatch(
   assert.match(play598, /visibility: 'hidden'/, '1.4.598 the rule line keeps layout when hidden')
   assert.match(maze598, /\.maze-how-slot/, '1.4.598 maze-how slot reserves height')
   assert.match(phone598, /async function checkMazeFarTap/, '1.4.598 checkMazeFarTap is defined')
-  assert.match(phone598, /await checkMazeFarTap\(browser, port, errors\)/, '1.4.598 the full path runs checkMazeFarTap')
+  {
+    const defaultPathStart = phone598.indexOf("    await checkEasyOneGold(browser, port, errors)\n")
+    assert.ok(defaultPathStart >= 0, '1.4.598 default phone path starts at checkEasyOneGold')
+    const defaultPath = phone598.slice(defaultPathStart)
+    assert.match(
+      defaultPath,
+      /await checkEasyOneGold\(browser, port, errors\)\n    await checkMazeFarTap\(browser, port, errors\)/,
+      '1.4.598 the full path runs checkMazeFarTap after checkEasyOneGold',
+    )
+  }
   assert.match(
     phone598,
     /checkMazeFarTap ok \$\{label\} taps=\$\{taps\} gridDy=\$\{gridDy\.toFixed\(1\)\} gold=\$\{goldPlay\} cell=/,
