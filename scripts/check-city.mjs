@@ -1970,13 +1970,7 @@ assert.doesNotMatch(
     )?.[0] ?? null
   assert.ok(readBaseNwWaveSurvived(defend597), '1.4.597 the standalone base .nw-wave-survived block is present')
   const assertBasePinMisses = (css, label) => {
-    let threw = false
-    try {
-      assert.ok(readBaseNwWaveSurvived(css))
-    } catch {
-      threw = true
-    }
-    assert.equal(threw, true, label)
+    assert.equal(readBaseNwWaveSurvived(css), null, label)
   }
   assertBasePinMisses(
     defend597.replace(/^\.nw-wave-survived \{\n  top: 72px;/m, '.nw-wave-survived {\n  top: 60px;'),
