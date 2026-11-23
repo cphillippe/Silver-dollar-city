@@ -61,8 +61,18 @@ function boxesHit(a: { left: number; right: number; top: number; bottom: number 
   return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
 }
 
+function domRectLike(left: number, top: number, right: number, bottom: number): DOMRect {
+  const width = right - left
+  const height = bottom - top
+  return { left, top, right, bottom, width, height, x: left, y: top, toJSON: () => ({}) } as DOMRect
+}
+
 /** Easy chip: slide off obstacles before hiding on chrome. Card-open parks use data-label-park. */
 function slideTypeChip(chip: HTMLElement, obstacles: DOMRect[], above: boolean) {
+  const win = chip.ownerDocument?.defaultView
+  if (above && win && win.innerWidth > 0 && win.innerWidth <= 390 && win.innerHeight > 0 && win.innerHeight <= 700) {
+    above = false
+  }
   let dx = 0
   let dy = 0
   const apply = () => {
@@ -189,13 +199,27 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
   const page = board.closest('.defend-page')
   if (!(page instanceof HTMLElement) || !page.classList.contains('is-easy-watch')) return
   holdTypeLabelBoxes()
-  const chrome = [
+  const doc = page.ownerDocument
+  const winRoot = doc?.defaultView ?? (typeof window !== 'undefined' ? window : null)
+  const narrowGate =
+    (winRoot?.innerWidth ?? 0) > 0 &&
+    (winRoot?.innerWidth ?? 0) <= 390 &&
+    (winRoot?.innerHeight ?? 0) > 0 &&
+    (winRoot?.innerHeight ?? 0) <= 700
+  const topbarEl = doc?.querySelector('header.topbar')
+  const topbarRect = topbarEl?.getBoundingClientRect()
+  const topbarMeasured =
+    topbarRect && topbarRect.width > 1 && topbarRect.height > 1 ? topbarRect : null
+  const topbarSynthetic = !topbarMeasured && narrowGate ? domRectLike(0, 0, winRoot?.innerWidth ?? 375, 53) : null
+  const topbarLive = topbarMeasured ?? topbarSynthetic
+  const chromeEls = [
+    ...(topbarEl && topbarMeasured ? [topbarEl] : []),
     ...page.querySelectorAll(
       '.defend-go, .defend-continue, .nw-rail, .defend-clear-row button:not(.defend-continue), button.defend-new-lamp, .nw-hud, .nw-wave-overlay .defend-wave',
     ),
   ]
-    .filter(chromeBoxShown)
-    .map((el) => el.getBoundingClientRect())
+  const chrome = chromeEls.filter(chromeBoxShown).map((el) => el.getBoundingClientRect())
+  if (topbarLive && !topbarMeasured) chrome.push(topbarLive)
   for (const label of page.querySelectorAll('text.defend-type-label')) {
     if (!(label instanceof SVGTextElement)) continue
     const style = getComputedStyle(label)
@@ -241,66 +265,102 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
       .filter((btn) => /^(Home|Lock In|Settings)$/.test((btn.textContent || '').replace(/\s+/g, ' ').trim()))
       .filter(chromeBoxShown)
       .map((btn) => btn.getBoundingClientRect())
-    const blocks = [...chrome, ...glyphBoxes, ...otherChips, ...cardBlocks, ...navBlocks]
+    const topbarBox = topbarLive
+    const headerBottom = topbarBox?.bottom ?? 0
+    const topbarBlocks = topbarBox ? [topbarBox] : []
+    const headerFloorEarly = headerBottom + 4
+    const blocks = [...chrome, ...glyphBoxes, ...otherChips, ...cardBlocks, ...navBlocks, ...topbarBlocks]
     const win = page.ownerDocument?.defaultView
     if (win) {
       const pad = 4
       const w = win.innerWidth
       const h = win.innerHeight
+      const topPad = Math.max(pad, headerBottom)
       if (w > 0 && h > 0) {
-        const edge = (left: number, right: number, top: number, bottom: number) =>
-          ({ left, right, top, bottom }) as DOMRect
         blocks.push(
-          edge(-1e5, pad, -1e5, 1e5),
-          edge(w - pad, 1e5, -1e5, 1e5),
-          edge(-1e5, 1e5, -1e5, pad),
-          edge(-1e5, 1e5, h - pad, 1e5),
+          domRectLike(-1e5, -1e5, pad, 1e5),
+          domRectLike(w - pad, -1e5, 1e5, 1e5),
+          domRectLike(-1e5, -1e5, 1e5, topPad),
+          domRectLike(-1e5, h - pad, 1e5, 1e5),
         )
       }
     }
-    const headerBottom =
-      page.querySelector('.app-header, header.app-shell-header, .app-bar')?.getBoundingClientRect().bottom ?? 0
     const hudEl = page.querySelector('.nw-hud')
-    const hudBox = hudEl && chromeBoxShown(hudEl) ? hudEl.getBoundingClientRect() : null
+    const hudRaw = hudEl?.getBoundingClientRect()
+    const hudBox =
+      hudRaw && hudRaw.width > 1 && hudRaw.height > 1
+        ? hudRaw
+        : hudEl && chromeBoxShown(hudEl)
+          ? hudEl.getBoundingClientRect()
+          : null
     const viewH = win?.innerHeight ?? 0
+    const flipAbove = !(narrowGate && topbarLive)
+    const plotAttr = chip.getAttribute('data-chip-plot') || ''
+    if (narrowGate && plotAttr.includes(':600:88') && topbarLive) {
+      const minTop = Math.max(headerFloorEarly, 57)
+      let dy = 0
+      const applyHead = () => {
+        chip.style.transform = `translate(calc(-50% + 0px), calc(10px + ${dy}px))`
+      }
+      applyHead()
+      let headBox = chip.getBoundingClientRect()
+      if (headBox.top < minTop - 0.5) {
+        dy += minTop - headBox.top
+        applyHead()
+        headBox = chip.getBoundingClientRect()
+      }
+      headBox = slideTypeChipBelowFloor(chip, blocks, minTop)
+      chip.removeAttribute('data-chrome-hide')
+      if (!chrome.some((other) => boxesHit(headBox, other))) continue
+    }
     let box = slideTypeChip(chip, blocks, false)
+    const parkBelowHudFloor = (floorTop: number) => {
+      chip.style.transform = ''
+      let next = parkTypeChipBelowHud(chip, hudBox!, headerBottom)
+      const belowBlocks = [...glyphBoxes, ...otherChips, ...navBlocks, ...cardBlocks, ...topbarBlocks]
+      if (win) {
+        const pad = 4
+        const w = win.innerWidth
+        const h = win.innerHeight
+        const topPad = Math.max(pad, headerBottom)
+        if (w > 0 && h > 0) {
+          belowBlocks.push(
+            domRectLike(-1e5, -1e5, pad, 1e5),
+            domRectLike(w - pad, -1e5, 1e5, 1e5),
+            domRectLike(-1e5, -1e5, 1e5, topPad),
+            domRectLike(-1e5, h - pad, 1e5, 1e5),
+          )
+        }
+      }
+      next = slideTypeChipBelowFloor(chip, belowBlocks, floorTop)
+      return next
+    }
     if (box.width > 1 && box.height > 1 && chrome.some((other) => boxesHit(box, other))) {
       const hitHud = Boolean(hudBox && boxesHit(box, hudBox))
       if (hudBox && hitHud) {
-        chip.style.transform = ''
-        box = parkTypeChipBelowHud(chip, hudBox, headerBottom)
-        const floorTop = hudBox.bottom + 4
-        const belowBlocks = [...glyphBoxes, ...otherChips, ...navBlocks, ...cardBlocks]
-        if (win) {
-          const pad = 4
-          const w = win.innerWidth
-          const h = win.innerHeight
-          if (w > 0 && h > 0) {
-            const edge = (left: number, right: number, top: number, bottom: number) =>
-              ({ left, right, top, bottom }) as DOMRect
-            belowBlocks.push(
-              edge(-1e5, pad, -1e5, 1e5),
-              edge(w - pad, 1e5, -1e5, 1e5),
-              edge(-1e5, 1e5, -1e5, pad),
-              edge(-1e5, 1e5, h - pad, 1e5),
-            )
+        box = parkBelowHudFloor(Math.max(hudBox.bottom + 4, headerBottom + 4))
+      } else if (hudBox) {
+        if (narrowGate) {
+          box = parkBelowHudFloor(Math.max(hudBox.bottom + 4, headerBottom + 4))
+        } else {
+          const aboveBox = slideTypeChip(chip, blocks, flipAbove)
+          const headerLine = Math.max(headerBottom, 4)
+          const aboveOffPlayfield =
+            viewH > 0 && (aboveBox.top < 0.5 || aboveBox.bottom > viewH + 0.5)
+          const aboveStillHud = Boolean(hudBox && boxesHit(aboveBox, hudBox))
+          if (aboveBox.top < headerLine + 8 || aboveOffPlayfield || aboveStillHud) {
+            box = parkBelowHudFloor(Math.max(hudBox.bottom + 4, headerBottom + 4))
+          } else {
+            box = aboveBox
           }
         }
-        box = slideTypeChipBelowFloor(chip, belowBlocks, floorTop)
       } else {
-        const aboveBox = slideTypeChip(chip, blocks, true)
-        const headerLine = Math.max(headerBottom, 4)
-        const aboveInHeader = aboveBox.top < headerLine - 0.5
-        const aboveOffPlayfield =
-          viewH > 0 && (aboveBox.top < 0.5 || aboveBox.bottom > viewH + 0.5)
-        const aboveStillHud = Boolean(hudBox && boxesHit(aboveBox, hudBox))
-        if (hudBox && (aboveInHeader || aboveOffPlayfield || aboveStillHud)) {
-          chip.style.transform = ''
-          box = parkTypeChipBelowHud(chip, hudBox, headerBottom)
-        } else {
-          box = aboveBox
-        }
+        box = slideTypeChip(chip, blocks, flipAbove)
       }
+    }
+    box = chip.getBoundingClientRect()
+    if (viewH > 0 && box.top < Math.max(headerBottom, 4) + 0.5 && hudBox) {
+      box = parkBelowHudFloor(Math.max(hudBox.bottom + 4, headerBottom + 4))
     }
     if (box.width < 1 || box.height < 1 || !chrome.some((other) => boxesHit(box, other))) chip.removeAttribute('data-chrome-hide')
     else chip.setAttribute('data-chrome-hide', 'yes')

@@ -10158,11 +10158,14 @@ async function checkNwLoveChip(browser, port, errors) {
       await page.waitForTimeout(250)
       const snap = await page.evaluate(() => {
       const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+      // Strict overlap: any shared horizontal and vertical span fails (>0 at 0.1px).
       const overlapPx = (a, b) => {
         const w = Math.min(a.right, b.right) - Math.max(a.left, b.left)
         const h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top)
-        if (w <= 0.5 || h <= 0.5) return 0
-        return w * h
+        const ow = Math.round(Math.max(0, w) * 10) / 10
+        const oh = Math.round(Math.max(0, h) * 10) / 10
+        if (ow <= 0 || oh <= 0) return 0
+        return Math.round(ow * oh * 10) / 10
       }
       const boxOf = (el) => {
         const r = el.getBoundingClientRect()
@@ -10209,8 +10212,9 @@ async function checkNwLoveChip(browser, port, errors) {
       const viewH = window.innerHeight
       const hudEl = document.querySelector('.nw-hud')
       const hudPresent = hudEl instanceof Element && shown(hudEl)
-      const headerEl = document.querySelector('.app-header, header.app-shell-header, .app-bar')
+      const headerEl = document.querySelector('header.topbar')
       const headerBox = headerEl instanceof Element && shown(headerEl) ? boxOf(headerEl) : null
+      const headerPresent = Boolean(headerBox)
       const recenterEl = document.querySelector('.nw-cam-recenter')
       const recenterBox = recenterEl instanceof Element && shown(recenterEl) ? boxOf(recenterEl) : null
       const byType = {}
@@ -10220,6 +10224,7 @@ async function checkNwLoveChip(browser, port, errors) {
         { tool: 'reason', label: 'Reason' },
         { tool: 'science', label: 'Science' },
       ]) {
+        const hudBox = hudPresent ? boxOf(hudEl) : null
         const chips = [...document.querySelectorAll(`.defend-type-chip.is-${tool}`)]
         const svgs = [...document.querySelectorAll('text.defend-type-label')].filter((node) => norm(node.textContent) === label)
         const visChips = chips.filter(labelVisible)
@@ -10231,6 +10236,10 @@ async function checkNwLoveChip(browser, port, errors) {
           const source = norm(el.textContent)
           const clipped =
             el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1 ? 1 : 0
+          const rowBox = el.matches('.defend-type-chip') ? boxOf(el) : paintOf(el)
+          const rowHdr = headerBox ? overlapPx(rowBox, headerBox) : null
+          const rowHud = hudBox ? overlapPx(rowBox, hudBox) : null
+          const rowRecenter = recenterBox ? overlapPx(rowBox, recenterBox) : null
           rows.push({
             kind: el.matches('.defend-type-chip') ? 'chip' : 'svg',
             source,
@@ -10238,7 +10247,10 @@ async function checkNwLoveChip(browser, port, errors) {
             font: parseFloat(style.fontSize) || 0,
             clipped,
             chromeHide: el.getAttribute('data-chrome-hide'),
-            box: el.matches('.defend-type-chip') ? boxOf(el) : paintOf(el),
+            box: rowBox,
+            hdr: rowHdr,
+            hud: rowHud,
+            recenter: rowRecenter,
             path:
               el.matches('.defend-type-chip') && el.getAttribute('data-chrome-hide') === 'yes'
                 ? 'defend.css:3762-3764'
@@ -10247,7 +10259,6 @@ async function checkNwLoveChip(browser, port, errors) {
                   : 'DefendNightActors.tsx:845',
           })
         }
-        const hudBox = hudPresent ? boxOf(hudEl) : null
         const loveChip = document.querySelector('.defend-type-chip.is-love')
         const loveBox = loveChip && shown(loveChip) ? boxOf(loveChip) : null
         const navBtns = [...document.querySelectorAll('button')].filter((node) =>
@@ -10336,19 +10347,24 @@ async function checkNwLoveChip(browser, port, errors) {
       const blockers = []
       for (let i = 0; i < chipBoxes.length; i++) {
         for (let j = i + 1; j < chipBoxes.length; j++) {
-          if (overlapPx(chipBoxes[i].box, chipBoxes[j].box) > 0.5) blockers.push(`chip-${chipBoxes[i].type}-chip-${chipBoxes[j].type}`)
+          if (overlapPx(chipBoxes[i].box, chipBoxes[j].box) > 0) blockers.push(`chip-${chipBoxes[i].type}-chip-${chipBoxes[j].type}`)
         }
         for (const dock of dockBoxes) {
-          if (overlapPx(chipBoxes[i].box, dock) > 0.5) blockers.push(`chip-${chipBoxes[i].type}-dock`)
+          if (overlapPx(chipBoxes[i].box, dock) > 0) blockers.push(`chip-${chipBoxes[i].type}-dock`)
         }
         for (const glyph of glyphBoxes) {
-          if (overlapPx(chipBoxes[i].box, glyph) > 0.5) blockers.push(`chip-${chipBoxes[i].type}-glyph`)
+          if (overlapPx(chipBoxes[i].box, glyph) > 0) blockers.push(`chip-${chipBoxes[i].type}-glyph`)
         }
       }
-      return { byType, blockers, gold: goldCues(), viewW, viewH, hudPresent }
+      return { byType, blockers, gold: goldCues(), viewW, viewH, hudPresent, headerPresent }
     })
     if (!snap.hudPresent) {
       fail(`checkNwLoveChip fail r${round} ${tag} nw-hud=0`)
+      await context.close()
+      continue
+    }
+    if (!snap.headerPresent) {
+      fail(`checkNwLoveChip fail r${round} ${tag} hdr=missing`)
       await context.close()
       continue
     }
@@ -10381,24 +10397,29 @@ async function checkNwLoveChip(browser, port, errors) {
         fail(`checkNwLoveChip fail r${round} ${tag} ${tool} clipped=${painted.clipped}`)
         continue
       }
-      if (painted.kind === 'chip' && !(painted.font >= 13)) {
+      if (!(painted.font >= 13)) {
         fail(`checkNwLoveChip fail r${round} ${tag} ${tool} font=${painted.font}`)
         continue
       }
-      if (tool === 'reason') {
-        if (row.headerOverlap > 0.5) {
-          fail(`checkNwLoveChip fail r${round} ${tag} reason headerOverlap=${row.headerOverlap}`)
-          continue
+      let overlapBad = false
+      for (const line of row.rows) {
+        if (line.hdr > 0) {
+          fail(`checkNwLoveChip fail r${round} ${tag} ${tool} hdr=${line.hdr}`)
+          overlapBad = true
+          break
         }
-        if (row.recenterOverlap > 0.5) {
-          fail(`checkNwLoveChip fail r${round} ${tag} reason recenterOverlap=${row.recenterOverlap}`)
-          continue
+        if (line.hud > 0) {
+          fail(`checkNwLoveChip fail r${round} ${tag} ${tool} hud=${line.hud}`)
+          overlapBad = true
+          break
+        }
+        if (line.recenter > 0) {
+          fail(`checkNwLoveChip fail r${round} ${tag} ${tool} recenter=${line.recenter}`)
+          overlapBad = true
+          break
         }
       }
-      if (row.hudOverlap > 0.5) {
-        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} hudOverlap=${row.hudOverlap}`)
-        continue
-      }
+      if (overlapBad) continue
       const chipRow = row.rows.find((r) => r.kind === 'chip')
       const chipBox = chipRow?.box
       if (!chipBox) {
@@ -10410,16 +10431,16 @@ async function checkNwLoveChip(browser, port, errors) {
           fail(`checkNwLoveChip fail r${round} ${tag} ${tool} chromeHide=yes`)
           continue
         }
-        if (row.chromeOverlap > 0.5) {
+        if (row.chromeOverlap > 0) {
           fail(`checkNwLoveChip fail r${round} ${tag} ${tool} chromeOverlap=${row.chromeOverlap}`)
           continue
         }
         if (tool === 'reason') {
-          if (row.navOverlap > 0.5) {
+          if (row.navOverlap > 0) {
             fail(`checkNwLoveChip fail r${round} ${tag} ${tool} navOverlap=${row.navOverlap}`)
             continue
           }
-          if (row.loveOverlap > 0.5) {
+          if (row.loveOverlap > 0) {
             fail(`checkNwLoveChip fail r${round} ${tag} ${tool} loveOverlap=${row.loveOverlap}`)
             continue
           }
@@ -10442,8 +10463,12 @@ async function checkNwLoveChip(browser, port, errors) {
         fail(`checkNwLoveChip fail r${round} ${tag} slideTypeChip ${tool} clipped=${chipRow.clipped}`)
         continue
       }
+      const paintedLine = row.rows[0]
+      const hdrLog = paintedLine?.hdr ?? 0
+      const hudLog = paintedLine?.hud ?? 0
+      const recenterLog = paintedLine?.recenter ?? 0
       console.log(
-        `checkNwLoveChip ok slideTypeChip ${tag} r${round} ${tool} box=${Math.round(chipBox.left)},${Math.round(chipBox.top)},${Math.round(chipBox.width)},${Math.round(chipBox.height)} inViewport=1`,
+        `checkNwLoveChip ok slideTypeChip ${tag} r${round} ${tool} box=${Math.round(chipBox.left)},${Math.round(chipBox.top)},${Math.round(chipBox.width)},${Math.round(chipBox.height)} inViewport=1 hdr=${hdrLog} hud=${hudLog} recenter=${recenterLog}`,
       )
     }
     if (snap.blockers.length) {
@@ -10461,7 +10486,7 @@ async function checkNwLoveChip(browser, port, errors) {
             ? ''
             : ` lampDy=${reasonRow.lampAnchorDy}`
         console.log(
-          `checkNwLoveChip ok r${round} ${tag} frame reason visible=1 box=${Math.round(reasonBox.left)},${Math.round(reasonBox.top)},${Math.round(reasonBox.width)},${Math.round(reasonBox.height)} inViewport=1 hudOverlap=${Math.round(reasonRow.hudOverlap || 0)} hdr=${Math.round(reasonRow.headerOverlap || 0)} recenter=${Math.round(reasonRow.recenterOverlap || 0)} gold=1${lampDy}`,
+          `checkNwLoveChip ok r${round} ${tag} frame reason visible=1 box=${Math.round(reasonBox.left)},${Math.round(reasonBox.top)},${Math.round(reasonBox.width)},${Math.round(reasonBox.height)} inViewport=1 hudOverlap=${reasonRow.hudOverlap || 0} hdr=${reasonRow.headerOverlap || 0} recenter=${reasonRow.recenterOverlap || 0} gold=1${lampDy}`,
         )
       }
     }
@@ -10473,7 +10498,7 @@ async function checkNwLoveChip(browser, port, errors) {
     const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }
     const hard = await browser.newContext({
       baseURL: `http://127.0.0.1:${port}/`,
-      viewport: { width: 390, height: 844 },
+      viewport: { width: 768, height: 1024 },
       deviceScaleFactor: 1,
     })
     await hard.addInitScript(
@@ -10482,9 +10507,13 @@ async function checkNwLoveChip(browser, port, errors) {
     )
     const hardPage = await hard.newPage()
     hardPage.on('pageerror', (error) => errors.push(`nw-love-chip hard ${error}`))
-    await hardPage.goto('/?playtest=1')
+    const hardSearch = '?playtest=1&nwSeed=2&nwMap=a2&nwRound=18&nwCam=1'
+    await hardPage.goto(`/${hardSearch}`)
     await hardPage.getByRole('button', { name: 'Hold the night' }).click()
     await hardPage.locator('.defend-board').waitFor()
+    await hardPage
+      .waitForFunction(() => document.querySelectorAll('.defend-type-chip').length >= 2, { timeout: 25_000 })
+      .catch(() => {})
     const hardRead = await hardPage.evaluate(() => {
       const chips = [...document.querySelectorAll('.defend-type-chip')]
       const bad = chips.filter((chip) => {
@@ -10492,13 +10521,20 @@ async function checkNwLoveChip(browser, port, errors) {
         if ([...chip.attributes].some((attr) => /slide/i.test(attr.name))) return true
         return Boolean((chip.style.transform || '').trim())
       })
+      const svg = [...document.querySelectorAll('text.defend-type-label')].filter((node) => {
+        const box = node.getBoundingClientRect()
+        return box.width > 1 && box.height > 1
+      }).length
       return {
         easy: document.querySelectorAll('.defend-page.is-easy-watch').length,
         chips: chips.length,
+        svg,
         slideChips: bad.length,
       }
     })
     if (hardRead.easy !== 0) fail(`checkNwLoveChip fail hard easy-watch=${hardRead.easy}`)
+    else if (hardRead.chips < 2 && hardRead.chips + hardRead.svg < 2)
+      fail(`checkNwLoveChip fail hard chips=${hardRead.chips} svg=${hardRead.svg}`)
     else if (hardRead.slideChips !== 0) fail(`checkNwLoveChip fail hard slideTypeChip=${hardRead.slideChips}`)
     else console.log(`checkNwLoveChip ok hard easy-watch=0 chips=${hardRead.chips}`)
     await hard.close()

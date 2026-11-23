@@ -1960,8 +1960,9 @@ assert.doesNotMatch(
   const board597 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
   const phone597 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
   assert.match(board597, /function slideTypeChip/, '1.4.597 Easy nudges type chips off chrome before hiding')
+  assert.match(board597, /header\.topbar/, '1.4.597 Easy park reads header.topbar for chip clearance')
   assert.match(board597, /function parkTypeChipBelowHud/, '1.4.597 short phones park chips under the hearts HUD')
-  assert.match(board597, /slideTypeChip\(chip, blocks, true\)/, '1.4.597 chips flip above the lamp when Begin still blocks them')
+  assert.match(board597, /slideTypeChip\(chip, blocks, flipAbove\)/, '1.4.597 chips flip above only when topbar is clear on tall frames')
   assert.match(board597, /const chipNodes = \[\.\.\.page\.querySelectorAll\('\.defend-type-chip'\)\]/, '1.4.587 hideTypeLabelsOnChrome flags chips')
   assert.match(phone597, /async function checkNwLoveChip/, '1.4.597 checkNwLoveChip is defined')
   assert.match(
@@ -1984,10 +1985,29 @@ assert.doesNotMatch(
   )
   assert.match(phone597, /lampAnchorDy/, '1.4.597 love-chip snap measures chip distance from lamp anchor')
   assert.match(phone597, /fail r\$\{round\} \$\{tag\} nw-hud=0/, '1.4.597 love-chip fails when the hearts HUD is missing')
-  assert.match(phone597, /reason headerOverlap/, '1.4.597 Reason stays off the app header at every size')
-  assert.match(phone597, /hdr=\$\{Math\.round\(reasonRow\.headerOverlap/, '1.4.597 frame ok logs header overlap for Reason')
+  assert.match(phone597, /fail r\$\{round\} \$\{tag\} hdr=missing/, '1.4.597 love-chip fails when header.topbar is missing')
+  assert.match(phone597, /header\.topbar/, '1.4.597 love-chip snap uses header.topbar')
+  assert.match(phone597, /if \(!\(painted\.font >= 13\)\)/, '1.4.597 love-chip font floor covers chip and svg')
+  assert.match(phone597, /fail r\$\{round\} \$\{tag\} \$\{tool\} hdr=/, '1.4.597 love-chip fails painted overlap with topbar')
+  assert.match(
+    phone597,
+    /ok slideTypeChip.*hdr=\$\{hdrLog\} hud=\$\{hudLog\} recenter=\$\{recenterLog\}/,
+    '1.4.597 slideTypeChip ok logs hdr hud recenter per chip',
+  )
+  assert.match(phone597, /checkNwLoveChip fail hard chips=/, '1.4.597 Hard path requires at least two type chips')
   assert.match(phone597, /checkNwLoveChip fail hard slideTypeChip/, '1.4.597 Hard rejects Easy chip slide transforms')
   assert.match(phone597, /waitNwLoveChipCamReady/, '1.4.597 official cam waits for Recenter and Begin')
+  const loveDefaultRegion = phone597.slice(phone597.lastIndexOf("if (process.env.NW_LOVE_CHIP_ONLY === '1')"))
+  assert.match(
+    phone597,
+    /await checkNwSpendOnScreen\(browser, port, errors\)\n    await checkNwLoveChip\(browser, port, errors\)/,
+    '1.4.597 default phone path runs checkNwLoveChip after checkNwSpendOnScreen',
+  )
+  assert.match(
+    loveDefaultRegion,
+    /if \(process\.env\.NW_LOVE_CHIP_ONLY === '1'\) \{\n      await checkNwLoveChip\(browser, port, errors\)/,
+    '1.4.597 NW_LOVE_CHIP_ONLY guard calls checkNwLoveChip',
+  )
 }
 
 
