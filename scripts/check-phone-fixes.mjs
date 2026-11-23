@@ -9785,6 +9785,186 @@ async function checkGemSightCue(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #898 Easy Who helped? wrong picture stays marked after a miss tap. */
+const SHOW_IT_MISS_SIZES = [
+  [375, 667],
+  [375, 812],
+  [390, 844],
+  [412, 915],
+]
+
+async function checkShowItMiss(browser, port, errors) {
+  const only = process.env.SHOW_IT_MISS_SIZE
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+
+  for (const [width, height] of SHOW_IT_MISS_SIZES) {
+    const size = `${width}x${height}`
+    if (only && only !== size) continue
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      reducedMotion: 'no-preference',
+    })
+    await context.addInitScript(() => {
+      localStorage.clear()
+      window.__sawtoothStarts = 0
+      const Ctx = window.AudioContext
+      if (!Ctx) return
+      const origCreate = Ctx.prototype.createOscillator
+      Ctx.prototype.createOscillator = function createOscillatorPatched() {
+        const osc = origCreate.call(this)
+        const origStart = osc.start.bind(osc)
+        osc.start = function startPatched(...args) {
+          if (osc.type === 'sawtooth') window.__sawtoothStarts += 1
+          return origStart(...args)
+        }
+        return osc
+      }
+    })
+    const page = await context.newPage()
+    page.on('pageerror', (error) => errors.push(`show-it-miss ${size} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(`show-it-miss ${size} ${msg.text()}`)
+    })
+
+    let miss = 0
+    let shift = 0
+    let minTap = 999
+    let minText = 999
+    let gold = 0
+    let pop = 0
+
+    try {
+      await page.goto('/?playtest=1')
+      await page.getByRole('button', { name: 'Start Easy' }).click()
+      await page.locator('main.hub.is-easy-home').waitFor()
+      const learnAside = page.locator('.easy-learn-aside')
+      if ((await learnAside.count()) < 1) fail(`checkShowItMiss fail ${size} learn-aside=0`)
+      await learnAside.click()
+      await page.locator('.show-it-teach.is-clip').waitFor()
+      await page.locator('.show-it-clip').evaluate((v) => v.dispatchEvent(new Event('ended')))
+      await page.locator('.show-it-teach.is-pick').waitFor()
+
+      const beforeHelper = await page.locator('.show-it-choice[aria-label="Helper"]').evaluate((el) => ({
+        left: el.offsetLeft,
+        top: el.offsetTop,
+        width: el.offsetWidth,
+        height: el.offsetHeight,
+      }))
+
+      const wrong = page.locator('.show-it-choice[aria-label="Walked past"]')
+      if ((await wrong.count()) < 1) fail(`checkShowItMiss fail ${size} wrong-choice=0`)
+      const wrongBox = await wrong.boundingBox()
+      if (!wrongBox) fail(`checkShowItMiss fail ${size} wrong-box=0`)
+      await page.mouse.click(wrongBox.x + wrongBox.width / 2, wrongBox.y + wrongBox.height / 2)
+      await page.waitForTimeout(1000)
+
+      const missCards = page.locator('.show-it-choice.is-miss')
+      miss = await missCards.count()
+      if (miss !== 1) {
+        fail(`checkShowItMiss fail ${size} miss-count=${miss}`)
+      } else {
+        const missLabel = await missCards.first().getAttribute('aria-label')
+        if (missLabel !== 'Walked past') fail(`checkShowItMiss fail ${size} miss-label=${missLabel}`)
+        const helperMiss = await page.locator('.show-it-choice[aria-label="Helper"].is-miss').count()
+        if (helperMiss !== 0) fail(`checkShowItMiss fail ${size} helper-miss=${helperMiss}`)
+      }
+
+      if (miss === 1) {
+        const afterHelper = await page.locator('.show-it-choice[aria-label="Helper"]').evaluate((el) => ({
+          left: el.offsetLeft,
+          top: el.offsetTop,
+          width: el.offsetWidth,
+          height: el.offsetHeight,
+        }))
+        shift =
+          beforeHelper.left !== afterHelper.left ||
+          beforeHelper.top !== afterHelper.top ||
+          beforeHelper.width !== afterHelper.width ||
+          beforeHelper.height !== afterHelper.height
+            ? 1
+            : 0
+        if (shift !== 0) fail(`checkShowItMiss fail ${size} helper-shift=1`)
+      }
+
+      const tapRead = await page.evaluate(() => {
+        const taps = [...document.querySelectorAll('.show-it-choice')]
+        let min = 999
+        for (const el of taps) {
+          const box = el.getBoundingClientRect()
+          if (box.width < 1 || box.height < 1) continue
+          min = Math.min(min, box.width, box.height)
+        }
+        return min === 999 ? 0 : min
+      })
+      minTap = Math.round(tapRead * 10) / 10
+      if (minTap < 44) fail(`checkShowItMiss fail ${size} minTap=${minTap}`)
+
+      const backH = await page.evaluate(() => {
+        const back = document.querySelector('main .text-link')
+        return back ? parseFloat(getComputedStyle(back).fontSize) : 0
+      })
+      if (backH > 0) console.log(`checkShowItMiss info ${size} backH=${backH}`)
+
+      const textBad = await page.evaluate(() => {
+        const main = document.querySelector('main')
+        if (!main) return ['main=0']
+        const bad = []
+        const walker = document.createTreeWalker(main, NodeFilter.SHOW_TEXT)
+        while (walker.nextNode()) {
+          const node = walker.currentNode
+          const text = node.textContent.replace(/\s+/g, ' ').trim()
+          if (!text) continue
+          const el = node.parentElement
+          if (!el || el.closest('[aria-hidden="true"], script, style')) continue
+          const st = getComputedStyle(el)
+          const box = el.getBoundingClientRect()
+          if (st.display === 'none' || st.visibility === 'hidden' || box.width < 2 || box.height < 2) continue
+          const px = parseFloat(st.fontSize)
+          if (!(px >= 13)) bad.push(`${px}:${text.slice(0, 24)}`)
+        }
+        return bad
+      })
+      if (textBad.length) {
+        minText = 0
+        fail(`checkShowItMiss fail ${size} minText=${textBad[0]}`)
+      } else {
+        minText = 13
+      }
+
+      const goldRead = await readEasyGold(page)
+      gold = goldRead.frames.reduce((max, frame) => Math.max(max, frame.gold || 0), 0)
+      if (gold > 1) fail(`checkShowItMiss fail ${size} gold=${gold}`)
+
+      pop = await page.evaluate(() => window.__sawtoothStarts ?? 0)
+      if (pop !== 1) fail(`checkShowItMiss fail ${size} pop=${pop}`)
+    } catch (error) {
+      fail(`checkShowItMiss fail ${size} throw=${error.message}`)
+    }
+
+    const hadFail = problems.some((line) => line.startsWith(`checkShowItMiss fail ${size}`))
+    if (!hadFail) {
+      console.log(`checkShowItMiss ok ${size} miss=1 shift=0 minTap=${minTap} minText=${minText} gold=${gold} pop=1`)
+    } else {
+      console.log(`checkShowItMiss fail ${size} miss=${miss} shift=${shift} minTap=${minTap} minText=${minText} gold=${gold} pop=${pop}`)
+    }
+
+    await context.close()
+  }
+
+  for (const err of errors.slice(errorMark)) fail(`checkShowItMiss error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 /** #951 Easy round-clear Spend and ? stay on screen (fixed to the viewport, not the collapsed clear bar). */
 const NW_SPEND_ON_SCREEN_SIZES = [
   [375, 812],
@@ -11086,6 +11266,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'dig win readable nights stay free of console errors')
       return
     }
+    if (process.env.SHOW_IT_MISS_ONLY === '1') {
+      await checkShowItMiss(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'show it miss nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
@@ -11110,6 +11295,7 @@ export async function checkPhoneFixes() {
     await checkDigWinReadable(browser, port, errors)
     await checkGemSightCue(browser, port, errors)
     await checkNwSpendOnScreen(browser, port, errors)
+    await checkShowItMiss(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -11286,7 +11472,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY', 'SHOW_IT_MISS_ONLY', 'NW_STRIP_WORDS_ONLY', 'DIG_WIN_READABLE_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')

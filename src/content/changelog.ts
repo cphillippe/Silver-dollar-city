@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.597',
+    title: 'Who helped? miss mark',
+    when: '2026-11-23',
+    items: [
+      'On Easy, a wrong picture on Who helped? stays marked so you can see your miss.',
+      'Hard stays the same.',
+      'Refs #898.',
+    ],
+  },
+  {
     version: '1.4.596',
     title: 'Night Watch: Spend and help on screen',
     when: '2026-11-22',

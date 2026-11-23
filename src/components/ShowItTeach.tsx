@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { PH_ROAD_SHOW_IT } from '../content/showIt'
+import { playGemPop } from '../lib/juice'
 
 interface ShowItTeachProps {
   onUnlock: () => void
@@ -16,6 +17,7 @@ export function ShowItTeach({ onUnlock }: ShowItTeachProps) {
   const [needsTap, setNeedsTap] = useState(false)
   const [shakeId, setShakeId] = useState<string | null>(null)
   const [shakeN, setShakeN] = useState(0)
+  const [missIds, setMissIds] = useState<ReadonlySet<string>>(() => new Set())
 
   useEffect(() => {
     const video = videoRef.current
@@ -48,6 +50,8 @@ export function ShowItTeach({ onUnlock }: ShowItTeachProps) {
       onUnlock()
       return
     }
+    playGemPop('miss')
+    setMissIds((prev) => new Set(prev).add(id))
     setShakeId(id)
     setShakeN((n) => n + 1)
   }
@@ -59,11 +63,12 @@ export function ShowItTeach({ onUnlock }: ShowItTeachProps) {
         <div className="show-it-choices">
           {PH_ROAD_SHOW_IT.choices.map((choice) => {
             const shaking = shakeId === choice.id
+            const missed = missIds.has(choice.id)
             return (
               <button
                 key={shaking ? `${choice.id}-${shakeN}` : choice.id}
                 type="button"
-                className={`show-it-choice${shaking ? ' is-shake' : ''}`}
+                className={`show-it-choice${shaking ? ' is-shake' : ''}${missed ? ' is-miss' : ''}`}
                 aria-label={choice.label}
                 onClick={() => choose(choice.id)}
               >
