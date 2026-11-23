@@ -6811,7 +6811,9 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
 }
 
 /* 792b NWUI-8: Wave survived! holds about 2.4s. It never takes a tap (pointer-events inherited from the base rule). */
+/* 1.4.597: raise past the Sparks label under camera scale (issue 984). */
 .defend-page.is-easy-watch .nw-wave-survived {
+  top: 98px;
   animation: nw-wave-survived-hold 2.4s ease-out both;
 }
 
