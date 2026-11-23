@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { inflateSync } from 'node:zlib'
 import {
   CITY_HOLLOW_TO_WITNESS,
@@ -1960,17 +1961,30 @@ assert.doesNotMatch(
   '1.4.597 the player note does not name other tiers',
 )
 {
-  const defend597 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const defend597Path = fileURLToPath(new URL('../src/styles/defend.css', import.meta.url))
+  const defend597 = readFileSync(defend597Path, 'utf8')
   const phone597 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  const readBaseNwWaveSurvived = (css) =>
+    css.match(
+      /^\.nw-wave-survived \{\n  top: 72px;\n  left: 12px;[\s\S]*?animation: nw-wave-survived-pop 1\.2s ease-out both;\n\}/m,
+    )?.[0] ?? null
+  assert.ok(readBaseNwWaveSurvived(defend597), '1.4.597 the standalone base .nw-wave-survived block is present')
+  assert.throws(
+    () =>
+      assert.ok(
+        readBaseNwWaveSurvived(defend597.replace(/^\.nw-wave-survived \{\n  top: 72px;/m, '.nw-wave-survived {\n  top: 60px;')),
+      ),
+    '1.4.597 mutating base wave-survived top to 60px fails the pin',
+  )
+  assert.throws(
+    () => assert.ok(readBaseNwWaveSurvived(defend597.replace(/^\.nw-wave-survived \{\n  top: 72px;\n/m, '.nw-wave-survived {\n'))),
+    '1.4.597 deleting base wave-survived top fails the pin',
+  )
   assert.match(
     defend597,
-    /\.defend-page\.is-easy-watch \.nw-wave-survived \{[\s\S]*?top: 98px;/,
-    '1.4.597 Easy wave-survived top is raised',
+    /\.defend-page\.is-easy-watch \.nw-wave-survived \{[^}]*top: 116px;/,
+    '1.4.597 Easy wave-survived top is raised in the Easy-only rule body',
   )
-  const baseWaveSurvived597 = defend597.match(/^\.nw-wave-survived \{[\s\S]*?top: 72px;/m)?.[0]
-  assert.ok(baseWaveSurvived597, '1.4.597 the base .nw-wave-survived rule block is present at top 72px')
-  assert.match(baseWaveSurvived597, /top: 72px;/, '1.4.597 the base wave-survived rule pins top 72px for Hard')
-  assert.doesNotMatch(baseWaveSurvived597, /top: 98px/, '1.4.597 the base wave-survived rule does not use the Easy offset')
   assert.match(phone597, /async function checkNwWaveSurvivedClear/, '1.4.597 checkNwWaveSurvivedClear is defined')
   const cheerOnly597 = phone597.slice(
     phone597.indexOf("if (process.env.NW_ROUND_CHEER_ONLY === '1')"),
@@ -1987,7 +2001,7 @@ assert.doesNotMatch(
     /await checkNwRoundCheer\(browser, port, errors\)\n    await checkNwWaveSurvivedClear\(browser, port, errors\)/,
     '1.4.597 the full path runs checkNwWaveSurvivedClear right after checkNwRoundCheer',
   )
-  assert.match(phone597, /checkNwWaveSurvivedClear ok \$\{size\} vsLabel=.*vsChip=/, '1.4.597 the ok line logs overlap, chips, and banner box')
+  assert.match(phone597, /checkNwWaveSurvivedClear ok \$\{size\} vsLabel=.*vsChip=.*chipsOn=/, '1.4.597 the ok line logs overlap, chipsOn, and banner box')
 }
 
 // 1.4.596: Easy Night Watch Spend / ? on screen at round clear (#951).

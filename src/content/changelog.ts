@@ -32,7 +32,7 @@ export const CHANGELOG: ChangeNote[] = [
     title: 'Night Watch: wave clear banner',
     when: '2026-11-23',
     items: [
-      'On Easy, the Wave survived banner sits lower so it no longer covers the Sparks label when a wave clears.',
+      'On Easy, the Wave survived banner sits lower so it clears the Sparks label and the on-map Reason chip when a wave clears.',
       'Hard stays the same.',
       'Refs #984.',
     ],
