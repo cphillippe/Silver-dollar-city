@@ -4795,34 +4795,35 @@ const EASY_ONE_GOLD_MS = 1500
 const EASY_GOLD_BASE_1579 = {
   '375x667 home-first': { '2 Help': { x: 131, y: 561, w: 113, h: 48 } },
   '375x667 home-after-l1': { '3 Lock In': { x: 250, y: 584.1, w: 113, h: 48 } },
-  // 1.4.596: y re-pinned from CI run 45026157592 (checkEasyOneGold rect lines); x/w unchanged.
+  // 1.4.595: y re-pinned from CI run 44839256365 after the What's new row; x/w unchanged.
   '375x667 settings-more': {
     'Open Profile': { x: 41, y: 1406.5, w: 130, h: 52 },
-    Candy: { x: 41, y: 1854.3, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1854.3, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1914.3, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2217.6, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2463.4, w: 176, h: 52 },
+    Candy: { x: 41, y: 1849.3, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1849.3, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1909.3, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2212.6, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2458.4, w: 176, h: 52 },
   },
   '390x844 home-first': { '2 Help': { x: 136, y: 738, w: 118, h: 48 } },
   '390x844 home-after-l1': { '3 Lock In': { x: 260, y: 761.1, w: 118, h: 48 } },
   '390x844 settings-more': {
     'Open Profile': { x: 41, y: 1407.9, w: 130, h: 52 },
-    Candy: { x: 41, y: 1855.7, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1855.7, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1915.7, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2194.2, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2440, w: 176, h: 52 },
+    Candy: { x: 41, y: 1850.7, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1850.7, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1910.7, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2189.2, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2435, w: 176, h: 52 },
   },
   '412x915 home-first': { '2 Help': { x: 143.3, y: 809, w: 125.3, h: 48 } },
   '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
+  // 1.4.598: y from CI 45027861469 (What's new row); x/w unchanged from 1.4.595 pins.
   '412x915 settings-more': {
     'Open Profile': { x: 41, y: 1360.7, w: 130, h: 52 },
-    Candy: { x: 41, y: 1788.6, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1788.6, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1848.6, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2127.1, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2372.9, w: 176, h: 52 },
+    Candy: { x: 41, y: 1808.5, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1808.5, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1868.5, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2147, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2392.8, w: 176, h: 52 },
   },
 }
 
@@ -5154,6 +5155,242 @@ async function sampleEasyScreen(page, size, screen, fails) {
  * 1.4.581 (#916). Fresh Easy save. One gold cue on Home (first view and after lesson 1)
  * and on Settings → More at every scroll stop that shows a gold cue or the Look row.
  */
+const MAZE_FAR_TAP_SIZES = [
+  [375, 667],
+  [390, 844],
+  [412, 915],
+]
+
+/** Easy L1 road maze: one far tap walks the shortest path; the rule line does not shift the grid (#886). */
+async function checkMazeFarTap(browser, port, errors) {
+  const fails = []
+  const fail = (line) => fails.push(line)
+  const STEP_DIRS = [
+    { r: -1, c: 0 },
+    { r: 1, c: 0 },
+    { r: 0, c: -1 },
+    { r: 0, c: 1 },
+  ]
+  const key = (cell) => `${cell.r}:${cell.c}`
+
+  const countPlayGold = async (page) =>
+    page.evaluate(() => {
+      const goldish = (value) => {
+        const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g
+        let match
+        while ((match = re.exec(value || ''))) {
+          const r = Number(match[1])
+          const g = Number(match[2])
+          const b = Number(match[3])
+          if (r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+        }
+        return false
+      }
+      const goldCells = [...document.querySelectorAll('[data-maze-cell]')].filter((el) => {
+        const style = getComputedStyle(el)
+        return goldish(style.boxShadow) || goldish(style.outlineColor) || goldish(style.borderColor)
+      }).length
+      const filled = [...document.querySelectorAll('button, a.btn')].filter((el) => {
+        if (!(el instanceof HTMLElement)) return false
+        if (el.closest('[hidden], .easy-core, [data-maze-dock]')) return false
+        const style = getComputedStyle(el)
+        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+        const box = el.getBoundingClientRect()
+        if (box.width <= 0 || box.height <= 0) return false
+        return el.classList.contains('primary')
+      }).length
+      if (filled > 0) return filled
+      return goldCells
+    })
+
+  for (const [width, height] of MAZE_FAR_TAP_SIZES) {
+    const label = `${width}x${height}`
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      reducedMotion: 'reduce',
+    })
+    await context.addInitScript(() => localStorage.clear())
+    const page = await context.newPage()
+    page.on('pageerror', (error) => errors.push(`maze-far-tap ${label} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(`maze-far-tap ${label} ${msg.text()}`)
+    })
+    const openRoadMaze = async () => {
+      await page.goto('/?playtest=1')
+      await page.getByRole('button', { name: 'Start Easy' }).click()
+      await page.locator('main.hub.is-easy-home').waitFor()
+      await page.locator('.easy-home-steps li.is-now .easy-coach-step').click()
+      await page.locator('[data-maze-cell].is-here').waitFor()
+    }
+    await openRoadMaze()
+
+    const boardY = () =>
+      page.locator('.maze-board').evaluate((el) => el.getBoundingClientRect().y)
+
+    const readHere = async () => {
+      const loc = page.locator('[data-maze-cell].is-here')
+      return { r: Number(await loc.getAttribute('data-r')), c: Number(await loc.getAttribute('data-c')) }
+    }
+    const tapCell = async (cell) => {
+      const loc = page.locator(`[data-maze-cell][data-r="${cell.r}"][data-c="${cell.c}"]`)
+      const box = await loc.boundingBox()
+      if (!box) {
+        fail(`checkMazeFarTap fail ${label} missing cell ${key(cell)}`)
+        return false
+      }
+      await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+      return true
+    }
+    const waitHere = async (target) => {
+      try {
+        await page.waitForFunction(
+          ({ r, c }) => {
+            if (document.querySelector('.play.is-road-maze')?.getAttribute('data-maze-walking') === 'yes') return false
+            const here = document.querySelector('[data-maze-cell].is-here')
+            return here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)
+          },
+          target,
+          { timeout: 4000 },
+        )
+        return true
+      } catch {
+        fail(`checkMazeFarTap fail ${label} walk did not reach ${key(target)}`)
+        return false
+      }
+    }
+
+    await page.locator('[data-maze-how]').waitFor()
+    const rulePx = await page
+      .locator('[data-maze-how]')
+      .evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
+    if (!(rulePx >= 13)) fail(`checkMazeFarTap fail ${label} rule=${rulePx}px`)
+    const cellMin = await page.locator('[data-maze-cell].is-road').evaluateAll((nodes) => {
+      let min = Infinity
+      for (const node of nodes) {
+        const box = node.getBoundingClientRect()
+        if (box.width > 0 && box.height > 0) min = Math.min(min, box.width, box.height)
+      }
+      return Number.isFinite(min) ? min : 0
+    })
+    if (cellMin < 44) fail(`checkMazeFarTap fail ${label} cell=${cellMin}px`)
+
+    const yRuleOn = await boardY()
+    const at0 = await readHere()
+    const openKeys = await page.locator('[data-maze-cell].is-road').evaluateAll((nodes) =>
+      nodes.map((node) => `${node.getAttribute('data-r')}:${node.getAttribute('data-c')}`),
+    )
+    const openSet = new Set(openKeys)
+    const near = STEP_DIRS.map((dir) => ({ r: at0.r + dir.r, c: at0.c + dir.c })).find((cell) => openSet.has(key(cell)))
+    if (!near) fail(`checkMazeFarTap fail ${label} no near road tile`)
+    else {
+      await tapCell(near)
+      await waitHere(near)
+    }
+    const ruleHidden = await page.evaluate(() => {
+      const el = document.querySelector('[data-maze-how]')
+      if (!el) return 1
+      return getComputedStyle(el).visibility === 'hidden' ? 1 : 0
+    })
+    if (ruleHidden !== 1) fail(`checkMazeFarTap fail ${label} ruleHidden=${ruleHidden}`)
+    const yRuleOff = await boardY()
+    const gridDy = Math.abs(yRuleOff - yRuleOn)
+    if (gridDy > 0.5) fail(`checkMazeFarTap fail ${label} gridDy=${gridDy.toFixed(2)}`)
+
+    const across = { r: 4, c: 2 }
+    const past = { r: 6, c: 2 }
+    if (openSet.has(key(across)) && openSet.has(key(past))) {
+      await openRoadMaze()
+      if (await tapCell(across)) await waitHere(across)
+      if (
+        !(await page.locator('.play.is-road-maze.is-helped').count()) &&
+        (await tapCell(past))
+      ) {
+        await waitHere(past)
+      }
+      if (await page.locator('.play.is-road-maze.is-helped').count()) {
+        fail(`checkMazeFarTap fail ${label} pass-by helped`)
+      }
+    } else fail(`checkMazeFarTap fail ${label} pass-by path missing`)
+
+    await openRoadMaze()
+    const goldStart = await countPlayGold(page)
+    if (goldStart !== 1) fail(`checkMazeFarTap fail ${label} gold=${goldStart} at start`)
+
+    const hurt = {
+      r: Number(await page.locator('[data-maze-cell].is-hurt').getAttribute('data-r')),
+      c: Number(await page.locator('[data-maze-cell].is-hurt').getAttribute('data-c')),
+    }
+    const inn = {
+      r: Number(await page.locator('[data-maze-cell].is-inn').getAttribute('data-r')),
+      c: Number(await page.locator('[data-maze-cell].is-inn').getAttribute('data-c')),
+    }
+
+    const atStart = await readHere()
+    const pathToHurt = shortestMazePath(atStart, hurt)
+    const distHurt = pathToHurt && pathToHurt.length > 1 ? pathToHurt.length - 1 : 0
+    if (distHurt <= 1) fail(`checkMazeFarTap fail ${label} hurt dist=${distHurt}`)
+    const tapsHurt = 1
+    if (!(await tapCell(hurt))) {
+      await context.close()
+      continue
+    }
+    if (!(await waitHere(hurt))) {
+      await context.close()
+      continue
+    }
+    const goldAtHurt = await countPlayGold(page)
+    if (goldAtHurt !== 1) fail(`checkMazeFarTap fail ${label} gold=${goldAtHurt} at hurt`)
+    try {
+      await page.locator('.play.is-road-maze.is-helped').waitFor({ timeout: 8000 })
+    } catch {
+      fail(`checkMazeFarTap fail ${label} helped wait`)
+      await context.close()
+      continue
+    }
+
+    const atHurt = await readHere()
+    const pathToInn = shortestMazePath(atHurt, inn)
+    const distInn = pathToInn && pathToInn.length > 1 ? pathToInn.length - 1 : 0
+    if (distInn <= 1) fail(`checkMazeFarTap fail ${label} inn dist=${distInn}`)
+    const tapsInn = 1
+    if (!(await tapCell(inn))) {
+      await context.close()
+      continue
+    }
+    try {
+      await page.waitForFunction(
+        ({ r, c }) => {
+          if (document.querySelector('.play.is-road-maze')?.getAttribute('data-maze-walking') === 'yes') return false
+          const here = document.querySelector('[data-maze-cell].is-here')
+          if (here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)) return true
+          return Boolean(document.querySelector('[data-maze-dock]'))
+        },
+        inn,
+        { timeout: 4000 },
+      )
+    } catch {
+      fail(`checkMazeFarTap fail ${label} walk did not reach ${key(inn)}`)
+      await context.close()
+      continue
+    }
+
+    const taps = tapsHurt + tapsInn
+    const goldPlay = Math.max(goldStart, goldAtHurt)
+    const cellPx = Math.round(cellMin * 10) / 10
+    const ruleRounded = Math.round(rulePx * 10) / 10
+    if (!fails.some((line) => line.includes(label))) {
+      console.log(
+        `checkMazeFarTap ok ${label} taps=${taps} gridDy=${gridDy.toFixed(1)} gold=${goldPlay} cell=${cellPx}px rule=${ruleRounded}px ruleHidden=${ruleHidden} distHurt=${distHurt} distInn=${distInn}`,
+      )
+    }
+    await context.close()
+  }
+  assert.equal(fails.length, 0, fails.join('\n'))
+}
+
+
 async function checkEasyOneGold(browser, port, errors) {
   const only = process.env.EASY_ONE_GOLD_SIZE
   const fails = []
@@ -11016,6 +11253,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', '1.4.578 off-top glyph nights stay free of console errors')
       return
     }
+    if (process.env.MAZE_FAR_TAP_ONLY === '1') {
+      await checkMazeFarTap(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'maze far tap nights stay free of console errors')
+      return
+    }
     if (process.env.EASY_ONE_GOLD_ONLY === '1') {
       await checkEasyOneGold(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'easy one-gold screens stay free of console errors')
@@ -11092,6 +11334,7 @@ export async function checkPhoneFixes() {
       return
     }
     await checkEasyOneGold(browser, port, errors)
+    await checkMazeFarTap(browser, port, errors)
     await checkGemHintSlot(browser, port, errors)
     await checkTabletBeginGold(browser, port, errors)
     await checkNightRun905(browser, port, errors)
@@ -11286,7 +11529,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'MAZE_FAR_TAP_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
