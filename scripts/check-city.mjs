@@ -1968,13 +1968,13 @@ assert.doesNotMatch(
   assert.match(maze598, /\.maze-how-slot/, '1.4.598 maze-how slot reserves height')
   assert.match(phone598, /async function checkMazeFarTap/, '1.4.598 checkMazeFarTap is defined')
   {
-    const defaultPathStart = phone598.indexOf("    await checkEasyOneGold(browser, port, errors)\n")
-    assert.ok(defaultPathStart >= 0, '1.4.598 default phone path starts at checkEasyOneGold')
-    const defaultPath = phone598.slice(defaultPathStart)
+    const lastIdx = phone598.lastIndexOf('      return\n    }\n')
+    const tail = phone598.slice(lastIdx)
+    assert.ok(lastIdx >= 0, '1.4.598 phone path has a final _ONLY return before the default region')
     assert.match(
-      defaultPath,
-      /await checkEasyOneGold\(browser, port, errors\)\n    await checkMazeFarTap\(browser, port, errors\)/,
-      '1.4.598 the full path runs checkMazeFarTap after checkEasyOneGold',
+      tail,
+      /\n    await checkMazeFarTap\(browser, port, errors\)\n/,
+      '1.4.598 checkMazeFarTap runs in the unconditional default region',
     )
   }
   assert.match(
