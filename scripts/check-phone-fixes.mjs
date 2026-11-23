@@ -9140,7 +9140,6 @@ async function checkNwStripWords(browser, port, errors) {
 }
 
 export async function checkLockInRotate(browser, port, errors) {
-  if (process.env.LOCKIN_ROTATE_SKIP === '1') return
   await runLockInRotateCheck(browser, port, errors)
 }
 

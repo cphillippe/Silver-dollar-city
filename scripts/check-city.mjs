@@ -1971,7 +1971,16 @@ assert.doesNotMatch(
     /await checkEasyOneGold\(browser, port, errors\)\n    await checkLockInRotate\(browser, port, errors\)/,
     '#963 the full path runs checkLockInRotate after checkEasyOneGold',
   )
-  assert.match(rotate963, /checkLockInRotate ok \$\{size\} \$\{lineId\} format=/, '#963 the check logs format per lesson from the DOM')
+  assert.match(
+    rotate963,
+    /checkLockInRotate ok \$\{size\} \$\{lineId\} format=\$\{live\} gold=\$\{goldWant\} clipped=\$\{metrics\.clipped\} minFont=\$\{metrics\.minFont\} minTap=/,
+    '#963 the check logs format, clip, font and tap per lesson from the DOM',
+  )
+  assert.match(rotate963, /encodeFormatForLine\(lineId\)/, '#963 live format matches encodeFormatForLine')
+  assert.match(rotate963, /\.lockin-recall\.is-ask/, '#963 format A child selector')
+  assert.match(rotate963, /\.lockin-encode-b/, '#963 format B child selector')
+  assert.match(rotate963, /\.lockin-encode-c/, '#963 format C child selector')
+  assert.match(rotate963, /encodeBWindowViolations/, '#963 B at most once in any 3-lesson window')
   assert.match(phone963, /runLockInRotateCheck/, '#963 check-lockin-rotate owns the runtime driver')
   assert.match(rotate963, /readFormatStrictSource[\s\S]*missing-data-encode-format/, '#963 strict data-encode-format on gate unless EXPECT_ROTATE_FAIL')
   assert.match(rotate963, /throw new Error\('advanceEncodeRecallAsk: missing data-encode-format/, '#963 advanceEncodeRecallAsk does not guess format')
