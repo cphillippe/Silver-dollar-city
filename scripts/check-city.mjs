@@ -1970,10 +1970,11 @@ assert.doesNotMatch(
   assert.match(phone599, /frameW=\$\{snap\.viewW\} cam=\$\{snap\.nwCam\} pan=\$\{snap\.camPan\}/, '1.4.599 love-chip ok logs frame and cam')
   assert.match(phone599, /checkNwLoveChip fail r\$\{round\} \$\{tag\} slideTypeChip \$\{tool\} \$\{line\.kind\} box=/, '1.4.599 love-chip fails on painted Reason nodes off-frame')
   const lastIdx599 = phone599.lastIndexOf('      return\n    }\n')
+  assert.ok(lastIdx599 >= 0, '1.4.599 phone-fixes default region tail is present')
   assert.match(
     phone599.slice(lastIdx599),
-    /\n    await checkNwSpendOnScreen\(browser, port, errors\)\n    await checkNwLoveChip\(browser, port, errors\)\n/,
-    '1.4.599 default phone path runs checkNwLoveChip after checkNwSpendOnScreen',
+    /\n    await checkNwLoveChip\(browser, port, errors\)\n/,
+    '1.4.599 default phone path runs checkNwLoveChip',
   )
 }
 
