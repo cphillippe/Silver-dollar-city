@@ -159,6 +159,32 @@ function slideTypeChipBelowFloor(chip: HTMLElement, obstacles: DOMRect[], floorT
     }
   }
   apply()
+  const frameW = chip.ownerDocument?.defaultView?.innerWidth ?? 0
+  if (frameW > 0) {
+    let box = chip.getBoundingClientRect()
+    const margin = 2
+    if (box.left < margin) {
+      dx += margin - box.left
+      apply()
+      box = chip.getBoundingClientRect()
+    }
+    if (box.right > frameW - margin) {
+      dx -= box.right - (frameW - margin)
+      apply()
+      box = chip.getBoundingClientRect()
+    }
+    const page = chip.closest('.defend-page')
+    if (page instanceof HTMLElement) {
+      for (const dock of page.querySelectorAll('.nw-docks button, button.defend-new-lamp')) {
+        if (!(dock instanceof HTMLElement) || !chromeBoxShown(dock)) continue
+        const bit = dock.getBoundingClientRect()
+        box = chip.getBoundingClientRect()
+        if (!boxesHit(box, bit) || box.left >= frameW / 2) continue
+        dx += bit.right + margin - box.left
+        apply()
+      }
+    }
+  }
   return chip.getBoundingClientRect()
 }
 
