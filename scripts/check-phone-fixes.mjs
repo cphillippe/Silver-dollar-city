@@ -4796,33 +4796,36 @@ const EASY_GOLD_BASE_1579 = {
   '375x667 home-first': { '2 Help': { x: 131, y: 561, w: 113, h: 48 } },
   '375x667 home-after-l1': { '3 Lock In': { x: 250, y: 584.1, w: 113, h: 48 } },
   // 1.4.596: y re-pinned from CI run 45026157592 (checkEasyOneGold rect lines); x/w unchanged.
+  // 1.4.597 What's new row (Love chip): re-pinned from CI run 45048191343.
   '375x667 settings-more': {
     'Open Profile': { x: 41, y: 1406.5, w: 130, h: 52 },
-    Candy: { x: 41, y: 1854.3, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1854.3, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1914.3, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2217.6, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2463.4, w: 176, h: 52 },
+    Candy: { x: 41, y: 1874.1, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1874.1, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1934.1, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2237.5, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2483.3, w: 176, h: 52 },
   },
   '390x844 home-first': { '2 Help': { x: 136, y: 738, w: 118, h: 48 } },
   '390x844 home-after-l1': { '3 Lock In': { x: 260, y: 761.1, w: 118, h: 48 } },
+  // 1.4.597 What's new row (Love chip): re-pinned from CI run 45059535776.
   '390x844 settings-more': {
     'Open Profile': { x: 41, y: 1407.9, w: 130, h: 52 },
-    Candy: { x: 41, y: 1855.7, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1855.7, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1915.7, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2194.2, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2440, w: 176, h: 52 },
+    Candy: { x: 41, y: 1875.5, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1875.5, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1935.5, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2214, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2459.9, w: 176, h: 52 },
   },
   '412x915 home-first': { '2 Help': { x: 143.3, y: 809, w: 125.3, h: 48 } },
   '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
+  // 1.4.597 What's new row (Love chip): re-pinned from CI run 45211502352.
   '412x915 settings-more': {
     'Open Profile': { x: 41, y: 1360.7, w: 130, h: 52 },
-    Candy: { x: 41, y: 1788.6, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1788.6, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1848.6, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2127.1, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2372.9, w: 176, h: 52 },
+    Candy: { x: 41, y: 1828.3, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1828.3, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1888.3, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2166.8, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2412.7, w: 176, h: 52 },
   },
 }
 
@@ -5891,7 +5894,7 @@ const TYPE_LABEL_PINS = {
   },
   '390x844': {
     planted: { begin: { x: 75, y: 779.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: {} },
-    card: { begin: { x: 75, y: 779.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 194.5, y: 319, w: 32, h: 32 }, 'pip-far': { x: 66.5, y: 353.4, w: 18, h: 16 }, 'buy-far': { x: 146.5, y: 328.7, w: 46, h: 44 }, 'pip-strong': { x: 66.5, y: 398.4, w: 18, h: 16 }, 'buy-strong': { x: 146.5, y: 373.7, w: 46, h: 44 } } },
+    card: { begin: { x: 75, y: 779.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 233.3, y: 269.9, w: 32, h: 32 }, 'pip-far': { x: 105.3, y: 304.3, w: 18, h: 16 }, 'buy-far': { x: 185.3, y: 279.5, w: 46, h: 44 }, 'pip-strong': { x: 105.3, y: 349.3, w: 18, h: 16 }, 'buy-strong': { x: 185.3, y: 324.5, w: 46, h: 44 } } },
     r5: { begin: null, continue: { x: 132.5, y: 780, w: 125, h: 56 }, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 498.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 554.9, w: 52, h: 53.1 } }, card: {} },
     r1: { begin: null, continue: { x: 132.5, y: 780, w: 125, h: 56 }, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 498.9, w: 52, h: 53.1 } }, card: {} },
   },
@@ -10099,6 +10102,448 @@ async function checkNwSpendOnScreen(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #949 Easy NW: type chips stay visible on official cam (375×667 gate + tall phones). */
+const NW_LOVE_CHIP_FRAME_SIZES = [
+  [375, 667],
+  [375, 812],
+  [390, 844],
+  [412, 915],
+]
+const NW_LOVE_CHIP_ROUNDS = [18, 24]
+const NW_LOVE_CHIP_TYPES = [
+  { tool: 'love', label: 'Love' },
+  { tool: 'logic', label: 'Logic' },
+  { tool: 'reason', label: 'Reason' },
+  { tool: 'science', label: 'Science' },
+]
+
+/** After jump, official cam shows Recenter and Begin (no tap yet). */
+async function waitNwLoveChipCamReady(page, tag, round) {
+  await assertGlyphCamera(page, `${tag} r${round} love-chip`)
+  await page.locator('.nw-cam-recenter').waitFor({ timeout: 20_000 })
+  await page.waitForFunction(() => {
+    const go = document.querySelector('.defend-go')
+    return go instanceof HTMLElement && go.getClientRects().length > 0
+  })
+  await page.waitForTimeout(250)
+}
+
+async function checkNwLoveChip(browser, port, errors) {
+  const only = process.env.NW_LOVE_CHIP_SIZE
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+  const onlyRound = process.env.NW_LOVE_CHIP_ROUND
+
+  for (const round of NW_LOVE_CHIP_ROUNDS) {
+    if (onlyRound && onlyRound !== String(round)) continue
+    const search = TYPE_LABEL_SEARCH.replace('nwRound=18', `nwRound=${round}`)
+    for (const [width, height] of NW_LOVE_CHIP_FRAME_SIZES) {
+      const tag = `${width}x${height}`
+      if (only && only !== tag) continue
+      const { context, page } = await openMap(browser, port, width, height, 'a2', {
+        motion: false,
+        search,
+      })
+      page.on('pageerror', (error) => errors.push(`nw-love-chip r${round} ${tag} ${error}`))
+      await waitNwLoveChipCamReady(page, tag, round)
+      await plantTypeLabelSeats(page, `${tag} r${round}`)
+      await page.evaluate(() => document.fonts?.ready)
+      await page.waitForTimeout(250)
+      const snap = await page.evaluate(() => {
+      const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+      // Strict overlap: any shared horizontal and vertical span fails (>0 at 0.1px).
+      const overlapPx = (a, b) => {
+        const w = Math.min(a.right, b.right) - Math.max(a.left, b.left)
+        const h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top)
+        const ow = Math.round(Math.max(0, w) * 10) / 10
+        const oh = Math.round(Math.max(0, h) * 10) / 10
+        if (ow <= 0 || oh <= 0) return 0
+        return Math.round(ow * oh * 10) / 10
+      }
+      const boxOf = (el) => {
+        const r = el.getBoundingClientRect()
+        return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height }
+      }
+      const paintOf = (el) => {
+        const rect = el.getBoundingClientRect()
+        let left = rect.left
+        let right = rect.right
+        let top = rect.top
+        let bottom = rect.bottom
+        const range = document.createRange()
+        for (const child of el.childNodes) {
+          if (child.nodeType !== 3 || !(child.textContent || '').trim()) continue
+          range.selectNodeContents(child)
+          for (const bit of range.getClientRects()) {
+            if (bit.width <= 0 || bit.height <= 0) continue
+            left = Math.min(left, bit.left)
+            right = Math.max(right, bit.right)
+            top = Math.min(top, bit.top)
+            bottom = Math.max(bottom, bit.bottom)
+          }
+        }
+        return { left, top, right, bottom, width: right - left, height: bottom - top }
+      }
+      const shown = (el) => {
+        const style = getComputedStyle(el)
+        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+        const box = el.getBoundingClientRect()
+        return box.width > 1 && box.height > 1
+      }
+      const labelVisible = (el) => {
+        if (!shown(el)) return false
+        if (el.matches('.defend-type-chip')) return true
+        return paintOf(el).width > 1 && paintOf(el).height > 1
+      }
+      const chipType = (el) => {
+        for (const part of el.classList) {
+          if (part.startsWith('is-') && part.length > 3) return part.slice(3)
+        }
+        return ''
+      }
+      const viewW = window.innerWidth
+      const viewH = window.innerHeight
+      const hudEl = document.querySelector('.nw-hud')
+      const hudPresent = hudEl instanceof Element && shown(hudEl)
+      const headerEl = document.querySelector('header.topbar')
+      const headerBox = headerEl instanceof Element && shown(headerEl) ? boxOf(headerEl) : null
+      const headerPresent = Boolean(headerBox)
+      const recenterEl = document.querySelector('.nw-cam-recenter')
+      const recenterBox = recenterEl instanceof Element && shown(recenterEl) ? boxOf(recenterEl) : null
+      const byType = {}
+      for (const { tool, label } of [
+        { tool: 'love', label: 'Love' },
+        { tool: 'logic', label: 'Logic' },
+        { tool: 'reason', label: 'Reason' },
+        { tool: 'science', label: 'Science' },
+      ]) {
+        const hudBox = hudPresent ? boxOf(hudEl) : null
+        const chips = [...document.querySelectorAll(`.defend-type-chip.is-${tool}`)]
+        const svgs = [...document.querySelectorAll('text.defend-type-label')].filter((node) => norm(node.textContent) === label)
+        const visChips = chips.filter(labelVisible)
+        const visSvgs = svgs.filter(labelVisible)
+        const rows = []
+        for (const el of [...chips, ...svgs]) {
+          if (!labelVisible(el)) continue
+          const style = getComputedStyle(el)
+          const source = norm(el.textContent)
+          const clipped =
+            el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1 ? 1 : 0
+          const rowBox = el.matches('.defend-type-chip') ? boxOf(el) : paintOf(el)
+          const rowHdr = headerBox ? overlapPx(rowBox, headerBox) : null
+          const rowHud = hudBox ? overlapPx(rowBox, hudBox) : null
+          const rowRecenter = recenterBox ? overlapPx(rowBox, recenterBox) : null
+          rows.push({
+            kind: el.matches('.defend-type-chip') ? 'chip' : 'svg',
+            source,
+            rendered: source,
+            font: parseFloat(style.fontSize) || 0,
+            clipped,
+            chromeHide: el.getAttribute('data-chrome-hide'),
+            box: rowBox,
+            hdr: rowHdr,
+            hud: rowHud,
+            recenter: rowRecenter,
+            path:
+              el.matches('.defend-type-chip') && el.getAttribute('data-chrome-hide') === 'yes'
+                ? 'defend.css:3762-3764'
+                : el.matches('.defend-type-chip')
+                  ? 'DefendNightBoard.tsx:292'
+                  : 'DefendNightActors.tsx:845',
+          })
+        }
+        const loveChip = document.querySelector('.defend-type-chip.is-love')
+        const loveBox = loveChip && shown(loveChip) ? boxOf(loveChip) : null
+        const navBtns = [...document.querySelectorAll('button')].filter((node) =>
+          /^(Home|Lock In|Settings)$/.test(norm(node.textContent)),
+        )
+        const chromeRects = [
+          document.querySelector('.defend-go'),
+          document.querySelector('.defend-continue'),
+          ...document.querySelectorAll('.nw-rail .defend-ability, .nw-rail button'),
+          ...document.querySelectorAll('button.defend-new-lamp'),
+          ...document.querySelectorAll('.defend-clear-row button:not(.defend-continue)'),
+        ]
+          .filter((el) => el instanceof Element && shown(el))
+          .map(boxOf)
+        let hudOverlap = 0
+        let chromeOverlap = 0
+        let loveOverlap = 0
+        let navOverlap = 0
+        let headerOverlap = 0
+        let recenterOverlap = 0
+        let lampAnchorDy = null
+        for (const chip of visChips) {
+          const chipBox = boxOf(chip)
+          if (hudBox) hudOverlap = Math.max(hudOverlap, overlapPx(chipBox, hudBox))
+          if (headerBox) headerOverlap = Math.max(headerOverlap, overlapPx(chipBox, headerBox))
+          if (recenterBox) recenterOverlap = Math.max(recenterOverlap, overlapPx(chipBox, recenterBox))
+          for (const rect of chromeRects) {
+            chromeOverlap = Math.max(chromeOverlap, overlapPx(chipBox, rect))
+          }
+          if (tool !== 'love' && loveBox) loveOverlap = Math.max(loveOverlap, overlapPx(chipBox, loveBox))
+          for (const btn of navBtns) {
+            navOverlap = Math.max(navOverlap, overlapPx(chipBox, boxOf(btn)))
+          }
+          const plotId = chip.getAttribute('data-chip-plot')
+          const lampEl = plotId ? document.querySelector(`[data-clear-lamp="${plotId}"]`) : null
+          if (lampEl && shown(lampEl)) {
+            const lampBox = boxOf(lampEl)
+            const chipCy = (chipBox.top + chipBox.bottom) / 2
+            const lampCy = (lampBox.top + lampBox.bottom) / 2
+            lampAnchorDy = Math.round((chipCy - lampCy) * 10) / 10
+          }
+        }
+        byType[tool] = {
+          label,
+          visible: visChips.length + visSvgs.length,
+          chip: visChips.length,
+          svg: visSvgs.length,
+          hudOverlap,
+          chromeOverlap,
+          loveOverlap,
+          navOverlap,
+          headerOverlap,
+          recenterOverlap,
+          lampAnchorDy,
+          rows,
+        }
+      }
+      const chipBoxes = [...document.querySelectorAll('.defend-type-chip')].filter(labelVisible).map((el) => ({ type: chipType(el), box: boxOf(el) }))
+      const dockBoxes = [...document.querySelectorAll('.nw-docks button.defend-new-lamp, button.defend-new-lamp')].filter(shown).map(boxOf)
+      const glyphBoxes = [...document.querySelectorAll('.defend-pad .defend-lamp-sprite, .defend-pad image.defend-type-mark')].filter(shown).map(boxOf)
+      const goldCues = () => {
+        let count = 0
+        const gold = (value) => {
+          const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+          let match
+          while ((match = re.exec(value || ''))) {
+            const r = Number(match[1])
+            const g = Number(match[2])
+            const b = Number(match[3])
+            const a = match[4] === undefined ? 1 : Number(match[4])
+            if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+          }
+          return false
+        }
+        const chrome =
+          '.defend-go, .defend-continue, .defend-raider.is-easy-cue .defend-raider-face, .defend-clear-spend, .defend-clear-help, .defend-tower-card, .lamp-upgrade-glyph .is-stroke'
+        for (const el of document.querySelectorAll(chrome)) {
+          if (!shown(el)) continue
+          const style = getComputedStyle(el)
+          const text = [...el.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+          const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+          if (gold(style.backgroundImage) || gold(style.backgroundColor) || gold(style.boxShadow) || (text && gold(style.color))) count += 1
+        }
+        return count
+      }
+      const blockers = []
+      for (let i = 0; i < chipBoxes.length; i++) {
+        for (let j = i + 1; j < chipBoxes.length; j++) {
+          if (overlapPx(chipBoxes[i].box, chipBoxes[j].box) > 0) blockers.push(`chip-${chipBoxes[i].type}-chip-${chipBoxes[j].type}`)
+        }
+        for (const dock of dockBoxes) {
+          if (overlapPx(chipBoxes[i].box, dock) > 0) blockers.push(`chip-${chipBoxes[i].type}-dock`)
+        }
+        for (const glyph of glyphBoxes) {
+          if (overlapPx(chipBoxes[i].box, glyph) > 0) blockers.push(`chip-${chipBoxes[i].type}-glyph`)
+        }
+      }
+      return { byType, blockers, gold: goldCues(), viewW, viewH, hudPresent, headerPresent }
+    })
+    if (!snap.hudPresent) {
+      fail(`checkNwLoveChip fail r${round} ${tag} nw-hud=0`)
+      await context.close()
+      continue
+    }
+    if (!snap.headerPresent) {
+      fail(`checkNwLoveChip fail r${round} ${tag} hdr=missing`)
+      await context.close()
+      continue
+    }
+    const gate667 = width === 375 && height === 667
+    const frameMark = problems.length
+    for (const { tool, label } of NW_LOVE_CHIP_TYPES) {
+      const row = snap.byType[tool]
+      if (!row) {
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} missing row`)
+        continue
+      }
+      if (row.visible !== 1) {
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} visible=${row.visible} chip=${row.chip} svg=${row.svg}`)
+        continue
+      }
+      if (row.chip > 0 && row.svg > 0) {
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} double chip=${row.chip} svg=${row.svg}`)
+        continue
+      }
+      const painted = row.rows[0]
+      if (!painted) {
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} painted=0`)
+        continue
+      }
+      if (painted.rendered !== label) {
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} rendered=${JSON.stringify(painted.rendered)} source=${JSON.stringify(label)}`)
+        continue
+      }
+      if (painted.clipped !== 0) {
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} clipped=${painted.clipped}`)
+        continue
+      }
+      if (!(painted.font >= 13)) {
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} font=${painted.font}`)
+        continue
+      }
+      let overlapBad = false
+      for (const line of row.rows) {
+        if (line.hdr > 0) {
+          fail(`checkNwLoveChip fail r${round} ${tag} ${tool} hdr=${line.hdr}`)
+          overlapBad = true
+          break
+        }
+        if (line.hud > 0) {
+          fail(`checkNwLoveChip fail r${round} ${tag} ${tool} hud=${line.hud}`)
+          overlapBad = true
+          break
+        }
+        if (line.recenter > 0) {
+          fail(`checkNwLoveChip fail r${round} ${tag} ${tool} recenter=${line.recenter}`)
+          overlapBad = true
+          break
+        }
+      }
+      if (overlapBad) continue
+      const chipRow = row.rows.find((r) => r.kind === 'chip')
+      const chipBox = chipRow?.box
+      if (!chipBox) {
+        fail(`checkNwLoveChip fail r${round} ${tag} slideTypeChip ${tool} chip=0`)
+        continue
+      }
+      if (gate667) {
+        if (chipRow.chromeHide === 'yes') {
+          fail(`checkNwLoveChip fail r${round} ${tag} ${tool} chromeHide=yes`)
+          continue
+        }
+        if (row.chromeOverlap > 0) {
+          fail(`checkNwLoveChip fail r${round} ${tag} ${tool} chromeOverlap=${row.chromeOverlap}`)
+          continue
+        }
+        if (tool === 'reason') {
+          if (row.navOverlap > 0) {
+            fail(`checkNwLoveChip fail r${round} ${tag} ${tool} navOverlap=${row.navOverlap}`)
+            continue
+          }
+          if (row.loveOverlap > 0) {
+            fail(`checkNwLoveChip fail r${round} ${tag} ${tool} loveOverlap=${row.loveOverlap}`)
+            continue
+          }
+        }
+      }
+      const inView =
+        chipBox.left >= -0.5 &&
+        chipBox.top >= -0.5 &&
+        chipBox.right <= snap.viewW + 0.5 &&
+        chipBox.bottom <= snap.viewH + 0.5 &&
+        chipBox.width > 1 &&
+        chipBox.height > 1
+      if (!inView) {
+        fail(
+          `checkNwLoveChip fail r${round} ${tag} slideTypeChip ${tool} box=${chipBox.left.toFixed(1)},${chipBox.top.toFixed(1)},${chipBox.width.toFixed(1)},${chipBox.height.toFixed(1)} viewport=${snap.viewW}x${snap.viewH}`,
+        )
+        continue
+      }
+      if (chipRow.clipped !== 0) {
+        fail(`checkNwLoveChip fail r${round} ${tag} slideTypeChip ${tool} clipped=${chipRow.clipped}`)
+        continue
+      }
+      const paintedLine = row.rows[0]
+      const hdrLog = paintedLine?.hdr ?? 0
+      const hudLog = paintedLine?.hud ?? 0
+      const recenterLog = paintedLine?.recenter ?? 0
+      console.log(
+        `checkNwLoveChip ok slideTypeChip ${tag} r${round} ${tool} box=${Math.round(chipBox.left)},${Math.round(chipBox.top)},${Math.round(chipBox.width)},${Math.round(chipBox.height)} inViewport=1 hdr=${hdrLog} hud=${hudLog} recenter=${recenterLog}`,
+      )
+    }
+    if (snap.blockers.length) {
+      fail(`checkNwLoveChip fail r${round} ${tag} overlap=${snap.blockers.join(',')}`)
+    }
+    if (snap.gold !== 1) {
+      fail(`checkNwLoveChip fail r${round} ${tag} gold=${snap.gold}`)
+    }
+    if (problems.length === frameMark) {
+      const reasonRow = snap.byType.reason
+      const reasonBox = reasonRow?.rows.find((r) => r.kind === 'chip')?.box
+      if (reasonBox) {
+        const lampDy =
+          reasonRow.lampAnchorDy === null || reasonRow.lampAnchorDy === undefined
+            ? ''
+            : ` lampDy=${reasonRow.lampAnchorDy}`
+        console.log(
+          `checkNwLoveChip ok r${round} ${tag} frame reason visible=1 box=${Math.round(reasonBox.left)},${Math.round(reasonBox.top)},${Math.round(reasonBox.width)},${Math.round(reasonBox.height)} inViewport=1 hudOverlap=${reasonRow.hudOverlap || 0} hdr=${reasonRow.headerOverlap || 0} recenter=${reasonRow.recenterOverlap || 0} gold=1${lampDy}`,
+        )
+      }
+    }
+    await context.close()
+    }
+  }
+
+  if (!only) {
+    const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }
+    const hard = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 768, height: 1024 },
+      deviceScaleFactor: 1,
+    })
+    await hard.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: hardSave },
+    )
+    const hardPage = await hard.newPage()
+    hardPage.on('pageerror', (error) => errors.push(`nw-love-chip hard ${error}`))
+    const hardSearch = '?playtest=1&nwSeed=2&nwMap=a2&nwRound=18&nwCam=1'
+    await hardPage.goto(`/${hardSearch}`)
+    await hardPage.getByRole('button', { name: 'Hold the night' }).click()
+    await hardPage.locator('.defend-board').waitFor()
+    await hardPage
+      .waitForFunction(() => document.querySelectorAll('.defend-type-chip').length >= 2, { timeout: 25_000 })
+      .catch(() => {})
+    const hardRead = await hardPage.evaluate(() => {
+      const chips = [...document.querySelectorAll('.defend-type-chip')]
+      const bad = chips.filter((chip) => {
+        if (chip.getAttribute('data-chip-park') || chip.getAttribute('data-label-park')) return true
+        if ([...chip.attributes].some((attr) => /slide/i.test(attr.name))) return true
+        return Boolean((chip.style.transform || '').trim())
+      })
+      const svg = [...document.querySelectorAll('text.defend-type-label')].filter((node) => {
+        const box = node.getBoundingClientRect()
+        return box.width > 1 && box.height > 1
+      }).length
+      return {
+        easy: document.querySelectorAll('.defend-page.is-easy-watch').length,
+        chips: chips.length,
+        svg,
+        slideChips: bad.length,
+      }
+    })
+    if (hardRead.easy !== 0) fail(`checkNwLoveChip fail hard easy-watch=${hardRead.easy}`)
+    else if (hardRead.chips < 2 && hardRead.chips + hardRead.svg < 2)
+      fail(`checkNwLoveChip fail hard chips=${hardRead.chips} svg=${hardRead.svg}`)
+    else if (hardRead.slideChips !== 0) fail(`checkNwLoveChip fail hard slideTypeChip=${hardRead.slideChips}`)
+    else console.log(`checkNwLoveChip ok hard easy-watch=0 chips=${hardRead.chips}`)
+    await hard.close()
+  }
+
+  for (const err of errors.slice(errorMark)) fail(`checkNwLoveChip error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 /** #967 Easy first plant must not open the upgrade card. A touch tap does, on the parent. */
 const PLANT_NO_CARD_SIZES = [
   [375, 667],
@@ -11081,6 +11526,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'nw spend on screen nights stay free of console errors')
       return
     }
+    if (process.env.NW_LOVE_CHIP_ONLY === '1') {
+      await checkNwLoveChip(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'nw love chip nights stay free of console errors')
+      return
+    }
     if (process.env.DIG_WIN_READABLE_ONLY === '1') {
       await checkDigWinReadable(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'dig win readable nights stay free of console errors')
@@ -11110,6 +11560,7 @@ export async function checkPhoneFixes() {
     await checkDigWinReadable(browser, port, errors)
     await checkGemSightCue(browser, port, errors)
     await checkNwSpendOnScreen(browser, port, errors)
+    await checkNwLoveChip(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -11286,7 +11737,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY', 'NW_LOVE_CHIP_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
