@@ -28,13 +28,23 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.598',
+    version: '1.4.599',
     title: 'Night Watch: Reason chip on tall phones',
     when: '2026-11-24',
     items: [
       'On Easy, the Reason type name chip stays inside the screen after you recenter the map, including on tall phones.',
       'Hard stays the same.',
       'Refs #949.',
+    ],
+  },
+  {
+    version: '1.4.598',
+    title: 'Night Watch: wave clear banner',
+    when: '2026-11-24',
+    items: [
+      'On Easy, the Wave survived banner sits lower so it clears the Sparks label and the on-map Reason chip when a wave clears.',
+      'Hard stays the same.',
+      'Refs #984.',
     ],
   },
   {
