@@ -10404,7 +10404,7 @@ async function checkNwUnlockToastBanner(browser, port, errors) {
         search,
       })
       page.on('pageerror', (error) => errors.push(`unlock-toast r${round} ${size} ${error}`))
-      await waitNwLoveChipCamReady(page, size, round)
+      await waitNwUnlockToastCamReady(page, size, round)
       await plantTypeLabelSeats(page, `${size} r${round}`)
       await snapNwLoveChipOfficialCam(page)
       await page.locator('.defend-go').click()
@@ -10808,6 +10808,20 @@ const NW_LOVE_CHIP_TYPES = [
 async function waitNwLoveChipCamReady(page, tag, round) {
   await assertGlyphCamera(page, `${tag} r${round} love-chip`)
   await page.locator('.nw-cam-recenter').waitFor({ timeout: 20_000 })
+  await page.waitForFunction(() => {
+    const go = document.querySelector('.defend-go')
+    return go instanceof HTMLElement && go.getClientRects().length > 0
+  })
+  await page.waitForTimeout(250)
+}
+
+/** Official cam when Recenter exists; tablets may lack the control. */
+async function waitNwUnlockToastCamReady(page, tag, round) {
+  await assertGlyphCamera(page, `${tag} r${round} unlock-toast`)
+  const recenter = page.locator('.nw-cam-recenter')
+  if (await recenter.isVisible().catch(() => false)) {
+    await recenter.waitFor({ state: 'visible', timeout: 20_000 })
+  }
   await page.waitForFunction(() => {
     const go = document.querySelector('.defend-go')
     return go instanceof HTMLElement && go.getClientRects().length > 0
