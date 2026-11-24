@@ -430,28 +430,31 @@ export function placeTowerCard(
   const stripPadTop = point.top - STRIP_PAD_CLEAR.up * sc
   const stripAboveLamp = (card: { left: number; top: number }) => card.top + cardHeight <= stripPadTop + TAP_EPS
   const stripClearsRoad = (card: { left: number; top: number }) => tapHits(card) === 0 && roadHits(card) === 0
+  const topAbove = clampCardTop(stripPadTop - cardHeight - GAP, board.h, boundH, reserveBottom)
+  const maxStripLeft = Math.max(MARGIN, board.w - W - RAIL)
+  const stripOffRoadCard = (lefts: readonly number[]) => {
+    const tops = [topAbove]
+    for (let lift = 16; lift <= 192; lift += 16) tops.push(Math.max(MARGIN, topAbove - lift))
+    for (const left of lefts) {
+      for (const topTry of tops) {
+        const card = { left: Math.max(MARGIN, Math.min(left, maxStripLeft)), top: topTry }
+        if (
+          stripAboveLamp(card) &&
+          roadHits(card) === 0 &&
+          stripLampHits(card) + ownHits(card) + softHits(card) === 0
+        ) {
+          return { ...card, side: 'above' as const, markClear: stripClearsRoad(card) }
+        }
+      }
+    }
+    return null
+  }
   if (strip) {
-    const topAbove = clampCardTop(stripPadTop - cardHeight - GAP, board.h, boundH, reserveBottom)
     /** #988: 384–392 phones pin the Reason-style strip to the left edge like wider frames. */
     const frameW = defendFrameWidth()
     if (stripLeftOfLamp && frameW >= 384 && frameW <= 392) {
-      const pinLefts = [0, 2]
-      const pinTops = [topAbove]
-      for (let lift = 16; lift <= 160; lift += 16) {
-        pinTops.push(Math.max(MARGIN, topAbove - lift))
-      }
-      for (const pinLeft of pinLefts) {
-        for (const topTry of pinTops) {
-          const card = { left: pinLeft, top: topTry }
-          if (
-            stripAboveLamp(card) &&
-            stripLampHits(card) + ownHits(card) + softHits(card) === 0 &&
-            roadHits(card) === 0
-          ) {
-            return { ...card, side: 'above', markClear: stripClearsRoad(card) }
-          }
-        }
-      }
+      const pinned = stripOffRoadCard([0, 2])
+      if (pinned) return pinned
     }
     const clearX = LAMP_HIT.x * sc + GLYPH_CLEAR
     const offRoadLeft = stripLeftOfLamp
@@ -597,6 +600,14 @@ export function placeTowerCard(
         }
         if (acceptStrip(fallback)) break
       }
+    }
+    if (acceptStrip(fallback)) {
+      return { ...fallback, side: 'above', markClear: true }
+    }
+    if (roadHits(fallback) > 0) {
+      const railLeft = Math.max(MARGIN, board.w - W - RAIL)
+      const offRoad = stripOffRoadCard([0, 2, MARGIN, forcedLeft, railLeft, fallback.left, 8, 16])
+      if (offRoad) return offRoad
     }
     return {
       ...fallback,

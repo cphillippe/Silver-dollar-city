@@ -1957,6 +1957,8 @@ assert.doesNotMatch(latestChange('1.4.599').items.join('\n'), /Fixes #|Closes #|
   assert.match(place988, /frameW >= 384 && frameW <= 392/, '#988 pins mid-narrow strip buys')
   assert.match(place988, /pinLefts = \[0, 2\]/, '#988 mid-narrow strip pin tries left 0 and 2')
   assert.match(place988, /roadHits\(card\) === 0/, '#988 pin band requires roadHits clear')
+  assert.match(place988, /stripOffRoadCard/, '#988 strip tries off-road pin before road-on fallback')
+  assert.match(place988, /roadHits\(fallback\) > 0/, '#988 re-pins strip when wide search still hits the road')
   assert.match(phone988, /async function checkNwReasonStripRoad/, '#988 checkNwReasonStripRoad is defined')
   assert.match(
     phone988,
