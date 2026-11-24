@@ -28,13 +28,24 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.597',
+    version: '1.4.598',
     title: 'Night Watch: wave clear banner',
-    when: '2026-11-23',
+    when: '2026-11-24',
     items: [
       'On Easy, the Wave survived banner sits lower so it clears the Sparks label and the on-map Reason chip when a wave clears.',
       'Hard stays the same.',
       'Refs #984.',
+    ],
+  },
+  {
+    version: '1.4.597',
+    title: 'Night Watch: Love lamp name on screen',
+    when: '2026-11-22',
+    items: [
+      'On Easy, every planted pillar lamp keeps its type name chip on screen, including Love at the upper seats.',
+      'Chips slide off docks and Begin instead of vanishing when chrome would cover them.',
+      'Hard stays the same.',
+      'Refs #949.',
     ],
   },
   {

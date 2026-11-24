@@ -1948,11 +1948,69 @@ assert.match(
 
 
 
-// 1.4.597: Easy Night Watch wave-survived banner clears Sparks label (#984).
-assert.equal(APP_VERSION, '1.4.597')
-assert.equal(CHANGELOG[0].version, '1.4.597', '1.4.597 is the newest row')
-assert.match(latestChange('1.4.597').items.join('\n'), /Refs #984/, '1.4.597 changelog refs #984')
-assert.match(latestChange('1.4.597').items.join('\n'), /Wave survived|wave clear banner/i, '1.4.597 changelog names the banner fix')
+// 1.4.598: Easy Night Watch wave-survived banner clears Sparks label (#984).
+assert.equal(APP_VERSION, '1.4.598')
+assert.equal(CHANGELOG[0].version, '1.4.598', '1.4.598 is the newest row')
+assert.match(latestChange('1.4.598').items.join('\n'), /Refs #984/, '1.4.598 changelog refs #984')
+assert.match(latestChange('1.4.598').items.join('\n'), /Wave survived|wave clear banner/i, '1.4.598 changelog names the banner fix')
+assert.match(latestChange('1.4.598').items.join('\n'), /Hard stays the same\./)
+assert.doesNotMatch(latestChange('1.4.598').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.598 changelog avoids GitHub close keywords')
+assert.doesNotMatch(
+  playerVisibleChangeItems(latestChange('1.4.598').items).join('\n'),
+  /\bHard\b|\bMedium\b/,
+  '1.4.598 the player note does not name other tiers',
+)
+{
+  const defend598Path = fileURLToPath(new URL('../src/styles/defend.css', import.meta.url))
+  const defend598 = readFileSync(defend598Path, 'utf8')
+  const phone598 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  const readBaseNwWaveSurvived = (css) =>
+    css.match(
+      /^\.nw-wave-survived \{\n  top: 72px;\n  left: 12px;[\s\S]*?animation: nw-wave-survived-pop 1\.2s ease-out both;\n\}/m,
+    )?.[0] ?? null
+  assert.ok(readBaseNwWaveSurvived(defend598), '1.4.598 the standalone base .nw-wave-survived block is present')
+  const assertBasePinMisses = (css, label) => {
+    assert.equal(readBaseNwWaveSurvived(css), null, label)
+  }
+  assertBasePinMisses(
+    defend598.replace(/^\.nw-wave-survived \{\n  top: 72px;/m, '.nw-wave-survived {\n  top: 60px;'),
+    '1.4.598 mutating base wave-survived top to 60px fails the pin',
+  )
+  assertBasePinMisses(
+    defend598.replace(/^\.nw-wave-survived \{\n  top: 72px;\n/m, '.nw-wave-survived {\n'),
+    '1.4.598 deleting base wave-survived top fails the pin',
+  )
+  assert.match(
+    defend598,
+    /\.defend-page\.is-easy-watch \.nw-wave-survived \{[^}]*top: 116px;/,
+    '1.4.598 Easy wave-survived top is raised in the Easy-only rule body',
+  )
+  assert.match(phone598, /async function checkNwWaveSurvivedClear/, '1.4.598 checkNwWaveSurvivedClear is defined')
+  const cheerOnly598 = phone598.slice(
+    phone598.indexOf("if (process.env.NW_ROUND_CHEER_ONLY === '1')"),
+    phone598.indexOf("if (process.env.NW_WAVE_SURVIVED_ONLY === '1')"),
+  )
+  assert.doesNotMatch(cheerOnly598, /checkNwWaveSurvivedClear/, '1.4.598 the round-cheer-only branch does not run the wave-survived scan')
+  const waveOnly598 = phone598.slice(
+    phone598.indexOf("if (process.env.NW_WAVE_SURVIVED_ONLY === '1')"),
+    phone598.indexOf("if (process.env.NW_PLANT_NO_CARD_ONLY === '1')"),
+  )
+  assert.match(waveOnly598, /await checkNwWaveSurvivedClear\(browser, port, errors\)/, '1.4.598 the wave-survived-only branch runs the scan')
+  assert.match(phone598, /checkNwWaveSurvivedClear ok \$\{size\} vsLabel=.*vsChip=.*chipsOn=/, '1.4.598 the ok line logs overlap, chipsOn, and banner box')
+  const lastIdx = phone598.lastIndexOf('      return\n    }\n')
+  assert.ok(lastIdx >= 0, '1.4.598 phone-fixes default region tail is present')
+  const tail = phone598.slice(lastIdx)
+  assert.match(
+    tail,
+    /\n    await checkNwWaveSurvivedClear\(browser, port, errors\)\n/,
+    '1.4.598 default path runs checkNwWaveSurvivedClear',
+  )
+}
+
+// 1.4.597: Easy Night Watch Love lamp type chip stays visible (#949).
+assert.equal(CHANGELOG[1].version, '1.4.597', '1.4.597 follows the newest row')
+assert.match(latestChange('1.4.597').items.join('\n'), /Refs #949/, '1.4.597 changelog refs #949')
+assert.match(latestChange('1.4.597').items.join('\n'), /Love/)
 assert.match(latestChange('1.4.597').items.join('\n'), /Hard stays the same\./)
 assert.doesNotMatch(latestChange('1.4.597').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.597 changelog avoids GitHub close keywords')
 assert.doesNotMatch(
@@ -1961,51 +2019,61 @@ assert.doesNotMatch(
   '1.4.597 the player note does not name other tiers',
 )
 {
-  const defend597Path = fileURLToPath(new URL('../src/styles/defend.css', import.meta.url))
-  const defend597 = readFileSync(defend597Path, 'utf8')
+  const board597 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
   const phone597 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
-  const readBaseNwWaveSurvived = (css) =>
-    css.match(
-      /^\.nw-wave-survived \{\n  top: 72px;\n  left: 12px;[\s\S]*?animation: nw-wave-survived-pop 1\.2s ease-out both;\n\}/m,
-    )?.[0] ?? null
-  assert.ok(readBaseNwWaveSurvived(defend597), '1.4.597 the standalone base .nw-wave-survived block is present')
-  const assertBasePinMisses = (css, label) => {
-    assert.equal(readBaseNwWaveSurvived(css), null, label)
-  }
-  assertBasePinMisses(
-    defend597.replace(/^\.nw-wave-survived \{\n  top: 72px;/m, '.nw-wave-survived {\n  top: 60px;'),
-    '1.4.597 mutating base wave-survived top to 60px fails the pin',
-  )
-  assertBasePinMisses(
-    defend597.replace(/^\.nw-wave-survived \{\n  top: 72px;\n/m, '.nw-wave-survived {\n'),
-    '1.4.597 deleting base wave-survived top fails the pin',
-  )
-  assert.match(
-    defend597,
-    /\.defend-page\.is-easy-watch \.nw-wave-survived \{[^}]*top: 116px;/,
-    '1.4.597 Easy wave-survived top is raised in the Easy-only rule body',
-  )
-  assert.match(phone597, /async function checkNwWaveSurvivedClear/, '1.4.597 checkNwWaveSurvivedClear is defined')
-  const cheerOnly597 = phone597.slice(
-    phone597.indexOf("if (process.env.NW_ROUND_CHEER_ONLY === '1')"),
-    phone597.indexOf("if (process.env.NW_WAVE_SURVIVED_ONLY === '1')"),
-  )
-  assert.doesNotMatch(cheerOnly597, /checkNwWaveSurvivedClear/, '1.4.597 the round-cheer-only branch does not run the wave-survived scan')
-  const waveOnly597 = phone597.slice(
-    phone597.indexOf("if (process.env.NW_WAVE_SURVIVED_ONLY === '1')"),
-    phone597.indexOf("if (process.env.NW_PLANT_NO_CARD_ONLY === '1')"),
-  )
-  assert.match(waveOnly597, /await checkNwWaveSurvivedClear\(browser, port, errors\)/, '1.4.597 the wave-survived-only branch runs the scan')
+  assert.match(board597, /function slideTypeChip/, '1.4.597 Easy nudges type chips off chrome before hiding')
+  assert.match(board597, /header\.topbar/, '1.4.597 Easy park reads header.topbar for chip clearance')
+  assert.match(board597, /function parkTypeChipBelowHud/, '1.4.597 short phones park chips under the hearts HUD')
+  assert.match(board597, /slideTypeChip\(chip, blocks, flipAbove\)/, '1.4.597 chips flip above only when topbar is clear on tall frames')
+  assert.match(board597, /const chipNodes = \[\.\.\.page\.querySelectorAll\('\.defend-type-chip'\)\]/, '1.4.587 hideTypeLabelsOnChrome flags chips')
+  assert.match(phone597, /async function checkNwLoveChip/, '1.4.597 checkNwLoveChip is defined')
   assert.match(
     phone597,
-    /await checkNwRoundCheer\(browser, port, errors\)\n    await checkNwWaveSurvivedClear\(browser, port, errors\)/,
-    '1.4.597 the full path runs checkNwWaveSurvivedClear right after checkNwRoundCheer',
+    /await checkNwSpendOnScreen\(browser, port, errors\)\n    await checkNwLoveChip\(browser, port, errors\)/,
+    '1.4.597 the full path runs checkNwLoveChip after checkNwSpendOnScreen',
   )
-  assert.match(phone597, /checkNwWaveSurvivedClear ok \$\{size\} vsLabel=.*vsChip=.*chipsOn=/, '1.4.597 the ok line logs overlap, chipsOn, and banner box')
+  assert.match(phone597, /NW_LOVE_CHIP_FRAME_SIZES/, '1.4.597 love-chip gate covers 375×667 and tall phones')
+  assert.match(phone597, /\[375, 667\]/, '1.4.597 375×667 is in the love-chip frame list')
+  assert.match(phone597, /NW_LOVE_CHIP_ROUNDS = \[18, 24\]/, '1.4.597 love-chip runs rounds 18 and 24')
+  assert.match(
+    phone597,
+    /checkNwLoveChip ok r\$\{round\} \$\{tag\} frame reason visible=1 box=.* inViewport=1/,
+    '1.4.597 each frame logs Reason box and HUD overlap',
+  )
+  assert.match(
+    phone597,
+    /checkNwLoveChip ok slideTypeChip \$\{tag\} r\$\{round\} \$\{tool\} box=.* inViewport=1/,
+    '1.4.597 slideTypeChip logs in-viewport box per chip per frame',
+  )
+  assert.match(phone597, /lampAnchorDy/, '1.4.597 love-chip snap measures chip distance from lamp anchor')
+  assert.match(phone597, /fail r\$\{round\} \$\{tag\} nw-hud=0/, '1.4.597 love-chip fails when the hearts HUD is missing')
+  assert.match(phone597, /fail r\$\{round\} \$\{tag\} hdr=missing/, '1.4.597 love-chip fails when header.topbar is missing')
+  assert.match(phone597, /header\.topbar/, '1.4.597 love-chip snap uses header.topbar')
+  assert.match(phone597, /if \(!\(painted\.font >= 13\)\)/, '1.4.597 love-chip font floor covers chip and svg')
+  assert.match(phone597, /fail r\$\{round\} \$\{tag\} \$\{tool\} hdr=/, '1.4.597 love-chip fails painted overlap with topbar')
+  assert.match(
+    phone597,
+    /ok slideTypeChip.*hdr=\$\{hdrLog\} hud=\$\{hudLog\} recenter=\$\{recenterLog\}/,
+    '1.4.597 slideTypeChip ok logs hdr hud recenter per chip',
+  )
+  assert.match(phone597, /checkNwLoveChip fail hard chips=/, '1.4.597 Hard path requires at least two type chips')
+  assert.match(phone597, /checkNwLoveChip fail hard slideTypeChip/, '1.4.597 Hard rejects Easy chip slide transforms')
+  assert.match(phone597, /waitNwLoveChipCamReady/, '1.4.597 official cam waits for Recenter and Begin')
+  const loveDefaultRegion = phone597.slice(phone597.lastIndexOf("if (process.env.NW_LOVE_CHIP_ONLY === '1')"))
+  assert.match(
+    phone597,
+    /await checkNwSpendOnScreen\(browser, port, errors\)\n    await checkNwLoveChip\(browser, port, errors\)/,
+    '1.4.597 default phone path runs checkNwLoveChip after checkNwSpendOnScreen',
+  )
+  assert.match(
+    loveDefaultRegion,
+    /if \(process\.env\.NW_LOVE_CHIP_ONLY === '1'\) \{\n      await checkNwLoveChip\(browser, port, errors\)/,
+    '1.4.597 NW_LOVE_CHIP_ONLY guard calls checkNwLoveChip',
+  )
 }
 
 // 1.4.596: Easy Night Watch Spend / ? on screen at round clear (#951).
-assert.equal(CHANGELOG[1].version, '1.4.596', '1.4.596 follows the newest row')
+assert.equal(CHANGELOG[2].version, '1.4.596', '1.4.596 follows the newest row')
 assert.match(latestChange('1.4.596').items.join('\n'), /Refs #951/, '1.4.596 changelog refs #951')
 assert.match(latestChange('1.4.596').items.join('\n'), /Spend/)
 assert.match(latestChange('1.4.596').items.join('\n'), /Hard stays the same\./)
@@ -2332,7 +2400,8 @@ assert.doesNotMatch(
   assert.match(phone587, /rail=\$\{railHit\}/, '1.4.587 the scan logs rail centre hits')
   assert.match(defend587, /\.defend-page\.is-easy-watch:has\(\.defend-type-chip\) text\.defend-type-label/, '1.4.587 Easy hides SVG words when chips mount')
   assert.match(defend587, /\.defend-type-chip\[data-chrome-hide='yes'\]/, '1.4.587 chips can chrome-hide')
-  assert.match(board587, /for \(const chip of page\.querySelectorAll\('\.defend-type-chip'\)\)/, '1.4.587 hideTypeLabelsOnChrome flags chips')
+  assert.match(board587, /const chipNodes = \[\.\.\.page\.querySelectorAll\('\.defend-type-chip'\)\]/, '1.4.587 hideTypeLabelsOnChrome flags chips')
+  assert.match(board587, /for \(const chip of chipNodes\)/, '1.4.587 hideTypeLabelsOnChrome walks every chip')
 }
 
 // 1.4.586: Easy first plant shockwave (#957).
