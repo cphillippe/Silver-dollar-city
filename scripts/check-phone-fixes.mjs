@@ -4818,14 +4818,14 @@ const EASY_GOLD_BASE_1579 = {
   },
   '412x915 home-first': { '2 Help': { x: 143.3, y: 809, w: 125.3, h: 48 } },
   '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
-  // 1.4.598 What's new row (wave banner): same −39.7y shift as 375×667 run 45329274078.
+  // 1.4.598 What's new row (wave banner): re-pinned from CI run 45351727603.
   '412x915 settings-more': {
     'Open Profile': { x: 41, y: 1360.7, w: 130, h: 52 },
-    Candy: { x: 41, y: 1788.6, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1788.6, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1848.6, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2127.1, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2373, w: 176, h: 52 },
+    Candy: { x: 41, y: 1763.8, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1763.8, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1823.8, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2102.3, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2348.1, w: 176, h: 52 },
   },
 }
 
