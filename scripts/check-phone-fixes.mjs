@@ -9137,6 +9137,613 @@ async function checkNwStripWords(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #988 Easy Night Watch: Reason buy strip stays off the road at 384–390 (NW Lead freeze repro). */
+const NW_REASON_STRIP_SEARCH = '?playtest=1&nwDebug=1&nwSeed=2&nwMap=a2&nwRound=18&nwLamps=0&nwCam=1'
+const NW_REASON_STRIP_SIZES = [
+  [384, 844],
+  [388, 844],
+  [390, 844],
+  [393, 844],
+  [412, 915],
+]
+const NW_REASON_STRIP_PAN = { 390: -235.192, 393: -233.692 }
+
+const nwReasonSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+function nwReasonPanX(transform) {
+  if (!transform || transform === 'none') return 0
+  const t3 = /translate3d\(\s*([-\d.]+)px/i.exec(transform)
+  if (t3) return +t3[1]
+  const m = /matrix\(\s*[^,]+,\s*[^,]+,\s*[^,]+,\s*[^,]+,\s*([-\d.]+)/.exec(transform)
+  if (m) return +m[1]
+  const m3 = /matrix3d\(([^)]+)\)/.exec(transform)
+  if (m3) {
+    const parts = m3[1].split(',').map((v) => +v.trim())
+    if (parts.length >= 14) return parts[12]
+  }
+  return NaN
+}
+
+async function nwReasonTouchDrag(cdp, fromX, fromY, toX, toY) {
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: fromX, y: fromY }] })
+  for (let i = 1; i <= 12; i += 1) {
+    const t = i / 12
+    const ease = t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2
+    const x = fromX + (toX - fromX) * ease
+    const y = fromY + (toY - fromY) * ease
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y }] })
+    await nwReasonSleep(16)
+  }
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+}
+
+async function nwReasonTouchTap(cdp, x, y) {
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] })
+  await nwReasonSleep(50)
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+}
+
+async function nwReasonPlantAt(page, cdp, tool, ring, label) {
+  if (await page.locator('.defend-tower-card').count()) {
+    await page.keyboard.press('Escape')
+    await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+  }
+  if (tool === 'candle') {
+    await page.locator('[data-candle-lamp="yes"]').click()
+  } else {
+    const index = GLYPH_TOOLS.indexOf(tool)
+    const on = await page.evaluate(() => [...document.querySelectorAll('.nw-rail .defend-ability.is-on')].map((node) => (node.textContent || '').trim()))
+    if (!(on.length === 1 && on[0].startsWith(GLYPH_NAME[tool]))) await page.locator('.nw-rail .defend-ability').nth(index).click()
+  }
+  let point = await glyphSeatPoint(page, ring)
+  if (!point) await nwReasonReachSeat(page, cdp, ring, label)
+  point = await glyphSeatPoint(page, ring)
+  assert.ok(point, `${label} plant ${tool} seat ${ring.cx},${ring.cy} takes a tap`)
+  await page.mouse.click(point.x, point.y)
+  await page.waitForFunction(
+    (seat) =>
+      ![...document.querySelectorAll('.defend-plant-ground circle.is-live')].some(
+        (node) => Number(node.getAttribute('cx')) === seat.cx && Number(node.getAttribute('cy')) === seat.cy,
+      ),
+    ring,
+  )
+  await page.waitForTimeout(250)
+  if (await page.locator('.defend-tower-card').count()) {
+    await page.keyboard.press('Escape')
+    await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+  }
+}
+
+async function nwReasonReadPanX(page) {
+  return page.evaluate(() => {
+    const panEl = document.querySelector('.nw-pan')
+    if (!(panEl instanceof HTMLElement)) return NaN
+    const transform = panEl.style.transform || getComputedStyle(panEl).transform
+    if (!transform || transform === 'none') return 0
+    const t3 = /translate3d\(\s*([-\d.]+)px/i.exec(transform)
+    if (t3) return +t3[1]
+    const m = /matrix\(\s*[^,]+,\s*[^,]+,\s*[^,]+,\s*[^,]+,\s*([-\d.]+)/.exec(transform)
+    if (m) return +m[1]
+    const m3 = /matrix3d\(([^)]+)\)/.exec(transform)
+    if (m3) {
+      const parts = m3[1].split(',').map((v) => +v.trim())
+      if (parts.length >= 14) return parts[12]
+    }
+    return NaN
+  })
+}
+
+async function nwReasonStripPanPin(page, cdp, wantPan, label) {
+  if (wantPan == null) return
+  for (let attempt = 0; attempt < 32; attempt += 1) {
+    const panX = await nwReasonReadPanX(page)
+    if (!Number.isNaN(panX) && Math.abs(panX - wantPan) <= 0.05) return
+    const probe = await page.evaluate(() => ({ w: innerWidth, h: innerHeight }))
+    const cx = probe.w / 2
+    const cy = probe.h / 2
+    const dx = Number.isNaN(panX) ? 0 : Math.max(-140, Math.min(140, (wantPan - panX) * 1.05))
+    await nwReasonTouchDrag(cdp, cx, cy, cx - dx, cy)
+    await nwReasonSleep(450)
+  }
+}
+
+async function nwReasonReachSeat(page, cdp, seat, label) {
+  const target = { cx: seat.cx, cy: seat.cy - 26 }
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const probe = await page.evaluate((t) => {
+      const svg = document.querySelector('.defend-board')
+      const ctm = svg?.getScreenCTM()
+      if (!svg || !ctm) return { ok: false, x: 0, y: 0, w: innerWidth, h: innerHeight }
+      const p = svg.createSVGPoint()
+      p.x = t.cx
+      p.y = t.cy
+      const q = p.matrixTransform(ctm)
+      const hit = document.elementFromPoint(q.x, q.y)
+      const ok =
+        hit &&
+        hit.closest('.defend-board') &&
+        !hit.closest('button, .nw-rail, .nw-docks, .nw-map-overlay')
+      return { ok, x: q.x, y: q.y, w: innerWidth, h: innerHeight }
+    }, target)
+    if (probe.ok) return
+    const cx = probe.w / 2
+    const cy = probe.h / 2
+    const dx = Math.max(-150, Math.min(150, cx - probe.x))
+    const dyMax = seat.cy >= 500 ? 360 : 250
+    const dy = Math.max(-dyMax, Math.min(dyMax, cy - probe.y))
+    await nwReasonTouchDrag(cdp, cx, cy, cx + dx, cy + dy)
+    await nwReasonSleep(600)
+  }
+}
+
+async function openNwReasonStripRoad(browser, port, width, height) {
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width, height },
+    deviceScaleFactor: 2,
+    hasTouch: true,
+    isMobile: true,
+    reducedMotion: 'reduce',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: SAVE },
+  )
+  const page = await context.newPage()
+  await page.goto(NW_REASON_STRIP_SEARCH)
+  await page.getByRole('button', { name: 'Settings' }).click()
+  await page.locator('summary', { hasText: 'Developer' }).click()
+  await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
+  await page.locator('.defend-page').waitFor()
+  await page.locator('.defend-board').waitFor()
+  if (await page.locator('[data-map-overlay]').count()) {
+    await page.locator('[data-map="a2"]').click()
+    await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+  }
+  const cdp = await context.newCDPSession(page)
+  return { context, page, cdp }
+}
+
+async function nwReasonStripTapLamp(page, cdp, seat, tool) {
+  const pad = page.locator(`.defend-pad[data-tower-type="${tool}"]`)
+  if (await pad.count()) {
+    await pad.click({ force: true })
+    return
+  }
+  const waveHit = page.locator(
+    `.defend-pad.is-planted[data-tower-type="${tool}"] rect.defend-hit[data-lamp-wave-hit="yes"]`,
+  )
+  if (await waveHit.count()) {
+    await waveHit.click({ force: true })
+    return
+  }
+  const target = { cx: seat.cx, cy: seat.cy - 26 }
+  const point = await page.evaluate((t) => {
+    const svg = document.querySelector('.defend-board')
+    const ctm = svg?.getScreenCTM()
+    if (!svg || !ctm) return null
+    const p = svg.createSVGPoint()
+    p.x = t.cx
+    p.y = t.cy
+    return p.matrixTransform(ctm)
+  }, target)
+  if (!point) return
+  await nwReasonTouchTap(cdp, point.x, point.y)
+}
+
+async function nwReasonStripUnfreezeForCue(page, label) {
+  const resume = page.getByRole('button', { name: 'Resume walkers' })
+  if (await resume.count()) {
+    await resume.click()
+    await page.waitForTimeout(250)
+  }
+  await page.locator('.defend-raider').first().waitFor({ timeout: 20_000 })
+  const n = await page.locator('.defend-raider').count()
+  assert.ok(n > 0, `${label} mid-wave has raiders after resume (${n})`)
+}
+
+async function nwReasonStripEnsureFreeze(page, label) {
+  const mode = await page.evaluate(() => {
+    const root = document.querySelector('.defend-page')
+    const button = [...document.querySelectorAll('button')].find((node) =>
+      /^(Pause|Resume) walkers$/.test((node.textContent || '').trim()),
+    )
+    return {
+      freeze: root?.classList.contains('is-nw-debug-freeze') ?? false,
+      pause: button ? (button.textContent || '').trim() : '',
+    }
+  })
+  if (mode.pause === 'Pause walkers') {
+    await page.getByRole('button', { name: 'Pause walkers' }).click()
+    await page.waitForTimeout(200)
+  }
+  const again = await page.evaluate(() => {
+    const root = document.querySelector('.defend-page')
+    const button = [...document.querySelectorAll('button')].find((node) =>
+      /^(Pause|Resume) walkers$/.test((node.textContent || '').trim()),
+    )
+    return {
+      freeze: root?.classList.contains('is-nw-debug-freeze') ?? false,
+      pause: button ? (button.textContent || '').trim() : '',
+    }
+  })
+  assert.equal(again.pause, 'Resume walkers', `${label} mid-wave measure keeps walkers paused (Resume walkers)`)
+}
+
+async function nwReasonStripGoldCount(page) {
+  return page.evaluate(() => {
+    const goldish = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = +match[1]
+        const g = +match[2]
+        const b = +match[3]
+        const a = match[4] === undefined ? 1 : +match[4]
+        if (a > 0.05 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const names = []
+    const sels =
+      '.defend-go, .defend-continue, .defend-raider.is-easy-cue .defend-raider-face, .defend-path-buy, .defend-bright-buy, .defend-tower-card, .lamp-upgrade-glyph .is-stroke, .lamp-upgrade-glyph .is-gap, .lamp-upgrade-glyph .is-dot'
+    for (const el of document.querySelectorAll(sels)) {
+      const style = getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+      const rect = el.getBoundingClientRect()
+      if (rect.width <= 0 || rect.height <= 0) continue
+      let why = false
+      if (el instanceof SVGElement) {
+        if (style.stroke !== 'none' && parseFloat(style.strokeWidth) > 0 && goldish(style.stroke)) why = true
+        if (style.fill !== 'none' && goldish(style.fill)) why = true
+        if (goldish(style.filter)) why = true
+      } else if (
+        goldish(style.backgroundImage) ||
+        goldish(style.backgroundColor) ||
+        goldish(style.boxShadow) ||
+        goldish(style.borderTopColor) ||
+        goldish(style.filter)
+      ) {
+        why = true
+      }
+      if (why) names.push(String(el.getAttribute('class') || el.tagName).split(/\s+/).slice(0, 3).join('.'))
+    }
+    return names.length
+  })
+}
+
+async function nwReasonStripMeasure(page) {
+  return page.evaluate(() => {
+    const round = (n) => Math.round(n * 10000) / 10000
+    const road = document.querySelector('.defend-road')
+    const cardEl = document.querySelector('.defend-tower-card[data-strip="yes"]')
+    const svg = document.querySelector('.defend-board')
+    const panEl = document.querySelector('.nw-pan')
+    const zoomEl = document.querySelector('.nw-zoom')
+    const camEl = document.querySelector('.nw-cam')
+    if (!(road instanceof SVGGeometryElement)) throw new Error('missing defend-road')
+    if (!(cardEl instanceof HTMLElement)) throw new Error('missing strip card')
+    if (!(svg instanceof SVGSVGElement)) throw new Error('missing defend-board')
+    if (!(panEl instanceof HTMLElement)) throw new Error('missing nw-pan')
+    if (!(zoomEl instanceof HTMLElement)) throw new Error('missing nw-zoom')
+    if (!(camEl instanceof HTMLElement)) throw new Error('missing nw-cam')
+    const ctm = svg.getScreenCTM()
+    if (!ctm) throw new Error('no screen ctm')
+    const panStyle = panEl.style.transform || getComputedStyle(panEl).transform
+    const zoomStyle = zoomEl.style.transform || getComputedStyle(zoomEl).transform
+    const panParse = (transform) => {
+      if (!transform || transform === 'none') return 0
+      const t3 = /translate3d\(\s*([-\d.]+)px/i.exec(transform)
+      if (t3) return +t3[1]
+      const m = /matrix\(\s*[^,]+,\s*[^,]+,\s*[^,]+,\s*[^,]+,\s*([-\d.]+)/.exec(transform)
+      if (m) return +m[1]
+      const m3 = /matrix3d\(([^)]+)\)/.exec(transform)
+      if (m3) {
+        const parts = m3[1].split(',').map((v) => +v.trim())
+        if (parts.length >= 14) return parts[12]
+      }
+      return NaN
+    }
+    const lotPt = svg.createSVGPoint()
+    lotPt.x = 464
+    lotPt.y = 224
+    const lot = lotPt.matrixTransform(ctm)
+    const cr = cardEl.getBoundingClientRect()
+    const strokeW = parseFloat(getComputedStyle(road).strokeWidth)
+    if (!Number.isFinite(strokeW) || strokeW <= 0) throw new Error(`bad road strokeW=${getComputedStyle(road).strokeWidth}`)
+  const half = strokeW / 2 + 0.75
+    const cells = new Set()
+    for (let i = 0; i <= 393; i += 1) {
+      const at = road.getPointAtLength((i * road.getTotalLength()) / 393)
+      const p = svg.createSVGPoint()
+      p.x = at.x
+      p.y = at.y
+      const s = p.matrixTransform(ctm)
+      const left = s.x - half
+      const right = s.x + half
+      const top = s.y - half
+      const bottom = s.y + half
+      const ix0 = Math.max(cr.left, left)
+      const iy0 = Math.max(cr.top, top)
+      const ix1 = Math.min(cr.right, right)
+      const iy1 = Math.min(cr.bottom, bottom)
+      if (ix0 >= ix1 || iy0 >= iy1) continue
+      const x0 = Math.ceil(ix0)
+      const y0 = Math.ceil(iy0)
+      const x1 = Math.floor(ix1)
+      const y1 = Math.floor(iy1)
+      for (let x = x0; x <= x1; x += 1) {
+        for (let y = y0; y <= y1; y += 1) cells.add(`${x},${y}`)
+      }
+    }
+    const STRIP_W = 112
+    const STRIP_ROAD_HALF = 11
+    const TAP_EPS = 0.5
+    const roadPad = STRIP_ROAD_HALF + TAP_EPS
+    const cardLeft = parseFloat(cardEl.style.left)
+    const cardTop = parseFloat(cardEl.style.top)
+    const cardH = cardEl.offsetHeight
+    const padLeft = cardLeft - roadPad
+    const padRight = cardLeft + STRIP_W + roadPad
+    const padTop = cardTop - roadPad
+    const padBottom = cardTop + cardH + roadPad
+    let roadPadHit = 0
+    const pathLen = road.getTotalLength()
+    for (let i = 0; i <= 393; i += 1) {
+      const at = road.getPointAtLength((i * pathLen) / 393)
+      if (at.x >= padLeft && at.x <= padRight && at.y >= padTop && at.y <= padBottom) {
+        roadPadHit = 1
+        break
+      }
+    }
+    const inView =
+      cr.left >= 0 && cr.top >= 0 && cr.right <= innerWidth + 0.5 && cr.bottom <= innerHeight + 0.5
+    return {
+      scrollX: round(scrollX),
+      scrollY: round(scrollY),
+      camOn: camEl.getAttribute('data-nw-cam') === 'on',
+      zoomStyle,
+      panStyle,
+      panX: round(panParse(panStyle)),
+      ctm: { a: round(ctm.a), d: round(ctm.d), e: round(ctm.e), f: round(ctm.f) },
+      lot: { x: round(lot.x), y: round(lot.y) },
+      card: [round(cr.x), round(cr.y), round(cr.right), round(cr.bottom)],
+      cardLeft: round(cardLeft),
+      overlapPx2: cells.size,
+      strokeW: round(strokeW),
+      roadPadHit,
+      offCanvas: !inView,
+    }
+  })
+}
+
+async function nwReasonStripTapText(page) {
+  return page.evaluate(() => {
+    const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+    const lineOf = (el) => {
+      if (!el) return null
+      const style = getComputedStyle(el)
+      const directs = [...el.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+      if (!directs.length) return null
+      const source = norm(directs.map((child) => child.textContent).join(''))
+      const rect = el.getBoundingClientRect()
+      if (rect.width < 1 || rect.height < 1) return null
+      const range = document.createRange()
+      let rendered = ''
+      const host = { left: rect.left - 1, right: rect.right + 1, top: rect.top - 1, bottom: rect.bottom + 1 }
+      for (const child of directs) {
+        const raw = child.textContent
+        for (let i = 0; i < raw.length; i += 1) {
+          const ch = raw[i]
+          if (!ch.trim()) {
+            rendered += ch
+            continue
+          }
+          range.setStart(child, i)
+          range.setEnd(child, i + 1)
+          let painted = false
+          for (const bit of range.getClientRects()) {
+            if (bit.width <= 0 || bit.height <= 0) continue
+            if (bit.right > host.left && bit.left < host.right && bit.bottom > host.top && bit.top < host.bottom) {
+              painted = true
+              break
+            }
+          }
+          if (painted) rendered += ch
+        }
+      }
+      return {
+        source,
+        rendered: norm(rendered),
+        font: parseFloat(style.fontSize),
+        scrollW: el.scrollWidth,
+        clientW: el.clientWidth,
+        scrollH: el.scrollHeight,
+        clientH: el.clientHeight,
+      }
+    }
+    let clipped = 0
+    let minFont = 999
+    let minTap = 999
+    const rows = []
+    for (const path of ['far', 'strong']) {
+      const el = document.querySelector(`.defend-tower-card[data-strip='yes'] .defend-path[data-path='${path}'] .defend-path-buy`)
+      if (!(el instanceof HTMLElement)) throw new Error(`missing strip buy ${path}`)
+      const box = el.getBoundingClientRect()
+      minTap = Math.min(minTap, box.width, box.height)
+      const cost = lineOf(el)
+      if (!cost) throw new Error(`missing strip cost line ${path}`)
+      if (cost.scrollW > cost.clientW + 1 || cost.scrollH > cost.clientH + 1) clipped += 1
+      minFont = Math.min(minFont, cost.font)
+      rows.push({ path, w: box.width, h: box.height, cost })
+    }
+    return { clipped, minFont, minTap, rows }
+  })
+}
+
+async function checkNwReasonStripRoad(browser, port, errors) {
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+  const jobs = []
+  for (const [width, height] of NW_REASON_STRIP_SIZES) jobs.push({ width, height, tool: 'reason' })
+  for (const tool of ['love', 'logic', 'science']) jobs.push({ width: 390, height: 844, tool })
+  jobs.push({ width: 412, height: 915, tool: 'love' })
+
+  const onlySize = process.env.NW_REASON_STRIP_ROAD_SIZE
+  const onlyTool = process.env.NW_REASON_STRIP_ROAD_TOOL
+  for (const job of jobs) {
+    const label = `${job.width}x${job.height}`
+    const tag = `${label} ${job.tool}`
+    if (onlySize && onlySize !== label) continue
+    if (onlyTool && onlyTool !== job.tool) continue
+    const seat =
+      job.tool === 'love'
+        ? { cx: 464, cy: 360 }
+        : job.tool === 'logic'
+          ? { cx: 600, cy: 88 }
+          : job.tool === 'science'
+            ? { cx: 464, cy: 768 }
+            : { cx: 464, cy: 224 }
+    let jobDone = false
+    const maxTrials = job.width === 384 ? 8 : 3
+    for (let trial = 0; trial < maxTrials && !jobDone; trial++) {
+      const problemMark = problems.length
+      const trialErrors = errors.length
+      const { context, page, cdp } = await openNwReasonStripRoad(browser, port, job.width, job.height)
+      page.on('pageerror', (error) => errors.push(`reason-strip-road ${tag} ${error}`))
+      await glyphSetup(page)
+      for (const lamp of NW_STRIP_WORDS_LAMPS) {
+        const rings = await page.evaluate(() =>
+        [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({
+          cx: Number(ring.getAttribute('cx')),
+          cy: Number(ring.getAttribute('cy')),
+        })),
+      )
+        const ring = rings.find((entry) => entry.cx === lamp.cx && entry.cy === lamp.cy)
+        assert.ok(ring, `${tag} has a live seat ${lamp.cx},${lamp.cy}`)
+        await nwReasonPlantAt(page, cdp, lamp.tool, ring, `${tag} plant ${lamp.tool}`)
+      }
+      await page.locator('.defend-go').click()
+      await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
+      await page.waitForTimeout(800)
+      if ((await page.locator('.defend-raider.is-easy-cue').count()) < 1) {
+        await nwReasonStripUnfreezeForCue(page, tag)
+      }
+      await page.locator('.defend-raider.is-easy-cue').waitFor({ timeout: 60_000 })
+      await nwReasonStripEnsureFreeze(page, tag)
+      await nwReasonReachSeat(page, cdp, seat, tag)
+      if (job.width === 384) await glyphPanToPad(page, job.tool)
+      await page.waitForTimeout(400)
+      for (let attempt = 0; attempt < 12 && (await page.locator('.defend-tower-card[data-strip="yes"]').count()) < 1; attempt += 1) {
+        await nwReasonStripTapLamp(page, cdp, seat, job.tool)
+        await page.waitForTimeout(350)
+      }
+      if ((await page.locator('.defend-tower-card[data-strip="yes"]').count()) < 1) {
+        fail(`checkNwReasonStripRoad fail ${tag} strip=missing`)
+        await context.close()
+        const added = problems.slice(problemMark)
+        for (const line of added) seen.delete(line)
+        problems.length = problemMark
+        errors.length = trialErrors
+        continue
+      }
+      await page.waitForTimeout(500)
+      let read
+      let stripTap
+      try {
+        read = await nwReasonStripMeasure(page)
+        stripTap = await nwReasonStripTapText(page)
+      } catch (error) {
+        fail(`checkNwReasonStripRoad fail ${tag} measure=${error.message}`)
+        await context.close()
+        const added = problems.slice(problemMark)
+        for (const line of added) seen.delete(line)
+        problems.length = problemMark
+        errors.length = trialErrors
+        continue
+      }
+      const gold = await nwReasonStripGoldCount(page)
+      if ((await page.locator('.defend-raider.is-easy-cue').count()) < 1) {
+        fail(`checkNwReasonStripRoad fail ${tag} easy-cue=missing`)
+      }
+      if (read.scrollX !== 0 || read.scrollY !== 0) fail(`checkNwReasonStripRoad fail ${tag} scroll=${read.scrollX},${read.scrollY}`)
+      if (!read.camOn) fail(`checkNwReasonStripRoad fail ${tag} cam=off`)
+      if (!read.zoomStyle.includes('1.4')) fail(`checkNwReasonStripRoad fail ${tag} zoom=${read.zoomStyle}`)
+      const wantPan = job.tool === 'reason' ? NW_REASON_STRIP_PAN[job.width] : null
+      const panTol = 0.05
+      if (wantPan != null && Math.abs(read.panX - wantPan) > panTol) {
+        fail(`checkNwReasonStripRoad fail ${tag} pan=${read.panX} want=${wantPan}`)
+      }
+      if (job.tool === 'reason' && job.width === 390) {
+        if (Math.abs(read.ctm.a - 0.927138) > 0.002 || Math.abs(read.ctm.d - 0.927138) > 0.002) {
+          fail(`checkNwReasonStripRoad fail ${tag} ctm a=${read.ctm.a} d=${read.ctm.d}`)
+        }
+        if (Math.abs(read.ctm.e - -235.1921) > 0.05 || Math.abs(read.ctm.f - 93.0127) > 0.05) {
+          fail(`checkNwReasonStripRoad fail ${tag} ctm e=${read.ctm.e} f=${read.ctm.f}`)
+        }
+        if (Math.abs(read.lot.x - 195) > 1.5 || Math.abs(read.lot.y - 300.69) > 1.5) {
+          fail(`checkNwReasonStripRoad fail ${tag} lot=${read.lot.x},${read.lot.y}`)
+        }
+        if (Math.abs(read.card[1] - 101) > 2) {
+          fail(`checkNwReasonStripRoad fail ${tag} state-mismatch cardTop=${read.card[1]} want~101`)
+        }
+      }
+      if (job.tool === 'reason' && job.width >= 384 && job.width <= 392) {
+        if (job.width === 384) {
+          if (read.overlapPx2 > 0) {
+            fail(
+              `checkNwReasonStripRoad fail ${tag} overlap=${read.overlapPx2}px2 strokeW=${read.strokeW} hits=${read.overlapPx2} pan=${read.panX} card=[${read.card.join(',')}]`,
+            )
+          }
+          if (read.cardLeft > 26) {
+            fail(`checkNwReasonStripRoad fail ${tag} cardLeft=${read.cardLeft} want<=26`)
+          }
+        } else {
+          const wantLefts = [0, 2]
+          if (!wantLefts.some((want) => Math.abs(read.cardLeft - want) <= 0.5)) {
+            fail(`checkNwReasonStripRoad fail ${tag} cardLeft=${read.cardLeft} want=${wantLefts.join('|')}±0.5`)
+          }
+        }
+        if (read.roadPadHit !== 0) fail(`checkNwReasonStripRoad fail ${tag} roadPadHit=${read.roadPadHit} want=0`)
+      }
+      if (stripTap.clipped !== 0) fail(`checkNwReasonStripRoad fail ${tag} clipped=${stripTap.clipped}`)
+      if (!(stripTap.minFont >= 13)) fail(`checkNwReasonStripRoad fail ${tag} font=${stripTap.minFont}`)
+      if (!(stripTap.minTap >= 44)) fail(`checkNwReasonStripRoad fail ${tag} tap=${stripTap.minTap}`)
+      if (read.offCanvas) fail(`checkNwReasonStripRoad fail ${tag} off-canvas card=${read.card.join(',')}`)
+      if (read.overlapPx2 > 0) {
+        fail(
+          `checkNwReasonStripRoad fail ${tag} overlap=${read.overlapPx2}px2 strokeW=${read.strokeW} hits=${read.overlapPx2} pan=${read.panX} card=[${read.card.join(',')}]`,
+        )
+      }
+      if (gold !== 1) fail(`checkNwReasonStripRoad fail ${tag} gold=${gold}`)
+      jobDone = !problems.slice(problemMark).some((line) => line.includes(` ${tag} `))
+      if (jobDone) {
+        const cardLine = `card=[${read.card.join(',')}]`
+        console.log(
+          `checkNwReasonStripRoad ok ${tag} overlap=${read.overlapPx2} strokeW=${read.strokeW} gold=${gold} pan=${read.panX} ctm=${read.ctm.a},${read.ctm.d},${read.ctm.e},${read.ctm.f} font=${stripTap.minFont}px tap=${stripTap.minTap}px ${cardLine}`,
+        )
+      } else {
+        const added = problems.slice(problemMark)
+        for (const line of added) seen.delete(line)
+        problems.length = problemMark
+        errors.length = trialErrors
+      }
+      await context.close()
+    }
+    if (!jobDone) fail(`checkNwReasonStripRoad fail ${tag} exhausted-retries`)
+  }
+
+  for (const err of errors.slice(errorMark)) fail(`checkNwReasonStripRoad error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 /** #964 Easy golden-path Dig DUG! (wb-women) — readable secondaries and takeaway gap above Lock In. */
 const DIG_WIN_READABLE_SIZES = [
   [375, 667],
@@ -11071,6 +11678,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'strip words nights stay free of console errors')
       return
     }
+    if (process.env.NW_REASON_STRIP_ROAD_ONLY === '1') {
+      await checkNwReasonStripRoad(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'reason strip road nights stay free of console errors')
+      return
+    }
     if (process.env.GEM_SIGHT_CUE_ONLY === '1') {
       await checkGemSightCue(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'gem sight cue nights stay free of console errors')
@@ -11107,6 +11719,7 @@ export async function checkPhoneFixes() {
     await checkNwCandleName(browser, port, errors)
     await checkNwPlantRingOnce(browser, port, errors)
     await checkNwStripWords(browser, port, errors)
+    await checkNwReasonStripRoad(browser, port, errors)
     await checkDigWinReadable(browser, port, errors)
     await checkGemSightCue(browser, port, errors)
     await checkNwSpendOnScreen(browser, port, errors)
@@ -11286,7 +11899,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'NW_STRIP_WORDS_ONLY', 'NW_REASON_STRIP_ROAD_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
