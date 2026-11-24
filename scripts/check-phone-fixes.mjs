@@ -4796,36 +4796,36 @@ const EASY_GOLD_BASE_1579 = {
   '375x667 home-first': { '2 Help': { x: 131, y: 561, w: 113, h: 48 } },
   '375x667 home-after-l1': { '3 Lock In': { x: 250, y: 584.1, w: 113, h: 48 } },
   // 1.4.596: y re-pinned from CI run 45026157592 (checkEasyOneGold rect lines); x/w unchanged.
-  // 1.4.597 What's new row (Love chip): re-pinned from CI run 45048191343.
+  // 1.4.598 What's new row (wave banner): re-pinned from CI run 45329274078.
   '375x667 settings-more': {
     'Open Profile': { x: 41, y: 1406.5, w: 130, h: 52 },
-    Candy: { x: 41, y: 1874.1, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1874.1, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1934.1, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2237.5, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2483.3, w: 176, h: 52 },
+    Candy: { x: 41, y: 1834.4, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1834.4, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1894.4, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2197.7, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2443.5, w: 176, h: 52 },
   },
   '390x844 home-first': { '2 Help': { x: 136, y: 738, w: 118, h: 48 } },
   '390x844 home-after-l1': { '3 Lock In': { x: 260, y: 761.1, w: 118, h: 48 } },
-  // 1.4.597 What's new row (Love chip): re-pinned from CI run 45059535776.
+  // 1.4.598 What's new row (wave banner): same −39.7y shift as 375×667 run 45329274078.
   '390x844 settings-more': {
     'Open Profile': { x: 41, y: 1407.9, w: 130, h: 52 },
-    Candy: { x: 41, y: 1875.5, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1875.5, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1935.5, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2214, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2459.9, w: 176, h: 52 },
+    Candy: { x: 41, y: 1835.8, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1835.8, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1895.8, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2174.3, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2420.2, w: 176, h: 52 },
   },
   '412x915 home-first': { '2 Help': { x: 143.3, y: 809, w: 125.3, h: 48 } },
   '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
-  // 1.4.597 What's new row (Love chip): re-pinned from CI run 45211502352.
+  // 1.4.598 What's new row (wave banner): same −39.7y shift as 375×667 run 45329274078.
   '412x915 settings-more': {
     'Open Profile': { x: 41, y: 1360.7, w: 130, h: 52 },
-    Candy: { x: 41, y: 1828.3, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1828.3, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1888.3, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2166.8, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2412.7, w: 176, h: 52 },
+    Candy: { x: 41, y: 1788.6, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1788.6, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1848.6, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2127.1, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2373, w: 176, h: 52 },
   },
 }
 
