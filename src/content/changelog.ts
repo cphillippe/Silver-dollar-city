@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.598',
+    title: 'Night Watch: wave clear banner',
+    when: '2026-11-24',
+    items: [
+      'On Easy, the Wave survived banner sits lower so it clears the Sparks label and the on-map Reason chip when a wave clears.',
+      'Hard stays the same.',
+      'Refs #984.',
+    ],
+  },
+  {
     version: '1.4.597',
     title: 'Night Watch: Love lamp name on screen',
     when: '2026-11-22',

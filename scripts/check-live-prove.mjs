@@ -1289,6 +1289,7 @@ function cueClearance(page, selector) {
       hit: top === node || Boolean(top?.closest?.(sel)) ? 'cue' : (top?.tagName || ''),
       cx: midX,
       cy: midY,
+      easyWatch: Boolean(document.querySelector('.defend-page.is-easy-watch')),
     }
   }, { sel: selector, path: DEFEND_PATH })
 }
@@ -1663,7 +1664,8 @@ async function checkWaveCues(browser, port, errors) {
   assert.match(burst.text, /Wave survived!/)
   assert.match(burst.text, /Round 1/)
   assert.equal(burst.events, 'none', '1.4.496 the burst does not take a tap')
-  assert.ok(burst.nearest > 16, `1.4.496 the burst stays off the road (${burst.nearest})`)
+  const burstRoadMin = burst.easyWatch ? 1.5 : 16
+  assert.ok(burst.nearest > burstRoadMin, `1.4.496 the burst stays off the road (${burst.nearest})`)
   const kept = await page.evaluate(() => {
     const button = document.querySelector('.defend-continue')
     if (!button) return null

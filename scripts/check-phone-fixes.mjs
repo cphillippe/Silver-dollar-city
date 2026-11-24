@@ -4796,36 +4796,36 @@ const EASY_GOLD_BASE_1579 = {
   '375x667 home-first': { '2 Help': { x: 131, y: 561, w: 113, h: 48 } },
   '375x667 home-after-l1': { '3 Lock In': { x: 250, y: 584.1, w: 113, h: 48 } },
   // 1.4.596: y re-pinned from CI run 45026157592 (checkEasyOneGold rect lines); x/w unchanged.
-  // 1.4.597 What's new row (Love chip): re-pinned from CI run 45048191343.
+  // 1.4.598 What's new row (wave banner): re-pinned from CI run 45329274078.
   '375x667 settings-more': {
     'Open Profile': { x: 41, y: 1406.5, w: 130, h: 52 },
-    Candy: { x: 41, y: 1874.1, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1874.1, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1934.1, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2237.5, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2483.3, w: 176, h: 52 },
+    Candy: { x: 41, y: 1834.4, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1834.4, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1894.4, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2197.7, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2443.5, w: 176, h: 52 },
   },
   '390x844 home-first': { '2 Help': { x: 136, y: 738, w: 118, h: 48 } },
   '390x844 home-after-l1': { '3 Lock In': { x: 260, y: 761.1, w: 118, h: 48 } },
-  // 1.4.597 What's new row (Love chip): re-pinned from CI run 45059535776.
+  // 1.4.598 What's new row (wave banner): re-pinned from CI run 45342239039 (Import y=2420.1).
   '390x844 settings-more': {
     'Open Profile': { x: 41, y: 1407.9, w: 130, h: 52 },
-    Candy: { x: 41, y: 1875.5, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1875.5, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1935.5, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2214, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2459.9, w: 176, h: 52 },
+    Candy: { x: 41, y: 1835.8, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1835.8, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1895.8, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2174.3, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2420.1, w: 176, h: 52 },
   },
   '412x915 home-first': { '2 Help': { x: 143.3, y: 809, w: 125.3, h: 48 } },
   '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
-  // 1.4.597 What's new row (Love chip): re-pinned from CI run 45211502352.
+  // 1.4.598 What's new row (wave banner): re-pinned from CI run 45351727603.
   '412x915 settings-more': {
     'Open Profile': { x: 41, y: 1360.7, w: 130, h: 52 },
-    Candy: { x: 41, y: 1828.3, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1828.3, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1888.3, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2166.8, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2412.7, w: 176, h: 52 },
+    Candy: { x: 41, y: 1763.8, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1763.8, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1823.8, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2102.3, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2348.1, w: 176, h: 52 },
   },
 }
 
@@ -9788,6 +9788,339 @@ async function checkGemSightCue(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #984 Easy wave-survived banner must clear the Sparks label at the 1.05 animation peak. */
+const NW_WAVE_SURVIVED_SEARCH = '?playtest=1&nwSeed=2&nwMap=a2&nwRound=5&nwLamps=0&nwCam=1'
+const NW_WAVE_SURVIVED_SIZES = [
+  [375, 667],
+  [375, 812],
+  [390, 844],
+  [412, 915],
+  [768, 1024],
+]
+
+async function sampleWaveSurvivedHold(page) {
+  return page.evaluate(async () => {
+    const round = (n) => Math.round(n * 10) / 10
+    const shown = (el) => {
+      if (!el) return false
+      const style = getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+      const box = el.getBoundingClientRect()
+      return box.width > 1 && box.height > 1
+    }
+    const boxOf = (el) => {
+      const rect = el.getBoundingClientRect()
+      return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom }
+    }
+    const area = (a, b) => {
+      const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left))
+      const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+      return w * h
+    }
+    const goldTone = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = Number(match[1])
+        const g = Number(match[2])
+        const b = Number(match[3])
+        const a = match[4] === undefined ? 1 : Number(match[4])
+        if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const goldCues = () => {
+      const root = document.querySelector('.defend-page')
+      if (!root) return 0
+      const chrome =
+        'button, .defend-abilities, .defend-boost, .defend-tower-card, .defend-path-pip, .nw-balloon-orb, .defend-wave, .defend-ability-stock'
+      const names = [...root.querySelectorAll(chrome)]
+        .filter((node) => !node.closest('.defend-nw-debug'))
+        .filter((node) => {
+          const rect = node.getBoundingClientRect()
+          const style = getComputedStyle(node)
+          return rect.width > 1 && rect.height > 1 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0
+        })
+        .filter((node) => {
+          const style = getComputedStyle(node)
+          const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+          const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && goldTone(style[`border${side}Color`]))
+          return goldTone(style.backgroundImage) || goldTone(style.backgroundColor) || border || goldTone(style.boxShadow) || (text && goldTone(style.color))
+        })
+      return names.length
+    }
+    const waitStart = performance.now()
+    while (performance.now() - waitStart < 8000) {
+      const banner = document.querySelector('.nw-wave-survived')
+      if (banner && shown(banner)) break
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+    }
+    const chromeUnion = (selector) => {
+      const boxes = [...document.querySelectorAll(selector)].filter(shown).map(boxOf)
+      if (!boxes.length) return null
+      return boxes.reduce((acc, b) => ({
+        left: Math.min(acc.left, b.left),
+        top: Math.min(acc.top, b.top),
+        right: Math.max(acc.right, b.right),
+        bottom: Math.max(acc.bottom, b.bottom),
+      }))
+    }
+    const maxChromeOverlap = (bannerBox, selector) => {
+      let max = 0
+      for (const node of document.querySelectorAll(selector)) {
+        if (!shown(node)) continue
+        max = Math.max(max, area(bannerBox, boxOf(node)))
+      }
+      return max
+    }
+    const paintOfLabel = (el) => {
+      const rect = el.getBoundingClientRect()
+      let left = rect.left
+      let right = rect.right
+      let top = rect.top
+      let bottom = rect.bottom
+      const range = document.createRange()
+      for (const child of el.childNodes) {
+        if (child.nodeType !== 3 || !(child.textContent || '').trim()) continue
+        range.selectNodeContents(child)
+        for (const bit of range.getClientRects()) {
+          if (bit.width <= 0 || bit.height <= 0) continue
+          left = Math.min(left, bit.left)
+          right = Math.max(right, bit.right)
+          top = Math.min(top, bit.top)
+          bottom = Math.max(bottom, bit.bottom)
+        }
+      }
+      return { left, top, right, bottom }
+    }
+    const inViewport = (box) =>
+      box.right > 0 && box.bottom > 0 && box.left < innerWidth && box.top < innerHeight
+    const chipOverlap = (bannerBox) => {
+      let max = 0
+      let chipsOn = 0
+      for (const el of document.querySelectorAll('.defend-type-chip, text.defend-type-label')) {
+        if (el.getAttribute('data-chrome-hide') === 'yes') continue
+        if (!shown(el)) continue
+        const box = el.matches('.defend-type-chip') ? boxOf(el) : paintOfLabel(el)
+        if (!inViewport(box)) continue
+        chipsOn += 1
+        max = Math.max(max, area(bannerBox, box))
+      }
+      return { max, chipsOn }
+    }
+    const banner = document.querySelector('.nw-wave-survived')
+    const label = document.querySelector('.nw-balloon-label')
+    const countNode = document.querySelector('.nw-balloon-count')
+    if (!banner) return { missing: 'banner' }
+    if (!label) return { missing: 'label' }
+    if (!countNode) return { missing: 'count' }
+    const samples = []
+    const holdStart = performance.now()
+    while (performance.now() - holdStart < 2200) {
+      if (!shown(banner)) {
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+        continue
+      }
+      const bannerBox = boxOf(banner)
+      const count = document.querySelector('.nw-balloon-count')
+      if (!count) return { missing: 'count' }
+      const cont = document.querySelector('.defend-continue')
+      const rail = chromeUnion('.nw-rail')
+      const targets = {
+        label: boxOf(label),
+        count: shown(count) ? boxOf(count) : null,
+        continue: cont && shown(cont) ? boxOf(cont) : null,
+        rail,
+      }
+      const ov = {}
+      for (const [key, box] of Object.entries(targets)) {
+        if (key === 'rail' || key === 'dock') continue
+        ov[key] = box ? area(bannerBox, box) : null
+      }
+      ov.rail = rail ? area(bannerBox, rail) : null
+      ov.dock = maxChromeOverlap(
+        bannerBox,
+        'button.defend-new-lamp, .defend-clear-row button:not(.defend-continue)',
+      )
+      const chip = chipOverlap(bannerBox)
+      ov.chip = chip.chipsOn > 0 ? chip.max : 0
+      const style = getComputedStyle(banner)
+      const inside =
+        bannerBox.left >= -1 &&
+        bannerBox.top >= -1 &&
+        bannerBox.right <= window.innerWidth + 1 &&
+        bannerBox.bottom <= window.innerHeight + 1
+      const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+      const lineClip = (el) => {
+        const style = getComputedStyle(el)
+        const scrollClip = el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1
+        if (!scrollClip) return 0
+        if (style.textOverflow && style.textOverflow !== 'clip') return 0
+        const directs = [...el.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+        const source = norm(directs.length ? directs.map((child) => child.textContent).join('') : el.textContent)
+        const rect = el.getBoundingClientRect()
+        const range = document.createRange()
+        let rendered = ''
+        const host = { left: rect.left - 1, right: rect.right + 1, top: rect.top - 1, bottom: rect.bottom + 1 }
+        for (const child of directs.length ? directs : []) {
+          const raw = child.textContent || ''
+          for (let i = 0; i < raw.length; i += 1) {
+            const ch = raw[i]
+            if (!ch.trim()) {
+              rendered += ch
+              continue
+            }
+            range.setStart(child, i)
+            range.setEnd(child, i + 1)
+            let painted = false
+            for (const bit of range.getClientRects()) {
+              if (bit.width <= 0 || bit.height <= 0) continue
+              if (bit.right > host.left && bit.left < host.right && bit.bottom > host.top && bit.top < host.bottom) {
+                painted = true
+                break
+              }
+            }
+            if (painted) rendered += ch
+          }
+        }
+        if (!directs.length) rendered = source
+        return norm(rendered) !== source ? 1 : 0
+      }
+      const texts = [...banner.querySelectorAll('.nw-wave-survived-title, .nw-wave-survived-round')]
+      let fontMin = Infinity
+      let clipped = 0
+      for (const node of texts) {
+        if (!shown(node)) continue
+        const fs = parseFloat(getComputedStyle(node).fontSize)
+        if (Number.isFinite(fs)) fontMin = Math.min(fontMin, fs)
+        clipped += lineClip(node)
+      }
+      samples.push({
+        ov,
+        banner: {
+          left: round(bannerBox.left),
+          top: round(bannerBox.top),
+          right: round(bannerBox.right),
+          bottom: round(bannerBox.bottom),
+        },
+        inside,
+        fontMin: Number.isFinite(fontMin) ? fontMin : 0,
+        clipped,
+        gold: goldCues(),
+        opacity: Number(style.opacity),
+        chipsOn: chip.chipsOn,
+      })
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+    }
+    return { samples }
+  })
+}
+
+async function checkNwWaveSurvivedClear(browser, port, errors) {
+  const only = process.env.NW_WAVE_SURVIVED_SIZE
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+
+  const tapUntilBoost = async (page) => {
+    const started = Date.now()
+    while (Date.now() - started < 90_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
+      const cue = await page.evaluate(() => {
+        const face = document.querySelector('.defend-raider.is-easy-cue')
+        if (!face) return null
+        const id = face.getAttribute('data-walker-id')
+        const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+        if (!tap) return null
+        const box = tap.getBoundingClientRect()
+        const x = box.x + box.width / 2
+        const y = box.y + box.height / 2
+        const node = document.elementFromPoint(x, y)
+        if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+        return { x, y }
+      })
+      if (cue) await page.mouse.click(cue.x, cue.y)
+      await page.waitForTimeout(80)
+    }
+  }
+
+  for (const [width, height] of NW_WAVE_SURVIVED_SIZES) {
+    const size = `${width}x${height}`
+    if (only && only !== size) continue
+    const { context, page } = await openMap(browser, port, width, height, 'a2', {
+      motion: true,
+      search: NW_WAVE_SURVIVED_SEARCH,
+    })
+    page.on('pageerror', (error) => errors.push(`wave-survived ${size} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() !== 'error') return
+      const text = msg.text()
+      if (text.includes('Encountered two children with the same key')) return
+      errors.push(`wave-survived ${size} ${text}`)
+    })
+    await page.evaluate(() => document.fonts?.ready)
+    await plantTypeLabelSeats(page, size)
+    await page.locator('.defend-go').click()
+    await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
+    await tapUntilBoost(page)
+    const reached = (await page.locator('.defend-page.is-boost').count()) > 0
+    if (!reached) {
+      fail(`checkNwWaveSurvivedClear fail ${size} boost=0`)
+      await context.close()
+      continue
+    }
+    await page.waitForTimeout(150)
+    const sample = await sampleWaveSurvivedHold(page)
+    if (sample.missing === 'banner') fail(`checkNwWaveSurvivedClear fail ${size} banner=0`)
+    if (sample.missing === 'label') fail(`checkNwWaveSurvivedClear fail ${size} label=0`)
+    if (sample.missing === 'count') fail(`checkNwWaveSurvivedClear fail ${size} count=0`)
+    const holdSamples = (sample.samples || []).filter((row) => row.opacity > 0.4)
+    if (holdSamples.length < 10) fail(`checkNwWaveSurvivedClear fail ${size} samples=${holdSamples.length}`)
+    if (holdSamples.some((row) => row.ov.count === null)) fail(`checkNwWaveSurvivedClear fail ${size} count=0`)
+    const maxOv = { label: 0, count: 0, continue: 0, rail: 0, dock: 0, chip: 0 }
+    let maxChipsOn = 0
+    let worst = holdSamples[0]
+    for (const row of holdSamples) {
+      maxChipsOn = Math.max(maxChipsOn, row.chipsOn || 0)
+      for (const key of Object.keys(maxOv)) {
+        const val = row.ov[key]
+        if (val == null) continue
+        if (key === 'chip' && (row.chipsOn || 0) < 1) continue
+        maxOv[key] = Math.max(maxOv[key], val)
+      }
+      if ((row.ov.label || 0) >= (worst?.ov.label || 0)) worst = row
+    }
+    if (width === 375 && height === 667 && maxChipsOn < 1) fail(`checkNwWaveSurvivedClear fail ${size} chipsOn=0`)
+    if (maxOv.label > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsLabel=${maxOv.label.toFixed(1)}`)
+    if (maxOv.count > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsCount=${maxOv.count.toFixed(1)}`)
+    if (maxOv.continue > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsContinue=${maxOv.continue.toFixed(1)}`)
+    if (maxOv.rail > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsRail=${maxOv.rail.toFixed(1)}`)
+    if (maxOv.dock > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsDock=${maxOv.dock.toFixed(1)}`)
+    if (maxChipsOn > 0 && maxOv.chip > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsChip=${maxOv.chip.toFixed(1)} chipsOn=${maxChipsOn}`)
+    if (!holdSamples.every((row) => row.inside)) fail(`checkNwWaveSurvivedClear fail ${size} viewport`)
+    if (holdSamples.some((row) => row.fontMin < 13)) fail(`checkNwWaveSurvivedClear fail ${size} fontMin`)
+    if (holdSamples.some((row) => row.clipped !== 0)) fail(`checkNwWaveSurvivedClear fail ${size} clipped`)
+    if (holdSamples.some((row) => row.gold !== 1)) fail(`checkNwWaveSurvivedClear fail ${size} gold`)
+    const b = worst.banner
+    const localFail = problems.some((line) => line.includes(` ${size} `))
+    if (!localFail) {
+      const vsChip = maxChipsOn > 0 ? maxOv.chip.toFixed(1) : '0.0'
+      console.log(
+        `checkNwWaveSurvivedClear ok ${size} vsLabel=${maxOv.label.toFixed(1)} vsCount=${maxOv.count.toFixed(1)} vsChip=${vsChip} chipsOn=${maxChipsOn} go=absent banner=${b.left},${b.top},${b.right},${b.bottom} samples=${holdSamples.length} gold=1`,
+      )
+    }
+    await context.close()
+  }
+
+  for (const err of errors.slice(errorMark)) fail(`checkNwWaveSurvivedClear error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 /** #951 Easy round-clear Spend and ? stay on screen (fixed to the viewport, not the collapsed clear bar). */
 const NW_SPEND_ON_SCREEN_SIZES = [
   [375, 812],
@@ -11491,6 +11824,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'round cheer nights stay free of console errors')
       return
     }
+    if (process.env.NW_WAVE_SURVIVED_ONLY === '1') {
+      await checkNwWaveSurvivedClear(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'wave survived banner nights stay free of console errors')
+      return
+    }
     if (process.env.NW_PLANT_NO_CARD_ONLY === '1') {
       await checkNwPlantNoCard(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'plant no-card nights stay free of console errors')
@@ -11552,6 +11890,7 @@ export async function checkPhoneFixes() {
     await checkMap05CamOffRing(browser, port, errors)
     await checkNwPlantIgnite(browser, port, errors)
     await checkNwRoundCheer(browser, port, errors)
+    await checkNwWaveSurvivedClear(browser, port, errors)
     await checkNwPlantNoCard(browser, port, errors)
     await checkNwLampMoveHop(browser, port, errors)
     await checkNwCandleName(browser, port, errors)
@@ -11737,7 +12076,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY', 'NW_LOVE_CHIP_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_WAVE_SURVIVED_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY', 'NW_LOVE_CHIP_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
