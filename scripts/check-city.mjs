@@ -1944,9 +1944,37 @@ assert.match(
 
 
 
+// 1.4.598: Easy Night Watch Reason chip on-screen at 412×915 after official cam (#949).
+assert.equal(APP_VERSION, '1.4.598')
+assert.equal(CHANGELOG[0].version, '1.4.598', '1.4.598 is the newest row')
+assert.match(latestChange('1.4.598').items.join('\n'), /Refs #949/, '1.4.598 changelog refs #949')
+assert.match(latestChange('1.4.598').items.join('\n'), /Reason/)
+assert.match(latestChange('1.4.598').items.join('\n'), /Hard stays the same\./)
+assert.doesNotMatch(latestChange('1.4.598').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.598 changelog avoids GitHub close keywords')
+assert.doesNotMatch(
+  playerVisibleChangeItems(latestChange('1.4.598').items).join('\n'),
+  /\bHard\b|\bMedium\b/,
+  '1.4.598 the player note does not name other tiers',
+)
+{
+  const board598 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
+  const phone598 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  assert.match(board598, /const margin = 2/, '1.4.598 chip frame margin is 2px inside slideTypeChipBelowFloor')
+  assert.match(board598, /box\.left < margin/, '1.4.598 below-floor slide respects the frame left edge')
+  assert.match(phone598, /async function snapNwLoveChipOfficialCam/, '1.4.598 love-chip snaps official cam through Recenter')
+  assert.match(phone598, /await snapNwLoveChipOfficialCam\(page\)/, '1.4.598 love-chip recenters after the planted frame is live')
+  assert.match(phone598, /frameW=\$\{snap\.viewW\} cam=\$\{snap\.nwCam\} pan=\$\{snap\.camPan\}/, '1.4.598 love-chip ok logs frame and cam')
+  assert.match(phone598, /checkNwLoveChip fail r\$\{round\} \$\{tag\} slideTypeChip \$\{tool\} \$\{line\.kind\} box=/, '1.4.598 love-chip fails on painted Reason nodes off-frame')
+  const lastIdx = phone598.lastIndexOf('      return\n    }\n')
+  assert.match(
+    phone598.slice(lastIdx),
+    /\n    await checkNwSpendOnScreen\(browser, port, errors\)\n    await checkNwLoveChip\(browser, port, errors\)\n/,
+    '1.4.598 default phone path runs checkNwLoveChip after checkNwSpendOnScreen',
+  )
+}
+
 // 1.4.597: Easy Night Watch Love lamp type chip stays visible (#949).
-assert.equal(APP_VERSION, '1.4.597')
-assert.equal(CHANGELOG[0].version, '1.4.597', '1.4.597 is the newest row')
+assert.equal(CHANGELOG[1].version, '1.4.597', '1.4.597 follows the newest row')
 assert.match(latestChange('1.4.597').items.join('\n'), /Refs #949/, '1.4.597 changelog refs #949')
 assert.match(latestChange('1.4.597').items.join('\n'), /Love/)
 assert.match(latestChange('1.4.597').items.join('\n'), /Hard stays the same\./)

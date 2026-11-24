@@ -10128,6 +10128,17 @@ async function waitNwLoveChipCamReady(page, tag, round) {
   await page.waitForTimeout(250)
 }
 
+/** Live play treats Recenter as the official camera pan. */
+async function snapNwLoveChipOfficialCam(page) {
+  const recenter = page.getByRole('button', { name: 'Recenter map' })
+  if (await recenter.count()) {
+    await recenter.click()
+    await page.waitForTimeout(250)
+  }
+  await page.evaluate(() => document.fonts?.ready)
+  await page.waitForTimeout(250)
+}
+
 async function checkNwLoveChip(browser, port, errors) {
   const only = process.env.NW_LOVE_CHIP_SIZE
   const problems = []
@@ -10154,8 +10165,7 @@ async function checkNwLoveChip(browser, port, errors) {
       page.on('pageerror', (error) => errors.push(`nw-love-chip r${round} ${tag} ${error}`))
       await waitNwLoveChipCamReady(page, tag, round)
       await plantTypeLabelSeats(page, `${tag} r${round}`)
-      await page.evaluate(() => document.fonts?.ready)
-      await page.waitForTimeout(250)
+      await snapNwLoveChipOfficialCam(page)
       const snap = await page.evaluate(() => {
       const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
       // Strict overlap: any shared horizontal and vertical span fails (>0 at 0.1px).
@@ -10356,7 +10366,11 @@ async function checkNwLoveChip(browser, port, errors) {
           if (overlapPx(chipBoxes[i].box, glyph) > 0) blockers.push(`chip-${chipBoxes[i].type}-glyph`)
         }
       }
-      return { byType, blockers, gold: goldCues(), viewW, viewH, hudPresent, headerPresent }
+      const zoom = document.querySelector('.nw-zoom')
+      const zoomStyle = zoom instanceof HTMLElement ? getComputedStyle(zoom) : null
+      const camPan = zoomStyle?.transform && zoomStyle.transform !== 'none' ? zoomStyle.transform : 'matrix(1,0,0,1,0,0)'
+      const nwCam = new URLSearchParams(location.search).get('nwCam') || '0'
+      return { byType, blockers, gold: goldCues(), viewW, viewH, hudPresent, headerPresent, camPan, nwCam }
     })
     if (!snap.hudPresent) {
       fail(`checkNwLoveChip fail r${round} ${tag} nw-hud=0`)
@@ -10446,16 +10460,28 @@ async function checkNwLoveChip(browser, port, errors) {
           }
         }
       }
+      const frameMargin = 2
+      for (const line of row.rows) {
+        const b = line.box
+        if (b.left < frameMargin - 0.01 || b.right > snap.viewW - frameMargin + 0.01) {
+          fail(
+            `checkNwLoveChip fail r${round} ${tag} slideTypeChip ${tool} ${line.kind} box=${b.left.toFixed(1)},${b.top.toFixed(1)},${b.width.toFixed(1)},${b.height.toFixed(1)} frameW=${snap.viewW} cam=${snap.nwCam} pan=${snap.camPan}`,
+          )
+          overlapBad = true
+          break
+        }
+      }
+      if (overlapBad) continue
       const inView =
-        chipBox.left >= -0.5 &&
+        chipBox.left >= frameMargin - 0.01 &&
         chipBox.top >= -0.5 &&
-        chipBox.right <= snap.viewW + 0.5 &&
+        chipBox.right <= snap.viewW - frameMargin + 0.01 &&
         chipBox.bottom <= snap.viewH + 0.5 &&
         chipBox.width > 1 &&
         chipBox.height > 1
       if (!inView) {
         fail(
-          `checkNwLoveChip fail r${round} ${tag} slideTypeChip ${tool} box=${chipBox.left.toFixed(1)},${chipBox.top.toFixed(1)},${chipBox.width.toFixed(1)},${chipBox.height.toFixed(1)} viewport=${snap.viewW}x${snap.viewH}`,
+          `checkNwLoveChip fail r${round} ${tag} slideTypeChip ${tool} box=${chipBox.left.toFixed(1)},${chipBox.top.toFixed(1)},${chipBox.width.toFixed(1)},${chipBox.height.toFixed(1)} viewport=${snap.viewW}x${snap.viewH} cam=${snap.nwCam} pan=${snap.camPan}`,
         )
         continue
       }
@@ -10468,7 +10494,7 @@ async function checkNwLoveChip(browser, port, errors) {
       const hudLog = paintedLine?.hud ?? 0
       const recenterLog = paintedLine?.recenter ?? 0
       console.log(
-        `checkNwLoveChip ok slideTypeChip ${tag} r${round} ${tool} box=${Math.round(chipBox.left)},${Math.round(chipBox.top)},${Math.round(chipBox.width)},${Math.round(chipBox.height)} inViewport=1 hdr=${hdrLog} hud=${hudLog} recenter=${recenterLog}`,
+        `checkNwLoveChip ok slideTypeChip ${tag} r${round} ${tool} box=${Math.round(chipBox.left)},${Math.round(chipBox.top)},${Math.round(chipBox.width)},${Math.round(chipBox.height)} inViewport=1 frameW=${snap.viewW} cam=${snap.nwCam} pan=${snap.camPan} hdr=${hdrLog} hud=${hudLog} recenter=${recenterLog}`,
       )
     }
     if (snap.blockers.length) {
@@ -10479,14 +10505,27 @@ async function checkNwLoveChip(browser, port, errors) {
     }
     if (problems.length === frameMark) {
       const reasonRow = snap.byType.reason
-      const reasonBox = reasonRow?.rows.find((r) => r.kind === 'chip')?.box
-      if (reasonBox) {
+      const reasonPainted = (reasonRow?.rows || []).filter((r) => r.kind === 'chip' || r.kind === 'svg')
+      if (reasonPainted.length) {
+        let union = { ...reasonPainted[0].box }
+        for (const row of reasonPainted.slice(1)) {
+          union = {
+            left: Math.min(union.left, row.box.left),
+            top: Math.min(union.top, row.box.top),
+            right: Math.max(union.right, row.box.right),
+            bottom: Math.max(union.bottom, row.box.bottom),
+            width: 0,
+            height: 0,
+          }
+        }
+        union.width = union.right - union.left
+        union.height = union.bottom - union.top
         const lampDy =
           reasonRow.lampAnchorDy === null || reasonRow.lampAnchorDy === undefined
             ? ''
             : ` lampDy=${reasonRow.lampAnchorDy}`
         console.log(
-          `checkNwLoveChip ok r${round} ${tag} frame reason visible=1 box=${Math.round(reasonBox.left)},${Math.round(reasonBox.top)},${Math.round(reasonBox.width)},${Math.round(reasonBox.height)} inViewport=1 hudOverlap=${reasonRow.hudOverlap || 0} hdr=${reasonRow.headerOverlap || 0} recenter=${reasonRow.recenterOverlap || 0} gold=1${lampDy}`,
+          `checkNwLoveChip ok r${round} ${tag} frame reason visible=1 box=${Math.round(union.left)},${Math.round(union.top)},${Math.round(union.width)},${Math.round(union.height)} inViewport=1 frameW=${snap.viewW} cam=${snap.nwCam} pan=${snap.camPan} hudOverlap=${reasonRow.hudOverlap || 0} hdr=${reasonRow.headerOverlap || 0} recenter=${reasonRow.recenterOverlap || 0} gold=1${lampDy}`,
         )
       }
     }
