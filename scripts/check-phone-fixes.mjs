@@ -1482,7 +1482,18 @@ async function checkMapNote(browser, port, errors) {
       assert.ok(first.w >= 100, `${label} the note is at least 100px wide (${first.w})`)
       assert.ok(first.h > 8, `${label} the note has a visible height (${first.h})`)
       assert.ok(first.font >= 14, `${label} the note text is at least 14px (${first.font})`)
-      assert.equal(first.top, '108px', `${label} the note sits at 108px`)
+      const bannerBox = await page
+        .locator('.nw-wave-survived')
+        .boundingBox()
+        .catch(() => null)
+      if (bannerBox && bannerBox.height > 4) {
+        assert.ok(
+          first.y >= bannerBox.y + bannerBox.height - 2,
+          `${label} the note sits below the wave banner ${JSON.stringify({ note: first, banner: bannerBox })}`,
+        )
+      } else {
+        assert.equal(first.top, '108px', `${label} the note sits at 108px`)
+      }
       assert.equal(first.events, 'none', `${label} the note does not take taps`)
       assert.ok(first.opacity > 0.9 && first.visibility !== 'hidden' && first.display !== 'none', `${label} the note is visible`)
       const center = width / 2
@@ -10121,6 +10132,324 @@ async function checkNwWaveSurvivedClear(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #998 Easy unlock toast must not cover Wave survived! on sloppy late-round clears. */
+const NW_UNLOCK_TOAST_SIZES = [
+  [375, 667],
+  [375, 812],
+  [384, 812],
+  [390, 844],
+  [412, 915],
+  [768, 1024],
+]
+const NW_UNLOCK_TOAST_ROUNDS = [18, 24]
+
+async function sampleUnlockToastOverlap(page) {
+  return page.evaluate(async () => {
+    const round = (n) => Math.round(n * 10) / 10
+    const shown = (el) => {
+      if (!el) return false
+      const style = getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+      const box = el.getBoundingClientRect()
+      return box.width > 1 && box.height > 1
+    }
+    const boxOf = (el) => {
+      const rect = el.getBoundingClientRect()
+      return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom }
+    }
+    const area = (a, b) => {
+      const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left))
+      const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+      return w * h
+    }
+    const goldTone = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = Number(match[1])
+        const g = Number(match[2])
+        const b = Number(match[3])
+        const a = match[4] === undefined ? 1 : Number(match[4])
+        if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const goldCues = () => {
+      const root = document.querySelector('.defend-page')
+      if (!root) return 0
+      const chrome =
+        'button, .defend-abilities, .defend-boost, .defend-tower-card, .defend-path-pip, .nw-balloon-orb, .defend-wave, .defend-ability-stock'
+      return [...root.querySelectorAll(chrome)]
+        .filter((node) => !node.closest('.defend-nw-debug'))
+        .filter((node) => {
+          const rect = node.getBoundingClientRect()
+          const style = getComputedStyle(node)
+          return rect.width > 1 && rect.height > 1 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0
+        })
+        .filter((node) => {
+          const style = getComputedStyle(node)
+          const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+          const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && goldTone(style[`border${side}Color`]))
+          return goldTone(style.backgroundImage) || goldTone(style.backgroundColor) || border || goldTone(style.boxShadow) || (text && goldTone(style.color))
+        }).length
+    }
+    const maxChromeOverlap = (bannerBox, selector) => {
+      let max = 0
+      for (const node of document.querySelectorAll(selector)) {
+        if (!shown(node)) continue
+        max = Math.max(max, area(bannerBox, boxOf(node)))
+      }
+      return max
+    }
+    const chipOverlap = (bannerBox) => {
+      let max = 0
+      let chipsOn = 0
+      for (const el of document.querySelectorAll('.defend-type-chip, text.defend-type-label')) {
+        if (el.getAttribute('data-chrome-hide') === 'yes') continue
+        if (!shown(el)) continue
+        const box = boxOf(el)
+        if (box.right <= 0 || box.bottom <= 0 || box.left >= innerWidth || box.top >= innerHeight) continue
+        chipsOn += 1
+        max = Math.max(max, area(bannerBox, box))
+      }
+      return { max, chipsOn }
+    }
+    const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+    const lineClip = (el) => {
+      const style = getComputedStyle(el)
+      const scrollClip = el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1
+      if (!scrollClip) return 0
+      if (style.textOverflow && style.textOverflow !== 'clip') return 0
+      const directs = [...el.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+      const source = norm(directs.length ? directs.map((child) => child.textContent).join('') : el.textContent)
+      const rect = el.getBoundingClientRect()
+      const range = document.createRange()
+      let rendered = ''
+      const host = { left: rect.left - 1, right: rect.right + 1, top: rect.top - 1, bottom: rect.bottom + 1 }
+      for (const child of directs.length ? directs : []) {
+        const raw = child.textContent || ''
+        for (let i = 0; i < raw.length; i += 1) {
+          const ch = raw[i]
+          if (!ch.trim()) {
+            rendered += ch
+            continue
+          }
+          range.setStart(child, i)
+          range.setEnd(child, i + 1)
+          let painted = false
+          for (const bit of range.getClientRects()) {
+            if (bit.width <= 0 || bit.height <= 0) continue
+            if (bit.right > host.left && bit.left < host.right && bit.bottom > host.top && bit.top < host.bottom) {
+              painted = true
+              break
+            }
+          }
+          if (painted) rendered += ch
+        }
+      }
+      if (!directs.length) rendered = source
+      return norm(rendered) !== source ? 1 : 0
+    }
+    const label = document.querySelector('.nw-balloon-label')
+    const countNode = document.querySelector('.nw-balloon-count')
+    const hud = document.querySelector('.nw-hud')
+    const samples = []
+    const waitStart = performance.now()
+    while (performance.now() - waitStart < 5000) {
+      const banner = document.querySelector('.nw-wave-survived')
+      const toast = document.querySelector('.nw-map-toast')
+      if (banner && toast && shown(banner) && shown(toast) && label && countNode) break
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+    }
+    const loopStart = performance.now()
+    while (performance.now() - loopStart < 2600) {
+      const banner = document.querySelector('.nw-wave-survived')
+      const toast = document.querySelector('.nw-map-toast')
+      if (!banner || !toast || !shown(banner) || !shown(toast)) {
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+        continue
+      }
+      const bannerBox = boxOf(banner)
+      const toastBox = boxOf(toast)
+      const toastOv = area(bannerBox, toastBox)
+      const count = document.querySelector('.nw-balloon-count')
+      const cont = document.querySelector('.defend-continue')
+      const targets = {
+        label: boxOf(label),
+        count: shown(count) ? boxOf(count) : null,
+        continue: cont && shown(cont) ? boxOf(cont) : null,
+        hud: hud && shown(hud) ? boxOf(hud) : null,
+      }
+      const ov = { toast: toastOv }
+      for (const [key, box] of Object.entries(targets)) {
+        ov[key] = box ? area(bannerBox, box) : null
+      }
+      ov.dock = maxChromeOverlap(bannerBox, 'button.defend-new-lamp, .defend-clear-row button:not(.defend-continue)')
+      const chip = chipOverlap(bannerBox)
+      ov.chip = chip.chipsOn > 0 ? chip.max : 0
+      let fontMin = Infinity
+      let clipped = 0
+      for (const node of [banner, toast]) {
+        for (const el of node.querySelectorAll('*').length ? [node, ...node.querySelectorAll('*')] : [node]) {
+          if (!shown(el) || el.children.length) continue
+          const fs = parseFloat(getComputedStyle(el).fontSize)
+          if (Number.isFinite(fs)) fontMin = Math.min(fontMin, fs)
+        }
+        clipped += lineClip(node)
+      }
+      const insideBanner =
+        bannerBox.left >= -1 &&
+        bannerBox.top >= -1 &&
+        bannerBox.right <= window.innerWidth + 1 &&
+        bannerBox.bottom <= window.innerHeight + 1
+      const insideToast =
+        toastBox.left >= -1 &&
+        toastBox.top >= -1 &&
+        toastBox.right <= window.innerWidth + 1 &&
+        toastBox.bottom <= window.innerHeight + 1
+      samples.push({
+        ov,
+        banner: {
+          left: round(bannerBox.left),
+          top: round(bannerBox.top),
+          right: round(bannerBox.right),
+          bottom: round(bannerBox.bottom),
+          w: round(bannerBox.right - bannerBox.left),
+          h: round(bannerBox.bottom - bannerBox.top),
+        },
+        toast: {
+          left: round(toastBox.left),
+          top: round(toastBox.top),
+          right: round(toastBox.right),
+          bottom: round(toastBox.bottom),
+          w: round(toastBox.right - toastBox.left),
+          h: round(toastBox.bottom - toastBox.top),
+        },
+        insideBanner,
+        insideToast,
+        fontMin: Number.isFinite(fontMin) ? fontMin : 0,
+        clipped,
+        gold: goldCues(),
+        chipsOn: chip.chipsOn,
+      })
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+    }
+    return { samples, missing: !samples.length ? 'frames' : null }
+  })
+}
+
+async function checkNwUnlockToastBanner(browser, port, errors) {
+  const onlySize = process.env.NW_UNLOCK_TOAST_SIZE
+  const onlyRound = process.env.NW_UNLOCK_TOAST_ROUND
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+
+  const tapUntilBoost = async (page) => {
+    const started = Date.now()
+    while (Date.now() - started < 90_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
+      const cue = await page.evaluate(() => {
+        const face = document.querySelector('.defend-raider.is-easy-cue')
+        if (!face) return null
+        const id = face.getAttribute('data-walker-id')
+        const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+        if (!tap) return null
+        const box = tap.getBoundingClientRect()
+        const x = box.x + box.width / 2
+        const y = box.y + box.height / 2
+        const node = document.elementFromPoint(x, y)
+        if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+        return { x, y }
+      })
+      if (cue) await page.mouse.click(cue.x, cue.y)
+      await page.waitForTimeout(80)
+    }
+  }
+
+  for (const round of NW_UNLOCK_TOAST_ROUNDS) {
+    if (onlyRound && onlyRound !== String(round)) continue
+    const search = `?playtest=1&nwSeed=2&nwMap=a2&nwRound=${round}&nwLamps=0&nwCam=1`
+    for (const [width, height] of NW_UNLOCK_TOAST_SIZES) {
+      const size = `${width}x${height}`
+      if (onlySize && onlySize !== size) continue
+      const { context, page } = await openMap(browser, port, width, height, 'a2', {
+        motion: true,
+        search,
+      })
+      page.on('pageerror', (error) => errors.push(`unlock-toast r${round} ${size} ${error}`))
+      await page.evaluate(() => document.fonts?.ready)
+      await plantTypeLabelSeats(page, `${size} r${round}`)
+      await page.locator('.defend-go').click()
+      await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
+      await tapUntilBoost(page)
+      if ((await page.locator('.defend-page.is-boost').count()) < 1) {
+        fail(`checkNwUnlockToastBanner fail r${round} ${size} boost=0`)
+        await context.close()
+        continue
+      }
+      await page.waitForTimeout(100)
+      const hasToast = (await page.locator('.nw-map-toast').count()) > 0
+      if (!hasToast) {
+        fail(`checkNwUnlockToastBanner fail r${round} ${size} toast=0`)
+        await context.close()
+        continue
+      }
+      const sample = await sampleUnlockToastOverlap(page)
+      if (sample.missing === 'frames') {
+        fail(`checkNwUnlockToastBanner fail r${round} ${size} frames=0`)
+        await context.close()
+        continue
+      }
+      const frames = sample.samples || []
+      const both = frames.filter((row) => row.ov.toast != null)
+      if (both.length < 8) fail(`checkNwUnlockToastBanner fail r${round} ${size} frames=${both.length}`)
+      const maxToast = Math.max(...both.map((row) => row.ov.toast || 0))
+      const maxOv = { label: 0, count: 0, continue: 0, hud: 0, dock: 0, chip: 0 }
+      let worst = both[0]
+      for (const row of both) {
+        for (const key of Object.keys(maxOv)) {
+          const val = row.ov[key]
+          if (val == null) continue
+          if (key === 'chip' && (row.chipsOn || 0) < 1) continue
+          maxOv[key] = Math.max(maxOv[key], val)
+        }
+        if ((row.ov.toast || 0) >= (worst?.ov.toast || 0)) worst = row
+      }
+      if (maxToast > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} toastVsBanner=${maxToast.toFixed(1)}`)
+      if (maxOv.label > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} vsLabel=${maxOv.label.toFixed(1)}`)
+      if (maxOv.count > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} vsCount=${maxOv.count.toFixed(1)}`)
+      if (maxOv.continue > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} vsContinue=${maxOv.continue.toFixed(1)}`)
+      if (maxOv.hud > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} vsHud=${maxOv.hud.toFixed(1)}`)
+      if (maxOv.dock > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} vsDock=${maxOv.dock.toFixed(1)}`)
+      if ((worst.chipsOn || 0) > 0 && maxOv.chip > 0) {
+        fail(`checkNwUnlockToastBanner fail r${round} ${size} vsChip=${maxOv.chip.toFixed(1)}`)
+      }
+      if (both.some((row) => !row.insideBanner || !row.insideToast)) fail(`checkNwUnlockToastBanner fail r${round} ${size} viewport`)
+      if (both.some((row) => row.fontMin < 13)) fail(`checkNwUnlockToastBanner fail r${round} ${size} fontMin`)
+      if (both.some((row) => row.clipped !== 0)) fail(`checkNwUnlockToastBanner fail r${round} ${size} clipped`)
+      if (both.some((row) => row.gold !== 1)) fail(`checkNwUnlockToastBanner fail r${round} ${size} gold=${both.find((row) => row.gold !== 1)?.gold}`)
+      const localFail = problems.some((line) => line.includes(`r${round} ${size}`))
+      if (!localFail) {
+        const b = worst.banner
+        const t = worst.toast
+        console.log(
+          `checkNwUnlockToastBanner ok r${round} ${size} banner=${b.left},${b.top},${b.w},${b.h} toast=${t.left},${t.top},${t.w},${t.h} overlap=${maxToast.toFixed(1)} gold=1`,
+        )
+      }
+      await context.close()
+    }
+  }
+
+  for (const err of errors.slice(errorMark)) fail(`checkNwUnlockToastBanner error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 /** #951 Easy round-clear Spend and ? stay on screen (fixed to the viewport, not the collapsed clear bar). */
 const NW_SPEND_ON_SCREEN_SIZES = [
   [375, 812],
@@ -11908,6 +12237,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'nw love chip nights stay free of console errors')
       return
     }
+    if (process.env.NW_UNLOCK_TOAST_ONLY === '1') {
+      await checkNwUnlockToastBanner(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'nw unlock toast banner nights stay free of console errors')
+      return
+    }
     if (process.env.DIG_WIN_READABLE_ONLY === '1') {
       await checkDigWinReadable(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'dig win readable nights stay free of console errors')
@@ -11939,6 +12273,7 @@ export async function checkPhoneFixes() {
     await checkGemSightCue(browser, port, errors)
     await checkNwSpendOnScreen(browser, port, errors)
     await checkNwLoveChip(browser, port, errors)
+    await checkNwUnlockToastBanner(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -12115,7 +12450,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_WAVE_SURVIVED_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY', 'NW_LOVE_CHIP_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_WAVE_SURVIVED_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY', 'NW_LOVE_CHIP_ONLY', 'NW_UNLOCK_TOAST_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')

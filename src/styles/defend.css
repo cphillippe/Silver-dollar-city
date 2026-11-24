@@ -5779,6 +5779,12 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   pointer-events: none;
 }
 
+/* 1.4.600: unlock note stacks under Wave survived! while both show (#998). */
+.defend-page.is-easy-watch:has(.nw-wave-survived) .nw-map-toast {
+  top: 178px;
+  transform: translateX(-50%) translateY(0);
+}
+
 /* Pace chip: direct child of .nw-hud beside .defend-hud (not inside the <p>). */
 .defend-page.is-easy-watch .nw-hud > .nw-pace {
   position: absolute;

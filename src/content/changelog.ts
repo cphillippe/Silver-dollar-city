@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.600',
+    title: 'Night Watch: unlock toast clear row',
+    when: '2026-11-24',
+    items: [
+      'On Easy, the New map unlocked toast drops below the Wave survived banner when both show on a clear.',
+      'Hard stays the same.',
+      'Refs #998.',
+    ],
+  },
+  {
     version: '1.4.599',
     title: 'Night Watch: Reason chip on tall phones',
     when: '2026-11-24',
