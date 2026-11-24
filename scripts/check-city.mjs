@@ -1972,7 +1972,7 @@ assert.doesNotMatch(
   assert.match(phone600, /async function checkNwUnlockToastBanner/, '1.4.600 checkNwUnlockToastBanner is defined')
   assert.match(
     phone600,
-    /checkNwUnlockToastBanner ok r\$\{round\} \$\{size\} banner=.*toast=.*overlap=0 gold=1/,
+    /checkNwUnlockToastBanner ok r\$\{round\} \$\{size\} banner=.*toast=.*overlap=.*vsChip=.*chipsOn=.*gold=1/,
     '1.4.600 the ok line logs banner and toast boxes',
   )
   const lastIdx = phone600.lastIndexOf('      return\n    }\n')

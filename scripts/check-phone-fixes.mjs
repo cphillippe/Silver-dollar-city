@@ -10201,14 +10201,35 @@ async function sampleUnlockToastOverlap(page) {
       }
       return max
     }
+    const paintOfLabel = (el) => {
+      const rect = el.getBoundingClientRect()
+      let left = rect.left
+      let right = rect.right
+      let top = rect.top
+      let bottom = rect.bottom
+      const range = document.createRange()
+      for (const child of el.childNodes) {
+        if (child.nodeType !== 3 || !(child.textContent || '').trim()) continue
+        range.selectNodeContents(child)
+        for (const bit of range.getClientRects()) {
+          if (bit.width <= 0 || bit.height <= 0) continue
+          left = Math.min(left, bit.left)
+          right = Math.max(right, bit.right)
+          top = Math.min(top, bit.top)
+          bottom = Math.max(bottom, bit.bottom)
+        }
+      }
+      return { left, top, right, bottom }
+    }
     const chipOverlap = (bannerBox) => {
       let max = 0
       let chipsOn = 0
       for (const el of document.querySelectorAll('.defend-type-chip, text.defend-type-label')) {
         if (el.getAttribute('data-chrome-hide') === 'yes') continue
         if (!shown(el)) continue
-        const box = boxOf(el)
+        const box = el.matches('.defend-type-chip') ? boxOf(el) : paintOfLabel(el)
         if (box.right <= 0 || box.bottom <= 0 || box.left >= innerWidth || box.top >= innerHeight) continue
+        if (el.matches('text.defend-type-label') && box.right - box.left < 2) continue
         chipsOn += 1
         max = Math.max(max, area(bannerBox, box))
       }
@@ -10286,7 +10307,7 @@ async function sampleUnlockToastOverlap(page) {
       }
       ov.dock = maxChromeOverlap(bannerBox, 'button.defend-new-lamp, .defend-clear-row button:not(.defend-continue)')
       const chip = chipOverlap(bannerBox)
-      ov.chip = chip.chipsOn > 0 ? chip.max : 0
+      ov.chip = chip.chipsOn > 0 ? chip.max : null
       let fontMin = Infinity
       let clipped = 0
       for (const node of [banner, toast]) {
@@ -10383,8 +10404,9 @@ async function checkNwUnlockToastBanner(browser, port, errors) {
         search,
       })
       page.on('pageerror', (error) => errors.push(`unlock-toast r${round} ${size} ${error}`))
-      await page.evaluate(() => document.fonts?.ready)
+      await waitNwLoveChipCamReady(page, size, round)
       await plantTypeLabelSeats(page, `${size} r${round}`)
+      await snapNwLoveChipOfficialCam(page)
       await page.locator('.defend-go').click()
       await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
       await tapUntilBoost(page)
@@ -10412,7 +10434,9 @@ async function checkNwUnlockToastBanner(browser, port, errors) {
       const maxToast = Math.max(...both.map((row) => row.ov.toast || 0))
       const maxOv = { label: 0, count: 0, continue: 0, hud: 0, dock: 0, chip: 0 }
       let worst = both[0]
+      let maxChipsOn = 0
       for (const row of both) {
+        maxChipsOn = Math.max(maxChipsOn, row.chipsOn || 0)
         for (const key of Object.keys(maxOv)) {
           const val = row.ov[key]
           if (val == null) continue
@@ -10427,8 +10451,8 @@ async function checkNwUnlockToastBanner(browser, port, errors) {
       if (maxOv.continue > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} vsContinue=${maxOv.continue.toFixed(1)}`)
       if (maxOv.hud > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} vsHud=${maxOv.hud.toFixed(1)}`)
       if (maxOv.dock > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} vsDock=${maxOv.dock.toFixed(1)}`)
-      if ((worst.chipsOn || 0) > 0 && maxOv.chip > 0) {
-        fail(`checkNwUnlockToastBanner fail r${round} ${size} vsChip=${maxOv.chip.toFixed(1)}`)
+      if (maxChipsOn > 0 && maxOv.chip > 0) {
+        fail(`checkNwUnlockToastBanner fail r${round} ${size} vsChip=${maxOv.chip.toFixed(1)} chipsOn=${maxChipsOn}`)
       }
       if (both.some((row) => !row.insideBanner || !row.insideToast)) fail(`checkNwUnlockToastBanner fail r${round} ${size} viewport`)
       if (both.some((row) => row.fontMin < 13)) fail(`checkNwUnlockToastBanner fail r${round} ${size} fontMin`)
@@ -10438,8 +10462,9 @@ async function checkNwUnlockToastBanner(browser, port, errors) {
       if (!localFail) {
         const b = worst.banner
         const t = worst.toast
+        const vsChip = maxChipsOn > 0 ? maxOv.chip.toFixed(1) : '0.0'
         console.log(
-          `checkNwUnlockToastBanner ok r${round} ${size} banner=${b.left},${b.top},${b.w},${b.h} toast=${t.left},${t.top},${t.w},${t.h} overlap=${maxToast.toFixed(1)} gold=1`,
+          `checkNwUnlockToastBanner ok r${round} ${size} banner=${b.left},${b.top},${b.w},${b.h} toast=${t.left},${t.top},${t.w},${t.h} overlap=${maxToast.toFixed(1)} vsLabel=${maxOv.label.toFixed(1)} vsCount=${maxOv.count.toFixed(1)} vsChip=${vsChip} chipsOn=${maxChipsOn} gold=1`,
         )
       }
       await context.close()
