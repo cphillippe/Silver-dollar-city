@@ -4344,6 +4344,11 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   animation: nw-power-pop-under 1.6s ease forwards;
 }
 
+/* 1.4.600: stacked unlock note drops the leak line again (#998). */
+body:has(.defend-page.is-easy-watch:has(.nw-wave-survived) .nw-map-toast) .nw-power-banner.is-still {
+  top: 318px;
+}
+
 @keyframes nw-power-pop-under {
   0% {
     opacity: 0;
@@ -4487,7 +4492,8 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   .defend-hearts.is-mend-pop span.is-on,
   .nw-power-banner,
   .nw-mend-shield,
-  body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
+  body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still,
+  body:has(.defend-page.is-easy-watch:has(.nw-wave-survived) .nw-map-toast) .nw-power-banner.is-still {
     animation: none;
   }
 }
