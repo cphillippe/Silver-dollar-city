@@ -10146,8 +10146,8 @@ const NW_UNLOCK_TOAST_SIZES = [
 ]
 const NW_UNLOCK_TOAST_ROUNDS = [18, 24]
 
-async function sampleUnlockToastOverlap(page) {
-  return page.evaluate(async () => {
+async function sampleUnlockToastOverlap(page, bannerClipMut = false) {
+  return page.evaluate(async (bannerClipMut) => {
     const round = (n) => Math.round(n * 10) / 10
     const shown = (el) => {
       if (!el) return false
@@ -10271,25 +10271,63 @@ async function sampleUnlockToastOverlap(page) {
       el.clientWidth === 0 &&
       el.clientHeight === 0 &&
       (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0)
-    const inspectClip = (el) => {
-      if (!el) return null
+    // Decorative ✦ pseudo-elements inflate scroll metrics on .nw-wave-survived; measure painted text in the line spans.
+    const inspectBannerLineClip = (el) => {
+      if (!el || !shown(el)) return null
       const style = getComputedStyle(el)
       if (clipSkipsZeroBox(el, style)) return null
-      const wOver = el.scrollWidth > el.clientWidth + 1
-      const hOver = el.scrollHeight > el.clientHeight + 1
-      if (!wOver && !hOver) return null
-      // Flex line-box measure: overflow:visible and no width clip — scrollHeight can exceed clientHeight by ≤2px with full text painted.
-      if (!wOver && hOver && style.overflow === 'visible' && el.scrollWidth <= el.clientWidth + 1) {
-        const dh = el.scrollHeight - el.clientHeight
-        if (dh > 0 && dh <= 2) return null
-      }
+      const rect = el.getBoundingClientRect()
+      const host = { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom }
       const source = normClipText(el.textContent)
-      const rendered = source
+      const range = document.createRange()
+      const directs = [...el.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+      let rendered = ''
+      let glyphOutside = false
+      const stampGlyph = (child, index) => {
+        const ch = (child.textContent || '')[index]
+        if (!ch?.trim()) return true
+        range.setStart(child, index)
+        range.setEnd(child, index + 1)
+        let painted = false
+        for (const bit of range.getClientRects()) {
+          if (bit.width <= 0 || bit.height <= 0) continue
+          painted = true
+          const intersects =
+            bit.right > host.left && bit.left < host.right && bit.bottom > host.top && bit.top < host.bottom
+          if (!intersects) glyphOutside = true
+        }
+        return painted
+      }
+      if (directs.length) {
+        for (const child of directs) {
+          const raw = child.textContent || ''
+          for (let i = 0; i < raw.length; i += 1) {
+            const ch = raw[i]
+            if (!ch.trim()) {
+              rendered += ch
+              continue
+            }
+            if (stampGlyph(child, i)) rendered += ch
+          }
+        }
+      } else {
+        rendered = source
+      }
+      rendered = normClipText(rendered)
+      const ellipsis =
+        style.textOverflow === 'ellipsis' &&
+        (style.overflow === 'hidden' || style.overflowX === 'hidden' || style.overflowY === 'hidden')
+      const scrollClip = el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1
+      const textTrimmed = rendered !== source
+      if (!textTrimmed && !glyphOutside && !(ellipsis && scrollClip)) return null
       return {
         sel: clipSelector(el),
+        mode: 'banner-text-range',
         text: source.slice(0, 80),
         source,
         rendered,
+        glyphOutside,
+        ellipsis: Boolean(ellipsis && scrollClip),
         scrollW: el.scrollWidth,
         clientW: el.clientWidth,
         scrollH: el.scrollHeight,
@@ -10299,7 +10337,29 @@ async function sampleUnlockToastOverlap(page) {
         whiteSpace: style.whiteSpace,
       }
     }
-    const lineClip = (el) => (inspectClip(el) ? 1 : 0)
+    const inspectClipScroll = (el) => {
+      if (!el) return null
+      const style = getComputedStyle(el)
+      if (clipSkipsZeroBox(el, style)) return null
+      const wOver = el.scrollWidth > el.clientWidth + 1
+      const hOver = el.scrollHeight > el.clientHeight + 1
+      if (!wOver && !hOver) return null
+      const source = normClipText(el.textContent)
+      return {
+        sel: clipSelector(el),
+        mode: 'scroll',
+        text: source.slice(0, 80),
+        source,
+        rendered: source,
+        scrollW: el.scrollWidth,
+        clientW: el.clientWidth,
+        scrollH: el.scrollHeight,
+        clientH: el.clientHeight,
+        overflow: style.overflow,
+        textOverflow: style.textOverflow,
+        whiteSpace: style.whiteSpace,
+      }
+    }
     const label = document.querySelector('.nw-balloon-label')
     const countNode = document.querySelector('.nw-balloon-count')
     const hud = document.querySelector('.nw-hud')
@@ -10310,6 +10370,14 @@ async function sampleUnlockToastOverlap(page) {
       const toast = document.querySelector('.nw-map-toast')
       if (banner && toast && shown(banner) && shown(toast) && label && countNode) break
       await new Promise((resolve) => requestAnimationFrame(resolve))
+    }
+    if (bannerClipMut) {
+      const title = document.querySelector('.nw-wave-survived-title')
+      if (title) {
+        title.style.maxWidth = '52px'
+        title.style.overflow = 'hidden'
+        title.style.whiteSpace = 'nowrap'
+      }
     }
     const loopStart = performance.now()
     while (performance.now() - loopStart < 2600) {
@@ -10345,10 +10413,7 @@ async function sampleUnlockToastOverlap(page) {
       let fontMin = Infinity
       let clipped = 0
       const clipHits = []
-      const clipTargets = [
-        ...banner.querySelectorAll('.nw-wave-survived-title, .nw-wave-survived-round'),
-        toast,
-      ]
+      const bannerLines = [...banner.querySelectorAll('.nw-wave-survived-title, .nw-wave-survived-round')]
       for (const root of [banner, toast]) {
         for (const el of root.querySelectorAll('*').length ? [root, ...root.querySelectorAll('*')] : [root]) {
           if (!shown(el) || el.children.length) continue
@@ -10356,13 +10421,17 @@ async function sampleUnlockToastOverlap(page) {
           if (Number.isFinite(fs)) fontMin = Math.min(fontMin, fs)
         }
       }
-      for (const el of clipTargets) {
-        if (!shown(el)) continue
-        const hit = inspectClip(el)
+      for (const el of bannerLines) {
+        const hit = inspectBannerLineClip(el)
         if (hit) {
           clipped += 1
           clipHits.push(hit)
         }
+      }
+      const toastHit = inspectClipScroll(toast)
+      if (toastHit) {
+        clipped += 1
+        clipHits.push(toastHit)
       }
       const insideBanner =
         bannerBox.left >= -1 &&
@@ -10405,7 +10474,7 @@ async function sampleUnlockToastOverlap(page) {
       await new Promise((resolve) => requestAnimationFrame(resolve))
     }
     return { samples, missing: !samples.length ? 'frames' : null }
-  })
+  }, bannerClipMut)
 }
 
 async function checkNwUnlockToastBanner(browser, port, errors) {
@@ -10471,7 +10540,7 @@ async function checkNwUnlockToastBanner(browser, port, errors) {
         await context.close()
         continue
       }
-      const sample = await sampleUnlockToastOverlap(page)
+      const sample = await sampleUnlockToastOverlap(page, process.env.NW_UNLOCK_TOAST_BANNER_CLIP_MUT === '1')
       if (sample.missing === 'frames') {
         fail(`checkNwUnlockToastBanner fail r${round} ${size} frames=0`)
         await context.close()
@@ -10537,7 +10606,7 @@ async function checkNwUnlockToastBanner(browser, port, errors) {
         const hit = worstClip?.hit || worstClip
         if (hit?.sel) {
           fail(
-            `checkNwUnlockToastBanner fail r${round} ${size} clipped frame=${clipIdx} sel=${hit.sel} text=${JSON.stringify(hit.text)} rendered=${JSON.stringify(hit.rendered)} source=${JSON.stringify(hit.source)} scrollW=${hit.scrollW} clientW=${hit.clientW} scrollH=${hit.scrollH} clientH=${hit.clientH} overflow=${hit.overflow} text-overflow=${hit.textOverflow} white-space=${hit.whiteSpace}`,
+            `checkNwUnlockToastBanner fail r${round} ${size} clipped frame=${clipIdx} sel=${hit.sel} mode=${hit.mode || 'scroll'} text=${JSON.stringify(hit.text)} rendered=${JSON.stringify(hit.rendered)} source=${JSON.stringify(hit.source)} glyphOutside=${hit.glyphOutside ? 1 : 0} ellipsis=${hit.ellipsis ? 1 : 0} scrollW=${hit.scrollW} clientW=${hit.clientW} scrollH=${hit.scrollH} clientH=${hit.clientH} overflow=${hit.overflow} text-overflow=${hit.textOverflow} white-space=${hit.whiteSpace}`,
           )
         } else {
           fail(`checkNwUnlockToastBanner fail r${round} ${size} clipped frame=${clipIdx} detail=${JSON.stringify(hit)}`)

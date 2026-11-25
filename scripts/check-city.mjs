@@ -2066,14 +2066,29 @@ assert.doesNotMatch(
     phone600.indexOf('async function sampleUnlockToastOverlap'),
     phone600.indexOf('async function checkNwUnlockToastBanner'),
   )
-  assert.match(unlockSample, /const inspectClip = \(el\) =>/, '1.4.600 unlock toast clip uses inspectClip')
+  assert.match(unlockSample, /const inspectBannerLineClip = \(el\) =>/, '1.4.600 banner clip uses text-range measure')
+  assert.match(unlockSample, /Decorative.*pseudo-elements inflate scroll metrics/, '1.4.600 banner clip cites ✦ pseudo-elements')
+  assert.match(unlockSample, /const inspectClipScroll = \(el\) =>/, '1.4.600 toast clip uses scroll overflow')
   assert.match(
     unlockSample,
     /el\.scrollWidth > el\.clientWidth \+ 1 \|\| el\.scrollHeight > el\.clientHeight \+ 1/,
-    '1.4.600 unlock toast clip keeps the scroll overflow rule',
+    '1.4.600 scroll clip keeps the scroll overflow rule',
   )
-  assert.doesNotMatch(unlockSample, /textOverflow !== 'clip'/, '1.4.600 unlock toast clip ignores text-overflow kind')
-  assert.match(unlockSample, /Flex line-box measure/, '1.4.600 unlock toast clip documents the visible line-box carve-out')
+  assert.doesNotMatch(unlockSample, /textOverflow !== 'clip'/, '1.4.600 clip ignores text-overflow kind skips')
+  assert.doesNotMatch(unlockSample, /Flex line-box measure/, '1.4.600 clip has no blanket line-box tolerance')
+  assert.match(phone600, /NW_UNLOCK_TOAST_BANNER_CLIP_MUT === '1'/, '1.4.600 banner clip mutation harness is wired')
+  const bannerClipWouldFail = (source, rendered, glyphOutside, ellipsis, scrollClip) =>
+    source !== rendered || glyphOutside || (ellipsis && scrollClip)
+  assert.equal(
+    bannerClipWouldFail('Wave survived!', 'Wave surv', false, true, true),
+    true,
+    '1.4.600 mut forced banner text overflow',
+  )
+  assert.equal(
+    bannerClipWouldFail('Wave survived!', 'Wave survived!', false, false, false),
+    false,
+    '1.4.600 mut banner text fully painted',
+  )
   assert.match(
     phone600,
     /clipped frame=\$\{clipIdx\} sel=/,
