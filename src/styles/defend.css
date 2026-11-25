@@ -5806,6 +5806,11 @@ body:has(.defend-page.is-easy-watch .nw-wave-survived):has(.defend-page.is-easy-
   transform: translateX(-50%) translateY(0);
 }
 
+/* 1.4.600: lift Wave survived! off painted type chips while the unlock note stacks (#998). */
+.defend-page.is-easy-watch:has(.nw-wave-survived):has(.nw-map-toast) .nw-wave-survived {
+  top: 92px;
+}
+
 /* Short phones: keep the stacked note clear of painted type chips (checkNwUnlockToastBanner toastVsChip). */
 @media (max-height: 720px) {
   .defend-page.is-easy-watch:has(.nw-wave-survived) .nw-map-toast {
