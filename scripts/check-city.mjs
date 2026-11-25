@@ -2066,12 +2066,19 @@ assert.doesNotMatch(
     phone600.indexOf('async function sampleUnlockToastOverlap'),
     phone600.indexOf('async function checkNwUnlockToastBanner'),
   )
+  assert.match(unlockSample, /const inspectClip = \(el\) =>/, '1.4.600 unlock toast clip uses inspectClip')
   assert.match(
     unlockSample,
-    /const lineClip = \(el\) =>\s*\n\s*el\.scrollWidth > el\.clientWidth \+ 1 \|\| el\.scrollHeight > el\.clientHeight \+ 1 \? 1 : 0/,
-    '1.4.600 unlock toast clip is scroll overflow only',
+    /el\.scrollWidth > el\.clientWidth \+ 1 \|\| el\.scrollHeight > el\.clientHeight \+ 1/,
+    '1.4.600 unlock toast clip keeps the scroll overflow rule',
   )
   assert.doesNotMatch(unlockSample, /textOverflow !== 'clip'/, '1.4.600 unlock toast clip ignores text-overflow kind')
+  assert.match(unlockSample, /Flex line-box measure/, '1.4.600 unlock toast clip documents the visible line-box carve-out')
+  assert.match(
+    phone600,
+    /clipped frame=\$\{clipIdx\} sel=/,
+    '1.4.600 unlock toast clip fails name the node and frame',
+  )
 }
 
 // 1.4.599: Easy Night Watch Reason chip on-screen at 412×915 after official cam (#949).

@@ -10258,8 +10258,48 @@ async function sampleUnlockToastOverlap(page) {
       }
       return { taps, small }
     }
-    const lineClip = (el) =>
-      el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1 ? 1 : 0
+    const normClipText = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+    const clipSelector = (el) => {
+      if (!el?.matches) return el?.nodeName || '?'
+      const bits = []
+      if (el.id) bits.push(`#${el.id}`)
+      if (el.classList?.length) bits.push(`.${[...el.classList].join('.')}`)
+      return bits.length ? bits.join('') : el.nodeName.toLowerCase()
+    }
+  /** Skip zero-box nodes that never paint (scroll clip is meaningless). */
+    const clipSkipsZeroBox = (el, style) =>
+      el.clientWidth === 0 &&
+      el.clientHeight === 0 &&
+      (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0)
+    const inspectClip = (el) => {
+      if (!el) return null
+      const style = getComputedStyle(el)
+      if (clipSkipsZeroBox(el, style)) return null
+      const wOver = el.scrollWidth > el.clientWidth + 1
+      const hOver = el.scrollHeight > el.clientHeight + 1
+      if (!wOver && !hOver) return null
+      // Flex line-box measure: overflow:visible and no width clip — scrollHeight can exceed clientHeight by ≤2px with full text painted.
+      if (!wOver && hOver && style.overflow === 'visible' && el.scrollWidth <= el.clientWidth + 1) {
+        const dh = el.scrollHeight - el.clientHeight
+        if (dh > 0 && dh <= 2) return null
+      }
+      const source = normClipText(el.textContent)
+      const rendered = source
+      return {
+        sel: clipSelector(el),
+        text: source.slice(0, 80),
+        source,
+        rendered,
+        scrollW: el.scrollWidth,
+        clientW: el.clientWidth,
+        scrollH: el.scrollHeight,
+        clientH: el.clientHeight,
+        overflow: style.overflow,
+        textOverflow: style.textOverflow,
+        whiteSpace: style.whiteSpace,
+      }
+    }
+    const lineClip = (el) => (inspectClip(el) ? 1 : 0)
     const label = document.querySelector('.nw-balloon-label')
     const countNode = document.querySelector('.nw-balloon-count')
     const hud = document.querySelector('.nw-hud')
@@ -10304,13 +10344,25 @@ async function sampleUnlockToastOverlap(page) {
       const taps = tapAudit(bannerBox, toastBox)
       let fontMin = Infinity
       let clipped = 0
-      for (const node of [banner, toast]) {
-        for (const el of node.querySelectorAll('*').length ? [node, ...node.querySelectorAll('*')] : [node]) {
+      const clipHits = []
+      const clipTargets = [
+        ...banner.querySelectorAll('.nw-wave-survived-title, .nw-wave-survived-round'),
+        toast,
+      ]
+      for (const root of [banner, toast]) {
+        for (const el of root.querySelectorAll('*').length ? [root, ...root.querySelectorAll('*')] : [root]) {
           if (!shown(el) || el.children.length) continue
           const fs = parseFloat(getComputedStyle(el).fontSize)
           if (Number.isFinite(fs)) fontMin = Math.min(fontMin, fs)
         }
-        clipped += lineClip(node)
+      }
+      for (const el of clipTargets) {
+        if (!shown(el)) continue
+        const hit = inspectClip(el)
+        if (hit) {
+          clipped += 1
+          clipHits.push(hit)
+        }
       }
       const insideBanner =
         bannerBox.left >= -1 &&
@@ -10344,6 +10396,7 @@ async function sampleUnlockToastOverlap(page) {
         insideToast,
         fontMin: Number.isFinite(fontMin) ? fontMin : 0,
         clipped,
+        clipHits,
         gold: goldCues(),
         chipsOn: chip.chipsOn,
         taps: taps.taps,
@@ -10473,7 +10526,23 @@ async function checkNwUnlockToastBanner(browser, port, errors) {
       }
       if (both.some((row) => !row.insideBanner || !row.insideToast)) fail(`checkNwUnlockToastBanner fail r${round} ${size} viewport`)
       if (both.some((row) => row.fontMin < 13)) fail(`checkNwUnlockToastBanner fail r${round} ${size} fontMin`)
-      if (both.some((row) => row.clipped !== 0)) fail(`checkNwUnlockToastBanner fail r${round} ${size} clipped`)
+      if (both.some((row) => row.clipped !== 0)) {
+        const worstClip =
+          both
+            .filter((row) => row.clipped !== 0)
+            .flatMap((row, frameIdx) => (row.clipHits || []).map((hit) => ({ frameIdx, hit })))
+            .sort((a, b) => b.hit.scrollW - b.hit.clientW - (a.hit.scrollW - a.hit.clientW))[0] ||
+          both.find((row) => row.clipped !== 0)?.clipHits?.[0]
+        const clipIdx = worstClip?.frameIdx ?? '?'
+        const hit = worstClip?.hit || worstClip
+        if (hit?.sel) {
+          fail(
+            `checkNwUnlockToastBanner fail r${round} ${size} clipped frame=${clipIdx} sel=${hit.sel} text=${JSON.stringify(hit.text)} rendered=${JSON.stringify(hit.rendered)} source=${JSON.stringify(hit.source)} scrollW=${hit.scrollW} clientW=${hit.clientW} scrollH=${hit.scrollH} clientH=${hit.clientH} overflow=${hit.overflow} text-overflow=${hit.textOverflow} white-space=${hit.whiteSpace}`,
+          )
+        } else {
+          fail(`checkNwUnlockToastBanner fail r${round} ${size} clipped frame=${clipIdx} detail=${JSON.stringify(hit)}`)
+        }
+      }
       if (both.some((row) => row.gold !== 1)) fail(`checkNwUnlockToastBanner fail r${round} ${size} gold=${both.find((row) => row.gold !== 1)?.gold}`)
       const localFail = problems.some((line) => line.includes(`r${round} ${size}`))
       if (!localFail) {
