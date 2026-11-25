@@ -4349,6 +4349,18 @@ body:has(.defend-page.is-easy-watch:has(.nw-wave-survived) .nw-map-toast) .nw-po
   top: 318px;
 }
 
+@media (max-height: 720px) {
+  body:has(.defend-page.is-easy-watch:has(.nw-wave-survived) .nw-map-toast) .nw-power-banner.is-still {
+    top: 458px;
+  }
+}
+
+@media (min-width: 740px) and (min-height: 900px) {
+  body:has(.defend-page.is-easy-watch:has(.nw-wave-survived) .nw-map-toast) .nw-power-banner.is-still {
+    top: 362px;
+  }
+}
+
 @keyframes nw-power-pop-under {
   0% {
     opacity: 0;
@@ -5789,6 +5801,20 @@ body:has(.defend-page.is-easy-watch:has(.nw-wave-survived) .nw-map-toast) .nw-po
 .defend-page.is-easy-watch:has(.nw-wave-survived) .nw-map-toast {
   top: 178px;
   transform: translateX(-50%) translateY(0);
+}
+
+/* Short phones: keep the stacked note clear of painted type chips (checkNwUnlockToastBanner toastVsChip). */
+@media (max-height: 720px) {
+  .defend-page.is-easy-watch:has(.nw-wave-survived) .nw-map-toast {
+    top: 318px;
+  }
+}
+
+/* Tablet: type chips sit lower under the stacked note. */
+@media (min-width: 740px) and (min-height: 900px) {
+  .defend-page.is-easy-watch:has(.nw-wave-survived) .nw-map-toast {
+    top: 212px;
+  }
 }
 
 /* Pace chip: direct child of .nw-hud beside .defend-hud (not inside the <p>). */
