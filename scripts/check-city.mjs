@@ -1969,19 +1969,24 @@ assert.doesNotMatch(
     /\.defend-page\.is-easy-watch:has\(\.nw-wave-survived\) \.nw-map-toast/,
     '1.4.600 Easy stacks the unlock toast below the wave banner',
   )
-  assert.match(phone600, /async function checkNwUnlockToastBanner/, '1.4.600 checkNwUnlockToastBanner is defined')
+  assert.equal(
+    [...phone600.matchAll(/async function checkNwUnlockToastBanner/g)].length,
+    1,
+    '1.4.600 exactly one checkNwUnlockToastBanner definition',
+  )
   assert.match(
     phone600,
-    /checkNwUnlockToastBanner ok r\$\{round\} \$\{size\} banner=.*toast=.*overlap=.*vsChip=.*chipsOn=.*gold=1/,
-    '1.4.600 the ok line logs banner and toast boxes',
+    /checkNwUnlockToastBanner ok r\$\{round\} \$\{size\} banner=.*toast=.*overlap=.*vsChip=.*toastVsChip=.*taps=.*gold=1/,
+    '1.4.600 the ok line logs banner, toast, chip, and tap guards',
   )
+  assert.match(phone600, /both\.length < 20/, '1.4.600 unlock toast holds at least 20 sampled frames')
   const lastIdx = phone600.lastIndexOf('      return\n    }\n')
   assert.ok(lastIdx >= 0, '1.4.600 phone-fixes default region tail is present')
   const tail = phone600.slice(lastIdx)
-  assert.match(
-    tail,
-    /\n    await checkNwUnlockToastBanner\(browser, port, errors\)\n/,
-    '1.4.600 default path runs checkNwUnlockToastBanner',
+  assert.equal(
+    [...tail.matchAll(/await checkNwUnlockToastBanner\(browser, port, errors\)/g)].length,
+    1,
+    '1.4.600 default path runs checkNwUnlockToastBanner exactly once',
   )
 }
 

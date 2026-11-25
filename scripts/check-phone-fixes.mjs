@@ -10221,7 +10221,7 @@ async function sampleUnlockToastOverlap(page) {
       }
       return { left, top, right, bottom }
     }
-    const chipOverlap = (bannerBox) => {
+    const chipOverlap = (refBox) => {
       let max = 0
       let chipsOn = 0
       for (const el of document.querySelectorAll('.defend-type-chip, text.defend-type-label')) {
@@ -10231,9 +10231,29 @@ async function sampleUnlockToastOverlap(page) {
         if (box.right <= 0 || box.bottom <= 0 || box.left >= innerWidth || box.top >= innerHeight) continue
         if (el.matches('text.defend-type-label') && box.right - box.left < 2) continue
         chipsOn += 1
-        max = Math.max(max, area(bannerBox, box))
+        max = Math.max(max, area(refBox, box))
       }
       return { max, chipsOn }
+    }
+    const tapAudit = (bannerBox, toastBox) => {
+      const union = {
+        left: Math.min(bannerBox.left, toastBox.left),
+        top: Math.min(bannerBox.top, toastBox.top),
+        right: Math.max(bannerBox.right, toastBox.right),
+        bottom: Math.max(bannerBox.bottom, toastBox.bottom),
+      }
+      let taps = 0
+      let small = 0
+      for (const btn of document.querySelectorAll('button')) {
+        if (!shown(btn)) continue
+        const box = boxOf(btn)
+        if (area(union, box) <= 0) continue
+        taps += 1
+        const w = box.right - box.left
+        const h = box.bottom - box.top
+        if (w < 44 || h < 44) small += 1
+      }
+      return { taps, small }
     }
     const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
     const lineClip = (el) => {
@@ -10308,6 +10328,11 @@ async function sampleUnlockToastOverlap(page) {
       ov.dock = maxChromeOverlap(bannerBox, 'button.defend-new-lamp, .defend-clear-row button:not(.defend-continue)')
       const chip = chipOverlap(bannerBox)
       ov.chip = chip.chipsOn > 0 ? chip.max : null
+      ov.toastLabel = area(toastBox, boxOf(label))
+      ov.toastCount = shown(count) ? area(toastBox, boxOf(count)) : 0
+      const toastChip = chipOverlap(toastBox)
+      ov.toastChip = toastChip.chipsOn > 0 ? toastChip.max : null
+      const taps = tapAudit(bannerBox, toastBox)
       let fontMin = Infinity
       let clipped = 0
       for (const node of [banner, toast]) {
@@ -10352,6 +10377,8 @@ async function sampleUnlockToastOverlap(page) {
         clipped,
         gold: goldCues(),
         chipsOn: chip.chipsOn,
+        taps: taps.taps,
+        tapSmall: taps.small,
       })
       await new Promise((resolve) => requestAnimationFrame(resolve))
     }
@@ -10430,17 +10457,30 @@ async function checkNwUnlockToastBanner(browser, port, errors) {
       }
       const frames = sample.samples || []
       const both = frames.filter((row) => row.ov.toast != null)
-      if (both.length < 8) fail(`checkNwUnlockToastBanner fail r${round} ${size} frames=${both.length}`)
+      if (both.length < 20) fail(`checkNwUnlockToastBanner fail r${round} ${size} frames=${both.length}`)
       const maxToast = Math.max(...both.map((row) => row.ov.toast || 0))
-      const maxOv = { label: 0, count: 0, continue: 0, hud: 0, dock: 0, chip: 0 }
+      const maxOv = {
+        label: 0,
+        count: 0,
+        continue: 0,
+        hud: 0,
+        dock: 0,
+        chip: 0,
+        toastLabel: 0,
+        toastCount: 0,
+        toastChip: 0,
+      }
       let worst = both[0]
       let maxChipsOn = 0
+      let maxTaps = 0
       for (const row of both) {
         maxChipsOn = Math.max(maxChipsOn, row.chipsOn || 0)
+        maxTaps = Math.max(maxTaps, row.taps || 0)
         for (const key of Object.keys(maxOv)) {
           const val = row.ov[key]
           if (val == null) continue
           if (key === 'chip' && (row.chipsOn || 0) < 1) continue
+          if (key === 'toastChip' && (row.chipsOn || 0) < 1) continue
           maxOv[key] = Math.max(maxOv[key], val)
         }
         if ((row.ov.toast || 0) >= (worst?.ov.toast || 0)) worst = row
@@ -10454,6 +10494,14 @@ async function checkNwUnlockToastBanner(browser, port, errors) {
       if (maxChipsOn > 0 && maxOv.chip > 0) {
         fail(`checkNwUnlockToastBanner fail r${round} ${size} vsChip=${maxOv.chip.toFixed(1)} chipsOn=${maxChipsOn}`)
       }
+      if (maxOv.toastLabel > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} toastVsLabel=${maxOv.toastLabel.toFixed(1)}`)
+      if (maxOv.toastCount > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} toastVsCount=${maxOv.toastCount.toFixed(1)}`)
+      if (maxChipsOn > 0 && maxOv.toastChip > 0) {
+        fail(`checkNwUnlockToastBanner fail r${round} ${size} toastVsChip=${maxOv.toastChip.toFixed(1)} chipsOn=${maxChipsOn}`)
+      }
+      if (both.some((row) => (row.tapSmall || 0) > 0)) {
+        fail(`checkNwUnlockToastBanner fail r${round} ${size} tapMin`)
+      }
       if (both.some((row) => !row.insideBanner || !row.insideToast)) fail(`checkNwUnlockToastBanner fail r${round} ${size} viewport`)
       if (both.some((row) => row.fontMin < 13)) fail(`checkNwUnlockToastBanner fail r${round} ${size} fontMin`)
       if (both.some((row) => row.clipped !== 0)) fail(`checkNwUnlockToastBanner fail r${round} ${size} clipped`)
@@ -10463,8 +10511,10 @@ async function checkNwUnlockToastBanner(browser, port, errors) {
         const b = worst.banner
         const t = worst.toast
         const vsChip = maxChipsOn > 0 ? maxOv.chip.toFixed(1) : '0.0'
+        const toastVsChip = maxChipsOn > 0 ? maxOv.toastChip.toFixed(1) : '0.0'
+        const tapsLog = maxTaps > 0 ? String(maxTaps) : '0'
         console.log(
-          `checkNwUnlockToastBanner ok r${round} ${size} banner=${b.left},${b.top},${b.w},${b.h} toast=${t.left},${t.top},${t.w},${t.h} overlap=${maxToast.toFixed(1)} vsLabel=${maxOv.label.toFixed(1)} vsCount=${maxOv.count.toFixed(1)} vsChip=${vsChip} chipsOn=${maxChipsOn} gold=1`,
+          `checkNwUnlockToastBanner ok r${round} ${size} banner=${b.left},${b.top},${b.w},${b.h} toast=${t.left},${t.top},${t.w},${t.h} overlap=${maxToast.toFixed(1)} vsLabel=${maxOv.label.toFixed(1)} vsCount=${maxOv.count.toFixed(1)} vsChip=${vsChip} toastVsLabel=${maxOv.toastLabel.toFixed(1)} toastVsCount=${maxOv.toastCount.toFixed(1)} toastVsChip=${toastVsChip} chipsOn=${maxChipsOn} taps=${tapsLog} gold=1`,
         )
       }
       await context.close()
