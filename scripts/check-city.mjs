@@ -1969,10 +1969,113 @@ assert.doesNotMatch(
     /\.defend-page\.is-easy-watch:has\(\.nw-wave-survived\) \.nw-map-toast/,
     '1.4.600 Easy stacks the unlock toast below the wave banner',
   )
-  assert.equal(
-    [...phone600.matchAll(/async function checkNwUnlockToastBanner/g)].length,
-    1,
-    '1.4.600 exactly one checkNwUnlockToastBanner definition',
+  const countNwUnlockToastBannerDefs = (src) => {
+    const exportAsync = [...src.matchAll(/\bexport\s+async\s+function\s+checkNwUnlockToastBanner\b/g)].length
+    const constAsync = [...src.matchAll(/\bconst\s+checkNwUnlockToastBanner\s*=\s*async\b/g)].length
+    const stripped = src.replace(/\bexport\s+async\s+function\s+checkNwUnlockToastBanner\b/g, '')
+    const plainAsync = [...stripped.matchAll(/\basync\s+function\s+checkNwUnlockToastBanner\b/g)].length
+    return exportAsync + constAsync + plainAsync
+  }
+  const assertNwUnlockToastTailOrder = (src, label) => {
+    const lastIdx = src.lastIndexOf('      return\n    }\n')
+    assert.ok(lastIdx >= 0, `${label} phone-fixes default region tail is present`)
+    const tail = src.slice(lastIdx)
+    const loveIdx = tail.indexOf('await checkNwLoveChip(browser, port, errors)')
+    const unlockIdx = tail.indexOf('await checkNwUnlockToastBanner(browser, port, errors)')
+    const mapNoteIdx = tail.indexOf("process.env.NW_MAP_NOTE_ONLY !== '1'")
+    assert.ok(loveIdx >= 0 && unlockIdx >= 0 && mapNoteIdx >= 0, `${label} unlock-toast tail anchors are present`)
+    assert.ok(
+      loveIdx < unlockIdx && unlockIdx < mapNoteIdx,
+      `${label} checkNwUnlockToastBanner runs after checkNwLoveChip and before the map-note gate`,
+    )
+    assert.equal(
+      [...tail.matchAll(/await checkNwUnlockToastBanner\(browser, port, errors\)/g)].length,
+      1,
+      `${label} default path runs checkNwUnlockToastBanner exactly once`,
+    )
+    assert.equal(countNwUnlockToastBannerDefs(src), 1, `${label} exactly one checkNwUnlockToastBanner definition`)
+  }
+  const assertUnlockToastGuardBreaks = (mutated, expect, label) => {
+    try {
+      assertNwUnlockToastTailOrder(mutated, label)
+      assert.equal(countNwUnlockToastBannerDefs(mutated), 1, label)
+      assert.fail(`${label} should fail (${expect})`)
+    } catch (error) {
+      assert.equal(error.code, 'ERR_ASSERTION', `${label} throws AssertionError (${expect})`)
+    }
+  }
+  const assertUnlockToastDefCountBreaks = (mutated, expect, label) => {
+    try {
+      assert.equal(countNwUnlockToastBannerDefs(mutated), 1, label)
+      assert.fail(`${label} should fail (${expect})`)
+    } catch (error) {
+      assert.equal(error.code, 'ERR_ASSERTION', `${label} throws AssertionError (${expect})`)
+    }
+  }
+  const tailAnchor600 = phone600.lastIndexOf('      return\n    }\n')
+  const patchPhoneTail600 = (edit) => phone600.slice(0, tailAnchor600) + edit(phone600.slice(tailAnchor600))
+  assertNwUnlockToastTailOrder(phone600, '1.4.600')
+  assertUnlockToastGuardBreaks(
+    patchPhoneTail600((tail) => tail.replace('\n    await checkNwUnlockToastBanner(browser, port, errors)\n', '\n')),
+    'delete-call',
+    '1.4.600 mut delete unlock call',
+  )
+  assertUnlockToastGuardBreaks(
+    patchPhoneTail600((tail) =>
+      tail.replace(
+        '    await checkNwUnlockToastBanner(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
+        '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwUnlockToastBanner(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
+      ),
+    ),
+    'duplicate-call',
+    '1.4.600 mut duplicate unlock call',
+  )
+  assertUnlockToastGuardBreaks(
+    patchPhoneTail600((tail) =>
+      tail.replace(
+        '    await checkNwLoveChip(browser, port, errors)\n    await checkNwUnlockToastBanner(browser, port, errors)\n',
+        '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwLoveChip(browser, port, errors)\n',
+      ),
+    ),
+    'before-love',
+    '1.4.600 mut unlock before love',
+  )
+  assertUnlockToastGuardBreaks(
+    patchPhoneTail600((tail) =>
+      tail.replace(
+        '    await checkNwUnlockToastBanner(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
+        '    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {\n    await checkNwUnlockToastBanner(browser, port, errors)\n',
+      ),
+    ),
+    'after-map-note-gate',
+    '1.4.600 mut unlock after map-note gate',
+  )
+  assertUnlockToastGuardBreaks(
+    patchPhoneTail600((tail) =>
+      tail
+        .replace(
+          '    await checkNwUnlockToastBanner(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
+          '    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {\n',
+        )
+        .replace('  await browser.close()', '    await checkNwUnlockToastBanner(browser, port, errors)\n  await browser.close()'),
+    ),
+    'before-close',
+    '1.4.600 mut unlock before browser.close',
+  )
+  assertUnlockToastDefCountBreaks(
+    `${phone600}\nasync function checkNwUnlockToastBanner(browser, port, errors) {}\n`,
+    'second-async-fn',
+    '1.4.600 mut second async function def',
+  )
+  assertUnlockToastDefCountBreaks(
+    `${phone600}\nexport async function checkNwUnlockToastBanner(browser, port, errors) {}\n`,
+    'export-async-fn',
+    '1.4.600 mut export async function def',
+  )
+  assertUnlockToastDefCountBreaks(
+    `${phone600}\nconst checkNwUnlockToastBanner = async (browser, port, errors) => {}\n`,
+    'const-async',
+    '1.4.600 mut const async def',
   )
   assert.match(
     phone600,
@@ -1980,14 +2083,16 @@ assert.doesNotMatch(
     '1.4.600 the ok line logs banner, toast, chip, and tap guards',
   )
   assert.match(phone600, /both\.length < 20/, '1.4.600 unlock toast holds at least 20 sampled frames')
-  const lastIdx = phone600.lastIndexOf('      return\n    }\n')
-  assert.ok(lastIdx >= 0, '1.4.600 phone-fixes default region tail is present')
-  const tail = phone600.slice(lastIdx)
-  assert.equal(
-    [...tail.matchAll(/await checkNwUnlockToastBanner\(browser, port, errors\)/g)].length,
-    1,
-    '1.4.600 default path runs checkNwUnlockToastBanner exactly once',
+  const unlockSample = phone600.slice(
+    phone600.indexOf('async function sampleUnlockToastOverlap'),
+    phone600.indexOf('async function checkNwUnlockToastBanner'),
   )
+  assert.match(
+    unlockSample,
+    /const lineClip = \(el\) =>\s*\n\s*el\.scrollWidth > el\.clientWidth \+ 1 \|\| el\.scrollHeight > el\.clientHeight \+ 1 \? 1 : 0/,
+    '1.4.600 unlock toast clip is scroll overflow only',
+  )
+  assert.doesNotMatch(unlockSample, /textOverflow !== 'clip'/, '1.4.600 unlock toast clip ignores text-overflow kind')
 }
 
 // 1.4.599: Easy Night Watch Reason chip on-screen at 412×915 after official cam (#949).

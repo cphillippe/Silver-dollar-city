@@ -1487,11 +1487,14 @@ async function checkMapNote(browser, port, errors) {
         .boundingBox()
         .catch(() => null)
       if (bannerBox && bannerBox.height > 4) {
+        console.log(`checkMapNote ${label} mapNoteTop=${first.top} waveBanner=yes`)
         assert.ok(
           first.y >= bannerBox.y + bannerBox.height - 2,
           `${label} the note sits below the wave banner ${JSON.stringify({ note: first, banner: bannerBox })}`,
         )
       } else {
+        // Stacked wave banner present on round 8 clears; pin 108px only without banner (CI map-note top log pending run id).
+        console.log(`checkMapNote ${label} mapNoteTop=${first.top} waveBanner=no`)
         assert.equal(first.top, '108px', `${label} the note sits at 108px`)
       }
       assert.equal(first.events, 'none', `${label} the note does not take taps`)
@@ -10255,42 +10258,8 @@ async function sampleUnlockToastOverlap(page) {
       }
       return { taps, small }
     }
-    const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
-    const lineClip = (el) => {
-      const style = getComputedStyle(el)
-      const scrollClip = el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1
-      if (!scrollClip) return 0
-      if (style.textOverflow && style.textOverflow !== 'clip') return 0
-      const directs = [...el.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
-      const source = norm(directs.length ? directs.map((child) => child.textContent).join('') : el.textContent)
-      const rect = el.getBoundingClientRect()
-      const range = document.createRange()
-      let rendered = ''
-      const host = { left: rect.left - 1, right: rect.right + 1, top: rect.top - 1, bottom: rect.bottom + 1 }
-      for (const child of directs.length ? directs : []) {
-        const raw = child.textContent || ''
-        for (let i = 0; i < raw.length; i += 1) {
-          const ch = raw[i]
-          if (!ch.trim()) {
-            rendered += ch
-            continue
-          }
-          range.setStart(child, i)
-          range.setEnd(child, i + 1)
-          let painted = false
-          for (const bit of range.getClientRects()) {
-            if (bit.width <= 0 || bit.height <= 0) continue
-            if (bit.right > host.left && bit.left < host.right && bit.bottom > host.top && bit.top < host.bottom) {
-              painted = true
-              break
-            }
-          }
-          if (painted) rendered += ch
-        }
-      }
-      if (!directs.length) rendered = source
-      return norm(rendered) !== source ? 1 : 0
-    }
+    const lineClip = (el) =>
+      el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1 ? 1 : 0
     const label = document.querySelector('.nw-balloon-label')
     const countNode = document.querySelector('.nw-balloon-count')
     const hud = document.querySelector('.nw-hud')
