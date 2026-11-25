@@ -4345,19 +4345,22 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
 }
 
 /* 1.4.600: stacked unlock note drops the leak line again (#998). */
-body:has(.defend-page.is-easy-watch:has(.nw-wave-survived) .nw-map-toast) .nw-power-banner.is-still {
-  top: 318px;
+body:has(.defend-page.is-easy-watch .nw-wave-survived):has(.defend-page.is-easy-watch .nw-map-toast)
+  .nw-power-banner.is-still {
+  top: 328px;
 }
 
 @media (max-height: 720px) {
-  body:has(.defend-page.is-easy-watch:has(.nw-wave-survived) .nw-map-toast) .nw-power-banner.is-still {
+  body:has(.defend-page.is-easy-watch .nw-wave-survived):has(.defend-page.is-easy-watch .nw-map-toast)
+    .nw-power-banner.is-still {
     top: 458px;
   }
 }
 
 @media (min-width: 740px) and (min-height: 900px) {
-  body:has(.defend-page.is-easy-watch:has(.nw-wave-survived) .nw-map-toast) .nw-power-banner.is-still {
-    top: 362px;
+  body:has(.defend-page.is-easy-watch .nw-wave-survived):has(.defend-page.is-easy-watch .nw-map-toast)
+    .nw-power-banner.is-still {
+    top: 368px;
   }
 }
 
