@@ -100,6 +100,7 @@ export function RecallGate({
 
   const easyEncode = easy && encode
   const [recalled, setRecalled] = useState(false)
+  const [recallClean, setRecallClean] = useState(true)
   const nextTap =
     phase === 'teach'
       ? easy
@@ -216,14 +217,17 @@ export function RecallGate({
             reason={brief.reason}
             source={brief.source}
             packMisses={brief.reasonChoices}
-            onDone={(result) => settle(result.clean)}
+            onDone={(result) => settle(result.clean && recallClean)}
           />
         ) : (
           <LockInEncodeRecall
             id={brief.id}
             claim={brief.claim}
             format={encodeFormatForLine(brief.id)}
-            onDone={() => setRecalled(true)}
+            onDone={(result) => {
+              setRecallClean(result.clean)
+              setRecalled(true)
+            }}
           />
         )}
       </section>

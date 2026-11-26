@@ -15,7 +15,8 @@ interface LockInEncodeRecallProps {
   id: string
   claim: string
   format: EncodeFormatId
-  onDone: () => void
+  /** clean is false when a Format C map tap missed; A and B always report clean. */
+  onDone: (result: { clean: boolean }) => void
 }
 
 type Phase = 'ask' | 'reveal'
@@ -26,7 +27,7 @@ type Phase = 'ask' | 'reveal'
  */
 export function LockInEncodeRecall({ id, claim, format, onDone }: LockInEncodeRecallProps) {
   if (format === 'A') {
-    return <LockInRecall id={id} claim={claim} onDone={onDone} />
+    return <LockInRecall id={id} claim={claim} onDone={() => onDone({ clean: true })} />
   }
   return <LockInEncodeRecallBC id={id} claim={claim} format={format} onDone={onDone} />
 }
@@ -84,6 +85,7 @@ function LockInEncodeRecallBC({
     [format, phase, stamp.plotId],
   )
 
+  const finish = () => onDone({ clean: wrongMapTaps === 0 })
   const mapPlotHint = wrongMapTaps >= 2
   const mapTapGold = format === 'C' && phase === 'ask' && !mapPlotHint
 
@@ -94,10 +96,10 @@ function LockInEncodeRecallBC({
           {faced}
         </p>
         <div className="cta-dock">
-          <button type="button" className="btn primary xl lockin-recall-had" onClick={onDone}>
+          <button type="button" className="btn primary xl lockin-recall-had" onClick={finish}>
             I had it
           </button>
-          <button type="button" className="lockin-recall-not-yet" onClick={onDone}>
+          <button type="button" className="lockin-recall-not-yet" onClick={finish}>
             Not yet
           </button>
         </div>
@@ -141,7 +143,7 @@ function LockInEncodeRecallBC({
                     className={`quick-review-plot-hit ${hint ? 'is-now' : ''}`}
                     style={{ left: `${left}%`, top: `${top}%` }}
                     onClick={() => onPlotTap(plotId)}
-                    aria-label={`${prompt}. ${EASY.reviewMapTap}`}
+                    aria-label={`${prompt} ${EASY.reviewMapTap}`}
                   >
                     <img src={img} alt="" draggable={false} />
                   </button>
