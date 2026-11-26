@@ -1965,11 +1965,18 @@ assert.doesNotMatch(
   assert.match(encode963, /export function encodeFormatForLine/, '#963 encodeFormatForLine is defined')
   assert.match(encode963, /export function pickEncodeFormat/, '#963 pickEncodeFormat is defined')
   assert.match(gate963, /encodeFormatForLine\(brief\.id\)/, '#963 RecallGate rotates encode format')
-  assert.match(phone963, /async function checkLockInRotate/, '#963 checkLockInRotate is defined')
+  assert.equal(phone963.match(/async function checkLockInRotate\(/g)?.length, 1, '#963 checkLockInRotate has one definition')
+  const lastIdx963 = phone963.lastIndexOf('      return\n    }\n')
+  assert.ok(lastIdx963 > 0, '#963 the last early return is found')
+  const head963 = phone963.slice(0, lastIdx963)
+  const tail963 = phone963.slice(lastIdx963)
+  const call963 = 'await checkLockInRotate(browser, port, errors)'
+  assert.equal(tail963.split(call963).length - 1, 1, '#963 the default phone path calls checkLockInRotate exactly once')
+  assert.match(tail963, /\n    await checkLockInRotate\(browser, port, errors\)\n/, '#963 the default phone path call is unconditional')
   assert.match(
-    phone963,
-    /await checkEasyOneGold\(browser, port, errors\)\n    await checkLockInRotate\(browser, port, errors\)/,
-    '#963 the full path runs checkLockInRotate after checkEasyOneGold',
+    head963,
+    /process\.env\.LOCKIN_ROTATE_ONLY === '1'[\s\S]*?await checkLockInRotate\(browser, port, errors\)/,
+    '#963 the LOCKIN_ROTATE_ONLY branch sits above the last early return',
   )
   assert.match(
     rotate963,
@@ -1987,6 +1994,15 @@ assert.doesNotMatch(
   assert.match(lock843, /encodeFormatForLine/, '#963 check-lockin-843 knows encode rotation')
   assert.match(lock843, /await assertScreen\(page, `\$\{tag\}recall`, \/quick-review-think-fill\/\)/, '#963 format B ask uses assertScreen')
   assert.match(lock843, /await assertScreen\(page, `\$\{tag\}recall`, \/quick-review-\(map-tap\|plot-hit\)\/\)/, '#963 format C ask uses assertScreen')
+  const recall963 = readFileSync(new URL('../src/easyTrail/lockIn/LockInEncodeRecall.tsx', import.meta.url), 'utf8')
+  assert.doesNotMatch(lock843, /frames && format === 'A'/, '#963 the recall→reveal sampler is not gated on Format A')
+  assert.match(lock843, /recall→reveal \$\{format\}/, '#963 the recall→reveal sampler labels each format')
+  assert.match(lock843, /recall→reveal samples \$\{/, '#963 check-lockin-843 logs the recall→reveal sample count')
+  assert.doesNotMatch(lock843, /pickFormat\(id, date, 'A'/, '#963 R-c does not hardcode lastFormat A')
+  assert.doesNotMatch(recall963, /\$\{prompt\}\. /, '#963 the map aria-label has no double punctuation')
+  assert.match(recall963, /onDone\(\{ clean: wrongMapTaps === 0 \}\)/, '#963 a Format C wrong tap reports clean=false')
+  assert.match(gate963, /settle\(result\.clean && recallClean\)/, '#963 RecallGate settles with the recall step and the Why step')
+  assert.match(lock843, /async function flowD/, '#963 check-lockin-843 runs the C wrong-tap miss flow')
   assert.equal(lock843.match(/assert\.equal\(APP_VERSION, '([^']+)'\)/)?.[1], '1.4.603', '#963 check-lockin-843 pins app version')
 }
 assert.equal(encodeRotationRepeats(encodeFormatsThrough(10)), 0, '#963 golden-path encode formats do not repeat back-to-back')

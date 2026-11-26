@@ -167,7 +167,7 @@ export function startFrameSampler(expected) {
       els: {},
       blocks: [],
       shaking: Boolean(document.querySelector('.is-shake')),
-      gold: window.__probe.goldCues(),
+      gold: document.querySelector('.lockin-encode') ? window.__probe.keptGoldCues() : window.__probe.goldCues(),
       fonts: window.__probe.fontViolations(),
     }
     for (const [name, selector] of Object.entries(expected)) {
@@ -193,6 +193,7 @@ export function startFrameSampler(expected) {
     for (const el of document.querySelectorAll('.app-body ' + blockSel.split(', ').join(', .app-body '))) {
       if (!isShown(el) || seen.has(el)) continue
       if (el.closest('[aria-hidden="true"]')) continue
+      if (el.matches('.quick-review-plot-hit')) continue
       seen.add(el)
       const hasOwnText = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())
       const isTap = el.matches('button')
@@ -228,5 +229,5 @@ export function stopFrameSampler() {
 
 /** Source of the in-page `window.__probe`, installed with `addInitScript` before any page script. */
 export function probeInitSource() {
-  return `window.__probe = { goldCues: ${goldCues}, fontViolations: ${fontViolations} }`
+  return `window.__probe = { goldCues: ${goldCues}, keptGoldCues: ${keptGoldCues}, fontViolations: ${fontViolations} }`
 }

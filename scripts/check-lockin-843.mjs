@@ -162,12 +162,15 @@ assert.match(recallSrc, /encodeFormatForLine\(brief\.id\)/)
 assert.match(holdSrc, /<QuickReview[\s\S]*?formatsACOnly[\s\S]*?skipHonesty/)
 assert.match(holdSrc, /practice=\{!\(trace && isDue\(trace, today\)\)\}/)
 
-// R-c: the first review after Lock In is format C, never A or B.
+// R-c: the kept review never repeats the format the Lock In encode just used, and stays A or C.
 for (const id of EASY_LINE_ORDER) {
+  const encoded = encodeFormatForLine(id)
   for (let day = 1; day <= 28; day += 1) {
     for (let interval = 0; interval <= 4; interval += 1) {
       const date = `2026-11-${String(day).padStart(2, '0')}`
-      assert.equal(pickFormat(id, date, 'A', undefined, interval, { acOnly: true }), 'C', `${id} ${date} after A is C`)
+      const kept = pickFormat(id, date, encoded, undefined, interval, { acOnly: true })
+      assert.notEqual(kept, encoded, `${id} ${date} kept review repeats encode format ${encoded}`)
+      assert.notEqual(kept, 'B', `${id} ${date} kept review is never B on Home`)
     }
   }
 }
@@ -488,10 +491,10 @@ async function recallToSlide(page, viewport, facts, { notYet = false, shots = tr
     const plotId = lociStampFor(facts.id).plotId
     await page.locator(`[data-plot-id="${plotId}"]`).click()
   }
-  if (frames && format === 'A') {
+  if (frames) {
     await sample(
       page,
-      `${tag}recall→reveal`,
+      `${tag}recall→reveal ${format}`,
       {
         claim: { selector: '.lockin-recall-claim', count: 1, windowMs: 600 },
         had: { selector: '.lockin-recall-had', count: 1, windowMs: 600 },
@@ -502,10 +505,8 @@ async function recallToSlide(page, viewport, facts, { notYet = false, shots = tr
     )
   } else {
     await reveal()
-    if (format === 'B') {
-      await page.locator('.lockin-encode.is-reveal .lockin-recall-claim').waitFor({ timeout: 6000 })
-    }
   }
+  if (format === 'B') await page.locator('.lockin-encode.is-reveal .lockin-recall-claim').waitFor({ timeout: 6000 })
   const text = (await page.locator('.lockin-recall-claim').innerText()).trim()
   assert.equal(text, facts.claim, `${tag}reveal: shows the live Easy claim`)
   const claimSize = await page.locator('.lockin-recall-claim').evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
@@ -738,11 +739,46 @@ async function flowC(viewport) {
   })
 }
 
+// ----- Flow D: a wrong Format C map tap is a counted miss, like a wrong Why pick -----
+async function flowD(viewport) {
+  await session({ viewport, seed: seedLine(0) }, async (page) => {
+    assert.equal(encodeFormatForLine('ph-road'), 'C', 'ph-road is the Format C lesson')
+    const facts = lineFacts('ph-road')
+    await openLockIn(page)
+    const target = lociStampFor('ph-road').plotId
+    const plots = await page.locator('.quick-review-plot-hit').evaluateAll((els) => els.map((el) => el.getAttribute('data-plot-id')))
+    const wrong = plots.filter((id) => id !== target)
+    const mapLabels = await page.locator('.quick-review-plot-hit').evaluateAll((els) => els.map((el) => el.getAttribute('aria-label')))
+    await page.locator(`.quick-review-plot-hit[data-plot-id="${wrong[0]}"]`).click()
+    assert.equal((await page.locator('.quick-review-map-miss').innerText()).trim(), 'Not here. Try another spot.', 'a wrong tap teaches')
+    assert.equal(await page.locator('.quick-review-plot-hit.is-now').count(), 0, 'no ring after the 1st wrong tap')
+    await page.locator(`.quick-review-plot-hit[data-plot-id="${wrong[1]}"]`).click()
+    assert.equal(await page.locator('.quick-review-plot-hit.is-now').count(), 1, 'the ring shows on the 2nd wrong tap')
+    await page.locator(`.quick-review-plot-hit[data-plot-id="${target}"]`).click()
+    await page.locator('.lockin-recall-claim').waitFor({ timeout: 6000 })
+    await page.getByRole('button', { name: 'I had it' }).click()
+    await page.locator('.why-chip').first().waitFor()
+    await page.locator('.why-chip', { hasText: easyWhyLine(facts.right) }).click()
+    await page.locator('.recall-done').waitFor()
+    await page.waitForTimeout(1300)
+    await page.locator('.recall-done').click()
+    await page.locator('main[aria-label="Home"]').waitFor()
+    await page.waitForTimeout(400)
+    const state = await progressOf(page)
+    assert.deepEqual(state.lessonScore ?? {}, {}, 'C wrong tap is a counted miss: the clean Why pick still earns no tier score')
+    assert.equal(state.lessonTier?.['ph-road'], 'easy', 'C wrong tap is a counted miss: the lesson stays on its first tier')
+    assert.equal(state.memory['ph-road'].lastFormat, 'C', 'the miss is written against Format C')
+    assert.ok(mapLabels.length > 0, 'the map plots carry aria labels')
+    for (const label of mapLabels) assert.equal(label, "What's the main idea? Tap where you learned it", 'map plot label has no double punctuation')
+  })
+}
+
 for (const viewport of [...VIEWPORTS, PROVE_WIDTH]) {
   await flowA(viewport, false)
   await flowA(viewport, true)
   await flowB(viewport)
   await flowC(viewport)
+  await flowD(viewport)
   console.log(`check-lockin-843: ${viewport[0]}x${viewport[1]} ok`)
 }
 
@@ -752,7 +788,7 @@ for (let index = 0; index < 5; index += 1) {
   await session({ viewport: VIEWPORTS[0], seed: seedLine(index) }, async (page) => {
     const facts = lineFacts(id)
     await openLockIn(page)
-    await recallToSlide(page, VIEWPORTS[0], facts, { shots: false, frames: false, tag: `${id}-` })
+    await recallToSlide(page, VIEWPORTS[0], facts, { shots: false, frames: index < 3, tag: `${id}-` })
     await assertBoard(page, VIEWPORTS[0], facts, 4, `${id} `)
     await assertScreen(page, `${id} slide`, /why-slide-cue/)
     if (id === 'ph-debt') assert.equal(facts.claim, debtClaim, 'ph-debt reveal reads the live Easy claim')
@@ -853,5 +889,12 @@ await browser.close()
 await server.close()
 
 console.log(frameLog.join('\n'))
+const revealFrames = { A: 0, B: 0, C: 0 }
+for (const line of frameLog) {
+  const hit = line.match(/recall→reveal ([ABC]):/)
+  if (hit) revealFrames[hit[1]] += 1
+}
+console.log(`check-lockin-843: recall→reveal samples ${revealFrames.A + revealFrames.B + revealFrames.C} A=${revealFrames.A} B=${revealFrames.B} C=${revealFrames.C}`)
+for (const format of ['A', 'B', 'C']) assert.ok(revealFrames[format] > 0, `the recall→reveal sampler ran for Format ${format}`)
 console.log(`check-lockin-843: shots in ${shotDir}`)
 console.log('check-lockin-843: ok')
