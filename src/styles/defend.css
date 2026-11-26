@@ -5811,6 +5811,15 @@ body:has(.defend-page.is-easy-watch .nw-wave-survived):has(.defend-page.is-easy-
   top: 92px;
 }
 
+/* Tall narrow phones: left-side chips paint under the default banner — tuck it right. */
+@media (min-width: 360px) and (max-width: 391px) and (min-height: 800px) {
+  .defend-page.is-easy-watch:has(.nw-wave-survived):has(.nw-map-toast) .nw-wave-survived {
+    left: auto;
+    right: 12px;
+    max-width: min(168px, 46vw);
+  }
+}
+
 /* Short phones: keep the stacked note clear of painted type chips (checkNwUnlockToastBanner toastVsChip). */
 @media (max-height: 720px) {
   .defend-page.is-easy-watch:has(.nw-wave-survived) .nw-map-toast {
