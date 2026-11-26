@@ -205,6 +205,21 @@ assert.match(
   /!walkingRef\.current[\s\S]*?!dragWalking\.current[\s\S]*?isNextToHurt\(atRef\.current\)/,
   'pointer-up beside the hurt man waits until the tap walk finishes',
 )
+assert.match(
+  playSrc,
+  /if \(document\.documentElement\.dataset\.easy === 'on'\) \{\s*const path = mazeEasyTapPath\(here, target\)/,
+  'far tap walk is Easy only',
+)
+assert.match(
+  playSrc,
+  /const step = mazeStepToward\(here, target\)[\s\S]*?walkPath\(\[here, step\]\)\n  \}/,
+  'Hard tap stays one step toward the target',
+)
+assert.match(
+  playSrc,
+  /document\.documentElement\.dataset\.easy === 'on' && !won \? \(\s*<div className="maze-how-slot">/,
+  'the rule slot only exists on Easy',
+)
 assert.match(playSrc, /mazeStepToward/)
 assert.match(playSrc, /mazeDragStepsToward/)
 assert.match(playSrc, /extendDragToward/)
