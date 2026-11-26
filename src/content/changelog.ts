@@ -29,7 +29,7 @@ export function playerVisibleChangeTitle(title: string): string | null {
 export const CHANGELOG: ChangeNote[] = [
   {
     version: '1.4.604',
-    title: 'BS-OK: Night Watch: Reason buy strip stays off the road',
+    title: 'Night Watch: Reason buy strip stays off the road',
     when: 'YYYY-MM-DD',
     items: [
       'On Easy, the buy strip you open during a wave no longer sits on the walking road on small phones.',
