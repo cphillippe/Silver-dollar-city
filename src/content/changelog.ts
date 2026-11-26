@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.602',
+    title: 'Who helped? See your miss',
+    when: 'YYYY-MM-DD',
+    items: [
+      'On Easy, tap a wrong picture and it stays marked. Now you can see your miss.',
+      'Hard stays the same.',
+      'Refs #898.',
+    ],
+  },
+  {
     version: '1.4.600',
     title: 'Night Watch: unlock toast clear row',
     when: '2026-11-24',

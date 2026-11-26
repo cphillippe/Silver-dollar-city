@@ -4810,36 +4810,36 @@ const EASY_GOLD_BASE_1579 = {
   '375x667 home-first': { '2 Help': { x: 131, y: 561, w: 113, h: 48 } },
   '375x667 home-after-l1': { '3 Lock In': { x: 250, y: 584.1, w: 113, h: 48 } },
   // 1.4.596: y re-pinned from CI run 45026157592 (checkEasyOneGold rect lines); x/w unchanged.
-  // 1.4.598 What's new row (wave banner): re-pinned from CI run 45329274078.
+  // 1.4.602 What's new row (Who helped? See your miss): y carried from #994 CI run 45247321920 (same drop text as its 1.4.597 row); x/w unchanged.
   '375x667 settings-more': {
     'Open Profile': { x: 41, y: 1406.5, w: 130, h: 52 },
-    Candy: { x: 41, y: 1834.4, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1834.4, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1894.4, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2197.7, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2443.5, w: 176, h: 52 },
+    Candy: { x: 41, y: 1789.7, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1789.7, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1849.7, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2153, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2398.9, w: 176, h: 52 },
   },
   '390x844 home-first': { '2 Help': { x: 136, y: 738, w: 118, h: 48 } },
   '390x844 home-after-l1': { '3 Lock In': { x: 260, y: 761.1, w: 118, h: 48 } },
-  // 1.4.598 What's new row (wave banner): re-pinned from CI run 45342239039 (Import y=2420.1).
+  // 1.4.602 What's new row (Who helped? See your miss): y carried from #994 CI run 45259446814 (same drop text as its 1.4.597 row); x/w unchanged.
   '390x844 settings-more': {
     'Open Profile': { x: 41, y: 1407.9, w: 130, h: 52 },
-    Candy: { x: 41, y: 1835.8, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1835.8, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1895.8, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2174.3, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2420.1, w: 176, h: 52 },
+    Candy: { x: 41, y: 1791.1, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1791.1, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1851.1, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2129.6, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2375.5, w: 176, h: 52 },
   },
   '412x915 home-first': { '2 Help': { x: 143.3, y: 809, w: 125.3, h: 48 } },
   '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
-  // 1.4.598 What's new row (wave banner): re-pinned from CI run 45351727603.
+  // 1.4.602 What's new row (Who helped? See your miss): y carried from #994 CI run 45272407156 (same drop text as its 1.4.597 row); x/w unchanged.
   '412x915 settings-more': {
     'Open Profile': { x: 41, y: 1360.7, w: 130, h: 52 },
-    Candy: { x: 41, y: 1763.8, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1763.8, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1823.8, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2102.3, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2348.1, w: 176, h: 52 },
+    Candy: { x: 41, y: 1743.9, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1743.9, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1803.9, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2082.4, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2328.3, w: 176, h: 52 },
   },
 }
 
@@ -10659,6 +10659,328 @@ async function checkNwUnlockToastBanner(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #898 Easy Who helped? wrong picture stays marked after a miss tap. */
+const SHOW_IT_MISS_SIZES = [
+  [375, 667],
+  [375, 812],
+  [390, 844],
+  [412, 915],
+]
+
+async function checkShowItMiss(browser, port, errors) {
+  const only = process.env.SHOW_IT_MISS_SIZE
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+
+  for (const [width, height] of SHOW_IT_MISS_SIZES) {
+    const size = `${width}x${height}`
+    if (only && only !== size) continue
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      reducedMotion: 'no-preference',
+    })
+    await context.addInitScript(() => {
+      localStorage.clear()
+      window.__sawtoothStarts = 0
+      window.__audioCtxs = new Set()
+      window.__hasAudioContext = typeof window.AudioContext === 'function'
+      const Ctx = window.AudioContext
+      if (!Ctx) return
+      const origCreate = Ctx.prototype.createOscillator
+      Ctx.prototype.createOscillator = function createOscillatorPatched() {
+        window.__audioCtxs.add(this)
+        const osc = origCreate.call(this)
+        const origStart = osc.start.bind(osc)
+        osc.start = function startPatched(...args) {
+          if (osc.type === 'sawtooth') window.__sawtoothStarts += 1
+          return origStart(...args)
+        }
+        return osc
+      }
+    })
+    const page = await context.newPage()
+    page.on('pageerror', (error) => errors.push(`show-it-miss ${size} ${error}`))
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(`show-it-miss ${size} ${msg.text()}`)
+    })
+
+    let miss = 0
+    let shift = 0
+    let minTap = 999
+    let minText = 999
+    let gold = 0
+    let borderGold = -1
+    let frameCount = 0
+    let popAtTap = 0
+    let pop = 0
+
+    try {
+      await page.goto('/?playtest=1')
+      await page.getByRole('button', { name: 'Start Easy' }).click()
+      await page.locator('main.hub.is-easy-home').waitFor()
+      const learnAside = page.locator('.easy-learn-aside')
+      if ((await learnAside.count()) < 1) fail(`checkShowItMiss fail ${size} learn-aside=0`)
+      await learnAside.click()
+      await page.locator('.show-it-teach.is-clip').waitFor()
+      await page.locator('.show-it-clip').evaluate((v) => v.dispatchEvent(new Event('ended')))
+      await page.locator('.show-it-teach.is-pick').waitFor()
+
+      const easyOn = await page.evaluate(() => document.documentElement.getAttribute('data-easy'))
+      if (easyOn !== 'on') fail(`checkShowItMiss fail ${size} easy-branch data-easy=${easyOn}`)
+
+      const beforeHelper = await page.locator('.show-it-choice[aria-label="Helper"]').evaluate((el) => ({
+        left: el.offsetLeft,
+        top: el.offsetTop,
+        width: el.offsetWidth,
+        height: el.offsetHeight,
+      }))
+
+      const wrong = page.locator('.show-it-choice[aria-label="Walked past"]')
+      if ((await wrong.count()) < 1) fail(`checkShowItMiss fail ${size} wrong-choice=0`)
+      const wrongBox = await wrong.boundingBox()
+      if (!wrongBox) fail(`checkShowItMiss fail ${size} wrong-box=0`)
+
+      if (!(await page.evaluate(() => window.__hasAudioContext))) fail(`checkShowItMiss fail ${size} no-AudioContext`)
+      const popBefore = await page.evaluate(() => window.__sawtoothStarts)
+      if (popBefore !== 0) fail(`checkShowItMiss fail ${size} pop-before=${popBefore}`)
+      if ((await page.evaluate(() => window.__audioCtxs.size)) !== 0) fail(`checkShowItMiss fail ${size} audio-before=1`)
+
+      await page.evaluate(() => {
+        window.__clickAt = Infinity
+        document.addEventListener('click', () => { window.__clickAt = performance.now() }, { capture: true, once: true })
+        window.__tapFrames = new Promise((resolve) => {
+          const frames = []
+          const t0 = performance.now()
+          const tick = () => {
+            let tap = 999
+            let off = 0
+            for (const el of document.querySelectorAll('.show-it-choice')) {
+              const box = el.getBoundingClientRect()
+              if (box.width < 1 || box.height < 1) continue
+              tap = Math.min(tap, box.width, box.height)
+              if (box.left < -0.5 || box.top < -0.5 || box.right > innerWidth + 0.5 || box.bottom > innerHeight + 0.5) off += 1
+            }
+            frames.push({
+              t: performance.now(),
+              tap: tap === 999 ? 0 : tap,
+              off,
+              miss: document.querySelectorAll('.show-it-choice.is-miss').length,
+            })
+            if (performance.now() - t0 < 1000) requestAnimationFrame(tick)
+            else resolve(frames)
+          }
+          requestAnimationFrame(tick)
+        })
+      })
+      await page.mouse.click(wrongBox.x + wrongBox.width / 2, wrongBox.y + wrongBox.height / 2)
+      await page.waitForTimeout(60)
+      popAtTap = (await page.evaluate(() => window.__sawtoothStarts)) - popBefore
+      if (popAtTap !== 1) fail(`checkShowItMiss fail ${size} pop-at-tap=${popAtTap}`)
+      const audioAtTap = await page.evaluate(() => window.__audioCtxs.size)
+      if (audioAtTap !== 1) fail(`checkShowItMiss fail ${size} audio-at-tap=${audioAtTap}`)
+      await page.waitForTimeout(1000)
+
+      const missCards = page.locator('.show-it-choice.is-miss')
+      miss = await missCards.count()
+      if (miss !== 1) {
+        fail(`checkShowItMiss fail ${size} miss-count=${miss}`)
+      } else {
+        const missLabel = await missCards.first().getAttribute('aria-label')
+        if (missLabel !== 'Walked past') fail(`checkShowItMiss fail ${size} miss-label=${missLabel}`)
+        const helperMiss = await page.locator('.show-it-choice[aria-label="Helper"].is-miss').count()
+        if (helperMiss !== 0) fail(`checkShowItMiss fail ${size} helper-miss=${helperMiss}`)
+      }
+
+      if (miss === 1) {
+        const afterHelper = await page.locator('.show-it-choice[aria-label="Helper"]').evaluate((el) => ({
+          left: el.offsetLeft,
+          top: el.offsetTop,
+          width: el.offsetWidth,
+          height: el.offsetHeight,
+        }))
+        shift =
+          beforeHelper.left !== afterHelper.left ||
+          beforeHelper.top !== afterHelper.top ||
+          beforeHelper.width !== afterHelper.width ||
+          beforeHelper.height !== afterHelper.height
+            ? 1
+            : 0
+        if (shift !== 0) fail(`checkShowItMiss fail ${size} helper-shift=1`)
+      }
+
+      // Per frame, not one snapshot: the shake and the miss paint must never shrink a card under 44px or push it off screen.
+      const frames = await page.evaluate(() => Promise.all([window.__tapFrames, window.__clickAt]).then(([rows, at]) => rows.map((row) => ({ ...row, after: row.t >= at }))))
+      frameCount = frames.length
+      if (frameCount < 20) fail(`checkShowItMiss fail ${size} tap-frames=${frameCount}`)
+      const afterFrames = frames.filter((row) => row.after)
+      if (afterFrames.length < 20) fail(`checkShowItMiss fail ${size} tap-frames-after-click=${afterFrames.length}`)
+      minTap = Math.round(Math.min(...frames.map((row) => row.tap)) * 10) / 10
+      if (minTap < 44) fail(`checkShowItMiss fail ${size} minTap=${minTap}`)
+      const offFrame = frames.find((row) => row.off > 0)
+      if (offFrame) fail(`checkShowItMiss fail ${size} card-off-screen frame=${frames.indexOf(offFrame)} cards=${offFrame.off}`)
+      const lostMark = afterFrames.find((row) => row.miss !== 1)
+      if (lostMark) fail(`checkShowItMiss fail ${size} miss-not-lasting frame=${frames.indexOf(lostMark)} miss=${lostMark.miss}`)
+
+      // Every visible text node: painted glyph boxes stay on screen and inside any ancestor that clips (hidden/clip),
+      // and a clipping parent never scrolls past its client box. overflow:visible parents are not clips: p.show-it-prompt
+      // reads scroll 30 vs client 28 at 412x915 from line-height 1.1 and paints fully, so it is reported, not failed.
+      const layout = await page.evaluate(() => {
+        const round = (n) => Math.round(n * 10) / 10
+        const name = (el) => `${el.tagName.toLowerCase()}.${String(el.getAttribute('class') || '').split(/\s+/).filter(Boolean).slice(0, 3).join('.')}`
+        const shown = (el) => {
+          const st = getComputedStyle(el)
+          const box = el.getBoundingClientRect()
+          return st.display !== 'none' && st.visibility !== 'hidden' && box.width >= 2 && box.height >= 2
+        }
+        const off = []
+        const clipped = []
+        const soft = []
+        let nodes = 0
+        const walker = document.createTreeWalker(document.querySelector('main') ?? document.body, NodeFilter.SHOW_TEXT)
+        while (walker.nextNode()) {
+          const node = walker.currentNode
+          if (!node.textContent.trim()) continue
+          const el = node.parentElement
+          if (!el || el.closest('[aria-hidden="true"], script, style') || !shown(el)) continue
+          nodes += 1
+          const range = document.createRange()
+          range.selectNodeContents(node)
+          const glyphs = [...range.getClientRects()].filter((r) => r.width > 0 && r.height > 0)
+          for (const r of glyphs) {
+            if (r.left < -0.5 || r.top < -0.5 || r.right > innerWidth + 0.5 || r.bottom > innerHeight + 0.5) {
+              off.push(`${name(el)}@${round(r.left)},${round(r.top)},${round(r.right)},${round(r.bottom)}/${innerWidth}x${innerHeight}`)
+              break
+            }
+          }
+          const own = getComputedStyle(el)
+          const ownClips = own.overflowX !== 'visible' || own.overflowY !== 'visible'
+          if (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1) {
+            const line = `${name(el)} scroll=${el.scrollWidth}x${el.scrollHeight} client=${el.clientWidth}x${el.clientHeight} overflow=${own.overflowX}/${own.overflowY}`
+            if (ownClips) clipped.push(line)
+            else soft.push(line)
+          }
+          for (let a = el; a && a !== document.body; a = a.parentElement) {
+            const st = getComputedStyle(a)
+            if (st.overflowX !== 'hidden' && st.overflowX !== 'clip' && st.overflowY !== 'hidden' && st.overflowY !== 'clip') continue
+            const box = a.getBoundingClientRect()
+            const left = box.left + a.clientLeft
+            const top = box.top + a.clientTop
+            const bad = glyphs.find((r) => r.left < left - 1 || r.top < top - 1 || r.right > left + a.clientWidth + 1 || r.bottom > top + a.clientHeight + 1)
+            if (bad) {
+              clipped.push(`${name(el)} glyphs=${round(bad.left)},${round(bad.top)},${round(bad.right)},${round(bad.bottom)} inside ${name(a)}=${round(left)},${round(top)},${round(left + a.clientWidth)},${round(top + a.clientHeight)}`)
+              break
+            }
+          }
+        }
+        const pageX = document.documentElement.scrollWidth - document.documentElement.clientWidth
+        return { off, clipped, soft, nodes, pageX }
+      })
+      if (layout.nodes < 2) fail(`checkShowItMiss fail ${size} text-nodes=${layout.nodes}`)
+      if (layout.off.length) fail(`checkShowItMiss fail ${size} off-screen=${layout.off[0]}`)
+      if (layout.clipped.length) fail(`checkShowItMiss fail ${size} clipped=${layout.clipped[0]}`)
+      if (layout.pageX > 1) fail(`checkShowItMiss fail ${size} page-scroll-x=${layout.pageX}`)
+      for (const line of layout.soft) console.log(`checkShowItMiss info ${size} visible-overflow ${line}`)
+
+      const backH = await page.evaluate(() => {
+        const back = document.querySelector('main .text-link')
+        return back ? parseFloat(getComputedStyle(back).fontSize) : 0
+      })
+      if (backH > 0) console.log(`checkShowItMiss info ${size} backH=${backH}`)
+
+      const textBad = await page.evaluate(() => {
+        const main = document.querySelector('main')
+        if (!main) return ['main=0']
+        const bad = []
+        const walker = document.createTreeWalker(main, NodeFilter.SHOW_TEXT)
+        while (walker.nextNode()) {
+          const node = walker.currentNode
+          const text = node.textContent.replace(/\s+/g, ' ').trim()
+          if (!text) continue
+          const el = node.parentElement
+          if (!el || el.closest('[aria-hidden="true"], script, style')) continue
+          const st = getComputedStyle(el)
+          const box = el.getBoundingClientRect()
+          if (st.display === 'none' || st.visibility === 'hidden' || box.width < 2 || box.height < 2) continue
+          const px = parseFloat(st.fontSize)
+          if (!(px >= 13)) bad.push(`${px}:${text.slice(0, 24)}`)
+        }
+        return bad
+      })
+      if (textBad.length) {
+        minText = 0
+        fail(`checkShowItMiss fail ${size} minText=${textBad[0]}`)
+      } else {
+        minText = 13
+      }
+
+      // The lasting mark is a computed paint, not just a class: cedar frame on the missed card, gold frame kept on the other two.
+      const paint = await page.evaluate(() => {
+        const probe = (name) => {
+          const el = document.createElement('i')
+          el.style.cssText = `position:absolute;visibility:hidden;border:3px solid var(${name})`
+          document.body.appendChild(el)
+          const color = getComputedStyle(el).borderTopColor
+          el.remove()
+          return color
+        }
+        const cedar = probe('--cedar')
+        const goldVar = probe('--gold')
+        const cards = [...document.querySelectorAll('.show-it-choice')]
+        const missed = cards.find((el) => el.classList.contains('is-miss'))
+        if (!missed) return { ok: false, why: 'cards=0' }
+        const frame = getComputedStyle(missed)
+        const others = cards.filter((el) => el !== missed).map((el) => getComputedStyle(el).borderTopColor)
+        const goldFrames = cards.filter((el) => getComputedStyle(el).borderTopColor === goldVar).length
+        const ok =
+          frame.borderTopColor === cedar &&
+          cedar !== goldVar &&
+          frame.borderTopWidth === '3px' &&
+          frame.borderTopStyle === 'solid' &&
+          Number(frame.opacity) > 0 &&
+          Number(frame.opacity) < 1 &&
+          frame.boxShadow !== 'none' &&
+          others.length === 2 &&
+          others.every((color) => color === goldVar)
+        return { ok, goldFrames, why: `miss=${frame.borderTopColor} cedar=${cedar} others=${others.join('|')} gold=${goldVar} opacity=${frame.opacity}` }
+      })
+      borderGold = paint.goldFrames ?? -1
+      if (!paint.ok) fail(`checkShowItMiss fail ${size} miss-paint ${paint.why}`)
+
+      // Gold cues (readEasyGold) are gold-filled or glowing buttons. This pick screen has none: its gold is a card border the reader skips.
+      // gold<=1 is a ceiling so the miss mark never adds a gold fill or glow. It is 0, not 1, because no button is a gold next step here.
+      const goldRead = await readEasyGold(page)
+      gold = goldRead.frames.reduce((max, frame) => Math.max(max, frame.gold || 0), 0)
+      if (gold > 1) fail(`checkShowItMiss fail ${size} gold=${gold}`)
+
+      pop = (await page.evaluate(() => window.__sawtoothStarts)) - popBefore
+      if (pop !== popAtTap) fail(`checkShowItMiss fail ${size} pop-repeat=${pop}`)
+    } catch (error) {
+      fail(`checkShowItMiss fail ${size} throw=${error.message}`)
+    }
+
+    const hadFail = problems.some((line) => line.startsWith(`checkShowItMiss fail ${size}`))
+    if (!hadFail) {
+      console.log(`checkShowItMiss ok ${size} miss=1 shift=0 frames=${frameCount} minTap=${minTap} minText=${minText} clipped=0 onScreen=1 paint=cedar goldFrames=${borderGold} gold=${gold} pop=${pop}`)
+    } else {
+      console.log(`checkShowItMiss fail ${size} miss=${miss} shift=${shift} frames=${frameCount} minTap=${minTap} minText=${minText} gold=${gold} pop=${pop}`)
+    }
+
+    await context.close()
+  }
+
+  for (const err of errors.slice(errorMark)) fail(`checkShowItMiss error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 /** #951 Easy round-clear Spend and ? stay on screen (fixed to the viewport, not the collapsed clear bar). */
 const NW_SPEND_ON_SCREEN_SIZES = [
   [375, 812],
@@ -12470,6 +12792,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'dig win readable nights stay free of console errors')
       return
     }
+    if (process.env.SHOW_IT_MISS_ONLY === '1') {
+      await checkShowItMiss(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'show it miss nights stay free of console errors')
+      return
+    }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
       await checkLampGlyph(browser, port, errors)
       assert.equal(errors.join('\n'), '', '1.4.566 glyph nights stay free of console errors')
@@ -12497,6 +12824,7 @@ export async function checkPhoneFixes() {
     await checkNwSpendOnScreen(browser, port, errors)
     await checkNwLoveChip(browser, port, errors)
     await checkNwUnlockToastBanner(browser, port, errors)
+    await checkShowItMiss(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -12673,7 +13001,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_WAVE_SURVIVED_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY', 'NW_LOVE_CHIP_ONLY', 'NW_UNLOCK_TOAST_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_WAVE_SURVIVED_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY', 'NW_LOVE_CHIP_ONLY', 'NW_UNLOCK_TOAST_ONLY', 'SHOW_IT_MISS_ONLY', 'NW_STRIP_WORDS_ONLY', 'DIG_WIN_READABLE_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
