@@ -10146,6 +10146,33 @@ const NW_UNLOCK_TOAST_SIZES = [
 ]
 const NW_UNLOCK_TOAST_ROUNDS = [18, 24]
 
+function nwUnlockToastSizesForRun() {
+  if (process.env.NW_UNLOCK_TOAST_SAMPLER !== '1' || !process.env.NW_UNLOCK_TOAST_EXTRA_SIZES) {
+    return NW_UNLOCK_TOAST_SIZES
+  }
+  try {
+    const extra = JSON.parse(process.env.NW_UNLOCK_TOAST_EXTRA_SIZES)
+    if (!Array.isArray(extra)) return NW_UNLOCK_TOAST_SIZES
+    if (process.env.NW_UNLOCK_TOAST_EXTRA_ONLY === '1') {
+      return extra
+        .filter((pair) => Array.isArray(pair) && pair.length >= 2)
+        .map(([w, h]) => [Number(w), Number(h)])
+    }
+    const seen = new Set(NW_UNLOCK_TOAST_SIZES.map(([w, h]) => `${w}x${h}`))
+    const out = [...NW_UNLOCK_TOAST_SIZES]
+    for (const pair of extra) {
+      if (!Array.isArray(pair) || pair.length < 2) continue
+      const key = `${pair[0]}x${pair[1]}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push([Number(pair[0]), Number(pair[1])])
+    }
+    return out
+  } catch {
+    return NW_UNLOCK_TOAST_SIZES
+  }
+}
+
 async function sampleUnlockToastOverlap(page, bannerClipMut = false) {
   return page.evaluate(async (bannerClipMut) => {
     const round = (n) => Math.round(n * 10) / 10
@@ -10514,7 +10541,7 @@ async function checkNwUnlockToastBanner(browser, port, errors) {
   for (const round of NW_UNLOCK_TOAST_ROUNDS) {
     if (onlyRound && onlyRound !== String(round)) continue
     const search = `?playtest=1&nwSeed=2&nwMap=a2&nwRound=${round}&nwLamps=0&nwCam=1`
-    for (const [width, height] of NW_UNLOCK_TOAST_SIZES) {
+    for (const [width, height] of nwUnlockToastSizesForRun()) {
       const size = `${width}x${height}`
       if (onlySize && onlySize !== size) continue
       const { context, page } = await openMap(browser, port, width, height, 'a2', {
