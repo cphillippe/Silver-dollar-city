@@ -538,11 +538,46 @@ export function placeTowerCard(
     }
     return best
   }
+  /**
+   * Mid-wave strip with no road-free spot above its lamp (lamp near the top of the frame, or a narrow phone):
+   * take the nearest spot anywhere on the frame that clears the road, every tap target and every lamp pad.
+   * `search` cannot do this: it ranks "below the lamp" (1e8) worse than "on the road" (1e6), so it hands back a
+   * card that sits on the road.
+   */
+  const stripOffRoadSpot = (): { left: number; top: number; side: 'above' | 'below'; markClear: boolean } | null => {
+    if (!roadCentres.length) return null
+    const lefts = new Set<number>()
+    const tops = new Set<number>()
+    for (let left = EDGE; left <= wideLeft + 0.1; left += 8) lefts.add(left)
+    for (let top = MARGIN; top <= maxTop + 0.1; top += 8) tops.add(top)
+    lefts.add(wideLeft)
+    tops.add(maxTop)
+    let best: { left: number; top: number } | null = null
+    let bestKey = Infinity
+    for (const left of lefts) {
+      for (const top of tops) {
+        const card = { left, top }
+        if (tapHits(card) + roadHits(card) + stripLampHits(card) + ownHits(card) > 0) continue
+        const key =
+          softHits(card) * 1e5 +
+          softArea(card) * 0.5 +
+          (stripAboveLamp(card) ? 0 : 1e4) +
+          Math.hypot(left + W / 2 - point.left, top + cardHeight / 2 - point.top)
+        if (key < bestKey) {
+          bestKey = key
+          best = card
+        }
+      }
+    }
+    return best ? { ...best, side: cardSide(best.top, point.top, cardHeight), markClear: true } : null
+  }
   const snug = search(1, maxLeft, maxTop)
   if (glyphHits(snug) + tapHits(snug) + roadHits(snug) + ownHits(snug) + softHits(snug) === 0) return { ...snug, markClear: true }
   const wide = search(1, wideLeft, wideTop, EDGE)
   if (glyphHits(wide) + tapHits(wide) + roadHits(wide) + ownHits(wide) + softHits(wide) === 0) return { ...wide, markClear: true }
   if (strip) {
+    const offRoad = stripOffRoadSpot()
+    if (offRoad) return offRoad
     let fallback: { left: number; top: number } = search(1, wideLeft, wideTop, EDGE)
     const clearX = LAMP_HIT.x * sc + GLYPH_CLEAR
     const forcedLeft = stripLeftOfLamp

@@ -9140,6 +9140,509 @@ async function checkNwStripWords(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #988 Easy Night Watch: the mid-wave Reason strip stays off the road in every frame of its visible life. */
+const NW_REASON_STRIP_SEARCH = '?playtest=1&nwDebug=1&nwSeed=2&nwMap=a2&nwRound=18&nwLamps=0&nwCam=1'
+const NW_REASON_STRIP_SIZES = [
+  [375, 667],
+  [375, 812],
+  [384, 844],
+  [388, 844],
+  [390, 844],
+  [412, 915],
+  [768, 1024],
+]
+const NW_REASON_STRIP_ROUNDS = [18, 24]
+/** The other three seats, where the strip is placed from a different lamp point, on the two narrowest frames. */
+const NW_REASON_STRIP_OTHER_SEATS = {
+  love: { cx: 464, cy: 360 },
+  logic: { cx: 600, cy: 88 },
+  science: { cx: 464, cy: 768 },
+}
+const NW_REASON_STRIP_OTHER_SIZES = [
+  [375, 667],
+  [388, 844],
+]
+/** The strip is watched for this long after it opens; the card must be painted in at least MIN_FRAMES of them. */
+const NW_REASON_STRIP_LIFE_MS = 3000
+const NW_REASON_STRIP_MIN_FRAMES = 20
+
+const nwReasonSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+async function nwReasonTouchDrag(cdp, fromX, fromY, toX, toY) {
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: fromX, y: fromY }] })
+  for (let i = 1; i <= 12; i += 1) {
+    const t = i / 12
+    const ease = t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2
+    const x = fromX + (toX - fromX) * ease
+    const y = fromY + (toY - fromY) * ease
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y }] })
+    await nwReasonSleep(16)
+  }
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+}
+
+async function nwReasonTouchTap(cdp, x, y) {
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] })
+  await nwReasonSleep(50)
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+}
+
+async function nwReasonPlantAt(page, cdp, tool, ring, label) {
+  if (await page.locator('.defend-tower-card').count()) {
+    await page.keyboard.press('Escape')
+    await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+  }
+  if (tool === 'candle') {
+    await page.locator('[data-candle-lamp="yes"]').click()
+  } else {
+    const index = GLYPH_TOOLS.indexOf(tool)
+    const on = await page.evaluate(() => [...document.querySelectorAll('.nw-rail .defend-ability.is-on')].map((node) => (node.textContent || '').trim()))
+    if (!(on.length === 1 && on[0].startsWith(GLYPH_NAME[tool]))) await page.locator('.nw-rail .defend-ability').nth(index).click()
+  }
+  let point = await glyphSeatPoint(page, ring)
+  if (!point) await nwReasonReachSeat(page, cdp, ring, label)
+  point = await glyphSeatPoint(page, ring)
+  assert.ok(point, `${label} plant ${tool} seat ${ring.cx},${ring.cy} takes a tap`)
+  await page.mouse.click(point.x, point.y)
+  await page.waitForFunction(
+    (seat) =>
+      ![...document.querySelectorAll('.defend-plant-ground circle.is-live')].some(
+        (node) => Number(node.getAttribute('cx')) === seat.cx && Number(node.getAttribute('cy')) === seat.cy,
+      ),
+    ring,
+  )
+  await page.waitForTimeout(250)
+  if (await page.locator('.defend-tower-card').count()) {
+    await page.keyboard.press('Escape')
+    await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
+  }
+}
+
+async function nwReasonReachSeat(page, cdp, seat, label) {
+  const target = { cx: seat.cx, cy: seat.cy - 26 }
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const probe = await page.evaluate((t) => {
+      const svg = document.querySelector('.defend-board')
+      const ctm = svg?.getScreenCTM()
+      if (!svg || !ctm) return { ok: false, x: 0, y: 0, w: innerWidth, h: innerHeight }
+      const p = svg.createSVGPoint()
+      p.x = t.cx
+      p.y = t.cy
+      const q = p.matrixTransform(ctm)
+      const hit = document.elementFromPoint(q.x, q.y)
+      const ok =
+        hit &&
+        hit.closest('.defend-board') &&
+        !hit.closest('button, .nw-rail, .nw-docks, .nw-map-overlay')
+      return { ok, x: q.x, y: q.y, w: innerWidth, h: innerHeight }
+    }, target)
+    if (probe.ok) return
+    const cx = probe.w / 2
+    const cy = probe.h / 2
+    const dx = Math.max(-150, Math.min(150, cx - probe.x))
+    const dyMax = seat.cy >= 500 ? 360 : 250
+    const dy = Math.max(-dyMax, Math.min(dyMax, cy - probe.y))
+    await nwReasonTouchDrag(cdp, cx, cy, cx + dx, cy + dy)
+    await nwReasonSleep(600)
+  }
+}
+
+async function openNwReasonStripRoad(browser, port, width, height) {
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width, height },
+    deviceScaleFactor: 2,
+    hasTouch: true,
+    isMobile: true,
+    reducedMotion: 'reduce',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: SAVE },
+  )
+  const page = await context.newPage()
+  await page.goto(NW_REASON_STRIP_SEARCH)
+  await page.getByRole('button', { name: 'Settings' }).click()
+  await page.locator('summary', { hasText: 'Developer' }).click()
+  await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
+  await page.locator('.defend-page').waitFor()
+  await page.locator('.defend-board').waitFor()
+  if (await page.locator('[data-map-overlay]').count()) {
+    await page.locator('[data-map="a2"]').click()
+    await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+  }
+  const cdp = await context.newCDPSession(page)
+  return { context, page, cdp }
+}
+
+async function nwReasonStripUnfreezeForCue(page, label) {
+  const resume = page.getByRole('button', { name: 'Resume walkers' })
+  if (await resume.count()) {
+    await resume.click()
+    await page.waitForTimeout(250)
+  }
+  await page.locator('.defend-raider').first().waitFor({ timeout: 20_000 })
+  const n = await page.locator('.defend-raider').count()
+  assert.ok(n > 0, `${label} mid-wave has raiders after resume (${n})`)
+}
+
+async function nwReasonStripEnsureFreeze(page, label) {
+  const mode = await page.evaluate(() => {
+    const root = document.querySelector('.defend-page')
+    const button = [...document.querySelectorAll('button')].find((node) =>
+      /^(Pause|Resume) walkers$/.test((node.textContent || '').trim()),
+    )
+    return {
+      freeze: root?.classList.contains('is-nw-debug-freeze') ?? false,
+      pause: button ? (button.textContent || '').trim() : '',
+    }
+  })
+  if (mode.pause === 'Pause walkers') {
+    await page.getByRole('button', { name: 'Pause walkers' }).click()
+    await page.waitForTimeout(200)
+  }
+  const again = await page.evaluate(() => {
+    const root = document.querySelector('.defend-page')
+    const button = [...document.querySelectorAll('button')].find((node) =>
+      /^(Pause|Resume) walkers$/.test((node.textContent || '').trim()),
+    )
+    return {
+      freeze: root?.classList.contains('is-nw-debug-freeze') ?? false,
+      pause: button ? (button.textContent || '').trim() : '',
+    }
+  })
+  assert.equal(again.pause, 'Resume walkers', `${label} mid-wave measure keeps walkers paused (Resume walkers)`)
+}
+
+async function nwReasonStripGoldCount(page) {
+  return page.evaluate(() => {
+    const goldish = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = +match[1]
+        const g = +match[2]
+        const b = +match[3]
+        const a = match[4] === undefined ? 1 : +match[4]
+        if (a > 0.05 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const names = []
+    const sels =
+      '.defend-go, .defend-continue, .defend-raider.is-easy-cue .defend-raider-face, .defend-path-buy, .defend-bright-buy, .defend-tower-card, .lamp-upgrade-glyph .is-stroke, .lamp-upgrade-glyph .is-gap, .lamp-upgrade-glyph .is-dot'
+    for (const el of document.querySelectorAll(sels)) {
+      const style = getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+      const rect = el.getBoundingClientRect()
+      if (rect.width <= 0 || rect.height <= 0) continue
+      let why = false
+      if (el instanceof SVGElement) {
+        if (style.stroke !== 'none' && parseFloat(style.strokeWidth) > 0 && goldish(style.stroke)) why = true
+        if (style.fill !== 'none' && goldish(style.fill)) why = true
+        if (goldish(style.filter)) why = true
+      } else if (
+        goldish(style.backgroundImage) ||
+        goldish(style.backgroundColor) ||
+        goldish(style.boxShadow) ||
+        goldish(style.borderTopColor) ||
+        goldish(style.filter)
+      ) {
+        why = true
+      }
+      if (why) names.push(String(el.getAttribute('class') || el.tagName).split(/\s+/).slice(0, 3).join('.'))
+    }
+    return names.length
+  })
+}
+
+/** Starts a requestAnimationFrame sampler: every frame records the strip card box and its px² overlap with the road stroke. */
+async function nwReasonStripSamplerStart(page) {
+  await page.evaluate(() => {
+    const road = document.querySelector('.defend-road')
+    const svg = document.querySelector('.defend-board')
+    if (!(road instanceof SVGGeometryElement) || !(svg instanceof SVGSVGElement)) throw new Error('missing defend-road or defend-board')
+    const strokeW = parseFloat(getComputedStyle(road).strokeWidth)
+    if (!Number.isFinite(strokeW) || strokeW <= 0) throw new Error(`bad road strokeW=${getComputedStyle(road).strokeWidth}`)
+    const half = strokeW / 2 + 0.75
+    const length = road.getTotalLength()
+    const pts = []
+    for (let i = 0; i <= 393; i += 1) {
+      const at = road.getPointAtLength((i * length) / 393)
+      pts.push([at.x, at.y])
+    }
+    const st = { run: true, t0: performance.now(), frames: [] }
+    window.__nwReasonStrip = st
+    const probe = svg.createSVGPoint()
+    const tick = () => {
+      if (!st.run) return
+      const cardEl = document.querySelector('.defend-tower-card[data-strip="yes"]')
+      const ctm = svg.getScreenCTM()
+      if (cardEl instanceof HTMLElement && ctm) {
+        const cr = cardEl.getBoundingClientRect()
+        const cells = new Set()
+        for (const [x, y] of pts) {
+          probe.x = x
+          probe.y = y
+          const s = probe.matrixTransform(ctm)
+          const ix0 = Math.max(cr.left, s.x - half)
+          const iy0 = Math.max(cr.top, s.y - half)
+          const ix1 = Math.min(cr.right, s.x + half)
+          const iy1 = Math.min(cr.bottom, s.y + half)
+          if (ix0 >= ix1 || iy0 >= iy1) continue
+          for (let cx = Math.ceil(ix0); cx <= Math.floor(ix1); cx += 1) {
+            for (let cy = Math.ceil(iy0); cy <= Math.floor(iy1); cy += 1) cells.add(`${cx},${cy}`)
+          }
+        }
+        const pan = document.querySelector('.nw-pan')
+        st.frames.push({
+          t: Math.round(performance.now() - st.t0),
+          card: [cr.left, cr.top, cr.right, cr.bottom].map((v) => Math.round(v * 100) / 100),
+          overlap: cells.size,
+          strokeW,
+          pan: pan instanceof HTMLElement ? pan.style.transform : '',
+          inView: cr.left >= 0 && cr.top >= 0 && cr.right <= innerWidth + 0.5 && cr.bottom <= innerHeight + 0.5,
+        })
+      }
+      requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  })
+}
+
+async function nwReasonStripSamplerStop(page) {
+  return page.evaluate(() => {
+    window.__nwReasonStrip.run = false
+    return window.__nwReasonStrip.frames
+  })
+}
+
+/** Every button, text node and clipping box inside the strip card, not only the two buy lines. */
+async function nwReasonStripAudit(page) {
+  return page.evaluate(() => {
+    const card = document.querySelector('.defend-tower-card[data-strip="yes"]')
+    if (!(card instanceof HTMLElement)) throw new Error('missing strip card')
+    const out = { smallTaps: [], smallText: [], clipped: [], scroll: [scrollX, scrollY] }
+    const name = (el) => `${el.tagName.toLowerCase()}.${String(el.getAttribute('class') || '').split(/\s+/).filter(Boolean).slice(0, 2).join('.')}`
+    for (const el of [card, ...card.querySelectorAll('*')]) {
+      if (!(el instanceof HTMLElement)) continue
+      const style = getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden') continue
+      const box = el.getBoundingClientRect()
+      if (box.width < 1 || box.height < 1) continue
+      if (el.matches('button, [role="button"]') && Math.min(box.width, box.height) < 44) {
+        out.smallTaps.push(`${name(el)} ${Math.round(box.width * 10) / 10}x${Math.round(box.height * 10) / 10}`)
+      }
+      const direct = [...el.childNodes].some((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+      if (direct && parseFloat(style.fontSize) < 13) out.smallText.push(`${name(el)} ${style.fontSize}`)
+      const hides = style.overflowX !== 'visible' || style.overflowY !== 'visible'
+      if ((direct || hides) && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1)) {
+        out.clipped.push(`${name(el)} sw=${el.scrollWidth}/${el.clientWidth} sh=${el.scrollHeight}/${el.clientHeight}`)
+      }
+    }
+    return out
+  })
+}
+
+/** Opens the mid-wave strip by clicking the centre of the lamp's own hit rect, and says what the click landed on. */
+async function nwReasonStripOpen(page, cdp, seat, tool, label) {
+  for (let attempt = 0; attempt < 12 && (await page.locator('.defend-tower-card[data-strip="yes"]').count()) < 1; attempt += 1) {
+    if (attempt > 0) await nwReasonReachSeat(page, cdp, seat, label)
+    const target = await page.evaluate((id) => {
+      const hit =
+        document.querySelector(`.defend-pad.is-planted[data-tower-type="${id}"] rect.defend-hit[data-lamp-wave-hit="yes"]`) ||
+        document.querySelector(`.defend-pad[data-tower-type="${id}"] rect.defend-hit`)
+      if (!hit) return null
+      const box = hit.getBoundingClientRect()
+      return { x: box.left + box.width / 2, y: box.top + box.height / 2 }
+    }, tool)
+    if (target) await page.mouse.click(target.x, target.y)
+    await page.waitForTimeout(350)
+  }
+  return (await page.locator('.defend-tower-card[data-strip="yes"]').count()) > 0
+}
+
+async function nwReasonStripTapText(page) {
+  return page.evaluate(() => {
+    const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+    const lineOf = (el) => {
+      if (!el) return null
+      const style = getComputedStyle(el)
+      const directs = [...el.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+      if (!directs.length) return null
+      const source = norm(directs.map((child) => child.textContent).join(''))
+      const rect = el.getBoundingClientRect()
+      if (rect.width < 1 || rect.height < 1) return null
+      const range = document.createRange()
+      let rendered = ''
+      const host = { left: rect.left - 1, right: rect.right + 1, top: rect.top - 1, bottom: rect.bottom + 1 }
+      for (const child of directs) {
+        const raw = child.textContent
+        for (let i = 0; i < raw.length; i += 1) {
+          const ch = raw[i]
+          if (!ch.trim()) {
+            rendered += ch
+            continue
+          }
+          range.setStart(child, i)
+          range.setEnd(child, i + 1)
+          let painted = false
+          for (const bit of range.getClientRects()) {
+            if (bit.width <= 0 || bit.height <= 0) continue
+            if (bit.right > host.left && bit.left < host.right && bit.bottom > host.top && bit.top < host.bottom) {
+              painted = true
+              break
+            }
+          }
+          if (painted) rendered += ch
+        }
+      }
+      return {
+        source,
+        rendered: norm(rendered),
+        font: parseFloat(style.fontSize),
+        scrollW: el.scrollWidth,
+        clientW: el.clientWidth,
+        scrollH: el.scrollHeight,
+        clientH: el.clientHeight,
+      }
+    }
+    let clipped = 0
+    let minFont = 999
+    let minTap = 999
+    const rows = []
+    for (const path of ['far', 'strong']) {
+      const el = document.querySelector(`.defend-tower-card[data-strip='yes'] .defend-path[data-path='${path}'] .defend-path-buy`)
+      if (!(el instanceof HTMLElement)) throw new Error(`missing strip buy ${path}`)
+      const box = el.getBoundingClientRect()
+      minTap = Math.min(minTap, box.width, box.height)
+      const cost = lineOf(el)
+      if (!cost) throw new Error(`missing strip cost line ${path}`)
+      if (cost.scrollW > cost.clientW + 1 || cost.scrollH > cost.clientH + 1) clipped += 1
+      minFont = Math.min(minFont, cost.font)
+      rows.push({ path, w: box.width, h: box.height, cost })
+    }
+    return { clipped, minFont, minTap, rows }
+  })
+}
+
+async function checkNwReasonStripRoad(browser, port, errors) {
+  const problems = []
+  const fail = (line) => {
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+  const jobs = []
+  for (const round of NW_REASON_STRIP_ROUNDS) {
+    for (const [width, height] of NW_REASON_STRIP_SIZES) jobs.push({ round, width, height, tool: 'reason', seat: { cx: 464, cy: 224 } })
+  }
+  for (const [tool, seat] of Object.entries(NW_REASON_STRIP_OTHER_SEATS)) {
+    for (const [width, height] of NW_REASON_STRIP_OTHER_SIZES) jobs.push({ round: 24, width, height, tool, seat })
+  }
+  for (const { round, width, height, tool, seat } of jobs) {
+    const tag = `${width}x${height} r${round} ${tool}`
+    const search = NW_REASON_STRIP_SEARCH.replace('nwRound=18', `nwRound=${round}`)
+    let done = false
+    // A trial repeats only when the harness never got a strip on screen. A measured overlap is never retried.
+    for (let trial = 0; trial < 3 && !done; trial += 1) {
+      const context = await browser.newContext({
+        baseURL: `http://127.0.0.1:${port}/`,
+        viewport: { width, height },
+        deviceScaleFactor: 2,
+        hasTouch: true,
+        isMobile: true,
+        reducedMotion: 'reduce',
+      })
+      await context.addInitScript((payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)), { key: STORAGE_KEY, save: SAVE })
+      const page = await context.newPage()
+      const trialErrors = errors.length
+      page.on('pageerror', (error) => errors.push(`reason-strip-road ${tag} ${error}`))
+      await page.goto(search)
+      await page.getByRole('button', { name: 'Settings' }).click()
+      await page.locator('summary', { hasText: 'Developer' }).click()
+      await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
+      await page.locator('.defend-page').waitFor()
+      await page.locator('.defend-board').waitFor()
+      if (await page.locator('[data-map-overlay]').count()) {
+        await page.locator('[data-map="a2"]').click()
+        await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+      }
+      const cdp = await context.newCDPSession(page)
+      await glyphSetup(page)
+      for (const lamp of NW_STRIP_WORDS_LAMPS) {
+        const rings = await page.evaluate(() =>
+          [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({
+            cx: Number(ring.getAttribute('cx')),
+            cy: Number(ring.getAttribute('cy')),
+          })),
+        )
+        const ring = rings.find((entry) => entry.cx === lamp.cx && entry.cy === lamp.cy)
+        assert.ok(ring, `${tag} has a live seat ${lamp.cx},${lamp.cy}`)
+        await nwReasonPlantAt(page, cdp, lamp.tool, ring, `${tag} plant ${lamp.tool}`)
+      }
+      await page.locator('.defend-go').click()
+      await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
+      await page.waitForTimeout(800)
+      if ((await page.locator('.defend-raider.is-easy-cue').count()) < 1) await nwReasonStripUnfreezeForCue(page, tag)
+      await page.locator('.defend-raider.is-easy-cue').waitFor({ timeout: 60_000 })
+      await nwReasonStripEnsureFreeze(page, tag)
+      await nwReasonReachSeat(page, cdp, seat, tag)
+      await glyphPanToPad(page, tool)
+      // Sampling starts before the tap so the first painted frame of the strip is judged too.
+      await nwReasonStripSamplerStart(page)
+      const opened = await nwReasonStripOpen(page, cdp, seat, tool, tag)
+      if (!opened) {
+        await nwReasonStripSamplerStop(page)
+        console.log(`checkNwReasonStripRoad retry ${tag} strip=missing trial=${trial}`)
+        errors.length = trialErrors
+        await context.close()
+        continue
+      }
+      await page.waitForTimeout(NW_REASON_STRIP_LIFE_MS)
+      const frames = await nwReasonStripSamplerStop(page)
+      const audit = await nwReasonStripAudit(page)
+      const stripTap = await nwReasonStripTapText(page)
+      const gold = await nwReasonStripGoldCount(page)
+      const camOn = await page.evaluate(() => document.querySelector('.nw-cam')?.getAttribute('data-nw-cam') === 'on')
+      const cueCount = await page.locator('.defend-raider.is-easy-cue').count()
+      done = true
+      if (frames.length < NW_REASON_STRIP_MIN_FRAMES) {
+        fail(`checkNwReasonStripRoad fail ${tag} frames=${frames.length} want>=${NW_REASON_STRIP_MIN_FRAMES}`)
+      }
+      const worst = frames.reduce((a, b) => (b.overlap > a.overlap ? b : a), frames[0])
+      const hitFrames = frames.filter((frame) => frame.overlap > 0)
+      if (worst && worst.overlap > 0) {
+        fail(
+          `checkNwReasonStripRoad fail ${tag} overlap=${worst.overlap}px2 frames=${hitFrames.length}/${frames.length} first=f${frames.indexOf(hitFrames[0])}@${hitFrames[0].t}ms strokeW=${worst.strokeW} pan=${worst.pan} card=[${worst.card.join(',')}]`,
+        )
+      }
+      const offFrames = frames.filter((frame) => !frame.inView).length
+      if (offFrames) fail(`checkNwReasonStripRoad fail ${tag} off-canvas frames=${offFrames}/${frames.length}`)
+      if (cueCount < 1) fail(`checkNwReasonStripRoad fail ${tag} easy-cue=missing`)
+      if (audit.scroll[0] !== 0 || audit.scroll[1] !== 0) fail(`checkNwReasonStripRoad fail ${tag} scroll=${audit.scroll.join(',')}`)
+      if (width < 768 && !camOn) fail(`checkNwReasonStripRoad fail ${tag} cam=off`)
+      if (audit.smallTaps.length) fail(`checkNwReasonStripRoad fail ${tag} taps under 44px: ${audit.smallTaps.join('; ')}`)
+      if (audit.smallText.length) fail(`checkNwReasonStripRoad fail ${tag} text under 13px: ${audit.smallText.join('; ')}`)
+      if (audit.clipped.length) fail(`checkNwReasonStripRoad fail ${tag} clip: ${audit.clipped.join('; ')}`)
+      if (stripTap.clipped !== 0) fail(`checkNwReasonStripRoad fail ${tag} cost clipped=${stripTap.clipped}`)
+      if (!(stripTap.minFont >= 13)) fail(`checkNwReasonStripRoad fail ${tag} font=${stripTap.minFont}`)
+      if (!(stripTap.minTap >= 44)) fail(`checkNwReasonStripRoad fail ${tag} tap=${stripTap.minTap}`)
+      if (gold !== 1) fail(`checkNwReasonStripRoad fail ${tag} gold=${gold}`)
+      if (!problems.some((line) => line.includes(` ${tag} `))) {
+        const states = new Set(frames.map((frame) => frame.pan)).size
+        console.log(
+          `checkNwReasonStripRoad ok ${tag} frames=${frames.length} overlapMax=${worst.overlap} camStates=${states} strokeW=${worst.strokeW} gold=${gold} font=${stripTap.minFont}px tap=${stripTap.minTap}px clip=0 card=[${worst.card.join(',')}]`,
+        )
+      }
+      await context.close()
+    }
+    if (!done) fail(`checkNwReasonStripRoad fail ${tag} exhausted-retries strip=missing`)
+  }
+  for (const err of errors.slice(errorMark)) fail(`checkNwReasonStripRoad error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 /** #964 Easy golden-path Dig DUG! (wb-women) — readable secondaries and takeaway gap above Lock In. */
 const DIG_WIN_READABLE_SIZES = [
   [375, 667],
@@ -11893,6 +12396,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'strip words nights stay free of console errors')
       return
     }
+    if (process.env.NW_REASON_STRIP_ROAD_ONLY === '1') {
+      await checkNwReasonStripRoad(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'reason strip road nights stay free of console errors')
+      return
+    }
     if (process.env.GEM_SIGHT_CUE_ONLY === '1') {
       await checkGemSightCue(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'gem sight cue nights stay free of console errors')
@@ -11939,6 +12447,7 @@ export async function checkPhoneFixes() {
     await checkGemSightCue(browser, port, errors)
     await checkNwSpendOnScreen(browser, port, errors)
     await checkNwLoveChip(browser, port, errors)
+    await checkNwReasonStripRoad(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -12115,7 +12624,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_WAVE_SURVIVED_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY', 'NW_LOVE_CHIP_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_WAVE_SURVIVED_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY', 'NW_LOVE_CHIP_ONLY', 'NW_REASON_STRIP_ROAD_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')

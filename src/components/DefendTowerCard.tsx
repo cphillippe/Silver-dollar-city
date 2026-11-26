@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { isFreeSpot } from '../lib/lampPlace'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
@@ -467,19 +468,30 @@ export function DefendTowerCard({
     let frame = 0
     let stop = false
     let roadCamKey = ''
-    const bumpStripRoad = () => {
+    const refreshStripRoad = (now: boolean) => {
       if (stop || !strip || !cardRef.current) return
       const camKey = stripRoadCamKey()
-      if (camKey !== roadCamKey) {
-        roadCamKey = camKey
-        const parent = cardRef.current.offsetParent
-        if (parent instanceof HTMLElement) {
-          const origin = parent.getBoundingClientRect()
-          roadTapBoxes(origin.left + parent.clientLeft, origin.top + parent.clientTop)
-          setRoadRev((v) => v + 1)
-        }
+      if (camKey === roadCamKey) return
+      roadCamKey = camKey
+      const parent = cardRef.current.offsetParent
+      if (parent instanceof HTMLElement) {
+        const origin = parent.getBoundingClientRect()
+        roadTapBoxes(origin.left + parent.clientLeft, origin.top + parent.clientTop)
+        if (now) flushSync(() => setRoadRev((v) => v + 1))
+        else setRoadRev((v) => v + 1)
       }
+    }
+    const bumpStripRoad = () => {
+      if (stop || !strip || !cardRef.current) return
+      refreshStripRoad(false)
       frame = requestAnimationFrame(bumpStripRoad)
+    }
+    // The camera writes pan/zoom straight to the DOM. Re-place the strip in the same turn, before the next
+    // frame paints, so no frame shows the strip placed for the previous camera.
+    let camWatch: MutationObserver | null = null
+    if (strip && typeof MutationObserver !== 'undefined') {
+      camWatch = new MutationObserver(() => refreshStripRoad(true))
+      for (const el of document.querySelectorAll('.nw-pan, .nw-zoom')) camWatch.observe(el, { attributes: true, attributeFilter: ['style'] })
     }
     if (strip && cardRef.current) {
       const parent = cardRef.current.offsetParent
@@ -492,6 +504,7 @@ export function DefendTowerCard({
     }
     return () => {
       stop = true
+      camWatch?.disconnect()
       if (frame) cancelAnimationFrame(frame)
       restoreParkedLabels()
     }

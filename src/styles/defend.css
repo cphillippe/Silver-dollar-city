@@ -6323,6 +6323,12 @@ body:has(.defend-page.is-easy-watch .nw-map-toast) .nw-power-banner.is-still {
   right: auto !important;
 }
 
+/* Two 44px buy rows and the 4px gap are 92px: exactly the 96px box less its 2px borders. Vertical padding
+   made the content 4px too tall and the centred overflow was clipped (sh 94 / ch 92). */
+.defend-page.is-easy-watch.is-easy-tap .defend-tower-card[data-strip='yes'] {
+  padding: 0 2px;
+}
+
 .defend-page.is-easy-watch.is-easy-tap .defend-tower-card {
   width: 112px !important;
   height: 96px;
