@@ -21,7 +21,6 @@ import { lineTakeaway } from '../src/lib/successBeat.ts'
 import { SOURCE_DIG_AGAIN } from '../src/lib/sourceDig.ts'
 import { GEM_SIGHT_CUE } from '../src/lib/gemJar.ts'
 import { buildGemPuzzle } from '../src/lib/gemSearch.ts'
-import { APP_VERSION } from '../src/config/app.ts'
 import { runLockInRotateCheck } from './check-lockin-rotate.mjs'
 
 const SAVE = {
@@ -9518,7 +9517,7 @@ function gemSightSave() {
   return {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.600',
+    appVersion: '1.4.595',
     savedAt: now.toISOString(),
     progress: {
       started: true,
@@ -9761,7 +9760,7 @@ async function checkGemSightCue(browser, port, errors) {
     const hardSave = {
       kind: SAVE_KIND,
       schemaVersion: SAVE_SCHEMA_VERSION,
-      appVersion: '1.4.600',
+      appVersion: '1.4.595',
       savedAt: new Date().toISOString(),
       progress: { ...SAVE.progress, easyMode: false, started: true, matchLifetime: 5000, matchSkillSeen: 1 },
     }

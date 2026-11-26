@@ -1944,17 +1944,17 @@ assert.match(
 
 
 
-// 1.4.600: Easy Lock In encode format rotation (Refs #963). Forward-merge landing version for #990.
-assert.equal(APP_VERSION, '1.4.600')
-assert.equal(CHANGELOG[0].version, '1.4.600', '1.4.600 is the newest row')
-assert.match(latestChange('1.4.600').items.join('\n'), /Refs #963/, '1.4.600 changelog refs #963')
-assert.match(latestChange('1.4.600').items.join('\n'), /Quick Review/)
-assert.match(latestChange('1.4.600').items.join('\n'), /Medium and Hard/)
-assert.doesNotMatch(latestChange('1.4.600').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.600 changelog avoids GitHub close keywords')
+// 1.4.603: Easy Lock In encode format rotation (Refs #963). Forward-merge landing version for #990.
+assert.equal(APP_VERSION, '1.4.603')
+assert.equal(CHANGELOG[0].version, '1.4.603', '1.4.603 is the newest row')
+assert.match(latestChange('1.4.603').items.join('\n'), /Refs #963/, '1.4.603 changelog refs #963')
+assert.match(latestChange('1.4.603').items.join('\n'), /Quick Review/)
+assert.match(latestChange('1.4.603').items.join('\n'), /Medium and Hard/)
+assert.doesNotMatch(latestChange('1.4.603').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.603 changelog avoids GitHub close keywords')
 assert.doesNotMatch(
-  playerVisibleChangeItems(latestChange('1.4.600').items).join('\n'),
+  playerVisibleChangeItems(latestChange('1.4.603').items).join('\n'),
   /\bHard\b|\bMedium\b/,
-  '1.4.600 the player note does not name other tiers',
+  '1.4.603 the player note does not name other tiers',
 )
 {
   const encode963 = readFileSync(new URL('../src/easyTrail/review/encodeFormat.ts', import.meta.url), 'utf8')
@@ -1987,7 +1987,7 @@ assert.doesNotMatch(
   assert.match(lock843, /encodeFormatForLine/, '#963 check-lockin-843 knows encode rotation')
   assert.match(lock843, /await assertScreen\(page, `\$\{tag\}recall`, \/quick-review-think-fill\/\)/, '#963 format B ask uses assertScreen')
   assert.match(lock843, /await assertScreen\(page, `\$\{tag\}recall`, \/quick-review-\(map-tap\|plot-hit\)\/\)/, '#963 format C ask uses assertScreen')
-  assert.equal(lock843.match(/assert\.equal\(APP_VERSION, '([^']+)'\)/)?.[1], '1.4.600', '#963 check-lockin-843 pins app version')
+  assert.equal(lock843.match(/assert\.equal\(APP_VERSION, '([^']+)'\)/)?.[1], '1.4.603', '#963 check-lockin-843 pins app version')
 }
 assert.equal(encodeRotationRepeats(encodeFormatsThrough(10)), 0, '#963 golden-path encode formats do not repeat back-to-back')
 assert.equal(encodeRotationRepeats(Array(10).fill('A')), 9, '#963 main-fail proof: identical encode formats repeat 9 times in 10 lessons')
