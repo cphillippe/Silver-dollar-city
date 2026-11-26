@@ -28,13 +28,44 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.597',
-    title: 'Who helped? miss mark',
-    when: '2026-11-23',
+    version: '1.4.600',
+    title: 'Night Watch: unlock toast clear row',
+    when: '2026-11-24',
     items: [
-      'On Easy, a wrong picture on Who helped? stays marked so you can see your miss.',
+      'On Easy, the New map unlocked toast drops below the Wave survived banner when both show on a clear.',
       'Hard stays the same.',
-      'Refs #898.',
+      'Refs #998.',
+    ],
+  },
+  {
+    version: '1.4.599',
+    title: 'Night Watch: Reason chip on tall phones',
+    when: '2026-11-24',
+    items: [
+      'On Easy, the Reason type name chip stays inside the screen after you recenter the map, including on tall phones.',
+      'Hard stays the same.',
+      'Refs #949.',
+    ],
+  },
+  {
+    version: '1.4.598',
+    title: 'Night Watch: wave clear banner',
+    when: '2026-11-24',
+    items: [
+      'On Easy, the Wave survived banner sits lower so it clears the Sparks label and the on-map Reason chip when a wave clears.',
+      'Hard stays the same.',
+      'Refs #984.',
+    ],
+  },
+  {
+    version: '1.4.597',
+    title: 'Night Watch: Love lamp name on screen',
+    when: '2026-11-22',
+    items: [
+      'On Easy, every planted pillar lamp keeps its type name chip on screen, including Love at the upper seats.',
+      'Chips slide off docks and Begin instead of vanishing when chrome would cover them.',
+      'Hard stays the same.',
+      'Refs #949.',
     ],
   },
   {

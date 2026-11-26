@@ -1482,7 +1482,21 @@ async function checkMapNote(browser, port, errors) {
       assert.ok(first.w >= 100, `${label} the note is at least 100px wide (${first.w})`)
       assert.ok(first.h > 8, `${label} the note has a visible height (${first.h})`)
       assert.ok(first.font >= 14, `${label} the note text is at least 14px (${first.font})`)
-      assert.equal(first.top, '108px', `${label} the note sits at 108px`)
+      const bannerBox = await page
+        .locator('.nw-wave-survived')
+        .boundingBox()
+        .catch(() => null)
+      if (bannerBox && bannerBox.height > 4) {
+        console.log(`checkMapNote ${label} mapNoteTop=${first.top} waveBanner=yes`)
+        assert.ok(
+          first.y >= bannerBox.y + bannerBox.height - 2,
+          `${label} the note sits below the wave banner ${JSON.stringify({ note: first, banner: bannerBox })}`,
+        )
+      } else {
+        // Stacked wave banner present on round 8 clears; pin 108px only without banner (CI map-note top log pending run id).
+        console.log(`checkMapNote ${label} mapNoteTop=${first.top} waveBanner=no`)
+        assert.equal(first.top, '108px', `${label} the note sits at 108px`)
+      }
       assert.equal(first.events, 'none', `${label} the note does not take taps`)
       assert.ok(first.opacity > 0.9 && first.visibility !== 'hidden' && first.display !== 'none', `${label} the note is visible`)
       const center = width / 2
@@ -4795,35 +4809,37 @@ const EASY_ONE_GOLD_MS = 1500
 const EASY_GOLD_BASE_1579 = {
   '375x667 home-first': { '2 Help': { x: 131, y: 561, w: 113, h: 48 } },
   '375x667 home-after-l1': { '3 Lock In': { x: 250, y: 584.1, w: 113, h: 48 } },
-  // 1.4.597: y re-pinned from CI run 45247321920 (checkEasyOneGold rect lines); x/w unchanged.
+  // 1.4.596: y re-pinned from CI run 45026157592 (checkEasyOneGold rect lines); x/w unchanged.
+  // 1.4.598 What's new row (wave banner): re-pinned from CI run 45329274078.
   '375x667 settings-more': {
     'Open Profile': { x: 41, y: 1406.5, w: 130, h: 52 },
-    Candy: { x: 41, y: 1789.7, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1789.7, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1849.7, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2153, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2398.9, w: 176, h: 52 },
+    Candy: { x: 41, y: 1834.4, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1834.4, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1894.4, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2197.7, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2443.5, w: 176, h: 52 },
   },
   '390x844 home-first': { '2 Help': { x: 136, y: 738, w: 118, h: 48 } },
   '390x844 home-after-l1': { '3 Lock In': { x: 260, y: 761.1, w: 118, h: 48 } },
+  // 1.4.598 What's new row (wave banner): re-pinned from CI run 45342239039 (Import y=2420.1).
   '390x844 settings-more': {
     'Open Profile': { x: 41, y: 1407.9, w: 130, h: 52 },
-    Candy: { x: 41, y: 1791.1, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1791.1, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1851.1, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2129.6, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2375.5, w: 176, h: 52 },
+    Candy: { x: 41, y: 1835.8, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1835.8, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1895.8, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2174.3, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2420.1, w: 176, h: 52 },
   },
   '412x915 home-first': { '2 Help': { x: 143.3, y: 809, w: 125.3, h: 48 } },
   '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
+  // 1.4.598 What's new row (wave banner): re-pinned from CI run 45351727603.
   '412x915 settings-more': {
     'Open Profile': { x: 41, y: 1360.7, w: 130, h: 52 },
-    // 1.4.597: y re-pinned from CI run 45272407156; x/w unchanged.
-    Candy: { x: 41, y: 1743.9, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1743.9, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1803.9, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2082.4, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2328.3, w: 176, h: 52 },
+    Candy: { x: 41, y: 1763.8, w: 84, h: 52 },
+    'Dusk town': { x: 133, y: 1763.8, w: 112, h: 52 },
+    'Clean parchment': { x: 41, y: 1823.8, w: 162, h: 52 },
+    'Export JSON': { x: 41, y: 2102.3, w: 132, h: 52 },
+    'Import pasted save': { x: 41, y: 2348.1, w: 176, h: 52 },
   },
 }
 
@@ -5892,7 +5908,7 @@ const TYPE_LABEL_PINS = {
   },
   '390x844': {
     planted: { begin: { x: 75, y: 779.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: {} },
-    card: { begin: { x: 75, y: 779.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 194.5, y: 319, w: 32, h: 32 }, 'pip-far': { x: 66.5, y: 353.4, w: 18, h: 16 }, 'buy-far': { x: 146.5, y: 328.7, w: 46, h: 44 }, 'pip-strong': { x: 66.5, y: 398.4, w: 18, h: 16 }, 'buy-strong': { x: 146.5, y: 373.7, w: 46, h: 44 } } },
+    card: { begin: { x: 75, y: 779.6, w: 240, h: 56.4 }, continue: null, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-candle': { x: 6, y: 177, w: 52, h: 53.1 }, 'dock-bell': { x: 6, y: 235, w: 52, h: 53.1 }, 'dock-incense': { x: 6, y: 293, w: 52, h: 53.1 }, 'dock-cross': { x: 6, y: 351, w: 52, h: 53.1 } }, card: { pull: { x: 233.3, y: 269.9, w: 32, h: 32 }, 'pip-far': { x: 105.3, y: 304.3, w: 18, h: 16 }, 'buy-far': { x: 185.3, y: 279.5, w: 46, h: 44 }, 'pip-strong': { x: 105.3, y: 349.3, w: 18, h: 16 }, 'buy-strong': { x: 185.3, y: 324.5, w: 46, h: 44 } } },
     r5: { begin: null, continue: { x: 132.5, y: 780, w: 125, h: 56 }, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 498.9, w: 52, h: 53.1 }, 'dock-candle': { x: 6, y: 554.9, w: 52, h: 53.1 } }, card: {} },
     r1: { begin: null, continue: { x: 132.5, y: 780, w: 125, h: 56 }, rail: { 'rail-love': { x: 331, y: 104, w: 48, h: 48 }, 'rail-logic': { x: 331, y: 156, w: 48, h: 48 }, 'rail-reason': { x: 331, y: 208, w: 48, h: 48 }, 'rail-science': { x: 331, y: 260, w: 48, h: 48 } }, docks: { 'dock-new': { x: 6, y: 498.9, w: 52, h: 53.1 } }, card: {} },
   },
@@ -9786,16 +9802,236 @@ async function checkGemSightCue(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
-/** #898 Easy Who helped? wrong picture stays marked after a miss tap. */
-const SHOW_IT_MISS_SIZES = [
+/** #984 Easy wave-survived banner must clear the Sparks label at the 1.05 animation peak. */
+const NW_WAVE_SURVIVED_SEARCH = '?playtest=1&nwSeed=2&nwMap=a2&nwRound=5&nwLamps=0&nwCam=1'
+const NW_WAVE_SURVIVED_SIZES = [
   [375, 667],
   [375, 812],
   [390, 844],
   [412, 915],
+  [768, 1024],
 ]
 
-async function checkShowItMiss(browser, port, errors) {
-  const only = process.env.SHOW_IT_MISS_SIZE
+async function sampleWaveSurvivedHold(page) {
+  return page.evaluate(async () => {
+    const round = (n) => Math.round(n * 10) / 10
+    const shown = (el) => {
+      if (!el) return false
+      const style = getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+      const box = el.getBoundingClientRect()
+      return box.width > 1 && box.height > 1
+    }
+    const boxOf = (el) => {
+      const rect = el.getBoundingClientRect()
+      return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom }
+    }
+    const area = (a, b) => {
+      const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left))
+      const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+      return w * h
+    }
+    const goldTone = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = Number(match[1])
+        const g = Number(match[2])
+        const b = Number(match[3])
+        const a = match[4] === undefined ? 1 : Number(match[4])
+        if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const goldCues = () => {
+      const root = document.querySelector('.defend-page')
+      if (!root) return 0
+      const chrome =
+        'button, .defend-abilities, .defend-boost, .defend-tower-card, .defend-path-pip, .nw-balloon-orb, .defend-wave, .defend-ability-stock'
+      const names = [...root.querySelectorAll(chrome)]
+        .filter((node) => !node.closest('.defend-nw-debug'))
+        .filter((node) => {
+          const rect = node.getBoundingClientRect()
+          const style = getComputedStyle(node)
+          return rect.width > 1 && rect.height > 1 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0
+        })
+        .filter((node) => {
+          const style = getComputedStyle(node)
+          const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+          const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && goldTone(style[`border${side}Color`]))
+          return goldTone(style.backgroundImage) || goldTone(style.backgroundColor) || border || goldTone(style.boxShadow) || (text && goldTone(style.color))
+        })
+      return names.length
+    }
+    const waitStart = performance.now()
+    while (performance.now() - waitStart < 8000) {
+      const banner = document.querySelector('.nw-wave-survived')
+      if (banner && shown(banner)) break
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+    }
+    const chromeUnion = (selector) => {
+      const boxes = [...document.querySelectorAll(selector)].filter(shown).map(boxOf)
+      if (!boxes.length) return null
+      return boxes.reduce((acc, b) => ({
+        left: Math.min(acc.left, b.left),
+        top: Math.min(acc.top, b.top),
+        right: Math.max(acc.right, b.right),
+        bottom: Math.max(acc.bottom, b.bottom),
+      }))
+    }
+    const maxChromeOverlap = (bannerBox, selector) => {
+      let max = 0
+      for (const node of document.querySelectorAll(selector)) {
+        if (!shown(node)) continue
+        max = Math.max(max, area(bannerBox, boxOf(node)))
+      }
+      return max
+    }
+    const paintOfLabel = (el) => {
+      const rect = el.getBoundingClientRect()
+      let left = rect.left
+      let right = rect.right
+      let top = rect.top
+      let bottom = rect.bottom
+      const range = document.createRange()
+      for (const child of el.childNodes) {
+        if (child.nodeType !== 3 || !(child.textContent || '').trim()) continue
+        range.selectNodeContents(child)
+        for (const bit of range.getClientRects()) {
+          if (bit.width <= 0 || bit.height <= 0) continue
+          left = Math.min(left, bit.left)
+          right = Math.max(right, bit.right)
+          top = Math.min(top, bit.top)
+          bottom = Math.max(bottom, bit.bottom)
+        }
+      }
+      return { left, top, right, bottom }
+    }
+    const inViewport = (box) =>
+      box.right > 0 && box.bottom > 0 && box.left < innerWidth && box.top < innerHeight
+    const chipOverlap = (bannerBox) => {
+      let max = 0
+      let chipsOn = 0
+      for (const el of document.querySelectorAll('.defend-type-chip, text.defend-type-label')) {
+        if (el.getAttribute('data-chrome-hide') === 'yes') continue
+        if (!shown(el)) continue
+        const box = el.matches('.defend-type-chip') ? boxOf(el) : paintOfLabel(el)
+        if (!inViewport(box)) continue
+        chipsOn += 1
+        max = Math.max(max, area(bannerBox, box))
+      }
+      return { max, chipsOn }
+    }
+    const banner = document.querySelector('.nw-wave-survived')
+    const label = document.querySelector('.nw-balloon-label')
+    const countNode = document.querySelector('.nw-balloon-count')
+    if (!banner) return { missing: 'banner' }
+    if (!label) return { missing: 'label' }
+    if (!countNode) return { missing: 'count' }
+    const samples = []
+    const holdStart = performance.now()
+    while (performance.now() - holdStart < 2200) {
+      if (!shown(banner)) {
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+        continue
+      }
+      const bannerBox = boxOf(banner)
+      const count = document.querySelector('.nw-balloon-count')
+      if (!count) return { missing: 'count' }
+      const cont = document.querySelector('.defend-continue')
+      const rail = chromeUnion('.nw-rail')
+      const targets = {
+        label: boxOf(label),
+        count: shown(count) ? boxOf(count) : null,
+        continue: cont && shown(cont) ? boxOf(cont) : null,
+        rail,
+      }
+      const ov = {}
+      for (const [key, box] of Object.entries(targets)) {
+        if (key === 'rail' || key === 'dock') continue
+        ov[key] = box ? area(bannerBox, box) : null
+      }
+      ov.rail = rail ? area(bannerBox, rail) : null
+      ov.dock = maxChromeOverlap(
+        bannerBox,
+        'button.defend-new-lamp, .defend-clear-row button:not(.defend-continue)',
+      )
+      const chip = chipOverlap(bannerBox)
+      ov.chip = chip.chipsOn > 0 ? chip.max : 0
+      const style = getComputedStyle(banner)
+      const inside =
+        bannerBox.left >= -1 &&
+        bannerBox.top >= -1 &&
+        bannerBox.right <= window.innerWidth + 1 &&
+        bannerBox.bottom <= window.innerHeight + 1
+      const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+      const lineClip = (el) => {
+        const style = getComputedStyle(el)
+        const scrollClip = el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1
+        if (!scrollClip) return 0
+        if (style.textOverflow && style.textOverflow !== 'clip') return 0
+        const directs = [...el.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+        const source = norm(directs.length ? directs.map((child) => child.textContent).join('') : el.textContent)
+        const rect = el.getBoundingClientRect()
+        const range = document.createRange()
+        let rendered = ''
+        const host = { left: rect.left - 1, right: rect.right + 1, top: rect.top - 1, bottom: rect.bottom + 1 }
+        for (const child of directs.length ? directs : []) {
+          const raw = child.textContent || ''
+          for (let i = 0; i < raw.length; i += 1) {
+            const ch = raw[i]
+            if (!ch.trim()) {
+              rendered += ch
+              continue
+            }
+            range.setStart(child, i)
+            range.setEnd(child, i + 1)
+            let painted = false
+            for (const bit of range.getClientRects()) {
+              if (bit.width <= 0 || bit.height <= 0) continue
+              if (bit.right > host.left && bit.left < host.right && bit.bottom > host.top && bit.top < host.bottom) {
+                painted = true
+                break
+              }
+            }
+            if (painted) rendered += ch
+          }
+        }
+        if (!directs.length) rendered = source
+        return norm(rendered) !== source ? 1 : 0
+      }
+      const texts = [...banner.querySelectorAll('.nw-wave-survived-title, .nw-wave-survived-round')]
+      let fontMin = Infinity
+      let clipped = 0
+      for (const node of texts) {
+        if (!shown(node)) continue
+        const fs = parseFloat(getComputedStyle(node).fontSize)
+        if (Number.isFinite(fs)) fontMin = Math.min(fontMin, fs)
+        clipped += lineClip(node)
+      }
+      samples.push({
+        ov,
+        banner: {
+          left: round(bannerBox.left),
+          top: round(bannerBox.top),
+          right: round(bannerBox.right),
+          bottom: round(bannerBox.bottom),
+        },
+        inside,
+        fontMin: Number.isFinite(fontMin) ? fontMin : 0,
+        clipped,
+        gold: goldCues(),
+        opacity: Number(style.opacity),
+        chipsOn: chip.chipsOn,
+      })
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+    }
+    return { samples }
+  })
+}
+
+async function checkNwWaveSurvivedClear(browser, port, errors) {
+  const only = process.env.NW_WAVE_SURVIVED_SIZE
   const problems = []
   const seen = new Set()
   const fail = (line) => {
@@ -9806,163 +10042,620 @@ async function checkShowItMiss(browser, port, errors) {
   }
   const errorMark = errors.length
 
-  for (const [width, height] of SHOW_IT_MISS_SIZES) {
+  const tapUntilBoost = async (page) => {
+    const started = Date.now()
+    while (Date.now() - started < 90_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
+      const cue = await page.evaluate(() => {
+        const face = document.querySelector('.defend-raider.is-easy-cue')
+        if (!face) return null
+        const id = face.getAttribute('data-walker-id')
+        const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+        if (!tap) return null
+        const box = tap.getBoundingClientRect()
+        const x = box.x + box.width / 2
+        const y = box.y + box.height / 2
+        const node = document.elementFromPoint(x, y)
+        if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+        return { x, y }
+      })
+      if (cue) await page.mouse.click(cue.x, cue.y)
+      await page.waitForTimeout(80)
+    }
+  }
+
+  for (const [width, height] of NW_WAVE_SURVIVED_SIZES) {
     const size = `${width}x${height}`
     if (only && only !== size) continue
-    const context = await browser.newContext({
-      baseURL: `http://127.0.0.1:${port}/`,
-      viewport: { width, height },
-      deviceScaleFactor: 1,
-      reducedMotion: 'no-preference',
+    const { context, page } = await openMap(browser, port, width, height, 'a2', {
+      motion: true,
+      search: NW_WAVE_SURVIVED_SEARCH,
     })
-    await context.addInitScript(() => {
-      localStorage.clear()
-      window.__sawtoothStarts = 0
-      const Ctx = window.AudioContext
-      if (!Ctx) return
-      const origCreate = Ctx.prototype.createOscillator
-      Ctx.prototype.createOscillator = function createOscillatorPatched() {
-        const osc = origCreate.call(this)
-        const origStart = osc.start.bind(osc)
-        osc.start = function startPatched(...args) {
-          if (osc.type === 'sawtooth') window.__sawtoothStarts += 1
-          return origStart(...args)
-        }
-        return osc
-      }
-    })
-    const page = await context.newPage()
-    page.on('pageerror', (error) => errors.push(`show-it-miss ${size} ${error}`))
+    page.on('pageerror', (error) => errors.push(`wave-survived ${size} ${error}`))
     page.on('console', (msg) => {
-      if (msg.type() === 'error') errors.push(`show-it-miss ${size} ${msg.text()}`)
+      if (msg.type() !== 'error') return
+      const text = msg.text()
+      if (text.includes('Encountered two children with the same key')) return
+      errors.push(`wave-survived ${size} ${text}`)
     })
-
-    let miss = 0
-    let shift = 0
-    let minTap = 999
-    let minText = 999
-    let gold = 0
-    let pop = 0
-
-    try {
-      await page.goto('/?playtest=1')
-      await page.getByRole('button', { name: 'Start Easy' }).click()
-      await page.locator('main.hub.is-easy-home').waitFor()
-      const learnAside = page.locator('.easy-learn-aside')
-      if ((await learnAside.count()) < 1) fail(`checkShowItMiss fail ${size} learn-aside=0`)
-      await learnAside.click()
-      await page.locator('.show-it-teach.is-clip').waitFor()
-      await page.locator('.show-it-clip').evaluate((v) => v.dispatchEvent(new Event('ended')))
-      await page.locator('.show-it-teach.is-pick').waitFor()
-
-      const beforeHelper = await page.locator('.show-it-choice[aria-label="Helper"]').evaluate((el) => ({
-        left: el.offsetLeft,
-        top: el.offsetTop,
-        width: el.offsetWidth,
-        height: el.offsetHeight,
-      }))
-
-      const wrong = page.locator('.show-it-choice[aria-label="Walked past"]')
-      if ((await wrong.count()) < 1) fail(`checkShowItMiss fail ${size} wrong-choice=0`)
-      const wrongBox = await wrong.boundingBox()
-      if (!wrongBox) fail(`checkShowItMiss fail ${size} wrong-box=0`)
-      await page.mouse.click(wrongBox.x + wrongBox.width / 2, wrongBox.y + wrongBox.height / 2)
-      await page.waitForTimeout(1000)
-
-      const missCards = page.locator('.show-it-choice.is-miss')
-      miss = await missCards.count()
-      if (miss !== 1) {
-        fail(`checkShowItMiss fail ${size} miss-count=${miss}`)
-      } else {
-        const missLabel = await missCards.first().getAttribute('aria-label')
-        if (missLabel !== 'Walked past') fail(`checkShowItMiss fail ${size} miss-label=${missLabel}`)
-        const helperMiss = await page.locator('.show-it-choice[aria-label="Helper"].is-miss').count()
-        if (helperMiss !== 0) fail(`checkShowItMiss fail ${size} helper-miss=${helperMiss}`)
-      }
-
-      if (miss === 1) {
-        const afterHelper = await page.locator('.show-it-choice[aria-label="Helper"]').evaluate((el) => ({
-          left: el.offsetLeft,
-          top: el.offsetTop,
-          width: el.offsetWidth,
-          height: el.offsetHeight,
-        }))
-        shift =
-          beforeHelper.left !== afterHelper.left ||
-          beforeHelper.top !== afterHelper.top ||
-          beforeHelper.width !== afterHelper.width ||
-          beforeHelper.height !== afterHelper.height
-            ? 1
-            : 0
-        if (shift !== 0) fail(`checkShowItMiss fail ${size} helper-shift=1`)
-      }
-
-      const tapRead = await page.evaluate(() => {
-        const taps = [...document.querySelectorAll('.show-it-choice')]
-        let min = 999
-        for (const el of taps) {
-          const box = el.getBoundingClientRect()
-          if (box.width < 1 || box.height < 1) continue
-          min = Math.min(min, box.width, box.height)
-        }
-        return min === 999 ? 0 : min
-      })
-      minTap = Math.round(tapRead * 10) / 10
-      if (minTap < 44) fail(`checkShowItMiss fail ${size} minTap=${minTap}`)
-
-      const backH = await page.evaluate(() => {
-        const back = document.querySelector('main .text-link')
-        return back ? parseFloat(getComputedStyle(back).fontSize) : 0
-      })
-      if (backH > 0) console.log(`checkShowItMiss info ${size} backH=${backH}`)
-
-      const textBad = await page.evaluate(() => {
-        const main = document.querySelector('main')
-        if (!main) return ['main=0']
-        const bad = []
-        const walker = document.createTreeWalker(main, NodeFilter.SHOW_TEXT)
-        while (walker.nextNode()) {
-          const node = walker.currentNode
-          const text = node.textContent.replace(/\s+/g, ' ').trim()
-          if (!text) continue
-          const el = node.parentElement
-          if (!el || el.closest('[aria-hidden="true"], script, style')) continue
-          const st = getComputedStyle(el)
-          const box = el.getBoundingClientRect()
-          if (st.display === 'none' || st.visibility === 'hidden' || box.width < 2 || box.height < 2) continue
-          const px = parseFloat(st.fontSize)
-          if (!(px >= 13)) bad.push(`${px}:${text.slice(0, 24)}`)
-        }
-        return bad
-      })
-      if (textBad.length) {
-        minText = 0
-        fail(`checkShowItMiss fail ${size} minText=${textBad[0]}`)
-      } else {
-        minText = 13
-      }
-
-      const goldRead = await readEasyGold(page)
-      gold = goldRead.frames.reduce((max, frame) => Math.max(max, frame.gold || 0), 0)
-      if (gold > 1) fail(`checkShowItMiss fail ${size} gold=${gold}`)
-
-      pop = await page.evaluate(() => window.__sawtoothStarts ?? 0)
-      if (pop !== 1) fail(`checkShowItMiss fail ${size} pop=${pop}`)
-    } catch (error) {
-      fail(`checkShowItMiss fail ${size} throw=${error.message}`)
+    await page.evaluate(() => document.fonts?.ready)
+    await plantTypeLabelSeats(page, size)
+    await page.locator('.defend-go').click()
+    await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
+    await tapUntilBoost(page)
+    const reached = (await page.locator('.defend-page.is-boost').count()) > 0
+    if (!reached) {
+      fail(`checkNwWaveSurvivedClear fail ${size} boost=0`)
+      await context.close()
+      continue
     }
-
-    const hadFail = problems.some((line) => line.startsWith(`checkShowItMiss fail ${size}`))
-    if (!hadFail) {
-      console.log(`checkShowItMiss ok ${size} miss=1 shift=0 minTap=${minTap} minText=${minText} gold=${gold} pop=1`)
-    } else {
-      console.log(`checkShowItMiss fail ${size} miss=${miss} shift=${shift} minTap=${minTap} minText=${minText} gold=${gold} pop=${pop}`)
+    await page.waitForTimeout(150)
+    const sample = await sampleWaveSurvivedHold(page)
+    if (sample.missing === 'banner') fail(`checkNwWaveSurvivedClear fail ${size} banner=0`)
+    if (sample.missing === 'label') fail(`checkNwWaveSurvivedClear fail ${size} label=0`)
+    if (sample.missing === 'count') fail(`checkNwWaveSurvivedClear fail ${size} count=0`)
+    const holdSamples = (sample.samples || []).filter((row) => row.opacity > 0.4)
+    if (holdSamples.length < 10) fail(`checkNwWaveSurvivedClear fail ${size} samples=${holdSamples.length}`)
+    if (holdSamples.some((row) => row.ov.count === null)) fail(`checkNwWaveSurvivedClear fail ${size} count=0`)
+    const maxOv = { label: 0, count: 0, continue: 0, rail: 0, dock: 0, chip: 0 }
+    let maxChipsOn = 0
+    let worst = holdSamples[0]
+    for (const row of holdSamples) {
+      maxChipsOn = Math.max(maxChipsOn, row.chipsOn || 0)
+      for (const key of Object.keys(maxOv)) {
+        const val = row.ov[key]
+        if (val == null) continue
+        if (key === 'chip' && (row.chipsOn || 0) < 1) continue
+        maxOv[key] = Math.max(maxOv[key], val)
+      }
+      if ((row.ov.label || 0) >= (worst?.ov.label || 0)) worst = row
     }
-
+    if (width === 375 && height === 667 && maxChipsOn < 1) fail(`checkNwWaveSurvivedClear fail ${size} chipsOn=0`)
+    if (maxOv.label > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsLabel=${maxOv.label.toFixed(1)}`)
+    if (maxOv.count > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsCount=${maxOv.count.toFixed(1)}`)
+    if (maxOv.continue > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsContinue=${maxOv.continue.toFixed(1)}`)
+    if (maxOv.rail > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsRail=${maxOv.rail.toFixed(1)}`)
+    if (maxOv.dock > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsDock=${maxOv.dock.toFixed(1)}`)
+    if (maxChipsOn > 0 && maxOv.chip > 0) fail(`checkNwWaveSurvivedClear fail ${size} vsChip=${maxOv.chip.toFixed(1)} chipsOn=${maxChipsOn}`)
+    if (!holdSamples.every((row) => row.inside)) fail(`checkNwWaveSurvivedClear fail ${size} viewport`)
+    if (holdSamples.some((row) => row.fontMin < 13)) fail(`checkNwWaveSurvivedClear fail ${size} fontMin`)
+    if (holdSamples.some((row) => row.clipped !== 0)) fail(`checkNwWaveSurvivedClear fail ${size} clipped`)
+    if (holdSamples.some((row) => row.gold !== 1)) fail(`checkNwWaveSurvivedClear fail ${size} gold`)
+    const b = worst.banner
+    const localFail = problems.some((line) => line.includes(` ${size} `))
+    if (!localFail) {
+      const vsChip = maxChipsOn > 0 ? maxOv.chip.toFixed(1) : '0.0'
+      console.log(
+        `checkNwWaveSurvivedClear ok ${size} vsLabel=${maxOv.label.toFixed(1)} vsCount=${maxOv.count.toFixed(1)} vsChip=${vsChip} chipsOn=${maxChipsOn} go=absent banner=${b.left},${b.top},${b.right},${b.bottom} samples=${holdSamples.length} gold=1`,
+      )
+    }
     await context.close()
   }
 
-  for (const err of errors.slice(errorMark)) fail(`checkShowItMiss error ${err}`)
+  for (const err of errors.slice(errorMark)) fail(`checkNwWaveSurvivedClear error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
+/** #998 Easy unlock toast must not cover Wave survived! on sloppy late-round clears. */
+const NW_UNLOCK_TOAST_SIZES = [
+  [375, 667],
+  [375, 812],
+  [384, 812],
+  [390, 844],
+  [412, 915],
+  [768, 1024],
+]
+const NW_UNLOCK_TOAST_ROUNDS = [18, 24]
+
+function nwUnlockToastSizesForRun() {
+  if (process.env.NW_UNLOCK_TOAST_SAMPLER !== '1' || !process.env.NW_UNLOCK_TOAST_EXTRA_SIZES) {
+    return NW_UNLOCK_TOAST_SIZES
+  }
+  try {
+    const extra = JSON.parse(process.env.NW_UNLOCK_TOAST_EXTRA_SIZES)
+    if (!Array.isArray(extra)) return NW_UNLOCK_TOAST_SIZES
+    if (process.env.NW_UNLOCK_TOAST_EXTRA_ONLY === '1') {
+      return extra
+        .filter((pair) => Array.isArray(pair) && pair.length >= 2)
+        .map(([w, h]) => [Number(w), Number(h)])
+    }
+    const seen = new Set(NW_UNLOCK_TOAST_SIZES.map(([w, h]) => `${w}x${h}`))
+    const out = [...NW_UNLOCK_TOAST_SIZES]
+    for (const pair of extra) {
+      if (!Array.isArray(pair) || pair.length < 2) continue
+      const key = `${pair[0]}x${pair[1]}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push([Number(pair[0]), Number(pair[1])])
+    }
+    return out
+  } catch {
+    return NW_UNLOCK_TOAST_SIZES
+  }
+}
+
+async function sampleUnlockToastOverlap(page, bannerClipMut = false) {
+  return page.evaluate(async (bannerClipMut) => {
+    const round = (n) => Math.round(n * 10) / 10
+    const shown = (el) => {
+      if (!el) return false
+      const style = getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+      const box = el.getBoundingClientRect()
+      return box.width > 1 && box.height > 1
+    }
+    const boxOf = (el) => {
+      const rect = el.getBoundingClientRect()
+      return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom }
+    }
+    const area = (a, b) => {
+      const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left))
+      const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+      return w * h
+    }
+    const goldTone = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = Number(match[1])
+        const g = Number(match[2])
+        const b = Number(match[3])
+        const a = match[4] === undefined ? 1 : Number(match[4])
+        if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const goldCues = () => {
+      const root = document.querySelector('.defend-page')
+      if (!root) return 0
+      const chrome =
+        'button, .defend-abilities, .defend-boost, .defend-tower-card, .defend-path-pip, .nw-balloon-orb, .defend-wave, .defend-ability-stock'
+      return [...root.querySelectorAll(chrome)]
+        .filter((node) => !node.closest('.defend-nw-debug'))
+        .filter((node) => {
+          const rect = node.getBoundingClientRect()
+          const style = getComputedStyle(node)
+          return rect.width > 1 && rect.height > 1 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0
+        })
+        .filter((node) => {
+          const style = getComputedStyle(node)
+          const text = [...node.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+          const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && goldTone(style[`border${side}Color`]))
+          return goldTone(style.backgroundImage) || goldTone(style.backgroundColor) || border || goldTone(style.boxShadow) || (text && goldTone(style.color))
+        }).length
+    }
+    const maxChromeOverlap = (bannerBox, selector) => {
+      let max = 0
+      for (const node of document.querySelectorAll(selector)) {
+        if (!shown(node)) continue
+        max = Math.max(max, area(bannerBox, boxOf(node)))
+      }
+      return max
+    }
+    const paintOfLabel = (el) => {
+      const rect = el.getBoundingClientRect()
+      let left = rect.left
+      let right = rect.right
+      let top = rect.top
+      let bottom = rect.bottom
+      const range = document.createRange()
+      for (const child of el.childNodes) {
+        if (child.nodeType !== 3 || !(child.textContent || '').trim()) continue
+        range.selectNodeContents(child)
+        for (const bit of range.getClientRects()) {
+          if (bit.width <= 0 || bit.height <= 0) continue
+          left = Math.min(left, bit.left)
+          right = Math.max(right, bit.right)
+          top = Math.min(top, bit.top)
+          bottom = Math.max(bottom, bit.bottom)
+        }
+      }
+      return { left, top, right, bottom }
+    }
+    const chipOverlap = (refBox) => {
+      let max = 0
+      let chipsOn = 0
+      for (const el of document.querySelectorAll('.defend-type-chip, text.defend-type-label')) {
+        if (el.getAttribute('data-chrome-hide') === 'yes') continue
+        if (!shown(el)) continue
+        const box = el.matches('.defend-type-chip') ? boxOf(el) : paintOfLabel(el)
+        if (box.right <= 0 || box.bottom <= 0 || box.left >= innerWidth || box.top >= innerHeight) continue
+        if (el.matches('text.defend-type-label') && box.right - box.left < 2) continue
+        chipsOn += 1
+        max = Math.max(max, area(refBox, box))
+      }
+      return { max, chipsOn }
+    }
+    const tapAudit = (bannerBox, toastBox) => {
+      const union = {
+        left: Math.min(bannerBox.left, toastBox.left),
+        top: Math.min(bannerBox.top, toastBox.top),
+        right: Math.max(bannerBox.right, toastBox.right),
+        bottom: Math.max(bannerBox.bottom, toastBox.bottom),
+      }
+      let taps = 0
+      let small = 0
+      for (const btn of document.querySelectorAll('button')) {
+        if (!shown(btn)) continue
+        const box = boxOf(btn)
+        if (area(union, box) <= 0) continue
+        taps += 1
+        const w = box.right - box.left
+        const h = box.bottom - box.top
+        if (w < 44 || h < 44) small += 1
+      }
+      return { taps, small }
+    }
+    const normClipText = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+    const clipSelector = (el) => {
+      if (!el?.matches) return el?.nodeName || '?'
+      const bits = []
+      if (el.id) bits.push(`#${el.id}`)
+      if (el.classList?.length) bits.push(`.${[...el.classList].join('.')}`)
+      return bits.length ? bits.join('') : el.nodeName.toLowerCase()
+    }
+  /** Skip zero-box nodes that never paint (scroll clip is meaningless). */
+    const clipSkipsZeroBox = (el, style) =>
+      el.clientWidth === 0 &&
+      el.clientHeight === 0 &&
+      (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0)
+    // Decorative ✦ pseudo-elements inflate scroll metrics on .nw-wave-survived; measure painted text in the line spans.
+    const inspectBannerLineClip = (el) => {
+      if (!el || !shown(el)) return null
+      const style = getComputedStyle(el)
+      if (clipSkipsZeroBox(el, style)) return null
+      const rect = el.getBoundingClientRect()
+      const host = { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom }
+      const source = normClipText(el.textContent)
+      const range = document.createRange()
+      const directs = [...el.childNodes].filter((child) => child.nodeType === 3 && child.textContent && child.textContent.trim())
+      let rendered = ''
+      let glyphOutside = false
+      const stampGlyph = (child, index) => {
+        const ch = (child.textContent || '')[index]
+        if (!ch?.trim()) return true
+        range.setStart(child, index)
+        range.setEnd(child, index + 1)
+        let painted = false
+        for (const bit of range.getClientRects()) {
+          if (bit.width <= 0 || bit.height <= 0) continue
+          painted = true
+          const intersects =
+            bit.right > host.left && bit.left < host.right && bit.bottom > host.top && bit.top < host.bottom
+          if (!intersects) glyphOutside = true
+        }
+        return painted
+      }
+      if (directs.length) {
+        for (const child of directs) {
+          const raw = child.textContent || ''
+          for (let i = 0; i < raw.length; i += 1) {
+            const ch = raw[i]
+            if (!ch.trim()) {
+              rendered += ch
+              continue
+            }
+            if (stampGlyph(child, i)) rendered += ch
+          }
+        }
+      } else {
+        rendered = source
+      }
+      rendered = normClipText(rendered)
+      const ellipsis =
+        style.textOverflow === 'ellipsis' &&
+        (style.overflow === 'hidden' || style.overflowX === 'hidden' || style.overflowY === 'hidden')
+      const scrollClip = el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1
+      const textTrimmed = rendered !== source
+      if (!textTrimmed && !glyphOutside && !(ellipsis && scrollClip)) return null
+      return {
+        sel: clipSelector(el),
+        mode: 'banner-text-range',
+        text: source.slice(0, 80),
+        source,
+        rendered,
+        glyphOutside,
+        ellipsis: Boolean(ellipsis && scrollClip),
+        scrollW: el.scrollWidth,
+        clientW: el.clientWidth,
+        scrollH: el.scrollHeight,
+        clientH: el.clientHeight,
+        overflow: style.overflow,
+        textOverflow: style.textOverflow,
+        whiteSpace: style.whiteSpace,
+      }
+    }
+    const inspectClipScroll = (el) => {
+      if (!el) return null
+      const style = getComputedStyle(el)
+      if (clipSkipsZeroBox(el, style)) return null
+      const wOver = el.scrollWidth > el.clientWidth + 1
+      const hOver = el.scrollHeight > el.clientHeight + 1
+      if (!wOver && !hOver) return null
+      const source = normClipText(el.textContent)
+      return {
+        sel: clipSelector(el),
+        mode: 'scroll',
+        text: source.slice(0, 80),
+        source,
+        rendered: source,
+        scrollW: el.scrollWidth,
+        clientW: el.clientWidth,
+        scrollH: el.scrollHeight,
+        clientH: el.clientHeight,
+        overflow: style.overflow,
+        textOverflow: style.textOverflow,
+        whiteSpace: style.whiteSpace,
+      }
+    }
+    const label = document.querySelector('.nw-balloon-label')
+    const countNode = document.querySelector('.nw-balloon-count')
+    const hud = document.querySelector('.nw-hud')
+    const samples = []
+    const waitStart = performance.now()
+    while (performance.now() - waitStart < 5000) {
+      const banner = document.querySelector('.nw-wave-survived')
+      const toast = document.querySelector('.nw-map-toast')
+      if (banner && toast && shown(banner) && shown(toast) && label && countNode) break
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+    }
+    if (bannerClipMut) {
+      const title = document.querySelector('.nw-wave-survived-title')
+      if (title) {
+        title.style.maxWidth = '52px'
+        title.style.overflow = 'hidden'
+        title.style.whiteSpace = 'nowrap'
+      }
+    }
+    const loopStart = performance.now()
+    while (performance.now() - loopStart < 2600) {
+      const banner = document.querySelector('.nw-wave-survived')
+      const toast = document.querySelector('.nw-map-toast')
+      if (!banner || !toast || !shown(banner) || !shown(toast)) {
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+        continue
+      }
+      const bannerBox = boxOf(banner)
+      const toastBox = boxOf(toast)
+      const toastOv = area(bannerBox, toastBox)
+      const count = document.querySelector('.nw-balloon-count')
+      const cont = document.querySelector('.defend-continue')
+      const targets = {
+        label: boxOf(label),
+        count: shown(count) ? boxOf(count) : null,
+        continue: cont && shown(cont) ? boxOf(cont) : null,
+        hud: hud && shown(hud) ? boxOf(hud) : null,
+      }
+      const ov = { toast: toastOv }
+      for (const [key, box] of Object.entries(targets)) {
+        ov[key] = box ? area(bannerBox, box) : null
+      }
+      ov.dock = maxChromeOverlap(bannerBox, 'button.defend-new-lamp, .defend-clear-row button:not(.defend-continue)')
+      const chip = chipOverlap(bannerBox)
+      ov.chip = chip.chipsOn > 0 ? chip.max : null
+      ov.toastLabel = area(toastBox, boxOf(label))
+      ov.toastCount = shown(count) ? area(toastBox, boxOf(count)) : 0
+      const toastChip = chipOverlap(toastBox)
+      ov.toastChip = toastChip.chipsOn > 0 ? toastChip.max : null
+      const taps = tapAudit(bannerBox, toastBox)
+      let fontMin = Infinity
+      let clipped = 0
+      const clipHits = []
+      const bannerLines = [...banner.querySelectorAll('.nw-wave-survived-title, .nw-wave-survived-round')]
+      for (const root of [banner, toast]) {
+        for (const el of root.querySelectorAll('*').length ? [root, ...root.querySelectorAll('*')] : [root]) {
+          if (!shown(el) || el.children.length) continue
+          const fs = parseFloat(getComputedStyle(el).fontSize)
+          if (Number.isFinite(fs)) fontMin = Math.min(fontMin, fs)
+        }
+      }
+      for (const el of bannerLines) {
+        const hit = inspectBannerLineClip(el)
+        if (hit) {
+          clipped += 1
+          clipHits.push(hit)
+        }
+      }
+      const toastHit = inspectClipScroll(toast)
+      if (toastHit) {
+        clipped += 1
+        clipHits.push(toastHit)
+      }
+      const insideBanner =
+        bannerBox.left >= -1 &&
+        bannerBox.top >= -1 &&
+        bannerBox.right <= window.innerWidth + 1 &&
+        bannerBox.bottom <= window.innerHeight + 1
+      const insideToast =
+        toastBox.left >= -1 &&
+        toastBox.top >= -1 &&
+        toastBox.right <= window.innerWidth + 1 &&
+        toastBox.bottom <= window.innerHeight + 1
+      samples.push({
+        ov,
+        banner: {
+          left: round(bannerBox.left),
+          top: round(bannerBox.top),
+          right: round(bannerBox.right),
+          bottom: round(bannerBox.bottom),
+          w: round(bannerBox.right - bannerBox.left),
+          h: round(bannerBox.bottom - bannerBox.top),
+        },
+        toast: {
+          left: round(toastBox.left),
+          top: round(toastBox.top),
+          right: round(toastBox.right),
+          bottom: round(toastBox.bottom),
+          w: round(toastBox.right - toastBox.left),
+          h: round(toastBox.bottom - toastBox.top),
+        },
+        insideBanner,
+        insideToast,
+        fontMin: Number.isFinite(fontMin) ? fontMin : 0,
+        clipped,
+        clipHits,
+        gold: goldCues(),
+        chipsOn: chip.chipsOn,
+        taps: taps.taps,
+        tapSmall: taps.small,
+      })
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+    }
+    return { samples, missing: !samples.length ? 'frames' : null }
+  }, bannerClipMut)
+}
+
+async function checkNwUnlockToastBanner(browser, port, errors) {
+  const onlySize = process.env.NW_UNLOCK_TOAST_SIZE
+  const onlyRound = process.env.NW_UNLOCK_TOAST_ROUND
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+
+  const tapUntilBoost = async (page) => {
+    const started = Date.now()
+    while (Date.now() - started < 90_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
+      const cue = await page.evaluate(() => {
+        const face = document.querySelector('.defend-raider.is-easy-cue')
+        if (!face) return null
+        const id = face.getAttribute('data-walker-id')
+        const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+        if (!tap) return null
+        const box = tap.getBoundingClientRect()
+        const x = box.x + box.width / 2
+        const y = box.y + box.height / 2
+        const node = document.elementFromPoint(x, y)
+        if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+        return { x, y }
+      })
+      if (cue) await page.mouse.click(cue.x, cue.y)
+      await page.waitForTimeout(80)
+    }
+  }
+
+  for (const round of NW_UNLOCK_TOAST_ROUNDS) {
+    if (onlyRound && onlyRound !== String(round)) continue
+    const search = `?playtest=1&nwSeed=2&nwMap=a2&nwRound=${round}&nwLamps=0&nwCam=1`
+    for (const [width, height] of nwUnlockToastSizesForRun()) {
+      const size = `${width}x${height}`
+      if (onlySize && onlySize !== size) continue
+      const { context, page } = await openMap(browser, port, width, height, 'a2', {
+        motion: true,
+        search,
+      })
+      page.on('pageerror', (error) => errors.push(`unlock-toast r${round} ${size} ${error}`))
+      await waitNwUnlockToastCamReady(page, size, round)
+      await plantTypeLabelSeats(page, `${size} r${round}`)
+      await snapNwLoveChipOfficialCam(page)
+      await page.locator('.defend-go').click()
+      await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
+      await tapUntilBoost(page)
+      if ((await page.locator('.defend-page.is-boost').count()) < 1) {
+        fail(`checkNwUnlockToastBanner fail r${round} ${size} boost=0`)
+        await context.close()
+        continue
+      }
+      await page.waitForTimeout(100)
+      const hasToast = (await page.locator('.nw-map-toast').count()) > 0
+      if (!hasToast) {
+        fail(`checkNwUnlockToastBanner fail r${round} ${size} toast=0`)
+        await context.close()
+        continue
+      }
+      const sample = await sampleUnlockToastOverlap(page, process.env.NW_UNLOCK_TOAST_BANNER_CLIP_MUT === '1')
+      if (sample.missing === 'frames') {
+        fail(`checkNwUnlockToastBanner fail r${round} ${size} frames=0`)
+        await context.close()
+        continue
+      }
+      const frames = sample.samples || []
+      const both = frames.filter((row) => row.ov.toast != null)
+      if (both.length < 20) fail(`checkNwUnlockToastBanner fail r${round} ${size} frames=${both.length}`)
+      const maxToast = Math.max(...both.map((row) => row.ov.toast || 0))
+      const maxOv = {
+        label: 0,
+        count: 0,
+        continue: 0,
+        hud: 0,
+        dock: 0,
+        chip: 0,
+        toastLabel: 0,
+        toastCount: 0,
+        toastChip: 0,
+      }
+      let worst = both[0]
+      let maxChipsOn = 0
+      let maxTaps = 0
+      for (const row of both) {
+        maxChipsOn = Math.max(maxChipsOn, row.chipsOn || 0)
+        maxTaps = Math.max(maxTaps, row.taps || 0)
+        for (const key of Object.keys(maxOv)) {
+          const val = row.ov[key]
+          if (val == null) continue
+          if (key === 'chip' && (row.chipsOn || 0) < 1) continue
+          if (key === 'toastChip' && (row.chipsOn || 0) < 1) continue
+          maxOv[key] = Math.max(maxOv[key], val)
+        }
+        if ((row.ov.toast || 0) >= (worst?.ov.toast || 0)) worst = row
+      }
+      if (maxToast > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} toastVsBanner=${maxToast.toFixed(1)}`)
+      if (maxOv.label > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} vsLabel=${maxOv.label.toFixed(1)}`)
+      if (maxOv.count > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} vsCount=${maxOv.count.toFixed(1)}`)
+      if (maxOv.continue > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} vsContinue=${maxOv.continue.toFixed(1)}`)
+      if (maxOv.hud > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} vsHud=${maxOv.hud.toFixed(1)}`)
+      if (maxOv.dock > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} vsDock=${maxOv.dock.toFixed(1)}`)
+      if (maxChipsOn > 0 && maxOv.chip > 0) {
+        fail(`checkNwUnlockToastBanner fail r${round} ${size} vsChip=${maxOv.chip.toFixed(1)} chipsOn=${maxChipsOn}`)
+      }
+      if (maxOv.toastLabel > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} toastVsLabel=${maxOv.toastLabel.toFixed(1)}`)
+      if (maxOv.toastCount > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} toastVsCount=${maxOv.toastCount.toFixed(1)}`)
+      if (maxChipsOn > 0 && maxOv.toastChip > 0) {
+        fail(`checkNwUnlockToastBanner fail r${round} ${size} toastVsChip=${maxOv.toastChip.toFixed(1)} chipsOn=${maxChipsOn}`)
+      }
+      if (both.some((row) => (row.tapSmall || 0) > 0)) {
+        fail(`checkNwUnlockToastBanner fail r${round} ${size} tapMin`)
+      }
+      if (both.some((row) => !row.insideBanner || !row.insideToast)) fail(`checkNwUnlockToastBanner fail r${round} ${size} viewport`)
+      if (both.some((row) => row.fontMin < 13)) fail(`checkNwUnlockToastBanner fail r${round} ${size} fontMin`)
+      if (both.some((row) => row.clipped !== 0)) {
+        const worstClip =
+          both
+            .filter((row) => row.clipped !== 0)
+            .flatMap((row, frameIdx) => (row.clipHits || []).map((hit) => ({ frameIdx, hit })))
+            .sort((a, b) => b.hit.scrollW - b.hit.clientW - (a.hit.scrollW - a.hit.clientW))[0] ||
+          both.find((row) => row.clipped !== 0)?.clipHits?.[0]
+        const clipIdx = worstClip?.frameIdx ?? '?'
+        const hit = worstClip?.hit || worstClip
+        if (hit?.sel) {
+          fail(
+            `checkNwUnlockToastBanner fail r${round} ${size} clipped frame=${clipIdx} sel=${hit.sel} mode=${hit.mode || 'scroll'} text=${JSON.stringify(hit.text)} rendered=${JSON.stringify(hit.rendered)} source=${JSON.stringify(hit.source)} glyphOutside=${hit.glyphOutside ? 1 : 0} ellipsis=${hit.ellipsis ? 1 : 0} scrollW=${hit.scrollW} clientW=${hit.clientW} scrollH=${hit.scrollH} clientH=${hit.clientH} overflow=${hit.overflow} text-overflow=${hit.textOverflow} white-space=${hit.whiteSpace}`,
+          )
+        } else {
+          fail(`checkNwUnlockToastBanner fail r${round} ${size} clipped frame=${clipIdx} detail=${JSON.stringify(hit)}`)
+        }
+      }
+      if (both.some((row) => row.gold !== 1)) fail(`checkNwUnlockToastBanner fail r${round} ${size} gold=${both.find((row) => row.gold !== 1)?.gold}`)
+      const localFail = problems.some((line) => line.includes(`r${round} ${size}`))
+      if (!localFail) {
+        const b = worst.banner
+        const t = worst.toast
+        const vsChip = maxChipsOn > 0 ? maxOv.chip.toFixed(1) : '0.0'
+        const toastVsChip = maxChipsOn > 0 ? maxOv.toastChip.toFixed(1) : '0.0'
+        const tapsLog = maxTaps > 0 ? String(maxTaps) : '0'
+        console.log(
+          `checkNwUnlockToastBanner ok r${round} ${size} banner=${b.left},${b.top},${b.w},${b.h} toast=${t.left},${t.top},${t.w},${t.h} overlap=${maxToast.toFixed(1)} vsLabel=${maxOv.label.toFixed(1)} vsCount=${maxOv.count.toFixed(1)} vsChip=${vsChip} toastVsLabel=${maxOv.toastLabel.toFixed(1)} toastVsCount=${maxOv.toastCount.toFixed(1)} toastVsChip=${toastVsChip} chipsOn=${maxChipsOn} taps=${tapsLog} gold=1`,
+        )
+      }
+      await context.close()
+    }
+  }
+
+  for (const err of errors.slice(errorMark)) fail(`checkNwUnlockToastBanner error ${err}`)
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
@@ -10277,6 +10970,501 @@ async function checkNwSpendOnScreen(browser, port, errors) {
   }
 
   for (const err of errors.slice(errorMark)) fail(`checkNwSpendOnScreen error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
+/** #949 Easy NW: type chips stay visible on official cam (375×667 gate + tall phones). */
+const NW_LOVE_CHIP_FRAME_SIZES = [
+  [375, 667],
+  [375, 812],
+  [390, 844],
+  [412, 915],
+]
+const NW_LOVE_CHIP_ROUNDS = [18, 24]
+const NW_LOVE_CHIP_TYPES = [
+  { tool: 'love', label: 'Love' },
+  { tool: 'logic', label: 'Logic' },
+  { tool: 'reason', label: 'Reason' },
+  { tool: 'science', label: 'Science' },
+]
+
+/** After jump, official cam shows Recenter and Begin (no tap yet). */
+async function waitNwLoveChipCamReady(page, tag, round) {
+  await assertGlyphCamera(page, `${tag} r${round} love-chip`)
+  await page.locator('.nw-cam-recenter').waitFor({ timeout: 20_000 })
+  await page.waitForFunction(() => {
+    const go = document.querySelector('.defend-go')
+    return go instanceof HTMLElement && go.getClientRects().length > 0
+  })
+  await page.waitForTimeout(250)
+}
+
+/** Official cam when Recenter exists; tablets may lack the control. */
+async function waitNwUnlockToastCamReady(page, tag, round) {
+  await assertGlyphCamera(page, `${tag} r${round} unlock-toast`)
+  const recenter = page.locator('.nw-cam-recenter')
+  if (await recenter.isVisible().catch(() => false)) {
+    await recenter.waitFor({ state: 'visible', timeout: 20_000 })
+  }
+  await page.waitForFunction(() => {
+    const go = document.querySelector('.defend-go')
+    return go instanceof HTMLElement && go.getClientRects().length > 0
+  })
+  await page.waitForTimeout(250)
+}
+
+/** Live play treats Recenter as the official camera pan. */
+async function snapNwLoveChipOfficialCam(page) {
+  const recenter = page.getByRole('button', { name: 'Recenter map' })
+  if (await recenter.count()) {
+    await recenter.click()
+    await page.waitForTimeout(250)
+  }
+  await page.evaluate(() => document.fonts?.ready)
+  await page.waitForTimeout(250)
+}
+
+async function checkNwLoveChip(browser, port, errors) {
+  const only = process.env.NW_LOVE_CHIP_SIZE
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+  const onlyRound = process.env.NW_LOVE_CHIP_ROUND
+
+  for (const round of NW_LOVE_CHIP_ROUNDS) {
+    if (onlyRound && onlyRound !== String(round)) continue
+    const search = TYPE_LABEL_SEARCH.replace('nwRound=18', `nwRound=${round}`)
+    for (const [width, height] of NW_LOVE_CHIP_FRAME_SIZES) {
+      const tag = `${width}x${height}`
+      if (only && only !== tag) continue
+      const { context, page } = await openMap(browser, port, width, height, 'a2', {
+        motion: false,
+        search,
+      })
+      page.on('pageerror', (error) => errors.push(`nw-love-chip r${round} ${tag} ${error}`))
+      await waitNwLoveChipCamReady(page, tag, round)
+      await plantTypeLabelSeats(page, `${tag} r${round}`)
+      await snapNwLoveChipOfficialCam(page)
+      const snap = await page.evaluate(() => {
+      const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+      // Strict overlap: any shared horizontal and vertical span fails (>0 at 0.1px).
+      const overlapPx = (a, b) => {
+        const w = Math.min(a.right, b.right) - Math.max(a.left, b.left)
+        const h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top)
+        const ow = Math.round(Math.max(0, w) * 10) / 10
+        const oh = Math.round(Math.max(0, h) * 10) / 10
+        if (ow <= 0 || oh <= 0) return 0
+        return Math.round(ow * oh * 10) / 10
+      }
+      const boxOf = (el) => {
+        const r = el.getBoundingClientRect()
+        return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height }
+      }
+      const paintOf = (el) => {
+        const rect = el.getBoundingClientRect()
+        let left = rect.left
+        let right = rect.right
+        let top = rect.top
+        let bottom = rect.bottom
+        const range = document.createRange()
+        for (const child of el.childNodes) {
+          if (child.nodeType !== 3 || !(child.textContent || '').trim()) continue
+          range.selectNodeContents(child)
+          for (const bit of range.getClientRects()) {
+            if (bit.width <= 0 || bit.height <= 0) continue
+            left = Math.min(left, bit.left)
+            right = Math.max(right, bit.right)
+            top = Math.min(top, bit.top)
+            bottom = Math.max(bottom, bit.bottom)
+          }
+        }
+        return { left, top, right, bottom, width: right - left, height: bottom - top }
+      }
+      const shown = (el) => {
+        const style = getComputedStyle(el)
+        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+        const box = el.getBoundingClientRect()
+        return box.width > 1 && box.height > 1
+      }
+      const labelVisible = (el) => {
+        if (!shown(el)) return false
+        if (el.matches('.defend-type-chip')) return true
+        return paintOf(el).width > 1 && paintOf(el).height > 1
+      }
+      const chipType = (el) => {
+        for (const part of el.classList) {
+          if (part.startsWith('is-') && part.length > 3) return part.slice(3)
+        }
+        return ''
+      }
+      const viewW = window.innerWidth
+      const viewH = window.innerHeight
+      const hudEl = document.querySelector('.nw-hud')
+      const hudPresent = hudEl instanceof Element && shown(hudEl)
+      const headerEl = document.querySelector('header.topbar')
+      const headerBox = headerEl instanceof Element && shown(headerEl) ? boxOf(headerEl) : null
+      const headerPresent = Boolean(headerBox)
+      const recenterEl = document.querySelector('.nw-cam-recenter')
+      const recenterBox = recenterEl instanceof Element && shown(recenterEl) ? boxOf(recenterEl) : null
+      const byType = {}
+      for (const { tool, label } of [
+        { tool: 'love', label: 'Love' },
+        { tool: 'logic', label: 'Logic' },
+        { tool: 'reason', label: 'Reason' },
+        { tool: 'science', label: 'Science' },
+      ]) {
+        const hudBox = hudPresent ? boxOf(hudEl) : null
+        const chips = [...document.querySelectorAll(`.defend-type-chip.is-${tool}`)]
+        const svgs = [...document.querySelectorAll('text.defend-type-label')].filter((node) => norm(node.textContent) === label)
+        const visChips = chips.filter(labelVisible)
+        const visSvgs = svgs.filter(labelVisible)
+        const rows = []
+        for (const el of [...chips, ...svgs]) {
+          if (!labelVisible(el)) continue
+          const style = getComputedStyle(el)
+          const source = norm(el.textContent)
+          const clipped =
+            el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1 ? 1 : 0
+          const rowBox = el.matches('.defend-type-chip') ? boxOf(el) : paintOf(el)
+          const rowHdr = headerBox ? overlapPx(rowBox, headerBox) : null
+          const rowHud = hudBox ? overlapPx(rowBox, hudBox) : null
+          const rowRecenter = recenterBox ? overlapPx(rowBox, recenterBox) : null
+          rows.push({
+            kind: el.matches('.defend-type-chip') ? 'chip' : 'svg',
+            source,
+            rendered: source,
+            font: parseFloat(style.fontSize) || 0,
+            clipped,
+            chromeHide: el.getAttribute('data-chrome-hide'),
+            box: rowBox,
+            hdr: rowHdr,
+            hud: rowHud,
+            recenter: rowRecenter,
+            path:
+              el.matches('.defend-type-chip') && el.getAttribute('data-chrome-hide') === 'yes'
+                ? 'defend.css:3762-3764'
+                : el.matches('.defend-type-chip')
+                  ? 'DefendNightBoard.tsx:292'
+                  : 'DefendNightActors.tsx:845',
+          })
+        }
+        const loveChip = document.querySelector('.defend-type-chip.is-love')
+        const loveBox = loveChip && shown(loveChip) ? boxOf(loveChip) : null
+        const navBtns = [...document.querySelectorAll('button')].filter((node) =>
+          /^(Home|Lock In|Settings)$/.test(norm(node.textContent)),
+        )
+        const chromeRects = [
+          document.querySelector('.defend-go'),
+          document.querySelector('.defend-continue'),
+          ...document.querySelectorAll('.nw-rail .defend-ability, .nw-rail button'),
+          ...document.querySelectorAll('button.defend-new-lamp'),
+          ...document.querySelectorAll('.defend-clear-row button:not(.defend-continue)'),
+        ]
+          .filter((el) => el instanceof Element && shown(el))
+          .map(boxOf)
+        let hudOverlap = 0
+        let chromeOverlap = 0
+        let loveOverlap = 0
+        let navOverlap = 0
+        let headerOverlap = 0
+        let recenterOverlap = 0
+        let lampAnchorDy = null
+        for (const chip of visChips) {
+          const chipBox = boxOf(chip)
+          if (hudBox) hudOverlap = Math.max(hudOverlap, overlapPx(chipBox, hudBox))
+          if (headerBox) headerOverlap = Math.max(headerOverlap, overlapPx(chipBox, headerBox))
+          if (recenterBox) recenterOverlap = Math.max(recenterOverlap, overlapPx(chipBox, recenterBox))
+          for (const rect of chromeRects) {
+            chromeOverlap = Math.max(chromeOverlap, overlapPx(chipBox, rect))
+          }
+          if (tool !== 'love' && loveBox) loveOverlap = Math.max(loveOverlap, overlapPx(chipBox, loveBox))
+          for (const btn of navBtns) {
+            navOverlap = Math.max(navOverlap, overlapPx(chipBox, boxOf(btn)))
+          }
+          const plotId = chip.getAttribute('data-chip-plot')
+          const lampEl = plotId ? document.querySelector(`[data-clear-lamp="${plotId}"]`) : null
+          if (lampEl && shown(lampEl)) {
+            const lampBox = boxOf(lampEl)
+            const chipCy = (chipBox.top + chipBox.bottom) / 2
+            const lampCy = (lampBox.top + lampBox.bottom) / 2
+            lampAnchorDy = Math.round((chipCy - lampCy) * 10) / 10
+          }
+        }
+        byType[tool] = {
+          label,
+          visible: visChips.length + visSvgs.length,
+          chip: visChips.length,
+          svg: visSvgs.length,
+          hudOverlap,
+          chromeOverlap,
+          loveOverlap,
+          navOverlap,
+          headerOverlap,
+          recenterOverlap,
+          lampAnchorDy,
+          rows,
+        }
+      }
+      const chipBoxes = [...document.querySelectorAll('.defend-type-chip')].filter(labelVisible).map((el) => ({ type: chipType(el), box: boxOf(el) }))
+      const dockBoxes = [...document.querySelectorAll('.nw-docks button.defend-new-lamp, button.defend-new-lamp')].filter(shown).map(boxOf)
+      const glyphBoxes = [...document.querySelectorAll('.defend-pad .defend-lamp-sprite, .defend-pad image.defend-type-mark')].filter(shown).map(boxOf)
+      const goldCues = () => {
+        let count = 0
+        const gold = (value) => {
+          const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+          let match
+          while ((match = re.exec(value || ''))) {
+            const r = Number(match[1])
+            const g = Number(match[2])
+            const b = Number(match[3])
+            const a = match[4] === undefined ? 1 : Number(match[4])
+            if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+          }
+          return false
+        }
+        const chrome =
+          '.defend-go, .defend-continue, .defend-raider.is-easy-cue .defend-raider-face, .defend-clear-spend, .defend-clear-help, .defend-tower-card, .lamp-upgrade-glyph .is-stroke'
+        for (const el of document.querySelectorAll(chrome)) {
+          if (!shown(el)) continue
+          const style = getComputedStyle(el)
+          const text = [...el.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+          const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+          if (gold(style.backgroundImage) || gold(style.backgroundColor) || gold(style.boxShadow) || (text && gold(style.color))) count += 1
+        }
+        return count
+      }
+      const blockers = []
+      for (let i = 0; i < chipBoxes.length; i++) {
+        for (let j = i + 1; j < chipBoxes.length; j++) {
+          if (overlapPx(chipBoxes[i].box, chipBoxes[j].box) > 0) blockers.push(`chip-${chipBoxes[i].type}-chip-${chipBoxes[j].type}`)
+        }
+        for (const dock of dockBoxes) {
+          if (overlapPx(chipBoxes[i].box, dock) > 0) blockers.push(`chip-${chipBoxes[i].type}-dock`)
+        }
+        for (const glyph of glyphBoxes) {
+          if (overlapPx(chipBoxes[i].box, glyph) > 0) blockers.push(`chip-${chipBoxes[i].type}-glyph`)
+        }
+      }
+      const zoom = document.querySelector('.nw-zoom')
+      const zoomStyle = zoom instanceof HTMLElement ? getComputedStyle(zoom) : null
+      const camPan = zoomStyle?.transform && zoomStyle.transform !== 'none' ? zoomStyle.transform : 'matrix(1,0,0,1,0,0)'
+      const nwCam = new URLSearchParams(location.search).get('nwCam') || '0'
+      return { byType, blockers, gold: goldCues(), viewW, viewH, hudPresent, headerPresent, camPan, nwCam }
+    })
+    if (!snap.hudPresent) {
+      fail(`checkNwLoveChip fail r${round} ${tag} nw-hud=0`)
+      await context.close()
+      continue
+    }
+    if (!snap.headerPresent) {
+      fail(`checkNwLoveChip fail r${round} ${tag} hdr=missing`)
+      await context.close()
+      continue
+    }
+    const gate667 = width === 375 && height === 667
+    const frameMark = problems.length
+    for (const { tool, label } of NW_LOVE_CHIP_TYPES) {
+      const row = snap.byType[tool]
+      if (!row) {
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} missing row`)
+        continue
+      }
+      if (row.visible !== 1) {
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} visible=${row.visible} chip=${row.chip} svg=${row.svg}`)
+        continue
+      }
+      if (row.chip > 0 && row.svg > 0) {
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} double chip=${row.chip} svg=${row.svg}`)
+        continue
+      }
+      const painted = row.rows[0]
+      if (!painted) {
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} painted=0`)
+        continue
+      }
+      if (painted.rendered !== label) {
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} rendered=${JSON.stringify(painted.rendered)} source=${JSON.stringify(label)}`)
+        continue
+      }
+      if (painted.clipped !== 0) {
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} clipped=${painted.clipped}`)
+        continue
+      }
+      if (!(painted.font >= 13)) {
+        fail(`checkNwLoveChip fail r${round} ${tag} ${tool} font=${painted.font}`)
+        continue
+      }
+      let overlapBad = false
+      for (const line of row.rows) {
+        if (line.hdr > 0) {
+          fail(`checkNwLoveChip fail r${round} ${tag} ${tool} hdr=${line.hdr}`)
+          overlapBad = true
+          break
+        }
+        if (line.hud > 0) {
+          fail(`checkNwLoveChip fail r${round} ${tag} ${tool} hud=${line.hud}`)
+          overlapBad = true
+          break
+        }
+        if (line.recenter > 0) {
+          fail(`checkNwLoveChip fail r${round} ${tag} ${tool} recenter=${line.recenter}`)
+          overlapBad = true
+          break
+        }
+      }
+      if (overlapBad) continue
+      const chipRow = row.rows.find((r) => r.kind === 'chip')
+      const chipBox = chipRow?.box
+      if (!chipBox) {
+        fail(`checkNwLoveChip fail r${round} ${tag} slideTypeChip ${tool} chip=0`)
+        continue
+      }
+      if (gate667) {
+        if (chipRow.chromeHide === 'yes') {
+          fail(`checkNwLoveChip fail r${round} ${tag} ${tool} chromeHide=yes`)
+          continue
+        }
+        if (row.chromeOverlap > 0) {
+          fail(`checkNwLoveChip fail r${round} ${tag} ${tool} chromeOverlap=${row.chromeOverlap}`)
+          continue
+        }
+        if (tool === 'reason') {
+          if (row.navOverlap > 0) {
+            fail(`checkNwLoveChip fail r${round} ${tag} ${tool} navOverlap=${row.navOverlap}`)
+            continue
+          }
+          if (row.loveOverlap > 0) {
+            fail(`checkNwLoveChip fail r${round} ${tag} ${tool} loveOverlap=${row.loveOverlap}`)
+            continue
+          }
+        }
+      }
+      const frameMargin = 2
+      for (const line of row.rows) {
+        const b = line.box
+        if (b.left < frameMargin - 0.01 || b.right > snap.viewW - frameMargin + 0.01) {
+          fail(
+            `checkNwLoveChip fail r${round} ${tag} slideTypeChip ${tool} ${line.kind} box=${b.left.toFixed(1)},${b.top.toFixed(1)},${b.width.toFixed(1)},${b.height.toFixed(1)} frameW=${snap.viewW} cam=${snap.nwCam} pan=${snap.camPan}`,
+          )
+          overlapBad = true
+          break
+        }
+      }
+      if (overlapBad) continue
+      const inView =
+        chipBox.left >= frameMargin - 0.01 &&
+        chipBox.top >= -0.5 &&
+        chipBox.right <= snap.viewW - frameMargin + 0.01 &&
+        chipBox.bottom <= snap.viewH + 0.5 &&
+        chipBox.width > 1 &&
+        chipBox.height > 1
+      if (!inView) {
+        fail(
+          `checkNwLoveChip fail r${round} ${tag} slideTypeChip ${tool} box=${chipBox.left.toFixed(1)},${chipBox.top.toFixed(1)},${chipBox.width.toFixed(1)},${chipBox.height.toFixed(1)} viewport=${snap.viewW}x${snap.viewH} cam=${snap.nwCam} pan=${snap.camPan}`,
+        )
+        continue
+      }
+      if (chipRow.clipped !== 0) {
+        fail(`checkNwLoveChip fail r${round} ${tag} slideTypeChip ${tool} clipped=${chipRow.clipped}`)
+        continue
+      }
+      const paintedLine = row.rows[0]
+      const hdrLog = paintedLine?.hdr ?? 0
+      const hudLog = paintedLine?.hud ?? 0
+      const recenterLog = paintedLine?.recenter ?? 0
+      console.log(
+        `checkNwLoveChip ok slideTypeChip ${tag} r${round} ${tool} box=${Math.round(chipBox.left)},${Math.round(chipBox.top)},${Math.round(chipBox.width)},${Math.round(chipBox.height)} inViewport=1 frameW=${snap.viewW} cam=${snap.nwCam} pan=${snap.camPan} hdr=${hdrLog} hud=${hudLog} recenter=${recenterLog}`,
+      )
+    }
+    if (snap.blockers.length) {
+      fail(`checkNwLoveChip fail r${round} ${tag} overlap=${snap.blockers.join(',')}`)
+    }
+    if (snap.gold !== 1) {
+      fail(`checkNwLoveChip fail r${round} ${tag} gold=${snap.gold}`)
+    }
+    if (problems.length === frameMark) {
+      const reasonRow = snap.byType.reason
+      const reasonPainted = (reasonRow?.rows || []).filter((r) => r.kind === 'chip' || r.kind === 'svg')
+      if (reasonPainted.length) {
+        let union = { ...reasonPainted[0].box }
+        for (const row of reasonPainted.slice(1)) {
+          union = {
+            left: Math.min(union.left, row.box.left),
+            top: Math.min(union.top, row.box.top),
+            right: Math.max(union.right, row.box.right),
+            bottom: Math.max(union.bottom, row.box.bottom),
+            width: 0,
+            height: 0,
+          }
+        }
+        union.width = union.right - union.left
+        union.height = union.bottom - union.top
+        const lampDy =
+          reasonRow.lampAnchorDy === null || reasonRow.lampAnchorDy === undefined
+            ? ''
+            : ` lampDy=${reasonRow.lampAnchorDy}`
+        console.log(
+          `checkNwLoveChip ok r${round} ${tag} frame reason visible=1 box=${Math.round(union.left)},${Math.round(union.top)},${Math.round(union.width)},${Math.round(union.height)} inViewport=1 frameW=${snap.viewW} cam=${snap.nwCam} pan=${snap.camPan} hudOverlap=${reasonRow.hudOverlap || 0} hdr=${reasonRow.headerOverlap || 0} recenter=${reasonRow.recenterOverlap || 0} gold=1${lampDy}`,
+        )
+      }
+    }
+    await context.close()
+    }
+  }
+
+  if (!only) {
+    const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }
+    const hard = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 768, height: 1024 },
+      deviceScaleFactor: 1,
+    })
+    await hard.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: hardSave },
+    )
+    const hardPage = await hard.newPage()
+    hardPage.on('pageerror', (error) => errors.push(`nw-love-chip hard ${error}`))
+    const hardSearch = '?playtest=1&nwSeed=2&nwMap=a2&nwRound=18&nwCam=1'
+    await hardPage.goto(`/${hardSearch}`)
+    await hardPage.getByRole('button', { name: 'Hold the night' }).click()
+    await hardPage.locator('.defend-board').waitFor()
+    await hardPage
+      .waitForFunction(() => document.querySelectorAll('.defend-type-chip').length >= 2, { timeout: 25_000 })
+      .catch(() => {})
+    const hardRead = await hardPage.evaluate(() => {
+      const chips = [...document.querySelectorAll('.defend-type-chip')]
+      const bad = chips.filter((chip) => {
+        if (chip.getAttribute('data-chip-park') || chip.getAttribute('data-label-park')) return true
+        if ([...chip.attributes].some((attr) => /slide/i.test(attr.name))) return true
+        return Boolean((chip.style.transform || '').trim())
+      })
+      const svg = [...document.querySelectorAll('text.defend-type-label')].filter((node) => {
+        const box = node.getBoundingClientRect()
+        return box.width > 1 && box.height > 1
+      }).length
+      return {
+        easy: document.querySelectorAll('.defend-page.is-easy-watch').length,
+        chips: chips.length,
+        svg,
+        slideChips: bad.length,
+      }
+    })
+    if (hardRead.easy !== 0) fail(`checkNwLoveChip fail hard easy-watch=${hardRead.easy}`)
+    else if (hardRead.chips < 2 && hardRead.chips + hardRead.svg < 2)
+      fail(`checkNwLoveChip fail hard chips=${hardRead.chips} svg=${hardRead.svg}`)
+    else if (hardRead.slideChips !== 0) fail(`checkNwLoveChip fail hard slideTypeChip=${hardRead.slideChips}`)
+    else console.log(`checkNwLoveChip ok hard easy-watch=0 chips=${hardRead.chips}`)
+    await hard.close()
+  }
+
+  for (const err of errors.slice(errorMark)) fail(`checkNwLoveChip error ${err}`)
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
@@ -11227,6 +12415,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'round cheer nights stay free of console errors')
       return
     }
+    if (process.env.NW_WAVE_SURVIVED_ONLY === '1') {
+      await checkNwWaveSurvivedClear(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'wave survived banner nights stay free of console errors')
+      return
+    }
     if (process.env.NW_PLANT_NO_CARD_ONLY === '1') {
       await checkNwPlantNoCard(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'plant no-card nights stay free of console errors')
@@ -11262,14 +12455,19 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'nw spend on screen nights stay free of console errors')
       return
     }
+    if (process.env.NW_LOVE_CHIP_ONLY === '1') {
+      await checkNwLoveChip(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'nw love chip nights stay free of console errors')
+      return
+    }
+    if (process.env.NW_UNLOCK_TOAST_ONLY === '1') {
+      await checkNwUnlockToastBanner(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'nw unlock toast banner nights stay free of console errors')
+      return
+    }
     if (process.env.DIG_WIN_READABLE_ONLY === '1') {
       await checkDigWinReadable(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'dig win readable nights stay free of console errors')
-      return
-    }
-    if (process.env.SHOW_IT_MISS_ONLY === '1') {
-      await checkShowItMiss(browser, port, errors)
-      assert.equal(errors.join('\n'), '', 'show it miss nights stay free of console errors')
       return
     }
     if (process.env.NW_GLYPH_ONLY === '1' || process.env.NW_LABEL_ONLY === '1') {
@@ -11288,6 +12486,7 @@ export async function checkPhoneFixes() {
     await checkMap05CamOffRing(browser, port, errors)
     await checkNwPlantIgnite(browser, port, errors)
     await checkNwRoundCheer(browser, port, errors)
+    await checkNwWaveSurvivedClear(browser, port, errors)
     await checkNwPlantNoCard(browser, port, errors)
     await checkNwLampMoveHop(browser, port, errors)
     await checkNwCandleName(browser, port, errors)
@@ -11296,7 +12495,8 @@ export async function checkPhoneFixes() {
     await checkDigWinReadable(browser, port, errors)
     await checkGemSightCue(browser, port, errors)
     await checkNwSpendOnScreen(browser, port, errors)
-    await checkShowItMiss(browser, port, errors)
+    await checkNwLoveChip(browser, port, errors)
+    await checkNwUnlockToastBanner(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -11473,7 +12673,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY', 'SHOW_IT_MISS_ONLY', 'NW_STRIP_WORDS_ONLY', 'DIG_WIN_READABLE_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_WAVE_SURVIVED_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY', 'NW_LOVE_CHIP_ONLY', 'NW_UNLOCK_TOAST_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
