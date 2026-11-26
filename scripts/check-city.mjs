@@ -1949,55 +1949,60 @@ assert.match(
 
 
 
-// 1.4.601: Easy Who helped? wrong picture stays marked (#898). Slot 1.4.600 belongs to #999.
-assert.equal(APP_VERSION, '1.4.601')
-assert.equal(CHANGELOG[0].version, '1.4.601', '1.4.601 is the newest row')
-assert.match(latestChange('1.4.601').when, /^(\d{4}-\d{2}-\d{2}|YYYY-MM-DD)$/, '1.4.601 when is a date, or the merge-date placeholder until merge')
-assert.match(latestChange('1.4.601').items.join('\n'), /Refs #898/, '1.4.601 changelog refs #898')
-assert.match(latestChange('1.4.601').items.join('\n'), /Who helped/)
-assert.match(latestChange('1.4.601').items.join('\n'), /Hard stays the same\./)
-assert.doesNotMatch(latestChange('1.4.601').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.601 changelog avoids GitHub close keywords')
+// 1.4.602: Easy Who helped? wrong picture stays marked (#898). Slot 1.4.601 belongs to banner-rail.
+assert.equal(APP_VERSION, '1.4.602')
+assert.equal(CHANGELOG[0].version, '1.4.602', '1.4.602 is the newest row')
+assert.match(latestChange('1.4.602').when, /^(\d{4}-\d{2}-\d{2}|YYYY-MM-DD)$/, '1.4.602 when is a date, or the merge-date placeholder until merge')
+assert.equal(latestChange('1.4.602').title, 'Who helped? See your miss', '1.4.602 changelog title is BS-OK copy')
+assert.equal(
+  latestChange('1.4.602').items[0],
+  'On Easy, tap a wrong picture and it stays marked. Now you can see your miss.',
+  '1.4.602 changelog item 1 is BS-OK copy',
+)
+assert.match(latestChange('1.4.602').items.join('\n'), /Refs #898/, '1.4.602 changelog refs #898')
+assert.match(latestChange('1.4.602').items.join('\n'), /Hard stays the same\./)
+assert.doesNotMatch(latestChange('1.4.602').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.602 changelog avoids GitHub close keywords')
 assert.doesNotMatch(
-  playerVisibleChangeItems(latestChange('1.4.601').items).join('\n'),
+  playerVisibleChangeItems(latestChange('1.4.602').items).join('\n'),
   /\bHard\b|\bMedium\b/,
-  '1.4.601 the player note does not name other tiers',
+  '1.4.602 the player note does not name other tiers',
 )
 {
-  const show601 = readFileSync(new URL('../src/components/ShowItTeach.tsx', import.meta.url), 'utf8')
-  const showCss601 = readFileSync(new URL('../src/styles/showIt.css', import.meta.url), 'utf8')
-  const teach601 = readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8')
-  const phone601 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
-  assert.match(show601, /playGemPop\('miss'\)/, '1.4.601 a wrong tap plays the miss pop')
-  assert.match(show601, /is-miss/, '1.4.601 miss ids stay on the wrong card')
-  assert.match(show601, /is-shake/, '1.4.601 the shake class stays on a wrong tap')
-  const missRules601 = [...showCss601.matchAll(/([^{}]*is-miss[^{}]*)\{([^}]*)\}/g)]
-  assert.equal(missRules601.length, 1, '1.4.601 exactly one is-miss rule')
-  assert.match(missRules601[0][1], /\.show-it-choice\.is-miss/, '1.4.601 miss paint is on the choice card')
-  assert.doesNotMatch(missRules601[0][2], /gold|#ffcc33|#e0b34a|#c4922a/i, '1.4.601 miss paint body is not gold')
-  assert.match(missRules601[0][2], /border-color:\s*var\(--cedar\)/, '1.4.601 miss paint uses a cedar frame')
-  assert.equal((teach601.match(/<ShowItTeach /g) ?? []).length, 1, '1.4.601 ShowItTeach renders from one place')
+  const show602 = readFileSync(new URL('../src/components/ShowItTeach.tsx', import.meta.url), 'utf8')
+  const showCss602 = readFileSync(new URL('../src/styles/showIt.css', import.meta.url), 'utf8')
+  const teach602 = readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8')
+  const phone602 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  assert.match(show602, /playGemPop\('miss'\)/, '1.4.602 a wrong tap plays the miss pop')
+  assert.match(show602, /is-miss/, '1.4.602 miss ids stay on the wrong card')
+  assert.match(show602, /is-shake/, '1.4.602 the shake class stays on a wrong tap')
+  const missRules602 = [...showCss602.matchAll(/([^{}]*is-miss[^{}]*)\{([^}]*)\}/g)]
+  assert.equal(missRules602.length, 1, '1.4.602 exactly one is-miss rule')
+  assert.match(missRules602[0][1], /\.show-it-choice\.is-miss/, '1.4.602 miss paint is on the choice card')
+  assert.doesNotMatch(missRules602[0][2], /gold|#ffcc33|#e0b34a|#c4922a/i, '1.4.602 miss paint body is not gold')
+  assert.match(missRules602[0][2], /border-color:\s*var\(--cedar\)/, '1.4.602 miss paint uses a cedar frame')
+  assert.equal((teach602.match(/<ShowItTeach /g) ?? []).length, 1, '1.4.602 ShowItTeach renders from one place')
   assert.match(
-    teach601,
+    teach602,
     /if \(easy\) \{\s*if \(brief\.id === SHOW_IT_LINE\) \{[^}]*<ShowItTeach onUnlock=\{onUnlock\} \/>/,
-    '1.4.601 ShowItTeach only renders inside the Easy branch, so Hard never gets is-miss',
+    '1.4.602 ShowItTeach only renders inside the Easy branch, so Hard never gets is-miss',
   )
-  assert.equal((phone601.match(/async function checkShowItMiss/g) ?? []).length, 1, '1.4.601 checkShowItMiss is defined once')
-  assert.match(phone601, /SHOW_IT_MISS_ONLY/, '1.4.601 scoped runs can target the miss check alone')
+  assert.equal((phone602.match(/async function checkShowItMiss/g) ?? []).length, 1, '1.4.602 checkShowItMiss is defined once')
+  assert.match(phone602, /SHOW_IT_MISS_ONLY/, '1.4.602 scoped runs can target the miss check alone')
   assert.match(
-    phone601,
+    phone602,
     /if \(process\.env\.SHOW_IT_MISS_ONLY === '1'\) \{\n      await checkShowItMiss\(browser, port, errors\)\n/,
-    '1.4.601 the scoped branch calls checkShowItMiss',
+    '1.4.602 the scoped branch calls checkShowItMiss',
   )
-  const tail601 = phone601.slice(phone601.lastIndexOf('      return\n    }\n'))
-  const call601 = '\n    await checkShowItMiss(browser, port, errors)\n'
-  const callAt601 = tail601.indexOf(call601)
-  const loveAt601 = tail601.indexOf('\n    await checkNwLoveChip(browser, port, errors)\n')
-  const mapAt601 = tail601.indexOf("\n    if (process.env.NW_MAP_NOTE_ONLY !== '1') {")
-  assert.equal((tail601.match(/checkShowItMiss\(/g) ?? []).length, 1, '1.4.601 the default phone path calls checkShowItMiss exactly once')
-  assert.ok(callAt601 >= 0, '1.4.601 the default call is a 4-space statement of its own')
+  const tail602 = phone602.slice(phone602.lastIndexOf('      return\n    }\n'))
+  const call602 = '\n    await checkShowItMiss(browser, port, errors)\n'
+  const callAt602 = tail602.indexOf(call602)
+  const loveAt602 = tail602.indexOf('\n    await checkNwLoveChip(browser, port, errors)\n')
+  const mapAt602 = tail602.indexOf("\n    if (process.env.NW_MAP_NOTE_ONLY !== '1') {")
+  assert.equal((tail602.match(/checkShowItMiss\(/g) ?? []).length, 1, '1.4.602 the default phone path calls checkShowItMiss exactly once')
+  assert.ok(callAt602 >= 0, '1.4.602 the default call is a 4-space statement of its own')
   assert.ok(
-    loveAt601 >= 0 && loveAt601 < callAt601 && callAt601 < mapAt601,
-    '1.4.601 checkShowItMiss runs after checkNwLoveChip and before the NW_MAP_NOTE_ONLY block',
+    loveAt602 >= 0 && loveAt602 < callAt602 && callAt602 < mapAt602,
+    '1.4.602 checkShowItMiss runs after checkNwLoveChip and before the NW_MAP_NOTE_ONLY block',
   )
   for (const marker of [
     /tap-frames=/,
@@ -2012,7 +2017,7 @@ assert.doesNotMatch(
     /if \(gold > 1\)/,
     /checkShowItMiss ok \$\{size\}/,
   ]) {
-    assert.match(phone601, marker, `1.4.601 checkShowItMiss keeps ${marker}`)
+    assert.match(phone602, marker, `1.4.602 checkShowItMiss keeps ${marker}`)
   }
 }
 

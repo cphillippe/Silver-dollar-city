@@ -4810,7 +4810,7 @@ const EASY_GOLD_BASE_1579 = {
   '375x667 home-first': { '2 Help': { x: 131, y: 561, w: 113, h: 48 } },
   '375x667 home-after-l1': { '3 Lock In': { x: 250, y: 584.1, w: 113, h: 48 } },
   // 1.4.596: y re-pinned from CI run 45026157592 (checkEasyOneGold rect lines); x/w unchanged.
-  // 1.4.601 What's new row (Who helped? miss mark): y carried from #994 CI run 45247321920 (same drop text as its 1.4.597 row); x/w unchanged.
+  // 1.4.602 What's new row (Who helped? See your miss): y carried from #994 CI run 45247321920 (same drop text as its 1.4.597 row); x/w unchanged.
   '375x667 settings-more': {
     'Open Profile': { x: 41, y: 1406.5, w: 130, h: 52 },
     Candy: { x: 41, y: 1789.7, w: 84, h: 52 },
@@ -4821,7 +4821,7 @@ const EASY_GOLD_BASE_1579 = {
   },
   '390x844 home-first': { '2 Help': { x: 136, y: 738, w: 118, h: 48 } },
   '390x844 home-after-l1': { '3 Lock In': { x: 260, y: 761.1, w: 118, h: 48 } },
-  // 1.4.601 What's new row (Who helped? miss mark): y carried from #994 CI run 45259446814 (same drop text as its 1.4.597 row); x/w unchanged.
+  // 1.4.602 What's new row (Who helped? See your miss): y carried from #994 CI run 45259446814 (same drop text as its 1.4.597 row); x/w unchanged.
   '390x844 settings-more': {
     'Open Profile': { x: 41, y: 1407.9, w: 130, h: 52 },
     Candy: { x: 41, y: 1791.1, w: 84, h: 52 },
@@ -4832,7 +4832,7 @@ const EASY_GOLD_BASE_1579 = {
   },
   '412x915 home-first': { '2 Help': { x: 143.3, y: 809, w: 125.3, h: 48 } },
   '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
-  // 1.4.601 What's new row (Who helped? miss mark): y carried from #994 CI run 45272407156 (same drop text as its 1.4.597 row); x/w unchanged.
+  // 1.4.602 What's new row (Who helped? See your miss): y carried from #994 CI run 45272407156 (same drop text as its 1.4.597 row); x/w unchanged.
   '412x915 settings-more': {
     'Open Profile': { x: 41, y: 1360.7, w: 130, h: 52 },
     Candy: { x: 41, y: 1743.9, w: 84, h: 52 },
