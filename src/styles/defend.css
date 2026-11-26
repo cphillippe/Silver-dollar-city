@@ -5806,48 +5806,44 @@ body:has(.defend-page.is-easy-watch .nw-wave-survived):has(.defend-page.is-easy-
   transform: translateX(-50%) translateY(0);
 }
 
-/* 1.4.600: lift Wave survived! off painted type chips while the unlock note stacks (#998). */
+/* 1.4.601: Wave survived! centers in the map column; right edge stays left of the ability rail (#998). */
 .defend-page.is-easy-watch:has(.nw-wave-survived):has(.nw-map-toast) .nw-wave-survived {
   top: 92px;
+  left: 50%;
+  right: auto;
+  width: max-content;
+  max-width: calc(100% - var(--nw-rail-w) * 2 - var(--nw-gap) * 4 - 16px);
+  transform: translateX(-50%);
+  animation: nw-wave-survived-hold-center 2.4s ease-out both;
 }
 
-/* Shorter tall phone (e.g. 360×780): drop the stacked note under the map chip labels. */
+@keyframes nw-wave-survived-hold-center {
+  0% {
+    transform: translateX(-50%) scale(0.86);
+    opacity: 0;
+  }
+  9% {
+    transform: translateX(-50%) scale(1.05);
+    opacity: 1;
+  }
+  92% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Mid-height phones: lift the centered banner off map type chips while the unlock note stacks. */
 @media (min-height: 720px) and (max-height: 789px) {
+  .defend-page.is-easy-watch:has(.nw-wave-survived):has(.nw-map-toast) .nw-wave-survived {
+    top: 128px;
+  }
+
   .defend-page.is-easy-watch:has(.nw-wave-survived):has(.nw-map-toast) .nw-map-toast {
-    top: 396px;
-  }
-}
-
-/* Tall mid band: tuck right whenever unlock toast stacks (no chip :has race). */
-@media (min-height: 790px) and (max-height: 899px) {
-  .defend-page.is-easy-watch:has(.nw-wave-survived):has(.nw-map-toast) .nw-wave-survived {
-    top: 92px;
-    left: auto;
-    right: 12px;
-    max-width: min(156px, 42vw);
-    animation: none;
-  }
-}
-
-/* Very tall phone (412×915): four chips stay on the left rail. */
-@media (min-height: 900px) {
-  .defend-page.is-easy-watch:has(.nw-wave-survived):has(.nw-map-toast):has(
-      .defend-type-chip:not([data-chrome-hide='yes']):nth-of-type(4)
-    )
-    .nw-wave-survived {
-    top: 92px;
-    left: 12px;
-    right: auto;
-    max-width: 168px;
-  }
-}
-
-/* Tablet: left rail whenever the unlock note stacks. */
-@media (min-width: 740px) {
-  .defend-page.is-easy-watch:has(.nw-wave-survived):has(.nw-map-toast) .nw-wave-survived {
-    left: 12px;
-    right: auto;
-    max-width: 168px;
+    top: 268px;
   }
 }
 
@@ -5855,6 +5851,21 @@ body:has(.defend-page.is-easy-watch .nw-wave-survived):has(.defend-page.is-easy-
 @media (max-height: 720px) {
   .defend-page.is-easy-watch:has(.nw-wave-survived) .nw-map-toast {
     top: 318px;
+  }
+
+  /* When both show, clamp the banner and stack the note without mid-map toast (checkNwWaveBannerRailClear). */
+  .defend-page.is-easy-watch:has(.nw-wave-survived):has(.nw-map-toast) .nw-wave-survived {
+    top: 116px;
+    left: 12px;
+    right: calc(var(--nw-rail-w) + var(--nw-gap) * 2);
+    width: auto;
+    max-width: none;
+    transform: none;
+    animation: nw-wave-survived-hold 2.4s ease-out both;
+  }
+
+  .defend-page.is-easy-watch:has(.nw-wave-survived):has(.nw-map-toast) .nw-map-toast {
+    top: 202px;
   }
 }
 
