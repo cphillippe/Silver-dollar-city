@@ -31,7 +31,7 @@ export const CHANGELOG: ChangeNote[] = [
     version: '1.4.601',
     title: 'Behind the scenes: Easy NW wave banner rail overlap guard',
     when: '2026-11-26',
-    items: ['Nothing changes for players yet.', 'Refs #998.'],
+    items: ['Nothing changes for players yet.', 'Refs #998.', 'Refs #1010.', 'Refs #1011.'],
   },
   {
     version: '1.4.600',

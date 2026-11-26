@@ -1953,6 +1953,8 @@ assert.match(
 assert.equal(APP_VERSION, '1.4.601')
 assert.equal(CHANGELOG[0].version, '1.4.601', '1.4.601 is the newest row')
 assert.match(latestChange('1.4.601').items.join('\n'), /Refs #998/, '1.4.601 changelog refs #998')
+assert.match(latestChange('1.4.601').items.join('\n'), /Refs #1010/, '1.4.601 changelog refs #1010')
+assert.match(latestChange('1.4.601').items.join('\n'), /Refs #1011/, '1.4.601 changelog refs #1011')
 assert.match(latestChange('1.4.601').items.join('\n'), /Nothing changes for players yet\./)
 assert.doesNotMatch(latestChange('1.4.601').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.601 changelog avoids GitHub close keywords')
 assert.equal(playerVisibleChangeItems(latestChange('1.4.601').items).length, 0, '1.4.601 has no player-facing changelog copy')
