@@ -5865,6 +5865,13 @@ body:has(.defend-page.is-easy-watch .nw-wave-survived):has(.defend-page.is-easy-
   }
 }
 
+/* 360×780: pull the stacked note up so toastStackTop stays ≤350 (checkNwWaveBannerRailClear). */
+@media (min-height: 720px) and (max-height: 789px) and (max-width: 390px) {
+  .defend-page.is-easy-watch:has(.nw-wave-survived):has(.nw-map-toast) .nw-map-toast {
+    top: 252px;
+  }
+}
+
 /* Short phones: keep the stacked note clear of painted type chips (checkNwUnlockToastBanner toastVsChip). */
 @media (max-height: 720px) {
   .defend-page.is-easy-watch:has(.nw-wave-survived) .nw-map-toast {
