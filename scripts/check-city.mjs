@@ -2078,10 +2078,10 @@ assert.doesNotMatch(
     '1.4.600 the ok line logs banner, toast, chip, and tap guards',
   )
   const board1009 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
-  assert.doesNotMatch(
+  assert.match(
     board1009,
-    /if \(cardOpen \|\| chip\.getAttribute\('data-label-park'\)\)/,
-    '1.4.600 #1009 clear chips always take the layout pass',
+    /if \(!boosting && \(cardOpen \|\| chip\.getAttribute\('data-label-park'\)\)\)/,
+    '1.4.600 #1009 clear boost always takes the layout pass',
   )
   assert.match(board1009, /hideTypeLabelsOnChrome\(board, boosting\)/, '1.4.600 clear chips relayout on boost')
   assert.match(phone600, /if \(process\.env\.NW_CLEAR_CHIPS_ONLY === '1'\)/, '1.4.600 clear-chip ONLY guard is present')

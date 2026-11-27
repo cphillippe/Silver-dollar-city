@@ -260,6 +260,7 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement, boosting = false) {
   const chipNodes = [...page.querySelectorAll('.defend-type-chip')]
     .filter((node): node is HTMLElement => node instanceof HTMLElement)
     .sort((a, b) => (parseFloat(b.style.top) || 0) - (parseFloat(a.style.top) || 0))
+  const cardOpen = Boolean(page.querySelector('.defend-tower-card'))
   const glyphBoxes = [
     ...page.querySelectorAll('.defend-pad .defend-lamp-sprite, .defend-pad image.defend-type-mark'),
   ]
@@ -272,6 +273,12 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement, boosting = false) {
     const style = getComputedStyle(chip)
     if (style.display === 'none' || Number(style.opacity) === 0) {
       chip.removeAttribute('data-chrome-hide')
+      continue
+    }
+    if (!boosting && (cardOpen || chip.getAttribute('data-label-park'))) {
+      const box = chip.getBoundingClientRect()
+      if (box.width < 1 || box.height < 1 || !chrome.some((other) => boxesHit(box, other))) chip.removeAttribute('data-chrome-hide')
+      else chip.setAttribute('data-chrome-hide', 'yes')
       continue
     }
     chip.removeAttribute('data-label-park')
