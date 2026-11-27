@@ -440,7 +440,9 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement, boosting = false) {
         box = chip.getBoundingClientRect()
         const chipCy = (box.top + box.bottom) / 2
         const padCy = (padBox.top + padBox.bottom) / 2
-        if (Math.abs(chipCy - padCy) > 96) {
+        const playTop = Math.max(headerBottom, 4)
+        const offPlay = viewH > 0 && (box.bottom > viewH - 4 + 0.5 || box.top < playTop - 0.5)
+        if (Math.abs(chipCy - padCy) > 96 && (!boosting || offPlay)) {
           chip.style.transform = ''
           box = slideTypeChip(chip, blocks, flipAbove)
           box = chip.getBoundingClientRect()
@@ -600,7 +602,11 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     if (!easy) return
     const board = boardRef.current
     if (!board) return
-    const hide = () => hideTypeLabelsOnChrome(board, boosting)
+    const hide = () => {
+      const page = board.closest('.defend-page')
+      const plantedPads = page?.querySelectorAll('.defend-pad.is-planted').length ?? 0
+      hideTypeLabelsOnChrome(board, boosting && plantedPads >= 5)
+    }
     hide()
     const pan = board.closest('.nw-pan')
     const watch = new MutationObserver(hide)
