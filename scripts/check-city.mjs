@@ -1967,9 +1967,14 @@ assert.equal(playerVisibleChangeItems(latestChange('1.4.601').items).length, 0, 
     '1.4.601 Easy wave banner centers in the map column',
   )
   assert.match(defend601, /@keyframes nw-wave-survived-hold-center/, '1.4.601 wave banner pop keeps the centered anchor')
+  assert.match(
+    defend601,
+    /@media \(min-height: 790px\) and \(max-height: 899px\) \{\s*\n  \.defend-page\.is-easy-watch:has\(\.nw-wave-survived\):has\(\.nw-map-toast\) \.nw-wave-survived \{\s*\n    top: 128px;\s*\n  \}\s*\n\}/,
+    '1.4.601 tall-mid wave banner only lifts top (no right-edge tuck)',
+  )
   assert.doesNotMatch(
     defend601,
-    /@media \(min-height: 790px\) and \(max-height: 899px\) \{\s*\n  \.defend-page\.is-easy-watch:has\(\.nw-wave-survived\):has\(\.nw-map-toast\) \.nw-wave-survived \{[\s\S]*?animation:\s*none/,
+    /@media \(min-height: 790px\) and \(max-height: 899px\) \{\s*\n  \.defend-page\.is-easy-watch:has\(\.nw-wave-survived\):has\(\.nw-map-toast\) \.nw-wave-survived \{[^}]*animation:\s*none/,
     '1.4.601 does not tuck the banner under the right rail',
   )
   const countNwWaveBannerRailClearDefs = (src) => {
