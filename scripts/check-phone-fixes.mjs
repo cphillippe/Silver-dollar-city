@@ -10906,7 +10906,10 @@ async function checkNwWaveBannerRailClear(browser, port, errors) {
       if (maxChipsOn > 0 && maxOv.chip > 0) {
         fail(`checkNwWaveBannerRailClear fail r${round} ${size} vsChip=${maxOv.chip.toFixed(1)} chipsOn=${maxChipsOn}`)
       }
-      if (height > 720 && maxOv.toastNewLamp > 0) {
+      // Short 375×667: dock new-lamp row overlaps the unlock toast on main too (eeec6037 ~6219px²;
+      // 1.4.601 stack ~1324px²). Fail every other size when toast covers the new-lamp row.
+      const toastNewLampExempt = width === 375 && height === 667
+      if (!toastNewLampExempt && maxOv.toastNewLamp > 0) {
         fail(`checkNwWaveBannerRailClear fail r${round} ${size} toastVsNewLamp=${maxOv.toastNewLamp.toFixed(1)}`)
       }
       if (height >= 720 && height <= 789 && maxOv.toastDeep > 350) {
