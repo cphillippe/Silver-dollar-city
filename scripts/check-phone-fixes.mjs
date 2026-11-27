@@ -10958,6 +10958,248 @@ async function checkNwWaveBannerRailClear(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+const NW_LAMP_STACK_LAMP_SEL =
+  '.defend-clear-row button.defend-new-lamp, .defend-clear-row button.defend-candle-lamp, .defend-clear-row button.defend-bell-lamp, .defend-clear-row button.defend-incense-lamp, .defend-clear-row button.defend-cross-lamp'
+
+async function sampleNwLampStackClear(page) {
+  return page.evaluate(async (lampSel) => {
+    const innerWidth = window.innerWidth
+    const innerHeight = window.innerHeight
+    const shown = (el) => {
+      if (!el) return false
+      const style = getComputedStyle(el)
+      const rect = el.getBoundingClientRect()
+      return (
+        style.display !== 'none' &&
+        style.visibility !== 'hidden' &&
+        Number(style.opacity) > 0.05 &&
+        rect.width > 1 &&
+        rect.height > 1
+      )
+    }
+    const area = (a, b) => {
+      const x = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left))
+      const y = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+      return x * y
+    }
+    const boxOf = (el) => {
+      const r = el.getBoundingClientRect()
+      return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, w: r.width, h: r.height }
+    }
+    const waitStart = performance.now()
+    while (performance.now() - waitStart < 5000) {
+      const banner = document.querySelector('.nw-wave-survived')
+      const toast = document.querySelector('.nw-map-toast')
+      if (banner && toast && shown(banner) && shown(toast)) break
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+    }
+    const samples = []
+    const loopStart = performance.now()
+    while (performance.now() - loopStart < 2600) {
+      const banner = document.querySelector('.nw-wave-survived')
+      const toast = document.querySelector('.nw-map-toast')
+      if (!banner || !toast || !shown(banner) || !shown(toast)) {
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+        continue
+      }
+      const buttons = [...document.querySelectorAll(lampSel)].filter(shown)
+      if (buttons.length < 5) {
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+        continue
+      }
+      const rects = buttons.map((el) => {
+        const r = boxOf(el)
+        const afterSize = parseFloat(getComputedStyle(el, '::after').fontSize)
+        const bodySize = parseFloat(getComputedStyle(el).fontSize)
+        return {
+          tag: el.className.split(/\s+/).find((c) => c.includes('lamp')) || 'lamp',
+          ...r,
+          costPx: Number.isFinite(afterSize) ? afterSize : bodySize,
+        }
+      })
+      let lampStackOverlap = 0
+      for (let i = 0; i < rects.length; i++) {
+        for (let j = i + 1; j < rects.length; j++) {
+          lampStackOverlap = Math.max(lampStackOverlap, area(rects[i], rects[j]))
+        }
+      }
+      const sorted = [...rects].sort((a, b) => a.top - b.top)
+      const gaps = []
+      let minGap = Infinity
+      for (let i = 0; i < sorted.length - 1; i++) {
+        const gap = sorted[i + 1].top - sorted[i].bottom
+        gaps.push(Number(gap.toFixed(2)))
+        minGap = Math.min(minGap, gap)
+      }
+      let minTap = Infinity
+      let minCost = Infinity
+      let onScreen = true
+      for (const r of rects) {
+        minTap = Math.min(minTap, r.w, r.h)
+        minCost = Math.min(minCost, r.costPx)
+        if (r.left < 0 || r.top < 0 || r.right > innerWidth || r.bottom > innerHeight) onScreen = false
+      }
+      samples.push({
+        lampStackOverlap,
+        minGap,
+        minTap,
+        minCost,
+        onScreen,
+        gaps,
+        rects: sorted.map((r) => ({
+          tag: r.tag,
+          t: Number(r.top.toFixed(1)),
+          b: Number(r.bottom.toFixed(1)),
+          l: Number(r.left.toFixed(1)),
+          w: Number(r.w.toFixed(1)),
+          h: Number(r.h.toFixed(1)),
+        })),
+      })
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+    }
+    return { samples, missing: !samples.length ? 'frames' : null }
+  }, NW_LAMP_STACK_LAMP_SEL)
+}
+
+async function checkNwLampStackClear(browser, port, errors) {
+  const onlySize = process.env.NW_LAMP_STACK_SIZE
+  const onlyRound = process.env.NW_LAMP_STACK_ROUND
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+
+  const tapUntilBoost = async (page) => {
+    const started = Date.now()
+    while (Date.now() - started < 90_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
+      const cue = await page.evaluate(() => {
+        const face = document.querySelector('.defend-raider.is-easy-cue')
+        if (!face) return null
+        const id = face.getAttribute('data-walker-id')
+        const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+        if (!tap) return null
+        const box = tap.getBoundingClientRect()
+        const x = box.x + box.width / 2
+        const y = box.y + box.height / 2
+        const node = document.elementFromPoint(x, y)
+        if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+        return { x, y }
+      })
+      if (cue) await page.mouse.click(cue.x, cue.y)
+      await page.waitForTimeout(80)
+    }
+  }
+
+  for (const round of NW_UNLOCK_TOAST_ROUNDS) {
+    if (onlyRound && onlyRound !== String(round)) continue
+    const search = `?playtest=1&nwSeed=2&nwMap=a2&nwRound=${round}&nwLamps=0&nwCam=1`
+    for (const [width, height] of nwUnlockToastSizesForRun()) {
+      const size = `${width}x${height}`
+      if (onlySize && onlySize !== size) continue
+      const proofShot =
+        process.env.NW_LAMP_STACK_PROOF_SHOT === '1' &&
+        width === 375 &&
+        height === 667 &&
+        (round === 18 || round === 24)
+      const { context, page } = await openMap(browser, port, width, height, 'a2', {
+        motion: true,
+        search,
+        deviceScaleFactor: proofShot ? 2 : 1,
+      })
+      page.on('pageerror', (error) => errors.push(`lamp-stack r${round} ${size} ${error}`))
+      await waitNwUnlockToastCamReady(page, size, round)
+      await plantTypeLabelSeats(page, `${size} r${round}`)
+      await snapNwLoveChipOfficialCam(page)
+      await page.locator('.defend-go').click()
+      await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
+      await tapUntilBoost(page)
+      if ((await page.locator('.defend-page.is-boost').count()) < 1) {
+        fail(`checkNwLampStackClear fail r${round} ${size} boost=0`)
+        await context.close()
+        continue
+      }
+      await page.waitForTimeout(100)
+      if ((await page.locator('.nw-map-toast').count()) < 1) {
+        fail(`checkNwLampStackClear fail r${round} ${size} toast=0`)
+        await context.close()
+        continue
+      }
+      const sample = await sampleNwLampStackClear(page)
+      if (sample.missing === 'frames') {
+        fail(`checkNwLampStackClear fail r${round} ${size} frames=0`)
+        await context.close()
+        continue
+      }
+      const frames = sample.samples || []
+      if (frames.length < 20) fail(`checkNwLampStackClear fail r${round} ${size} frames=${frames.length}`)
+      let maxOverlap = 0
+      let minGap = Infinity
+      let minTap = Infinity
+      let minCost = Infinity
+      let lastGaps = []
+      let lastRects = []
+      for (const row of frames) {
+        maxOverlap = Math.max(maxOverlap, row.lampStackOverlap || 0)
+        minGap = Math.min(minGap, row.minGap ?? Infinity)
+        minTap = Math.min(minTap, row.minTap ?? Infinity)
+        minCost = Math.min(minCost, row.minCost ?? Infinity)
+        lastGaps = row.gaps || lastGaps
+        lastRects = row.rects || lastRects
+        if (!row.onScreen) fail(`checkNwLampStackClear fail r${round} ${size} offScreen`)
+      }
+      if (maxOverlap > 0) {
+        fail(`checkNwLampStackClear fail r${round} ${size} lampStackOverlap=${maxOverlap.toFixed(1)}`)
+      }
+      if (minGap < 4) {
+        fail(`checkNwLampStackClear fail r${round} ${size} minGap=${minGap.toFixed(1)}`)
+      }
+      if (minTap < 44) {
+        fail(`checkNwLampStackClear fail r${round} ${size} minTap=${minTap.toFixed(1)}`)
+      }
+      if (minCost < 13) {
+        fail(`checkNwLampStackClear fail r${round} ${size} minCost=${minCost.toFixed(1)}`)
+      }
+      const localFail = problems.some((line) => line.includes(`r${round} ${size}`))
+      if (!localFail) {
+        console.log(
+          `checkNwLampStackClear ok r${round} ${size} lampStackOverlap=${maxOverlap.toFixed(1)} minGap=${minGap === Infinity ? '0.0' : minGap.toFixed(1)} minTap=${minTap === Infinity ? '0.0' : minTap.toFixed(1)} gaps=${JSON.stringify(lastGaps)} rects=${JSON.stringify(lastRects)}`,
+        )
+      }
+      if (proofShot && !localFail) {
+        const shotDir = join(tmpdir(), 'nw-lamp-stack-proof-601')
+        mkdirSync(shotDir, { recursive: true })
+        const shotPath = join(shotDir, `375x667-r${round}-lamp-stack-2x.png`)
+        const clip = await page.evaluate(() => {
+          const toast = document.querySelector('.nw-map-toast')
+          const banner = document.querySelector('.nw-wave-survived')
+          const lamps = document.querySelector('.defend-clear-row button.defend-cross-lamp')
+          if (!toast) return null
+          const t = toast.getBoundingClientRect()
+          const b = banner?.getBoundingClientRect()
+          const l = lamps?.getBoundingClientRect()
+          const top = Math.max(0, (b ? Math.min(b.top, t.top) : t.top) - 8)
+          const bottom = Math.max(t.bottom, l?.bottom ?? t.bottom) + 12
+          const right = Math.max(80, (l?.right ?? 70) + 8)
+          return { x: 0, y: top, width: right, height: Math.min(innerHeight - top, bottom - top) }
+        })
+        if (clip) {
+          await page.screenshot({ path: shotPath, clip })
+          console.log(`nw-lamp-stack-proof-shot ${shotPath}`)
+        }
+      }
+      await context.close()
+    }
+  }
+
+  for (const err of errors.slice(errorMark)) fail(`checkNwLampStackClear error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 /** #951 Easy round-clear Spend and ? stay on screen (fixed to the viewport, not the collapsed clear bar). */
 const NW_SPEND_ON_SCREEN_SIZES = [
   [375, 812],
@@ -12769,6 +13011,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'nw wave banner rail nights stay free of console errors')
       return
     }
+    if (process.env.NW_LAMP_STACK_ONLY === '1') {
+      await checkNwLampStackClear(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'nw lamp stack nights stay free of console errors')
+      return
+    }
     if (process.env.DIG_WIN_READABLE_ONLY === '1') {
       await checkDigWinReadable(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'dig win readable nights stay free of console errors')
@@ -12802,6 +13049,7 @@ export async function checkPhoneFixes() {
     await checkNwLoveChip(browser, port, errors)
     await checkNwUnlockToastBanner(browser, port, errors)
     await checkNwWaveBannerRailClear(browser, port, errors)
+    await checkNwLampStackClear(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -12978,7 +13226,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_WAVE_SURVIVED_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY', 'NW_LOVE_CHIP_ONLY', 'NW_UNLOCK_TOAST_ONLY', 'NW_WAVE_BANNER_RAIL_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_WAVE_SURVIVED_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY', 'NW_LOVE_CHIP_ONLY', 'NW_UNLOCK_TOAST_ONLY', 'NW_WAVE_BANNER_RAIL_ONLY', 'NW_LAMP_STACK_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')

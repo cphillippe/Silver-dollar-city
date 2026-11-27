@@ -1984,6 +1984,13 @@ assert.equal(playerVisibleChangeItems(latestChange('1.4.601').items).length, 0, 
     const plainAsync = [...stripped.matchAll(/\basync\s+function\s+checkNwWaveBannerRailClear\b/g)].length
     return exportAsync + constAsync + plainAsync
   }
+  const countNwLampStackClearDefs = (src) => {
+    const exportAsync = [...src.matchAll(/\bexport\s+async\s+function\s+checkNwLampStackClear\b/g)].length
+    const constAsync = [...src.matchAll(/\bconst\s+checkNwLampStackClear\s*=\s*async\b/g)].length
+    const stripped = src.replace(/\bexport\s+async\s+function\s+checkNwLampStackClear\b/g, '')
+    const plainAsync = [...stripped.matchAll(/\basync\s+function\s+checkNwLampStackClear\b/g)].length
+    return exportAsync + constAsync + plainAsync
+  }
   const nwWaveBannerRailTailOk = (src) => {
     const lastIdx = src.lastIndexOf('      return\n    }\n')
     if (lastIdx < 0) return false
@@ -1991,11 +1998,14 @@ assert.equal(playerVisibleChangeItems(latestChange('1.4.601').items).length, 0, 
     const loveIdx = tail.indexOf('await checkNwLoveChip(browser, port, errors)')
     const unlockIdx = tail.indexOf('await checkNwUnlockToastBanner(browser, port, errors)')
     const railIdx = tail.indexOf('await checkNwWaveBannerRailClear(browser, port, errors)')
+    const lampStackIdx = tail.indexOf('await checkNwLampStackClear(browser, port, errors)')
     const mapNoteIdx = tail.indexOf("process.env.NW_MAP_NOTE_ONLY !== '1'")
-    if (loveIdx < 0 || unlockIdx < 0 || railIdx < 0 || mapNoteIdx < 0) return false
-    if (!(loveIdx < unlockIdx && unlockIdx < railIdx && railIdx < mapNoteIdx)) return false
+    if (loveIdx < 0 || unlockIdx < 0 || railIdx < 0 || lampStackIdx < 0 || mapNoteIdx < 0) return false
+    if (!(loveIdx < unlockIdx && unlockIdx < railIdx && railIdx < lampStackIdx && lampStackIdx < mapNoteIdx)) return false
     if ([...tail.matchAll(/await checkNwWaveBannerRailClear\(browser, port, errors\)/g)].length !== 1) return false
+    if ([...tail.matchAll(/await checkNwLampStackClear\(browser, port, errors\)/g)].length !== 1) return false
     if (countNwWaveBannerRailClearDefs(src) !== 1) return false
+    if (countNwLampStackClearDefs(src) !== 1) return false
     return true
   }
   const tailAnchor601 = phone601.lastIndexOf('      return\n    }\n')
@@ -2027,6 +2037,12 @@ assert.equal(playerVisibleChangeItems(latestChange('1.4.601').items).length, 0, 
   )
   assert.match(phone601, /\.nw-rail \.defend-ability/, '1.4.601 rail sample includes ability chips')
   assert.match(phone601, /toastVsNewLamp/, '1.4.601 rail sample measures toast vs new-lamp row')
+  assert.match(
+    phone601,
+    /checkNwLampStackClear ok r\$\{round\} \$\{size\} lampStackOverlap=.*minGap=.*minTap=.*gaps=/,
+    '1.4.601 lamp stack ok line logs overlap and gaps',
+  )
+  assert.match(phone601, /defend-clear-row button\.defend-cross-lamp/, '1.4.601 lamp stack samples all five docks')
 }
 
 // 1.4.600: Easy Night Watch unlock toast clears the wave-survived banner (#998).

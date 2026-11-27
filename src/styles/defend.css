@@ -5894,26 +5894,43 @@ body:has(.defend-page.is-easy-watch .nw-wave-survived):has(.defend-page.is-easy-
   }
 }
 
-/* Short phones: while the unlock note samples, tuck the clear-row lamp stack under the toast. */
+/* Short phones: tuck the clear-row lamp stack under the unlock note with even 4px gaps (checkNwLampStackClear). */
 @media (max-width: 480px) and (max-height: 719px) {
+  .defend-page.is-easy-watch.is-boost:has(.nw-map-toast) .defend-clear-row button.defend-new-lamp {
+    min-height: 44px;
+    height: 44px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .defend-page.is-easy-watch.is-boost:has(.nw-map-toast) .defend-clear-row button.defend-new-lamp::before {
+    height: 26px;
+    line-height: 26px;
+  }
+
+  .defend-page.is-easy-watch.is-boost:has(.nw-map-toast) .defend-clear-row button.defend-new-lamp::after {
+    font-size: 13px;
+    line-height: 1.1;
+  }
+
   .defend-page.is-easy-watch.is-boost:has(.nw-map-toast) .defend-clear-row button.defend-new-lamp[data-new-lamp='yes'] {
-    bottom: 212px;
+    bottom: 252px;
   }
 
   .defend-page.is-easy-watch.is-boost:has(.nw-map-toast) .defend-clear-row button.defend-candle-lamp {
-    bottom: 156px;
+    bottom: 204px;
   }
 
   .defend-page.is-easy-watch.is-boost:has(.nw-map-toast) .defend-clear-row button.defend-bell-lamp {
-    bottom: 100px;
+    bottom: 156px;
   }
 
   .defend-page.is-easy-watch.is-boost:has(.nw-map-toast) .defend-clear-row button.defend-incense-lamp {
-    bottom: 72px;
+    bottom: 108px;
   }
 
   .defend-page.is-easy-watch.is-boost:has(.nw-map-toast) .defend-clear-row button.defend-cross-lamp {
-    bottom: 56px;
+    bottom: 60px;
   }
 
   .defend-page.is-easy-watch.is-boost:has(.nw-map-toast) .defend-candle-name {
