@@ -2058,9 +2058,14 @@ assert.doesNotMatch(
   assert.equal(countNwUnlockToastBannerDefs(constAsyncDef), 2, '1.4.600 const async def count')
   assert.match(
     phone600,
-    /checkNwUnlockToastBanner ok r\$\{round\} \$\{size\} banner=.*toast=.*overlap=.*vsChip=.*toastVsChip=.*taps=.*gold=1/,
-    '1.4.600 the ok line logs banner, toast, chip, and tap guards',
+    /checkNwUnlockToastBanner ok r\$\{round\} \$\{size\} banner=.*toast=.*overlap=.*vsChip=.*toastVsChip=.*taps=.*painted=.*gold=1/,
+    '1.4.600 the ok line logs banner, toast, chip, tap, and painted guards',
   )
+  assert.match(phone600, /async function assertLabelPainted\(page, selector, frameTag\)/, 'unlock toast exposes assertLabelPainted helper')
+  assert.match(phone600, /function auditLabelPainted\(el\)/, 'unlock toast painted grid uses auditLabelPainted')
+  assert.match(phone600, /painted-\$\{which\} frame=/, 'unlock toast painted fails name the label and frame')
+  assert.match(phone600, /document\.elementFromPoint\(x, y\)/, 'unlock toast painted samples elementFromPoint')
+  assert.match(phone600, /peelRoot\.style\.pointerEvents = 'auto'/, 'unlock toast painted enables pointer-events for hit-test peel')
   assert.match(phone600, /both\.length < 20/, '1.4.600 unlock toast holds at least 20 sampled frames')
   const unlockSample = phone600.slice(
     phone600.indexOf('async function sampleUnlockToastOverlap'),

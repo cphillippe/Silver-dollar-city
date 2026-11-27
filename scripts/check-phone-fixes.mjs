@@ -10173,8 +10173,183 @@ function nwUnlockToastSizesForRun() {
   }
 }
 
+/** Grid hit-test on glyph rects: elementFromPoint, opacity/visibility, viewport, scroll clip. Runs in the page (Playwright-serialized). */
+function auditLabelPainted(el) {
+  const paintFail = (reason, extra) => ({ ok: false, reason, painted: extra?.painted ?? 0, total: extra?.total ?? 0, ...extra })
+  if (!(el instanceof Element)) return paintFail('missing')
+  const peelRoot = el.closest('.nw-wave-survived, .nw-map-toast, .nw-skill-toast') || el
+  const prevPeel = peelRoot.style.pointerEvents
+  const prevSelf = el.style.pointerEvents
+  peelRoot.style.pointerEvents = 'auto'
+  el.style.pointerEvents = 'auto'
+  const finish = (row) => {
+    peelRoot.style.pointerEvents = prevPeel
+    el.style.pointerEvents = prevSelf
+    return row
+  }
+  const style = getComputedStyle(el)
+  if (style.display === 'none') return finish(paintFail('display'))
+  const waveHold = el.closest('.nw-wave-survived')
+  if (waveHold) {
+    const holdOpacity = Number(getComputedStyle(waveHold).opacity)
+    if (holdOpacity < 0.9) return finish({ ok: true, painted: 0, total: 0, fade: true })
+  }
+  let effOpacity = 1
+  for (let node = el; node && node.nodeType === 1; node = node.parentElement) {
+    const st = getComputedStyle(node)
+    if (st.visibility === 'hidden') return finish(paintFail('visibility', { effOpacity }))
+    const op = Number(st.opacity)
+    if (op === 0) return finish(paintFail('opacity', { effOpacity: 0 }))
+    effOpacity *= op
+  }
+  if (effOpacity < 0.9) return finish(paintFail('opacity', { effOpacity }))
+  const selfClips =
+    style.overflow === 'hidden' ||
+    style.overflow === 'clip' ||
+    style.overflowX === 'hidden' ||
+    style.overflowX === 'clip' ||
+    style.overflowY === 'hidden' ||
+    style.overflowY === 'clip'
+  const ellipsis =
+    style.textOverflow === 'ellipsis' &&
+    (style.overflow === 'hidden' || style.overflowX === 'hidden' || style.overflowY === 'hidden')
+  const wOver = el.scrollWidth > el.clientWidth + 1
+  const hOver = el.scrollHeight > el.clientHeight + 1
+  if ((selfClips || ellipsis) && (wOver || hOver)) {
+      return finish(
+        paintFail(ellipsis && (wOver || hOver) ? 'ellipsis' : 'scrollClip', {
+          scrollW: el.scrollWidth,
+          clientW: el.clientWidth,
+          scrollH: el.scrollHeight,
+          clientH: el.clientHeight,
+        }),
+      )
+  }
+  const range = document.createRange()
+  const glyphRects = []
+  const stampLineRects = (child) => {
+    if (child.nodeType !== 3 || !(child.textContent || '').trim()) return
+    range.selectNodeContents(child)
+    for (const bit of range.getClientRects()) {
+      if (bit.width <= 1 || bit.height <= 1) continue
+      glyphRects.push(bit)
+    }
+  }
+  for (const child of el.childNodes) stampLineRects(child)
+  if (!glyphRects.length) {
+    range.selectNodeContents(el)
+    for (const bit of range.getClientRects()) {
+      if (bit.width <= 1 || bit.height <= 1) continue
+      glyphRects.push(bit)
+    }
+  }
+  if (!glyphRects.length) {
+    const rect = el.getBoundingClientRect()
+    if (rect.width <= 1 || rect.height <= 1) return finish(paintFail('glyphBox'))
+    glyphRects.push(rect)
+  }
+  let left = Infinity
+  let top = Infinity
+  let right = -Infinity
+  let bottom = -Infinity
+  for (const bit of glyphRects) {
+    left = Math.min(left, bit.left)
+    right = Math.max(right, bit.right)
+    top = Math.min(top, bit.top)
+    bottom = Math.max(bottom, bit.bottom)
+  }
+  if (
+    left < -1 ||
+    top < -1 ||
+    right > window.innerWidth + 1 ||
+    bottom > window.innerHeight + 1
+  ) {
+    return finish(paintFail('viewport', { left, top, right, bottom }))
+  }
+  for (let parent = el.parentElement; parent && parent !== document.documentElement; parent = parent.parentElement) {
+    const ps = getComputedStyle(parent)
+    const clips =
+      ps.overflow === 'hidden' ||
+      ps.overflow === 'clip' ||
+      ps.overflowX === 'hidden' ||
+      ps.overflowX === 'clip' ||
+      ps.overflowY === 'hidden' ||
+      ps.overflowY === 'clip'
+    if (!clips) continue
+    const pr = parent.getBoundingClientRect()
+    if (
+      left < pr.left - 0.5 ||
+      right > pr.right + 0.5 ||
+      top < pr.top - 0.5 ||
+      bottom > pr.bottom + 0.5
+    ) {
+      return finish(
+        paintFail('ancestorClip', {
+          parent: parent.className || parent.tagName,
+          scrollW: parent.scrollWidth,
+          clientW: parent.clientWidth,
+        }),
+      )
+    }
+  }
+  let painted = 0
+  let total = 0
+  let missX = null
+  let missY = null
+  let missTag = ''
+  for (const bit of glyphRects) {
+    const gw = Math.max(bit.width, 1)
+    const gh = Math.max(bit.height, 1)
+    const cols = gw >= 48 ? 3 : gw >= 26 ? 2 : 1
+    const titleLine = el.classList.contains('nw-wave-survived-title')
+    const rows = titleLine ? 1 : gh >= 18 ? 2 : 1
+    const insetX = Math.min(gw * 0.14, 4)
+    const insetY = Math.min(gh * 0.14, 3)
+    for (let row = 0; row < rows; row += 1) {
+      const fy = rows === 1 ? 0.5 : row / (rows - 1)
+      for (let col = 0; col < cols; col += 1) {
+        const fx = cols === 1 ? 0.5 : col / (cols - 1)
+        const x = bit.left + insetX + fx * Math.max(gw - 2 * insetX, 1)
+        const y = bit.top + insetY + fy * Math.max(gh - 2 * insetY, 1)
+        total += 1
+        const hit = document.elementFromPoint(x, y)
+        const onLabel =
+          hit &&
+          (el === hit ||
+            el.contains(hit) ||
+            hit.contains?.(el) ||
+            (peelRoot &&
+              hit === peelRoot &&
+              peelRoot.contains(el)))
+        if (onLabel) {
+          painted += 1
+        } else if (missX == null) {
+          missX = x
+          missY = y
+          const cls = hit ? String(hit.className?.baseVal ?? hit.className ?? '') : ''
+          missTag = hit ? `${hit.tagName}.${cls.slice(0, 40)}` : 'null'
+        }
+      }
+    }
+  }
+  if (painted !== total) return finish(paintFail('hit', { painted, total, missX, missY, missTag }))
+  return finish({ ok: true, painted, total })
+}
+
+/** One-shot painted-label assert for other phone checks (current frame). */
+async function assertLabelPainted(page, selector, frameTag) {
+  const loc = page.locator(selector).first()
+  const handle = await loc.elementHandle({ timeout: 5000 }).catch(() => null)
+  if (!handle) return { ok: false, reason: 'missing', painted: 0, total: 0, frameTag, selector }
+  const result = await page.evaluate(auditLabelPainted, handle)
+  await handle.dispose()
+  return { ...result, frameTag, selector }
+}
+
 async function sampleUnlockToastOverlap(page, bannerClipMut = false) {
-  return page.evaluate(async (bannerClipMut) => {
+  const auditFn = auditLabelPainted.toString()
+  return page.evaluate(async ({ bannerClipMut, auditFn }) => {
+    const auditLabelPainted = eval(`(${auditFn})`)
     const round = (n) => Math.round(n * 10) / 10
     const shown = (el) => {
       if (!el) return false
@@ -10460,6 +10635,9 @@ async function sampleUnlockToastOverlap(page, bannerClipMut = false) {
         clipped += 1
         clipHits.push(toastHit)
       }
+      const bannerTitle = banner.querySelector('.nw-wave-survived-title')
+      const bannerPaint = auditLabelPainted(bannerTitle)
+      const toastPaint = auditLabelPainted(toast)
       const insideBanner =
         bannerBox.left >= -1 &&
         bannerBox.top >= -1 &&
@@ -10497,11 +10675,13 @@ async function sampleUnlockToastOverlap(page, bannerClipMut = false) {
         chipsOn: chip.chipsOn,
         taps: taps.taps,
         tapSmall: taps.small,
+        bannerPaint,
+        toastPaint,
       })
       await new Promise((resolve) => requestAnimationFrame(resolve))
     }
     return { samples, missing: !samples.length ? 'frames' : null }
-  }, bannerClipMut)
+  }, { bannerClipMut, auditFn })
 }
 
 async function checkNwUnlockToastBanner(browser, port, errors) {
@@ -10640,6 +10820,31 @@ async function checkNwUnlockToastBanner(browser, port, errors) {
         }
       }
       if (both.some((row) => row.gold !== 1)) fail(`checkNwUnlockToastBanner fail r${round} ${size} gold=${both.find((row) => row.gold !== 1)?.gold}`)
+      const paintedFrames = both.filter(
+        (row) => !row.bannerPaint?.fade && !row.toastPaint?.fade && (row.bannerPaint?.total || 0) + (row.toastPaint?.total || 0) > 0,
+      )
+      if (paintedFrames.length < 8) {
+        fail(`checkNwUnlockToastBanner fail r${round} ${size} paintedFrames=${paintedFrames.length}`)
+      }
+      const paintFailFrame = paintedFrames.findIndex(
+        (row) => !row.bannerPaint?.ok || !row.toastPaint?.ok,
+      )
+      if (paintFailFrame >= 0) {
+        const row = paintedFrames[paintFailFrame]
+        const which = !row.bannerPaint?.ok ? 'banner' : 'toast'
+        const paint = which === 'banner' ? row.bannerPaint : row.toastPaint
+        const extra =
+          paint.reason === 'hit'
+            ? ` miss=${paint.missTag}@${paint.missX?.toFixed(1)},${paint.missY?.toFixed(1)}`
+            : paint.effOpacity != null
+              ? ` effOpacity=${paint.effOpacity}`
+              : paint.reason === 'scrollClip' || paint.reason === 'ancestorClip'
+                ? ` scrollW=${paint.scrollW} clientW=${paint.clientW}`
+                : ''
+        fail(
+          `checkNwUnlockToastBanner fail r${round} ${size} painted-${which} frame=${paintFailFrame} reason=${paint.reason} painted=${paint.painted}/${paint.total}${extra}`,
+        )
+      }
       const localFail = problems.some((line) => line.includes(`r${round} ${size}`))
       if (!localFail) {
         const b = worst.banner
@@ -10647,8 +10852,11 @@ async function checkNwUnlockToastBanner(browser, port, errors) {
         const vsChip = maxChipsOn > 0 ? maxOv.chip.toFixed(1) : '0.0'
         const toastVsChip = maxChipsOn > 0 ? maxOv.toastChip.toFixed(1) : '0.0'
         const tapsLog = maxTaps > 0 ? String(maxTaps) : '0'
+        const sampleRow = paintedFrames[0] || both[0]
+        const gridPerFrame = (sampleRow?.bannerPaint?.total || 0) + (sampleRow?.toastPaint?.total || 0)
+        const paintedOk = gridPerFrame > 0 ? `${gridPerFrame}/${gridPerFrame}` : '0/0'
         console.log(
-          `checkNwUnlockToastBanner ok r${round} ${size} banner=${b.left},${b.top},${b.w},${b.h} toast=${t.left},${t.top},${t.w},${t.h} overlap=${maxToast.toFixed(1)} vsLabel=${maxOv.label.toFixed(1)} vsCount=${maxOv.count.toFixed(1)} vsChip=${vsChip} toastVsLabel=${maxOv.toastLabel.toFixed(1)} toastVsCount=${maxOv.toastCount.toFixed(1)} toastVsChip=${toastVsChip} chipsOn=${maxChipsOn} taps=${tapsLog} gold=1`,
+          `checkNwUnlockToastBanner ok r${round} ${size} banner=${b.left},${b.top},${b.w},${b.h} toast=${t.left},${t.top},${t.w},${t.h} overlap=${maxToast.toFixed(1)} vsLabel=${maxOv.label.toFixed(1)} vsCount=${maxOv.count.toFixed(1)} vsChip=${vsChip} toastVsLabel=${maxOv.toastLabel.toFixed(1)} toastVsCount=${maxOv.toastCount.toFixed(1)} toastVsChip=${toastVsChip} chipsOn=${maxChipsOn} taps=${tapsLog} painted=${paintedOk} gold=1`,
         )
       }
       await context.close()
