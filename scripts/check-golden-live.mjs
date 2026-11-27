@@ -18,7 +18,7 @@ import { localDateKey } from '../src/lib/dates.ts'
 import { SAVE_KIND } from '../src/lib/save.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 import { EASY_OPEN_DAY_KEY } from '../src/content/goldenPath.ts'
-import { camClamp, camFrameInsets, camToPlate, focusPan, NW_CAMERA_FOCUS, NW_CAMERA_ZOOM } from '../src/components/nwCamera.ts'
+import { camClamp, camFrameInsets, camToPlate, focusPan, focusPanPrestart, NW_CAMERA_FOCUS, NW_CAMERA_ZOOM } from '../src/components/nwCamera.ts'
 import { boardFillBox } from '../src/nightWatch/map/phoneFill.ts'
 import { proveMazeDragAcceptance } from './check-maze-drag-live.mjs'
 
@@ -3254,9 +3254,17 @@ async function proveNwPlant(browser, origin, size, slug, errorsOut) {
     assert.ok(Math.abs(v.world.w - 798 * nwK(v).s0 * NW_CAMERA_ZOOM[id]) < 0.5, `${where} world width ${v.world.w}`)
     const drawn = await page.evaluate(() => document.querySelector('.nw-zoom').offsetWidth)
     assert.ok(Math.abs(drawn - 798 * nwK(v).s0) < 1, `${where} the board draws ${drawn} wide`)
-    const open = focusPan(NW_CAMERA_FOCUS[id], v.W, v.H, nwK(v).s0, v.z, camFrameInsets(v.frame.top))
-    nwNear(v.tx, open[0], 1, `${where} opens on the focus (x)`)
-    nwNear(v.ty, open[1], 1, `${where} opens on the focus (y)`)
+    const marks = await page.evaluate(() =>
+      [...document.querySelectorAll('.defend-plant-ground circle')].map((c) => ({
+        x: Number(c.getAttribute('cx')),
+        y: Number(c.getAttribute('cy')),
+        live: c.classList.contains('is-live'),
+      })),
+    )
+    const insets = camFrameInsets(v.frame.top)
+    const open = focusPanPrestart(marks, NW_CAMERA_FOCUS[id], v.W, v.H, nwK(v).s0, v.z, insets)
+    nwNear(v.tx, open[0], 1, `${where} opens on the pre-start framing (x)`)
+    nwNear(v.ty, open[1], 1, `${where} opens on the pre-start framing (y)`)
 
     const rc = await nwRect(page, '.nw-cam-recenter')
     assert.ok(rc, `${where} Recenter shows`)
