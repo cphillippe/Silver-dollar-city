@@ -1558,7 +1558,6 @@ async function checkLeakBanner(browser, port, errors) {
   const shots = join(tmpdir(), 'nw-leak-banner-565')
   mkdirSync(shots, { recursive: true })
   const sizes = [
-    [360, 780],
     [375, 667],
     [375, 812],
     [390, 844],

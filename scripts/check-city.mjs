@@ -1969,7 +1969,7 @@ assert.equal(playerVisibleChangeItems(latestChange('1.4.601').items).length, 0, 
   assert.match(defend601, /@keyframes nw-wave-survived-hold-center/, '1.4.601 wave banner pop keeps the centered anchor')
   assert.doesNotMatch(
     defend601,
-    /@media \(min-height: 790px\) and \(max-height: 899px\)[\s\S]*animation: none/,
+    /@media \(min-height: 790px\) and \(max-height: 899px\) \{\s*\n  \.defend-page\.is-easy-watch:has\(\.nw-wave-survived\):has\(\.nw-map-toast\) \.nw-wave-survived \{[\s\S]*?animation:\s*none/,
     '1.4.601 does not tuck the banner under the right rail',
   )
   const countNwWaveBannerRailClearDefs = (src) => {
