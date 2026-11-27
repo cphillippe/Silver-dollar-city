@@ -299,6 +299,7 @@ import {
   camTransform,
   camWorld,
   focusPan,
+  focusPanPrestart,
   NW_CAMERA_FOCUS,
   NW_CAMERA_ZOOM,
   NW_CAM_TOUCH_HOLD_MS,
@@ -1048,11 +1049,21 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }
   }
 
+  function camPrestartFraming() {
+    return easy && camOn && phase === 'plant' && Object.keys(plantsRef.current).length < 1
+  }
+
+  function camPrestartPan(f: NonNullable<ReturnType<typeof camFrame>>) {
+    const extra = easyShotReach(pathsOf(runPathsRef.current, ability))
+    const marks = armedSeatMarks(ability, progress, runTierRef.current, plantsRef.current, extra)
+    return focusPanPrestart(marks, NW_CAMERA_FOCUS[mapId], f.W, f.H, f.world.s0, camZ, f.insets)
+  }
+
   function recenter() {
     const f = camFrame()
     if (!f) return
     stampCamTouch()
-    const [tx, ty] = focusPan(NW_CAMERA_FOCUS[mapId], f.W, f.H, f.world.s0, camZ, f.insets)
+    const [tx, ty] = camPrestartFraming() ? camPrestartPan(f) : focusPan(NW_CAMERA_FOCUS[mapId], f.W, f.H, f.world.s0, camZ, f.insets)
     camApply(tx, ty, true)
   }
 

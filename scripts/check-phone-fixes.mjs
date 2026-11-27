@@ -8327,6 +8327,152 @@ async function checkNwCandleName(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #1008 Easy pre-start default cam: Far Hills and Licorice show enough live rings without pan. */
+const NW_PRESTART_SIZES = [
+  [375, 667],
+  [375, 812],
+  [384, 854],
+  [390, 844],
+  [412, 915],
+  [768, 1024],
+]
+const NW_PRESTART_SEARCH = {
+  'far-hills': '?playtest=1&nwSeed=2&nwMap=far-hills&nwLamps=0',
+  map05: '?playtest=1&nwSeed=2&nwMap=map05&nwLamps=0',
+}
+/** 375×667 floor: do not regress today's visible live rings on other maps. */
+const NW_PRESTART_FLOOR_375 = { a2: 3, map03: 9, map04: 5, map05: 3, map06: 5 }
+
+function nwPrestartWant(map, width, total, height) {
+  if (map === 'far-hills') return width >= 768 ? total : 4
+  if (map === 'map05') return total
+  if (width === 375 && height === 667) return NW_PRESTART_FLOOR_375[map] ?? 1
+  return 1
+}
+
+async function checkNwPrestartRings(browser, port, errors) {
+  const only = process.env.NW_PRESTART_RINGS_SIZE
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+
+  const samplePrestart = async (page) =>
+    page.evaluate(() => {
+      const winW = window.innerWidth
+      const winH = window.innerHeight
+      const ringClear = (box) =>
+        box.width > 1 &&
+        box.right > 12 &&
+        box.left < winW - 12 &&
+        box.bottom > 70 &&
+        box.top < winH - 80
+      const rings = [...document.querySelectorAll('.defend-plant-ground circle.is-live')]
+        .map((node) => {
+          const box = node.getBoundingClientRect()
+          if (box.width < 1) return null
+          return {
+            cx: Number(node.getAttribute('cx')),
+            cy: Number(node.getAttribute('cy')),
+            clear: ringClear(box),
+          }
+        })
+        .filter(Boolean)
+      const goldRing = document.querySelector('.defend-plant-ground circle.is-first-seat')
+      let goldInView = false
+      if (goldRing) {
+        const r = goldRing.getBoundingClientRect()
+        const pad = 2
+        goldInView =
+          r.width > 1 &&
+          r.left + pad >= 0 &&
+          r.top + pad >= 0 &&
+          r.right - pad <= winW &&
+          r.bottom - pad <= winH
+      }
+      return { rings, clear: rings.filter((row) => row.clear).length, live: rings.length, goldInView }
+    })
+
+  for (const [map, search] of Object.entries(NW_PRESTART_SEARCH)) {
+    for (const [width, height] of NW_PRESTART_SIZES) {
+      const tag = `${map} ${width}x${height}`
+      if (only && only !== `${width}x${height}` && only !== tag) continue
+      const { context, page } = await openMap(browser, port, width, height, map, { search, motion: true })
+      page.on('pageerror', (error) => errors.push(`prestart ${tag} ${error}`))
+      page.on('console', (msg) => {
+        if (msg.type() === 'error') errors.push(`prestart ${tag} ${msg.text()}`)
+      })
+      await page.waitForTimeout(320)
+      let worstGold = 0
+      for (let frame = 0; frame < 12; frame += 1) {
+        const read = await samplePrestart(page)
+        worstGold = Math.max(worstGold, (await mapGoldCues(page)).length)
+        if (!read.goldInView) fail(`checkNwPrestartRings fail ${tag} frame=${frame} goldRingOffScreen`)
+        await page.waitForTimeout(50)
+      }
+      const last = await samplePrestart(page)
+      const want = nwPrestartWant(map, width, last.live, height)
+      if (last.clear < want) {
+        fail(`checkNwPrestartRings fail ${tag} liveClear=${last.clear} want>=${want} live=${last.live}`)
+      } else {
+        console.log(`checkNwPrestartRings ok ${tag} liveClear=${last.clear} live=${last.live} goldCue=${worstGold}`)
+      }
+      if (worstGold !== 1) fail(`checkNwPrestartRings fail ${tag} gold=${worstGold} want=1`)
+      const logic = page.locator('.nw-rail .defend-ability[data-type="logic"]')
+      if (await logic.count()) {
+        await logic.click()
+        await page.waitForTimeout(120)
+        const armed = await page.locator('.defend-page[data-lamp-picked="yes"]').count()
+        if (armed < 1) fail(`checkNwPrestartRings fail ${tag} logicTap=${armed}`)
+      }
+      await context.close()
+    }
+  }
+
+  for (const [map, floor] of Object.entries(NW_PRESTART_FLOOR_375)) {
+    if (map === 'far-hills' || map === 'map05') continue
+    const { context, page } = await openMap(browser, port, 375, 667, map, {
+      search: `?playtest=1&nwSeed=2&nwMap=${map}&nwLamps=0`,
+    })
+    page.on('pageerror', (error) => errors.push(`prestart floor ${map} ${error}`))
+    const read = await samplePrestart(page)
+    if (read.clear < floor) fail(`checkNwPrestartRings fail floor ${map} 375x667 liveClear=${read.clear} want>=${floor}`)
+    else console.log(`checkNwPrestartRings floor ok ${map} 375x667 liveClear=${read.clear}`)
+    await context.close()
+  }
+
+  const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }
+  const hard = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width: 375, height: 667 },
+    reducedMotion: 'reduce',
+  })
+  await hard.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: hardSave },
+  )
+  const hardPage = await hard.newPage()
+  await hardPage.goto('/?playtest=1')
+  await hardPage.getByRole('button', { name: 'Hold the night' }).click()
+  await hardPage.locator('.defend-board').waitFor()
+  if (await hardPage.locator('[data-map-overlay]').count()) {
+    await hardPage.locator('[data-map="far-hills"]').click()
+    await hardPage.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+  }
+  const camOn = await hardPage.locator('.nw-cam[data-nw-cam="on"]').count()
+  if (camOn !== 0) fail(`checkNwPrestartRings fail hard cam=${camOn}`)
+  else console.log('checkNwPrestartRings ok hard cam=0')
+  await hard.close()
+
+  for (const err of errors.slice(errorMark)) fail(`checkNwPrestartRings error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 /** #957 / Refs #959: Easy shockwave ring only on the first plant of the run. */
 const PLANT_RING_ONCE_SIZES = [
   [375, 812],
@@ -12465,6 +12611,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'nw unlock toast banner nights stay free of console errors')
       return
     }
+    if (process.env.NW_PRESTART_RINGS_ONLY === '1') {
+      await checkNwPrestartRings(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'nw prestart rings nights stay free of console errors')
+      return
+    }
     if (process.env.DIG_WIN_READABLE_ONLY === '1') {
       await checkDigWinReadable(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'dig win readable nights stay free of console errors')
@@ -12497,6 +12648,7 @@ export async function checkPhoneFixes() {
     await checkNwSpendOnScreen(browser, port, errors)
     await checkNwLoveChip(browser, port, errors)
     await checkNwUnlockToastBanner(browser, port, errors)
+    await checkNwPrestartRings(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({
@@ -12673,7 +12825,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_WAVE_SURVIVED_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY', 'NW_LOVE_CHIP_ONLY', 'NW_UNLOCK_TOAST_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_WAVE_SURVIVED_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY', 'NW_LOVE_CHIP_ONLY', 'NW_UNLOCK_TOAST_ONLY', 'NW_PRESTART_RINGS_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')

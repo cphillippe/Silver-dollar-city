@@ -102,6 +102,92 @@ export function camFrameInsets(
   }
 }
 
+/** Pre-start acceptance window (#1008): ring bbox meets the viewport edge margins. */
+function prestartRingInWindow(seat: { x: number; y: number }, view: CamSeatView): boolean {
+  const box = seatBox(seat, view)
+  return box.right > 12 && box.left < view.W - 12 && box.bottom > 70 && box.top < view.H - 80
+}
+
+function scorePrestart<T extends { x: number; y: number; live?: boolean }>(
+  seats: readonly T[],
+  view: CamSeatView,
+  insets: CamInsets,
+): { viewport: number; clear: number; gold: boolean } {
+  let viewport = 0
+  let clear = 0
+  for (const seat of seats) {
+    if (!seat.live) continue
+    if (prestartRingInWindow(seat, view)) viewport += 1
+    if (camSeatClear(seat, view, insets)) clear += 1
+  }
+  const gold = camFirstSeat(seats, view, insets)
+  return { viewport, clear, gold: Boolean(gold && camSeatClear(gold, view, insets)) }
+}
+
+/**
+ * Easy pre-plant open pan: keep the gold first-seat ring whole in the clear window and show as many
+ * live rings as the clamp allows. Falls back to `fallback` when there is no live seat data.
+ */
+export function focusPanPrestart<T extends { x: number; y: number; live?: boolean }>(
+  seats: readonly T[],
+  fallback: { x: number; y: number },
+  W: number,
+  H: number,
+  s0: number,
+  z: number,
+  insets: CamInsets,
+): [number, number] {
+  const live = seats.filter((seat) => seat.live)
+  if (live.length < 1) return focusPan(fallback, W, H, s0, z, insets)
+  const world = camWorld(W, H, z)
+  const minTx = W - world.w
+  const minTy = H - world.h
+  let best = focusPan(fallback, W, H, s0, z, insets)
+  let bestScore = scorePrestart(seats, { W, H, s0, z, tx: best[0], ty: best[1] }, insets)
+  const candidates: { x: number; y: number }[] = [fallback]
+  let minX = live[0].x
+  let maxX = live[0].x
+  let minY = live[0].y
+  let maxY = live[0].y
+  let sumX = 0
+  let sumY = 0
+  for (const seat of live) {
+    sumX += seat.x
+    sumY += seat.y
+    minX = Math.min(minX, seat.x)
+    maxX = Math.max(maxX, seat.x)
+    minY = Math.min(minY, seat.y)
+    maxY = Math.max(maxY, seat.y)
+    candidates.push(seat)
+  }
+  candidates.push({ x: sumX / live.length, y: sumY / live.length })
+  candidates.push({ x: (minX + maxX) / 2, y: (minY + maxY) / 2 })
+  const pick = (score: ReturnType<typeof scorePrestart>, pan: [number, number]) => {
+    const better =
+      score.viewport > bestScore.viewport ||
+      (score.viewport === bestScore.viewport && score.clear > bestScore.clear) ||
+      (score.viewport === bestScore.viewport && score.clear === bestScore.clear && !bestScore.gold)
+    if (score.gold && better) {
+      best = pan
+      bestScore = score
+    }
+  }
+  for (const point of candidates) {
+  const pan = focusPan(point, W, H, s0, z, insets)
+  pick(scorePrestart(seats, { W, H, s0, z, tx: pan[0], ty: pan[1] }, insets), pan)
+  }
+  const step = Math.max(8, Math.round(Math.min(W, H) / 48))
+  for (let ty = minTy; ty <= 0.5; ty += step) {
+    for (let tx = minTx; tx <= 0.5; tx += step) {
+      const [cx, cy] = camClamp(tx, ty, W, H, world)
+      const score = scorePrestart(seats, { W, H, s0, z, tx: cx, ty: cy }, insets)
+      if (!score.gold) continue
+      pick(score, [cx, cy])
+    }
+  }
+  return best
+}
+
 /** Pan that puts plate point `p` in the middle of the clear window, then clamps. */
 export function focusPan(
   p: { x: number; y: number },

@@ -2094,6 +2094,52 @@ assert.doesNotMatch(
     /clipped frame=\$\{clipIdx\} sel=/,
     '1.4.600 unlock toast clip fails name the node and frame',
   )
+  const countNwPrestartRingsDefs = (src) => {
+    const exportAsync = [...src.matchAll(/\bexport\s+async\s+function\s+checkNwPrestartRings\b/g)].length
+    const constAsync = [...src.matchAll(/\bconst\s+checkNwPrestartRings\s*=\s*async\b/g)].length
+    const stripped = src.replace(/\bexport\s+async\s+function\s+checkNwPrestartRings\b/g, '')
+    const plainAsync = [...stripped.matchAll(/\basync\s+function\s+checkNwPrestartRings\b/g)].length
+    return exportAsync + constAsync + plainAsync
+  }
+  const nwPrestartRingsTailOk = (src) => {
+    const lastIdx = src.lastIndexOf('      return\n    }\n')
+    if (lastIdx < 0) return false
+    const tail = src.slice(lastIdx)
+    const unlockIdx = tail.indexOf('await checkNwUnlockToastBanner(browser, port, errors)')
+    const preIdx = tail.indexOf('await checkNwPrestartRings(browser, port, errors)')
+    const mapNoteIdx = tail.indexOf("process.env.NW_MAP_NOTE_ONLY !== '1'")
+    if (unlockIdx < 0 || preIdx < 0 || mapNoteIdx < 0) return false
+    if (!(unlockIdx < preIdx && preIdx < mapNoteIdx)) return false
+    if ([...tail.matchAll(/await checkNwPrestartRings\(browser, port, errors\)/g)].length !== 1) return false
+    if (countNwPrestartRingsDefs(src) !== 1) return false
+    return true
+  }
+  const patchPhoneTailPrestart = (edit) => phone600.slice(0, tailAnchor600) + edit(phone600.slice(tailAnchor600))
+  assert.equal(nwPrestartRingsTailOk(phone600), true, '1.4.600 prestart-rings default tail order and def count')
+  assert.equal(
+    nwPrestartRingsTailOk(patchPhoneTailPrestart((tail) => tail.replace('\n    await checkNwPrestartRings(browser, port, errors)\n', '\n'))),
+    false,
+    '1.4.600 mut delete prestart call',
+  )
+  assert.equal(
+    nwPrestartRingsTailOk(
+      patchPhoneTailPrestart((tail) =>
+        tail.replace(
+          '    await checkNwPrestartRings(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
+          '    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
+        ),
+      ),
+    ),
+    false,
+    '1.4.600 mut prestart after map-note gate',
+  )
+  assert.match(phone600, /checkNwPrestartRings fail \$\{tag\} liveClear=\$\{last\.clear\} want>=\$\{want\}/, '1.4.600 prestart fail line names liveClear and want')
+  const cam601 = readFileSync(new URL('../src/components/nwCamera.ts', import.meta.url), 'utf8')
+  const screen601 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(cam601, /export function focusPanPrestart/, '1.4.600 prestart framing exports focusPanPrestart')
+  assert.match(screen601, /function camPrestartFraming/, '1.4.600 DefendScreen gates pre-start framing')
+  assert.match(screen601, /focusPanPrestart\(marks/, '1.4.600 pre-start open uses live marks')
+  assert.match(screen601, /easy && camOn && phase === 'plant'/, '1.4.600 prestart framing is Easy plant with no lamps')
 }
 
 // 1.4.599: Easy Night Watch Reason chip on-screen at 412×915 after official cam (#949).
