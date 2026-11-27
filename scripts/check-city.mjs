@@ -2022,8 +2022,8 @@ assert.equal(playerVisibleChangeItems(latestChange('1.4.601').items).length, 0, 
     nwWaveBannerRailTailOk(
       patchPhoneTail601((tail) =>
         tail.replace(
-          '    await checkNwWaveBannerRailClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
-          '    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
+          '    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
+          '    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
         ),
       ),
     ),
@@ -2078,9 +2078,10 @@ assert.doesNotMatch(
     const loveIdx = tail.indexOf('await checkNwLoveChip(browser, port, errors)')
     const unlockIdx = tail.indexOf('await checkNwUnlockToastBanner(browser, port, errors)')
     const railIdx = tail.indexOf('await checkNwWaveBannerRailClear(browser, port, errors)')
+    const lampStackIdx = tail.indexOf('await checkNwLampStackClear(browser, port, errors)')
     const mapNoteIdx = tail.indexOf("process.env.NW_MAP_NOTE_ONLY !== '1'")
-    if (loveIdx < 0 || unlockIdx < 0 || railIdx < 0 || mapNoteIdx < 0) return false
-    if (!(loveIdx < unlockIdx && unlockIdx < railIdx && railIdx < mapNoteIdx)) return false
+    if (loveIdx < 0 || unlockIdx < 0 || railIdx < 0 || lampStackIdx < 0 || mapNoteIdx < 0) return false
+    if (!(loveIdx < unlockIdx && unlockIdx < railIdx && railIdx < lampStackIdx && lampStackIdx < mapNoteIdx)) return false
     if ([...tail.matchAll(/await checkNwUnlockToastBanner\(browser, port, errors\)/g)].length !== 1) return false
     if (countNwUnlockToastBannerDefs(src) !== 1) return false
     return true
@@ -2097,8 +2098,8 @@ assert.doesNotMatch(
     nwUnlockToastTailOk(
       patchPhoneTail600((tail) =>
         tail.replace(
-          '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
-          '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
+          '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
+          '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
         ),
       ),
     ),
@@ -2121,8 +2122,8 @@ assert.doesNotMatch(
     nwUnlockToastTailOk(
       patchPhoneTail600((tail) =>
         tail.replace(
-          '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
-          '    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {\n    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n',
+          '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
+          '    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {\n    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n',
         ),
       ),
     ),
@@ -2134,7 +2135,7 @@ assert.doesNotMatch(
       patchPhoneTail600((tail) =>
         tail
           .replace(
-            '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
+            '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
             '    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {\n',
           )
           .replace('  await browser.close()', '    await checkNwUnlockToastBanner(browser, port, errors)\n  await browser.close()'),
