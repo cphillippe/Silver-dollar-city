@@ -1953,6 +1953,7 @@ assert.match(
 assert.equal(APP_VERSION, '1.4.600')
 assert.equal(CHANGELOG[0].version, '1.4.600', '1.4.600 is the newest row')
 assert.match(latestChange('1.4.600').items.join('\n'), /Refs #998/, '1.4.600 changelog refs #998')
+assert.match(latestChange('1.4.600').items.join('\n'), /Refs #1009/, '1.4.600 changelog refs #1009')
 assert.match(latestChange('1.4.600').items.join('\n'), /unlock toast|New map unlocked/i, '1.4.600 changelog names the unlock toast fix')
 assert.match(latestChange('1.4.600').items.join('\n'), /Hard stays the same\./)
 assert.doesNotMatch(latestChange('1.4.600').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.600 changelog avoids GitHub close keywords')
@@ -1976,15 +1977,25 @@ assert.doesNotMatch(
     const plainAsync = [...stripped.matchAll(/\basync\s+function\s+checkNwUnlockToastBanner\b/g)].length
     return exportAsync + constAsync + plainAsync
   }
+  const countNwClearChipsWithLampDefs = (src) => {
+    const exportAsync = [...src.matchAll(/\bexport\s+async\s+function\s+checkNwClearChipsWithLamp\b/g)].length
+    const constAsync = [...src.matchAll(/\bconst\s+checkNwClearChipsWithLamp\s*=\s*async\b/g)].length
+    const stripped = src.replace(/\bexport\s+async\s+function\s+checkNwClearChipsWithLamp\b/g, '')
+    const plainAsync = [...stripped.matchAll(/\basync\s+function\s+checkNwClearChipsWithLamp\b/g)].length
+    return exportAsync + constAsync + plainAsync
+  }
   const nwUnlockToastTailOk = (src) => {
     const lastIdx = src.lastIndexOf('      return\n    }\n')
     if (lastIdx < 0) return false
     const tail = src.slice(lastIdx)
     const loveIdx = tail.indexOf('await checkNwLoveChip(browser, port, errors)')
+    const clearIdx = tail.indexOf('await checkNwClearChipsWithLamp(browser, port, errors)')
     const unlockIdx = tail.indexOf('await checkNwUnlockToastBanner(browser, port, errors)')
     const mapNoteIdx = tail.indexOf("process.env.NW_MAP_NOTE_ONLY !== '1'")
-    if (loveIdx < 0 || unlockIdx < 0 || mapNoteIdx < 0) return false
-    if (!(loveIdx < unlockIdx && unlockIdx < mapNoteIdx)) return false
+    if (loveIdx < 0 || clearIdx < 0 || unlockIdx < 0 || mapNoteIdx < 0) return false
+    if (!(loveIdx < clearIdx && clearIdx < unlockIdx && unlockIdx < mapNoteIdx)) return false
+    if ([...tail.matchAll(/await checkNwClearChipsWithLamp\(browser, port, errors\)/g)].length !== 1) return false
+    if (countNwClearChipsWithLampDefs(src) !== 1) return false
     if ([...tail.matchAll(/await checkNwUnlockToastBanner\(browser, port, errors\)/g)].length !== 1) return false
     if (countNwUnlockToastBannerDefs(src) !== 1) return false
     return true
@@ -2013,13 +2024,18 @@ assert.doesNotMatch(
     nwUnlockToastTailOk(
       patchPhoneTail600((tail) =>
         tail.replace(
-          '    await checkNwLoveChip(browser, port, errors)\n    await checkNwUnlockToastBanner(browser, port, errors)\n',
-          '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwLoveChip(browser, port, errors)\n',
+          '    await checkNwLoveChip(browser, port, errors)\n    await checkNwClearChipsWithLamp(browser, port, errors)\n',
+          '    await checkNwClearChipsWithLamp(browser, port, errors)\n    await checkNwLoveChip(browser, port, errors)\n',
         ),
       ),
     ),
     false,
-    '1.4.600 mut unlock before love',
+    '1.4.600 mut clear chips before love',
+  )
+  assert.equal(
+    nwUnlockToastTailOk(patchPhoneTail600((tail) => tail.replace('\n    await checkNwClearChipsWithLamp(browser, port, errors)\n', '\n'))),
+    false,
+    '1.4.600 mut delete clear chips call',
   )
   assert.equal(
     nwUnlockToastTailOk(
@@ -2061,6 +2077,18 @@ assert.doesNotMatch(
     /checkNwUnlockToastBanner ok r\$\{round\} \$\{size\} banner=.*toast=.*overlap=.*vsChip=.*toastVsChip=.*taps=.*gold=1/,
     '1.4.600 the ok line logs banner, toast, chip, and tap guards',
   )
+  const board1009 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
+  assert.doesNotMatch(
+    board1009,
+    /if \(cardOpen \|\| chip\.getAttribute\('data-label-park'\)\)/,
+    '1.4.600 #1009 clear chips always take the layout pass',
+  )
+  assert.match(board1009, /hideTypeLabelsOnChrome\(board, boosting\)/, '1.4.600 clear chips relayout on boost')
+  assert.match(phone600, /if \(process\.env\.NW_CLEAR_CHIPS_ONLY === '1'\)/, '1.4.600 clear-chip ONLY guard is present')
+  assert.match(phone600, /async function checkNwClearChipsWithLamp/, '1.4.600 checkNwClearChipsWithLamp is defined')
+  assert.match(phone600, /NW_CLEAR_CHIPS_ONLY/, '1.4.600 clear-chip scan has a scoped-only guard')
+  assert.match(phone600, /checkNwClearChipsWithLamp fail \$\{size\} \$\{chip\.type\} orphan=1/, '1.4.600 #1001 no-orphan fail line')
+  assert.match(phone600, /checkNwClearChipsWithLamp ok \$\{size\} frames=.*science pairDist=.*gold=1/, '1.4.600 clear-chip ok line logs pair distance')
   assert.match(phone600, /both\.length < 20/, '1.4.600 unlock toast holds at least 20 sampled frames')
   const unlockSample = phone600.slice(
     phone600.indexOf('async function sampleUnlockToastOverlap'),

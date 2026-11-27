@@ -221,7 +221,7 @@ function labelPaintBox(el: SVGTextElement) {
  * a New-lamp dock, or the hearts/round HUD. The lamp art is not moved.
  * Re-reads on pan, resize, card open and the clear.
  */
-function hideTypeLabelsOnChrome(board: SVGSVGElement) {
+function hideTypeLabelsOnChrome(board: SVGSVGElement, boosting = false) {
   const page = board.closest('.defend-page')
   if (!(page instanceof HTMLElement) || !page.classList.contains('is-easy-watch')) return
   holdTypeLabelBoxes()
@@ -260,7 +260,6 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
   const chipNodes = [...page.querySelectorAll('.defend-type-chip')]
     .filter((node): node is HTMLElement => node instanceof HTMLElement)
     .sort((a, b) => (parseFloat(b.style.top) || 0) - (parseFloat(a.style.top) || 0))
-  const cardOpen = Boolean(page.querySelector('.defend-tower-card'))
   const glyphBoxes = [
     ...page.querySelectorAll('.defend-pad .defend-lamp-sprite, .defend-pad image.defend-type-mark'),
   ]
@@ -275,12 +274,7 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
       chip.removeAttribute('data-chrome-hide')
       continue
     }
-    if (cardOpen || chip.getAttribute('data-label-park')) {
-      const box = chip.getBoundingClientRect()
-      if (box.width < 1 || box.height < 1 || !chrome.some((other) => boxesHit(box, other))) chip.removeAttribute('data-chrome-hide')
-      else chip.setAttribute('data-chrome-hide', 'yes')
-      continue
-    }
+    chip.removeAttribute('data-label-park')
     chip.style.transform = ''
     chip.removeAttribute('data-chrome-hide')
     const otherChips = chipNodes
@@ -320,9 +314,29 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
           ? hudEl.getBoundingClientRect()
           : null
     const viewH = win?.innerHeight ?? 0
+    const chipKind = [...chip.classList].find((part) => part.startsWith('is-') && part.length > 3)
+    const lampPad =
+      chipKind && chipKind.length > 3
+        ? page.querySelector(`.defend-pad.is-planted.is-${chipKind.slice(3)}[data-tower-type="${chipKind.slice(3)}"]`)
+        : null
+    if (boosting && lampPad instanceof SVGGElement) {
+      const lampBox = lampPad.getBoundingClientRect()
+      const lampInPlay =
+        viewH > 0 &&
+        lampBox.width > 1 &&
+        lampBox.bottom >= Math.max(headerBottom, 4) - 0.5 &&
+        lampBox.top <= viewH - 4 + 0.5 &&
+        lampBox.left >= 2 - 0.5 &&
+        lampBox.right <= (win?.innerWidth ?? 0) - 2 + 0.5
+      if (!lampInPlay) {
+        const atLamp = chip.getBoundingClientRect()
+        if (viewH > 0 && (atLamp.top < 0 || atLamp.bottom > viewH)) chip.setAttribute('data-chrome-hide', 'yes')
+        continue
+      }
+    }
     const flipAbove = !(narrowGate && topbarLive)
     const plotAttr = chip.getAttribute('data-chip-plot') || ''
-    if (narrowGate && plotAttr.includes(':600:88') && topbarLive) {
+    if (narrowGate && !boosting && plotAttr.includes(':600:88') && topbarLive) {
       const minTop = Math.max(headerFloorEarly, 57)
       let dy = 0
       const applyHead = () => {
@@ -386,6 +400,65 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
     }
     box = chip.getBoundingClientRect()
     if (viewH > 0 && box.top < Math.max(headerBottom, 4) + 0.5 && hudBox) {
+      box = parkBelowHudFloor(Math.max(hudBox.bottom + 4, headerBottom + 4))
+    }
+    if (viewH > 0 && box.height > 1 && box.bottom > viewH - 4) {
+      const floorTop = Math.max(headerFloorEarly, hudBox ? Math.max(hudBox.bottom + 4, headerBottom + 4) : headerFloorEarly)
+      const floorBlocks = [...glyphBoxes, ...otherChips, ...navBlocks, ...cardBlocks, ...topbarBlocks]
+      if (win) {
+        const pad = 4
+        const w = win.innerWidth
+        const topPad = Math.max(pad, headerBottom)
+        if (w > 0) {
+          floorBlocks.push(
+            domRectLike(-1e5, -1e5, pad, 1e5),
+            domRectLike(w - pad, -1e5, 1e5, 1e5),
+            domRectLike(-1e5, -1e5, 1e5, topPad),
+            domRectLike(-1e5, viewH - pad, 1e5, 1e5),
+          )
+        }
+      }
+      box = slideTypeChipBelowFloor(chip, floorBlocks, floorTop)
+    }
+    if (lampPad instanceof SVGGElement) {
+      const padBox = lampPad.getBoundingClientRect()
+      const padInPlay =
+        viewH > 0 &&
+        padBox.width > 1 &&
+        padBox.bottom >= Math.max(headerBottom, 4) - 0.5 &&
+        padBox.top <= viewH - 4 + 0.5 &&
+        padBox.left >= 2 - 0.5 &&
+        padBox.right <= (win?.innerWidth ?? 0) - 2 + 0.5
+      if (padInPlay) {
+        box = chip.getBoundingClientRect()
+        const chipCy = (box.top + box.bottom) / 2
+        const padCy = (padBox.top + padBox.bottom) / 2
+        if (Math.abs(chipCy - padCy) > 96) {
+          chip.style.transform = ''
+          box = slideTypeChip(chip, blocks, flipAbove)
+          box = chip.getBoundingClientRect()
+          if (viewH > 0 && box.bottom > viewH - 4) {
+            const floorTop = Math.max(headerFloorEarly, hudBox ? Math.max(hudBox.bottom + 4, headerBottom + 4) : headerFloorEarly)
+            const floorBlocks = [...glyphBoxes, ...otherChips, ...navBlocks, ...cardBlocks, ...topbarBlocks]
+            if (win) {
+              const pad = 4
+              const w = win.innerWidth
+              const topPad = Math.max(pad, headerBottom)
+              if (w > 0) {
+                floorBlocks.push(
+                  domRectLike(-1e5, -1e5, pad, 1e5),
+                  domRectLike(w - pad, -1e5, 1e5, 1e5),
+                  domRectLike(-1e5, -1e5, 1e5, topPad),
+                  domRectLike(-1e5, viewH - pad, 1e5, 1e5),
+                )
+              }
+            }
+            box = slideTypeChipBelowFloor(chip, floorBlocks, floorTop)
+          }
+        }
+      }
+    }
+    if (hudBox && boxesHit(box, hudBox)) {
       box = parkBelowHudFloor(Math.max(hudBox.bottom + 4, headerBottom + 4))
     }
     if (box.width < 1 || box.height < 1 || !chrome.some((other) => boxesHit(box, other))) chip.removeAttribute('data-chrome-hide')
@@ -520,7 +593,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     if (!easy) return
     const board = boardRef.current
     if (!board) return
-    const hide = () => hideTypeLabelsOnChrome(board)
+    const hide = () => hideTypeLabelsOnChrome(board, boosting)
     hide()
     const pan = board.closest('.nw-pan')
     const watch = new MutationObserver(hide)
