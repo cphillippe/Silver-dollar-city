@@ -331,11 +331,11 @@ async function waitForFirstWalkerVisible(page, ceilingMs = FIRST_WALKER_VISIBLE_
   assert.fail(`first walker visible within ${ceilingMs}ms`)
 }
 
-async function openMap(browser, port, width, height, map, { motion = false, search = '?playtest=1&nwSeed=2', baseURL } = {}) {
+async function openMap(browser, port, width, height, map, { motion = false, search = '?playtest=1&nwSeed=2', baseURL, deviceScaleFactor = 1 } = {}) {
   const context = await browser.newContext({
     baseURL: baseURL || `http://127.0.0.1:${port}/`,
     viewport: { width, height },
-    deviceScaleFactor: 1,
+    deviceScaleFactor,
     reducedMotion: motion ? 'no-preference' : 'reduce',
   })
   await context.addInitScript(
@@ -10862,9 +10862,12 @@ async function checkNwWaveBannerRailClear(browser, port, errors) {
     for (const [width, height] of nwUnlockToastSizesForRun()) {
       const size = `${width}x${height}`
       if (onlySize && onlySize !== size) continue
+      const proofShot =
+        process.env.NW_UNLOCK_TOAST_PROOF_SHOT === '1' && width === 375 && height === 667 && round === 24
       const { context, page } = await openMap(browser, port, width, height, 'a2', {
         motion: true,
         search,
+        deviceScaleFactor: proofShot ? 2 : 1,
       })
       page.on('pageerror', (error) => errors.push(`wave-banner-rail r${round} ${size} ${error}`))
       await waitNwUnlockToastCamReady(page, size, round)
@@ -10906,10 +10909,7 @@ async function checkNwWaveBannerRailClear(browser, port, errors) {
       if (maxChipsOn > 0 && maxOv.chip > 0) {
         fail(`checkNwWaveBannerRailClear fail r${round} ${size} vsChip=${maxOv.chip.toFixed(1)} chipsOn=${maxChipsOn}`)
       }
-      // Short 375×667: dock new-lamp row overlaps the unlock toast on main too (eeec6037 ~6219px²;
-      // 1.4.601 stack ~1324px²). Fail every other size when toast covers the new-lamp row.
-      const toastNewLampExempt = width === 375 && height === 667
-      if (!toastNewLampExempt && maxOv.toastNewLamp > 0) {
+      if (maxOv.toastNewLamp > 0) {
         fail(`checkNwWaveBannerRailClear fail r${round} ${size} toastVsNewLamp=${maxOv.toastNewLamp.toFixed(1)}`)
       }
       if (height >= 720 && height <= 789 && maxOv.toastDeep > 350) {
@@ -10924,6 +10924,31 @@ async function checkNwWaveBannerRailClear(browser, port, errors) {
         console.log(
           `checkNwWaveBannerRailClear ok r${round} ${size} vsRail=${maxOv.rail.toFixed(1)} vsChip=${vsChip} toastVsNewLamp=${maxOv.toastNewLamp.toFixed(1)} chipsOn=${maxChipsOn} gold=1`,
         )
+      }
+      if (
+        !localFail &&
+        process.env.NW_UNLOCK_TOAST_PROOF_SHOT === '1' &&
+        width === 375 &&
+        height === 667 &&
+        round === 24
+      ) {
+        const shotDir = join(tmpdir(), 'nw-unlock-toast-proof-601')
+        mkdirSync(shotDir, { recursive: true })
+        const shotPath = join(shotDir, '375x667-r24-toast-2x.png')
+        const clip = await page.evaluate(() => {
+          const toast = document.querySelector('.nw-map-toast')
+          const banner = document.querySelector('.nw-wave-survived')
+          if (!toast) return null
+          const t = toast.getBoundingClientRect()
+          const b = banner?.getBoundingClientRect()
+          const top = Math.max(0, (b ? Math.min(b.top, t.top) : t.top) - 12)
+          const bottom = Math.max(t.bottom, b?.bottom ?? t.bottom) + 96
+          return { x: 0, y: top, width: innerWidth, height: Math.min(innerHeight - top, bottom - top) }
+        })
+        if (clip) {
+          await page.screenshot({ path: shotPath, clip })
+          console.log(`nw-unlock-toast-proof-shot ${shotPath}`)
+        }
       }
       await context.close()
     }

@@ -5894,6 +5894,33 @@ body:has(.defend-page.is-easy-watch .nw-wave-survived):has(.defend-page.is-easy-
   }
 }
 
+/* Short phones: while the unlock note samples, tuck the clear-row lamp stack under the toast. */
+@media (max-width: 480px) and (max-height: 719px) {
+  .defend-page.is-easy-watch.is-boost:has(.nw-map-toast) .defend-clear-row button.defend-new-lamp[data-new-lamp='yes'] {
+    bottom: 212px;
+  }
+
+  .defend-page.is-easy-watch.is-boost:has(.nw-map-toast) .defend-clear-row button.defend-candle-lamp {
+    bottom: 156px;
+  }
+
+  .defend-page.is-easy-watch.is-boost:has(.nw-map-toast) .defend-clear-row button.defend-bell-lamp {
+    bottom: 100px;
+  }
+
+  .defend-page.is-easy-watch.is-boost:has(.nw-map-toast) .defend-clear-row button.defend-incense-lamp {
+    bottom: 72px;
+  }
+
+  .defend-page.is-easy-watch.is-boost:has(.nw-map-toast) .defend-clear-row button.defend-cross-lamp {
+    bottom: 56px;
+  }
+
+  .defend-page.is-easy-watch.is-boost:has(.nw-map-toast) .defend-candle-name {
+    bottom: 168px;
+  }
+}
+
 /* Tablet: type chips sit lower under the stacked note. */
 @media (min-width: 740px) and (min-height: 900px) {
   .defend-page.is-easy-watch:has(.nw-wave-survived) .nw-map-toast {
