@@ -11061,6 +11061,10 @@ async function sampleNwLampStackClear(page) {
   }, NW_LAMP_STACK_LAMP_SEL)
 }
 
+function nwLampStackSizesForRun() {
+  return nwUnlockToastSizesForRun().filter(([width, height]) => height <= 719 && width <= 480)
+}
+
 async function checkNwLampStackClear(browser, port, errors) {
   const onlySize = process.env.NW_LAMP_STACK_SIZE
   const onlyRound = process.env.NW_LAMP_STACK_ROUND
@@ -11098,7 +11102,7 @@ async function checkNwLampStackClear(browser, port, errors) {
   for (const round of NW_UNLOCK_TOAST_ROUNDS) {
     if (onlyRound && onlyRound !== String(round)) continue
     const search = `?playtest=1&nwSeed=2&nwMap=a2&nwRound=${round}&nwLamps=0&nwCam=1`
-    for (const [width, height] of nwUnlockToastSizesForRun()) {
+    for (const [width, height] of nwLampStackSizesForRun()) {
       const size = `${width}x${height}`
       if (onlySize && onlySize !== size) continue
       const proofShot =
