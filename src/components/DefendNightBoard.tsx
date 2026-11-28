@@ -246,6 +246,13 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
   ]
   const chrome = chromeEls.filter(chromeBoxShown).map((el) => el.getBoundingClientRect())
   if (topbarLive && !topbarMeasured) chrome.push(topbarLive)
+  for (const el of page.querySelectorAll('.nw-wave-survived, .nw-map-toast')) {
+    if (!(el instanceof HTMLElement)) continue
+    const style = getComputedStyle(el)
+    if (style.display === 'none' || style.visibility === 'hidden') continue
+    const box = el.getBoundingClientRect()
+    if (box.width > 1 && box.height > 1) chrome.push(box)
+  }
   for (const label of page.querySelectorAll('text.defend-type-label')) {
     if (!(label instanceof SVGTextElement)) continue
     const style = getComputedStyle(label)
@@ -525,6 +532,11 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     const pan = board.closest('.nw-pan')
     const watch = new MutationObserver(hide)
     if (pan) watch.observe(pan, { attributes: true, attributeFilter: ['style'] })
+    const pageEl = board.closest('.defend-page')
+    const stackWatch = new MutationObserver(hide)
+    if (pageEl instanceof HTMLElement) {
+      stackWatch.observe(pageEl, { childList: true, subtree: true })
+    }
     const frame = board.closest('.defend-frame')
     const resize = new ResizeObserver(hide)
     if (frame instanceof HTMLElement) resize.observe(frame)
@@ -536,6 +548,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     return () => {
       dropFont = true
       watch.disconnect()
+      stackWatch.disconnect()
       resize.disconnect()
       window.removeEventListener('resize', hide)
     }

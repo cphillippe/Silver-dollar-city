@@ -5819,11 +5819,11 @@ body:has(.defend-page.is-easy-watch .nw-wave-survived):has(.defend-page.is-easy-
 
 @keyframes nw-wave-survived-hold-center {
   0% {
-    transform: translateX(-50%) scale(0.86);
+    transform: translateX(-50%) scale(1);
     opacity: 0;
   }
   9% {
-    transform: translateX(-50%) scale(1.05);
+    transform: translateX(-50%) scale(1);
     opacity: 1;
   }
   92% {
@@ -6990,11 +6990,11 @@ body:has(.defend-page.is-easy-watch .nw-wave-survived):has(.defend-page.is-easy-
 
 @keyframes nw-wave-survived-hold {
   0% {
-    transform: scale(0.86);
+    transform: scale(1);
     opacity: 0;
   }
   9% {
-    transform: scale(1.05);
+    transform: scale(1);
     opacity: 1;
   }
   92% {
