@@ -2098,7 +2098,7 @@ assert.doesNotMatch(
   assert.match(phone600, /if \(process\.env\.NW_CLEAR_CHIPS_ONLY === '1'\)/, '1.4.600 clear-chip ONLY guard is present')
   assert.match(phone600, /async function checkNwClearChipsWithLamp/, '1.4.600 checkNwClearChipsWithLamp is defined')
   assert.match(phone600, /NW_CLEAR_CHIPS_ONLY/, '1.4.600 clear-chip scan has a scoped-only guard')
-  assert.match(phone600, /checkNwClearChipsWithLamp fail \$\{size\} \$\{chip\.type\} orphan=1/, '1.4.600 #1001 no-orphan fail line')
+  assert.match(phone600, /checkNwClearChipsWithLamp fail \$\{tag\} \$\{chip\.type\} orphan=1/, '1.4.600 #1001 no-orphan fail line')
   assert.match(
     phone600,
     /checkNwClearChipsWithLamp ok \$\{size\} lamps=.*science pairDist=.*gold=1/,
