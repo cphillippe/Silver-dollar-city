@@ -1949,9 +1949,23 @@ assert.match(
 
 
 
+// 1.4.602: type chips stay put when wave banner stack chrome flickers (#1012).
+assert.equal(APP_VERSION, '1.4.602')
+assert.equal(CHANGELOG[0].version, '1.4.602', '1.4.602 is the newest row')
+assert.match(latestChange('1.4.602').items.join('\n'), /Refs #1012/, '1.4.602 changelog refs #1012')
+assert.match(latestChange('1.4.602').items.join('\n'), /Nothing changes for players yet\./)
+assert.equal(playerVisibleChangeItems(latestChange('1.4.602').items).length, 0, '1.4.602 has no player-facing changelog copy')
+{
+  const board602 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
+  const phone602 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  assert.match(board602, /touchesStackChrome/, '1.4.602 stack observer only reacts to wave toast chrome')
+  assert.match(board602, /layoutBlocks\.some/, '1.4.602 chips skip layout when no obstacle hit')
+  assert.match(phone602, /chipJitter=\$\{jitter\.max/, '1.4.602 rail ok line reports chip jitter')
+  assert.match(phone602, /jitter\.max > 4/, '1.4.602 rail check fails when chips jitter after settle')
+}
+
 // 1.4.601: Easy wave banner stays clear of the right ability rail (#998).
-assert.equal(APP_VERSION, '1.4.601')
-assert.equal(CHANGELOG[0].version, '1.4.601', '1.4.601 is the newest row')
+assert.equal(CHANGELOG[1].version, '1.4.601', '1.4.601 follows the newest row')
 assert.match(latestChange('1.4.601').items.join('\n'), /Refs #998/, '1.4.601 changelog refs #998')
 assert.match(latestChange('1.4.601').items.join('\n'), /Refs #1010/, '1.4.601 changelog refs #1010')
 assert.match(latestChange('1.4.601').items.join('\n'), /Refs #1011/, '1.4.601 changelog refs #1011')

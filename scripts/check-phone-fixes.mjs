@@ -10798,6 +10798,8 @@ async function sampleNwWaveBannerRailClear(page) {
     }
     const samples = []
     const loopStart = performance.now()
+    let bannerStack = null
+    let maxCueOnBanner = 0
     while (performance.now() - loopStart < 2600) {
       const banner = document.querySelector('.nw-wave-survived')
       const toast = document.querySelector('.nw-map-toast')
@@ -10811,6 +10813,26 @@ async function sampleNwWaveBannerRailClear(page) {
       const lamps = newLampUnion()
       const toastNewLamp = lamps ? area(toastBox, lamps) : 0
       const toastDeep = innerHeight >= 720 && innerHeight <= 789 ? toastBox.top : 0
+      if (!bannerStack) {
+        const cx = (textBox.left + textBox.right) / 2
+        const cy = (textBox.top + textBox.bottom) / 2
+        bannerStack = document
+          .elementsFromPoint(cx, cy)
+          .slice(0, 10)
+          .map((el) => {
+            const box = el.getBoundingClientRect()
+            const cls =
+              el instanceof SVGElement && el.className?.baseVal != null
+                ? el.className.baseVal
+                : String(el.className || '')
+            return { tag: el.tagName.toLowerCase(), class: cls.slice(0, 120), box: round(box.top) }
+          })
+        for (const el of document.querySelectorAll('.walker-target-cue, .walker-target-cue *')) {
+          if (!shown(el)) continue
+          const box = boxOf(el)
+          maxCueOnBanner = Math.max(maxCueOnBanner, area(textBox, box))
+        }
+      }
       samples.push({
         ov: { rail: chip.railMax, chip: chip.max, toastNewLamp, toastDeep },
         chipsOn: chip.chipsOn,
@@ -10818,7 +10840,49 @@ async function sampleNwWaveBannerRailClear(page) {
       })
       await new Promise((resolve) => requestAnimationFrame(resolve))
     }
-    return { samples, missing: !samples.length ? 'frames' : null }
+    const waitBannerGone = performance.now()
+    while (performance.now() - waitBannerGone < 3000) {
+      const banner = document.querySelector('.nw-wave-survived')
+      if (!banner || !shown(banner)) break
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+    }
+    for (let frame = 0; frame < 45; frame++) {
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+    }
+    const trackIds = new Set()
+    for (const el of document.querySelectorAll('.defend-type-chip')) {
+      if (el.getAttribute('data-chrome-hide') === 'yes') continue
+      if (!shown(el)) continue
+      trackIds.add(el.getAttribute('data-chip-plot') || el.className)
+    }
+    const prevTops = new Map()
+    let maxChipJitter = 0
+    let scienceJitter = 0
+    const stabilityUntil = performance.now() + 3000
+    while (performance.now() < stabilityUntil) {
+      for (const el of document.querySelectorAll('.defend-type-chip')) {
+        if (el.getAttribute('data-chrome-hide') === 'yes') continue
+        if (!shown(el)) continue
+        const id = el.getAttribute('data-chip-plot') || el.className
+        if (!trackIds.has(id)) continue
+        const top = el.getBoundingClientRect().top
+        const prev = prevTops.get(id)
+        if (prev != null) {
+          const d = Math.abs(top - prev)
+          maxChipJitter = Math.max(maxChipJitter, d)
+          if (el.classList.contains('is-science')) scienceJitter = Math.max(scienceJitter, d)
+        }
+        prevTops.set(id, top)
+      }
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+    }
+    return {
+      samples,
+      missing: !samples.length ? 'frames' : null,
+      chipJitter: { max: round(maxChipJitter), science: round(scienceJitter) },
+      bannerStack,
+      maxCueOnBanner: round(maxCueOnBanner),
+    }
   })
 }
 
@@ -10918,11 +10982,27 @@ async function checkNwWaveBannerRailClear(browser, port, errors) {
       if (frames.some((row) => row.gold !== 1)) {
         fail(`checkNwWaveBannerRailClear fail r${round} ${size} gold=${frames.find((row) => row.gold !== 1)?.gold}`)
       }
+      const jitter = sample.chipJitter || { max: 0, science: 0 }
+      if (jitter.max > 4) {
+        fail(
+          `checkNwWaveBannerRailClear fail r${round} ${size} chipJitter=${jitter.max.toFixed(1)} science=${jitter.science.toFixed(1)}`,
+        )
+      }
       const localFail = problems.some((line) => line.includes(`r${round} ${size}`))
       if (!localFail) {
         const vsChip = maxChipsOn > 0 ? maxOv.chip.toFixed(1) : '0.0'
         console.log(
-          `checkNwWaveBannerRailClear ok r${round} ${size} vsRail=${maxOv.rail.toFixed(1)} vsChip=${vsChip} toastVsNewLamp=${maxOv.toastNewLamp.toFixed(1)} chipsOn=${maxChipsOn} gold=1`,
+          `checkNwWaveBannerRailClear ok r${round} ${size} vsRail=${maxOv.rail.toFixed(1)} vsChip=${vsChip} toastVsNewLamp=${maxOv.toastNewLamp.toFixed(1)} chipsOn=${maxChipsOn} chipJitter=${jitter.max.toFixed(1)} scienceJitter=${jitter.science.toFixed(1)} gold=1`,
+        )
+      }
+      if (
+        !localFail &&
+        round === 24 &&
+        (size === '412x915' || size === '375x812') &&
+        sample.bannerStack
+      ) {
+        console.log(
+          `checkNwWaveBannerRailClear bannerStack r${round} ${size} cueOnBanner=${sample.maxCueOnBanner} ${JSON.stringify(sample.bannerStack)}`,
         )
       }
       if (

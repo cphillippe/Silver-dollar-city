@@ -288,8 +288,6 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
       else chip.setAttribute('data-chrome-hide', 'yes')
       continue
     }
-    chip.style.transform = ''
-    chip.removeAttribute('data-chrome-hide')
     const otherChips = chipNodes
       .filter((node) => node !== chip && chromeBoxShown(node))
       .map((node) => node.getBoundingClientRect())
@@ -302,7 +300,8 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
     const headerBottom = topbarBox?.bottom ?? 0
     const topbarBlocks = topbarBox ? [topbarBox] : []
     const headerFloorEarly = headerBottom + 4
-    const blocks = [...chrome, ...glyphBoxes, ...otherChips, ...cardBlocks, ...navBlocks, ...topbarBlocks]
+    const layoutBlocks = [...chrome, ...glyphBoxes, ...otherChips, ...cardBlocks, ...navBlocks, ...topbarBlocks]
+    const blocks = [...layoutBlocks]
     const win = page.ownerDocument?.defaultView
     if (win) {
       const pad = 4
@@ -318,6 +317,17 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
         )
       }
     }
+    const chipBoxNow = chip.getBoundingClientRect()
+    const hitsObstacle =
+      chipBoxNow.width > 1 &&
+      chipBoxNow.height > 1 &&
+      layoutBlocks.some((other) => boxesHit(chipBoxNow, other))
+    if (!hitsObstacle) {
+      chip.removeAttribute('data-chrome-hide')
+      continue
+    }
+    chip.style.transform = ''
+    chip.removeAttribute('data-chrome-hide')
     const hudEl = page.querySelector('.nw-hud')
     const hudRaw = hudEl?.getBoundingClientRect()
     const hudBox =
@@ -533,7 +543,28 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     const watch = new MutationObserver(hide)
     if (pan) watch.observe(pan, { attributes: true, attributeFilter: ['style'] })
     const pageEl = board.closest('.defend-page')
-    const stackWatch = new MutationObserver(hide)
+    const stackChromeSel = '.nw-wave-survived, .nw-map-toast'
+    const touchesStackChrome = (node: Node) => {
+      if (!(node instanceof Element)) return false
+      if (node.matches(stackChromeSel)) return true
+      return Boolean(node.querySelector(stackChromeSel))
+    }
+    const stackWatch = new MutationObserver((records) => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (touchesStackChrome(node)) {
+            hide()
+            return
+          }
+        }
+        for (const node of record.removedNodes) {
+          if (touchesStackChrome(node)) {
+            hide()
+            return
+          }
+        }
+      }
+    })
     if (pageEl instanceof HTMLElement) {
       stackWatch.observe(pageEl, { childList: true, subtree: true })
     }
