@@ -300,10 +300,14 @@ export function DefendNightActorsSvg({
   spawnLog = false,
   cueNudge = false,
   waveSurvivedHold = false,
+  waveBannerCueHoldMut = false,
+  waveBannerShotHoldMut = false,
   bannerCueProbePlate = null,
 }: Omit<DefendNightActorsProps, 'tapPos' | 'fireBest' | 'tapJuice' | 'easy' | 'onBoostTower'> & {
   easy: boolean
   waveSurvivedHold?: boolean
+  waveBannerCueHoldMut?: boolean
+  waveBannerShotHoldMut?: boolean
   bannerCueProbePlate?: { x: number; y: number } | null
 }) {
   const spawnSeen = useRef(new Set<string>())
@@ -378,7 +382,9 @@ export function DefendNightActorsSvg({
   const rowHead = new Map(candleRowHeads(candlePlants).map((head) => [head.id, head.mark]))
   const drawAt = (raider: Raider) => (walkIn ? walkIn.drawAt(raider) : raiderAt(raider))
   const cueAt = tapTarget ? drawAt(tapTarget) : null
-  const probeCueAt = bannerCueProbePlate && phase === 'boost' ? bannerCueProbePlate : null
+  void bannerCueProbePlate
+  const walkCueHold = waveSurvivedHold && !waveBannerCueHoldMut
+  const shotFxHold = waveSurvivedHold && !waveBannerShotHoldMut
   const walkers = raiders.map((raider) => {
     const held = walkIn ? walkIn.held(raider) : false
     const entering = walkIn ? walkIn.entering(raider) : false
@@ -1011,7 +1017,7 @@ export function DefendNightActorsSvg({
               ) : (
                 walkers
               )}
-              {!waveSurvivedHold
+              {!shotFxHold
                 ? shots.map((shot) => (
                     <g className="defend-shot" key={shot.key}>
                       <line
@@ -1031,7 +1037,7 @@ export function DefendNightActorsSvg({
                     </g>
                   ))
                 : null}
-              {easyTap && tapTarget && cueAt && !tapTarget.turned && !waveSurvivedHold ? (
+              {easyTap && tapTarget && cueAt && !tapTarget.turned && !walkCueHold ? (
                 <g className="nw-walk-cue" clipPath={walkIn ? 'url(#nw-walk-clip)' : undefined}>
                 <g
                   className="walker-target-cue"
@@ -1078,53 +1084,6 @@ export function DefendNightActorsSvg({
                 </g>
                 </g>
               ) : null}
-              {probeCueAt && phase === 'boost' && waveSurvivedHold && tapTarget ? (
-                <g className="nw-walk-cue" clipPath={walkIn ? 'url(#nw-walk-clip)' : undefined}>
-                  <g
-                    className="walker-target-cue"
-                    data-cue="target"
-                    data-cue-gait={tapTarget.boss ? 'boss' : tapTarget.gait && tapTarget.gait !== 'plain' ? tapTarget.gait : 'plain'}
-                    transform={`translate(${probeCueAt.x} ${probeCueAt.y})`}
-                    aria-hidden
-                    pointerEvents="none"
-                  >
-                    <circle className="walker-cue-pad" cy={PATH_WALKER_FACE_DY} r={CUE_RING_R} />
-                    <circle className="walker-cue-under" cy={PATH_WALKER_FACE_DY} r={CUE_RING_R} />
-                    <circle
-                      className={`walker-cue-ring${cueNudge ? ' is-cue-nudge' : ''}`}
-                      cy={PATH_WALKER_FACE_DY}
-                      r={CUE_RING_R}
-                    />
-                    <circle className="walker-cue-pulse" cy={PATH_WALKER_FACE_DY} r={CUE_RING_R + FACE_HALF * 0.22} />
-                    {tapTarget.gait === 'fast' ? (
-                      <g className="walker-cue-streaks" aria-hidden>
-                        <path d={`M${CUE_RING_R + 16} ${PATH_WALKER_FACE_DY - 14} l34 -8`} />
-                        <path d={`M${CUE_RING_R + 12} ${PATH_WALKER_FACE_DY + 2} l40 2`} />
-                        <path d={`M${CUE_RING_R + 18} ${PATH_WALKER_FACE_DY + 16} l28 10`} />
-                      </g>
-                    ) : null}
-                    {tapTarget.gait === 'tough' ? (
-                      <g aria-hidden>
-                        <ellipse
-                          className="walker-cue-shoulders"
-                          cx={-(CUE_RING_R + 16)}
-                          cy={PATH_WALKER_FACE_DY}
-                          rx="16"
-                          ry="24"
-                        />
-                        <ellipse
-                          className="walker-cue-shoulders"
-                          cx={CUE_RING_R + 16}
-                          cy={PATH_WALKER_FACE_DY}
-                          rx="16"
-                          ry="24"
-                        />
-                      </g>
-                    ) : null}
-                    <path className="walker-cue-arrow" d={CUE_ARROW} />
-                  </g>
-                </g>
-              ) : null}
               {blasts.map((blast) => (
                 <g key={blast.key} className="defend-blast" transform={`translate(${blast.x} ${blast.y})`}>
                   <circle className="defend-blast-ring" r="26" />
@@ -1156,7 +1115,7 @@ export function DefendNightActorsSvg({
                   ) : null}
                 </g>
               ))}
-              {!waveSurvivedHold ? (
+              {!shotFxHold ? (
                 <g className="defend-shot-flashes" pointerEvents="none">
                   {shots.map((shot) => (
                     <circle

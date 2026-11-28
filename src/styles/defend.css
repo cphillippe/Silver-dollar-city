@@ -5895,17 +5895,18 @@ body:has(.defend-page.is-easy-watch .nw-wave-survived):has(.defend-page.is-easy-
   }
 }
 
-/* 375×667: pin the unlock note in the left map band so Logic planted art stays clear (toastVsLamp). */
+/* 375×667: pin the stacked unlock toast in the left map band (not the r8 map-note band). */
 @media (max-height: 720px) and (max-width: 375px) {
-  .defend-page.is-easy-watch:has(.nw-wave-survived):has(.nw-map-toast) .nw-map-toast {
+  .defend-page.is-easy-watch:has(.nw-wave-survived):has(.nw-map-toast[data-nw-wave-stack='yes'])
+    .nw-map-toast[data-nw-wave-stack='yes'] {
     top: 188px;
     left: 6px;
     right: auto;
     width: auto;
     max-width: 132px;
     transform: none;
-    font-size: 13px;
-    padding: 5px 9px;
+    font-size: 14px;
+    padding: 4px 8px;
     line-height: 1.25;
   }
 }

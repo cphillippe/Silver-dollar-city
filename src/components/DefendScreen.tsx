@@ -4173,10 +4173,19 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   // Pale Begin and the plant line follow how many lamps are standing, not ring slots.
   const jumpSearch = typeof window === 'undefined' ? '' : window.location.search
+  const nwPlaytestJump = nightWatchJumpAllowed(jumpSearch, readNightWatchDebug())
   const nwWaveBannerCueProbe =
     typeof window !== 'undefined' &&
     new URLSearchParams(jumpSearch).get('nwWaveBannerCueProbe') === '1' &&
-    nightWatchJumpAllowed(jumpSearch, readNightWatchDebug())
+    nwPlaytestJump
+  const nwWaveBannerCueHoldMut =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(jumpSearch).get('nwWaveBannerCueHoldMut') === '1' &&
+    nwPlaytestJump
+  const nwWaveBannerShotHoldMut =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(jumpSearch).get('nwWaveBannerShotHoldMut') === '1' &&
+    nwPlaytestJump
   if (nwWaveBannerCueProbe && midWave && easyTap && tapAt && tapTarget && !walkInHeld(tapTarget, walkNow)) {
     lastCuePlateRef.current = { x: tapAt.x, y: tapAt.y }
   }
@@ -4858,6 +4867,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                   won={won}
                   phase={phase}
                   waveSurvivedHold={easy && survivedRound != null}
+                  waveBannerCueHoldMut={nwWaveBannerCueHoldMut}
+                  waveBannerShotHoldMut={nwWaveBannerShotHoldMut}
                   bannerCueProbePlate={bannerCueProbePlate}
                   fireBest={fireBest}
                   fireAtRaider={fireAtRaider}
@@ -4994,7 +5005,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               </p>
             ) : null}
             {unlockNote ? (
-              <p className="nw-skill-toast nw-map-toast" role="status">
+              <p
+                className="nw-skill-toast nw-map-toast"
+                role="status"
+                data-nw-wave-stack={easy && survivedRound != null ? 'yes' : undefined}
+              >
                 {unlockNote}
               </p>
             ) : null}

@@ -1964,19 +1964,35 @@ assert.equal(playerVisibleChangeItems(latestChange('1.4.601').items).length, 0, 
   const phone601 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
   assert.match(board601, /touchesStackChrome/, '1.4.601 stack observer only reacts to wave toast chrome')
   assert.match(board601, /layoutBlocks\.some/, '1.4.601 chips skip layout when no obstacle hit')
-  assert.match(actors601, /waveSurvivedHold/, '1.4.601 walker cue defers during wave survived hold')
-  assert.match(actors601, /!waveSurvivedHold[\s\S]*defend-shot/, '1.4.601 shots defer during wave survived hold')
-  assert.match(actors601, /!waveSurvivedHold[\s\S]*defend-face-flash/, '1.4.601 face flash defers during wave survived hold')
+  assert.match(actors601, /walkCueHold = waveSurvivedHold && !waveBannerCueHoldMut/, '1.4.601 walker cue defers during wave survived hold')
+  assert.match(actors601, /shotFxHold = waveSurvivedHold && !waveBannerShotHoldMut/, '1.4.601 shots defer during wave survived hold')
+  assert.match(actors601, /!shotFxHold[\s\S]*defend-shot/, '1.4.601 shot beams defer during wave survived hold')
+  assert.match(actors601, /!shotFxHold[\s\S]*defend-face-flash/, '1.4.601 face flash defers during wave survived hold')
+  assert.match(actors601, /!walkCueHold[\s\S]*walker-target-cue/, '1.4.601 live walker cue defers during wave survived hold')
+  assert.match(actors601, /&& !walkCueHold/, '1.4.601 walker cue render uses walkCueHold gate')
+  assert.equal(
+    /&& !walkCueHold/.test(actors601.replace(/\s*&& !walkCueHold/, '')),
+    false,
+    '1.4.601 mut strip walk cue hold gate',
+  )
+  assert.equal(
+    /!shotFxHold/.test(actors601.replace(/!shotFxHold/g, 'false')),
+    false,
+    '1.4.601 mut strip shot fx hold gate',
+  )
   assert.match(screen601, /waveSurvivedHold=\{easy && survivedRound != null\}/, '1.4.601 wave survived hold wires from screen')
   assert.match(screen601, /nwWaveBannerCueProbe[\s\S]*nightWatchJumpAllowed/, '1.4.601 banner cue probe stays playtest-only')
+  assert.match(screen601, /nwWaveBannerCueHoldMut[\s\S]*nightWatchJumpAllowed/, '1.4.601 cue hold mutation stays playtest-only')
+  assert.match(screen601, /nwWaveBannerShotHoldMut[\s\S]*nightWatchJumpAllowed/, '1.4.601 shot hold mutation stays playtest-only')
+  assert.match(screen601, /data-nw-wave-stack/, '1.4.601 stacked unlock toast is tagged for narrow CSS')
   assert.match(phone601, /sampleHoldShotFxVsBanner/, '1.4.601 rail sample measures lingering shot art on the banner')
   assert.match(phone601, /plantedLampOverlap/, '1.4.601 unlock toast samples planted lamp art overlap')
   assert.match(phone601, /toastVsLamp=/, '1.4.601 unlock toast ok line logs toast vs lamp overlap')
   assert.match(phone601, /height <= 667 && width <= 375 && maxOv\.toastLamp > 0/, '1.4.601 short phones fail when toast covers a planted lamp')
   assert.match(
     defend601,
-    /@media \(max-height: 720px\) and \(max-width: 375px\)[\s\S]*top: 188px[\s\S]*max-width: 132px/,
-    '1.4.601 375×667 stacks the unlock note in the banner gap clear of dock lamps',
+    /@media \(max-height: 720px\) and \(max-width: 375px\)[\s\S]*data-nw-wave-stack='yes'[\s\S]*top: 188px[\s\S]*max-width: 132px[\s\S]*font-size: 14px/,
+    '1.4.601 375×667 stacked unlock toast stays 14px in the banner gap clear of dock lamps',
   )
   assert.match(
     defend601,
@@ -2020,11 +2036,14 @@ assert.equal(playerVisibleChangeItems(latestChange('1.4.601').items).length, 0, 
     const loveIdx = tail.indexOf('await checkNwLoveChip(browser, port, errors)')
     const unlockIdx = tail.indexOf('await checkNwUnlockToastBanner(browser, port, errors)')
     const railIdx = tail.indexOf('await checkNwWaveBannerRailClear(browser, port, errors)')
+    const holdMutIdx = tail.indexOf('await checkNwWaveBannerHoldMutations(browser, port, errors)')
     const lampStackIdx = tail.indexOf('await checkNwLampStackClear(browser, port, errors)')
     const mapNoteIdx = tail.indexOf("process.env.NW_MAP_NOTE_ONLY !== '1'")
-    if (loveIdx < 0 || unlockIdx < 0 || railIdx < 0 || lampStackIdx < 0 || mapNoteIdx < 0) return false
-    if (!(loveIdx < unlockIdx && unlockIdx < railIdx && railIdx < lampStackIdx && lampStackIdx < mapNoteIdx)) return false
+    if (loveIdx < 0 || unlockIdx < 0 || railIdx < 0 || holdMutIdx < 0 || lampStackIdx < 0 || mapNoteIdx < 0) return false
+    if (!(loveIdx < unlockIdx && unlockIdx < railIdx && railIdx < holdMutIdx && holdMutIdx < lampStackIdx && lampStackIdx < mapNoteIdx))
+      return false
     if ([...tail.matchAll(/await checkNwWaveBannerRailClear\(browser, port, errors\)/g)].length !== 1) return false
+    if ([...tail.matchAll(/await checkNwWaveBannerHoldMutations\(browser, port, errors\)/g)].length !== 1) return false
     if ([...tail.matchAll(/await checkNwLampStackClear\(browser, port, errors\)/g)].length !== 1) return false
     if (countNwWaveBannerRailClearDefs(src) !== 1) return false
     if (countNwLampStackClearDefs(src) !== 1) return false
@@ -2044,8 +2063,8 @@ assert.equal(playerVisibleChangeItems(latestChange('1.4.601').items).length, 0, 
     nwWaveBannerRailTailOk(
       patchPhoneTail601((tail) =>
         tail.replace(
-          '    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
-          '    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
+          '    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwWaveBannerHoldMutations(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
+          '    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwWaveBannerHoldMutations(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
         ),
       ),
     ),
@@ -2060,6 +2079,27 @@ assert.equal(playerVisibleChangeItems(latestChange('1.4.601').items).length, 0, 
   assert.match(phone601, /jitter\.max > 4/, '1.4.601 rail check fails when chips jitter after settle')
   assert.match(phone601, /cueVsBanner > 0/, '1.4.601 rail check fails when walker cue overlaps the banner')
   assert.match(phone601, /cueVsBanner/, '1.4.601 rail ok line logs cue vs banner overlap')
+  assert.match(phone601, /checkNwWaveBannerHoldMutations/, '1.4.601 hold-mut harness exercises live cue and shot juice')
+  assert.match(phone601, /nwWaveBannerCueHoldMut=1/, '1.4.601 cue hold mutation is wired')
+  assert.match(phone601, /nwWaveBannerShotHoldMut=1/, '1.4.601 shot hold mutation is wired')
+  assert.match(phone601, /cueHit <= 0/, '1.4.601 cue-hold mut fails when live walker cue does not overlap')
+  assert.match(phone601, /shotHit <= 0/, '1.4.601 shot-hold mut fails when shot juice does not overlap')
+  const cueHoldMutGate = (src) =>
+    /cueHit <= 0/.test(src) && /checkNwWaveBannerHoldMutations/.test(src)
+  assert.equal(cueHoldMutGate(phone601), true, '1.4.601 cue-hold mut gate is committed')
+  assert.equal(
+    cueHoldMutGate(phone601.replace('if (cueHit <= 0)', 'if (false)')),
+    false,
+    '1.4.601 mut disable cue-hold overlap fail',
+  )
+  const shotHoldMutGate = (src) =>
+    /shotHit <= 0/.test(src) && /checkNwWaveBannerHoldMutations/.test(src)
+  assert.equal(shotHoldMutGate(phone601), true, '1.4.601 shot-hold mut gate is committed')
+  assert.equal(
+    shotHoldMutGate(phone601.replace('if (shotHit <= 0)', 'if (false)')),
+    false,
+    '1.4.601 mut disable shot-hold overlap fail',
+  )
   assert.match(phone601, /\.nw-rail \.defend-ability/, '1.4.601 rail sample includes ability chips')
   assert.match(phone601, /toastVsNewLamp/, '1.4.601 rail sample measures toast vs new-lamp row')
   assert.match(
@@ -2103,10 +2143,12 @@ assert.doesNotMatch(
     const loveIdx = tail.indexOf('await checkNwLoveChip(browser, port, errors)')
     const unlockIdx = tail.indexOf('await checkNwUnlockToastBanner(browser, port, errors)')
     const railIdx = tail.indexOf('await checkNwWaveBannerRailClear(browser, port, errors)')
+    const holdMutIdx = tail.indexOf('await checkNwWaveBannerHoldMutations(browser, port, errors)')
     const lampStackIdx = tail.indexOf('await checkNwLampStackClear(browser, port, errors)')
     const mapNoteIdx = tail.indexOf("process.env.NW_MAP_NOTE_ONLY !== '1'")
-    if (loveIdx < 0 || unlockIdx < 0 || railIdx < 0 || lampStackIdx < 0 || mapNoteIdx < 0) return false
-    if (!(loveIdx < unlockIdx && unlockIdx < railIdx && railIdx < lampStackIdx && lampStackIdx < mapNoteIdx)) return false
+    if (loveIdx < 0 || unlockIdx < 0 || railIdx < 0 || holdMutIdx < 0 || lampStackIdx < 0 || mapNoteIdx < 0) return false
+    if (!(loveIdx < unlockIdx && unlockIdx < railIdx && railIdx < holdMutIdx && holdMutIdx < lampStackIdx && lampStackIdx < mapNoteIdx))
+      return false
     if ([...tail.matchAll(/await checkNwUnlockToastBanner\(browser, port, errors\)/g)].length !== 1) return false
     if (countNwUnlockToastBannerDefs(src) !== 1) return false
     return true
@@ -2123,8 +2165,8 @@ assert.doesNotMatch(
     nwUnlockToastTailOk(
       patchPhoneTail600((tail) =>
         tail.replace(
-          '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
-          '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
+          '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwWaveBannerHoldMutations(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
+          '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwWaveBannerHoldMutations(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
         ),
       ),
     ),
@@ -2147,8 +2189,8 @@ assert.doesNotMatch(
     nwUnlockToastTailOk(
       patchPhoneTail600((tail) =>
         tail.replace(
-          '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
-          '    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {\n    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n',
+          '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwWaveBannerHoldMutations(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
+          '    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {\n    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwWaveBannerHoldMutations(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n',
         ),
       ),
     ),
@@ -2160,7 +2202,7 @@ assert.doesNotMatch(
       patchPhoneTail600((tail) =>
         tail
           .replace(
-            '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
+            '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwWaveBannerRailClear(browser, port, errors)\n    await checkNwWaveBannerHoldMutations(browser, port, errors)\n    await checkNwLampStackClear(browser, port, errors)\n    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {',
             '    if (process.env.NW_MAP_NOTE_ONLY !== \'1\') {\n',
           )
           .replace('  await browser.close()', '    await checkNwUnlockToastBanner(browser, port, errors)\n  await browser.close()'),

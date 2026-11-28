@@ -1481,11 +1481,7 @@ async function checkMapNote(browser, port, errors) {
       assert.equal(first.text, 'New map unlocked: The Far Hills!', `${label} the note names The Far Hills`)
       assert.ok(first.w >= 100, `${label} the note is at least 100px wide (${first.w})`)
       assert.ok(first.h > 8, `${label} the note has a visible height (${first.h})`)
-      const minMapNoteFont = width === 375 && height === 667 ? 13 : 14
-      assert.ok(
-        first.font >= minMapNoteFont,
-        `${label} the note text is at least ${minMapNoteFont}px (${first.font})`,
-      )
+      assert.ok(first.font >= 14, `${label} the note text is at least 14px (${first.font})`)
       const bannerBox = await page
         .locator('.nw-wave-survived')
         .boundingBox()
@@ -10877,6 +10873,8 @@ async function sampleNwWaveBannerRailClear(page) {
     }
     const samples = []
     const loopStart = performance.now()
+    let maxWalkerCueOnBanner = 0
+    let maxShotFxOnBanner = 0
     let maxCueOnBanner = 0
     while (performance.now() - loopStart < 2600) {
       const banner = document.querySelector('.nw-wave-survived')
@@ -10885,11 +10883,11 @@ async function sampleNwWaveBannerRailClear(page) {
         const textBox = bannerTextBox(banner)
         const cueBox = bannerCueBox(banner)
         const bannerBox = boxOf(banner)
-        maxCueOnBanner = Math.max(
-          maxCueOnBanner,
-          sampleCueVsBanner(cueBox),
-          sampleHoldShotFxVsBanner(bannerBox),
-        )
+        const walkerCue = sampleCueVsBanner(cueBox)
+        const shotFx = sampleHoldShotFxVsBanner(bannerBox)
+        maxWalkerCueOnBanner = Math.max(maxWalkerCueOnBanner, walkerCue)
+        maxShotFxOnBanner = Math.max(maxShotFxOnBanner, shotFx)
+        maxCueOnBanner = Math.max(maxCueOnBanner, walkerCue, shotFx)
       }
       if (!banner || !toast || !shown(banner) || !shown(toast)) {
         await new Promise((resolve) => requestAnimationFrame(resolve))
@@ -10948,9 +10946,85 @@ async function sampleNwWaveBannerRailClear(page) {
       samples,
       missing: !samples.length ? 'frames' : null,
       chipJitter: { max: round(maxChipJitter), science: round(scienceJitter) },
+      maxWalkerCueOnBanner: round(maxWalkerCueOnBanner),
+      maxShotFxOnBanner: round(maxShotFxOnBanner),
       maxCueOnBanner: round(maxCueOnBanner),
     }
   })
+}
+
+async function checkNwWaveBannerHoldMutations(browser, port, errors) {
+  const problems = []
+  const fail = (line) => {
+    if (problems.includes(line)) return
+    problems.push(line)
+    console.log(line)
+  }
+  const tapUntilBoost = async (page) => {
+    const started = Date.now()
+    while (Date.now() - started < 90_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
+      const cue = await page.evaluate(() => {
+        const face = document.querySelector('.defend-raider.is-easy-cue')
+        if (!face) return null
+        const id = face.getAttribute('data-walker-id')
+        const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+        if (!tap) return null
+        const box = tap.getBoundingClientRect()
+        const x = box.x + box.width / 2
+        const y = box.y + box.height / 2
+        const node = document.elementFromPoint(x, y)
+        if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+        return { x, y }
+      })
+      if (cue) await page.mouse.click(cue.x, cue.y)
+      await page.waitForTimeout(80)
+    }
+  }
+  const runMut = async (mutParam, label) => {
+    const search = `?playtest=1&nwSeed=2&nwMap=a2&nwRound=24&nwLamps=0&nwCam=1&nwWaveBannerCueProbe=1&${mutParam}`
+    const { context, page } = await openMap(browser, port, 412, 915, 'a2', { motion: true, search })
+    page.on('pageerror', (error) => errors.push(`wave-banner-hold-mut ${label} ${error}`))
+    await waitNwUnlockToastCamReady(page, '412x915', 24)
+    await plantTypeLabelSeats(page, `412x915 r24 ${label}`)
+    await snapNwLoveChipOfficialCam(page)
+    await page.locator('.defend-go').click()
+    await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
+    await tapUntilBoost(page)
+    if ((await page.locator('.defend-page.is-boost').count()) < 1) {
+      await context.close()
+      fail(`checkNwWaveBannerHoldMut fail ${label} boost=0`)
+      return null
+    }
+    await page.waitForTimeout(100)
+    const sample = await sampleNwWaveBannerRailClear(page)
+    await context.close()
+    if (sample.missing === 'frames') {
+      fail(`checkNwWaveBannerHoldMut fail ${label} frames=0`)
+      return null
+    }
+    return sample
+  }
+  const cueMut = await runMut('nwWaveBannerCueHoldMut=1', 'cue-hold')
+  if (!cueMut) {
+    for (const line of problems) errors.push(line)
+    return
+  }
+  const cueHit = cueMut.maxWalkerCueOnBanner ?? 0
+  console.log(
+    `checkNwWaveBannerHoldMut ok cue-hold walkerCueVsBanner=${cueHit.toFixed(1)} shotFxVsBanner=${(cueMut.maxShotFxOnBanner ?? 0).toFixed(1)}`,
+  )
+  if (cueHit <= 0) fail(`checkNwWaveBannerHoldMut fail cue-hold walkerCueVsBanner=${cueHit.toFixed(1)}`)
+  const shotMut = await runMut('nwWaveBannerShotHoldMut=1', 'shot-hold')
+  if (!shotMut) {
+    for (const line of problems) errors.push(line)
+    return
+  }
+  const shotHit = shotMut.maxShotFxOnBanner ?? 0
+  console.log(
+    `checkNwWaveBannerHoldMut ok shot-hold walkerCueVsBanner=${(shotMut.maxWalkerCueOnBanner ?? 0).toFixed(1)} shotFxVsBanner=${shotHit.toFixed(1)}`,
+  )
+  if (shotHit <= 0) fail(`checkNwWaveBannerHoldMut fail shot-hold shotFxVsBanner=${shotHit.toFixed(1)}`)
+  for (const line of problems) errors.push(line)
 }
 
 async function checkNwWaveBannerRailClear(browser, port, errors) {
@@ -13172,6 +13246,7 @@ export async function checkPhoneFixes() {
     }
     if (process.env.NW_WAVE_BANNER_RAIL_ONLY === '1') {
       await checkNwWaveBannerRailClear(browser, port, errors)
+      await checkNwWaveBannerHoldMutations(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'nw wave banner rail nights stay free of console errors')
       return
     }
@@ -13213,6 +13288,7 @@ export async function checkPhoneFixes() {
     await checkNwLoveChip(browser, port, errors)
     await checkNwUnlockToastBanner(browser, port, errors)
     await checkNwWaveBannerRailClear(browser, port, errors)
+    await checkNwWaveBannerHoldMutations(browser, port, errors)
     await checkNwLampStackClear(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
