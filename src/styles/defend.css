@@ -5890,8 +5890,23 @@ body:has(.defend-page.is-easy-watch .nw-wave-survived):has(.defend-page.is-easy-
   }
 
   .defend-page.is-easy-watch:has(.nw-wave-survived):has(.nw-map-toast) .nw-map-toast {
-    /* Stay below map-planted lamps after 601 centered banner (was 202px; toastVsLamp on 375×667). */
-    top: 318px;
+    /* Stack in the banner gap — dock lamps start ~y371 (checkNwWaveBannerRailClear toastVsNewLamp). */
+    top: 202px;
+  }
+}
+
+/* 375×667: pin the unlock note in the left map band so Logic planted art stays clear (toastVsLamp). */
+@media (max-height: 720px) and (max-width: 375px) {
+  .defend-page.is-easy-watch:has(.nw-wave-survived):has(.nw-map-toast) .nw-map-toast {
+    top: 188px;
+    left: 6px;
+    right: auto;
+    width: auto;
+    max-width: 132px;
+    transform: none;
+    font-size: 13px;
+    padding: 5px 9px;
+    line-height: 1.25;
   }
 }
 
