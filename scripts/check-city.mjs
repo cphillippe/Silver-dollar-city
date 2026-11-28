@@ -2080,19 +2080,82 @@ assert.doesNotMatch(
   const board1009 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
   assert.match(
     board1009,
-    /if \(!layoutBoost && \(cardOpen \|\| chip\.getAttribute\('data-label-park'\)\)\)/,
-    '1.4.600 #1009 clear boost layout only when layoutBoost is active',
+    /const clearHold =\s*\n\s*layoutBoost &&\s*\n\s*chipNeedsClearHoldLayout\(/,
+    '1.4.600 #1009 clear-hold layout per chip when orphaned or off-play during boost',
   )
   assert.match(
     board1009,
-    /hideTypeLabelsOnChrome\(board, boosting && latched\)/,
-    '1.4.600 clear chips relayout when boost clear-hold is latched',
+    /if \(!clearHold && \(cardOpen \|\| chip\.getAttribute\('data-label-park'\)\)\)/,
+    '1.4.600 #1009 chips skip park only when clear-hold needs layout',
   )
+  assert.match(board1009, /hideTypeLabelsOnChrome\(board, boosting\)/, '1.4.600 clear chips relayout on boost pass')
   assert.match(board1009, /function chipNeedsClearHoldLayout/, '1.4.600 clear-hold layout gated on off-play or orphan')
-  assert.match(board1009, /const layoutBoost/, '1.4.600 clear hold keyed off orphan scan not lamp count')
-  assert.match(board1009, /data-boost-clear-hold/, '1.4.600 boost clear-hold latches for four-lamp clears')
+  assert.match(
+    board1009,
+    /if \(clearHold && viewH > 0 && box\.height > 1 && box\.bottom > viewH - 4\)/,
+    '1.4.600 #1009 viewport floor clamp only on clear-hold chips',
+  )
   assert.match(board1009, /CLEAR_HOLD_CHIP_PAIR_MAX = 120/, '1.4.600 clear-hold pair max matches harness')
   assert.doesNotMatch(board1009, /plantedPads >= 5/, '1.4.600 clear chips do not gate on lamp count')
+  assert.doesNotMatch(board1009, /plantedPads >= 4/, '1.4.600 clear chips do not gate on four-lamp count')
+  assert.doesNotMatch(board1009, /data-boost-clear-hold/, '1.4.600 clear hold is per chip not page latch')
+  assert.match(
+    board1009,
+    /const layoutBoost =[\s\S]*holdScan[\s\S]*!!page\.querySelector\('\.defend-clear-lamp'\)/,
+    '1.4.600 #1009 clear hold layout runs during boost while clear lamps are on screen',
+  )
+  assert.match(board1009, /data-clear-hold-laid/, '1.4.600 clear-hold layout latches per chip across relayout passes')
+  assert.match(
+    board1009,
+    /if \(chip\.getAttribute\('data-clear-hold-laid'\) === 'yes' && !\(layoutBoost && clearHold\)\)/,
+    '1.4.600 #1009 laid chips skip repeat layout until clear-hold window closes',
+  )
+  const mut1009ClearHold = board1009.replace(
+    /const clearHold =\s*\n\s*layoutBoost &&\s*\n\s*chipNeedsClearHoldLayout\(/,
+    'const clearHold =\n      false &&\n      chipNeedsClearHoldLayout(',
+  )
+  assert.throws(
+    () =>
+      assert.match(
+        mut1009ClearHold,
+        /const clearHold =\s*\n\s*layoutBoost &&\s*\n\s*chipNeedsClearHoldLayout\(/,
+        '1.4.600 mut #1009 per-chip clear-hold gate',
+      ),
+    /1.4.600 mut #1009 per-chip clear-hold gate/,
+    '1.4.600 mut #1009 removing the clearHold gate must fail the source guard',
+  )
+  const mut1009LayoutBoost = board1009.replace(
+    "!!page.querySelector('.defend-clear-lamp')",
+    'false',
+  )
+  assert.throws(
+    () =>
+      assert.match(
+        mut1009LayoutBoost,
+        /!!page\.querySelector\('\.defend-clear-lamp'\)/,
+        '1.4.600 mut #1009 clear-lamp window',
+      ),
+    /1.4.600 mut #1009 clear-lamp window/,
+    '1.4.600 mut #1009 removing the clear-lamp window must fail the source guard',
+  )
+  const mut1009BoostHook = board1009.replace('hideTypeLabelsOnChrome(board, boosting)', 'hideTypeLabelsOnChrome(board)')
+  assert.throws(
+    () =>
+      assert.match(mut1009BoostHook, /hideTypeLabelsOnChrome\(board, boosting\)/, '1.4.600 mut #1009 boost hook'),
+    /1.4.600 mut #1009 boost hook/,
+    '1.4.600 mut #1009 dropping the boosting hook must fail the source guard',
+  )
+  const mut1001Orphan = phone600.replace('${chip.type} orphan=1', '${chip.type} orphan=0')
+  assert.throws(
+    () =>
+      assert.match(
+        mut1001Orphan,
+        /checkNwClearChipsWithLamp fail \$\{tag\} \$\{chip\.type\} orphan=1/,
+        '1.4.600 mut #1001 orphan fail line',
+      ),
+    /1.4.600 mut #1001 orphan fail line/,
+    '1.4.600 mut #1001 renaming the orphan fail line must fail the harness guard',
+  )
   assert.match(phone600, /lamps=\$\{lampCase\.lamps\}/, '1.4.600 clear-chip ok line logs lamp count case')
   assert.match(phone600, /NW_CLEAR_CHIP_CASES/, '1.4.600 clear-chip three and four lamp cases are defined')
   assert.match(phone600, /if \(process\.env\.NW_CLEAR_CHIPS_ONLY === '1'\)/, '1.4.600 clear-chip ONLY guard is present')

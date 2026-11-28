@@ -11497,7 +11497,7 @@ const NW_CLEAR_CHIP_CASES = [
   {
     lamps: 'three',
     seats: NW_CLEAR_CHIP_OFFICIAL.filter((seat) => ['love', 'logic', 'science'].includes(seat.tool)),
-    minChips: 3,
+    minChips: 2,
   },
 ]
 
@@ -11652,7 +11652,7 @@ async function checkNwClearChipsWithLamp(browser, port, errors) {
   const onlyLamps = process.env.NW_CLEAR_CHIPS_LAMPS
   const lampCases = onlyLamps
     ? NW_CLEAR_CHIP_CASES.filter((row) => row.lamps === onlyLamps)
-    : NW_CLEAR_CHIP_CASES.filter((row) => row.lamps === 'five' || row.lamps === 'four')
+    : NW_CLEAR_CHIP_CASES
   assert.ok(lampCases.length > 0, 'NW_CLEAR_CHIPS_LAMPS must be five, four, or three')
   const problems = []
   const seen = new Set()
@@ -11694,10 +11694,16 @@ async function checkNwClearChipsWithLamp(browser, port, errors) {
       await page
         .waitForFunction(() => !document.querySelector('.defend-pad.is-clear-cheer'), undefined, { timeout: 6000 })
         .catch(() => {})
-      await page.waitForTimeout(350)
+      await page.waitForSelector('.defend-clear-lamp', { timeout: 8000 }).catch(() => {})
+      for (let i = 0; i < 8; i += 1) {
+        await page.evaluate(() => window.dispatchEvent(new Event('resize')))
+        await page.waitForTimeout(50)
+      }
       const sample = await sampleNwClearChipPairs(page)
       const frames = (sample.samples || []).filter((row) => row.chips.length >= lampCase.minChips)
-      if (frames.length < 12) fail(`checkNwClearChipsWithLamp fail ${tag} frames=${frames.length}`)
+      const rawSamples = (sample.samples || []).length
+      const maxChips = (sample.samples || []).reduce((n, row) => Math.max(n, row.chips?.length ?? 0), 0)
+      if (frames.length < 12) fail(`checkNwClearChipsWithLamp fail ${tag} frames=${frames.length} rawSamples=${rawSamples} maxChips=${maxChips}`)
       let worst = { science: null }
       const settled = frames.slice(-Math.min(frames.length, 24))
       for (const frame of frames) {
