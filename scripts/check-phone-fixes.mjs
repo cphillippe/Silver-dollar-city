@@ -4810,36 +4810,36 @@ const EASY_GOLD_BASE_1579 = {
   '375x667 home-first': { '2 Help': { x: 131, y: 561, w: 113, h: 48 } },
   '375x667 home-after-l1': { '3 Lock In': { x: 250, y: 584.1, w: 113, h: 48 } },
   // 1.4.596: y re-pinned from CI run 45026157592 (checkEasyOneGold rect lines); x/w unchanged.
-  // 1.4.598 What's new row (wave banner): re-pinned from CI run 45329274078.
+  // 1.4.600 #998 changelog row: re-pinned from CI run 46116624230 rect lines; Open Profile unchanged.
   '375x667 settings-more': {
-    'Open Profile': { x: 41, y: 1406.5, w: 130, h: 52 },
-    Candy: { x: 41, y: 1834.4, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1834.4, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1894.4, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2197.7, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2443.5, w: 176, h: 52 },
+    'Open Profile': { x: 41, y: 1406.5, w: 129.4, h: 52 },
+    Candy: { x: 41, y: 1953.6, w: 84.4, h: 52 },
+    'Dusk town': { x: 133.4, y: 1953.6, w: 111.5, h: 52 },
+    'Clean parchment': { x: 41, y: 2013.6, w: 160.8, h: 52 },
+    'Export JSON': { x: 41, y: 2316.9, w: 132.7, h: 52 },
+    'Import pasted save': { x: 41, y: 2562.7, w: 178.5, h: 52 },
   },
   '390x844 home-first': { '2 Help': { x: 136, y: 738, w: 118, h: 48 } },
   '390x844 home-after-l1': { '3 Lock In': { x: 260, y: 761.1, w: 118, h: 48 } },
   // 1.4.598 What's new row (wave banner): re-pinned from CI run 45342239039 (Import y=2420.1).
   '390x844 settings-more': {
-    'Open Profile': { x: 41, y: 1407.9, w: 130, h: 52 },
-    Candy: { x: 41, y: 1835.8, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1835.8, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1895.8, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2174.3, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2420.1, w: 176, h: 52 },
+    'Open Profile': { x: 41, y: 1407.9, w: 129.4, h: 52 },
+    Candy: { x: 41, y: 1935.1, w: 84.4, h: 52 },
+    'Dusk town': { x: 133.4, y: 1935.1, w: 111.5, h: 52 },
+    'Clean parchment': { x: 41, y: 1995.1, w: 160.8, h: 52 },
+    'Export JSON': { x: 41, y: 2273.6, w: 132.7, h: 52 },
+    'Import pasted save': { x: 41, y: 2519.4, w: 178.5, h: 52 },
   },
   '412x915 home-first': { '2 Help': { x: 143.3, y: 809, w: 125.3, h: 48 } },
   '412x915 home-after-l1': { '3 Lock In': { x: 274.7, y: 832.1, w: 125.3, h: 48 } },
   // 1.4.598 What's new row (wave banner): re-pinned from CI run 45351727603.
   '412x915 settings-more': {
-    'Open Profile': { x: 41, y: 1360.7, w: 130, h: 52 },
-    Candy: { x: 41, y: 1763.8, w: 84, h: 52 },
-    'Dusk town': { x: 133, y: 1763.8, w: 112, h: 52 },
-    'Clean parchment': { x: 41, y: 1823.8, w: 162, h: 52 },
-    'Export JSON': { x: 41, y: 2102.3, w: 132, h: 52 },
-    'Import pasted save': { x: 41, y: 2348.1, w: 176, h: 52 },
+    'Open Profile': { x: 41, y: 1360.7, w: 129.4, h: 52 },
+    Candy: { x: 41, y: 1887.9, w: 84.4, h: 52 },
+    'Dusk town': { x: 133.4, y: 1887.9, w: 111.5, h: 52 },
+    'Clean parchment': { x: 41, y: 1947.9, w: 160.8, h: 52 },
+    'Export JSON': { x: 41, y: 2226.4, w: 132.7, h: 52 },
+    'Import pasted save': { x: 41, y: 2472.2, w: 178.5, h: 52 },
   },
 }
 
@@ -4976,17 +4976,19 @@ async function readEasyGold(page) {
         clientH: el.clientHeight,
       }
     }
-    const cues = () => {
+    const cues = (root) => {
       const names = []
       const buttons = []
-      for (const el of document.querySelectorAll('button, a.btn')) {
+      const list = root ? root.querySelectorAll('button, a.btn') : document.querySelectorAll('button, a.btn')
+      for (const el of list) {
         if (!(el instanceof HTMLElement)) continue
         if (el.closest('[hidden], .easy-core')) continue
         if (!shown(el) || !inView(el.getBoundingClientRect())) continue
         const style = getComputedStyle(el)
         const fill = gold(style.backgroundImage) || gold(style.backgroundColor)
         const glow = gold(style.boxShadow)
-        if (!fill && !glow) continue
+        const themeOn = el.closest('.theme-picks') && el.classList.contains('is-on')
+        if (!fill && !glow && !themeOn) continue
         names.push(nameOf(el))
         buttons.push(el)
       }
@@ -5019,14 +5021,14 @@ async function readEasyGold(page) {
         if (text === 'Import pasted save' || text === 'Export JSON') take(el)
       }
       for (const el of document.querySelectorAll('.theme-picks .btn')) take(el)
-      for (const el of cues().buttons) take(el)
+      for (const el of cues(null).buttons) take(el)
       return out
     }
     const read = () => {
-      const found = cues()
       const theme = document.querySelector('.theme-picks')
       const themeBox = theme ? theme.getBoundingClientRect() : null
       const themeVisible = Boolean(themeBox && themeBox.height > 1 && inView(themeBox) && themeBox.bottom > 8 && themeBox.top < innerHeight - 8)
+      const found = cues(themeVisible && theme instanceof HTMLElement ? theme : null)
       const hits = []
       const rects = {}
       const lines = []
