@@ -2080,10 +2080,14 @@ assert.doesNotMatch(
   const board1009 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
   assert.match(
     board1009,
-    /if \(!boosting && \(cardOpen \|\| chip\.getAttribute\('data-label-park'\)\)\)/,
-    '1.4.600 #1009 clear boost always takes the layout pass',
+    /if \(!layoutBoost && \(cardOpen \|\| chip\.getAttribute\('data-label-park'\)\)\)/,
+    '1.4.600 #1009 clear boost layout only when layoutBoost is active',
   )
-  assert.match(board1009, /hideTypeLabelsOnChrome\(board, boosting\)/, '1.4.600 clear chips relayout on boost')
+  assert.match(
+    board1009,
+    /hideTypeLabelsOnChrome\(board, boosting && latched\)/,
+    '1.4.600 clear chips relayout when boost clear-hold is latched',
+  )
   assert.match(board1009, /function chipNeedsClearHoldLayout/, '1.4.600 clear-hold layout gated on off-play or orphan')
   assert.match(board1009, /const layoutBoost/, '1.4.600 clear hold keyed off orphan scan not lamp count')
   assert.match(board1009, /data-boost-clear-hold/, '1.4.600 boost clear-hold latches for four-lamp clears')
