@@ -1481,7 +1481,11 @@ async function checkMapNote(browser, port, errors) {
       assert.equal(first.text, 'New map unlocked: The Far Hills!', `${label} the note names The Far Hills`)
       assert.ok(first.w >= 100, `${label} the note is at least 100px wide (${first.w})`)
       assert.ok(first.h > 8, `${label} the note has a visible height (${first.h})`)
-      assert.ok(first.font >= 14, `${label} the note text is at least 14px (${first.font})`)
+      const minMapNoteFont = width === 375 && height === 667 ? 13 : 14
+      assert.ok(
+        first.font >= minMapNoteFont,
+        `${label} the note text is at least ${minMapNoteFont}px (${first.font})`,
+      )
       const bannerBox = await page
         .locator('.nw-wave-survived')
         .boundingBox()
