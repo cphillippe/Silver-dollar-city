@@ -1012,24 +1012,26 @@ export function DefendNightActorsSvg({
               ) : (
                 walkers
               )}
-              {shots.map((shot) => (
-                <g className="defend-shot" key={shot.key}>
-                  <line
-                    className="defend-beam-halo"
-                    x1={shot.from.x}
-                    y1={shot.from.y}
-                    x2={shot.to.x}
-                    y2={shot.to.y}
-                  />
-                  <line
-                    className="defend-beam"
-                    x1={shot.from.x}
-                    y1={shot.from.y}
-                    x2={shot.to.x}
-                    y2={shot.to.y}
-                  />
-                </g>
-              ))}
+              {!waveSurvivedHold
+                ? shots.map((shot) => (
+                    <g className="defend-shot" key={shot.key}>
+                      <line
+                        className="defend-beam-halo"
+                        x1={shot.from.x}
+                        y1={shot.from.y}
+                        x2={shot.to.x}
+                        y2={shot.to.y}
+                      />
+                      <line
+                        className="defend-beam"
+                        x1={shot.from.x}
+                        y1={shot.from.y}
+                        x2={shot.to.x}
+                        y2={shot.to.y}
+                      />
+                    </g>
+                  ))
+                : null}
               {cueAt &&
               !waveSurvivedHold &&
               ((easyTap && tapTarget && !tapTarget.turned) || (probeCueAt && phase === 'boost')) ? (
@@ -1116,17 +1118,19 @@ export function DefendNightActorsSvg({
                   ) : null}
                 </g>
               ))}
-              <g className="defend-shot-flashes" pointerEvents="none">
-                {shots.map((shot) => (
-                  <circle
-                    key={`flash-${shot.key}`}
-                    className="defend-face-flash"
-                    cx={shot.to.x}
-                    cy={shot.to.y}
-                    r={PATH_WALKER_FACE_U * 0.42}
-                  />
-                ))}
-              </g>
+              {!waveSurvivedHold ? (
+                <g className="defend-shot-flashes" pointerEvents="none">
+                  {shots.map((shot) => (
+                    <circle
+                      key={`flash-${shot.key}`}
+                      className="defend-face-flash"
+                      cx={shot.to.x}
+                      cy={shot.to.y}
+                      r={PATH_WALKER_FACE_U * 0.42}
+                    />
+                  ))}
+                </g>
+              ) : null}
 
     </>
   )

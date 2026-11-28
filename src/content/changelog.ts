@@ -28,6 +28,16 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.602',
+    title: 'Night Watch: wave survived hold stays clear',
+    when: '2026-11-28',
+    items: [
+      'On Easy, the gold ring and lamp beams from your last taps fade while the Wave survived banner holds.',
+      'Refs #998.',
+      'Refs #1012.',
+    ],
+  },
+  {
     version: '1.4.601',
     title: 'Behind the scenes: Easy NW wave banner rail overlap guard',
     when: '2026-11-26',

@@ -4174,7 +4174,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   // Pale Begin and the plant line follow how many lamps are standing, not ring slots.
   const jumpSearch = typeof window === 'undefined' ? '' : window.location.search
   const nwWaveBannerCueProbe =
-    typeof window !== 'undefined' && new URLSearchParams(jumpSearch).get('nwWaveBannerCueProbe') === '1'
+    typeof window !== 'undefined' &&
+    new URLSearchParams(jumpSearch).get('nwWaveBannerCueProbe') === '1' &&
+    nightWatchJumpAllowed(jumpSearch, readNightWatchDebug())
   if (nwWaveBannerCueProbe && midWave && easyTap && tapAt && tapTarget && !walkInHeld(tapTarget, walkNow)) {
     lastCuePlateRef.current = { x: tapAt.x, y: tapAt.y }
   }

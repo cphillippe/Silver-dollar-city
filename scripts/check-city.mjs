@@ -1949,9 +1949,26 @@ assert.match(
 
 
 
+// 1.4.602: Easy wave-survived hold hides lingering shot juice (#998 / #1012).
+assert.equal(APP_VERSION, '1.4.602')
+assert.equal(CHANGELOG[0].version, '1.4.602', '1.4.602 is the newest row')
+assert.match(latestChange('1.4.602').items.join('\n'), /Wave survived/, '1.4.602 changelog names the hold')
+assert.match(latestChange('1.4.602').items.join('\n'), /Refs #998/, '1.4.602 changelog refs #998')
+assert.match(latestChange('1.4.602').items.join('\n'), /Refs #1012/, '1.4.602 changelog refs #1012')
+assert.doesNotMatch(latestChange('1.4.602').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.602 changelog avoids GitHub close keywords')
+{
+  const actors602 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  const screen602 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const phone602 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
+  assert.match(actors602, /!waveSurvivedHold[\s\S]*defend-shot/, '1.4.602 shots defer during wave survived hold')
+  assert.match(actors602, /!waveSurvivedHold[\s\S]*defend-face-flash/, '1.4.602 face flash defers during wave survived hold')
+  assert.match(screen602, /nwWaveBannerCueProbe[\s\S]*nightWatchJumpAllowed/, '1.4.602 banner cue probe stays playtest-only')
+  assert.match(phone602, /sampleHoldShotFxVsBanner/, '1.4.602 rail sample measures lingering shot art on the banner')
+  assert.match(phone602, /defend-face-flash/, '1.4.602 shot juice overlap includes face flash')
+}
+
 // 1.4.601: Easy wave banner stays clear of the right ability rail (#998).
-assert.equal(APP_VERSION, '1.4.601')
-assert.equal(CHANGELOG[0].version, '1.4.601', '1.4.601 is the newest row')
+assert.equal(CHANGELOG[1].version, '1.4.601', '1.4.601 follows 1.4.602 in changelog')
 assert.match(latestChange('1.4.601').items.join('\n'), /Refs #998/, '1.4.601 changelog refs #998')
 assert.match(latestChange('1.4.601').items.join('\n'), /Refs #1010/, '1.4.601 changelog refs #1010')
 assert.match(latestChange('1.4.601').items.join('\n'), /Refs #1011/, '1.4.601 changelog refs #1011')

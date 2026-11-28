@@ -10845,6 +10845,17 @@ async function sampleNwWaveBannerRailClear(page) {
       }
       return Math.max(max, cueStackHit(textBox))
     }
+    const sampleHoldShotFxVsBanner = (bannerBox) => {
+      if (!bannerBox) return 0
+      let max = 0
+      for (const sel of ['.defend-face-flash', '.defend-beam', '.defend-beam-halo']) {
+        for (const el of document.querySelectorAll(sel)) {
+          if (!cuePainted(el)) continue
+          max = Math.max(max, area(bannerBox, boxOf(el)))
+        }
+      }
+      return max
+    }
     const samples = []
     const loopStart = performance.now()
     let maxCueOnBanner = 0
@@ -10854,7 +10865,12 @@ async function sampleNwWaveBannerRailClear(page) {
       if (banner && shown(banner)) {
         const textBox = bannerTextBox(banner)
         const cueBox = bannerCueBox(banner)
-        maxCueOnBanner = Math.max(maxCueOnBanner, sampleCueVsBanner(cueBox))
+        const bannerBox = boxOf(banner)
+        maxCueOnBanner = Math.max(
+          maxCueOnBanner,
+          sampleCueVsBanner(cueBox),
+          sampleHoldShotFxVsBanner(bannerBox),
+        )
       }
       if (!banner || !toast || !shown(banner) || !shown(toast)) {
         await new Promise((resolve) => requestAnimationFrame(resolve))
@@ -10954,7 +10970,10 @@ async function checkNwWaveBannerRailClear(browser, port, errors) {
 
   for (const round of NW_UNLOCK_TOAST_ROUNDS) {
     if (onlyRound && onlyRound !== String(round)) continue
-      const search = `?playtest=1&nwSeed=2&nwMap=a2&nwRound=${round}&nwLamps=0&nwCam=1&nwWaveBannerCueProbe=1`
+      const search =
+        process.env.NW_WAVE_BANNER_NO_PROBE === '1'
+          ? `?playtest=1&nwSeed=2&nwMap=a2&nwRound=${round}&nwLamps=0&nwCam=1`
+          : `?playtest=1&nwSeed=2&nwMap=a2&nwRound=${round}&nwLamps=0&nwCam=1&nwWaveBannerCueProbe=1`
       for (const [width, height] of nwUnlockToastSizesForRun()) {
         const size = `${width}x${height}`
         if (onlySize && onlySize !== size) continue
