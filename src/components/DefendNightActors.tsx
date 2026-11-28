@@ -377,9 +377,7 @@ export function DefendNightActorsSvg({
   const candlePairs = candleLinks(candlePlants)
   const rowHead = new Map(candleRowHeads(candlePlants).map((head) => [head.id, head.mark]))
   const drawAt = (raider: Raider) => (walkIn ? walkIn.drawAt(raider) : raiderAt(raider))
-  const liveCueAt = tapTarget ? drawAt(tapTarget) : null
-  const probeCueAt = bannerCueProbePlate && phase === 'boost' ? bannerCueProbePlate : null
-  const cueAt = liveCueAt ?? probeCueAt
+  const cueAt = tapTarget ? drawAt(tapTarget) : null
   const walkers = raiders.map((raider) => {
     const held = walkIn ? walkIn.held(raider) : false
     const entering = walkIn ? walkIn.entering(raider) : false
@@ -1032,20 +1030,12 @@ export function DefendNightActorsSvg({
                     </g>
                   ))
                 : null}
-              {cueAt &&
-              !waveSurvivedHold &&
-              ((easyTap && tapTarget && !tapTarget.turned) || (probeCueAt && phase === 'boost')) ? (
+              {easyTap && tapTarget && cueAt && !tapTarget.turned && !waveSurvivedHold ? (
                 <g className="nw-walk-cue" clipPath={walkIn ? 'url(#nw-walk-clip)' : undefined}>
                 <g
                   className="walker-target-cue"
                   data-cue="target"
-                  data-cue-gait={
-                    tapTarget?.boss
-                      ? 'boss'
-                      : tapTarget?.gait && tapTarget.gait !== 'plain'
-                        ? tapTarget.gait
-                        : 'plain'
-                  }
+                  data-cue-gait={tapTarget.boss ? 'boss' : tapTarget.gait && tapTarget.gait !== 'plain' ? tapTarget.gait : 'plain'}
                   transform={`translate(${cueAt.x} ${cueAt.y})`}
                   aria-hidden
                   pointerEvents="none"
@@ -1058,14 +1048,14 @@ export function DefendNightActorsSvg({
                     r={CUE_RING_R}
                   />
                   <circle className="walker-cue-pulse" cy={PATH_WALKER_FACE_DY} r={CUE_RING_R + FACE_HALF * 0.22} />
-                  {tapTarget?.gait === 'fast' ? (
+                  {tapTarget.gait === 'fast' ? (
                     <g className="walker-cue-streaks" aria-hidden>
                       <path d={`M${CUE_RING_R + 16} ${PATH_WALKER_FACE_DY - 14} l34 -8`} />
                       <path d={`M${CUE_RING_R + 12} ${PATH_WALKER_FACE_DY + 2} l40 2`} />
                       <path d={`M${CUE_RING_R + 18} ${PATH_WALKER_FACE_DY + 16} l28 10`} />
                     </g>
                   ) : null}
-                  {tapTarget?.gait === 'tough' ? (
+                  {tapTarget.gait === 'tough' ? (
                     <g aria-hidden>
                       <ellipse
                         className="walker-cue-shoulders"
