@@ -2043,7 +2043,7 @@ assert.equal(playerVisibleChangeItems(latestChange('1.4.601').items).length, 0, 
     '1.4.601 the rail ok line logs overlap guards',
   )
   assert.match(phone601, /jitter\.max > 4/, '1.4.601 rail check fails when chips jitter after settle')
-  assert.match(phone601, /maxCueOnBanner > 0/, '1.4.601 rail check fails when walker cue overlaps the banner')
+  assert.match(phone601, /cueVsBanner > 0/, '1.4.601 rail check fails when walker cue overlaps the banner')
   assert.match(phone601, /cueVsBanner/, '1.4.601 rail ok line logs cue vs banner overlap')
   assert.match(phone601, /\.nw-rail \.defend-ability/, '1.4.601 rail sample includes ability chips')
   assert.match(phone601, /toastVsNewLamp/, '1.4.601 rail sample measures toast vs new-lamp row')
