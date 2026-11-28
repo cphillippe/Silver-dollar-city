@@ -10723,6 +10723,18 @@ async function sampleNwWaveBannerRailClear(page) {
       }
       return textBox || boxOf(banner)
     }
+    /** Walker cue rings can sit in the map band the centered hold banner shares (not only title ink). */
+    const bannerCueBox = (banner) => {
+      const full = boxOf(banner)
+      const text = bannerTextBox(banner)
+      const topPad = innerHeight >= 900 && innerWidth <= 430 ? 32 : innerHeight >= 790 && innerHeight <= 899 ? 28 : 24
+      return {
+        left: Math.min(full.left, text.left),
+        top: Math.min(full.top, text.top) - topPad,
+        right: Math.max(full.right, text.right),
+        bottom: Math.max(full.bottom, text.bottom),
+      }
+    }
     const chipRailOverlap = (refBox) => {
       let max = 0
       let chipsOn = 0
@@ -10796,12 +10808,54 @@ async function sampleNwWaveBannerRailClear(page) {
       if (banner && toast && shown(banner) && shown(toast)) break
       await new Promise((resolve) => requestAnimationFrame(resolve))
     }
+    const cuePainted = (el) => {
+      const style = getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+      const box = el.getBoundingClientRect()
+      return box.width > 0.25 && box.height > 0.25
+    }
+    const cueStackHit = (textBox) => {
+      if (!textBox || textBox.right <= textBox.left) return 0
+      const cx = (textBox.left + textBox.right) / 2
+      const cy = (textBox.top + textBox.bottom) / 2
+      let hit = 0
+      for (const el of document.elementsFromPoint(cx, cy)) {
+        const cue = el.closest?.('.walker-target-cue')
+        if (!cue) continue
+        for (const part of cue.querySelectorAll('.walker-cue-ring, .walker-cue-pulse, .walker-cue-pad, circle, path')) {
+          if (!cuePainted(part)) continue
+          hit = Math.max(hit, area(textBox, boxOf(part)))
+        }
+        if (cuePainted(cue)) hit = Math.max(hit, area(textBox, boxOf(cue)))
+      }
+      return hit
+    }
+    const sampleCueVsBanner = (textBox) => {
+      if (!textBox) return 0
+      let max = 0
+      for (const root of document.querySelectorAll('.walker-target-cue')) {
+        const bits = [
+          root,
+          ...root.querySelectorAll('.walker-cue-ring, .walker-cue-pulse, .walker-cue-pad, .walker-cue-under, circle, path'),
+        ]
+        for (const el of bits) {
+          if (!cuePainted(el)) continue
+          max = Math.max(max, area(textBox, boxOf(el)))
+        }
+      }
+      return Math.max(max, cueStackHit(textBox))
+    }
     const samples = []
     const loopStart = performance.now()
     let maxCueOnBanner = 0
     while (performance.now() - loopStart < 2600) {
       const banner = document.querySelector('.nw-wave-survived')
       const toast = document.querySelector('.nw-map-toast')
+      if (banner && shown(banner)) {
+        const textBox = bannerTextBox(banner)
+        const cueBox = bannerCueBox(banner)
+        maxCueOnBanner = Math.max(maxCueOnBanner, sampleCueVsBanner(cueBox))
+      }
       if (!banner || !toast || !shown(banner) || !shown(toast)) {
         await new Promise((resolve) => requestAnimationFrame(resolve))
         continue
@@ -10812,11 +10866,6 @@ async function sampleNwWaveBannerRailClear(page) {
       const lamps = newLampUnion()
       const toastNewLamp = lamps ? area(toastBox, lamps) : 0
       const toastDeep = innerHeight >= 720 && innerHeight <= 789 ? toastBox.top : 0
-      for (const el of document.querySelectorAll('.walker-target-cue, .walker-target-cue *')) {
-        if (!shown(el)) continue
-        const box = boxOf(el)
-        maxCueOnBanner = Math.max(maxCueOnBanner, area(textBox, box))
-      }
       samples.push({
         ov: { rail: chip.railMax, chip: chip.max, toastNewLamp, toastDeep },
         chipsOn: chip.chipsOn,
@@ -10905,37 +10954,37 @@ async function checkNwWaveBannerRailClear(browser, port, errors) {
 
   for (const round of NW_UNLOCK_TOAST_ROUNDS) {
     if (onlyRound && onlyRound !== String(round)) continue
-    const search = `?playtest=1&nwSeed=2&nwMap=a2&nwRound=${round}&nwLamps=0&nwCam=1`
-    for (const [width, height] of nwUnlockToastSizesForRun()) {
-      const size = `${width}x${height}`
-      if (onlySize && onlySize !== size) continue
-      const proofShot =
-        process.env.NW_UNLOCK_TOAST_PROOF_SHOT === '1' && width === 375 && height === 667 && round === 24
-      const { context, page } = await openMap(browser, port, width, height, 'a2', {
-        motion: true,
-        search,
-        deviceScaleFactor: proofShot ? 2 : 1,
-      })
-      page.on('pageerror', (error) => errors.push(`wave-banner-rail r${round} ${size} ${error}`))
-      await waitNwUnlockToastCamReady(page, size, round)
-      await plantTypeLabelSeats(page, `${size} r${round}`)
-      await snapNwLoveChipOfficialCam(page)
-      await page.locator('.defend-go').click()
-      await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
-      await tapUntilBoost(page)
-      if ((await page.locator('.defend-page.is-boost').count()) < 1) {
-        fail(`checkNwWaveBannerRailClear fail r${round} ${size} boost=0`)
-        await context.close()
-        continue
-      }
-      await page.waitForTimeout(100)
-      if ((await page.locator('.nw-map-toast').count()) < 1) {
-        fail(`checkNwWaveBannerRailClear fail r${round} ${size} toast=0`)
-        await context.close()
-        continue
-      }
-      const sample = await sampleNwWaveBannerRailClear(page)
-      if (sample.missing === 'frames') {
+      const search = `?playtest=1&nwSeed=2&nwMap=a2&nwRound=${round}&nwLamps=0&nwCam=1&nwWaveBannerCueProbe=1`
+      for (const [width, height] of nwUnlockToastSizesForRun()) {
+        const size = `${width}x${height}`
+        if (onlySize && onlySize !== size) continue
+        const proofShot =
+          process.env.NW_UNLOCK_TOAST_PROOF_SHOT === '1' && width === 375 && height === 667 && round === 24
+        const { context, page } = await openMap(browser, port, width, height, 'a2', {
+          motion: true,
+          search,
+          deviceScaleFactor: proofShot ? 2 : 1,
+        })
+        page.on('pageerror', (error) => errors.push(`wave-banner-rail r${round} ${size} ${error}`))
+        await waitNwUnlockToastCamReady(page, size, round)
+        await plantTypeLabelSeats(page, `${size} r${round}`)
+        await snapNwLoveChipOfficialCam(page)
+        await page.locator('.defend-go').click()
+        await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
+        await tapUntilBoost(page)
+        if ((await page.locator('.defend-page.is-boost').count()) < 1) {
+          fail(`checkNwWaveBannerRailClear fail r${round} ${size} boost=0`)
+          await context.close()
+          continue
+        }
+        await page.waitForTimeout(100)
+        if ((await page.locator('.nw-map-toast').count()) < 1) {
+          fail(`checkNwWaveBannerRailClear fail r${round} ${size} toast=0`)
+          await context.close()
+          continue
+        }
+        const sample = await sampleNwWaveBannerRailClear(page)
+        if (sample.missing === 'frames') {
         fail(`checkNwWaveBannerRailClear fail r${round} ${size} frames=0`)
         await context.close()
         continue

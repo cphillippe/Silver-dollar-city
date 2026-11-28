@@ -957,6 +957,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const hadMapArrowRef = useRef(false)
   const camFirstRef = useRef<{ x: number; y: number } | null>(null)
   const camCuePlateRef = useRef<{ x: number; y: number } | null>(null)
+  const lastCuePlateRef = useRef<{ x: number; y: number } | null>(null)
   const camLastTouchAt = useRef(-Infinity)
   const camPointerDown = useRef(0)
   const [camDims, setCamDims] = useState<{ W: number; H: number; top: number } | null>(null)
@@ -4172,6 +4173,13 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   // Pale Begin and the plant line follow how many lamps are standing, not ring slots.
   const jumpSearch = typeof window === 'undefined' ? '' : window.location.search
+  const nwWaveBannerCueProbe =
+    typeof window !== 'undefined' && new URLSearchParams(jumpSearch).get('nwWaveBannerCueProbe') === '1'
+  if (nwWaveBannerCueProbe && midWave && easyTap && tapAt && tapTarget && !walkInHeld(tapTarget, walkNow)) {
+    lastCuePlateRef.current = { x: tapAt.x, y: tapAt.y }
+  }
+  const bannerCueProbePlate =
+    nwWaveBannerCueProbe && phase === 'boost' && survivedRound != null ? lastCuePlateRef.current : null
   const playtestBare =
     easy &&
     nightWatchLampCap(jumpSearch) === 0 &&
@@ -4848,6 +4856,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                   won={won}
                   phase={phase}
                   waveSurvivedHold={easy && survivedRound != null}
+                  bannerCueProbePlate={bannerCueProbePlate}
                   fireBest={fireBest}
                   fireAtRaider={fireAtRaider}
                   easyTap={easyTap}

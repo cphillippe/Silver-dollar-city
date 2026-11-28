@@ -48,6 +48,8 @@ export type DefendNightBoardProps = Omit<DefendNightSkyProps, 'children'> &
     plateFill?: boolean
     /** Easy: Wave survived! is on screen — hold the lead-walker tap cue off the banner. */
     waveSurvivedHold?: boolean
+    /** Playtest: re-show the last in-wave cue plate point during Wave survived! (rail assert only). */
+    bannerCueProbePlate?: { x: number; y: number } | null
     /** Easy phone camera (#818). Plate px are `s0`, the world is zoomed by `z` and panned by `tx, ty`. */
     cam?: { s0: number; z: number; tx: number; ty: number }
   }
@@ -433,6 +435,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     heldLessons, playtestSteps = false, onOpenLessons, spawnLog = false,
     plateFill = false, onPlacePointer, cueNudge = false,
     waveSurvivedHold = false,
+    bannerCueProbePlate = null,
     map, roadD, porchCandy, roadLabel, mapFeatures, pops, mapId, walkIn, cam,
   } = props
   const walkerAim = useRef<{ id: number; point: { x: number; y: number } | null; pointerType: string } | null>(null)
@@ -729,6 +732,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           spawnLog={spawnLog}
           cueNudge={cueNudge}
           waveSurvivedHold={waveSurvivedHold}
+          bannerCueProbePlate={bannerCueProbePlate}
         />
       </DefendNightSky>
       {cam ? cardPortal(towerCard) : towerCard}
