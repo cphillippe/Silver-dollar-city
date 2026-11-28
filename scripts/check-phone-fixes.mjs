@@ -4810,7 +4810,7 @@ const EASY_GOLD_BASE_1579 = {
   '375x667 home-first': { '2 Help': { x: 131, y: 561, w: 113, h: 48 } },
   '375x667 home-after-l1': { '3 Lock In': { x: 250, y: 584.1, w: 113, h: 48 } },
   // 1.4.596: y re-pinned from CI run 45026157592 (checkEasyOneGold rect lines); x/w unchanged.
-  // 1.4.600 #998 changelog row: re-pinned from CI run 46116624230 rect lines; Open Profile unchanged.
+  // 1.4.600: Open Profile w=129.4 subpixel pin from CI run 46116624230 rect line; y unchanged vs 1.4.598.
   '375x667 settings-more': {
     'Open Profile': { x: 41, y: 1406.5, w: 129.4, h: 52 },
     Candy: { x: 41, y: 1953.6, w: 84.4, h: 52 },
@@ -4976,19 +4976,17 @@ async function readEasyGold(page) {
         clientH: el.clientHeight,
       }
     }
-    const cues = (root) => {
+    const cues = () => {
       const names = []
       const buttons = []
-      const list = root ? root.querySelectorAll('button, a.btn') : document.querySelectorAll('button, a.btn')
-      for (const el of list) {
+      for (const el of document.querySelectorAll('button, a.btn')) {
         if (!(el instanceof HTMLElement)) continue
         if (el.closest('[hidden], .easy-core')) continue
         if (!shown(el) || !inView(el.getBoundingClientRect())) continue
         const style = getComputedStyle(el)
         const fill = gold(style.backgroundImage) || gold(style.backgroundColor)
         const glow = gold(style.boxShadow)
-        const themeOn = el.closest('.theme-picks') && el.classList.contains('is-on')
-        if (!fill && !glow && !themeOn) continue
+        if (!fill && !glow) continue
         names.push(nameOf(el))
         buttons.push(el)
       }
@@ -5021,14 +5019,14 @@ async function readEasyGold(page) {
         if (text === 'Import pasted save' || text === 'Export JSON') take(el)
       }
       for (const el of document.querySelectorAll('.theme-picks .btn')) take(el)
-      for (const el of cues(null).buttons) take(el)
+      for (const el of cues().buttons) take(el)
       return out
     }
     const read = () => {
+      const found = cues()
       const theme = document.querySelector('.theme-picks')
       const themeBox = theme ? theme.getBoundingClientRect() : null
       const themeVisible = Boolean(themeBox && themeBox.height > 1 && inView(themeBox) && themeBox.bottom > 8 && themeBox.top < innerHeight - 8)
-      const found = cues(themeVisible && theme instanceof HTMLElement ? theme : null)
       const hits = []
       const rects = {}
       const lines = []

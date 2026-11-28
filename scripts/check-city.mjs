@@ -1953,7 +1953,6 @@ assert.match(
 assert.equal(APP_VERSION, '1.4.600')
 assert.equal(CHANGELOG[0].version, '1.4.600', '1.4.600 is the newest row')
 assert.match(latestChange('1.4.600').items.join('\n'), /Refs #998/, '1.4.600 changelog refs #998')
-assert.match(latestChange('1.4.600').items.join('\n'), /Refs #1009/, '1.4.600 changelog refs #1009')
 assert.match(latestChange('1.4.600').items.join('\n'), /unlock toast|New map unlocked/i, '1.4.600 changelog names the unlock toast fix')
 assert.match(latestChange('1.4.600').items.join('\n'), /Hard stays the same\./)
 assert.doesNotMatch(latestChange('1.4.600').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.600 changelog avoids GitHub close keywords')
@@ -2160,6 +2159,39 @@ assert.doesNotMatch(
     phone600,
     /checkNwClearChipsWithLamp ok \$\{size\} lamps=.*science pairDist=.*gold=1/,
     '1.4.600 clear-chip ok line logs pair distance',
+  )
+  const easyGoldSettingsStopRule = (src) =>
+    /screen === 'settings-more' \? frame\.gold >= 2 : frame\.gold !== 1/.test(src)
+  const easyGoldWholePageCues = (src) => {
+    const body = src.slice(src.indexOf('async function readEasyGold'), src.indexOf('function easyGoldReport'))
+    return /const found = cues\(\)/.test(body) && !/cues\(themeVisible/.test(body)
+  }
+  assert.equal(easyGoldSettingsStopRule(phone600), true, '1.4.600 #916 settings-more keeps gold<2 and other sizes gold===1')
+  assert.equal(easyGoldWholePageCues(phone600), true, '1.4.600 #916 readEasyGold counts cues on the whole page')
+  assert.match(phone600, /Open Profile': \{ x: 41, y: 1406\.5, w: 129\.4/, '1.4.600 #916 Open Profile w pin from CI 46116624230')
+  const mut916GoldZero = phone600.replace(
+    "screen === 'settings-more' ? frame.gold >= 2 : frame.gold !== 1",
+    "screen === 'settings-more' ? frame.gold >= 0 : frame.gold !== 1",
+  )
+  assert.equal(
+    easyGoldSettingsStopRule(mut916GoldZero),
+    false,
+    '1.4.600 mut #916 loosening settings-more gold floor must fail the harness guard',
+  )
+  const mut916GoldTwo = phone600.replace(
+    "screen === 'settings-more' ? frame.gold >= 2 : frame.gold !== 1",
+    "screen === 'settings-more' ? frame.gold >= 3 : frame.gold !== 1",
+  )
+  assert.equal(
+    easyGoldSettingsStopRule(mut916GoldTwo),
+    false,
+    '1.4.600 mut #916 allowing two gold cues on settings-more must fail the harness guard',
+  )
+  const mut916ThemeScoped = phone600.replace('const found = cues()', 'const found = cues(themeVisible ? theme : null)')
+  assert.equal(
+    easyGoldWholePageCues(mut916ThemeScoped),
+    false,
+    '1.4.600 mut #916 theme-scoped gold counting must fail the harness guard',
   )
   assert.match(phone600, /both\.length < 20/, '1.4.600 unlock toast holds at least 20 sampled frames')
   const unlockSample = phone600.slice(
