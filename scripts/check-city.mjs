@@ -2110,50 +2110,44 @@ assert.doesNotMatch(
     /if \(chip\.getAttribute\('data-clear-hold-laid'\) === 'yes' && !\(layoutBoost && clearHold\)\)/,
     '1.4.600 #1009 laid chips skip repeat layout until clear-hold window closes',
   )
+  const board1009ClearHoldGate = (src) =>
+    /const clearHold =\s*\n\s*layoutBoost &&\s*\n\s*chipNeedsClearHoldLayout\(/.test(src)
+  const board1009BoostHook = (src) => /hideTypeLabelsOnChrome\(board, boosting\)/.test(src)
+  const board1009ClearLampWindow = (src) => /!!page\.querySelector\('\.defend-clear-lamp'\)/.test(src)
+  const phone600OrphanFailLine = (src) =>
+    /checkNwClearChipsWithLamp fail \$\{tag\} \$\{chip\.type\} orphan=1/.test(src)
+  assert.equal(board1009ClearHoldGate(board1009), true, '1.4.600 #1009 per-chip clear-hold gate is present')
+  assert.equal(board1009BoostHook(board1009), true, '1.4.600 #1009 boost relayout hook is present')
+  assert.equal(board1009ClearLampWindow(board1009), true, '1.4.600 #1009 clear-lamp window is present')
+  assert.equal(phone600OrphanFailLine(phone600), true, '1.4.600 #1001 orphan fail line is present')
   const mut1009ClearHold = board1009.replace(
     /const clearHold =\s*\n\s*layoutBoost &&\s*\n\s*chipNeedsClearHoldLayout\(/,
     'const clearHold =\n      false &&\n      chipNeedsClearHoldLayout(',
   )
-  assert.throws(
-    () =>
-      assert.match(
-        mut1009ClearHold,
-        /const clearHold =\s*\n\s*layoutBoost &&\s*\n\s*chipNeedsClearHoldLayout\(/,
-        '1.4.600 mut #1009 per-chip clear-hold gate',
-      ),
-    /1.4.600 mut #1009 per-chip clear-hold gate/,
+  assert.equal(
+    board1009ClearHoldGate(mut1009ClearHold),
+    false,
     '1.4.600 mut #1009 removing the clearHold gate must fail the source guard',
   )
   const mut1009LayoutBoost = board1009.replace(
     "!!page.querySelector('.defend-clear-lamp')",
     'false',
   )
-  assert.throws(
-    () =>
-      assert.match(
-        mut1009LayoutBoost,
-        /!!page\.querySelector\('\.defend-clear-lamp'\)/,
-        '1.4.600 mut #1009 clear-lamp window',
-      ),
-    /1.4.600 mut #1009 clear-lamp window/,
+  assert.equal(
+    board1009ClearLampWindow(mut1009LayoutBoost),
+    false,
     '1.4.600 mut #1009 removing the clear-lamp window must fail the source guard',
   )
   const mut1009BoostHook = board1009.replace('hideTypeLabelsOnChrome(board, boosting)', 'hideTypeLabelsOnChrome(board)')
-  assert.throws(
-    () =>
-      assert.match(mut1009BoostHook, /hideTypeLabelsOnChrome\(board, boosting\)/, '1.4.600 mut #1009 boost hook'),
-    /1.4.600 mut #1009 boost hook/,
+  assert.equal(
+    board1009BoostHook(mut1009BoostHook),
+    false,
     '1.4.600 mut #1009 dropping the boosting hook must fail the source guard',
   )
   const mut1001Orphan = phone600.replace('${chip.type} orphan=1', '${chip.type} orphan=0')
-  assert.throws(
-    () =>
-      assert.match(
-        mut1001Orphan,
-        /checkNwClearChipsWithLamp fail \$\{tag\} \$\{chip\.type\} orphan=1/,
-        '1.4.600 mut #1001 orphan fail line',
-      ),
-    /1.4.600 mut #1001 orphan fail line/,
+  assert.equal(
+    phone600OrphanFailLine(mut1001Orphan),
+    false,
     '1.4.600 mut #1001 renaming the orphan fail line must fail the harness guard',
   )
   assert.match(phone600, /lamps=\$\{lampCase\.lamps\}/, '1.4.600 clear-chip ok line logs lamp count case')
