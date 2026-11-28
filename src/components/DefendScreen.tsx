@@ -289,6 +289,7 @@ import {
   camMarkerShare,
   camPointArrow,
   camSeatArrow,
+  camSeatShare,
   NW_ARROW_R,
   NW_CUE_ARROW_HIDE_SHARE,
   NW_CUE_FACE_R,
@@ -959,6 +960,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const camCuePlateRef = useRef<{ x: number; y: number } | null>(null)
   const camLastTouchAt = useRef(-Infinity)
   const camPointerDown = useRef(0)
+  const boostCamPrimedRef = useRef(false)
   const [camDims, setCamDims] = useState<{ W: number; H: number; top: number } | null>(null)
 
   function stampCamTouch() {
@@ -1018,6 +1020,36 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     if (W < 1 || H < 1) return null
     const box = node.getBoundingClientRect()
     return { W, H, left: box.left, top: box.top, world: camWorld(W, H, camZ), insets: camFrameInsets(box.top) }
+  }
+
+  /** Easy r5 clear (#1009): no-void pan so an off-playfield planted lamp and its chip stay paired. */
+  function keepPlantedLampsInBoostClear(): boolean {
+    if (!camOn || !easy || phase !== 'boost' || won) return false
+    const f = camFrame()
+    if (!f) return false
+    const view = {
+      W: f.W,
+      H: f.H,
+      s0: f.world.s0,
+      z: camZ,
+      tx: camPanRef.current[0],
+      ty: camPanRef.current[1],
+    }
+    let target: { x: number; y: number } | null = null
+    let worstShare = 1
+    for (const id of Object.keys(plantsRef.current)) {
+      const point = nightTowers.anchor(id)
+      const share = camSeatShare(point, view, f.insets)
+      if (share + 1e-6 < worstShare) {
+        worstShare = share
+        target = point
+      }
+    }
+    if (!target || worstShare >= 0.85) return false
+    const [tx, ty] = focusPan(target, f.W, f.H, f.world.s0, camZ, f.insets)
+    if (Math.abs(tx - camPanRef.current[0]) < 0.5 && Math.abs(ty - camPanRef.current[1]) < 0.5) return false
+    camApply(tx, ty, true)
+    return true
   }
 
   function camWrite() {
@@ -1109,6 +1141,24 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   useLayoutEffect(() => {
     if (easy) keepSeatRingInView()
   })
+
+  useEffect(() => {
+    if (phase !== 'boost') boostCamPrimedRef.current = false
+  }, [phase])
+
+  useEffect(() => {
+    if (!camOn || !easy || phase !== 'boost' || won || clearCheer || boardBox.w < 1) return
+    if (!boostCamPrimedRef.current) {
+      boostCamPrimedRef.current = true
+      recenter()
+      const tall = typeof window !== 'undefined' && window.innerHeight > 700
+      if (tall) {
+        for (let pass = 0; pass < 3; pass += 1) {
+          if (!keepPlantedLampsInBoostClear()) break
+        }
+      }
+    }
+  }, [camOn, easy, phase, won, clearCheer, plants, mapId, boardBox.w, boardBox.h, camZ])
 
   // #818: a fast drag that the clamp eats is still a native fling to the browser, and the next tap's click is dropped.
   // Consume touchmove once our pan is live (past NW_TAP_SLOP). Taps and lamp drags never set camPanning.

@@ -1976,15 +1976,25 @@ assert.doesNotMatch(
     const plainAsync = [...stripped.matchAll(/\basync\s+function\s+checkNwUnlockToastBanner\b/g)].length
     return exportAsync + constAsync + plainAsync
   }
+  const countNwClearChipsWithLampDefs = (src) => {
+    const exportAsync = [...src.matchAll(/\bexport\s+async\s+function\s+checkNwClearChipsWithLamp\b/g)].length
+    const constAsync = [...src.matchAll(/\bconst\s+checkNwClearChipsWithLamp\s*=\s*async\b/g)].length
+    const stripped = src.replace(/\bexport\s+async\s+function\s+checkNwClearChipsWithLamp\b/g, '')
+    const plainAsync = [...stripped.matchAll(/\basync\s+function\s+checkNwClearChipsWithLamp\b/g)].length
+    return exportAsync + constAsync + plainAsync
+  }
   const nwUnlockToastTailOk = (src) => {
     const lastIdx = src.lastIndexOf('      return\n    }\n')
     if (lastIdx < 0) return false
     const tail = src.slice(lastIdx)
     const loveIdx = tail.indexOf('await checkNwLoveChip(browser, port, errors)')
+    const clearIdx = tail.indexOf('await checkNwClearChipsWithLamp(browser, port, errors)')
     const unlockIdx = tail.indexOf('await checkNwUnlockToastBanner(browser, port, errors)')
     const mapNoteIdx = tail.indexOf("process.env.NW_MAP_NOTE_ONLY !== '1'")
-    if (loveIdx < 0 || unlockIdx < 0 || mapNoteIdx < 0) return false
-    if (!(loveIdx < unlockIdx && unlockIdx < mapNoteIdx)) return false
+    if (loveIdx < 0 || clearIdx < 0 || unlockIdx < 0 || mapNoteIdx < 0) return false
+    if (!(loveIdx < clearIdx && clearIdx < unlockIdx && unlockIdx < mapNoteIdx)) return false
+    if ([...tail.matchAll(/await checkNwClearChipsWithLamp\(browser, port, errors\)/g)].length !== 1) return false
+    if (countNwClearChipsWithLampDefs(src) !== 1) return false
     if ([...tail.matchAll(/await checkNwUnlockToastBanner\(browser, port, errors\)/g)].length !== 1) return false
     if (countNwUnlockToastBannerDefs(src) !== 1) return false
     return true
@@ -2013,13 +2023,18 @@ assert.doesNotMatch(
     nwUnlockToastTailOk(
       patchPhoneTail600((tail) =>
         tail.replace(
-          '    await checkNwLoveChip(browser, port, errors)\n    await checkNwUnlockToastBanner(browser, port, errors)\n',
-          '    await checkNwUnlockToastBanner(browser, port, errors)\n    await checkNwLoveChip(browser, port, errors)\n',
+          '    await checkNwLoveChip(browser, port, errors)\n    await checkNwClearChipsWithLamp(browser, port, errors)\n',
+          '    await checkNwClearChipsWithLamp(browser, port, errors)\n    await checkNwLoveChip(browser, port, errors)\n',
         ),
       ),
     ),
     false,
-    '1.4.600 mut unlock before love',
+    '1.4.600 mut clear chips before love',
+  )
+  assert.equal(
+    nwUnlockToastTailOk(patchPhoneTail600((tail) => tail.replace('\n    await checkNwClearChipsWithLamp(browser, port, errors)\n', '\n'))),
+    false,
+    '1.4.600 mut delete clear chips call',
   )
   assert.equal(
     nwUnlockToastTailOk(
@@ -2060,6 +2075,90 @@ assert.doesNotMatch(
     phone600,
     /checkNwUnlockToastBanner ok r\$\{round\} \$\{size\} banner=.*toast=.*overlap=.*vsChip=.*toastVsChip=.*taps=.*gold=1/,
     '1.4.600 the ok line logs banner, toast, chip, and tap guards',
+  )
+  const board1009 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
+  assert.match(
+    board1009,
+    /const clearHold =\s*\n\s*layoutBoost &&\s*\n\s*chipNeedsClearHoldLayout\(/,
+    '1.4.600 #1009 clear-hold layout per chip when orphaned or off-play during boost',
+  )
+  assert.match(
+    board1009,
+    /if \(!clearHold && \(cardOpen \|\| chip\.getAttribute\('data-label-park'\)\)\)/,
+    '1.4.600 #1009 chips skip park only when clear-hold needs layout',
+  )
+  assert.match(board1009, /hideTypeLabelsOnChrome\(board, boosting\)/, '1.4.600 clear chips relayout on boost pass')
+  assert.match(board1009, /function chipNeedsClearHoldLayout/, '1.4.600 clear-hold layout gated on off-play or orphan')
+  assert.match(
+    board1009,
+    /if \(clearHold && viewH > 0 && box\.height > 1 && box\.bottom > viewH - 4\)/,
+    '1.4.600 #1009 viewport floor clamp only on clear-hold chips',
+  )
+  assert.match(board1009, /CLEAR_HOLD_CHIP_PAIR_MAX = 120/, '1.4.600 clear-hold pair max matches harness')
+  assert.doesNotMatch(board1009, /plantedPads >= 5/, '1.4.600 clear chips do not gate on lamp count')
+  assert.doesNotMatch(board1009, /plantedPads >= 4/, '1.4.600 clear chips do not gate on four-lamp count')
+  assert.doesNotMatch(board1009, /data-boost-clear-hold/, '1.4.600 clear hold is per chip not page latch')
+  assert.match(
+    board1009,
+    /const layoutBoost =[\s\S]*holdScan[\s\S]*!!page\.querySelector\('\.defend-clear-lamp'\)/,
+    '1.4.600 #1009 clear hold layout runs during boost while clear lamps are on screen',
+  )
+  assert.match(board1009, /data-clear-hold-laid/, '1.4.600 clear-hold layout latches per chip across relayout passes')
+  assert.match(
+    board1009,
+    /if \(chip\.getAttribute\('data-clear-hold-laid'\) === 'yes' && !\(layoutBoost && clearHold\)\)/,
+    '1.4.600 #1009 laid chips skip repeat layout until clear-hold window closes',
+  )
+  const board1009ClearHoldGate = (src) =>
+    /const clearHold =\s*\n\s*layoutBoost &&\s*\n\s*chipNeedsClearHoldLayout\(/.test(src)
+  const board1009BoostHook = (src) => /hideTypeLabelsOnChrome\(board, boosting\)/.test(src)
+  const board1009ClearLampWindow = (src) => /!!page\.querySelector\('\.defend-clear-lamp'\)/.test(src)
+  const phone600OrphanFailLine = (src) =>
+    /checkNwClearChipsWithLamp fail \$\{tag\} \$\{chip\.type\} orphan=1/.test(src)
+  assert.equal(board1009ClearHoldGate(board1009), true, '1.4.600 #1009 per-chip clear-hold gate is present')
+  assert.equal(board1009BoostHook(board1009), true, '1.4.600 #1009 boost relayout hook is present')
+  assert.equal(board1009ClearLampWindow(board1009), true, '1.4.600 #1009 clear-lamp window is present')
+  assert.equal(phone600OrphanFailLine(phone600), true, '1.4.600 #1001 orphan fail line is present')
+  const mut1009ClearHold = board1009.replace(
+    /const clearHold =\s*\n\s*layoutBoost &&\s*\n\s*chipNeedsClearHoldLayout\(/,
+    'const clearHold =\n      false &&\n      chipNeedsClearHoldLayout(',
+  )
+  assert.equal(
+    board1009ClearHoldGate(mut1009ClearHold),
+    false,
+    '1.4.600 mut #1009 removing the clearHold gate must fail the source guard',
+  )
+  const mut1009LayoutBoost = board1009.replace(
+    "!!page.querySelector('.defend-clear-lamp')",
+    'false',
+  )
+  assert.equal(
+    board1009ClearLampWindow(mut1009LayoutBoost),
+    false,
+    '1.4.600 mut #1009 removing the clear-lamp window must fail the source guard',
+  )
+  const mut1009BoostHook = board1009.replace('hideTypeLabelsOnChrome(board, boosting)', 'hideTypeLabelsOnChrome(board)')
+  assert.equal(
+    board1009BoostHook(mut1009BoostHook),
+    false,
+    '1.4.600 mut #1009 dropping the boosting hook must fail the source guard',
+  )
+  const mut1001Orphan = phone600.replace('${chip.type} orphan=1', '${chip.type} orphan=0')
+  assert.equal(
+    phone600OrphanFailLine(mut1001Orphan),
+    false,
+    '1.4.600 mut #1001 renaming the orphan fail line must fail the harness guard',
+  )
+  assert.match(phone600, /lamps=\$\{lampCase\.lamps\}/, '1.4.600 clear-chip ok line logs lamp count case')
+  assert.match(phone600, /NW_CLEAR_CHIP_CASES/, '1.4.600 clear-chip three and four lamp cases are defined')
+  assert.match(phone600, /if \(process\.env\.NW_CLEAR_CHIPS_ONLY === '1'\)/, '1.4.600 clear-chip ONLY guard is present')
+  assert.match(phone600, /async function checkNwClearChipsWithLamp/, '1.4.600 checkNwClearChipsWithLamp is defined')
+  assert.match(phone600, /NW_CLEAR_CHIPS_ONLY/, '1.4.600 clear-chip scan has a scoped-only guard')
+  assert.match(phone600, /checkNwClearChipsWithLamp fail \$\{tag\} \$\{chip\.type\} orphan=1/, '1.4.600 #1001 no-orphan fail line')
+  assert.match(
+    phone600,
+    /checkNwClearChipsWithLamp ok \$\{size\} lamps=.*science pairDist=.*gold=1/,
+    '1.4.600 clear-chip ok line logs pair distance',
   )
   assert.match(phone600, /both\.length < 20/, '1.4.600 unlock toast holds at least 20 sampled frames')
   const unlockSample = phone600.slice(

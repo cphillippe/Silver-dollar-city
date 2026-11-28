@@ -11468,6 +11468,288 @@ async function checkNwLoveChip(browser, port, errors) {
   assert.equal(problems.length, 0, problems.join('\n'))
 }
 
+/** #1009 Easy r5 clear: each planted type chip stays in the playfield beside its lamp (#1001 no-orphan). */
+const NW_CLEAR_CHIPS_SEARCH = '?playtest=1&nwSeed=2&nwMap=a2&nwRound=5&nwLamps=0&nwCam=1'
+const NW_CLEAR_CHIPS_SIZES = [
+  [375, 667],
+  [375, 812],
+  [384, 854],
+  [390, 844],
+  [412, 915],
+  [768, 1024],
+]
+const NW_CLEAR_CHIP_OFFICIAL = [
+  { tool: 'love', cx: 464, cy: 360 },
+  { tool: 'logic', cx: 600, cy: 88 },
+  { tool: 'reason', cx: 464, cy: 224 },
+  { tool: 'science', cx: 464, cy: 768 },
+  { tool: 'candle', cx: 600, cy: 904 },
+]
+/** Tens-of-px band from #1009 / #995; #1001 orphans hit hundreds. */
+const NW_CLEAR_CHIP_PAIR_MAX = 120
+const NW_CLEAR_CHIP_CASES = [
+  { lamps: 'five', seats: NW_CLEAR_CHIP_OFFICIAL, minChips: 4 },
+  {
+    lamps: 'four',
+    seats: NW_CLEAR_CHIP_OFFICIAL.filter((seat) => seat.tool !== 'candle'),
+    minChips: 3,
+  },
+  {
+    lamps: 'three',
+    seats: NW_CLEAR_CHIP_OFFICIAL.filter((seat) => ['love', 'logic', 'science'].includes(seat.tool)),
+    minChips: 2,
+  },
+]
+
+async function plantOfficialA2Seats(page, label, seats) {
+  const rings = await page.evaluate(() =>
+    [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({
+      cx: Number(ring.getAttribute('cx')),
+      cy: Number(ring.getAttribute('cy')),
+    })),
+  )
+  for (const seat of seats) {
+    assert.ok(
+      rings.some((ring) => ring.cx === seat.cx && ring.cy === seat.cy),
+      `${label} seat ${seat.tool}@${seat.cx},${seat.cy} is live ${JSON.stringify(rings)}`,
+    )
+    await glyphPlantAt(page, seat.tool, seat, label)
+  }
+  assert.equal(
+    await page.locator('.defend-pad').count(),
+    seats.length,
+    `${label} ${seats.length} official lamps are planted`,
+  )
+}
+
+async function plantOfficialA2Five(page, label) {
+  await plantOfficialA2Seats(page, label, NW_CLEAR_CHIP_OFFICIAL)
+}
+
+async function sampleNwClearChipPairs(page) {
+  return page.evaluate(
+    async (pairMax) => {
+      const margin = 2
+      const shown = (el) => {
+        if (!el) return false
+        const style = getComputedStyle(el)
+        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+        const box = el.getBoundingClientRect()
+        return box.width > 1 && box.height > 1
+      }
+      const boxOf = (el) => {
+        const rect = el.getBoundingClientRect()
+        return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height }
+      }
+      const overlap = (a, b) => {
+        const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left))
+        const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+        return w * h
+      }
+      const chipType = (chip) => {
+        for (const part of chip.classList) {
+          if (part.startsWith('is-') && part.length > 3) return part.slice(3)
+        }
+        return ''
+      }
+      const padOf = (type) => {
+        if (!type) return null
+        const pad = document.querySelector(`.defend-pad.is-planted.is-${type}[data-tower-type="${type}"]`)
+        return pad && shown(pad) ? boxOf(pad) : null
+      }
+      const goldCues = () => {
+        let count = 0
+        const gold = (value) => {
+          const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/g
+          let match
+          while ((match = re.exec(value || ''))) {
+            const r = Number(match[1])
+            const g = Number(match[2])
+            const b = Number(match[3])
+            const a = match[4] === undefined ? 1 : Number(match[4])
+            if (a >= 0.3 && r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+          }
+          return false
+        }
+        const chrome =
+          'button, .defend-go, .defend-continue, .defend-abilities, .defend-boost, .defend-tower-card, .defend-path-pip, .nw-balloon-orb, .defend-wave, .defend-ability-stock'
+        for (const el of document.querySelectorAll(chrome)) {
+          if (!shown(el)) continue
+          const style = getComputedStyle(el)
+          const text = [...el.childNodes].some((child) => child.nodeType === 3 && child.textContent.trim())
+          const border = ['Top', 'Right', 'Bottom', 'Left'].some((side) => style[`border${side}Width`] !== '0px' && gold(style[`border${side}Color`]))
+          if (gold(style.backgroundImage) || gold(style.backgroundColor) || gold(style.boxShadow) || border || (text && gold(style.color))) count += 1
+        }
+        return count
+      }
+      const hud = document.querySelector('.nw-hud')
+      const hudBox = hud && shown(hud) ? boxOf(hud) : null
+      const sparks = document.querySelector('.nw-balloon-count, .nw-balloon-label')
+      const sparksBox = sparks && shown(sparks) ? boxOf(sparks) : null
+      const banner = document.querySelector('.nw-wave-survived')
+      const bannerBox = banner && shown(banner) ? boxOf(banner) : null
+      const inViewport = (box) =>
+        box.left >= margin - 0.01 &&
+        box.top >= -0.5 &&
+        box.right <= innerWidth - margin + 0.01 &&
+        box.bottom <= innerHeight + 0.01 &&
+        box.width > 1 &&
+        box.height > 1
+      const lampInPlayfield = (box) => {
+        const share =
+          Math.max(0, Math.min(box.bottom, innerHeight - margin) - Math.max(box.top, margin)) /
+          Math.max(1, box.bottom - box.top)
+        return share >= 0.45 && box.left >= margin - 0.01 && box.right <= innerWidth - margin + 0.01
+      }
+      const dist = (a, b) => Math.hypot((a.left + a.right) / 2 - (b.left + b.right) / 2, (a.top + a.bottom) / 2 - (b.top + b.bottom) / 2)
+      const samples = []
+      const started = performance.now()
+      while (performance.now() - started < 2200) {
+        if (!document.querySelector('.defend-page.is-boost')) {
+          await new Promise((resolve) => requestAnimationFrame(resolve))
+          continue
+        }
+        const frame = { chips: [], gold: goldCues(), vsHud: 0, vsSparks: 0 }
+        if (bannerBox) {
+          if (hudBox) frame.vsHud = overlap(bannerBox, hudBox)
+          if (sparksBox) frame.vsSparks = overlap(bannerBox, sparksBox)
+        }
+        for (const chip of document.querySelectorAll('.defend-type-chip')) {
+          if (chip.getAttribute('data-chrome-hide') === 'yes') continue
+          if (!shown(chip)) continue
+          const type = chipType(chip)
+          const box = boxOf(chip)
+          const pad = padOf(type)
+          const style = getComputedStyle(chip)
+          const font = parseFloat(style.fontSize) || 0
+          const clipped = chip.scrollWidth > chip.clientWidth + 1 || chip.scrollHeight > chip.clientHeight + 1 ? 1 : 0
+          const pairDist = pad ? dist(box, pad) : null
+          const orphan =
+            inViewport(box) &&
+            (pairDist === null || pairDist > pairMax || (pad && !lampInPlayfield(pad) && inViewport(box)))
+          frame.chips.push({
+            type,
+            box,
+            pad,
+            font,
+            clipped,
+            inViewport: inViewport(box),
+            pairDist,
+            orphan,
+          })
+        }
+        samples.push(frame)
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+      }
+      return { samples, viewW: innerWidth, viewH: innerHeight }
+    },
+    NW_CLEAR_CHIP_PAIR_MAX,
+  )
+}
+
+async function checkNwClearChipsWithLamp(browser, port, errors) {
+  const only = process.env.NW_CLEAR_CHIPS_SIZE
+  const onlyLamps = process.env.NW_CLEAR_CHIPS_LAMPS
+  const lampCases = onlyLamps
+    ? NW_CLEAR_CHIP_CASES.filter((row) => row.lamps === onlyLamps)
+    : NW_CLEAR_CHIP_CASES
+  assert.ok(lampCases.length > 0, 'NW_CLEAR_CHIPS_LAMPS must be five, four, or three')
+  const problems = []
+  const seen = new Set()
+  const fail = (line) => {
+    if (seen.has(line)) return
+    seen.add(line)
+    problems.push(line)
+    console.log(line)
+  }
+  const errorMark = errors.length
+  for (const [width, height] of NW_CLEAR_CHIPS_SIZES) {
+    const size = `${width}x${height}`
+    if (only && only !== size) continue
+    for (const lampCase of lampCases) {
+      const tag = `${size} lamps=${lampCase.lamps}`
+      const wantTypes = new Set(lampCase.seats.map((seat) => seat.tool))
+      const { context, page } = await openMap(browser, port, width, height, 'a2', {
+        motion: true,
+        search: NW_CLEAR_CHIPS_SEARCH,
+      })
+      page.on('pageerror', (error) => errors.push(`clear-chips ${tag} ${error}`))
+      page.on('console', (msg) => {
+        if (msg.type() !== 'error') return
+        const text = msg.text()
+        if (text.includes('Encountered two children with the same key')) return
+        errors.push(`clear-chips ${tag} ${text}`)
+      })
+      await page.evaluate(() => document.fonts?.ready)
+      await plantOfficialA2Seats(page, tag, lampCase.seats)
+      await snapNwLoveChipOfficialCam(page)
+      await page.locator('.defend-go').click()
+      await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
+      await clearToBoost(page, `${tag} r5`)
+      if ((await page.locator('.defend-page.is-boost').count()) < 1) {
+        fail(`checkNwClearChipsWithLamp fail ${tag} boost=0`)
+        await context.close()
+        continue
+      }
+      await page
+        .waitForFunction(() => !document.querySelector('.defend-pad.is-clear-cheer'), undefined, { timeout: 6000 })
+        .catch(() => {})
+      await page.waitForSelector('.defend-clear-lamp', { timeout: 8000 }).catch(() => {})
+      for (let i = 0; i < 8; i += 1) {
+        await page.evaluate(() => window.dispatchEvent(new Event('resize')))
+        await page.waitForTimeout(50)
+      }
+      const sample = await sampleNwClearChipPairs(page)
+      const frames = (sample.samples || []).filter((row) => row.chips.length >= lampCase.minChips)
+      const rawSamples = (sample.samples || []).length
+      const maxChips = (sample.samples || []).reduce((n, row) => Math.max(n, row.chips?.length ?? 0), 0)
+      if (frames.length < 12) fail(`checkNwClearChipsWithLamp fail ${tag} frames=${frames.length} rawSamples=${rawSamples} maxChips=${maxChips}`)
+      let worst = { science: null }
+      const settled = frames.slice(-Math.min(frames.length, 24))
+      for (const frame of frames) {
+        if (frame.gold !== 1) fail(`checkNwClearChipsWithLamp fail ${tag} gold=${frame.gold}`)
+        for (const chip of frame.chips) {
+          if (!wantTypes.has(chip.type)) continue
+          if (chip.type === 'science' && (!worst.science || (chip.pairDist ?? 0) > (worst.science.pairDist ?? 0))) worst.science = chip
+          if (!chip.inViewport) {
+            fail(
+              `checkNwClearChipsWithLamp fail ${tag} ${chip.type} inViewport=0 box=${chip.box.left.toFixed(1)},${chip.box.top.toFixed(1)},${chip.box.right.toFixed(1)},${chip.box.bottom.toFixed(1)} viewport=${sample.viewW}x${sample.viewH}`,
+            )
+            continue
+          }
+          if (chip.clipped !== 0) fail(`checkNwClearChipsWithLamp fail ${tag} ${chip.type} clipped=${chip.clipped}`)
+          if (!(chip.font >= 13)) fail(`checkNwClearChipsWithLamp fail ${tag} ${chip.type} font=${chip.font}`)
+          if (chip.orphan) {
+            const padLine = chip.pad
+              ? ` pad=${chip.pad.left.toFixed(1)},${chip.pad.top.toFixed(1)},${chip.pad.right.toFixed(1)},${chip.pad.bottom.toFixed(1)}`
+              : ' pad=missing'
+            fail(
+              `checkNwClearChipsWithLamp fail ${tag} ${chip.type} orphan=1 pairDist=${chip.pairDist == null ? 'null' : chip.pairDist.toFixed(1)} box=${chip.box.left.toFixed(1)},${chip.box.top.toFixed(1)},${chip.box.right.toFixed(1)},${chip.box.bottom.toFixed(1)}${padLine} viewport=${sample.viewW}x${sample.viewH}`,
+            )
+          }
+        }
+      }
+      for (const frame of settled) {
+        const vsHud = frame.vsHud || 0
+        const vsSparks = frame.vsSparks || 0
+        if (vsHud > 0) fail(`checkNwClearChipsWithLamp fail ${tag} vsHUD=${vsHud.toFixed(1)}`)
+        if (vsSparks > 0) fail(`checkNwClearChipsWithLamp fail ${tag} vsSparks=${vsSparks.toFixed(1)}`)
+      }
+      const localFail = problems.some((line) => line.includes(tag))
+      if (!localFail && frames.length >= 12) {
+        const sci = worst.science
+        const dist = sci?.pairDist == null ? 'null' : sci.pairDist.toFixed(1)
+        console.log(
+          `checkNwClearChipsWithLamp ok ${size} lamps=${lampCase.lamps} frames=${frames.length} science pairDist=${dist} vsHUD=0 vsSparks=0 gold=1 viewport=${sample.viewW}x${sample.viewH}`,
+        )
+      }
+      await context.close()
+    }
+  }
+  for (const err of errors.slice(errorMark)) fail(`checkNwClearChipsWithLamp error ${err}`)
+  assert.equal(problems.length, 0, problems.join('\n'))
+}
+
 /** #967 Easy first plant must not open the upgrade card. A touch tap does, on the parent. */
 const PLANT_NO_CARD_SIZES = [
   [375, 667],
@@ -12460,6 +12742,11 @@ export async function checkPhoneFixes() {
       assert.equal(errors.join('\n'), '', 'nw love chip nights stay free of console errors')
       return
     }
+    if (process.env.NW_CLEAR_CHIPS_ONLY === '1') {
+      await checkNwClearChipsWithLamp(browser, port, errors)
+      assert.equal(errors.join('\n'), '', 'clear chip-lamp nights stay free of console errors')
+      return
+    }
     if (process.env.NW_UNLOCK_TOAST_ONLY === '1') {
       await checkNwUnlockToastBanner(browser, port, errors)
       assert.equal(errors.join('\n'), '', 'nw unlock toast banner nights stay free of console errors')
@@ -12496,6 +12783,7 @@ export async function checkPhoneFixes() {
     await checkGemSightCue(browser, port, errors)
     await checkNwSpendOnScreen(browser, port, errors)
     await checkNwLoveChip(browser, port, errors)
+    await checkNwClearChipsWithLamp(browser, port, errors)
     await checkNwUnlockToastBanner(browser, port, errors)
     if (process.env.NW_MAP_NOTE_ONLY !== '1') {
     for (const [width, height] of WIDTHS) {
@@ -12673,7 +12961,7 @@ export async function checkPhoneFixes() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_WAVE_SURVIVED_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY', 'NW_LOVE_CHIP_ONLY', 'NW_UNLOCK_TOAST_ONLY'].some((name) => process.env[name] === '1')
+  const scoped = ['NW_LEAK_ONLY', 'NW_GLYPH_ONLY', 'NW_MAP_NOTE_ONLY', 'NW_LABEL_ONLY', 'NW_COMPACT_ONLY', 'GEM_HINT_ONLY', 'NW_TABLET_BEGIN_ONLY', 'NW_OFFTOP_ONLY', 'NW_DOCK_GOLD_ONLY', 'EASY_ONE_GOLD_ONLY', 'NW_TYPE_LABEL_ONLY', 'NW_MAP05_RING_ONLY', 'NW_PLANT_IGNITE_ONLY', 'NW_ROUND_CHEER_ONLY', 'NW_WAVE_SURVIVED_ONLY', 'NW_PLANT_NO_CARD_ONLY', 'NW_LAMP_MOVE_ONLY', 'NW_CANDLE_NAME_ONLY', 'NW_PLANT_RING_ONCE_ONLY', 'GEM_SIGHT_CUE_ONLY', 'NW_SPEND_ON_SCREEN_ONLY', 'NW_LOVE_CHIP_ONLY', 'NW_CLEAR_CHIPS_ONLY', 'NW_UNLOCK_TOAST_ONLY'].some((name) => process.env[name] === '1')
   if (!scoped) {
     // 1.4.567 (#843): the City scans job runs this file, so the Lock In check rides along. A miss fails the job.
     await import('./check-lockin-843.mjs')
