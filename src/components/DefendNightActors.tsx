@@ -299,8 +299,10 @@ export function DefendNightActorsSvg({
   lampRise = {},
   spawnLog = false,
   cueNudge = false,
+  waveSurvivedHold = false,
 }: Omit<DefendNightActorsProps, 'tapPos' | 'fireBest' | 'tapJuice' | 'easy' | 'onBoostTower'> & {
   easy: boolean
+  waveSurvivedHold?: boolean
 }) {
   const spawnSeen = useRef(new Set<string>())
   const faceAim = useRef<{ id: number; point: { x: number; y: number } | null; pointerType: string } | null>(null)
@@ -1024,7 +1026,7 @@ export function DefendNightActorsSvg({
                   />
                 </g>
               ))}
-              {easyTap && tapTarget && cueAt && !tapTarget.turned ? (
+              {easyTap && tapTarget && cueAt && !tapTarget.turned && !waveSurvivedHold ? (
                 <g className="nw-walk-cue" clipPath={walkIn ? 'url(#nw-walk-clip)' : undefined}>
                 <g
                   className="walker-target-cue"

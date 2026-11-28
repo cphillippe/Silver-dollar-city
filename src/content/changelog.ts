@@ -28,12 +28,6 @@ export function playerVisibleChangeTitle(title: string): string | null {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.602',
-    title: 'Behind the scenes: Easy NW chip layout stability on wave banner',
-    when: '2026-11-28',
-    items: ['Nothing changes for players yet.', 'Refs #1012.'],
-  },
-  {
     version: '1.4.601',
     title: 'Behind the scenes: Easy NW wave banner rail overlap guard',
     when: '2026-11-26',

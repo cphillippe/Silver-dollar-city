@@ -4847,6 +4847,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                   shake={shake}
                   won={won}
                   phase={phase}
+                  waveSurvivedHold={easy && survivedRound != null}
                   fireBest={fireBest}
                   fireAtRaider={fireAtRaider}
                   easyTap={easyTap}

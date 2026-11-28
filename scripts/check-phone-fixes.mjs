@@ -10798,7 +10798,6 @@ async function sampleNwWaveBannerRailClear(page) {
     }
     const samples = []
     const loopStart = performance.now()
-    let bannerStack = null
     let maxCueOnBanner = 0
     while (performance.now() - loopStart < 2600) {
       const banner = document.querySelector('.nw-wave-survived')
@@ -10813,25 +10812,10 @@ async function sampleNwWaveBannerRailClear(page) {
       const lamps = newLampUnion()
       const toastNewLamp = lamps ? area(toastBox, lamps) : 0
       const toastDeep = innerHeight >= 720 && innerHeight <= 789 ? toastBox.top : 0
-      if (!bannerStack) {
-        const cx = (textBox.left + textBox.right) / 2
-        const cy = (textBox.top + textBox.bottom) / 2
-        bannerStack = document
-          .elementsFromPoint(cx, cy)
-          .slice(0, 10)
-          .map((el) => {
-            const box = el.getBoundingClientRect()
-            const cls =
-              el instanceof SVGElement && el.className?.baseVal != null
-                ? el.className.baseVal
-                : String(el.className || '')
-            return { tag: el.tagName.toLowerCase(), class: cls.slice(0, 120), box: round(box.top) }
-          })
-        for (const el of document.querySelectorAll('.walker-target-cue, .walker-target-cue *')) {
-          if (!shown(el)) continue
-          const box = boxOf(el)
-          maxCueOnBanner = Math.max(maxCueOnBanner, area(textBox, box))
-        }
+      for (const el of document.querySelectorAll('.walker-target-cue, .walker-target-cue *')) {
+        if (!shown(el)) continue
+        const box = boxOf(el)
+        maxCueOnBanner = Math.max(maxCueOnBanner, area(textBox, box))
       }
       samples.push({
         ov: { rail: chip.railMax, chip: chip.max, toastNewLamp, toastDeep },
@@ -10846,7 +10830,7 @@ async function sampleNwWaveBannerRailClear(page) {
       if (!banner || !shown(banner)) break
       await new Promise((resolve) => requestAnimationFrame(resolve))
     }
-    for (let frame = 0; frame < 45; frame++) {
+    for (let frame = 0; frame < 90; frame++) {
       await new Promise((resolve) => requestAnimationFrame(resolve))
     }
     const trackIds = new Set()
@@ -10880,7 +10864,6 @@ async function sampleNwWaveBannerRailClear(page) {
       samples,
       missing: !samples.length ? 'frames' : null,
       chipJitter: { max: round(maxChipJitter), science: round(scienceJitter) },
-      bannerStack,
       maxCueOnBanner: round(maxCueOnBanner),
     }
   })
@@ -10983,6 +10966,10 @@ async function checkNwWaveBannerRailClear(browser, port, errors) {
         fail(`checkNwWaveBannerRailClear fail r${round} ${size} gold=${frames.find((row) => row.gold !== 1)?.gold}`)
       }
       const jitter = sample.chipJitter || { max: 0, science: 0 }
+      const cueVsBanner = sample.maxCueOnBanner ?? 0
+      if (cueVsBanner > 0) {
+        fail(`checkNwWaveBannerRailClear fail r${round} ${size} cueVsBanner=${cueVsBanner.toFixed(1)}`)
+      }
       if (jitter.max > 4) {
         fail(
           `checkNwWaveBannerRailClear fail r${round} ${size} chipJitter=${jitter.max.toFixed(1)} science=${jitter.science.toFixed(1)}`,
@@ -10992,17 +10979,7 @@ async function checkNwWaveBannerRailClear(browser, port, errors) {
       if (!localFail) {
         const vsChip = maxChipsOn > 0 ? maxOv.chip.toFixed(1) : '0.0'
         console.log(
-          `checkNwWaveBannerRailClear ok r${round} ${size} vsRail=${maxOv.rail.toFixed(1)} vsChip=${vsChip} toastVsNewLamp=${maxOv.toastNewLamp.toFixed(1)} chipsOn=${maxChipsOn} chipJitter=${jitter.max.toFixed(1)} scienceJitter=${jitter.science.toFixed(1)} gold=1`,
-        )
-      }
-      if (
-        !localFail &&
-        round === 24 &&
-        (size === '412x915' || size === '375x812') &&
-        sample.bannerStack
-      ) {
-        console.log(
-          `checkNwWaveBannerRailClear bannerStack r${round} ${size} cueOnBanner=${sample.maxCueOnBanner} ${JSON.stringify(sample.bannerStack)}`,
+          `checkNwWaveBannerRailClear ok r${round} ${size} vsRail=${maxOv.rail.toFixed(1)} vsChip=${vsChip} toastVsNewLamp=${maxOv.toastNewLamp.toFixed(1)} chipsOn=${maxChipsOn} chipJitter=${jitter.max.toFixed(1)} scienceJitter=${jitter.science.toFixed(1)} cueVsBanner=${cueVsBanner.toFixed(1)} gold=1`,
         )
       }
       if (
