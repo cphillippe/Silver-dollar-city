@@ -11487,22 +11487,43 @@ const NW_CLEAR_CHIP_OFFICIAL = [
 ]
 /** Tens-of-px band from #1009 / #995; #1001 orphans hit hundreds. */
 const NW_CLEAR_CHIP_PAIR_MAX = 120
+const NW_CLEAR_CHIP_CASES = [
+  { lamps: 'five', seats: NW_CLEAR_CHIP_OFFICIAL, minChips: 4 },
+  {
+    lamps: 'four',
+    seats: NW_CLEAR_CHIP_OFFICIAL.filter((seat) => seat.tool !== 'candle'),
+    minChips: 3,
+  },
+  {
+    lamps: 'three',
+    seats: NW_CLEAR_CHIP_OFFICIAL.filter((seat) => ['love', 'logic', 'science'].includes(seat.tool)),
+    minChips: 3,
+  },
+]
 
-async function plantOfficialA2Five(page, label) {
+async function plantOfficialA2Seats(page, label, seats) {
   const rings = await page.evaluate(() =>
-  [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({
+    [...document.querySelectorAll('.defend-plant-ground circle.is-live')].map((ring) => ({
       cx: Number(ring.getAttribute('cx')),
       cy: Number(ring.getAttribute('cy')),
     })),
   )
-  for (const seat of NW_CLEAR_CHIP_OFFICIAL) {
+  for (const seat of seats) {
     assert.ok(
       rings.some((ring) => ring.cx === seat.cx && ring.cy === seat.cy),
       `${label} seat ${seat.tool}@${seat.cx},${seat.cy} is live ${JSON.stringify(rings)}`,
     )
     await glyphPlantAt(page, seat.tool, seat, label)
   }
-  assert.equal(await page.locator('.defend-pad').count(), 5, `${label} five official lamps are planted`)
+  assert.equal(
+    await page.locator('.defend-pad').count(),
+    seats.length,
+    `${label} ${seats.length} official lamps are planted`,
+  )
+}
+
+async function plantOfficialA2Five(page, label) {
+  await plantOfficialA2Seats(page, label, NW_CLEAR_CHIP_OFFICIAL)
 }
 
 async function sampleNwClearChipPairs(page) {
@@ -11628,6 +11649,11 @@ async function sampleNwClearChipPairs(page) {
 
 async function checkNwClearChipsWithLamp(browser, port, errors) {
   const only = process.env.NW_CLEAR_CHIPS_SIZE
+  const onlyLamps = process.env.NW_CLEAR_CHIPS_LAMPS
+  const lampCases = onlyLamps
+    ? NW_CLEAR_CHIP_CASES.filter((row) => row.lamps === onlyLamps)
+    : NW_CLEAR_CHIP_CASES.filter((row) => row.lamps === 'five' || row.lamps === 'four')
+  assert.ok(lampCases.length > 0, 'NW_CLEAR_CHIPS_LAMPS must be five, four, or three')
   const problems = []
   const seen = new Set()
   const fail = (line) => {
@@ -11640,76 +11666,79 @@ async function checkNwClearChipsWithLamp(browser, port, errors) {
   for (const [width, height] of NW_CLEAR_CHIPS_SIZES) {
     const size = `${width}x${height}`
     if (only && only !== size) continue
-    const { context, page } = await openMap(browser, port, width, height, 'a2', {
-      motion: true,
-      search: NW_CLEAR_CHIPS_SEARCH,
-    })
-    page.on('pageerror', (error) => errors.push(`clear-chips ${size} ${error}`))
-    page.on('console', (msg) => {
-      if (msg.type() !== 'error') return
-      const text = msg.text()
-      if (text.includes('Encountered two children with the same key')) return
-      errors.push(`clear-chips ${size} ${text}`)
-    })
-    await page.evaluate(() => document.fonts?.ready)
-    await plantOfficialA2Five(page, size)
-    await snapNwLoveChipOfficialCam(page)
-    await page.locator('.defend-go').click()
-    await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
-    await clearToBoost(page, `${size} r5`)
-    if ((await page.locator('.defend-page.is-boost').count()) < 1) {
-      fail(`checkNwClearChipsWithLamp fail ${size} boost=0`)
-      await context.close()
-      continue
-    }
-    await page
-      .waitForFunction(() => !document.querySelector('.defend-pad.is-clear-cheer'), undefined, { timeout: 6000 })
-      .catch(() => {})
-    await page.waitForTimeout(350)
-    const sample = await sampleNwClearChipPairs(page)
-    const frames = (sample.samples || []).filter((row) => row.chips.length >= 4)
-    if (frames.length < 12) fail(`checkNwClearChipsWithLamp fail ${size} frames=${frames.length}`)
-    const wantTypes = new Set(['love', 'logic', 'reason', 'science', 'candle'])
-    let worst = { science: null }
-    const settled = frames.slice(-Math.min(frames.length, 24))
-    for (const frame of frames) {
-      if (frame.gold !== 1) fail(`checkNwClearChipsWithLamp fail ${size} gold=${frame.gold}`)
-      for (const chip of frame.chips) {
-        if (!wantTypes.has(chip.type)) continue
-        if (chip.type === 'science' && (!worst.science || (chip.pairDist ?? 0) > (worst.science.pairDist ?? 0))) worst.science = chip
-        if (!chip.inViewport) {
-          fail(
-            `checkNwClearChipsWithLamp fail ${size} ${chip.type} inViewport=0 box=${chip.box.left.toFixed(1)},${chip.box.top.toFixed(1)},${chip.box.right.toFixed(1)},${chip.box.bottom.toFixed(1)} viewport=${sample.viewW}x${sample.viewH}`,
-          )
-          continue
-        }
-        if (chip.clipped !== 0) fail(`checkNwClearChipsWithLamp fail ${size} ${chip.type} clipped=${chip.clipped}`)
-        if (!(chip.font >= 13)) fail(`checkNwClearChipsWithLamp fail ${size} ${chip.type} font=${chip.font}`)
-        if (chip.orphan) {
-          const padLine = chip.pad
-            ? ` pad=${chip.pad.left.toFixed(1)},${chip.pad.top.toFixed(1)},${chip.pad.right.toFixed(1)},${chip.pad.bottom.toFixed(1)}`
-            : ' pad=missing'
-          fail(
-            `checkNwClearChipsWithLamp fail ${size} ${chip.type} orphan=1 pairDist=${chip.pairDist == null ? 'null' : chip.pairDist.toFixed(1)} box=${chip.box.left.toFixed(1)},${chip.box.top.toFixed(1)},${chip.box.right.toFixed(1)},${chip.box.bottom.toFixed(1)}${padLine} viewport=${sample.viewW}x${sample.viewH}`,
-          )
+    for (const lampCase of lampCases) {
+      const tag = `${size} lamps=${lampCase.lamps}`
+      const wantTypes = new Set(lampCase.seats.map((seat) => seat.tool))
+      const { context, page } = await openMap(browser, port, width, height, 'a2', {
+        motion: true,
+        search: NW_CLEAR_CHIPS_SEARCH,
+      })
+      page.on('pageerror', (error) => errors.push(`clear-chips ${tag} ${error}`))
+      page.on('console', (msg) => {
+        if (msg.type() !== 'error') return
+        const text = msg.text()
+        if (text.includes('Encountered two children with the same key')) return
+        errors.push(`clear-chips ${tag} ${text}`)
+      })
+      await page.evaluate(() => document.fonts?.ready)
+      await plantOfficialA2Seats(page, tag, lampCase.seats)
+      await snapNwLoveChipOfficialCam(page)
+      await page.locator('.defend-go').click()
+      await page.locator('.defend-page.is-easy-tap').waitFor({ timeout: 120_000 })
+      await clearToBoost(page, `${tag} r5`)
+      if ((await page.locator('.defend-page.is-boost').count()) < 1) {
+        fail(`checkNwClearChipsWithLamp fail ${tag} boost=0`)
+        await context.close()
+        continue
+      }
+      await page
+        .waitForFunction(() => !document.querySelector('.defend-pad.is-clear-cheer'), undefined, { timeout: 6000 })
+        .catch(() => {})
+      await page.waitForTimeout(350)
+      const sample = await sampleNwClearChipPairs(page)
+      const frames = (sample.samples || []).filter((row) => row.chips.length >= lampCase.minChips)
+      if (frames.length < 12) fail(`checkNwClearChipsWithLamp fail ${tag} frames=${frames.length}`)
+      let worst = { science: null }
+      const settled = frames.slice(-Math.min(frames.length, 24))
+      for (const frame of frames) {
+        if (frame.gold !== 1) fail(`checkNwClearChipsWithLamp fail ${tag} gold=${frame.gold}`)
+        for (const chip of frame.chips) {
+          if (!wantTypes.has(chip.type)) continue
+          if (chip.type === 'science' && (!worst.science || (chip.pairDist ?? 0) > (worst.science.pairDist ?? 0))) worst.science = chip
+          if (!chip.inViewport) {
+            fail(
+              `checkNwClearChipsWithLamp fail ${tag} ${chip.type} inViewport=0 box=${chip.box.left.toFixed(1)},${chip.box.top.toFixed(1)},${chip.box.right.toFixed(1)},${chip.box.bottom.toFixed(1)} viewport=${sample.viewW}x${sample.viewH}`,
+            )
+            continue
+          }
+          if (chip.clipped !== 0) fail(`checkNwClearChipsWithLamp fail ${tag} ${chip.type} clipped=${chip.clipped}`)
+          if (!(chip.font >= 13)) fail(`checkNwClearChipsWithLamp fail ${tag} ${chip.type} font=${chip.font}`)
+          if (chip.orphan) {
+            const padLine = chip.pad
+              ? ` pad=${chip.pad.left.toFixed(1)},${chip.pad.top.toFixed(1)},${chip.pad.right.toFixed(1)},${chip.pad.bottom.toFixed(1)}`
+              : ' pad=missing'
+            fail(
+              `checkNwClearChipsWithLamp fail ${tag} ${chip.type} orphan=1 pairDist=${chip.pairDist == null ? 'null' : chip.pairDist.toFixed(1)} box=${chip.box.left.toFixed(1)},${chip.box.top.toFixed(1)},${chip.box.right.toFixed(1)},${chip.box.bottom.toFixed(1)}${padLine} viewport=${sample.viewW}x${sample.viewH}`,
+            )
+          }
         }
       }
+      for (const frame of settled) {
+        const vsHud = frame.vsHud || 0
+        const vsSparks = frame.vsSparks || 0
+        if (vsHud > 0) fail(`checkNwClearChipsWithLamp fail ${tag} vsHUD=${vsHud.toFixed(1)}`)
+        if (vsSparks > 0) fail(`checkNwClearChipsWithLamp fail ${tag} vsSparks=${vsSparks.toFixed(1)}`)
+      }
+      const localFail = problems.some((line) => line.includes(tag))
+      if (!localFail && frames.length >= 12) {
+        const sci = worst.science
+        const dist = sci?.pairDist == null ? 'null' : sci.pairDist.toFixed(1)
+        console.log(
+          `checkNwClearChipsWithLamp ok ${size} lamps=${lampCase.lamps} frames=${frames.length} science pairDist=${dist} vsHUD=0 vsSparks=0 gold=1 viewport=${sample.viewW}x${sample.viewH}`,
+        )
+      }
+      await context.close()
     }
-    for (const frame of settled) {
-      const vsHud = frame.vsHud || 0
-      const vsSparks = frame.vsSparks || 0
-      if (vsHud > 0) fail(`checkNwClearChipsWithLamp fail ${size} vsHUD=${vsHud.toFixed(1)}`)
-      if (vsSparks > 0) fail(`checkNwClearChipsWithLamp fail ${size} vsSparks=${vsSparks.toFixed(1)}`)
-    }
-    const localFail = problems.some((line) => line.includes(` ${size} `))
-    if (!localFail && frames.length >= 12) {
-      const sci = worst.science
-      const dist = sci?.pairDist == null ? 'null' : sci.pairDist.toFixed(1)
-      console.log(
-        `checkNwClearChipsWithLamp ok ${size} frames=${frames.length} science pairDist=${dist} vsHUD=0 vsSparks=0 gold=1 viewport=${sample.viewW}x${sample.viewH}`,
-      )
-    }
-    await context.close()
   }
   for (const err of errors.slice(errorMark)) fail(`checkNwClearChipsWithLamp error ${err}`)
   assert.equal(problems.length, 0, problems.join('\n'))

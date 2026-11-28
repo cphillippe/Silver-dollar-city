@@ -2084,11 +2084,22 @@ assert.doesNotMatch(
     '1.4.600 #1009 clear boost always takes the layout pass',
   )
   assert.match(board1009, /hideTypeLabelsOnChrome\(board, boosting\)/, '1.4.600 clear chips relayout on boost')
+  assert.match(board1009, /function chipNeedsClearHoldLayout/, '1.4.600 clear-hold layout gated on off-play or orphan')
+  assert.match(board1009, /const layoutBoost/, '1.4.600 clear hold keyed off orphan scan not lamp count')
+  assert.match(board1009, /data-boost-clear-hold/, '1.4.600 boost clear-hold latches for four-lamp clears')
+  assert.match(board1009, /CLEAR_HOLD_CHIP_PAIR_MAX = 120/, '1.4.600 clear-hold pair max matches harness')
+  assert.doesNotMatch(board1009, /plantedPads >= 5/, '1.4.600 clear chips do not gate on lamp count')
+  assert.match(phone600, /lamps=\$\{lampCase\.lamps\}/, '1.4.600 clear-chip ok line logs lamp count case')
+  assert.match(phone600, /NW_CLEAR_CHIP_CASES/, '1.4.600 clear-chip three and four lamp cases are defined')
   assert.match(phone600, /if \(process\.env\.NW_CLEAR_CHIPS_ONLY === '1'\)/, '1.4.600 clear-chip ONLY guard is present')
   assert.match(phone600, /async function checkNwClearChipsWithLamp/, '1.4.600 checkNwClearChipsWithLamp is defined')
   assert.match(phone600, /NW_CLEAR_CHIPS_ONLY/, '1.4.600 clear-chip scan has a scoped-only guard')
   assert.match(phone600, /checkNwClearChipsWithLamp fail \$\{size\} \$\{chip\.type\} orphan=1/, '1.4.600 #1001 no-orphan fail line')
-  assert.match(phone600, /checkNwClearChipsWithLamp ok \$\{size\} frames=.*science pairDist=.*gold=1/, '1.4.600 clear-chip ok line logs pair distance')
+  assert.match(
+    phone600,
+    /checkNwClearChipsWithLamp ok \$\{size\} lamps=.*science pairDist=.*gold=1/,
+    '1.4.600 clear-chip ok line logs pair distance',
+  )
   assert.match(phone600, /both\.length < 20/, '1.4.600 unlock toast holds at least 20 sampled frames')
   const unlockSample = phone600.slice(
     phone600.indexOf('async function sampleUnlockToastOverlap'),

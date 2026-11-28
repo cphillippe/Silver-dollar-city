@@ -33,7 +33,7 @@ export const CHANGELOG: ChangeNote[] = [
     when: '2026-11-24',
     items: [
       'On Easy, the New map unlocked toast drops below the Wave survived banner when both show on a clear.',
-      'Nothing changes for players yet: Night Watch r5 clear keeps each type chip beside its planted lamp.',
+      'Nothing changes for players yet: on Easy, boost clear-hold layout runs when a chip is off the playfield or orphaned from its lamp, not from planted-lamp count alone (four-plus clears and latched hold).',
       'Hard stays the same.',
       'Refs #998.',
       'Refs #1009.',
