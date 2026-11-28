@@ -46,6 +46,14 @@ export type DefendNightBoardProps = Omit<DefendNightSkyProps, 'children'> &
     onOpenLessons?: () => void
     /** Easy phone: overlays share the fill camera with the board. */
     plateFill?: boolean
+    /** Easy: Wave survived! is on screen — hold the lead-walker tap cue off the banner. */
+    waveSurvivedHold?: boolean
+    /** Playtest-only: undo the walker-cue hold gate (rail mutation harness). */
+    waveBannerCueHoldMut?: boolean
+    /** Playtest-only: undo the shot-juice hold gate (rail mutation harness). */
+    waveBannerShotHoldMut?: boolean
+    /** Playtest: last in-wave plate point for the rail cue probe (position only, no extra ring). */
+    bannerCueProbePlate?: { x: number; y: number } | null
     /** Easy phone camera (#818). Plate px are `s0`, the world is zoomed by `z` and panned by `tx, ty`. */
     cam?: { s0: number; z: number; tx: number; ty: number }
   }
@@ -246,6 +254,13 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
   ]
   const chrome = chromeEls.filter(chromeBoxShown).map((el) => el.getBoundingClientRect())
   if (topbarLive && !topbarMeasured) chrome.push(topbarLive)
+  for (const el of page.querySelectorAll('.nw-wave-survived, .nw-map-toast')) {
+    if (!(el instanceof HTMLElement)) continue
+    const style = getComputedStyle(el)
+    if (style.display === 'none' || style.visibility === 'hidden') continue
+    const box = el.getBoundingClientRect()
+    if (box.width > 1 && box.height > 1) chrome.push(box)
+  }
   for (const label of page.querySelectorAll('text.defend-type-label')) {
     if (!(label instanceof SVGTextElement)) continue
     const style = getComputedStyle(label)
@@ -281,8 +296,6 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
       else chip.setAttribute('data-chrome-hide', 'yes')
       continue
     }
-    chip.style.transform = ''
-    chip.removeAttribute('data-chrome-hide')
     const otherChips = chipNodes
       .filter((node) => node !== chip && chromeBoxShown(node))
       .map((node) => node.getBoundingClientRect())
@@ -295,7 +308,8 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
     const headerBottom = topbarBox?.bottom ?? 0
     const topbarBlocks = topbarBox ? [topbarBox] : []
     const headerFloorEarly = headerBottom + 4
-    const blocks = [...chrome, ...glyphBoxes, ...otherChips, ...cardBlocks, ...navBlocks, ...topbarBlocks]
+    const layoutBlocks = [...chrome, ...glyphBoxes, ...otherChips, ...cardBlocks, ...navBlocks, ...topbarBlocks]
+    const blocks = [...layoutBlocks]
     const win = page.ownerDocument?.defaultView
     if (win) {
       const pad = 4
@@ -311,6 +325,25 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
         )
       }
     }
+    const chipBoxNow = chip.getBoundingClientRect()
+    const hitsObstacle =
+      chipBoxNow.width > 1 &&
+      chipBoxNow.height > 1 &&
+      layoutBlocks.some((other) => boxesHit(chipBoxNow, other))
+    const minChipTop = Math.max(headerBottom, 4)
+    const viewH = win?.innerHeight ?? 0
+    const chipInView =
+      viewH <= 0 ||
+      (chipBoxNow.top >= minChipTop - 0.5 &&
+        chipBoxNow.bottom <= viewH + 0.5 &&
+        chipBoxNow.right > 0 &&
+        chipBoxNow.left < (win?.innerWidth ?? 0))
+    if (!hitsObstacle && chipInView) {
+      chip.removeAttribute('data-chrome-hide')
+      continue
+    }
+    chip.style.transform = ''
+    chip.removeAttribute('data-chrome-hide')
     const hudEl = page.querySelector('.nw-hud')
     const hudRaw = hudEl?.getBoundingClientRect()
     const hudBox =
@@ -319,7 +352,6 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
         : hudEl && chromeBoxShown(hudEl)
           ? hudEl.getBoundingClientRect()
           : null
-    const viewH = win?.innerHeight ?? 0
     const flipAbove = !(narrowGate && topbarLive)
     const plotAttr = chip.getAttribute('data-chip-plot') || ''
     if (narrowGate && plotAttr.includes(':600:88') && topbarLive) {
@@ -406,6 +438,10 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     onUpgradePath, onArmPathBuy, onBuyBright, showBright = false, runPaths, roundIndex = -1, armorFrom = 7,
     heldLessons, playtestSteps = false, onOpenLessons, spawnLog = false,
     plateFill = false, onPlacePointer, cueNudge = false,
+    waveSurvivedHold = false,
+    waveBannerCueHoldMut = false,
+    waveBannerShotHoldMut = false,
+    bannerCueProbePlate = null,
     map, roadD, porchCandy, roadLabel, mapFeatures, pops, mapId, walkIn, cam,
   } = props
   const walkerAim = useRef<{ id: number; point: { x: number; y: number } | null; pointerType: string } | null>(null)
@@ -525,6 +561,32 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     const pan = board.closest('.nw-pan')
     const watch = new MutationObserver(hide)
     if (pan) watch.observe(pan, { attributes: true, attributeFilter: ['style'] })
+    const pageEl = board.closest('.defend-page')
+    const stackChromeSel = '.nw-wave-survived, .nw-map-toast'
+    const touchesStackChrome = (node: Node) => {
+      if (!(node instanceof Element)) return false
+      if (node.matches(stackChromeSel)) return true
+      return Boolean(node.querySelector(stackChromeSel))
+    }
+    const stackWatch = new MutationObserver((records) => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (touchesStackChrome(node)) {
+            hide()
+            return
+          }
+        }
+        for (const node of record.removedNodes) {
+          if (touchesStackChrome(node)) {
+            hide()
+            return
+          }
+        }
+      }
+    })
+    if (pageEl instanceof HTMLElement) {
+      stackWatch.observe(pageEl, { childList: true, subtree: true })
+    }
     const frame = board.closest('.defend-frame')
     const resize = new ResizeObserver(hide)
     if (frame instanceof HTMLElement) resize.observe(frame)
@@ -536,6 +598,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     return () => {
       dropFont = true
       watch.disconnect()
+      stackWatch.disconnect()
       resize.disconnect()
       window.removeEventListener('resize', hide)
     }
@@ -674,6 +737,10 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           lampRise={lampRise}
           spawnLog={spawnLog}
           cueNudge={cueNudge}
+          waveSurvivedHold={waveSurvivedHold}
+          waveBannerCueHoldMut={waveBannerCueHoldMut}
+          waveBannerShotHoldMut={waveBannerShotHoldMut}
+          bannerCueProbePlate={bannerCueProbePlate}
         />
       </DefendNightSky>
       {cam ? cardPortal(towerCard) : towerCard}

@@ -299,8 +299,16 @@ export function DefendNightActorsSvg({
   lampRise = {},
   spawnLog = false,
   cueNudge = false,
+  waveSurvivedHold = false,
+  waveBannerCueHoldMut = false,
+  waveBannerShotHoldMut = false,
+  bannerCueProbePlate = null,
 }: Omit<DefendNightActorsProps, 'tapPos' | 'fireBest' | 'tapJuice' | 'easy' | 'onBoostTower'> & {
   easy: boolean
+  waveSurvivedHold?: boolean
+  waveBannerCueHoldMut?: boolean
+  waveBannerShotHoldMut?: boolean
+  bannerCueProbePlate?: { x: number; y: number } | null
 }) {
   const spawnSeen = useRef(new Set<string>())
   const faceAim = useRef<{ id: number; point: { x: number; y: number } | null; pointerType: string } | null>(null)
@@ -374,6 +382,9 @@ export function DefendNightActorsSvg({
   const rowHead = new Map(candleRowHeads(candlePlants).map((head) => [head.id, head.mark]))
   const drawAt = (raider: Raider) => (walkIn ? walkIn.drawAt(raider) : raiderAt(raider))
   const cueAt = tapTarget ? drawAt(tapTarget) : null
+  void bannerCueProbePlate
+  const walkCueHold = waveSurvivedHold && !waveBannerCueHoldMut
+  const shotFxHold = waveSurvivedHold && !waveBannerShotHoldMut
   const walkers = raiders.map((raider) => {
     const held = walkIn ? walkIn.held(raider) : false
     const entering = walkIn ? walkIn.entering(raider) : false
@@ -1006,25 +1017,27 @@ export function DefendNightActorsSvg({
               ) : (
                 walkers
               )}
-              {shots.map((shot) => (
-                <g className="defend-shot" key={shot.key}>
-                  <line
-                    className="defend-beam-halo"
-                    x1={shot.from.x}
-                    y1={shot.from.y}
-                    x2={shot.to.x}
-                    y2={shot.to.y}
-                  />
-                  <line
-                    className="defend-beam"
-                    x1={shot.from.x}
-                    y1={shot.from.y}
-                    x2={shot.to.x}
-                    y2={shot.to.y}
-                  />
-                </g>
-              ))}
-              {easyTap && tapTarget && cueAt && !tapTarget.turned ? (
+              {!shotFxHold
+                ? shots.map((shot) => (
+                    <g className="defend-shot" key={shot.key}>
+                      <line
+                        className="defend-beam-halo"
+                        x1={shot.from.x}
+                        y1={shot.from.y}
+                        x2={shot.to.x}
+                        y2={shot.to.y}
+                      />
+                      <line
+                        className="defend-beam"
+                        x1={shot.from.x}
+                        y1={shot.from.y}
+                        x2={shot.to.x}
+                        y2={shot.to.y}
+                      />
+                    </g>
+                  ))
+                : null}
+              {easyTap && tapTarget && cueAt && !tapTarget.turned && !walkCueHold ? (
                 <g className="nw-walk-cue" clipPath={walkIn ? 'url(#nw-walk-clip)' : undefined}>
                 <g
                   className="walker-target-cue"
@@ -1102,17 +1115,19 @@ export function DefendNightActorsSvg({
                   ) : null}
                 </g>
               ))}
-              <g className="defend-shot-flashes" pointerEvents="none">
-                {shots.map((shot) => (
-                  <circle
-                    key={`flash-${shot.key}`}
-                    className="defend-face-flash"
-                    cx={shot.to.x}
-                    cy={shot.to.y}
-                    r={PATH_WALKER_FACE_U * 0.42}
-                  />
-                ))}
-              </g>
+              {!shotFxHold ? (
+                <g className="defend-shot-flashes" pointerEvents="none">
+                  {shots.map((shot) => (
+                    <circle
+                      key={`flash-${shot.key}`}
+                      className="defend-face-flash"
+                      cx={shot.to.x}
+                      cy={shot.to.y}
+                      r={PATH_WALKER_FACE_U * 0.42}
+                    />
+                  ))}
+                </g>
+              ) : null}
 
     </>
   )
