@@ -324,7 +324,15 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
       chipBoxNow.width > 1 &&
       chipBoxNow.height > 1 &&
       layoutBlocks.some((other) => boxesHit(chipBoxNow, other))
-    if (!hitsObstacle) {
+    const minChipTop = Math.max(headerBottom, 4)
+    const viewH = win?.innerHeight ?? 0
+    const chipInView =
+      viewH <= 0 ||
+      (chipBoxNow.top >= minChipTop - 0.5 &&
+        chipBoxNow.bottom <= viewH + 0.5 &&
+        chipBoxNow.right > 0 &&
+        chipBoxNow.left < (win?.innerWidth ?? 0))
+    if (!hitsObstacle && chipInView) {
       chip.removeAttribute('data-chrome-hide')
       continue
     }
@@ -338,7 +346,6 @@ function hideTypeLabelsOnChrome(board: SVGSVGElement) {
         : hudEl && chromeBoxShown(hudEl)
           ? hudEl.getBoundingClientRect()
           : null
-    const viewH = win?.innerHeight ?? 0
     const flipAbove = !(narrowGate && topbarLive)
     const plotAttr = chip.getAttribute('data-chip-plot') || ''
     if (narrowGate && plotAttr.includes(':600:88') && topbarLive) {
