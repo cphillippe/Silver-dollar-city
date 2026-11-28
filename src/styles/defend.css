@@ -5890,7 +5890,8 @@ body:has(.defend-page.is-easy-watch .nw-wave-survived):has(.defend-page.is-easy-
   }
 
   .defend-page.is-easy-watch:has(.nw-wave-survived):has(.nw-map-toast) .nw-map-toast {
-    top: 202px;
+    /* Stay below map-planted lamps after 601 centered banner (was 202px; toastVsLamp on 375×667). */
+    top: 318px;
   }
 }
 

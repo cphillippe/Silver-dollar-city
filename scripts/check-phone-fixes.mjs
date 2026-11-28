@@ -10256,6 +10256,16 @@ async function sampleUnlockToastOverlap(page, bannerClipMut = false) {
       }
       return { left, top, right, bottom }
     }
+    const plantedLampOverlap = (refBox) => {
+      let max = 0
+      for (const pad of document.querySelectorAll('g.defend-pad.is-planted')) {
+        for (const el of pad.querySelectorAll('.defend-type-ring, image.defend-tower-lamp, .defend-lamp-sprite image')) {
+          if (!shown(el)) continue
+          max = Math.max(max, area(refBox, boxOf(el)))
+        }
+      }
+      return max
+    }
     const chipOverlap = (refBox) => {
       let max = 0
       let chipsOn = 0
@@ -10441,6 +10451,7 @@ async function sampleUnlockToastOverlap(page, bannerClipMut = false) {
       ov.toastCount = shown(count) ? area(toastBox, boxOf(count)) : 0
       const toastChip = chipOverlap(toastBox)
       ov.toastChip = toastChip.chipsOn > 0 ? toastChip.max : null
+      ov.toastLamp = plantedLampOverlap(toastBox)
       const taps = tapAudit(bannerBox, toastBox)
       let fontMin = Infinity
       let clipped = 0
@@ -10592,6 +10603,7 @@ async function checkNwUnlockToastBanner(browser, port, errors) {
         toastLabel: 0,
         toastCount: 0,
         toastChip: 0,
+        toastLamp: 0,
       }
       let worst = both[0]
       let maxChipsOn = 0
@@ -10621,6 +10633,9 @@ async function checkNwUnlockToastBanner(browser, port, errors) {
       if (maxOv.toastCount > 0) fail(`checkNwUnlockToastBanner fail r${round} ${size} toastVsCount=${maxOv.toastCount.toFixed(1)}`)
       if (maxChipsOn > 0 && maxOv.toastChip > 0) {
         fail(`checkNwUnlockToastBanner fail r${round} ${size} toastVsChip=${maxOv.toastChip.toFixed(1)} chipsOn=${maxChipsOn}`)
+      }
+      if (height <= 667 && width <= 375 && maxOv.toastLamp > 0) {
+        fail(`checkNwUnlockToastBanner fail r${round} ${size} toastVsLamp=${maxOv.toastLamp.toFixed(1)}`)
       }
       if (both.some((row) => (row.tapSmall || 0) > 0)) {
         fail(`checkNwUnlockToastBanner fail r${round} ${size} tapMin`)
@@ -10653,7 +10668,7 @@ async function checkNwUnlockToastBanner(browser, port, errors) {
         const toastVsChip = maxChipsOn > 0 ? maxOv.toastChip.toFixed(1) : '0.0'
         const tapsLog = maxTaps > 0 ? String(maxTaps) : '0'
         console.log(
-          `checkNwUnlockToastBanner ok r${round} ${size} banner=${b.left},${b.top},${b.w},${b.h} toast=${t.left},${t.top},${t.w},${t.h} overlap=${maxToast.toFixed(1)} vsLabel=${maxOv.label.toFixed(1)} vsCount=${maxOv.count.toFixed(1)} vsChip=${vsChip} toastVsLabel=${maxOv.toastLabel.toFixed(1)} toastVsCount=${maxOv.toastCount.toFixed(1)} toastVsChip=${toastVsChip} chipsOn=${maxChipsOn} taps=${tapsLog} gold=1`,
+          `checkNwUnlockToastBanner ok r${round} ${size} banner=${b.left},${b.top},${b.w},${b.h} toast=${t.left},${t.top},${t.w},${t.h} overlap=${maxToast.toFixed(1)} vsLabel=${maxOv.label.toFixed(1)} vsCount=${maxOv.count.toFixed(1)} vsChip=${vsChip} toastVsLabel=${maxOv.toastLabel.toFixed(1)} toastVsCount=${maxOv.toastCount.toFixed(1)} toastVsChip=${toastVsChip} toastVsLamp=${maxOv.toastLamp.toFixed(1)} chipsOn=${maxChipsOn} taps=${tapsLog} gold=1`,
         )
       }
       await context.close()
@@ -10949,7 +10964,20 @@ async function checkNwWaveBannerRailClear(browser, port, errors) {
 
   const tapUntilBoost = async (page) => {
     const started = Date.now()
+    let maxInWaveFlash = 0
     while (Date.now() - started < 90_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
+      if (process.env.NW_IN_WAVE_FLASH_LOG === '1') {
+        const n = await page.evaluate(() => {
+          const shown = (el) => {
+            const style = getComputedStyle(el)
+            if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+            const box = el.getBoundingClientRect()
+            return box.width > 0.25 && box.height > 0.25
+          }
+          return [...document.querySelectorAll('.defend-face-flash')].filter(shown).length
+        })
+        maxInWaveFlash = Math.max(maxInWaveFlash, n)
+      }
       const cue = await page.evaluate(() => {
         const face = document.querySelector('.defend-raider.is-easy-cue')
         if (!face) return null
@@ -10965,6 +10993,9 @@ async function checkNwWaveBannerRailClear(browser, port, errors) {
       })
       if (cue) await page.mouse.click(cue.x, cue.y)
       await page.waitForTimeout(80)
+    }
+    if (process.env.NW_IN_WAVE_FLASH_LOG === '1') {
+      console.log(`NW_IN_WAVE_FLASH maxFaceFlash=${maxInWaveFlash}`)
     }
   }
 

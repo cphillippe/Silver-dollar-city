@@ -1949,32 +1949,10 @@ assert.match(
 
 
 
-// 1.4.602: Easy wave-survived hold hides lingering shot juice (#998 / #1012).
-assert.equal(APP_VERSION, '1.4.602')
-assert.equal(CHANGELOG[0].version, '1.4.602', '1.4.602 is the newest row')
-assert.match(latestChange('1.4.602').items.join('\n'), /Wave survived/, '1.4.602 changelog names the hold')
-assert.match(latestChange('1.4.602').items.join('\n'), /Refs #998/, '1.4.602 changelog refs #998')
-assert.match(latestChange('1.4.602').items.join('\n'), /Refs #1012/, '1.4.602 changelog refs #1012')
-assert.doesNotMatch(latestChange('1.4.602').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.602 changelog avoids GitHub close keywords')
-{
-  const actors602 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
-  const screen602 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
-  const phone602 = readFileSync(new URL('../scripts/check-phone-fixes.mjs', import.meta.url), 'utf8')
-  assert.match(actors602, /!waveSurvivedHold[\s\S]*defend-shot/, '1.4.602 shots defer during wave survived hold')
-  assert.match(actors602, /!waveSurvivedHold[\s\S]*defend-face-flash/, '1.4.602 face flash defers during wave survived hold')
-  assert.match(screen602, /nwWaveBannerCueProbe[\s\S]*nightWatchJumpAllowed/, '1.4.602 banner cue probe stays playtest-only')
-  assert.match(phone602, /sampleHoldShotFxVsBanner/, '1.4.602 rail sample measures lingering shot art on the banner')
-  assert.match(phone602, /defend-face-flash/, '1.4.602 shot juice overlap includes face flash')
-}
-
 // 1.4.601: Easy wave banner stays clear of the right ability rail (#998).
-assert.equal(CHANGELOG[1].version, '1.4.601', '1.4.601 follows 1.4.602 in changelog')
-assert.match(latestChange('1.4.601').items.join('\n'), /Refs #998/, '1.4.601 changelog refs #998')
-assert.match(latestChange('1.4.601').items.join('\n'), /Refs #1010/, '1.4.601 changelog refs #1010')
-assert.match(latestChange('1.4.601').items.join('\n'), /Refs #1011/, '1.4.601 changelog refs #1011')
-assert.match(latestChange('1.4.601').items.join('\n'), /Nothing changes for players yet\./)
-assert.doesNotMatch(latestChange('1.4.601').items.join('\n'), /Fixes #|Closes #|Resolves #/, '1.4.601 changelog avoids GitHub close keywords')
-assert.equal(playerVisibleChangeItems(latestChange('1.4.601').items).length, 0, '1.4.601 has no player-facing changelog copy')
+assert.equal(APP_VERSION, '1.4.601')
+assert.equal(CHANGELOG[0].version, '1.4.600', '1.4.601 ships with main changelog head at 1.4.600')
+assert.match(latestChange('1.4.600').items.join('\n'), /Refs #998/, '1.4.600 changelog refs #998')
 {
   const defend601 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   const board601 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
@@ -1984,7 +1962,14 @@ assert.equal(playerVisibleChangeItems(latestChange('1.4.601').items).length, 0, 
   assert.match(board601, /touchesStackChrome/, '1.4.601 stack observer only reacts to wave toast chrome')
   assert.match(board601, /layoutBlocks\.some/, '1.4.601 chips skip layout when no obstacle hit')
   assert.match(actors601, /waveSurvivedHold/, '1.4.601 walker cue defers during wave survived hold')
+  assert.match(actors601, /!waveSurvivedHold[\s\S]*defend-shot/, '1.4.601 shots defer during wave survived hold')
+  assert.match(actors601, /!waveSurvivedHold[\s\S]*defend-face-flash/, '1.4.601 face flash defers during wave survived hold')
   assert.match(screen601, /waveSurvivedHold=\{easy && survivedRound != null\}/, '1.4.601 wave survived hold wires from screen')
+  assert.match(screen601, /nwWaveBannerCueProbe[\s\S]*nightWatchJumpAllowed/, '1.4.601 banner cue probe stays playtest-only')
+  assert.match(phone601, /sampleHoldShotFxVsBanner/, '1.4.601 rail sample measures lingering shot art on the banner')
+  assert.match(phone601, /plantedLampOverlap/, '1.4.601 unlock toast samples planted lamp art overlap')
+  assert.match(phone601, /toastVsLamp=/, '1.4.601 unlock toast ok line logs toast vs lamp overlap')
+  assert.match(phone601, /height <= 667 && width <= 375 && maxOv\.toastLamp > 0/, '1.4.601 short phones fail when toast covers a planted lamp')
   assert.match(
     defend601,
     /\.defend-page\.is-easy-watch:has\(\.nw-wave-survived\):has\(\.nw-map-toast\) \.nw-wave-survived[\s\S]*translateX\(-50%\)/,
@@ -2073,7 +2058,7 @@ assert.equal(playerVisibleChangeItems(latestChange('1.4.601').items).length, 0, 
 }
 
 // 1.4.600: Easy Night Watch unlock toast clears the wave-survived banner (#998).
-assert.equal(CHANGELOG[1].version, '1.4.600', '1.4.600 follows the newest row')
+assert.equal(CHANGELOG[1].version, '1.4.599', '1.4.599 follows 1.4.600 in changelog')
 assert.match(latestChange('1.4.600').items.join('\n'), /Refs #998/, '1.4.600 changelog refs #998')
 assert.match(latestChange('1.4.600').items.join('\n'), /unlock toast|New map unlocked/i, '1.4.600 changelog names the unlock toast fix')
 assert.match(latestChange('1.4.600').items.join('\n'), /Hard stays the same\./)
